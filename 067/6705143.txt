@@ -1,0 +1,178 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+struct node{
+	int key;
+	struct node *right;
+	struct node *left;
+	struct node *parent;
+};
+
+typedef struct node * Node;
+
+#define NIL NULL
+
+Node root;
+
+Node treeMinimum(Node x){//二分探索木の最小値
+	
+	while(x->left != NIL){
+		x = x->left;
+	}
+	return x;//最小の節点（節点xを根とする部分木）を返す
+}
+
+Node find(Node u,int k){//二分探索木の探索（根から葉に向かって接点を探す）
+	while(u!=NIL&&k!=u->key){
+		
+		if(k<u->key){//節点ｋより与えられたkeyが大きい場合左の子
+			u=u->left;
+		}
+		else{//それ以外の場合右の子
+			u=u->right;
+		}
+	}
+	return u;
+}
+
+Node treeSuccessor(Node x){//次節点の探索
+	
+	if(x->right != NIL){//右の子が存在するとき
+		return treeMinimum(x->right);
+	}
+	Node y = x->parent;
+	
+	while( y != NIL && x == y->right){//親がいないかつ右の子が存在するとき
+		x = y;
+		y = y->parent;
+	}
+	return y;
+}
+
+void treeDelete(Node z){//節点ｚを二分探索木から削除する
+	
+	Node y;
+	Node x;
+	
+	if(z->left == NIL || z->right == NIL){//ｚが子を持たないまたは子を１つ持つ
+		y = z;
+	}
+	else {
+		y = treeSuccessor(z);
+	}
+	if(y->left != NIL){
+		x = y->left;//ｘはｙの左の子
+	}
+	else {
+		x = y->right;//ｘはｙの右の子
+	}
+	
+	if( x != NIL){
+		x->parent = y->parent;
+	}
+	if(y->parent == NIL){//ｙが根の時
+		root = x;//ｘを木の根にする
+	}
+	else{
+		if( y == y->parent->left){//ｙがその親の左の子ならば
+			y->parent->left = x;//左の子をｘにする
+		}
+		else{
+			y->parent->right = x;//右の子をｘにする
+		}
+	}
+	if( y != z){//ｙの次節点が削除された場合
+		z->key = y->key;//ｙのデータをｚにコピーする
+	}
+	free(y);
+}
+
+
+void insert(int k){//二分探索木に新たに値を挿入する
+	Node y = NIL;
+	Node x = root;
+	Node z;
+
+	z = malloc(sizeof(struct node)); 
+	//左の子がNIL、右の子がNILである接点を受け取る
+	z->key = k;
+	z->left = NIL;
+	z->right = NIL;
+
+	while(x!=NIL){//正しい位置に挿入する
+		y=x;//親を設定
+		if(z->key<x->key){
+			x=x->left;//左の子へ移動
+		}
+		else{
+			x=x->right;//右の子へ移動
+		}
+	}
+	z->parent=y;
+	if(y==NIL){
+		root=z;//root：木の根
+	}
+	else{
+		if(z->key<y->key){
+			y->left=z;//zをyの左の子にする
+		}
+		else{
+			y->right=z;//zをyの右の子にする
+		}
+	}
+}
+
+void inorder(Node u){//中間順巡回 2回目で出力
+	if(u==NIL){
+		return;
+	}
+	inorder(u->left);
+	printf(" %d",u->key);
+	inorder(u->right);
+}
+
+void preorder(Node u){//先行順巡回 1回目で出力
+	if(u==NIL){
+		return;
+	}
+	printf(" %d",u->key);
+	preorder(u->left);
+	preorder(u->right);
+}
+
+
+int main(void){
+	int n, i, x;
+	char com[20];
+	scanf("%d", &n);
+
+	for ( i = 0; i < n; i++ ){
+		scanf("%s", com);
+		if ( com[0] == 'f' ){
+		scanf("%d", &x);
+		Node t = find(root, x);
+			if ( t != NIL ) {
+				printf("yes\n");
+			}
+			else {
+				printf("no\n");
+			}
+		}
+		else if ( com[0] == 'i' ){
+			scanf("%d", &x);
+			insert(x);
+		} 
+		else if ( com[0] == 'p' ){
+			inorder(root);
+			printf("\n");
+			preorder(root);
+			printf("\n");
+		} 
+		else if ( com[0] == 'd' ){
+			scanf("%d", &x);
+			treeDelete(find(root, x));
+		} 
+	}
+
+	return 0;
+}

@@ -1,0 +1,74 @@
+from collections import defaultdict
+
+
+def read_wgraph(inp=None, gitGraph=True):
+    if inp is not None:
+        V, E, r = inp[:6].split()
+        G = defaultdict(list)
+        W = {}
+        for i in inp[6:].split('\n'):
+            if i:
+                s, t, w = map(int, i.split())
+                if gitGraph:
+                    G[s].append((t, w))
+                else:
+                    G[s].append(t)
+                    W[(s, t)] = w
+                if t not in G:
+                    G[t] = []
+
+    else:
+        V, E, r = [int(v) for v in input().split()]
+        G = defaultdict(list)
+        W = {}
+        for i in range(V):
+            G[i]
+        for e in range(E):
+            s, t, w = [int(v) for v in input().split()]
+            G[s].append(t)
+            if t not in G:
+                G[t] = []
+            W[(s, t)] = w
+    return G, W, r
+
+
+import heapq
+
+def relax(W, s, ch, dist):
+  if dist[ch][0] > dist[s][0] + W[(s, ch)]:
+    dist[ch][0] = dist[s][0] + W[(s, ch)]
+
+def print_dist(dist):
+    for v in sorted(dist):
+        if dist[v][0] == 1e9:
+            print("INF")
+        else:
+            print(dist[v][0])
+
+def djkstra(G, W, s):
+  dist = {}
+  Q = []
+  for v in G:
+    dist[v] = [1e9, v]
+    Q.append(dist[v])
+  dist[s][0] = 0
+  inQ = set()
+  heapq.heapify(Q)
+  #inQ.add(s)
+  #print(Q)
+  S = set()
+  while Q:
+    du = heapq.heappop(Q)
+    u = du[1]
+    S.add(u)
+    #print(du, Q, G[u])
+    for ch in G[u]:
+      if ch not in S:
+        relax(W, u, ch, dist)
+        #if ch not in inQ:
+        #heapq.heappush(Q, dist[ch])
+            #inQ.add(ch)
+  return dist
+
+G, W, r = read_wgraph(gitGraph=False)
+print_dist(djkstra(G, W, r))

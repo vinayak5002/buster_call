@@ -1,0 +1,50 @@
+#define BUF_SIZE 1024
+
+#define MAX_COLUMN 101
+#define MAX_LAW 101
+
+#include <stdio.h>
+#include <string.h>
+
+int main(void) {
+	char buf[BUF_SIZE];
+	int column, law, c, l;
+	int mat[MAX_COLUMN][MAX_LAW];
+	int sum = 0;
+
+	memset(mat, 0, sizeof(mat));
+
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d %d", &column, &law);
+
+	for (c = 0; c < column; c++) {
+		sum = 0;
+		fgets(buf, sizeof(buf) - 1, stdin);
+		for (l = 0; l < law; l++) {
+			sscanf(buf, "%d %[^\n]", &mat[c][l], buf);
+			sum += mat[c][l];
+		}
+		mat[c][l] = sum;
+	}
+
+	for (l = 0; l <= law; l++) {
+		sum = 0;
+		for (c = 0; c < column; c++) {
+			sum += mat[c][l];
+		}
+		mat[c][l] = sum;
+	}
+
+	for (c = 0; c <= column; c++) {
+		for (l = 0; l <= law; l++) {
+			if (l == law) {
+				printf("%d\n", mat[c][l]);
+			}
+			else {
+				printf("%d ", mat[c][l]);
+			}
+		}
+	}
+
+	return 0;
+}

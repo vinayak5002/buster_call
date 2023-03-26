@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main(){
+    int n;
+    cin >> n;
+    vector<vector<int> > connect(n + 1);
+    vector<bool> visit(n + 1);
+
+    for (int i = 0; i < n; i++)
+    {
+        int u, k;
+        cin >> u >> k;
+        for (int j = 0; j < k; j++){
+            int to;
+            cin >> to;
+            connect[u].push_back(to);
+        }
+    }
+
+    queue<int> que;
+    que.push(1);
+    vector<int> res(n + 1);
+    int depth = 1;
+    res[1] = 0;
+    visit[1] = 1;
+    while (!que.empty())
+    {
+        int now = que.front();
+        que.pop();
+        for (int i = 0; i < connect[now].size(); i++)
+        {
+            int to = connect[now][i];
+            if (!visit[to])
+            {
+                visit[to] = 1;
+                res[to] = res[now] + 1;
+                que.push(to);
+            }
+        }
+    }
+    for (int i = 1; i < res.size(); i++){
+        if(i != 1 && res[i] == 0){
+            cout << i << " " << -1 << endl;
+        }else{
+            cout << i << " " << res[i] << endl;
+        }
+    }
+}

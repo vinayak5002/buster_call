@@ -1,0 +1,142 @@
+#include<iostream>
+#include<queue>
+#include <fstream>
+using namespace std;
+struct status{
+	int room [20][20];
+	int step;
+	int x;
+	int y;
+};
+status cstatus;
+int room[20][20];
+int step;
+queue <status> que;
+int W,H;
+
+
+bool bfs(int x, int y);
+
+
+
+
+int solve(){
+	
+	while (que.size()){
+		cstatus=que.front();
+		que.pop();
+		if (cstatus.step>10) return 0;
+		if (bfs(cstatus.x,cstatus.y)){
+			if (cstatus.step>10) return 0;
+			return cstatus.step;
+		}
+		
+	}
+}
+
+bool bfs(int x, int y){
+	bool result=false;
+	status tstatus;
+	
+	int temp=y;
+	
+	 
+	while (temp>0&&cstatus.room[x][temp]==0){
+		temp--;
+	}
+	if (cstatus.room[x][temp]==3){
+		cstatus.step=cstatus.step+1;
+		result=true;
+	}else if (cstatus.room[x][temp]==1&&temp!=y-1) {
+		tstatus=cstatus;
+		tstatus.room[x][temp]=0;
+		tstatus.step=cstatus.step+1;
+		tstatus.y=temp+1;
+		que.push(tstatus);
+	} 
+	
+	temp=x;
+	
+	while (temp<H-1&&cstatus.room[temp][y]==0){
+		temp++;
+	}
+	if (cstatus.room[temp][y]==3){
+		cstatus.step=cstatus.step+1;
+		return true;
+	}else if(cstatus.room[temp][y]==1&&temp!=x+1) {
+		tstatus=cstatus;
+		tstatus.room[temp][y]=0;
+		tstatus.step=cstatus.step+1;
+		tstatus.x=temp-1;
+		que.push(tstatus);
+	} 
+	
+	temp=y;
+	while (temp<W-1&&cstatus.room[x][temp]!=1){
+		temp++;
+	}
+	if (cstatus.room[x][temp]==3){
+		cstatus.step=cstatus.step+1;
+		return true;
+	}else if (cstatus.room[x][temp]==1&&temp!=y+1) {
+		tstatus=cstatus;
+		tstatus.room[x][temp]=0;
+		tstatus.step=cstatus.step+1;
+		tstatus.y=temp-1;
+		que.push(tstatus);
+	} 
+	
+	temp=x;
+	while (temp>0&&cstatus.room[temp][y]!=1){
+		temp--;
+	}
+	if (cstatus.room[temp][y]==3){
+		cstatus.step=cstatus.step+1;
+		return true;
+	}else if(cstatus.room[temp][y]==1&&temp!=x-1) {
+		tstatus=cstatus;
+		tstatus.room[temp][y]=0;
+		tstatus.step=cstatus.step+1;
+		tstatus.x=temp+1;
+		que.push(tstatus);
+	} 
+	return result;
+
+}
+ 
+int main(){
+//	ifstream fin ("I.1");
+
+	bool finished=false;
+	int startx,starty,endx,endy;
+	while (!finished){
+	
+	cin>>W>>H;
+	step=0;
+	while (!que.empty()) que.pop();
+
+	if (W!=0&&H!=0){
+		for (int i=0;i<H;i++){
+			for(int j=0;j<W;j++){
+				cin>>cstatus.room[i][j];
+				if (cstatus.room[i][j]==2){
+					startx=i;
+					starty=j;
+				}
+			}
+		}
+		cstatus.room[startx][starty]=0;
+		cstatus.step=0;
+		cstatus.x=startx;
+		cstatus.y=starty;
+		que.push(cstatus);
+		int result=solve();
+
+		if (result==0) cout<<-1<<endl;
+		else cout<<result<<endl;
+	}else finished=true; 
+	
+	}
+	return 0;
+	
+}

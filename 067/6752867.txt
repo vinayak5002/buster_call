@@ -1,0 +1,99 @@
+import java.util.*;
+
+public class Main {
+    static HashMap<Integer, HashMap<Integer, Integer>> road_map;
+    static int waribiki;
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            waribiki = sc.nextInt();
+            int town_num = sc.nextInt();
+            int road_num = sc.nextInt();
+            int start = sc.nextInt();
+            int goal = sc.nextInt();
+            if (waribiki == 0) break;
+            road_map = new HashMap<>();
+            for (int i = 0; i < town_num; i++) {
+                road_map.put(i+1, new HashMap<>());
+            }
+            for (int i = 0; i < road_num; i++) {
+                int a = sc.nextInt();
+                int b = sc.nextInt();
+                int f = sc.nextInt();
+                road_map.get(a).put(b, f);
+                road_map.get(b).put(a, f);
+            }
+            Queue<CheckPoint> searchList = new ArrayDeque<>();
+            HashMap<Integer, CheckPoint> searched = new HashMap<>();
+            CheckPoint c_start = new CheckPoint(start);
+            searched.put(start, c_start);
+            searchList.add(c_start);
+            while(searchList.size() > 0) {
+                CheckPoint town = searchList.poll();
+                int point = town.point;
+                HashMap<Integer, Integer> next_list = road_map.get(point);
+                for (int next :
+                        next_list.keySet()) {
+                    int next_town = next;
+                    int next_cost = next_list.get(next);
+                    CheckPoint searched_point = searched.get(next_town);
+                    CheckPoint next_point = town.addPoint(next_town);
+                    if (searched_point == null) {
+                        searched.put(next_town, next_point);
+                        searchList.add(next_point);
+                        continue;
+                    }
+                    if (getCostWithDiscount(next_point) < getCostWithDiscount(searched_point)) {
+                        searched.put(next_town, next_point);
+                        searchList.add(next_point);
+                    }
+                }
+            }
+            System.out.println(getCostWithDiscount(searched.get(goal)));
+        }
+        sc.close();
+    }
+    static int getCostWithDiscount(CheckPoint cp) {
+        ArrayList<Integer> path = cp.path;
+        int[] costs = new int[path.size()];
+        for (int i = 0; i < path.size() - 1; i++) {
+            int s = path.get(i);
+            int g = path.get(i + 1);
+            costs[i] = road_map.get(s).get(g);
+        }
+        Arrays.sort(costs);
+        int cost = 0;
+        for (int i = 0; i < costs.length - waribiki; i++) {
+            cost += costs[i];
+        }
+        for (int i = costs.length - waribiki; i >= 0 && i < costs.length; i++) {
+            cost += costs[i] / 2;
+        }
+        return cost;
+    }
+}
+
+class CheckPoint {
+    int point;
+    ArrayList<Integer> path = new ArrayList<>();
+
+    CheckPoint () {}
+    CheckPoint (int _point) {
+        point = _point;
+        path = new ArrayList<>();
+        path.add(_point);
+    }
+    CheckPoint (int _point, ArrayList<Integer> _path) {
+        point = _point;
+        path = new ArrayList<Integer>(_path);
+    }
+
+    CheckPoint addPoint (int _point) {
+        CheckPoint cp = new CheckPoint();
+        cp.point = _point;
+        cp.path = new ArrayList<>(path);
+        cp.path.add(_point);
+        return cp;
+    }
+}

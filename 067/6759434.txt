@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int W, H;
+vector<vector<char>> room;
+vector<vector<bool>> flag;
+
+int dfs(int w, int h) {
+  flag[h][w] = true;
+  int dw[4] = {1, 0, -1, 0}, dh[4] = {0, 1, 0, -1}, res = 1;
+  for (int i = 0; i < 4; i++) {
+    if (w + dw[i] >= W || h + dh[i] >= H) {
+      continue;
+    }
+
+    if (room[h + dh[i]][w + dw[i]] == '.' && !flag[h + dh[i]][w + dw[i]]) {
+      res += dfs(w + dw[i], h + dh[i]);
+    }
+  }
+  return res;
+}
+
+int main() {
+  while (true) {
+    cin >> W >> H;
+    if (W == 0 && H == 0) {
+      return 0;
+    }
+    room.resize(H, vector<char>(W)), flag.resize(H, vector<bool>(W));
+    for (int i = 0; i < H; i++) {
+      for (int j = 0; j < W; j++) {
+        cin >> room[i][j];
+      }
+    }
+
+    int ans;
+    for (int i = 0; i < H; i++) {
+      for (int j = 0; j < W; j++) {
+        if (room[i][j] == '@') {
+          ans = dfs(j, i);
+        }
+      }
+    }
+
+    cout << ans << endl;
+  }
+}
+

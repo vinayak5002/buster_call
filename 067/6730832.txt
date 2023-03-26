@@ -1,0 +1,108 @@
+def solve():
+    from sys import stdin
+    from collections import deque
+    
+    f_i = stdin
+    H, W, N = map(int, f_i.readline().split())
+    
+    W += 2
+    
+    field = '#' * W
+    for i in range(H):
+        line = f_i.readline().rstrip()
+        field += '#' + line + '#'
+    field += '#' * W
+    
+    rec = dict()
+    move = [1, -1, W, -W]
+    
+    
+    
+    # first search
+    # Also create a compressed adjacency list.
+    r, c = map(int, f_i.readline().split())
+    start = W * r + c
+    rec[start] = 0
+    q = deque()
+    q.append((start, 0, 0, start))
+    adj = dict() # adj[key]: (position, damage to move)
+    while q:
+        pos, total_dmg, move_dmg, dptr = q.popleft()
+        for m in move:
+            next_pos = pos + m
+            next_cell = field[next_pos]
+            if next_cell == '.':
+                if next_pos not in rec:
+                    if next_pos in adj:
+                        adj[next_pos].append((dptr, move_dmg))
+                    else:
+                        adj[next_pos] = [(dptr, move_dmg)]
+                    if dptr in adj:
+                        pass
+                        # adj[dptr].append((next_pos, move_dmg))
+                    else:
+                        pass
+                        # adj[dptr] = [(next_pos, move_dmg)]
+                    q.appendleft((next_pos, total_dmg, 0, next_pos))
+                    rec[next_pos] = total_dmg
+            elif next_cell == '@':
+                if next_pos not in rec:
+                    q.append((next_pos, total_dmg + 1, move_dmg + 1, dptr))
+                    rec[next_pos] = total_dmg + 1
+    
+    for i in range(N - 1):
+        r, c = map(int, f_i.readline().split())
+        start = W * r + c
+        if start not in rec:
+            return "-1 -1"
+        
+        visited = dict()
+        visited[start] = True
+        q = deque()
+        q.append((0, start))
+        while q:
+            dmg, pos = q.popleft()
+            # print(pos // W, pos % W, dmg) # test
+            
+            if dmg > rec[pos]:
+                rec[pos] = dmg
+            
+            if pos in adj:
+                for next_pos, dmg_to_move in adj[pos]:
+                    if next_pos in visited:
+                        continue
+                    visited[next_pos] = True
+                    if dmg_to_move:
+                        q.append((dmg + 1, next_pos))
+                    else:
+                        q.appendleft((dmg, next_pos))
+            else:
+                for m in move:
+                    next_pos = pos + m
+                    if next_pos in visited:
+                        continue
+                    visited[next_pos] = True
+                    next_cell = field[next_pos]
+                    if next_cell == '@':
+                        q.append((dmg + 1, next_pos))
+                    elif next_cell == '.':
+                        q.appendleft((dmg, next_pos))
+    #
+    # for k, v in adj.items():
+    #     print(k, v)
+        # r = k // W
+        # c = k % W
+        # print(f"from ({r}, {c})")
+        # for k1, v1 in v:
+        #     r1 = k1 // W
+        #     c1 = k1 % W
+        # print(f"({r1}, {c1}) = {v1}")
+    #
+    
+    candidate = ((dmg, pos) for pos, dmg in rec.items() if field[pos] == '.')
+    ans_dmg, ans_pos = min(candidate)
+    ans_r = ans_pos // W
+    ans_c = ans_pos % W
+    return f'{ans_r} {ans_c}'
+
+print(solve())

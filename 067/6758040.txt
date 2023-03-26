@@ -1,0 +1,89 @@
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include <climits>
+
+void makeSet(int);
+void Union(int,int);
+void link(int,int);
+int findSet(int);
+int get_cost(int,int,std::vector<int>,int,int);
+// int get_diff(int,int);
+
+std::vector<int> rank(10000),p(10000);
+std::vector<std::vector<int> > relation(10000,std::vector<int> (10000,INT_MAX));
+int main(){
+    int n,q,com;
+    std::cin>>n>>q;
+
+    
+    for(int i=0;i<n;i++){
+        makeSet(i);
+    }
+
+    for(int i=0;i<q;i++){
+        std::cin>>com;
+        if(com==0){
+            int id1,id2,w;
+            std::cin>>id1>>id2>>w;
+            Union(id1,id2);
+            // modify here
+            relation[id1][id2]=w;
+            relation[id2][id1]=-w;
+        }
+        if(com==1){
+            int id1,id2,w;
+            std::cin>>id1>>id2;
+            if(findSet(id1) != findSet(id2)){
+                std::cout<<"?"<<std::endl;
+            }
+            else{
+                std::vector<int> visited(n,0);
+                std::cout<< get_cost(id1,id2,visited,n,0)<<std::endl;
+                
+            }
+        }
+    }
+    return 0;
+}
+void makeSet(int x){
+    p[x]=x;
+    rank[x]=0;
+}
+
+void Union(int x,int y){
+    link(findSet(x),findSet(y));
+}
+
+void link(int x,int y){
+    if(rank[x]> rank[y]){
+        p[y]=x;
+    }
+    else{
+        p[x] = y;
+        if(rank[x]==rank[y]){
+            rank[y] = rank[y] + 1;
+        }
+    }
+}
+
+int findSet(int x){
+    if (x != p[x]){
+        p[x]= findSet(p[x]);
+    }
+    return p[x];
+}
+
+int get_cost(int now, int target, std::vector<int> visited, int n,int cost){
+    if(now==target)return cost;
+    visited[now]=1;
+    for(int i = 0; i<n ;i++){
+        if(relation[now][i]!= INT_MAX && visited[i]!= 1){
+            int update_cost = cost + relation[now][i];
+            int return_cost = get_cost(i,target,visited,n,update_cost);
+            if(return_cost)return return_cost;
+        }
+    }
+    return 0;
+}
+

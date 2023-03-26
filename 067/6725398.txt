@@ -1,0 +1,135 @@
+/**
+ * @file DSL_2_A.cpp
+ * @author skawaguc
+ * @brief
+ * https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_A&lang=jp
+ * @version 0.1
+ * @date 2022-06-16
+ *
+ * @copyright Copyright (c) 2022
+ *
+ */
+#define NDEBUG
+#include <cassert>
+#include <climits>
+#include <iostream>
+#include <vector>
+
+using namespace std;
+#define rep2(i, a, b) for (int i = (int)(a); i < (int)(b); i++)
+#define rep(i, b) rep2(i, 0, b)
+#define rrep2(i, b, a) for (int i = (int)(b); i >= (int)(a); i--)
+#define rrep(i, b) rrep2(i, b, 0)
+typedef long long ll;
+
+int N, Q;
+
+void get_input();
+void solve();
+
+int n;
+vector<int> dat;
+void init(int n_);
+void update(int k, int a);
+int query(int a, int b, int k, int l, int r);
+
+/**
+ * @brief メイン処理.
+ *
+ * @return int 0
+ */
+int main() {
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+
+  // 標準入力を取得
+  get_input();
+
+  // 求解処理
+  solve();
+
+  return 0;
+}
+
+/**
+ * @brief 標準入力を取得する.
+ *
+ */
+void get_input() { cin >> N >> Q; }
+
+/**
+ * @brief 求解処理.
+ *
+ */
+void solve() {
+  init(N);
+  int com, x, y;
+  rep(i, Q) {
+    cin >> com >> x >> y;
+    if (com == 0) {
+      update(x, y);
+    } else {
+      cout << query(x, y + 1, 0, 0, n) << endl;
+    }
+  }
+}
+
+/**
+ * @brief 初期化処理.
+ *
+ * @param n_ 要素数
+ */
+void init(int n_) {
+  // 簡単のため、要素数を2のべき乗に
+  n = 1;
+  while (n < n_) n *= 2;
+  dat.resize(2 * n - 1);
+
+  // すべての値をINFに
+  fill(dat.begin(), dat.end(), INT_MAX);
+}
+
+// k番目の値を（0-indexed）をaに変更
+/**
+ * @brief k番目の値をaに変更する.（O(log(n))）
+ *
+ * @param k 節点の番号
+ * @param a 値
+ */
+void update(int k, int a) {
+  // 葉の節点
+  k += n - 1;
+  dat[k] = a;
+  // 登りながら更新
+  while (k > 0) {
+    k = (k - 1) / 2;
+    dat[k] = min(dat[k * 2 + 1], dat[k * 2 + 2]);
+  }
+}
+
+/**
+ * @brief [a, b)の最小値を取得する.（O(log(n))）
+ * kは節点の番号、l, rはその接点が[l, r)に対応づいていることを表す.
+ * したがって、外からはquery(a, b, 0, 0, n)として呼ぶ.
+ *
+ * @param a 節点の番号
+ * @param b 節点の番号
+ * @param k 計算の簡単のための引数
+ * @param l 計算の簡単のための引数
+ * @param r 計算の簡単のための引数
+ * @return int [a, b)の最小値
+ */
+int query(int a, int b, int k, int l, int r) {
+  // [a, b)と[l, r)が交差してなければ、INF
+  if (r <= a || b <= l) return INT_MAX;
+
+  // [a, b)が[l, r)を完全に含んでいれば、この節点の値
+  if (a <= l && r <= b) return dat[k];
+
+  // そうでなければ、2つの子の最小値
+  const int m = (l + r) / 2;
+  const int vl = query(a, b, k * 2 + 1, l, m);
+  const int vr = query(a, b, k * 2 + 2, m, r);
+  return min(vl, vr);
+}
+

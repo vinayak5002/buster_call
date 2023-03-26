@@ -1,0 +1,120 @@
+#include <bits/stdc++.h>
+using namespace std;
+int sign(int x){
+  if (x > 0){
+    return 1;
+  } else if (x < 0){
+    return -1;
+  } else {
+    return 0;
+  }
+}
+struct point{
+  int x, y;
+  point(){
+  }
+  point(int x, int y): x(x), y(y){
+  }
+  point operator -(point P){
+    return point(x - P.x, y - P.y);
+  }
+};
+double abs(point P){
+  return sqrt(P.x * P.x + P.y * P.y);
+}
+double dist(point P, point Q){
+  return abs(Q - P);
+}
+int cross(point P, point Q){
+  return P.x * Q.y - P.y * Q.x;
+}
+bool point_in_triangle(point P, point A, point B, point C){
+  if (cross(C - A, B - A) < 0){
+    swap(B, C);
+  }
+  return cross(P - A, B - A) > 0 && cross(P - B, C - B) > 0 && cross(P - C, A - C) > 0;
+}
+int main(){
+  cout << fixed << setprecision(20);
+  while (true){
+    int m, n;
+    cin >> m >> n;
+    if (m == 0 && n == 0){
+      break;
+    }
+    vector<point> P(m);
+    for (int i = 0; i < m; i++){
+      cin >> P[i].x >> P[i].y;
+    }
+    vector<point> Q(n);
+    for (int i = 0; i < n; i++){
+      cin >> Q[i].x >> Q[i].y;
+    }
+    stack<vector<point>> R;
+    R.push({P[0]});
+    R.push({P[1]});
+    for (int i = 2; i < m; i++){
+      stack<point> T;
+      T.push(P[i]);
+      while (R.size() >= 2){
+        bool ok = false;
+        if (R.top().size() == 1){
+          ok = true;
+        } else {
+          int s = sign(cross(R.top()[1], R.top()[2]));
+          point D = T.top() - R.top()[0];
+          while (R.top().size() >= 2){
+            int cnt = R.top().size();
+            if (sign(cross(R.top()[cnt - 1], D)) == s){
+              break;
+            }
+            R.top().pop_back();
+          }
+          R.top().push_back(D);
+          if (R.top().size() == 2){
+            ok = true;
+          }
+        }
+        if (!ok){
+          break;
+        }
+        point B = R.top()[0];
+        R.pop();
+        while (true){
+          vector<point> tmp;
+          for (int j = 0; j < n; j++){
+            if (point_in_triangle(Q[j], R.top()[0], B, T.top())){
+              tmp.push_back(Q[j]);
+            }
+          }
+          if (tmp.empty()){
+            break;
+          }
+          int cnt = tmp.size();
+          int p = 0;
+          for (int j = 1; j < cnt; j++){
+            if (sign(cross(R.top()[0] - T.top(), B - T.top())) == sign(cross(tmp[p] - T.top(), tmp[j] - T.top()))){
+              p = j;
+            }
+          }
+          T.push(tmp[p]);
+        }
+      }
+      point pr = R.top()[0];
+      while (T.size() >= 2){
+        point c = T.top();
+        T.pop();
+        R.push({c, c - pr, T.top() - c});
+        pr = c;
+      }
+      R.push({P[i]});
+    }
+    double ans = 0;
+    while (R.size() >= 2){
+      point c = R.top()[0];
+      R.pop();
+      ans += dist(R.top()[0], c);
+    }
+    cout << ans << endl;
+  }
+}

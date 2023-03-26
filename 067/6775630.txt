@@ -1,0 +1,86 @@
+class RUQ:
+    def __init__(self, n):
+        self.array_size = n
+        self.tree_size = self._calculate_tree_size(n)
+        self.tree = self._init_tree(self.tree_size)
+        self.lazy = [None] * len(self.tree)
+    
+    def _calculate_tree_size(self, n):
+        size = 1
+        while size < n:
+            size *= 2
+        
+        return size
+    
+    def _init_tree(self, size):
+        tree = [2147483647] * (2 * size - 1)
+        
+        return tree
+    
+    def _lazy_evaluate(self, idx):
+        if self.lazy[idx] is None:
+            return None
+        
+        self.tree[idx] = self.lazy[idx]
+        # not leaf
+        if idx < self.tree_size - 1:
+            self.lazy[2 * idx + 1] = self.lazy[idx]
+            self.lazy[2 * idx + 2] = self.lazy[idx]
+        
+        self.lazy[idx] = None
+    
+    def _query(self, query_left, query_right, tree_node_idx, tree_left, tree_right):
+        # query range is outside of the tree node range -> ignore it
+        if tree_right <= query_left or tree_left >= query_right:
+            return 2147483647
+
+        self._lazy_evaluate(tree_node_idx)
+
+        # query range include the tree node range -> return tree node value
+        if query_left <= tree_left and query_right >= tree_right:
+            return self.tree[tree_node_idx]
+        
+        # search for the value in both children if the query range lies partially inside, partially outside
+        value_left = self._query(query_left, query_right, 2 * tree_node_idx + 1, tree_left, (tree_left + tree_right) // 2)
+        value_right = self._query(query_left, query_right, 2 * tree_node_idx + 2, (tree_left + tree_right) // 2, tree_right)
+        # comine their results
+        return min(value_left, value_right)
+    
+    def find(self, start, end):
+        return self._query(start, end + 1, 0, 0, self.tree_size)
+    
+    def update(self, start, end, value):
+        self._update(start, end + 1, 0, 0, self.tree_size, value)
+
+    def _update(self, query_left, query_right, tree_node_idx, tree_left, tree_right, value):
+        # propagate the lazy evaluation value to the children
+        if tree_right <= query_left or tree_left >= query_right:
+            return None
+        self._lazy_evaluate(tree_node_idx)
+        if query_left <= tree_left and query_right >= tree_right:
+            self.lazy[tree_node_idx] = value
+        else:
+            self._update(query_left, query_right, 2 * tree_node_idx + 1, tree_left, (tree_left + tree_right) // 2, value)
+            self._update(query_left, query_right, 2 * tree_node_idx + 2, (tree_left + tree_right) // 2, tree_right, value)
+            self.tree[tree_node_idx] = min(self.tree[2 * tree_node_idx + 1], self.tree[2 * tree_node_idx + 2])
+        
+        # update the lazy because self.tree[tree_node_idx] now has changed
+        self._lazy_evaluate(tree_node_idx)
+
+if __name__ == "__main__":
+    n, n_queries = [int(e) for e in input().split()]
+    queries = []
+    for _ in range(n_queries):
+        inputs = [int(e) for e in input().split()]
+        queries.append(inputs)
+
+    tree = RUQ(n)
+
+    for inputs in queries:
+        if inputs[0] == 0:
+            tree.update(*inputs[1:])
+        elif inputs[0] == 1:
+            start = inputs[1]
+            end = inputs[1]
+            result = tree.find(start, end)
+            print(result)

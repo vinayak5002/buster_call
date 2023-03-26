@@ -1,0 +1,105 @@
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+template< class T >
+struct CumulativeSum2D {
+  vector< vector< T > > data;
+
+  CumulativeSum2D(int W, int H) : data(W + 1, vector< int >(H + 1, 0)) {}
+
+  void add(int x, int y, T z) {
+    ++x, ++y;
+    if(x >= data.size() || y >= data[0].size()) return;
+    data[x][y] += z;
+  }
+
+  void build() {
+    for(int i = 1; i < data.size(); i++) {
+      for(int j = 1; j < data[i].size(); j++) {
+        data[i][j] += data[i][j - 1] + data[i - 1][j] - data[i - 1][j - 1];
+      }
+    }
+  }
+
+  T query(int sx, int sy, int gx, int gy) {
+    return (data[gx][gy] - data[sx][gy] - data[gx][sy] + data[sx][sy]);
+  }
+};
+	int Map[1000][1000] = {};
+	int emps[4][1000][1000] = {};
+int main() {
+	int h,w,r,c,n;
+	cin >> h >> w >> r >> c >> n;
+	
+	CumulativeSum2D<int> blocks(h,w);
+	
+	for(int i = 0; n > i; i++) {
+		int y,x;
+		cin >> y >> x;
+        y--;x--;
+		Map[y][x] = 1;
+		
+		blocks.add(y,x,1);
+		
+	}
+	blocks.build();
+	
+	
+	CumulativeSum2D<int> empsU(h,w),empsR(h,w),empsD(h,w),empsL(h,w);
+	
+	for(int i = 0; h > i; i++) {
+		for(int j = 0; w > j; j++) {
+			if(Map[i][j]) continue;
+			
+			emps[0][i][j] = (i > 0 ? emps[0][i - 1][j] : 0) + 1;
+			emps[3][i][j] = (j > 0 ? emps[3][i][j - 1] : 0) + 1;
+		}
+	}
+	for(int i = h-1; 0 <= i; i--) {
+		for(int j = w-1; 0 <= j; j--) {
+			if(Map[i][j]) continue;
+			
+			emps[2][i][j] = (i < h-1 ? emps[2][i + 1][j] : 0) + 1;
+			emps[1][i][j] = (j < w-1 ? emps[1][i][j + 1] : 0) + 1;
+		}
+	}
+	
+	for(int i = 0; h > i; i++) {
+		for(int j = 0; w > j; j++) {
+			empsU.add(i,j,emps[0][i][j]);
+			empsR.add(i,j,emps[1][i][j]);
+			empsD.add(i,j,emps[2][i][j]);
+			empsL.add(i,j,emps[3][i][j]);
+		}
+	}
+	empsU.build();
+	empsR.build();
+	empsD.build();
+	empsL.build();
+	
+	int Answer = -1;
+	
+	for(int i = 0; h-r >= i; i++) {
+		for(int j = 0; w-c >= j; j++) {
+			if(blocks.query(i,j,i+r,j+c) > 0) continue;
+			int U = i>0?empsU.query(i-1,j,i,j+c):0;
+			int R = 	j+c<=w-1?empsR.query(i,j+c,i+r,j+c+1):0;
+			
+			int D =	i+r<=h-1?empsD.query(i+r,j,i+r+1,j+c):0;
+			 
+			int L =	j>0?empsL.query(i,j-1,i+r,j) :0;
+			 
+			int cur = U+R+D+L;
+			
+			Answer = max(Answer, cur);
+			// cout << i << " " << j << " " << U<< " " << R<< " " << D<< " " << L << endl;
+		}
+	}
+	
+	cout << Answer << endl;
+	return 0;
+}
+

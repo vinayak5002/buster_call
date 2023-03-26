@@ -1,0 +1,45 @@
+#include<bits/stdc++.h>
+using namespace std;
+#pragma GCC target("avx2")
+#pragma GCC optimize("O3")
+using ll = long long;
+using pii = pair<ll, ll>;
+int memo[1<<15][16];
+const int inf = 1<<29;
+int n, m, ans = inf;
+
+int dp(int now, int bit, vector<vector<int>> &g, int s){
+	if (memo[bit][now] != -1) return memo[bit][now];
+	if (bit == (1<<n) - 1) return g[now][s];
+
+	int pos = inf;
+	for (int i = 0; i < n; i++){
+		if (bit & (1<<i) || g[now][i] == inf) continue;
+		pos = min(pos, g[now][i] + dp(i, bit | (1<<i), g, s));
+	}
+	return memo[bit][now] = pos;
+}
+
+int main(){
+ios::sync_with_stdio(false);
+std::cin.tie(nullptr);
+	for (int i = 0; i < (1<<15); i++){
+		for (int j = 0; j < 16; j++){
+			memo[i][j] = -1;
+		}
+	}
+
+	cin >> n >> m;
+	vector<vector<int>> g(n, vector<int> (n, inf));
+	for (int i = 0; i < m; i++){
+		int u, v, w;
+		cin >> u >> v >> w;
+
+		g[u][v] = w;
+	}
+
+	for (int i = 0; i < n; i++){
+		ans = min(ans, dp(i, 1<<i, g, i));
+	}
+	cout << (ans >= inf ? -1 : ans) << endl;
+}

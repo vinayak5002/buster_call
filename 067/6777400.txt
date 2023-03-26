@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (long long  i = 0; i < (long long )(n); i++) 
+#define all(x) (x).begin(),(x).end() 
+#define fix(x) fixed << setprecision(x)
+#define BACK(x) x.rbegin(),x.rend()
+//MOD1 1000000007
+//MOD2 998244353
+#define pb push_back
+#define mp make_pair
+#define bit(n) (1LL<<(n))
+using namespace std;
+using ull = unsigned long long;
+using ll = long long;
+using vl = vector<long long>;
+using vvl = vector<vector<long long>>;
+using vs = vector<string>;
+using pl = pair<long long, long long>;
+template <typename T> inline bool chmin(T& a, const T& b) {bool compare = a > b; if (a > b) a = b; return compare;}
+template <typename T> inline bool chmax(T& a, const T& b) {bool compare = a < b; if (a < b) a = b; return compare;}
+template<class T>using rp_queue=priority_queue<T,vector<T>,greater<T>>;
+const ll INF = 1LL << 60;
+//#include <atcoder/all>
+//using namespace atcoder;
+//using mint = modint1000000007;
+//using mint = modint998244353;
+
+struct Edge{ll to,cost;};
+void solve(){
+  ll V,E,r;cin>>V>>E>>r;
+  vector<vector<Edge>> G(V);
+  vl d(V,INF);
+  rep(i,E){
+    ll s,t,d;
+    cin>>s>>t>>d;
+    G[s].push_back(Edge{t,d});
+  }
+  rp_queue<pl> que;
+  d[r] = 0;
+  que.emplace(d[r],r);
+  while(!que.empty()){
+    pl p = que.top();
+    que.pop();
+    ll v = p.second;
+    if(d[v]<p.first)continue;
+    for(auto &e:G[v]){
+      if(d[e.to]>d[v]+e.cost){
+        d[e.to]=d[v]+e.cost;
+        que.emplace(d[e.to],e.to);
+      }
+    }
+  }
+  rep(i,V){
+    if(d[i]==INF)cout<<"INF"<<endl;
+    else cout<<d[i]<<endl;
+  }
+}
+int main(){cin.tie(nullptr);ios::sync_with_stdio(false);solve();}
+

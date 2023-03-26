@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 2000000002
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 123456
+#define M 1000000007
+// const int M = 1e7 のようにかく。
+
+typedef long long int ll;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+#define REP(i,n) for(int i=0; i<(int)n; i++)
+
+
+bool isPrime (int u){
+    vector<int> A;
+    int rootu = (int)sqrt(u);
+    REP (i,rootu+1){
+        if (i<2) {continue;}
+        if (u%i==0) { return false;}
+    }
+    return true;
+}
+
+vector<int> primelist (int u) {
+    //u以下の素数をすべて求める
+    //エラトステネスのふるい
+    vector<int> A;
+    bool ans=0;
+    REP (i,u+1){
+        if (i<2) {continue;}
+        if (i>2 && i%2 == 0 ) {continue;}
+        if (i>3 && i%3 == 0 ) {continue;}
+        if (isPrime(i)) { A.push_back(i); }
+    }
+    sort(A.begin(),A.end()); 
+    return A;
+}
+
+vector<int> factorize(int u) {
+    vector<int> A;
+    const int N = (int) sqrt(u) ;
+    REP (i, N+1) {
+        if (i < 2) {continue;}
+        while (u % i == 0 ) {
+            u = u / i;
+            A.push_back(i);            
+        }
+        if (u<2) {break;}
+    }
+    if ( u > 1 ){
+        A.push_back(u);
+    }
+    return A;
+}
+
+int main() {
+    int a;
+    int res=0;
+    scanf ("%d", &a);
+    vector<int> v = factorize(a) ;
+    int prev = 0;
+    res = a;
+    REP(i, (int)v.size() ) {
+        if (prev == v.at(i)) {continue;}
+        else {
+            res =  res * (v.at(i)-1)/v.at(i) ;
+            //printf ("%d \n", res); 
+            prev = v.at(i);
+        };
+    }
+    printf ("%d", res); 
+    printf ("\n");
+    return 0;
+}
+

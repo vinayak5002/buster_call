@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct Item {
+  int value;
+  int weight;
+};
+
+int dp[10001];
+
+int knapsack(vector<Item>& items, int max_weight) {
+  for (int i = 0; i <= max_weight; i++) dp[i] = 0;
+  for (auto& item : items) {
+    for (int i = max_weight; i >= 0; i--) {
+      if (i - item.weight >= 0) {
+        dp[i] = max(dp[i], dp[i-item.weight] + item.value);
+      }
+    }
+  }
+  return dp[max_weight];
+}
+
+int main() {
+  ios_base::sync_with_stdio(false);
+  cin.tie(0);
+  cout.tie(0);
+
+  int N, W;
+  cin >> N >> W;
+  vector<Item> items;
+  for (int i = 0; i < N; i++) {
+    int v, w;
+    cin >> v >> w;
+    items.push_back({v, w});
+  }
+  cout << knapsack(items, W) << '\n';
+
+  return 0;
+}
+

@@ -1,0 +1,160 @@
+#include<bits/stdc++.h>
+#define int ll
+#define rep(i, N) for(int i = 0; i < (int)(N); ++i)
+#define rep1(i, N) for(int i = 1; i <= (int)(N); ++i)
+#define per(i, N) for(int i = (N)-1; i >= 0; --i)
+#define all(v) (v).begin(), (v).end()
+#define rall(v) (v).rbegin(), (v).rend()
+#define bit(n, k) ((n) >> (k))
+#define pcnt(n) (__builtin_popcount(n))
+#define TakAo(ans) ans ? cout << "Takahashi\n" : cout << "Aoki\n"
+#define YesNo(ans) ans ? cout << "Yes\n" : cout << "No\n"
+#define endl '\n'
+#define fi first
+#define se second
+#define mkpr make_pair
+#define mktpl make_tuple
+#define eb emplace_back
+
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+using point = struct{ ll x, y; };
+using pointld = struct{ ld x, y; };
+template<class T> using max_heap = priority_queue<T>;
+template<class T> using min_heap = priority_queue<T, vector<T>, greater<T>>;
+template<class T> using vec = vector<T>;
+template<class T> using vvec = vec<vec<T>>;
+template<class T> using vvvec = vec<vvec<T>>;
+template<class T> using vvvvec = vvec<vvec<T>>;
+
+constexpr ld EPS = 1e-10;
+constexpr int INF = 1001001001;
+constexpr ll LINF = 1001001001001001001ll;
+constexpr ll MOD = (1) ? 998244353 : 1e9+7;
+constexpr int NIL = -1;
+constexpr int pm[2] = {1, -1};
+constexpr int dy[4] = {0, 1, 0, -1};
+constexpr int dx[4] = {1, 0, -1, 0};
+
+ll cel(ll a, ll b){ return (a + b - 1) / b;}
+ll Gcd(ll a, ll b){ return b ? Gcd(b, a % b) : abs(a);}
+template<class T> T powi(T x, ll exp){
+    return exp > 0 ? (exp & 1 ? x : 1) * powi(x * x, exp >> 1) : x / x;
+}
+ll modpow(ll x, ll exp, ll mod){
+    x %= mod;
+    return exp > 0 ? (exp & 1 ? x : 1) * modpow(x * x, exp >> 1, mod) % mod : 1;
+}
+template<class T> bool chmin(T &a, T b){ return a > b ? (a = b, true) : 0;}
+template<class T> bool chmax(T &a, T b){ return a < b ? (a = b, true) : 0;}
+
+using Pair = pair<ll, ll>;
+using Tpl = tuple<char, int, int>;
+
+void Main(){
+    while(1){
+        int N; cin >> N;
+        if(N == 0) break;
+
+        vec<Tpl> cmd(N);
+        vec<int> vals;
+        rep(i, N){
+            char c; cin >> c;
+            int A = NIL, B = NIL;
+            if(c == 'W'){
+                cin >> A >> B;
+            }
+            else cin >> A;
+
+            if(c != 'R'){
+                vals.eb(A);
+            }
+            cmd[i] = mktpl(c, A, B);
+        }
+
+        ll id = 0;
+        sort(all(vals));
+        vals.erase(unique(all(vals)), vals.end());
+        vec<int> ids(vals.size());
+
+        rep(i, N){
+            if(get<0>(cmd[i]) != 'R'){
+                int num = lower_bound(all(vals), get<1>(cmd[i])) - vals.begin();
+                ids[num] = get<1>(cmd[i]);
+                cmd[i] = mktpl(get<0>(cmd[i]),
+                               num,
+                               get<2>(cmd[i]));
+            }
+        }
+
+        vec<Pair> sect; 
+        sect.eb(mkpr(0, NIL));
+        rep(i, N){
+            Tpl T = cmd[i];
+            char c = get<0>(T);
+            int sz = sect.size();
+
+            if(c == 'W'){
+                int I = get<1>(T), S = get<2>(T);
+                for(int j = 0; S > 0 && j < sz; j++){
+                    if(j == sz - 1){
+                        sect[j].se = I;
+                        sect.eb(mkpr(sect[j].fi + S, NIL));
+                        break;
+                    }
+                    if(sect[j].se != NIL) continue;
+
+                    int sub = sect[j + 1].fi - sect[j].fi;
+                    if(S < sub){
+                        sect[j].se = I;
+                        sect.insert(sect.begin() + j + 1, mkpr(sect[j].fi + S, NIL));
+                        break;
+                    }
+                    else{
+                        sect[j].se = I;
+                        S -= sub;
+                    }
+                }
+            }
+            if(c == 'D'){
+                int I = get<1>(T);
+                rep(j, sz){
+                    if(sect[j].se == I) sect[j].se = NIL;
+                }
+            }
+            if(c == 'R'){
+                int P = get<1>(T);
+                auto it = upper_bound(all(sect), mkpr(P, INF));
+                if(it == sect.begin()){
+                    cout << -1 << endl;
+                    continue;
+                }
+                
+                it--;
+                //cout << (*it).se << endl;
+                int num = (*it).se;
+                if(0 <= num && num < (int)ids.size()){
+                    cout << ids[num] << endl;
+                }
+                else{
+                    cout << num << endl;
+                }
+            }
+        }
+
+        rep(j, 0){
+            cout << sect[j].fi << " " << sect[j].se << endl;
+        }
+        cout << endl;
+    }
+}
+ 
+signed main(){
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    cout << fixed << setprecision(10);
+    Main();
+    return 0;
+}

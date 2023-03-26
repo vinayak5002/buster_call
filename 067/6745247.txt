@@ -1,0 +1,129 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+
+void showArray(std::vector<int> W)
+{
+    for (auto it = W.begin(); it != W.end(); it++)
+    {
+        if (it != W.begin())
+        {
+            std::cout << " ";
+        }
+        std::cout << *it;
+    }
+    std::cout << std::endl;
+}
+
+int otherSortCost(std::vector<int> W)
+{
+    int ret = 0;
+    for (size_t i = 0; i < W.size(); i++)
+    {
+        std::vector<int>::iterator itr = std::min_element(W.begin() + i, W.end());
+        if (W[i] == *itr)
+        {
+            continue; //その数字自身がMINなら移動しない
+        }
+        else
+        {
+            size_t index = std::distance(W.begin(), itr);
+            std::swap(W[index], W[i]);
+            ret += W[i] + W[index];
+        }
+    }
+    return ret;
+}
+
+int groupSortCost(std::vector<int> W, const std::vector<int> sortedArray)
+{
+    int min_value = W[0];
+    int min_index = 0;
+    int ret = 0;
+
+    for (size_t i = 0; i < W.size(); i++)
+    {
+        if (!i)
+        {
+            W[min_index] = W[i + 1];
+            W[i + 1] = min_value;
+            ret += W[min_index] + W[i + 1];
+            min_index++;
+            continue;
+        }
+
+        std::vector<int>::iterator change_itr = std::min_element(W.begin() + i, W.end());
+        size_t change_index = std::distance(W.begin(), change_itr);
+        if (*change_itr == sortedArray[change_index] || *change_itr == W[min_index])
+        {
+            continue;
+        }
+        W[min_index] = W[change_index];
+        W[change_index] = min_value;
+        ret += W[min_index] + W[change_index];
+        min_index = change_index;
+    }
+    std::swap(W[0], W[min_index]);
+    ret += W[0] + W[min_index];
+    return ret;
+}
+
+//(1)全体のMINをひたすら移動させてソートする　→　minimumSortCost
+//　ただし全体のMINが正しい位置(W[0])にいる状態になるとソートが止まる　→　minimumSortCost の if (min_index == index) のところに入る
+//　この状態で　(I )全体のMINをわざわざ動かしてソートする　→　groupSortCost
+//　　　　　　　　　W[0]に全体のMIN(=min_value)がいる状態でW[i]に入るべき値(MINの次にMIN)(=chang_itr)を入れ替える
+//　　　　　　　(II)残りを頭からソートする処理に切り替えてソートする　→　otherSortCost
+//(2)頭からソートする　→　otherSortCost
+
+int minimumSortCost(std::vector<int> W, const std::vector<int> sortedArray)
+{
+    int ret = 0;
+
+    for (size_t i = 0; i < W.size(); i++)
+    {
+        // MINの値とindexを取得
+        std::vector<int>::iterator min_itr = std::min_element(W.begin(), W.end());
+        size_t min_index = std::distance(W.begin(), min_itr); // min_itr - W.begin() でもOK
+
+        // MINの場所にあるべき値とそのindexを取得
+        std::vector<int>::iterator itr = std::find(W.begin(), W.end(), sortedArray[min_index]);
+        size_t index = std::distance(W.begin(), itr);
+
+        // W[min_index](MIN値)と入るべきW[?](=sortedArray[index])を入れ替える
+        if (min_index == index) // MINが正しい場所にいる場合
+        {
+            int group = groupSortCost(W, sortedArray); //並び替えのコストをreturnする関数3(最小値は正しい位置にいるけどわざわざ動かす)
+            int other = otherSortCost(W);              //並び替えのコストをreturnする関数2(左から順にソート)
+            ret += std::min(group, other);
+            break;
+        }
+        else
+        {
+            std::swap(W[index], W[min_index]);
+            ret += W[index] + W[min_index];
+        }
+    }
+    return ret;
+}
+int main()
+{
+    int n;
+    std::cin >> n;
+    std::vector<int> W(n);
+    for (int i = 0; i < n; i++)
+    {
+        std::cin >> W[i]; //すべて異なる数字が入る
+    }
+
+    std::vector<int> sortedArray = W;
+
+    std::sort(sortedArray.begin(), sortedArray.end()); //ソート済の配列を得る
+
+    int count = minimumSortCost(W, sortedArray); //並び替えのコストをreturnする関数1(最小値を積極的に動かす)
+    int count_other = otherSortCost(W);
+
+    std::cout << std::min(count, count_other) << std::endl; //コストの小さいほうを表示
+
+    return 0;
+}

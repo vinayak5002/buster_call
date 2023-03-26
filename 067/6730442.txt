@@ -1,0 +1,65 @@
+#include <algorithm>
+#include <iostream>
+#include <vector>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+
+int V, E, Q;
+
+// Graph
+bool used[1 << 18];
+vector<int> G[1 << 18];
+vector<int> H[1 << 18];
+vector<int> I;
+int component[1 << 18];
+
+void dfs(int pos) {
+  used[pos] = true;
+  for(int nv : G[pos]){
+    if(!used[nv]) dfs(nv);
+  }
+  I.push_back(pos);
+}
+
+void rdfs(int pos, int k){
+  component[pos] = k;
+  used[pos] = true;
+  for(auto nv: H[pos]){
+    if(!used[nv]) rdfs(nv, k);
+  }
+}
+
+bool same(int u, int v){
+  return component[u] == component[v];
+}
+
+int main() {
+  cin >> V >> E;
+  int a, b;
+  rep(i, E) {
+    cin >> a >> b;
+    G[a].push_back(b);
+    H[b].push_back(a);
+  }
+
+  for (int i = 0; i < V; i++) {
+    if (!used[i]) dfs(i);
+  }
+  reverse(I.begin(), I.end());
+  for (int i = 0; i < V; i++) used[i] = false;
+  long long cnt = 1;
+  for(int i: I){
+    if(used[i] == true) continue;
+    rdfs(i, cnt);
+    cnt++;
+  }
+  cin >> Q;
+  vector<int> ans;
+  rep(i, Q){
+    cin >> a >> b;
+    ans.push_back(same(a, b));
+  }
+  for(int a: ans){
+    cout << a << endl;
+  }
+}

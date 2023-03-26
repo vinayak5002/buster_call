@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (long long  i = 0; i < (long long )(n); i++) 
+#define all(x) (x).begin(),(x).end() 
+#define fix(x) fixed << setprecision(x)
+#define BACK(x) x.rbegin(),x.rend()
+//MOD1 1000000007
+//MOD2 998244353
+#define pb push_back
+#define mp make_pair
+#define bit(n) (1LL<<(n))
+using namespace std;
+using ull = unsigned long long;
+using ll = long long;
+using vl = vector<long long>;
+using vvl = vector<vector<long long>>;
+using vs = vector<string>;
+using pl = pair<long long, long long>;
+template <typename T> inline bool chmin(T& a, const T& b) {bool compare = a > b; if (a > b) a = b; return compare;}
+template <typename T> inline bool chmax(T& a, const T& b) {bool compare = a < b; if (a < b) a = b; return compare;}
+const ll INF = 1LL << 60;
+//#include <atcoder/all>
+//using namespace atcoder;
+//using mint = modint1000000007;
+//using mint = modint998244353;
+ll dp[22][55000];
+void solve(){
+  //まずは漸化式を立てる
+  //dpテーブルには、i番目までを選んだ時,j円が作れる最小の枚数
+  //初期値はINF
+  //dp[i+1][j] = (dp[i][j],dp[i+1][j-C[i]]+1)
+  //そのC[i]を選べない時はdp[i+1][j] = dp[i][j];
+  //dp[0][0] = 0;
+  int N,M;cin>>N>>M;
+  vl C(M);rep(i,M)cin>>C[i];
+  rep(i,22)rep(j,55000)dp[i][j]=INF;
+  dp[0][0] = 0;
+  rep(i,M){
+    rep(j,N+1){
+      if(j<C[i])dp[i+1][j] = dp[i][j];
+      else dp[i+1][j] = min(dp[i][j],dp[i+1][j-C[i]]+1);
+    }
+  }
+  ll ans = INF;
+  rep(i,M+1)chmin(ans,dp[i][N]);
+  cout<<ans<<endl;
+}
+int main(){cin.tie(nullptr);ios::sync_with_stdio(false);solve();}
+

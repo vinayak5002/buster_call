@@ -1,0 +1,43 @@
+#include<iostream>
+#include<vector>
+#include<set>
+#include<queue>
+
+int main(){
+  int V, E:
+  std::cin >> V >> E;
+  std::vector<std::set<std::pair<int, int>>> links;
+  links.resize(V);
+  for(int i = 0; i < E; ++i){
+    int s, t, w;
+    std::cin >> s >> t >> w;
+    links[s].insert({- w, t});
+    links[t].insert({- w, s});
+  }
+  std::priority_queue<std::pair<int, int>> heap;
+  std::vector<bool> visited(V, false);   
+
+  int ans = 0;
+  visited.at(0) = true;
+ 
+  for(auto to : links.at(0)){
+     if(!visited.at(to.second)){
+        heap.push(to);
+     }
+  }
+
+  while(!heap.empty()){
+    auto from = heap.top(); heap.pop();
+    if(visited.at(from.second)){
+      continue;
+    }
+    ans -= from.first;
+    visited.at(from.second) = true;
+    for(auto to : links.at(from.second)){
+      if(!visited.at(to.second)){
+        heap.push(to);
+      }
+    }
+  }
+  return ans;
+}

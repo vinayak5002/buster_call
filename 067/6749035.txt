@@ -1,0 +1,94 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 500001
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 11001
+#define MAXM 110
+typedef long long int ll;
+
+int n, weight, v, w;
+int t = 0;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+
+long long int res;
+const long long int infty = (1LL<<31) - 1;
+const long long int M = 998244353777789;
+const long long int N = 499122177;
+
+vector<int> S;
+int A[MAXM][MAXN] ; 
+int VAL[MAXM] ; //コインの額面
+int W[MAXM];
+
+///////////計算量を減らす工夫///////////////
+// i番目までの荷物で重さjまででの最大価値をA[i][j]に保管
+// A[i][j] = max (A[i-1][j], A[i-1][j-W[i]] + VAL[i] )
+/////////////////////////////
+void init(){
+    for (int i=0 ; i<MAXM ; i++) {
+        A[i][0] = 0;
+    }
+    for (int i=0 ; i<MAXM ; i++ ) {
+        for (int j=1 ; j<MAXN ; j++) {
+            A[i][j] = 0;
+        }
+    }
+    // printf("END init  \n");
+}
+
+
+int ansback(int cargo, int w){
+    int tmp = 0 ;
+    int maxv = 0; 
+    //printf (" A[%d][%d] = max (ansback(%d-1,%d), ansback(%d,w-W[%d]) + %d) \n", cargo , w, cargo,w, cargo,cargo,  VAL[cargo]) ;  
+    //printf ("W[cargo]=%d  \n", W[cargo]);
+    if (cargo == 0 || w<0 ) {return 0;}
+    else if ( A[cargo][w] > 0 ) { maxv = A[cargo][w];}
+    else {
+        if (w-W[cargo]<0 ) { A[cargo][w] = ansback(cargo-1,w) ;}
+        else { A[cargo][w] = max (ansback(cargo-1,w), ansback(cargo,w-W[cargo]) + VAL[cargo]) ; } 
+        maxv = A[cargo][w];
+    }
+    //printf("ansback(%d,%d) = %d \n", cargo,w,maxv);
+    return maxv;
+}
+
+int main(){
+    cin >> n >> weight ;
+    for (int i=1; i<= n  ; i++) {
+        cin >> v >> w;
+        VAL[i]=v;
+        W[i]=w;
+    }
+    init();
+    int ans = ansback(n,weight);
+    printf ("%d\n", ans);
+    return 0;
+}
+
+
+/*
+入力
+１行目に２つの整数　N、W　が空白区切りで１行に与えられます。 続く N 行で i 番目の品物の価値 vi と重さ wi が空白区切りで与えられます。
+
+出力
+価値の合計の最大値を１行に出力してください。
+
+制約
+1 ≤ N ≤ 100
+1 ≤ vi ≤ 1,000
+1 ≤ wi ≤ 1,000
+1 ≤ W ≤ 10,000
+入出力例
+
+入力例 1
+4 5
+4 2
+5 2
+2 1
+8 3
+
+*/
+

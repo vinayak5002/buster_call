@@ -1,0 +1,74 @@
+#include<stdio.h>
+
+#define N 100
+#define NO_VISIT 0
+#define OK_VISIT 1
+#define COMPLETE_VISIT 2
+
+int n, M[N][N];
+int color[N];
+int d[N]; // 頂点を最初に訪問した発見時刻の記録
+int f[N]; // 頂点の隣接リストを調べ終えた完了時刻の記録
+int time; // タイムスタンプ
+
+// 再帰関数による深さ優先探索
+void dfs_visit(int u)
+{
+    int v;
+    color[u] = OK_VISIT;
+    d[u] = ++time; // 最初に訪問した記録
+    for(v=0; v<n; v++)
+    {
+        if(M[u][v] == 0){continue;}
+        if(color[v] == NO_VISIT){dfs_visit(v);}
+    }
+    color[u] = COMPLETE_VISIT;
+    f[u] = ++time; // 訪問の完了の記録
+}
+
+void dfs()
+{
+    int u;
+    //初期化
+    for(u=0; u<n; u++){color[u] = NO_VISIT;}
+    time = 0;
+
+    for(u=0; u<n; u++)
+    {
+        //未訪問の u を始点として深さ優先探索
+        if(color[u] == NO_VISIT){dfs_visit(u);}
+    }
+    for(u=0; u<n; u++)
+    {
+        printf("%d %d %d\n", u+1, d[u], f[u]);
+    }
+}
+
+int main()
+{
+    int u, v, k, i, j;
+    scanf("%d", &n);
+    for(i=0; i<n; i++)
+    {
+        for(j=0; j<n; j++)
+        {
+            M[i][j] = 0;
+        }
+    }
+
+    for(i=0; i<n; i++)
+    {
+        scanf("%d %d", &u, &k);
+        u = u - 1;
+        for(j=0; j<k; j++)
+        {
+            scanf("%d", &v);
+            v = v - 1;
+            M[u][v] = 1;
+        }
+    }
+
+    dfs();
+
+    return 0;
+}

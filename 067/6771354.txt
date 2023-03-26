@@ -1,0 +1,86 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+ll rec(string &S, V<char> &op, int l, int &r) {
+    if (S[l] == '(') {
+        l++;
+        V<ll> cur;
+        V<char> cc;
+        while (true) {
+            cur.push_back(rec(S, op, l, r));
+            l = r;
+            if (S[l] != ')') {
+                cc.push_back(S[l]);
+                l++;
+            } else {
+                break;
+            }
+        }
+        l++;
+        r = l;
+        rep(k, 3) {
+            V<ll> nex;
+            V<char> cnex;
+            nex.push_back(cur[0]);
+            for (int i = 1; i < cur.size(); i++) {
+                if (cc[i - 1] == op[k]) {
+                    ll b = nex.back();
+                    nex.pop_back();
+                    if (op[k] == '+') {
+                        nex.push_back(b + cur[i]);
+                    } else if (op[k] == '-') {
+                        nex.push_back(b - cur[i]);
+                    } else {
+                        nex.push_back(b * cur[i]);
+                    }
+                } else {
+                    nex.push_back(cur[i]);
+                    cnex.push_back(cc[i - 1]);
+                }
+            }
+            cur = nex;
+            cc = cnex;
+        }
+        assert(cur.size() == 1);
+        return cur[0];
+    } else if ('0' <= S[l] and S[l] <= '9') {
+        ll ret = 0;
+        while ('0' <= S[l] and S[l] <= '9') {
+            ret = ret * 10 + S[l] - '0';
+            l++;
+        }
+        r = l;
+        return ret;
+    }
+    assert(0);
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    string S;
+    cin >> S;
+    S = "(" + S + ")";
+    int N = S.size();
+    V<char> op = {'+', '-', '*'};
+    sort(op.begin(), op.end());
+    V<ll> res;
+    do {
+        int r;
+        res.push_back(rec(S, op, 0, r));
+        assert(r == N);
+    } while (next_permutation(op.begin(), op.end()));
+    cout << *max_element(res.begin(), res.end()) << '\n';
+    return 0;
+}
+

@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for (int i = 0; i < (n); ++i)
+using namespace std;
+using ll = long long;
+using P = pair<int,int>;
+
+struct BIT{
+    vector<int> v;
+    int N;
+    BIT(int n):v(n+1,0){
+        N=n;
+    }
+    void add(int i, int w){
+        for(int x=i;x<=N; x+=x&-x) v[x]+=w;
+    }
+    int sum(int i){
+        int ret=0;
+        for(int x=i;x>0; x-=x&-x) ret+=v[x];
+        return ret;
+    }
+};
+
+int main(){
+    int n;
+    cin >> n;
+    vector<P> a(n);
+    rep(i,n){
+        int x; cin>>x;
+        a[i].first=x;
+        a[i].second=i;
+    }
+    sort(a.begin(),a.end());
+    vector<int> b(n);
+    int tmp=0;
+    rep(i,n){
+        tmp++;
+        b[a[i].second]=tmp;
+    }
+    BIT bit(n);
+    ll ans=0;
+    rep(i,n){
+        ans+=i-bit.sum(b[i]);
+        bit.add(b[i],1);
+    }
+    cout << ans << endl;
+}

@@ -1,0 +1,130 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+void solve(int N) {
+    V<int> x(N), y(N), d(N, 1);
+    map<ll, int> mp;
+    const ll INF = 1LL << 30;
+    rep(i, N) {
+        cin >> x[i] >> y[i];
+        char c;
+        cin >> c;
+        mp[x[i] * INF + y[i]] = i;
+        if (c == 'x') {
+            d[i] = 0;
+            mp[(x[i] + 1) * INF + y[i]] = i;
+        } else {
+            mp[x[i] * INF + y[i] + 1] = i;
+        }
+    }
+    V<int> seen(N, 0);
+    const int dx[4] = {1, 0, -1, 0}, dy[4] = {0, 1, 0, -1};
+    rep(i, N) {
+        if (seen[i]) continue;
+        bool okc = false;
+        rep(_, 2) {
+            bool ok = true;
+            queue<int> que;
+            que.push(i);
+            map<int, int> s;
+            s[i] = _;
+            while (!que.empty()) {
+                int id = que.front();
+                que.pop();
+                int hx, hy, fx, fy;
+                if (d[id] == 0) {
+                    hx = x[id], hy = y[id];
+                    fx = x[id] + 1, fy = y[id];
+                } else {
+                    hx = x[id], hy = y[id];
+                    fx = x[id], fy = y[id] + 1;
+                }
+                if (s[id] == 1) {
+                    swap(hx, fx);
+                    swap(hy, fy);
+                }
+                // h
+                rep(k, 4) {
+                    int nx = hx + dx[k], ny = hy + dy[k];
+                    if (nx == fx and ny == fy) continue;
+                    if (mp.count(nx * INF + ny)) {
+                        int id2 = mp[nx * INF + ny];
+                        if (nx == x[id2] and ny == y[id2]) {
+                            if (s.count(id2) and s[id2] == 1) {
+                                ok = false;
+                                break;
+                            } else {
+                                if (s.count(id2) == 0) que.push(id2);
+                                s[id2] = 0;
+                            }
+                        } else {
+                            if (s.count(id2) and s[id2] == 0) {
+                                ok = false;
+                                break;
+                            } else {
+                                if (s.count(id2) == 0) que.push(id2);
+                                s[id2] = 1;
+                            }
+                        }
+                    }
+                }
+                // f
+                rep(k, 4) {
+                    int nx = fx + dx[k], ny = fy + dy[k];
+                    if (nx == hx and ny == hy) continue;
+                    if (mp.count(nx * INF + ny)) {
+                        int id2 = mp[nx * INF + ny];
+                        if (nx == x[id2] and ny == y[id2]) {
+                            if (s.count(id2) and s[id2] == 0) {
+                                ok = false;
+                                break;
+                            } else {
+                                if (s.count(id2) == 0) que.push(id2);
+                                s[id2] = 1;
+                            }
+                        } else {
+                            if (s.count(id2) and s[id2] == 1) {
+                                ok = false;
+                                break;
+                            } else {
+                                if (s.count(id2) == 0) que.push(id2);
+                                s[id2] = 0;
+                            }
+                        }
+                    }
+                }
+                if (!ok) break;
+            }
+            if (ok) {
+                for (auto [id, dir] : s) seen[id] = 1;
+                okc = true;
+                break;
+            }
+        }
+        if (!okc) {
+            cout << "No" << '\n';
+            return;
+        }
+    }
+    cout << "Yes" << '\n';
+    return;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N;
+    while (cin >> N, N != 0) solve(N);
+    return 0;
+}
+

@@ -1,0 +1,120 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct Card
+{
+    char Mark;
+    int Num;
+    int id;
+}Tramp;
+
+
+void BubbleSort(Tramp Cards[], int NumofCards);
+void SelectionSort(Tramp Cards[], int NumofCards);
+int CheckStable(Tramp Cards[], int NumofCards);
+void PrintCards(Tramp Cards[], int NumofCards);
+void swap(Tramp *CardX, Tramp *CardY);
+int main(void){
+    Tramp Cards[36];
+    Tramp CardsDemo[36];
+    
+    int NumofCards=0;
+    scanf("%d",&NumofCards);
+    char tmp[3];
+    for (int i = 0; i < NumofCards; i++)
+    {
+        scanf("%s",tmp);
+        (Cards+i)->Mark = tmp[0];
+        (Cards+i)->Num = atoi(&tmp[1]);
+        (Cards+i)->id = i;
+    }
+    
+    //PrintCards(CardsDemo, NumofCards);
+    memmove(CardsDemo, Cards, sizeof(Tramp)*36);
+
+    BubbleSort(CardsDemo, NumofCards);
+    PrintCards(CardsDemo,NumofCards );
+    if(CheckStable(CardsDemo, NumofCards)){
+        printf("Stable\n");
+    }else{
+        printf("Not stable\n");
+    }memmove(CardsDemo, Cards, sizeof(Tramp)*36);
+
+    SelectionSort(CardsDemo, NumofCards);
+    PrintCards(CardsDemo,NumofCards );
+    if(CheckStable(CardsDemo, NumofCards)){
+        printf("Stable\n");
+    }else{
+        printf("Not stable\n");
+    }
+    return 0;
+}
+
+
+void BubbleSort(Tramp Cards[], int NumofCards){
+    for (int i = 0; i < NumofCards; i++)
+    {
+       for (int j = NumofCards-1; j > i; j--)
+       {
+            if(Cards[j].Num < Cards[j-1].Num){
+                swap(&Cards[j], &Cards[j-1]);
+            }
+       }
+       
+    }
+    
+    return ;
+}
+void SelectionSort(Tramp Cards[], int NumofCards){
+    for (int i = 0; i < NumofCards; i++)
+    {
+        int minj = i;
+        for (int j = NumofCards-1; j > i; j--)
+        {
+            if (Cards[j].Num < Cards[minj].Num)
+            {
+                minj = j;
+            }
+            
+            
+        }
+        swap(&Cards[i],&Cards[minj]);
+        
+    }
+    
+    return ;
+}
+int CheckStable(Tramp Cards[], int NumofCards){
+    int stable = 1;
+    for (int i = 0; i < NumofCards-1; i++)
+    {
+        if((Cards[i].Num == Cards[i+1].Num) && (Cards[i].id > Cards[i+1].id)){
+            stable = 0;
+            break;
+        }
+    }
+    
+    return stable;
+}
+void PrintCards(Tramp Cards[], int NumofCards){
+    printf("%c", Cards[0].Mark);
+    printf("%d",Cards[0].Num);
+    for (int i = 1; i < NumofCards; i++)
+    {
+        printf(" %c", Cards[i].Mark);
+        printf("%d",Cards[i].Num);
+    }
+    printf("\n");
+    
+}
+
+
+void swap(Tramp *CardX, Tramp *CardY){
+    Tramp tmp = *CardX;
+    memmove(&tmp, CardX, sizeof(Tramp));
+    memmove(CardX, CardY, sizeof(Tramp));
+    memmove(CardY,&tmp, sizeof(Tramp));
+
+
+}

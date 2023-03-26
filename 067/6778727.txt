@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using State = string::iterator;
+
+string cip(State &it);
+string str(State &it);
+string let(State &it);
+
+string cip(State &it) {
+    string ans;
+    while (*it and *it != ']') ans += str(it);
+    return ans;
+}
+string str(State &it) {
+    if (*it == '[') {
+        it++;
+        string res = cip(it);
+        it++;
+        reverse(res.begin(), res.end());
+        return res;
+    } else {
+        return let(it);
+    }
+}
+string let(State &it) {
+    int offset = 0;
+    for (; *it == '+' or *it == '-'; ++it) {
+        if (*it == '+') ++offset;
+        else            --offset;
+    }
+    char v = *it++;
+    if (v == '?') {
+        return string(1, '?');
+    } else {
+        if (not ('A' <= v and v <= 'Z')) {
+            while (*it) cerr << *it++;
+            cerr << endl;
+            assert(false);
+        }
+        int x = (v - 'A' + offset) % 26;
+        if (x < 0) x += 26;
+        return string(1, char('A' + x));
+    }
+}
+
+int main() {
+    while (true) {
+        string s;
+        cin >> s;
+        if (s == ".") break;
+        auto it = s.begin();
+        string ans = cip(it);
+        replace(ans.begin(), ans.end(), '?', 'A');
+        cout << ans << endl;
+    }
+}

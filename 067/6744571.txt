@@ -1,0 +1,192 @@
+// mi完成
+#include <iostream>
+#include <bitset>
+#include <ios>
+#include <iomanip>
+#include <assert.h>
+
+enum Onoff
+{
+    OFF,
+    ON,
+};
+enum Order
+{
+    test,
+    set,
+    clear,
+    flip,
+    all,
+    any,
+    none,
+    count,
+    val,
+};
+
+// flagのうち、i番目のビットが0か1か
+Onoff getINumBit(int i, std::bitset<64> flag)
+{
+    std::bitset<64> bit_j;
+    std::bitset<64> bit_01 = 0x01;
+    std::bitset<64> bit_00 = 0x00;
+    // for (int j = 0; j < i; j++)
+    // {
+    //     flag >> 1;
+    // }
+    flag = flag >> i;
+    bit_j = flag & bit_01;
+
+    Onoff bit_i;
+    if (bit_j == bit_00)
+    {
+        bit_i = OFF;
+    }
+    else
+    {
+        bit_i = ON;
+    }
+    return bit_i;
+}
+
+void Test(int i, std::bitset<64> flag)
+{
+    if (getINumBit(i, flag) == ON)
+    {
+        std::cout << 1 << std::endl;
+    }
+    else
+    {
+        std::cout << 0 << std::endl;
+    }
+}
+
+void Set(int i, std::bitset<64> &flag)
+{
+    std::bitset<64> bit_01 = 0x01;
+    bit_01 = bit_01 << i;
+    flag = flag | bit_01;
+}
+
+void Clear(int i, std::bitset<64> &flag)
+{
+    std::bitset<64> bit_01 = 0x01;
+    bit_01 = bit_01 << i;
+    std::bitset<64> bit_01_not = ~bit_01;
+    flag = flag & bit_01_not;
+}
+
+// i番目のbitを反転する
+void Flip(int i, std::bitset<64> &flag)
+{
+    std::bitset<64> bit_01 = 0x01;
+    bit_01 = bit_01 << i;
+    flag = flag ^ bit_01;
+}
+
+void All(std::bitset<64> flag)
+{
+    if (flag == 0)
+    {
+        std::cout << 0 << std::endl;
+    }
+    else if (flag == 0xFFFFFFFFFFFFFFFF)
+    {
+        std::cout << 1 << std::endl;
+    }
+}
+
+void Any(std::bitset<64> flag)
+{
+    if (flag == 0)
+    {
+        std::cout << 0 << std::endl;
+    }
+    else
+    {
+        std::cout << 1 << std::endl;
+    }
+}
+
+void None(std::bitset<64> flag)
+{
+    if (flag == 0)
+    {
+        std::cout << 1 << std::endl;
+    }
+    else
+    {
+        std::cout << 1 << std::endl;
+    }
+}
+
+void Count(std::bitset<64> flag)
+{
+    int count = 0;
+    for (int j = 0; j < 64; j++)
+    {
+        if (getINumBit(j, flag) == ON)
+        {
+            count++;
+        }
+    }
+}
+
+void Val(std::bitset<64> flag)
+{
+    std::cout << flag.to_ullong() << std::endl;
+}
+
+int main(void)
+{
+    //単体テスト←次ここ
+    assert(getINumBit(0, 0x01) == 1);
+    assert(getINumBit(1, 0x01) == 0);
+    assert(getINumBit(0, 0x02) == 0);
+    assert(getINumBit(1, 0x02) == 1);
+    std::bitset<64>
+        flag;
+    int q;
+    std::cin >> q;
+    for (int j = 0; j < q; j++)
+    {
+        int order_num;
+        int i;
+        std::cin >> order_num;
+        if (order_num >= 0 && order_num <= 3)
+        {
+            std::cin >> i;
+        }
+
+        switch (order_num)
+        {
+        case test:
+            Test(i, flag);
+            break;
+        case set:
+            Set(i, flag);
+            break;
+        case clear:
+            Clear(i, flag);
+            break;
+        case flip:
+            Flip(i, flag);
+            break;
+        case all:
+            All(flag);
+            break;
+        case any:
+            Any(flag);
+            break;
+        case none:
+            None(flag);
+            break;
+        case count:
+            Count(flag);
+            break;
+        case val:
+            Val(flag);
+            break;
+        }
+    }
+    return 0;
+}

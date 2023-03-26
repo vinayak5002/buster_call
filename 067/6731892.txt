@@ -1,0 +1,120 @@
+// https://qiita.com/DaikiSuyama/items/9dba963ba74396b9b7fd
+// https://luling.hatenablog.com/entry/2018/12/01/212805
+// https://zenn.dev/antyuntyun/articles/atcoder-cpp-template
+//
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef unsigned long long ull;
+
+// rep macro
+#define reps(i, a, n) for (ll i = (a); i < (ll)(n); ++i)
+#define rreps(i, a, n) for (ll i = (a); i > (ll)(n); --i)
+#define rep(i, n) reps(i, 0, n)
+#define rrep(i, n) reps(i, 1, n + 1)
+#define repd(i,n) for(ll i=n-1;i>=0;i--)
+#define rrepd(i,n) for(ll i=n;i>=1;i--)
+
+#define optimize_cin() cin.tie(0); ios::sync_with_stdio(false)
+
+#define pb push_back
+#define mp make_pair
+#define all(obj) (obj).begin(), (obj).end()
+#define YESNO(bool) if(bool){cout<<"YES"<<endl;}else{cout<<"NO"<<endl;}
+#define yesno(bool) if(bool){cout<<"yes"<<endl;}else{cout<<"no"<<endl;}
+#define YesNo(bool) if(bool){cout<<"Yes"<<endl;}else{cout<<"No"<<endl;}
+
+//定数
+#define INF32 2147483647           // 2.147483647 x 10^{9}:32bit整数のinf
+#define INF64 9223372036854775807  // 9.22337203685477580 x 10^{18}:64bit整数のinf
+#define MOD 1000000007             //問題による
+#define PI 3.14159265359           // 円周率
+
+//略記
+#define F first
+#define S second
+
+//出力(空白区切りで昇順に)
+#define dump(x)                                                 \
+  for (auto i = x.begin(); i != --x.end(); i++) cout << *i << " "; \
+  cout << *--x.end() << endl;
+#define echo(x) cout << (x) << endl;
+
+#define dumpMatrix(ms, row, col) \
+for (auto i = 0; i < row; i++) { \
+  for (auto j = 0; j < col; j++) { \
+    if (j != 0) cout << " "; \
+    cout << ms[i][j]; \
+  } \
+  cout << endl; \
+}
+
+// aをbで割る時の繰上げ,繰り下げ
+ll _ceil(ll a, ll b) { return (a + (b - 1)) / b; }
+ll _floor(ll a, ll b) { return a / b; }
+
+// 大きい方、小さい方を残す
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return 1; } return 0; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return 1; } return 0; }
+
+// 参考 : https://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=5601445#1
+
+using P = pair<int, int>;
+
+signed main() {
+  string s;
+  cin >> s;
+  // 1文字
+  if (s == string(s.size(), s[0])) {
+    cout << s.size() << endl;
+    return 0;
+  }
+  // 'a' を 0番目として頻度を計算
+  int freq[26] = {};
+  for (char si : s) freq[si - 'a']++;
+  // PQにより頻度の降順に処理する
+  priority_queue<P, vector<P>, greater<P>> pque;
+  // 文字を2の冪乗でcodingする
+  // a, b, c, d, e, ... => 1, 2, 4, 8, 16, ...
+  // PQは(頻度, coding)で登録する
+  rep(i, 26) { pque.emplace(freq[i], 1 << i); }
+  //
+  int res[26] = {};
+  while (pque.size() >= 2) {
+    P x = pque.top();
+    pque.pop();
+    // 頻度0は存在しない文字なので飛ばす
+    if (x.first == 0) continue;
+    P y = pque.top();
+    pque.pop();
+    // coding1 | coding2 は2進数の和なので実質的に文字列の結合を表す
+    // 1 | 2 <=> 01 | 10 = 11 <=> 3
+    P z = make_pair(x.first + y.first, x.second | y.second);
+    rep(i, 26) {
+      // codingの和を分解する操作("x & 1"は奇数判定)
+      // 例えば6(= 2 + 4)は以下のようになる
+      //    6 >> 0 & 1 = 6 & 1 = 0
+      //    6 >> 1 & 1 = 3 & 1 = 1
+      //    6 >> 2 & 1 = 1 & 1 = 1
+      //    6 >> 3 & 1 = 0 & 1 = 0
+      if (z.second >> i & 1) res[i]++;
+    }
+    pque.push(z);
+  }
+  int sum = 0;
+  rep(i, 26) sum += freq[i] * res[i];
+  echo(sum);
+  // s = abcaとすると
+  // freq = [2, 1, 1, 0, ...]
+  // pque = [[0, 8], ..., [1, 2], [1, 4], [2, 1]]
+  // loop1
+  //    z = [2, 6]
+  //    pque = [[2, 6], [2, 1]]  # ループの最初のpopで0が全部消える
+  //    res = [0, 1, 1, 0, ...]
+  // loop2
+  //    z = [4, 7]
+  //    pque = [..., [4, 7]]
+  //    res = [1, 2, 2, 0, ...]
+  // sum = 2 * 1 + 1 * 2 + 1 * 2 + 0 * 0 + ... = 6
+}
+

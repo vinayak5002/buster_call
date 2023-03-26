@@ -1,0 +1,88 @@
+/*#pragma GCC target("avx2")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")*/
+#include<bits/stdc++.h>
+#define rep(i,s,n) for(int i = s; i < n; ++i)
+#define rrep(i,s,n) for(int i = s; i >= n; --i)
+#define fi first
+#define se second
+#define all(a) a.begin(),a.end()
+#define rall(a) a.rbegin(),a.rend()
+#define SUM(a) accumulate(all(a),0LL)
+#define MAX(a) *max_element(all(a))
+#define MIN(a) *min_element(all(a))
+#define fi first
+#define se second
+#define len(x) (int)(x).size()
+#define dup(x,y) (((x)+(y)-1)/(y))
+#define pb push_back
+#define eb emplace_back
+#define em emplace
+#define pq(T) priority_queue<T,vector<T>,greater<T>>
+using namespace std;
+template <class T> inline vector<vector<T>> vector2(const size_t &i, const size_t &j, const T &init = T()) {
+  return vector<vector<T>>(i, vector<T>(j, init));
+}
+template <class T> inline vector<vector<vector<T>>> vector3(const size_t &i, const size_t &j, const int &k, const T &init = T()) {
+  return vector<vector<vector<T>>>(i, vector<vector<T>>(j, vector<T>(k, init)));
+}
+template <class T> inline vector<vector<vector<vector<T>>>> vector4(const size_t &i, const size_t &j, const size_t &k, const size_t &l, const T &init = T()) {
+  return vector<vector<vector<vector<T>>>>(i, vector<vector<vector<T>>>(j, vector<vector<T>>(k, vector<T>(l, init))));
+}
+template<class T,class U>bool chmax(T &a,const U &b){return ((a<b) ? (a=b, true) : false);}
+template<class T,class U>bool chmin(T &a,const U &b){return ((a>b) ? (a=b, true) : false);}
+using ll = long long;
+using P = pair<ll,ll>;
+using PP = pair<P, P>;
+using Pint = pair<P, int>;
+using intP = pair<int, P>;
+// ================= ここまでテンプレ =================
+
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  
+  while(true){
+    int n;
+    cin >> n;
+    if(!n) break;
+    auto G = vector2<int>(n,5);
+    rep(i,0,n)rep(j,0,5) cin >> G[i][j];
+    int ans = 0;
+    while(true){
+      auto pre = G;
+      rep(i,0,n){
+        rep(j,0,3){
+          if (!G[i][j])continue;
+          int cnt = 0;
+          while (G[i][j] == G[i][j+cnt]){
+            cnt += 1;
+            if (j+cnt == 5) break;
+          }
+          if (cnt >= 3){
+            ans += cnt * G[i][j];
+            rep(k,0,cnt){
+              G[i][j+k] = 0;
+            }
+          }
+        }
+      }
+      if (pre == G){
+        break;
+      }
+      while(true){
+        auto pre2 = G;
+        rep(i,0,5) rep(j,1,n){
+          if(G[n-j-1][i] && !G[n-j][i]){
+            swap(G[n-j-1][i],G[n-j][i]);
+          }
+        }
+        if (pre2 == G)break;
+      }
+    }
+    cout << ans << endl;
+  }
+
+  return 0;
+}

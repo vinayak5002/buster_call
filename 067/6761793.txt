@@ -1,0 +1,111 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <set>
+#include <deque>
+#include <queue>
+#define TEST cout << "TEST" << endl
+#define IINF 2147483647
+#define LLINF 9223372036854775807
+#define AMARI 998244353
+using namespace std;
+
+//RMQとRSQをまとめたもの（遅延ではない）
+class ococo_segtree { 
+public:
+    int n;
+    vector<int> rsq;
+    vector<int> rmq;
+
+    //配列の初期化 O(N)
+    void syokica(int a) {
+        n = 1;
+        while (n < a)n *= 2;
+        rsq.resize(2 * n - 1);
+        rmq.resize(2 * n - 1);
+        for (int i = 0; i < 2 * n - 1; i++) {
+            rsq[i] = 0;
+            rmq[i] = IINF;
+        }
+    }
+
+    //a[i]をxにする O(logN)
+    void update_num(int i, int x) {
+        i += (n - 1);
+        rmq[i] = x;
+        int dif = x - rsq[i];
+        rsq[i] += dif;
+        while (i) {
+            i = (i - 1) / 2;
+            rmq[i] = min(rmq[i * 2 + 1],rmq[i * 2 + 2]);
+            rsq[i] += dif;
+        }
+    }
+
+    //a[i]にxを加える O(logN)
+    void add_num(int i, int x) {
+        i += (n - 1);
+        rsq[i] += x;
+        rmq[i] = min(rmq[i], x);
+        while (i) {
+            i = (i - 1) / 2;
+            rsq[i] += x;
+            rmq[i] = min(rmq[i * 2 + 1], rmq[i * 2 + 2]);
+        }
+    }
+
+    int get_sum2(int a, int b, int k,int l, int r) {
+        //cout << k << endl;
+        if (a <= l && r <= b)return rsq[k];
+        else if (r <= a || b <= l)return 0;
+        else {
+            int kari = (get_sum2(a, b, k * 2 + 1, l, (l + r) / 2) + get_sum2(a, b, k * 2 + 2, (l + r) / 2, r) );
+            return kari;
+        }
+    }
+    //[l,r)の和の取得 O(logN)
+    int get_sum(int l, int r) {
+        return get_sum2(l, r, 0, 0,n);
+    }
+
+    int get_minimum2(int a, int b, int k, int l, int r) {
+        if (a <= l && r <= b)return rmq[k];
+        else if (r <= a || b <= l)return IINF;
+        else return min(get_minimum2(a, b, k * 2 + 1, l, (l + r) / 2), get_minimum2(a, b, k * 2 + 2, (l + r) / 2, r));
+    }
+    //[l,r)の最小値の取得 O(logN)
+    int get_minimum(int l, int r) {
+        return get_minimum2(l, r, 0, 0, n);
+    }
+};
+
+int main(void) {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    int n, q;
+    cin >> n >> q;
+    ococo_segtree os;
+    os.syokica(n);
+    while (q--) {
+        /*
+        cout << endl << endl;
+        for (int i = 0; i < ors.value.size(); i++) {
+            cout << ors.value[i] << ' ';
+            if (i == 0 || i == 2 || i == 6)cout << endl;
+        }
+        cout << endl << endl;
+       */
+
+        int a, b, c;
+        cin >> a >> b >> c;
+        if (a == 0) {
+            os.update_num(b, c);
+        }
+        else {
+            cout << os.get_minimum(b, c + 1) << endl;
+        }
+    }
+    return 0;
+}

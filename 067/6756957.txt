@@ -1,0 +1,136 @@
+//#include <atcoder/all>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <deque>
+#include <exception>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <iosfwd>
+#include <iostream>
+#include <istream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <locale>
+#include <map>
+#include <memory>
+#include <new>
+#include <numeric>
+#include <ostream>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <stdexcept>
+#include <streambuf>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <valarray>
+#include <vector>
+#include <array>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <forward_list>
+#include <future>
+#include <initializer_list>
+#include <mutex>
+#include <random>
+#include <ratio>
+#include <regex>
+#include <scoped_allocator>
+#include <system_error>
+#include <thread>
+#include <tuple>
+#include <typeindex>
+#include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
+using namespace std;
+typedef long long ll;
+typedef pair<ll,ll> pll;
+typedef vector<int> vint;
+typedef vector<vector<int> > vvint;
+typedef vector<long long> vll;
+typedef vector<vector<long long> > vvll;
+typedef vector<pair<ll,ll>> vpll;
+typedef vector<string> vst;
+typedef vector<bool> vbo;
+typedef vector<vector<bool>> vvbo;
+#define rep(i,a) for(int i=0;i<a;i++)
+#define REP(i,a,b) for(int i=a;i<b;i++)
+#define rrep(i,a,b) for(int i=a;i>=b;i--)
+#define ALL(v) (v).begin(),(v).end()
+#define RALL(v) (v).rbegin(),(v).rend()
+ll gcd(ll a,ll b){return a?gcd(b%a,a):b;}
+ll lcm(ll a,ll b){return a / gcd(a,b) * b;}
+void oye(){cout << "Yes" << endl;}
+void ono(){cout << "No"  << endl;}
+//ll mod=998244353;
+//ll mod=1e9+7;
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(0);
+  ll h,score;
+  while(true){
+    cin>>h;
+    if(h==0) return 0;
+    vvll a(h,vll(5));
+    rep(i,h){
+      rep(j,5){
+        cin>>a[i][j];
+      }
+    }
+    vvbo elim(h,vbo(5,false));
+    bool key=true;
+    score=0;
+    while(key){
+      key=false;
+      rep(i,h) rep(j,5) elim[i][j]=false;
+      rep(i,h){
+        bool line=false;
+        elim[i][1]=(a[i][1]==a[i][2]);
+        elim[i][3]=(a[i][3]==a[i][2]);
+        if(elim[i][1] && elim[i][3]){
+          key=true;line=true;
+          elim[i][2]=true;
+        }
+        if(elim[i][1]){
+          elim[i][0]=(a[i][0]==a[i][2]);
+          if(elim[i][0]){
+            key=true;line=true;
+            elim[i][2]=true;
+          }
+        }
+        if(elim[i][3]){
+          elim[i][4]=(a[i][4]==a[i][2]);
+          if(elim[i][4]){
+            key=true;line=true;
+            elim[i][2]=true;
+          }
+        }
+        if(!line) rep(j,5) elim[i][j]=false;
+      }
+      
+      rep(i,h) rep(j,5){
+        if(elim[i][j]) score+=a[i][j];
+      }
+      rep(j,5){
+        ll elim_cnt=0;
+        rrep(i,h-1,0){
+          while(i-elim_cnt >=0 && elim[i-elim_cnt][j]){
+            elim_cnt++;
+          }
+          if(i-elim_cnt>=0)a[i][j]=a[i-elim_cnt][j];
+          else a[i][j]=-j;
+        }
+      }
+    }
+    cout<<score<<endl;
+  }
+}

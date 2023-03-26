@@ -1,0 +1,31 @@
+import sys
+sys.setrecursionlimit(1<<30)
+
+readline = sys.stdin.readline
+
+def main():
+
+    while True:
+        N = int(readline())
+        if N == 0:
+            break
+        W = list(map(int, readline().split()))
+        dp = [[0] * N for _ in range(N)]
+        for i in range(N-1):
+            if abs(W[i]-W[i+1]) <= 1:
+                dp[i][i+1] = 2
+        for d in range(2, N):
+            for l in range(N):
+                r = l + d
+                if r >= N:
+                    break
+                if dp[l+1][r-1] == d-1 and abs(W[l]-W[r]) <= 1:
+                    dp[l][r] = d + 1
+                for mid in range(l+1, r):
+                    dp[l][r] = max(dp[l][r], dp[l][mid]+dp[mid+1][r])
+
+        print(dp[0][-1])
+
+if __name__ == '__main__':
+    main()
+

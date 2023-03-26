@@ -1,0 +1,35 @@
+//
+// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_5_A&lang=ja
+//
+#include <algorithm>
+#include <iostream>
+#include <vector>
+
+int main() {
+    int n;
+    std::cin >> n;
+    int n_bits = 1 << n;
+    std::vector<int> A(n);
+    for (auto &a_i : A) std::cin >> a_i;
+    std::vector<int> sum(n_bits);
+    for (int i = 1; i < n_bits; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if ((i & (1 << j)) == 0) continue;
+            sum[i] += A[j];
+        }
+    }
+    std::sort(sum.begin(), sum.end());
+    int q;
+    std::cin >> q;
+    for (int i = 0; i < q; ++i) {
+        int m;
+        std::cin >> m;
+        auto p = std::lower_bound(sum.begin(), sum.end(), m);
+        if (p == sum.end() || *p != m) {
+            std::cout << "no" << std::endl;
+        } else {
+            std::cout << "yes" << std::endl;
+        }
+    }
+    return 0;
+}

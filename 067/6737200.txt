@@ -1,0 +1,322 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+#define DIGIT 9
+const long M = 1000000000;  // 10^9
+
+void print_num(const vector<long>&);
+int cmp(const vector<long>&, long);
+int cmp(const vector<long>&, const vector<long>&);
+
+vector<long> operator+(const vector<long>&, const vector<long>&);
+vector<long> operator-(const vector<long>&, const vector<long>&);
+void normalize(vector<long>&);
+vector<long> M_times_(const vector<long>&);
+vector<long> operator*(const vector<long>&, long);
+vector<long> operator*(long b, const vector<long>&);
+vector<long> operator*(const vector<long>&, const vector<long>&);
+
+struct Big_int {
+    int sgn;            // sgn == 1, 0, -1
+    vector<long> num;
+    Big_int(string);
+    friend int cmp(const Big_int&, const Big_int&);
+    friend Big_int operator+(const Big_int&, const Big_int&);
+    friend Big_int operator-(const Big_int&);
+    friend Big_int operator-(const Big_int&, const Big_int&);
+    friend Big_int operator*(const Big_int&, const Big_int&);
+    void print();
+};
+
+int main()
+{
+    string A, B;
+    cin >> A >> B;
+    Big_int a {A};
+    Big_int b {B};
+    Big_int c = a * b;
+    c.print();
+    cout << endl;
+
+    return 0;
+}
+
+////////////  Big integer の掛け算   //////////////////////////////
+Big_int operator*(const Big_int& a, const Big_int& b)
+{
+    Big_int c {""};
+    c.sgn = a.sgn * b.sgn;
+    c.num = a.num * b.num;
+    return c;
+}
+    
+//////////////   符号なし Big integer の掛け算   //////////////////////
+vector<long> operator*(const vector<long>& a, long b)
+{
+    vector<long> c;
+    int a_sz = a.size();
+    for (int i = 0; i < a_sz; ++i)
+	c.push_back(a[i] * b);
+    normalize(c);
+    return c;
+}
+
+vector<long> operator*(long b, const vector<long>& a)
+{
+    return a * b;
+}
+
+vector<long> operator*(const vector<long>& a, const vector<long>& b)
+{
+    int b_sz = b.size();
+    vector<long> A[b_sz];
+    A[0] = a; 
+    for (int i = 1; i < b_sz; ++i) 
+	A[i] = M_times_(A[i - 1]) ;
+    vector<long> C[b_sz];
+    for (int i = 0; i < b_sz; i++) 
+	C[i] = A[i] * b[i];
+    vector<long> c = C[0];
+    for (int i = 1; i < b_sz; i++) 
+	c = c +C[i];
+    return c;
+}
+
+//////////////////    符号なし整数の正規化とシフト   ///////////////////////////
+
+// 符号なし Big integer  a の表現を正規化する
+void normalize(vector<long>& a)
+{
+    int a_sz = a.size();
+    a.push_back(0);   
+    for (int i = 0; i < a_sz; ++i) {
+	long p = a[i];
+	long q = p / M;
+	long r = p % M;
+	a[i] = r;
+	a[i+1] += q;
+    }
+    while (a.back() == 0)
+	a.pop_back();
+    if (a.empty())
+	a.push_back(0); 
+}
+
+// 符号なし Big integer  a を M 倍
+vector<long> M_times_(const vector<long>& a)
+{
+    vector<long> c;
+    c.push_back(0);
+    for (auto i = 0; i < a.size(); ++i) 
+	c.push_back(a[i]);
+    return c;
+}
+
+////////////  Big Integer の和・差  //////////////////////////////////////
+
+Big_int operator+(const Big_int& a, const Big_int& b)
+{
+    Big_int c("");
+    if (a.sgn == b.sgn) {
+	c.sgn = a.sgn;
+	c.num = a.num + b.num;
+    } else {
+	switch (cmp(a.num, b.num)) {
+	case 1:
+	    c.sgn = a.sgn;
+	    c.num = a.num - b.num;
+	    break;
+	case -1:
+	    c.sgn = b.sgn;
+	    c.num = b.num - a.num;
+	    break;
+	case 0:
+	    c.sgn = 0;
+	    c.num.push_back(0);
+	    break;
+	}
+    }
+
+    return c;
+}
+
+Big_int operator-(const Big_int& a)
+{
+    Big_int c("");
+    c.num = a.num;
+    c.sgn = -a.sgn;
+	return c;
+}
+
+Big_int operator-(const Big_int& a, const Big_int& b)
+{
+    return a + (-b);
+}
+
+////////////////  符号なし Big Integer の和・差  //////////////////////////////
+
+// n と m の和
+vector<long> operator+(const vector<long>& n, const vector<long>& m)
+{
+    vector<long> a, b;
+    // a = max(n, m), b = min(n, m)
+    if (cmp(n, m) < 0) {
+	a = m;
+	b = n;
+    } else {
+	a = n;
+	b = m;
+    }
+    int a_sz = a.size();
+    int b_sz = b.size();
+
+    //  今から a に b を加える
+    if (cmp(b, 0) == 0)        // b == 0 なら
+	return a;              // a - b == a
+    //  a >= b > 0
+    if (a_sz == b_sz)
+	a.push_back(0);    // 桁上りのために a の最上位に 0 をおいておく
+    
+    for (int i = 0; i < b_sz; i++) {
+	long p = a[i] + b[i];
+	long q = p / M;       // q == 0, 1
+	long r = p % M;       // 0 <= r < M
+	a[i]= r;
+	a[i+1] += q;
+    }
+    if (a.back() == 0)   //  桁上がりのために置いたゼロが残っていれば
+	a.pop_back();    //  削除
+    return a;
+}
+
+//  n >= m として n - m を返す
+vector<long> operator-(const vector<long>& n, const vector<long>& m)
+{
+    vector<long> a = n;
+    vector<long> b = m;
+    int a_sz = a.size();
+    int b_sz = b.size();
+    //  a と b の桁を揃える
+    for (int i = b_sz; i < a_sz; ++i)
+	b[i] = 0;
+    for (int i = 0; i < a_sz; i++) {
+	if (a[i] < b[i]) {
+	    a[i+1] -= 1;
+	    a[i] += M;
+	}
+	a[i] -= b[i];
+    }
+   
+    
+    // 最上位からの連続するゼロを削除
+    while (a.back() == 0)
+	a.pop_back();
+    if (a.empty())      // a - b == 0 のとき 
+	a.push_back(0);
+
+    return a;
+}
+
+//////////////////   大小比較   ////////////////////////////////////////////
+
+int cmp(const vector<long>& n, long l)
+{
+    if (n.size() > 1)
+	return 1;
+    
+    if (n[0] > l)
+	return 1;
+    else if (n[0] < l)
+	return -1;
+    else
+	return 0;
+}
+
+// n - m > 0 なら 1、 n - m = 0 なら 0, n - m < 0 なら -1 を返す。
+int cmp(const vector<long>& n, const vector<long>& m)
+{
+    if (n.size() > m.size())
+	return 1;
+    if (n.size() < m.size())
+	return -1;
+    for (int i = n.size() - 1; i >= 0; --i) {
+	if (n[i] > m[i])
+	    return 1;
+	else if (n[i] < m[i])
+	    return -1;
+    }
+    return 0;  // n == m
+}
+
+// (a-b)/|a-b| を返す。
+int cmp(const Big_int& a, const Big_int& b)
+{
+    if (a.sgn > b.sgn)
+	return 1;
+    else if (a.sgn < b.sgn)
+	return -1;
+    // a.sgn == b.sgn
+    return a.sgn * cmp(a.num, b.num);    // a == 0  ==>  a.sgn == 0 
+}
+
+///////////////    コンストラクタ    ///////////////////////////////////////
+
+Big_int::Big_int(string x)
+{
+    if (x.empty()) {
+	sgn = 0;
+	return;   // mum は空のまま
+    }
+    vector<long> n;  // num
+    sgn = 1;
+    if (x[0] == '-') {
+	sgn = -1;
+	x = x.substr(1, x.length() - 1);
+    }
+    int r = x.length() % DIGIT;  //  最上位の桁は [0..10^r) 
+    int q = x.length() / DIGIT;  //  残りは q 個の [0..10^{DIGIT}) 
+    // 下位の桁からプッシュしていく
+    while (--q >= 0) {           //  q 回繰り返し、最後は q = 0
+	n.push_back(stoi(x.substr(r + DIGIT * q, DIGIT)));
+    }
+    if (r != 0)
+	n.push_back(stoi(x.substr(0, r)));
+    if (n.size() == 1 && n[0] == 0)  // n == 0 のとき
+	sgn = 0;
+    num = n;
+}
+
+/////////////////////   印字   ///////////////////////////////////////
+
+void print_num(const vector<long>& num)
+{
+    vector<long> n = num;
+    int d = n.size();
+    //  まず最上位の桁を印字
+    if (d > 0) {
+	cout << n.back();
+	n.pop_back();
+    }
+    //  残りの桁は先行するゼロを印字する必要がある
+    while (--d > 0) {
+	long l = n.back();
+	for (int m = M/10; m > 0; m /= 10) {
+	    cout << l / m;
+	    l %= m;
+	}
+	n.pop_back();
+    }
+}
+
+void Big_int::print()
+{
+    if (this->sgn < 0)
+	cout << "-";
+    print_num(this->num);
+}
+
+
+

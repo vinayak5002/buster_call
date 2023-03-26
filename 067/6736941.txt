@@ -1,0 +1,160 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+
+public class Main {
+
+	static int[][] graph;
+	static int[] pop;
+	static int[] searched;
+	static int[] firstTime;
+	static int[] finishTime;
+	static int time = 1;
+	static StringBuilder sb = new StringBuilder();
+	static final int NULL = 0;
+
+	public static void main(String[] args) throws IOException{
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		PrintWriter out = new PrintWriter(System.out);
+
+		int n = Integer.parseInt(br.readLine());
+
+		graph = new int[n][n];
+		pop = new int[n];
+		searched = new int[n];
+		firstTime = new int[n];
+		finishTime = new int[n];
+
+		String[] num;
+		String input;
+
+		for(int i=0; i<n; i++) {
+
+			pop[i] = NULL;
+			searched[i] = NULL;
+			firstTime[i] = 1;
+			finishTime[i] = 1;
+
+			for(int j=0; j<n; j++)
+				graph[i][j] = NULL;
+		}
+
+
+		for(int i=0; i<n; i++) {
+
+			//入力&格納
+			input = br.readLine();
+			num = input.split(" ");
+
+			int u = Integer.parseInt(num[0]);
+			int Uk = 2;
+
+			while(Uk != num.length) {
+
+				graph[u-1][Integer.parseInt(num[Uk])-1] = Integer.parseInt(num[Uk])-1;
+
+				Uk++;
+			}
+		}
+
+		/*for(int i=0; i<n; i++) {
+
+			for(int j=0; j<n; j++) {
+
+				System.out.print(graph[i][j] + " ");
+			}
+
+			System.out.println();
+		}*/
+
+		DFS(0, 0, 0, false, n);
+
+		//出力
+		for(int i=0; i<n; i++) {
+
+			int a = i + 1;
+			out.println(a + " " + firstTime[i] + " " + finishTime[i]);
+		}
+
+		out.flush();
+	}
+
+	static void DFS(int u, int d, int s, boolean yet, int n) {
+
+		int i = 0;
+		boolean judgeI = false;
+		boolean judgeJ = false;
+
+		//System.out.println(u);
+
+		if(!yet) {
+			pop[d] = u;
+
+			if(s<n)
+				searched[s] = u;
+		}
+
+		while(graph[u][i] == NULL) {
+
+			i++;
+
+			if(i==n) {
+
+				judgeI = true;
+				break;
+			}
+
+			if(graph[u][i] != NULL)
+				break;
+
+		}
+
+		time++;
+
+		if(!judgeI) {
+
+
+			graph[u][i] = NULL;
+			int j = 0;
+
+			while(j<n) {
+
+				if(searched[j] == i) {
+
+					judgeJ = true;
+					break;
+				}
+
+				j++;
+			}
+
+			if(!judgeJ) {
+				firstTime[i] = time;
+				DFS(i, ++d, ++s, false, n);
+			}
+
+			else {
+
+				finishTime[u] = time;
+
+				int a = d-1;
+				if(a >= 0) {
+					DFS(pop[a], a, s, true, n);
+				}
+			}
+		}
+
+		else {
+
+			finishTime[u] = time;
+
+			int a = d-1;
+			if(a >= 0) {
+				DFS(pop[a], a, s, true, n);
+			}
+		}
+	}
+}
+

@@ -1,0 +1,46 @@
+from collections import Counter, deque, defaultdict
+from itertools import permutations, combinations, accumulate, product, chain
+from functools import lru_cache
+from bisect import bisect, bisect_left, insort, insort_left
+from heapq import heapify, heappush, heappop
+from array import array
+from decimal import Decimal
+from copy import deepcopy
+from pprint import pprint
+from string import ascii_uppercase, ascii_lowercase, ascii_letters
+from math import factorial, floor, ceil, sqrt, log, log2, log10
+import math
+import sys
+sys.setrecursionlimit(1<<30)
+
+read = sys.stdin.read
+readline = sys.stdin.readline
+readlines = sys.stdin.readlines
+
+if __name__ == '__main__':
+    V, E, r = map(int, readline().split())
+    R = [list() for _ in range(V)]
+    for _ in range(E):
+        s, t, d = map(int, readline().split())
+        R[s].append([d, t])
+    INF = 1 << 30
+    ANS = [INF] * V
+    ANS[r] = 0
+
+    que = [[0, r]]
+
+    while que:
+        c, v = heappop(que)
+        if c > ANS[v]:
+            continue
+        for d, g in R[v]:
+            if c + d < ANS[g]:
+                ANS[g] = c + d
+                heappush(que, [c+d, g])
+
+    for i in range(V):
+        if ANS[i] == INF:
+            print('INF')
+        else:
+            print(ANS[i])
+

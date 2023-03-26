@@ -1,0 +1,68 @@
+import sys
+
+sys.setrecursionlimit(100000)
+n = int(input())
+cardListForQuickSort = [input().split() for _ in range(n)]
+cardListForMergeSort = cardListForQuickSort[:]
+lastItem = cardListForQuickSort[-1]
+
+
+def quickSort(targetList):
+    if len(targetList) <= 1:
+        return targetList
+    pivot = lastItem  # リスト最後尾をピボットに設定
+    leftList, rightList, middleList = [], [], []
+
+    for item in targetList:
+        if item[1] < pivot[1]:
+            leftList.append(item)
+        elif item[1] > pivot[1]:
+            rightList.append(item)
+        else:
+            middleList.append(item)
+
+    leftList = quickSort(leftList)
+    rightList = quickSort(rightList)
+
+    return leftList + middleList + rightList
+
+
+def mergeSort(targetList):
+    if len(targetList) <= 1:
+        return targetList
+
+    middleIndex = len(targetList) // 2
+    leftList = mergeSort(targetList[:middleIndex])
+    rightList = mergeSort(targetList[middleIndex:])
+    return merge(leftList, rightList)
+
+
+def merge(leftList, rightList):
+    mergedList = []
+    i, j = 0, 0
+    while (i < len(leftList)) and (j < len(rightList)):
+        if leftList[i][1] <= rightList[j][1]:
+            mergedList.append(leftList[i])
+            i += 1
+        else:
+            mergedList.append(rightList[j])
+            j += 1
+
+    if i < len(leftList):
+        mergedList.extend(leftList[i:])
+    if j < len(rightList):
+        mergedList.extend(rightList[j:])
+
+    return mergedList
+
+
+quickSortedCardList = quickSort(cardListForQuickSort)
+mergeSortedCardList = mergeSort(cardListForMergeSort)
+if quickSortedCardList != mergeSortedCardList:
+    print("Not stable")
+else:
+    print("Stable")
+
+for item in quickSortedCardList:
+    print(*item)
+

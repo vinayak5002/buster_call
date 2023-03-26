@@ -1,0 +1,38 @@
+from collections import deque
+N = int(input())
+G = [deque([]) for i in range(N+1)]
+for i in range(N):
+    u, k, *v = list(map(int, input().split()))
+    v.sort()
+    for j in v:
+        G[u].append(j)
+
+stack = []
+time = 0
+d = [-1]*(N+1)
+f = [-1]*(N+1)
+
+def dfs(v):
+    global time
+    time += 1
+    stack.append(v)
+    d[v] = time
+    while stack:
+        u = stack[-1]
+        if G[u]:
+            u_ = G[u].popleft()
+            if d[u_] == -1:
+                time += 1
+                d[u_] = time
+                stack.append(u_)
+        else:
+            time += 1
+            f[u] = time
+            stack.pop()
+
+for i in range(N):
+    if d[i+1] == -1:
+        dfs(i+1)
+
+for i in range(N):
+    print(i+1, d[i+1], f[i+1])

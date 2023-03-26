@@ -1,0 +1,52 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+struct Node{
+    vector<int> target;
+    bool visitedflag = false;
+    bool finishedflag = false;
+    Node(){target.resize(0);}
+};
+
+bool result = false;
+
+void dfs(int num, Node* graph)
+{
+    graph[num].visitedflag = true;
+
+    for(int nextnode : graph[num].target) {
+        if (graph[nextnode].finishedflag) continue;
+        if (graph[nextnode].visitedflag && !graph[nextnode].finishedflag) { result = true; return;}
+        dfs(nextnode, graph);
+        if(result) return;
+    }
+    
+    graph[num].finishedflag = true;
+}
+
+
+int main()
+{
+    int numV, numE;
+    int s, t;
+
+    cin >> numV >> numE;
+
+    Node graph[numV];
+    
+    for (int i = 0; i < numE; i++)
+    {
+        cin >> s >> t;
+        graph[s].target.push_back(t);
+    }
+
+    dfs(0, graph);
+
+    if(result) cout << "1" << endl;
+    else cout << "0" << endl;
+    
+    return 0;
+}
+

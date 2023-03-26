@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll = long long int;
+using ull = unsigned long long int;
+using P = pair<ll, ll>;
+using P3 = pair<ll, P>;
+using PP = pair<P, P>;
+constexpr int INF32 = 1 << 30;
+constexpr ll INF64 = 1LL << 62;
+// constexpr ll MOD = 1000000007;
+constexpr ll MOD = 998244353;
+constexpr int di[] = {0, 1, 0, -1};
+constexpr int dj[] = {1, 0, -1, 0};
+constexpr int di8[] = {0, 1, 1, 1, 0, -1, -1, -1};
+constexpr int dj8[] = {1, 1, 0, -1, -1, -1, 0, 1};
+constexpr double EPS = 1e-10;
+const double PI = acos(-1);
+
+#define ALL(v) (v).begin(), (v).end()
+#define REP(i, n) for (int i = 0, i_len = n; i < i_len; ++i)
+
+template<typename T1,typename T2> bool chmax(T1 &a, T2 b) { if (a<b) { a=b; return 1; } return 0; }
+template<typename T1,typename T2> bool chmin(T1 &a, T2 b) { if (b<a) { a=b; return 1; } return 0; }
+
+
+int solve() {
+    string x, y;
+    cin >> x;
+    if(x == "#") return 1;
+    int A, E, S, R;
+    cin >> y >> A >> E >> S >> R;
+    S = min(S, A+E);
+    int n = x.size(), m = y.size();
+    x += x;
+    y += y;
+    vector<vector<int>> dp(n+1, vector<int>(m+1));
+    int ans = INF32;
+    REP(k,n){
+        REP(i,n+1) fill(ALL(dp[i]), INF32);
+        REP(i,n+1) dp[i][0] = E*i;
+        REP(j,m+1) dp[0][j] = A*j;
+        REP(i,n+1) REP(j,m+1) {
+            if(i+1<=n) chmin(dp[i+1][j], dp[i][j] + (i+k<n ? E : E-R)); // erase x[i]
+            if(j+1<=m) chmin(dp[i][j+1], dp[i][j] + A); // add y[j] to x
+            if(i+1<=n && j+1<=m) chmin(dp[i+1][j+1], dp[i][j] + (x[i+k]==y[j] ? 0 : S));
+        }
+        chmin(ans, dp[n][m] + R*k);
+    }
+    cout << ans << endl;
+    return 0;
+}
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    // solve();
+    while(!solve());
+    return 0;
+}
+

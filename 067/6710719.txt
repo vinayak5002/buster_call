@@ -1,0 +1,60 @@
+def maxHeapify(dic,i,H):
+    largest=i
+    if "left" in dic[i]:
+        l=dic[i]["left"]
+        if l<=H and dic[l]["key"]>dic[i]["key"]:
+            largest=l
+        else:
+            largest=i
+    if "right" in dic[i]:
+        r=dic[i]["right"]
+    #左の子、自分、右の子で最大のnodeを選ぶ
+        if r<=H and dic[r]["key"]>dic[largest]["key"]:
+            largest=r
+    if not largest==i:
+        dic[i]["key"],dic[largest]["key"]=dic[largest]["key"],dic[i]["key"]
+        maxHeapify(dic,largest,H)
+        
+def buildMaxHeap(dic,H):
+    for i in range(H//2,0,-1):
+        maxHeapify(dic,i,H)
+    return dic
+
+
+def dicbuild(A,H):
+    dic={}
+    for i in range(H):
+        dic[i+1]={"key":A[i]}
+
+    for i in range(1,H+1):
+        if 2*i in dic:
+            dic[i]["left"]=2*i
+        if 2*i+1 in dic:
+            dic[i]["right"]=2*i+1
+        if i//2 in dic:
+            dic[i]["parent"]=i//2
+    return dic
+
+# buildMaxHeap(dic) #maxHeap構築
+
+# S,x=input().split()
+# x=int(x)
+A=[]
+H=0
+dic={}
+while True:
+    S=input().split()
+    # print(S)
+    if S[0]=="end":
+        break
+    elif S[0]=="insert":
+        A.append(int(S[1]))
+        H+=1
+        # print(A)
+    else:
+        dic=buildMaxHeap(dicbuild(A,H),H) #maxHeap構築
+        # print(dic)
+        print(dic[1]["key"])
+        H=H-1
+        A.remove(dic[1]["key"])
+        dic={}

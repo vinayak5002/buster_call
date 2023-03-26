@@ -1,0 +1,102 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long double ld;
+const ld eps = 1e-9;
+struct pt {
+    ld x, y;
+    pt() {x = 0; y = 0;}
+    pt(ld xx, ld yy) {
+        x = xx; y = yy;
+    }
+    ld mag() {
+        return sqrt(x*x + y*y);
+    }
+    pt operator+(pt o) {
+        return pt(x + o.x, y + o.y);
+    }
+    pt operator-(pt o) {
+        return pt(x - o.x, y - o.y);
+    }
+    pt operator*(ld val) {
+        return pt(x*val, y*val);
+    }
+    pt operator/(ld val) {
+        return pt(x/val, y/val);
+    }
+    friend ostream& operator<<(ostream &os, pt p) {
+        return os << "(" << p.x << ", " << p.y << ")";
+    }
+};
+ld cross(pt a, pt b) {
+    return a.x*b.y - a.y*b.x;
+}
+ld dot(pt a, pt b) {
+    return a.x*b.x + a.y*b.y;
+}
+
+void solve() {
+    int n; cin >> n;
+    vector<pt> poly(n);
+    ld x, y, tpolyar = 0;
+    for (int i = 0; i < n; ++i) {
+        cin >> x >> y;
+        poly[i] = pt(x, y);
+
+        if (i > 1)
+            tpolyar += cross(poly[i - 1] - poly[0], poly[i] - poly[0]);
+    }
+
+
+    ld longest = 0, runar = 0, shortest = 1e+64;
+    for (int i = 0, j = 0; i < n; ++i) {
+        while (runar - 0.5*tpolyar <= eps) {
+            j = (j + 1) % n;
+            runar += cross(poly[j] - poly[i], poly[(j + 1) % n] - poly[i]);
+        }
+ 
+        ld lar = runar - 0.5*tpolyar;
+        ld rar = cross(poly[j] - poly[i], poly[(j + 1) % n] - poly[i]) - lar;
+        pt arbsct = (poly[j]*lar + poly[(j + 1) % n]*rar)/(lar + rar);
+        ld l = (arbsct - poly[i]).mag();
+ 
+        longest = max(longest, l);
+        
+        shortest = min(shortest, l);
+ 
+        ld theta = asin(cross(poly[(j + 1) % n] - poly[j], poly[i] - poly[(i + 1) % n]) / ((poly[(j + 1) %n] - poly[j]).mag() * (poly[i] - poly[(i + 1) % n]).mag()));
+        ld alpha = acos(dot(arbsct - poly[i], poly[(i + 1) % n] - poly[i]) / (l * (poly[(i + 1) % n] - poly[i]).mag()));
+        if (M_PI_2 - alpha - theta/2 > eps && alpha + theta > eps) {
+            ld r1 = l * sin(alpha) * sqrt(sin(alpha + theta)) / (cos(theta/2) * (sqrt(sin(alpha + theta)) + sqrt(sin(alpha))));
+            ld r2 = r1 * sqrt(sin(alpha + theta) / sin(alpha));
+            ld b1 = r1 * cos(alpha + theta/2) / sin(alpha);
+            ld b2 = r2 * cos(alpha + theta/2) / sin(alpha + theta);
+ 
+            if (b1 - (poly[(i + 1) % n] - poly[i]).mag() <= eps && b2 - (poly[(j + 1) % n] - arbsct).mag() <= eps)
+                shortest = min(shortest, r1 + r2);
+        }
+ 
+        theta = asin(cross(poly[(j + 1) % n] - poly[j], poly[(n + i - 1) % n] - poly[i]) / ((poly[(j + 1) % n] - poly[j]).mag() * (poly[(n + i - 1) % n] - poly[i]).mag()));
+        alpha = acos(dot(arbsct - poly[i], poly[(n + i - 1) % n] - poly[i]) / (l * (poly[(n + i - 1) % n] - poly[i]).mag()));
+        if (M_PI_2 - alpha + theta/2 > eps && alpha - theta > eps) {
+            ld r1 = l * sin(alpha) * sqrt(sin(alpha - theta)) / (cos(theta/2) * (sqrt(sin(alpha - theta)) + sqrt(sin(alpha))));
+            ld r2 = r1 * sqrt(sin(alpha - theta) / sin(alpha));
+            ld b1 = r1 * cos(alpha - theta/2) / sin(alpha);
+            ld b2 = r2 * cos(alpha - theta/2) / sin(alpha - theta);
+ 
+            if (b1 - (poly[(n + i - 1) % n] - poly[i]).mag() <= eps && b2 - (poly[j] - arbsct).mag() <= eps)
+                shortest = min(shortest, r1 + r2);
+        }
+
+        runar -= cross(poly[(i + 1) % n] - poly[i], poly[(j + 1) % n] - poly[i]);
+    }
+ 
+    cout << shortest << "\n" << longest << "\n";
+}
+ 
+int main() {
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
+    cout << setprecision(10) << fixed;
+    solve();
+    return 0;
+}

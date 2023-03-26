@@ -1,0 +1,68 @@
+#pragma GCC optimize("Ofast")
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <queue>
+#include <cstdio>
+#include <ctime>
+#include <assert.h>
+#include <chrono>
+#include <random>
+#include <numeric>
+#include <set>
+#include <deque>
+#include <stack>
+#include <sstream>
+#include <utility>
+#include <cstring>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+#include <array>
+#include <bitset>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long ull;
+
+mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
+ll myRand(ll B) {
+    return (ull)rng() % B;
+}
+inline double time() {
+    return static_cast<long double>(chrono::duration_cast<chrono::nanoseconds>(chrono::steady_clock::now().time_since_epoch()).count()) * 1e-9;
+}
+
+int main(){
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    double x,y,t,w; cin >> x >> y >> t >> w;
+    const double pi = acos(-1.0);
+    t = t/180.0*pi;
+    w = w/180.0*pi;
+    double X = x*cos(-t)-y*sin(-t);
+    double Y = x*sin(-t)+y*cos(-t);
+    Y = abs(Y);
+    // 第1or2象限に(X,Y)が、レーダーはX軸の正の方向を向く
+    double L = 0, R = 1e9;
+    auto solve=[&](double v)->bool{
+        double r = v/w;
+        double rr = sqrt(X*X+Y*Y);
+        if(rr <= r) return true;
+        double theta = atan2(Y,X) + acos(r/rr);
+        x = r*cos(theta), y = r*sin(theta);
+        double d = sqrt((x-X)*(x-X)+(y-Y)*(y-Y));
+        return d/v <= theta/w;
+    };
+    for(int i=0;i<100;i++){
+        double mid = (L+R)/2.0;
+        if(solve(mid)){
+            R = mid;
+        }
+        else{
+            L = mid;
+        }
+    }
+    printf("%.9f\n",R);
+}
+

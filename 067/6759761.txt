@@ -1,0 +1,53 @@
+from sys import stdin
+input=stdin.readline
+banpei={}
+banpei["next"]=banpei
+banpei["prev"]=banpei
+
+
+def insert(k):
+  x={}
+  x["k"]=k
+  x["next"]=banpei["next"]
+  banpei["next"]["prev"]=x
+  banpei["next"]=x
+  x["prev"]=banpei
+
+def delete(k):
+  c=banpei["next"]
+  while(c!=banpei and c["k"]!=k):
+    c=c["next"]
+  c["prev"]["next"]=c["next"]
+  c["next"]["prev"]=c["prev"]
+
+def deleteFirst():
+   c=banpei["next"]
+   c["prev"]["next"]=c["next"]
+   c["next"]["prev"]=c["prev"]
+
+def deleteLast():
+  c=banpei["prev"]
+  c["prev"]["next"]=c["next"]
+  c["next"]["prev"]=c["prev"]
+
+def show():
+  s = []
+  c = banpei["next"]
+  while(c != banpei):
+    s.append(c["k"])
+    c = c["next"]
+  print(*s)
+
+n=int(input())
+for i in range(n):
+  command=input().rstrip()
+  if command[6]=="F":
+    deleteFirst()
+  elif command[6]=="L":
+    deleteLast()
+  else:
+    if command[0]=="i":
+      insert(command[7:])
+    elif command[0]=="d":
+      delete(command[7:])
+show()

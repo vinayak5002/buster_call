@@ -1,0 +1,70 @@
+class dice:
+    def __init__(self, state):
+        self.state = state
+
+    def rotate(self, s):
+        if s == "S":
+            r = [4, 0, 2, 3, 5, 1]
+        elif s == "N":
+            r = [1, 5, 2, 3, 0, 4]
+        elif s == "E":
+            r = [3, 1, 0, 5, 4, 2]
+        else:  # s == "W"
+            r = [2, 1, 5, 0, 4, 3]
+        self.state = [self.state[i] for i in r]
+
+    def get(self, d):
+        f = 0
+        for _ in range(4):
+            self.rotate("S")
+            for _ in range(4):
+                self.rotate("E")
+                if self.state[2] == d[2]:
+                    f = 1
+                    break
+            if f:
+                break
+        for _ in range(4):
+            if self.state == d:
+                return True
+            self.rotate("S")
+
+        return False
+
+    def check(self, other):
+        for _ in range(4):
+            if self.state == other.state:
+                return True
+            self.rotate("S")
+        return False
+
+    def __eq__(self, other):
+        for _ in range(4):
+            if self.state[2] == other.state[2]:
+                if self.check(other):
+                    return True
+            self.rotate("E")
+        self.rotate("N")
+        self.rotate("E")
+        if self.state[2] == other.state[2] and self.check(other):
+            return True
+        self.rotate("E")
+        self.rotate("E")
+        if self.state[2] == other.state[2] and self.check(other):
+            return True
+
+        return False
+
+    def __ne__(self, other):
+        return not (self == other)
+
+
+n = int(input())
+d = [dice(list(map(int, input().split()))) for _ in range(n)]
+for i in range(n):
+    for j in range(i + 1, n):
+        if d[i] == d[j]:
+            print("No")
+            exit()
+print("Yes")
+

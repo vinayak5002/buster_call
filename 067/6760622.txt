@@ -1,0 +1,73 @@
+#include <iostream>
+#include <vector>
+
+static const int INF = 2147483647;
+std::vector<int> D;
+std::vector<int> lazy;
+int n;
+void init(int n_){
+    n = 1;
+    while(n < n_)
+        n *= 2;
+    
+    for(int i=0; i<2*n-1; i++){
+        D.push_back(INF);
+        lazy.push_back(INF);
+    }
+}
+void eval(int k){
+    if(lazy[k]==INF)return;
+    if(k<n-1){
+    lazy[2*k+1]=lazy[2*k+2]=lazy[k];
+    }
+    D[k]=lazy[k];
+    lazy[k]=INF;
+}
+
+void update(int a,int b,int k,int x,int l,int r){
+    eval(k);
+    if(r<=a||b<=l)return;
+    if(a<=l&&r<=b){
+    lazy[k]=x;
+    eval(k);
+    }
+    else{
+    update(a,b,2*k+1,x,l,(l+r)/2);
+    update(a,b,2*k+2,x,(l+r)/2,r);
+    D[k] = std::min(D[2*k+1],D[2*k+2]);
+    }
+}
+
+int query(int a,int b,int k,int l,int r){
+    eval(k);
+    if (r<=a || b<=l) //case1 
+    return INF;
+    if (a<=l && r<=b) //case2 
+    return D[k];
+    int vl,vr;
+    vl = query(a, b, k*2 + 1, l, (l + r)/2);
+    vr = query(a, b, k*2 + 2, (l + r)/2, r); 
+    return std::min(vl, vr);
+}
+int findmin(int a,int b){
+    return query(a, b+1, 0, 0, n);
+}
+int main(){
+    int n_,q,c,s,t,x;
+
+    std::cin>>n_>>q;
+    init(n_);
+
+    for(int i=0;i<q;i++){
+    std::cin>>c>>s>>t;
+    if(c==0){
+        std::cin>>x;
+        update(s,t+1,0,x,0,n);
+    }
+    else{
+        int ans = findmin(s,t);
+        std::cout << ans << std::endl;
+    }
+    }
+    return 0;
+}

@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+namespace {
+    const int NIL = -1;
+    const int LIM = 100000;
+}  // namespace
+
+struct Node {
+    int parent, left, right;
+    Node() {
+        parent = NIL;
+        left = NIL;
+        right = NIL;
+    }
+};
+
+namespace {
+    vector<Node> tree(LIM);
+    vector<int> depth(LIM);
+}  // namespace
+
+void setDepth(int id, int d);
+void print(int id);
+
+int main() {
+    int n, id, degree, child, left, root;
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        Node node;
+        tree.push_back(node);
+        cin >> id >> degree;
+        for (int j = 0; j < degree; j++) {
+            cin >> child;
+            if (j == 0) {
+                tree.at(id).left = child;
+            } else {
+                tree.at(left).right = child;
+            }
+            left = child;
+            tree.at(child).parent = id;
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        if (tree.at(i).parent == NIL) {
+            root = i;
+        }
+    }
+
+    setDepth(root, 0);
+
+    for (int i = 0; i < n; i++) {
+        print(i);
+    }
+}
+
+void setDepth(int id, int d) {
+    depth.at(id) = d;
+    if (tree.at(id).right != NIL) {
+        setDepth(tree.at(id).right, d);
+    }
+    if (tree.at(id).left != NIL) {
+        setDepth(tree.at(id).left, d + 1);
+    }
+}
+
+void print(int id) {
+    cout << "node " << id << ": ";
+    cout << "parent = " << tree.at(id).parent << ", ";
+    cout << "depth = " << depth.at(id) << ", ";
+
+    if (tree.at(id).parent == NIL) {
+        cout << "root, ";
+    } else if (tree.at(id).left == NIL) {
+        cout << "leaf, ";
+    } else {
+        cout << "internal node, ";
+    }
+    int i, child;
+    cout << "[";
+    for (i = 0, child = tree.at(id).left; child != NIL;
+         i++, child = tree.at(child).right) {
+        if (i) {
+            cout << ", ";
+        }
+        cout << child;
+    }
+    cout << "]" << endl;
+}

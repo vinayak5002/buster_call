@@ -1,0 +1,44 @@
+#include <stdio.h>
+
+#define MAX 3000  // > N*N
+#define N 50
+
+// UNION-FIND library
+int p[MAX], rank[MAX];
+void make_set(int x) { p[x] = x, rank[x] = 0; }
+void link(int x, int y) {
+	if (rank[x] > rank[y]) p[y] = x;
+	else { p[x] = y; if (rank[x] == rank[y]) rank[y] = rank[y] + 1;	}
+}
+int find_set(int x) { if (x != p[x]) p[x] = find_set(p[x]);	return p[x]; }
+void union_set(int x, int y) { link(find_set(x), find_set(y)); }
+// UNION-FIND library above
+
+char map[N+3][N+3];
+int  id[N+3][N+3];
+int m[8][2] = {{-1,-1},{-1,0},{-1,1},{0,-1},{0,1},{1,-1},{1,0},{1,1}};
+
+int main()
+{
+	int w, h, i, r, c, r2, c2, a, n;
+
+	while (scanf("%d%d", &w, &h) && w) {
+		for (n = 0, r = 0; r < h; r++) for (c = 0; c < w; c++) {
+			scanf("%d", &a), map[r][c] = a;
+			if (a) make_set(n), id[r][c] = n++;
+		}
+		for (r = 0; r < h; r++) for (c = 0; c < w; c++) {
+			if (!map[r][c]) continue;
+			for (i = 0; i < 8; i++) {
+				r2 = r + m[i][0], c2 = c + m[i][1];
+				if (r2 < 0 || r2 >= h || c2 < 0 || c2 >= w || !map[r2][c2]) continue;
+				union_set(id[r][c], id[r2][c2]);
+			}
+		}
+		for (n = 0, r = 0; r < h; r++) for (c = 0; c < w; c++) if (map[r][c]) {
+			if (id[r][c] == p[id[r][c]]) n++;
+		}
+		printf("%d\n", n);
+	}
+	return 0;
+}

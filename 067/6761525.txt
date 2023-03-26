@@ -1,0 +1,61 @@
+from collections import deque
+import sys
+def input(): return sys.stdin.readline().rstrip()  # 文字列
+
+
+def create_array(*dims, initial=0):
+    """初期値initialでdim[0]*dim[1]*...*dim[n]の配列を生成"""
+    n = len(dims)
+    code = "[" * n + "{}] * {}" + " for _ in range({})]" * (n - 1)
+    return eval(code.format(initial, *reversed(dims)))
+
+
+def find(s, arr):
+    for i in range(H):
+        for j in range(W):
+            if arr[i][j] == s:
+                return i, j
+
+
+while True:
+    W, H = map(int, input().split())
+    if H == W == 0:
+        break
+
+    board = create_array(H, W, H, W, initial=0)
+    r = []
+    l = []
+    for i in range(H):
+        s = input()
+        l.append(s[:W])
+        r.append((s[W + 1:])[::-1])
+
+    x, y = find("L", l)
+    z, w = find("R", r)
+    board[x][y][z][w] = 1
+    que = deque()
+    que.append((x, y, z, w))
+
+    while que:
+        x, y, z, w = que.pop()
+        for i, j in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            a, b, c, d = x + i, y + j, z + i, w + j
+            if 0 <= a < H and 0 <= b < W and 0 <= c < H and 0 <= d < W:
+                if l[a][b] in ".%" and r[c][d] in ".%":
+                    if board[a][b][c][d] == 0:
+                        board[a][b][c][d] = 1
+                        que.append((a, b, c, d))
+                elif l[a][b] in ".%":
+                    if board[a][b][z][w] == 0:
+                        board[a][b][z][w] = 1
+                        que.append((a, b, z, w))
+                elif r[a][b] in ".%":
+                    if board[x][y][c][d] == 0:
+                        board[x][y][c][d] = 1
+                        que.append((x, y, c, d))
+
+    x, y = find("%", l)
+    z, w = find("%", r)
+    print("Yes" if board[x][y][z][w] else "No")
+
+

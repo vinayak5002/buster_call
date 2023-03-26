@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for(int i=0;i<(int)(n);i++)
+#define rep2(i, s, n) for(int i=(s);i<(int)(n);i++)
+#define reprev(i, n) for(int i=(int(n-1));i>=0;i--)
+#define reprev2(i, s, e) for(int i=(int(s));i>=(int)(e);i--)
+
+int main() {
+  string s;
+  stack<int> equation;
+    while(cin >> s){
+        int a, b;
+        if(s == "+"){
+            b = equation.top();
+            equation.pop();
+            a = equation.top();
+            equation.pop();
+            equation.push(a+b);
+
+        } else if(s == "-") {
+            b = equation.top();
+            equation.pop();
+            a = equation.top();
+            equation.pop();
+            equation.push(a-b);
+        } else if(s == "*"){
+            b = equation.top();
+            equation.pop();
+            a = equation.top();
+            equation.pop();
+            equation.push(a*b);
+        }else{
+            equation.push(stoi(s));
+        }
+    }
+    cout << equation.top() << endl;
+
+}

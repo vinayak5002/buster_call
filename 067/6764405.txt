@@ -1,0 +1,139 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+using namespace std;
+typedef long long ll;
+#define rad_to_deg(rad) (((rad) / 2 / M_PI) * 360)
+#define EPS (1e-7)
+#define PI (acos(-1))
+#define rep(i, n) for (int i = 0; i < n; i++)
+#define show(s) cout << s << endl
+#define chmin(x, y) x = min(x, y)
+#define chmax(x, y) x = max(x, y)
+#define MOD (1e9 + 7)
+#define rrep(i, n) for (int i = n - 1; i >= 0; --i)
+#define reps(i, N) for (int i = 1; i <= N; ++i)
+#define all(x) (x).begin(), (x).end()
+#define MP make_pair
+const int INF = 1e9;
+const ll LINF = 1e18;
+typedef pair<ll, ll> PII;
+//#define int long long
+
+//元がintの分けたものを返す p[0]は1桁目
+vector<int> divnum(ll num)
+{
+    int dig;
+    vector<int> p;
+    while (num)
+    {
+        dig = num % 10;
+        p.push_back(dig);
+        num /= 10;
+    }
+    return p;
+}
+//桁数を返す
+int digiter(ll num)
+{
+    int dig;
+    vector<int> p;
+    while (num)
+    {
+        dig = num % 10;
+        p.push_back(dig);
+        num /= 10;
+    }
+    return p.size();
+}
+//元がstringの分けたものを返す d[0]は一桁目
+vector<int> convertstring(string s)
+{
+    vector<int> d;
+    ll n = s.size();
+    reverse(s.begin(), s.end());
+    rep(i, n)
+    {
+        d.push_back(s[i] - '0');
+    }
+    return d;
+}
+
+/*long double　は%Lf*/
+// queue古い順,stack新しい
+// bool operator<(const Info &another) const {return x < another.x;}//struct(構造体)内の比較演算子のオバーロード
+// bool comp (const edge& e1,const edge& e2){return e1.cost<e2.cost }//<
+int N, M;
+
+struct edge
+{
+    int to;
+    ll cost;
+    edge(int to, ll cost) : to(to), cost(cost) {}
+};
+
+const int Vertex_MAX = 25;
+vector<edge> G[Vertex_MAX];
+ll d[Vertex_MAX];
+void dijkstra(int s, int pv)
+{
+    fill(d, d + Vertex_MAX, 1e9);
+    priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> que;
+    d[s] = 0; //状況に応じて(自己閉路の存在とか
+    que.push(make_pair(0, s));
+    while (!que.empty())
+    {
+        auto p = que.top();
+        que.pop();
+        int u = p.second;
+        ll cost = p.first;
+        if (d[u] < cost)
+            continue;
+        for (auto v : G[u])
+        {
+            if((u==s&&pv==v.to)||(v.to==u&&pv==s))continue;
+            if ((v.cost + cost) < d[v.to])
+            {
+                que.push(make_pair(v.cost + cost, v.to));
+                d[v.to] = v.cost + cost;
+            }
+        }
+        // cout << "work " << u << " " << G[u].size() << endl;
+    }
+}
+int32_t main()
+{
+    ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+    cin >> N >> M;
+    
+    vector<PII> way;
+    vector<int>w;
+    rep(i, M)
+    {
+        int s, t;ll d;
+        cin >> s >> t >> d;
+        s--;
+        t--;
+        G[s].push_back(edge(t, d));
+        G[t].push_back(edge(s, d));
+        way.push_back(PII(s, t));
+        w.push_back(d);
+    }
+    rep(i, M)
+    {
+        int sum1 = 0, sum2 = 0;
+        dijkstra(way[i].first,way[i].second);
+        sum1 += d[0];
+        sum2 += d[N - 1];
+        //cout << sum1 << "mid" << sum2 << endl;
+        dijkstra(way[i].second,way[i].first);
+        //cout<<way[i].second<<endl;
+        sum1 += d[N - 1];
+        sum2 += d[0];
+        sum1+=w[i];
+        sum2+=w[i];
+        int ans=min(sum1,sum2);
+        if(ans>=INF)ans=-1;
+        cout<<ans<<endl;
+    }
+}

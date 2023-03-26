@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for(int i = 0; i < (n); i++)
+using namespace std;
+typedef long long ll;
+
+int main(){
+    cin.tie(0);
+    ios::sync_with_stdio(0);
+    
+    while(true) {
+        string s; cin >> s;
+        if(s == ".") break;
+        string t; cin >> t;
+        if(s == t){ cout << "IDENTICAL" << endl; continue; }
+
+        auto f = [&](string x) {
+            vector<int> pos;
+            rep(i,(int)x.size()) if(x[i] == '\"') pos.push_back(i);
+
+            vector<string> res1, res2;
+            for(int i = 0; i < (int)pos.size(); i += 2) {
+                int L = pos[i], R = pos[i + 1];
+                string cur = "";
+                for(int k = L; k <= R; k++) cur += x[k];
+                res1.push_back(cur);
+            }
+
+            pos.push_back(0);
+            pos.push_back((int)x.size() - 1);
+            sort(pos.begin(), pos.end());
+            for(int i = 0; i < (int)pos.size(); i += 2) {
+                int L = pos[i], R = pos[i + 1];
+                string cur = "";
+                for(int k = L; k <= R; k++) cur += x[k];
+                res2.push_back(cur);
+            }
+
+            return pair<vector<string>,vector<string>>{res1, res2};
+        };
+
+        int cnt = 0;
+        auto [s1, s2] = f(s);
+        auto [t1, t2] = f(t);
+        if(s1.size() != t1.size()) cnt = 100;
+        for(int i = 0; i < (int)min(s1.size(), t1.size()); i++) {
+            if(s1[i] != t1[i]) {
+                cnt++;
+            }
+        }
+
+        if(s2 == t2 && cnt <= 1) {
+            cout << "CLOSE" << endl;
+        } else {
+            cout << "DIFFERENT" << endl;
+        }
+    }
+}

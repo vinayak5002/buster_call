@@ -1,0 +1,136 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+using namespace std;
+typedef long long ll;
+#define rad_to_deg(rad) (((rad) / 2 / M_PI) * 360)
+#define EPS (1e-7)
+#define PI (acos(-1))
+#define rep(i, n) for (int i = 0; i < n; i++)
+#define show(s) cout << s << endl
+#define chmin(x, y) x = min(x, y)
+#define chmax(x, y) x = max(x, y)
+#define MOD (1e9 + 7)
+#define rrep(i, n) for (int i = n - 1; i >= 0; --i)
+#define reps(i, N) for (int i = 1; i <= N; ++i)
+#define all(x) (x).begin(), (x).end()
+#define MP make_pair
+const int INF = 1e9;
+const ll LINF = 1e18;
+typedef pair<ll, ll> PII;
+//#define int long long
+
+//元がintの分けたものを返す p[0]は1桁目
+vector<int> divnum(ll num)
+{
+    int dig;
+    vector<int> p;
+    while (num)
+    {
+        dig = num % 10;
+        p.push_back(dig);
+        num /= 10;
+    }
+    return p;
+}
+//桁数を返す
+int digiter(ll num)
+{
+    int dig;
+    vector<int> p;
+    while (num)
+    {
+        dig = num % 10;
+        p.push_back(dig);
+        num /= 10;
+    }
+    return p.size();
+}
+//元がstringの分けたものを返す d[0]は一桁目
+vector<int> convertstring(string s)
+{
+    vector<int> d;
+    ll n = s.size();
+    reverse(s.begin(), s.end());
+    rep(i, n)
+    {
+        d.push_back(s[i] - '0');
+    }
+    return d;
+}
+
+/*long double　は%Lf*/
+// queue古い順,stack新しい
+// bool operator<(const Info &another) const {return x < another.x;}//struct(構造体)内の比較演算子のオバーロード
+// bool comp (const edge& e1,const edge& e2){return e1.cost<e2.cost }//<
+int H, W, R, C;
+int N;
+
+int32_t main()
+{
+    ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+    vector<int> h_barrier[1005];
+    vector<int> w_barrier[1005];
+    cin >> H >> W >> R >> C;
+    cin >> N;
+    int ans=0;
+    rep(i, N)
+    {
+        int r, c;
+        cin >> r >> c;
+        r--;
+        c--;
+        h_barrier[r].push_back(c);
+        w_barrier[c].push_back(r);
+    }
+    rep(i, H)
+    {
+        h_barrier[i].push_back(-1);
+        h_barrier[i].push_back(W);
+        sort(h_barrier[i].begin(), h_barrier[i].end());
+    }
+    rep(j, W)
+    {
+        w_barrier[j].push_back(-1);
+        w_barrier[j].push_back(H);
+        sort(w_barrier[j].begin(), w_barrier[j].end());
+    }
+    auto ok = [&](int x, int y)
+    {
+        if (x + R - 1 >= H || y + C - 1 >= W)
+            return false;
+        for (int i = x; i < x + R; ++i)
+        {
+            auto it = lower_bound(h_barrier[i].begin(), h_barrier[i].end(), y);
+            if (*it <= y + C - 1)
+                return false;
+        }
+        return true;
+    };
+    rep(i, H)
+    {
+        rep(j, W)
+        {
+            if(!ok(i,j))continue;
+            int sum=0;
+            rep(k,R){
+                auto it = lower_bound(h_barrier[i+k].begin(), h_barrier[i+k].end(), j);
+                int ul=*it;
+                it--;
+                int lb=*it;
+                sum+= (ul-lb)-1;
+            }
+            sum-= R*C;
+            rep(k,C){
+                auto it = lower_bound(w_barrier[j+k].begin(), w_barrier[j+k].end(), i);
+                int ul=*it;
+                it--;
+                int lb=*it;
+                sum+= (ul-lb)-1;
+            }
+            sum-=R*C;
+            chmax(ans,sum);
+        }
+    }
+    cout<<ans<<endl;
+}

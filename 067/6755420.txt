@@ -1,0 +1,98 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < n; ++i)
+typedef long long ll;
+using namespace std;
+
+typedef string::const_iterator State;
+void consume(State &begin, char expected);
+string parse_cipher(State &s);
+string parse_string(State &s);
+string parse_letter(State &s);
+
+void consume(State &begin, char expected) {
+    if (*begin == expected) {
+        begin++;
+    } else {
+        cerr << "Expected '" << expected << "' but got '" << *begin << "'" << endl;
+        exit(1);
+    }
+}
+
+string parse_cipher(State &s) {
+    string res = "";
+    while (*s != '\0' && *s != ']') {
+        res += parse_string(s);
+    }
+    return res;
+}
+
+string parse_string(State &s) {
+    string res = "";
+    if (*s == '[') {
+        consume(s, '[');
+        string cur = parse_cipher(s);
+        reverse(cur.begin(), cur.end());
+        res += cur;
+        consume(s, ']');
+    } else {
+        res += parse_letter(s);
+    }
+    return res;
+}
+string parse_letter(State &s) {
+    string res = "";
+    if (*s == '+') {
+        consume(s, '+');
+        string cur = parse_letter(s);
+
+        if (cur == "?")
+            res += '?';
+        else {
+            int id = cur[0] - 'A';
+            id = (id + 1) % 26;
+            res += (char)(id + 'A');
+        }
+    } else if (*s == '-') {
+        consume(s, '-');
+        string cur = parse_letter(s);
+
+        if (cur == "?")
+            res += '?';
+        else {
+            int id = cur[0] - 'A';
+            id = (id + 26 - 1) % 26;
+            res += (char)(id + 'A');
+        }
+    } else if (*s >= 'A' && *s <= 'Z') {
+        res += *s;
+        s++;
+    } else if (*s == '?') {
+        res += '?';
+        s++;
+    }
+
+    return res;
+}
+
+void solve(string S) {
+    State s = S.begin();
+    string res = parse_cipher(s);
+    for (char &c : res) {
+        if (c == '?')
+            cout << "A";
+        else
+            cout << c;
+    }
+    cout << "\n";
+}
+
+int main() {
+    string S;
+    while (cin >> S) {
+        if (S == ".") return 0;
+        solve(S);
+    }
+
+    return 0;
+}
+

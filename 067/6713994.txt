@@ -1,0 +1,152 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using vvvb = vector<vvb>;
+using vd = vector<double>;
+using vvd = vector<vd>;
+using vvvd = vector<vvd>;
+#define all(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q) {
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+template<class T>
+bool chmin(T& p, T q) {
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+ll gcd(ll(a), ll(b)) {
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+ll modPow(long long a, long long n, long long p) {
+    if (n == 0) return 1; // 0乗にも対応する場合
+    if (n == 1) return a % p;
+    if (n % 2 == 1) return (a * modPow(a, n - 1, p)) % p;
+    long long t = modPow(a, n / 2, p);
+    return (t * t) % p;
+}
+struct dsu {
+public:
+    dsu() : _n(0) {}
+    dsu(int n) : _n(n), par_size(n, -1) {}
+
+    int merge(int a, int b) {
+        int x = leader(a), y = leader(b);
+        if (x == y) return x;
+        if (-par_size[x] < -par_size[y]) swap(x, y);
+        par_size[x] += par_size[y];
+        par_size[y] = x;
+        return x;
+    }
+
+    bool same(int a, int b) {
+        return leader(a) == leader(b);
+    }
+
+    int leader(int a) {
+        if (par_size[a] < 0) return a;
+        return par_size[a] = leader(par_size[a]);
+    }
+
+    int size(int a) {
+        return -par_size[leader(a)];
+    }
+
+    vector<vector<int>> groups() {
+        std::vector<int> leader_buf(_n), gr_size(_n);
+        for (int i = 0; i < _n; i++) {
+            leader_buf[i] = leader(i);
+            gr_size[leader_buf[i]]++;
+        }
+        std::vector<vector<int>> res(_n);
+        for (int i = 0; i < _n; i++) {
+            res[i].reserve(gr_size[i]);
+        }
+        for (int i = 0; i < _n; i++) {
+            res[leader_buf[i]].push_back(i);
+        }
+        res.erase(
+            remove_if(res.begin(), res.end(),
+                [&](const vector<int>& v) { return v.empty(); }),
+            res.end());
+        return res;
+    }
+private:
+    int _n;
+    vector<int> par_size;
+};
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+
+    while (1) {
+        ll H, W;
+        cin >> H >> W;
+        swap(H, W);
+        if (H == 0)return 0;
+        vector<string> S(H);
+        ll SX = -1, SY = -1;
+        rep(i, H) {
+            cin >> S[i];
+            rep(w, W) {
+                if (S[i][w] == '@') {
+                    SY = i;
+                    SX = w;
+
+                }
+            }
+        }
+        vll dx = { 1,-1,0,0 };
+        vll dy = { 0,0,1,-1 };
+        queue<pair<ll, ll>> Q;
+        Q.push({ SY,SX });
+        set<pair<ll, ll>> Sa;
+        ll an = 0;
+        while (!Q.empty()) {
+            auto p = Q.front();
+            Q.pop();
+            if (Sa.count(p))continue;
+            Sa.insert(p);
+            an++;
+            rep(d, 4) {
+                ll ny = p.first + dy[d];
+                ll nx = p.second + dx[d];
+                if (ny < 0 || nx < 0 || ny >= H || nx >= W)continue;
+                if (Sa.count({ ny,nx }))continue;
+                if (S[ny][nx] == '#')continue;
+                Q.push({ ny,nx });
+            }
+        }
+        cout << an << endl;
+    }
+}

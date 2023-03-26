@@ -1,0 +1,150 @@
+#include <bits/stdc++.h>
+
+/*
+1-indexed + 閉区間実装
+*/
+
+static_assert(sizeof(long long) * CHAR_BIT == 64);
+
+long long nextpow2(long long n)
+{
+    assert(n > 0);
+    --n;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    n |= n >> 32;
+    return n + 1;
+}
+
+template <class T, class M>
+class segtree
+{
+private:
+    class M3
+    {
+    private:
+        M OP;
+
+    public:
+        explicit M3(const M& _OP)
+            : OP(_OP)
+        {
+        }
+
+        std::optional<T> operator()(const std::optional<T>& l, const std::optional<T>& r) const
+        {
+            if (l.has_value() && r.has_value())
+            {
+                return OP(l.value(), r.value());
+            }
+            else if (l.has_value())
+            {
+                return l;
+            }
+            else if (r.has_value())
+            {
+                return r;
+            }
+            else
+            {
+                return std::nullopt;
+            }
+        }
+    };
+    long long N;
+    long long I_END;
+    M3 OP;
+    std::vector<std::optional<T>> data;
+
+public:
+    segtree(void) = default;
+    segtree(const segtree&) = default;
+    segtree(segtree&&) noexcept = default;
+    segtree& operator=(const segtree&) & = default;
+    segtree& operator=(segtree&&) & noexcept = default;
+
+    segtree(const long long _N, const M _OP = M())
+        : N(_N)
+        , I_END(nextpow2(_N) - 1)
+        , OP(_OP)
+        , data(2 * nextpow2(_N))
+    {
+        assert(N > 0);
+        std::fill_n(data.begin() + I_END + 1, N, T());
+        for (long long ii = I_END; ii >= 1; --ii)
+        {
+            data[ii] = OP(data[2 * ii], data[2 * ii + 1]);
+        }
+    }
+
+    void full_update(const std::vector<T>& v)
+    {
+        assert(v.size() == N);
+        std::copy(v.begin(), v.end(), data.begin() + I_END + 1);
+        for (long long ii = I_END; ii >= 1; --ii)
+        {
+            data[ii] = OP(data[2 * ii], data[2 * ii + 1]);
+        }
+    }
+
+    void point_update(const long long i, const T& val)
+    {
+        assert(1 <= i && i <= N);
+        long long ii = I_END + i;
+        data[ii] = val;
+        while (ii != 1)
+        {
+            ii /= 2;
+            data[ii] = OP(data[2 * ii], data[2 * ii + 1]);
+        }
+    }
+
+    T range_reduce(const long long i, const long long j) const
+    {
+        assert(1 <= i && i <= j && j <= N);
+        std::optional<T> left;
+        std::optional<T> right;
+        long long ii = I_END + i;
+        long long jj = I_END + j;
+        while (ii != jj)
+        {
+            if ((ii & 1) == 1)
+            {
+                left = OP(data[ii++], left);
+            }
+            if ((jj & 1) == 0)
+            {
+                right = OP(right, data[jj--]);
+            }
+            ii /= 2;
+            jj /= 2;
+        }
+        right = OP(data[ii], right);
+        return OP(left, right).value();
+    }
+};
+
+int main(void)
+{
+    long long n, q;
+    std::cin >> n >> q;
+    segtree<long long, std::plus<long long>> tree(n);
+    for (long long i = 0; i < q; ++i)
+    {
+        long long c, x, y;
+        std::cin >> c >> x >> y;
+        if (c == 0)
+        {
+            tree.point_update(x, tree.range_reduce(x, x) + y);
+        }
+        else
+        {
+            std::cout << tree.range_reduce(x, y) << std::endl;
+        }
+    }
+    return 0;
+}
+

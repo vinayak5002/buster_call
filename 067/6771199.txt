@@ -1,0 +1,326 @@
+#include <bits/stdc++.h>
+using namespace std;
+#ifdef tabr
+#include "library/debug.cpp"
+#else
+#define debug(...)
+#endif
+
+template <long long mod>
+struct modular {
+    long long value;
+    modular(long long x = 0) {
+        value = x % mod;
+        if (value < 0) value += mod;
+    }
+    modular& operator+=(const modular& other) {
+        if ((value += other.value) >= mod) value -= mod;
+        return *this;
+    }
+    modular& operator-=(const modular& other) {
+        if ((value -= other.value) < 0) value += mod;
+        return *this;
+    }
+    modular& operator*=(const modular& other) {
+        value = value * other.value % mod;
+        return *this;
+    }
+    modular& operator/=(const modular& other) {
+        long long a = 0, b = 1, c = other.value, m = mod;
+        while (c != 0) {
+            long long t = m / c;
+            m -= t * c;
+            swap(c, m);
+            a -= t * b;
+            swap(a, b);
+        }
+        a %= mod;
+        if (a < 0) a += mod;
+        value = value * a % mod;
+        return *this;
+    }
+    friend modular operator+(const modular& lhs, const modular& rhs) { return modular(lhs) += rhs; }
+    friend modular operator-(const modular& lhs, const modular& rhs) { return modular(lhs) -= rhs; }
+    friend modular operator*(const modular& lhs, const modular& rhs) { return modular(lhs) *= rhs; }
+    friend modular operator/(const modular& lhs, const modular& rhs) { return modular(lhs) /= rhs; }
+    modular& operator++() { return *this += 1; }
+    modular& operator--() { return *this -= 1; }
+    modular operator++(int) {
+        modular res(*this);
+        *this += 1;
+        return res;
+    }
+    modular operator--(int) {
+        modular res(*this);
+        *this -= 1;
+        return res;
+    }
+    modular operator-() const { return modular(-value); }
+    bool operator==(const modular& rhs) const { return value == rhs.value; }
+    bool operator!=(const modular& rhs) const { return value != rhs.value; }
+    bool operator<(const modular& rhs) const { return value < rhs.value; }
+};
+template <long long mod>
+string to_string(const modular<mod>& x) {
+    return to_string(x.value);
+}
+template <long long mod>
+ostream& operator<<(ostream& stream, const modular<mod>& x) {
+    return stream << x.value;
+}
+template <long long mod>
+istream& operator>>(istream& stream, modular<mod>& x) {
+    stream >> x.value;
+    x.value %= mod;
+    if (x.value < 0) x.value += mod;
+    return stream;
+}
+
+using mint = modular<2011>;
+
+mint power(mint a, long long n) {
+    mint res = 1;
+    while (n > 0) {
+        if (n & 1) {
+            res *= a;
+        }
+        a *= a;
+        n >>= 1;
+    }
+    return res;
+}
+
+vector<mint> fact(1, 1);
+vector<mint> finv(1, 1);
+
+mint C(int n, int k) {
+    if (n < k || k < 0) {
+        return mint(0);
+    }
+    while ((int) fact.size() < n + 1) {
+        fact.emplace_back(fact.back() * (int) fact.size());
+        finv.emplace_back(mint(1) / fact.back());
+    }
+    return fact[n] * finv[k] * finv[n - k];
+}
+
+struct ASCII {
+    int h;
+    int w;
+    vector<string> s;
+
+    ASCII(vector<string> s_) {
+        s = s_;
+        h = (int) s.size();
+        w = (int) s[0].size();
+    }
+
+    string get_column(int j) {
+        string res;
+        for (int i = 0; i < h; i++) {
+            res += s[i][j];
+        }
+        return res;
+    }
+
+    string get_row(int i) {
+        return s[i];
+    }
+
+    ASCII get_rect(int i1, int i2, int j1, int j2) {  // [i1, i2], [j1, j2]
+        vector<string> t;
+        for (int i = i1; i <= i2; i++) {
+            t.emplace_back(s[i].substr(j1, j2 - j1 + 1));
+        }
+        return ASCII(t);
+    }
+
+    void erase_top() {
+        s.erase(s.begin());
+        h--;
+    }
+
+    void erase_bottom() {
+        s.pop_back();
+        h--;
+    }
+
+    void erase_left() {
+        for (auto& x : s) {
+            x.erase(x.begin());
+        }
+        w--;
+    }
+
+    void erase_right() {
+        for (auto& x : s) {
+            x.pop_back();
+        }
+        w--;
+    }
+
+    void format() {
+        while (get_row(0) == string(w, '.')) {
+            erase_top();
+        }
+        while (get_row(h - 1) == string(w, '.')) {
+            erase_bottom();
+        }
+        while (get_column(0) == string(h, '.')) {
+            erase_left();
+        }
+        while (get_column(w - 1) == string(h, '.')) {
+            erase_right();
+        }
+    }
+};
+
+mint expr(ASCII);
+mint expr_minus(ASCII);
+mint term(ASCII);
+mint factor(ASCII);
+mint powexpr(ASCII);
+mint primary(ASCII);
+
+bool exactly_one(string t, char c) {
+    string u = string(t.size(), '.');
+    auto iter = find(t.begin(), t.end(), c);
+    if (iter == t.end()) {
+        return false;
+    }
+    u[iter - t.begin()] = c;
+    return (t == u);
+}
+
+mint expr(ASCII s) {
+    s.format();
+    mint res = 0;
+    int bal = 0;
+    int last = -1;
+    for (int i = 0; i < s.w; i++) {
+        string t = s.get_column(i);
+        bal += (int) count(t.begin(), t.end(), '(');
+        bal -= (int) count(t.begin(), t.end(), ')');
+        if (exactly_one(t, '+') && bal == 0) {
+            res += expr_minus(s.get_rect(0, s.h - 1, last + 1, i - 1));
+            last = i;
+        }
+    }
+    res += expr_minus(s.get_rect(0, s.h - 1, last + 1, s.w - 1));
+    return res;
+}
+
+mint expr_minus(ASCII s) {
+    s.format();
+    mint res = 0;
+    int bal = 0;
+    int last = -1;
+    int found = 1;
+    for (int i = 0; i < s.w; i++) {
+        string t = s.get_column(i);
+        bal += (int) count(t.begin(), t.end(), '(');
+        bal -= (int) count(t.begin(), t.end(), ')');
+        if (exactly_one(t, '-') && bal == 0 && found == 0) {
+            res += term(s.get_rect(0, s.h - 1, last + 1, i - 1)) * (last == -1 ? 1 : -1);
+            last = i;
+        }
+        if (exactly_one(t, '-') || exactly_one(t, '*')) {
+            found = 1;
+        } else if (t != string(s.h, '.')) {
+            found = 0;
+        }
+    }
+    res += term(s.get_rect(0, s.h - 1, last + 1, s.w - 1)) * (last == -1 ? 1 : -1);
+    return res;
+    return res;
+}
+
+mint term(ASCII s) {
+    s.format();
+    mint res = 1;
+    int bal = 0;
+    int last = -1;
+    for (int i = 0; i < s.w; i++) {
+        string t = s.get_column(i);
+        bal += (int) count(t.begin(), t.end(), '(');
+        bal -= (int) count(t.begin(), t.end(), ')');
+        if (exactly_one(t, '*') && bal == 0) {
+            res *= factor(s.get_rect(0, s.h - 1, last + 1, i - 1));
+            last = i;
+        }
+    }
+    res *= factor(s.get_rect(0, s.h - 1, last + 1, s.w - 1));
+    return res;
+}
+
+mint factor(ASCII s) {
+    s.format();
+    if (exactly_one(s.get_column(0), '-')) {
+        s.erase_left();
+        assert(s.get_column(0) == string(s.h, '.'));
+        s.erase_left();
+        return -factor(s);
+    }
+    for (int i = 0; i < s.h; i++) {
+        if (s.get_row(i) == string(s.w, '=')) {
+            return expr(s.get_rect(0, i - 1, 0, s.w - 1)) / expr(s.get_rect(i + 1, s.h - 1, 0, s.w - 1));
+        }
+    }
+    return powexpr(s);
+}
+
+mint powexpr(ASCII s) {
+    s.format();
+    for (int i = 0; i < s.h - 1; i++) {
+        if ('0' <= s.s[i][s.w - 1] && s.s[i][s.w - 1] <= '9' && s.s[i + 1][s.w - 2] != '.') {
+            return power(primary(s.get_rect(0, s.h - 1, 0, s.w - 2)), s.s[i][s.w - 1] - '0');
+        }
+    }
+    return primary(s);
+}
+
+mint primary(ASCII s) {
+    s.format();
+    if (s.h == 1 && s.w == 1) {
+        return s.s[0][0] - '0';
+    }
+    assert(exactly_one(s.get_column(0), '('));
+    assert(exactly_one(s.get_column(s.w - 1), ')'));
+    s.erase_left();
+    s.erase_right();
+    assert(s.get_column(0) == string(s.h, '.'));
+    assert(s.get_column(s.w - 1) == string(s.h, '.'));
+    s.erase_left();
+    s.erase_right();
+    return expr(s);
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    while (true) {
+        int n;
+        cin >> n;
+        if (n == 0) {
+            break;
+        }
+        vector<string> s(n);
+        for (int i = 0; i < n; i++) {
+            cin >> s[i];
+        }
+        int m = (int) s[0].size();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (s[i][j] == '-') {
+                    if (j + 1 < m && s[i][j + 1] == '-') {
+                        s[i][j] = '=';
+                    } else if (j - 1 >= 0 && s[i][j - 1] == '=') {
+                        s[i][j] = '=';
+                    }
+                }
+            }
+        }
+        cout << expr(ASCII(s)) << '\n';
+    }
+    return 0;
+}

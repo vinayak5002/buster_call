@@ -1,0 +1,131 @@
+#define PROBLEM "https://onlinejudge.u-aizu.ac.jp/courses/library/5/GRL/1/GRL_1_A"
+#include <bits/stdc++.h>
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+constexpr ll MOD = 1e9 + 7;
+constexpr ll INF = 1e+18;
+constexpr ld EPS = 1e-12L;
+constexpr ld PI = 3.14159265358979323846L;
+
+// 辺
+template<class T>
+class Edge {
+  static int nextId;
+
+public:
+  const int from, to, id;
+  const T cost;
+  Edge(int from_, int to_, T cost_): from(from_), to(to_), cost(cost_), id(nextId++) {}
+};
+
+template<class T>
+int Edge<T>::nextId = 0;
+
+template<class T>
+ostream &operator<<(ostream &os, Edge<T> edge) {
+  os << edge.from << " -> " << edge.to << " (" << edge.cost << ")";
+  return os;
+}
+
+// グラフ(隣接リスト)
+template<class Cost = ll, class E = Edge<Cost>>
+class GraphL {
+  int n, m;
+  vector<vector<E>> adj;
+  unordered_map<int, vector<Cost>> shortest_path_dist;
+  unordered_map<int, vector<int>> shortest_path_parent;
+
+public:
+  GraphL() {}
+  GraphL(int n_): n(n_), m(0), adj(n_) {}
+
+  template<class... Args>
+  void add_edge(int from, int to, Args... args) {
+    adj[from].emplace_back(from, to, args...);
+    m++;
+  }
+  void add_node() {
+    adj.emplace_back();
+    n++;
+  }
+  vector<E> &operator[](int i) { return adj[i]; }
+
+  void dijkstra(int start_node);
+
+  // 最短距離
+  Cost getDist(int from, int to) { return shortest_path_dist[from][to]; }
+  // 最短パス
+  vector<int> getShortestPath(int from, int to) {
+    vector<int> path;
+    for(int cur = to; cur != -1; cur = shortest_path_parent[from][cur]) { path.emplace_back(cur); }
+    reverse(path.begin(), path.end());
+    return path;
+  }
+};
+
+template<class E = Edge<ll>>
+ostream &operator<<(ostream &os, GraphL<E> graph) {
+  os << "N = " << graph.n << ", M = " << graph.m << '\n';
+  for(const auto &ev: graph.adj) {
+    for(const auto &e: ev) { os << e << '\n'; }
+  }
+  return os;
+}
+
+// ダイクストラ法
+// 有向グラフの単一始点最短経路 O((E+V)logV)
+// https://algo-logic.info/dijkstra/
+template<class Cost, class E>
+void GraphL<Cost, E>::dijkstra(int start_node) {
+  if(shortest_path_dist.count(start_node)) {
+    return;
+  }
+  using P = pair<Cost, int>;
+  vector<Cost> dist(n, numeric_limits<Cost>::max());
+  vector<int> parent_v(n, -1);
+  dist[start_node] = 0;
+  priority_queue<P, vector<P>, greater<P>> pq;
+  pq.emplace(0, start_node);
+  while(!pq.empty()) {
+    P p = pq.top();
+    pq.pop();
+    Cost v = p.second;
+    if(dist[v] < p.first) {
+      continue;
+    }
+    for(const auto &e: adj[v]) {
+      if(dist[e.to] > dist[v] + e.cost) {
+        dist[e.to] = dist[v] + e.cost;
+        parent_v[e.to] = v;
+        pq.emplace(dist[e.to], e.to);
+      }
+    }
+  }
+  shortest_path_dist[start_node] = move(dist);
+  shortest_path_parent[start_node] = move(parent_v);
+}
+
+int main() {
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  int V, E, r;
+  cin >> V >> E >> r;
+  GraphL<int> graph(V);
+  for(int i = 0; i < E; ++i){
+    int s, t, d;
+    cin >> s >> t >> d;
+    graph.add_edge(s, t, d);
+  }
+  graph.dijkstra(r);
+  for(int i = 0; i < V; ++i){
+    int dist = graph.getDist(r, i);
+    if(dist >= 2000000000){
+      cout << "INF\n";
+    }else{
+      cout << dist << '\n';
+    }
+  }
+}
+

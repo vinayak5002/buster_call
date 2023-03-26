@@ -1,0 +1,42 @@
+# include <iostream>
+
+using namespace std;
+
+int n;
+const int max_n = 45;
+int pre[max_n], in[max_n], post[max_n];
+int root_index=0,ans_index=0;
+
+void tree_reconstruction(int l,int r){
+	if(l>=r)return;
+	int root=pre[root_index];
+    root_index++;
+
+	int i;
+
+    // preorderのルートがinorderのどこにあるか見つける
+	for(i=0;i<n;i++)if(in[i]==root)break;
+
+	tree_reconstruction(l,i);
+	tree_reconstruction(i+1,r);
+	post[ans_index]=root;
+    ans_index++;
+}
+
+
+int main(){
+
+    cin >> n;
+    for(int i=0;i<n;i++)cin>>pre[i];
+	for(int i=0;i<n;i++)cin>>in[i];
+
+    tree_reconstruction(0,n);    
+
+    for(int i=0;i<n;i++){
+		if(i!=0)cout<<" ";
+		cout<<post[i];
+	}
+	cout<<endl;
+
+    return 0;
+}

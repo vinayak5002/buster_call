@@ -1,0 +1,47 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    int N, M, K, bi = 0;
+    cin >> N >> M >> K;
+    vector<int> D(M);
+    vector<int> L(N, -1);
+    for(auto &&v:D){
+        cin >> v;
+        L[--v] = bi++;
+    }
+    vector<vector<int>> A(N, vector<int>(K));
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < K; j++){
+            cin >> A[i][j];
+            A[i][j]--;
+        }
+    }
+    queue<int> nxt;
+    vector<int> dp(1 << M, 1 << 29);
+    dp.back() = 0;
+    auto f = [&](int S, int k){
+        int T = 0;
+        for(int i = 0; i < M; i++){
+            if(~S >> i & 1)continue;
+            int from = D[i];
+            int to = A[from][k];
+            if(L[to] != -1)T |= 1 << L[to];
+        }
+        return T;
+    };
+    while(!nxt.empty()){
+        int S = nxt.front();
+        nxt.pop();
+        if(S == 0){
+            cout << dp[0] << '\n';
+            return 0;
+        }
+        for(int i = 0; i < K; i++){
+            int T = f(S, i);
+            if(dp[S] + 1 >= dp[T])continue;
+            dp[T] = dp[S] + 1;
+            nxt.push(T);
+        }
+    }
+}

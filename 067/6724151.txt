@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>
+// #include<atcoder/modint>
+using namespace std;
+// using namespace atcoder;
+
+map<string, set<int>> mp;
+set<char> ope = {'+', '-', '*', '/'};
+
+set<int> subsolve(string S){
+	if(mp.count(S)) return mp[S];
+	set<int> ret;
+	int l = S.size();
+	while(S[0] == '(' && S[l - 1] == ')'){
+		S = S.substr(1, l - 2);
+		l -= 2;
+	}
+	bool isnum = true;
+	int tot = 0;
+	for(int i = 0; i < l; i++){
+		if(S[i] == '('){
+			tot++;
+			isnum = false;
+		}
+		else if(S[i] == ')'){
+			isnum = false;
+			tot--;
+		}
+		else if(ope.count(S[i])){
+			isnum = false;
+			auto s1 = subsolve(S.substr(0, i));
+			auto s2 = subsolve(S.substr(i + 1));
+			for(auto n1: s1){
+				for(auto n2:s2){
+					if(S[i] == '+') ret.insert(n1 + n2);
+					else if(S[i] == '*') ret.insert(n1 * n2);
+					else if(S[i] == '-') ret.insert(n1 - n2);
+					else if(n2 != 0) ret.insert(n1 / n2);
+				}
+			}
+		}
+	}
+	if(isnum){
+		ret.insert(stoi(S));
+	}
+	mp[S] = ret;
+	return ret;
+}
+
+
+void solve(){
+	while(1){
+		string S;
+		cin >> S;
+		if(S == "#") return;
+		cout << subsolve(S).size() << "\n";
+	}
+}
+
+int main(){
+    cin.tie(0)->sync_with_stdio(0);
+    int t;
+    t = 1;
+    // cin >> t;
+    while(t--) solve();
+}
+    
+    

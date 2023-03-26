@@ -1,0 +1,120 @@
+#include <bits/stdc++.h>
+using namespace std;
+using vi = vector<int64_t>;
+using vii = vector<vi>;
+using pii = pair<int64_t, int64_t>;
+
+#define rep(i, n) for (int64_t i = 0; i < (int64_t)(n); i++)
+#define all(v) v.begin(), v.end()
+
+const int64_t inf = numeric_limits<int64_t>::max();
+
+// 以下可変
+
+// Segment tree
+// 完全二分木の形で区間系のあれこれを
+// 前処理 O(数列の長さ) クエリ当たり O（log 数列の長さ）で解決できる
+
+template <typename T>
+struct lazy_RMQ
+{
+    const T INF = pow(2, 31) - 1;
+    int64_t leaf;        // num of leaf
+    vector<T> dat, lazy; // complete binary tree
+
+    lazy_RMQ(int64_t seqLNG) : leaf(), dat(seqLNG * 4, INF), lazy(seqLNG * 4, INF)
+    { // leaf & dat initialization
+        int64_t xxx = 1;
+        while (seqLNG > xxx)
+        {
+            xxx *= 2;
+        }
+        leaf = xxx;
+    }
+
+    void leaf_set(int64_t leafN, T value) { (dat[leafN + leaf - 1] = value); }
+    void RMQ_build()
+    {
+        for (int64_t now = leaf - 2; now >= 0; now--)
+        {
+            dat[now] = min(dat[now * 2 + 1], dat[now * 2 + 2]);
+        }
+    }
+
+    // 遅延評価をする関数 node: now を更新し、子がいる場合は子らの遅延待ちもする
+    void eval(int64_t now)
+    {
+        if (lazy[now] == INF)
+            return;
+        if (now < leaf - 1)
+        {
+            lazy[now * 2 + 1] = lazy[now];
+            lazy[now * 2 + 2] = lazy[now];
+        }
+        dat[now] = lazy[now];
+        lazy[now] = INF;
+    }
+
+    void update(int64_t ai, int64_t bi, T xxx, int64_t now, int64_t left, int64_t right) // 区間 [ai, bi) を xxx で更新する
+    {
+        eval(now); // 既に別の遅延評価待ちをしているばあい、すっとばさないようにする
+        if (ai <= left && right <= bi)
+        {
+            lazy[now] = xxx;
+            eval(now); // now の更新だけはしておく（子は lazy に入れて予約だけ）
+        }
+        else if (ai < right && left < bi)
+        {
+            update(ai, bi, xxx, 2 * now + 1, left, (left + right) / 2);
+            update(ai, bi, xxx, 2 * now + 2, (left + right) / 2, right);
+            dat[now] = min(dat[now * 2 + 1], dat[now * 2 + 2]);
+        }
+    }
+    void update(int64_t ai, int64_t bi, int64_t xxx) { update(ai, bi, xxx, 0, 0, leaf); }
+
+    // [R, L) 間の最小値を出力する
+    T min_ele(int64_t ai, int64_t bi) { return min_ele_sub(ai, bi, 0, 0, leaf); }
+    T min_ele_sub(int64_t ai, int64_t bi, int64_t now, int64_t left, int64_t right)
+    {
+        eval(now);
+        if (bi <= left || right <= ai)
+        {
+            return INF;
+        }
+        else if (ai <= left && right <= bi)
+        {
+            return dat[now];
+        }
+        else
+        {
+            int64_t lmin = min_ele_sub(ai, bi, now * 2 + 1, left, (left + right) / 2);
+            int64_t rmin = min_ele_sub(ai, bi, now * 2 + 2, (left + right) / 2, right);
+            return min(lmin, rmin);
+        }
+    }
+};
+
+/////////////////////////////////////////////////////////////
+int main()
+{
+    int64_t N, Q;
+    cin >> N >> Q;
+
+
+    lazy_RMQ<int64_t> ANS(N);
+
+    rep(i, Q)
+    {
+        int64_t com, xi, yi;
+        cin >> com >> xi >> yi;
+        if(com == 0){
+            ANS.update(xi, xi + 1, yi);
+        }
+        else{
+            cout << ANS.min_ele(xi, yi + 1) << endl;
+        }
+    }
+
+    return 0;
+}
+

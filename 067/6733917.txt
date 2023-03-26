@@ -1,0 +1,233 @@
+#include<bits/stdc++.h>
+#define int ll
+#define rep(i, N) for(int i = 0; i < (int)N; ++i)
+#define rep1(i, N) for(int i = 1; i <= (int)N; ++i)
+#define per(i, N) for(int i = N-1; i >= 0; --i)
+#define all(v) (v).begin(), (v).end()
+#define rall(v) (v).rbegin(), (v).rend()
+#define bit(n, k) ((n) >> k)
+#define pcnt(n) (__builtin_popcount(n))
+#define TakAo(ans) ans ? cout << "Takahashi\n" : cout << "Aoki\n"
+#define YesNo(ans) ans ? cout << "Yes\n" : cout << "No\n"
+#define endl '\n'
+#define fi first
+#define se second
+#define mkpr make_pair
+#define mktpl make_tuple
+#define eb emplace_back
+
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+using point = struct{ ll x, y; };
+using State = string::const_iterator;
+template<class T> using max_heap = priority_queue<T>;
+template<class T> using min_heap = priority_queue<T, vector<T>, greater<T>>;
+template<class T> using vec = vector<T>;
+template<class T> using vvec = vec<vec<T>>;
+template<class T> using vvvec = vec<vvec<T>>;
+template<class T> using vvvvec = vvec<vvec<T>>;
+
+constexpr ld EPS = 1e-10;
+constexpr int INF = 1001001001;
+constexpr ll LINF = 1001001001001001001ll;
+constexpr ll MOD = (0) ? 998244353 : 1e9+7;
+constexpr int NIL = -1;
+constexpr int pm[2] = {1, -1};
+constexpr int dy[4] = {0, 1, 0, -1};
+constexpr int dx[4] = {1, 0, -1, 0};
+
+ll cel(ll a, ll b){ return (a + b - 1) / b;}
+ll Gcd(ll a, ll b){ return b ? Gcd(b, a % b) : abs(a);}
+template<class T> T powi(T x, ll exp){
+    return exp > 0 ? (exp & 1 ? x : 1) * powi(x * x, exp >> 1) : 1;
+}
+ll modpow(ll x, ll exp, ll mod){
+    x %= mod;
+    return exp > 0 ? (exp & 1 ? x : 1) * modpow(x * x, exp >> 1, mod) % mod : 1;
+}
+template<class T> bool chmin(T &a, T b){ return a > b ? (a = b, true) : 0;}
+template<class T>bool chmax(T &a, T b){ return a < b ? (a = b, true) : 0;}
+
+using Pair = pair<int, int>;
+using Tpl = tuple<int, int, int>;
+
+using cube = struct{
+    int x[2], y[2], z[2];
+};
+
+ll find_S(cube A, cube B){
+    ll X = 0, Y = 0, Z = 0;
+
+    // B in A
+    if(A.x[0] <= B.x[0] && A.y[0] <= B.y[0] && A.z[0] <= B.z[0] &&
+       A.x[1] >= B.x[1] && A.y[1] >= B.y[1] && A.z[1] >= B.z[1]){
+        X = B.x[1] - B.x[0];
+        Y = B.y[1] - B.y[0];
+        Z = B.z[1] - B.z[0];
+        if(X == 0 || Y == 0 || Z == 0){
+            return 0;
+        }
+        return (X * Y + Y * Z + Z * X) * 2;
+    }
+
+    if(B.x[1] < A.x[0] || A.x[1] < B.x[0]) return 0;
+    if(B.y[1] < A.y[0] || A.y[1] < B.y[0]) return 0;
+    if(B.z[1] < A.z[0] || A.z[1] < B.z[0]) return 0;
+
+    X = min(A.x[1], B.x[1]) - max(A.x[0], B.x[0]);
+    Y = min(A.y[1], B.y[1]) - max(A.y[0], B.y[0]);
+    Z = min(A.z[1], B.z[1]) - max(A.z[0], B.z[0]);
+
+    //cout << X << Y << Z << endl;
+
+    if(X == 0 || Y == 0 || Z == 0) return 0;
+    return (X * Y + Y * Z + Z * X) * 2;
+}
+
+void Main(){
+    while(1){
+        int N, K, S; cin >> N >> K >> S;
+        if(N == 0) break;
+        vec<cube> A(N);
+        rep(i, N){
+            int x, y, z; cin >> x >> y >> z;
+            A[i] = cube{x, x + S, y, y + S, z, z + S};
+        }
+
+        if(K == 1){
+            ll ans = LINF;
+            rep(i, N) chmin(ans, find_S(A[i], A[i]));
+            cout << ans << endl;
+            continue;
+        }
+
+        vvec<Pair> G(N);
+        rep(i, N){
+            for(int j = i + 1; j < N; j++){
+                ll val = find_S(A[i], A[j]);
+                if(val > 0){
+                    G[i].eb(mkpr(j, val));
+                    G[j].eb(mkpr(i, val));
+                }
+            }
+        }
+
+        ll ans = LINF;
+        vec<bool> used(N, 0);
+
+        // not cycle
+        rep(i, N){
+            if(G[i].size() == 0) used[i] = 1;
+            if(G[i].size() == 1 && !used[i]){
+                int num = 1, u = i;
+                ll val = find_S(A[u], A[u]);
+                queue<ll> que;
+                que.push(val);
+
+                while(1){
+                    used[u] = 1;
+                    if(G[u].size() == 1 && u != i) break;
+
+                    for(auto v : G[u]){
+                        if(!used[v.fi]){
+                            val -= v.se;
+                            que.push(-v.se);
+                            val += find_S(A[v.fi], A[v.fi]);
+                            que.push(find_S(A[v.fi], A[v.fi]));
+                            num++;
+
+                            if(num == K){
+                                //cout << "!!" << val << endl;
+                                chmin(ans, val);
+                            }
+                            if(num - 1 == K){
+                                rep(j, 2){
+                                    val -= que.front();
+                                    que.pop();
+                                }
+                                chmin(ans, val);
+                                num--;
+                            }
+
+                            u = v.fi;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        //cycle
+        rep(i, N){
+            if(!used[i]){
+                int num = 1, u = i, prev_v = NIL;
+                ll val = find_S(A[u], A[u]);
+                queue<ll> que;
+                que.push(val);
+
+                int roopcnt = 0, rooplen = 0;
+
+                while(1){
+                    used[u] = 1;
+                    //cout << u << " ";
+
+                    if(u == i){
+                        roopcnt++;
+                        //cout << rooplen << endl;
+                        if(rooplen == K){
+                            ll val2;
+                            rep(j, 2){
+                                if(G[u][j].fi != prev_v){
+                                    val2 = G[u][j].se;
+                                }                                
+                            }
+                            chmin(ans, val - val2);
+                            break;
+                        }
+                        else if(rooplen != 0) rooplen = K + 1;
+                    }
+                    if(roopcnt == 3) break;
+
+                    rooplen++;
+
+                    for(auto v : G[u]){
+                        if(v.fi != prev_v){
+                            val -= v.se;
+                            que.push(-v.se);
+                            val += find_S(A[v.fi], A[v.fi]);
+                            que.push(find_S(A[v.fi], A[v.fi]));
+                            num++;
+
+                            if(num == K) chmin(ans, val);
+                            if(num - 1 == K){
+                                rep(j, 2){
+                                    val -= que.front();
+                                    que.pop();
+                                }
+                                chmin(ans, val);
+                                num--;
+                            }
+
+                            prev_v = u;
+                            u = v.fi;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if(ans == LINF) cout << -1 << endl;
+        else cout << ans << endl;
+    }
+}
+ 
+signed main(){
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    cout << fixed << setprecision(10);
+    Main();
+    return 0;
+}

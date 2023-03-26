@@ -1,0 +1,105 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct ListItem{
+	int n;
+	struct ListItem* next;
+	struct ListItem* prev;
+}ListItem;
+
+typedef struct{
+	int size;
+	ListItem* head;
+	ListItem* end;
+}List;
+
+List* newList(){
+	List* list = malloc(sizeof(List));
+	ListItem* head = malloc(sizeof(ListItem));
+	ListItem* end = malloc(sizeof(ListItem));
+	list->head = head;
+	list->end = end;
+	list->head->next = end;
+	list->end->prev = head;
+	list->size = 0;
+	return list;
+}
+List* deleteList(List* list){
+	ListItem* item = list->head->next;
+	ListItem* delete_item;
+	while(item != list->end){
+		delete_item = item;
+		item = item->next;
+		free(delete_item);
+	}
+	free(list->head);
+	free(list->end);
+	free(list);
+}
+void insert(List* list,int n){
+	ListItem* item = malloc(sizeof(ListItem));
+	item->n = n;
+	item->next = list->head->next;
+	item->next->prev = item;
+	item->prev = list->head;
+	item->prev->next = item;
+	list->size += 1;
+}
+void deleteItem(List* list,ListItem* item){
+	if(item == NULL || item == list->head || item == list->end) return;
+	item->next->prev = item->prev;
+	item->prev->next = item->next;
+	list->size -= 1;
+	free(item);
+}
+ListItem* find(List* list,int n){
+	ListItem* item;
+	for(item = list->head->next;item != list->end;item = item->next){
+		if(item->n == n) return item;
+	}
+	return NULL;
+}
+void delete(List* list,int n){
+	ListItem* item = find(list,n);
+	deleteItem(list,item);
+}
+void deleteFirst(List* list){
+	deleteItem(list,list->head->next);
+}
+void deleteLast(List* list){
+	deleteItem(list,list->end->prev);
+}
+void printList(List* list){
+	ListItem* item;
+	for(item = list->head->next;item->next != list->end;item = item->next){
+		printf("%d ",item->n);
+	}
+	printf("%d\n",item->n);
+}
+
+int main(void){
+	List* list = newList();
+	
+	int n;
+	scanf("%d",&n);
+	for(int i = 0;i < n;i++){
+		char command[10];
+		int num;
+		scanf("%s",command);
+		if(strcmp(command,"insert") == 0){
+			scanf("%d",&num);
+			insert(list,num);
+		}else if(strcmp(command,"delete") == 0){
+			scanf("%d",&num);
+			delete(list,num);
+		}else if(strcmp(command,"deleteFirst") == 0){
+			deleteFirst(list);
+		}else if(strcmp(command,"deleteLast") == 0){
+			deleteLast(list);
+		}
+	}
+	printList(list);
+	deleteList(list);
+	return 0;
+}

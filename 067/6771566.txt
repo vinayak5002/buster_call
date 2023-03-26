@@ -1,0 +1,106 @@
+#include<stdio.h>
+
+#define N 100
+#define LING 100000
+#define NO_VISIT 0
+#define OK_VISIT 1
+#define COMPLETE_VISIT 2
+#define INFINITY (1<<21)
+
+int n, M[N][N];
+int d[N]; // 始点から各頂点までの最短距離を格納
+int que[LING];
+int head, tail;
+
+void push(int p)
+{
+    que[tail] = p;
+    tail = (tail+1) % LING;
+}
+
+int empty()
+{
+    if(head == tail)
+    {
+        return 1; // キューの中身が空である
+    }
+    else
+    {
+        return 0; // キューの中身は空ではない
+    }
+}
+
+int pop()
+{
+    int top;
+    top = que[head];
+    head = (head+1) % LING;
+    return top;
+}
+
+void BreadthFirstSrarch(int start)
+{
+    int i, u, vertex;
+    push(start);
+    for(i=0; i<n; i++)
+    {
+        d[i] = INFINITY;
+    }
+    d[start] = 0;
+
+    while(empty() == 0)
+    {
+        u = pop();
+        for(vertex = 0; vertex<n; vertex++)
+        {
+            if(M[u][vertex] == 0){continue;}
+            if(d[vertex] != INFINITY){continue;}
+            d[vertex] = d[u] + 1;
+            push(vertex);
+        }
+    }
+
+    for(i=0; i<n; i++)
+    {
+        if(d[i] == INFINITY)
+        {
+            printf("%d %d\n", i+1, -1);
+        }
+        else
+        {
+            printf("%d %d\n", i+1, d[i]);
+        }
+    }
+}
+
+int main()
+{
+    int i, j, u, k, v;
+
+    scanf("%d", &n);
+    for(i=0; i<n; i++)
+    {
+        for(j=0; j<n; j++)
+        {
+            M[i][j] = 0;
+        }
+    }
+    head = 1;
+    tail = n + 1;
+
+    for(i=0; i<n; i++)
+    {
+        scanf("%d %d", &u, &k);
+        u = u - 1;
+        for(j=0; j<k; j++)
+        {
+            scanf("%d", &v);
+            v = v - 1;
+            M[u][v] = 1;
+        }
+    }
+
+    BreadthFirstSrarch(0);
+
+    return 0;
+}

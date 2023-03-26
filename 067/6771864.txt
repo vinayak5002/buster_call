@@ -1,0 +1,108 @@
+#include<stdio.h>
+
+#define MAX 100
+#define INFTY 2097152
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+#define true 1
+#define false 0
+
+int n, M[MAX][MAX];
+
+void dijkstra()
+{
+	int minv, v, u, i;
+	int d[MAX], color[MAX];
+	
+	//すべての頂点を訪問回数0回で初期化する//
+	for( i = 0; i < n; i++ )
+	{
+		d[i] = INFTY;
+		color[i] = WHITE;
+	}
+	
+	d[0] = 0;
+	color[0] = GRAY;
+	
+	while(true)
+	{
+		minv = INFTY;
+		u = -1;
+		
+		//頂点が訪問回数1回の時の処理//
+		for( i = 0; i < n; i++ )
+		{
+			if( minv > d[i] && color[i] != BLACK )
+			{
+				u = i;
+				minv = d[i];
+			}
+		}
+		
+		if( u == -1 )
+		{
+			break;
+		}
+		
+		color[u] = BLACK;
+		
+		//すべての頂点について実行//
+		for( v = 0;  v < n; v++ )
+		{
+			if( color[v] != BLACK && M[u][v] != INFTY )   
+			{
+				if( d[v] > d[u] + M[u][v] )
+				{
+					d[v] = d[u] + M[u][v];
+					color[v] = GRAY;
+				}
+			}
+		}
+	}
+	
+	//頂点0から各頂点について、最短経路上の辺の重みの総和の出力//
+	for( i = 0; i < n; i++ )
+	{
+		if( d[i] == INFTY )
+		{
+			d[i] = -1;
+		}
+		
+		printf( "%d %d\n", i, d[i] );
+	}
+}
+	
+int main( void )
+{
+	int i, j;
+	int k, c, u, v;
+	
+	scanf( "%d", &n );
+	
+	//初期化//
+	for( i = 0; i < n; i++ )
+	{
+		for( j = 0; j < n; j++ )
+		{
+			M[i][j] = INFTY;
+		}
+	}
+	
+	//隣接する頂点番号と、辺の重みを入力//
+	for( i = 0; i < n; i++ )
+	{
+		scanf( "%d %d", &u, &k );
+		
+		for( j = 0; j < k; j++ )
+		{
+			scanf( "%d %d", &v, &c );
+			M[u][v] = c;
+		}
+	}
+	
+	dijkstra();
+	
+	return 0;
+}
+

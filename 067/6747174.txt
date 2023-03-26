@@ -1,0 +1,130 @@
+#include<iostream>
+#include<algorithm>
+#include<stack>
+#include<vector>
+using namespace std;
+typedef pair<int,int> option;
+#define MAX 10000
+ 
+Option add(Option x,Option y){
+  return Option(x.first+y.first,x.second+y.second);
+}
+ 
+Option mul(Option x,Option y){
+  return Option(x.first*y.first-x.second*y.second,x.first*y.second+x.second*y.first);
+}
+ 
+int pos=0,len,flg;
+string s;
+Option solve();
+void printF(Option Option);
+ 
+Option getNum(){
+  Option res=Option(0,0);
+  bool f=false;
+  if(s[pos]=='('){ pos++;return solve();  }
+  if(s[pos]=='-'){f=true;pos++;}
+  if(s[pos]=='i'){
+    res.second=1;
+    pos++;
+  }else{
+    while('0'<=s[pos]&&s[pos]<='9'){
+      res.first*=10;
+      res.first+=(s[pos]-'0');
+      if(res.first>MAX)flg=true;// debug
+      pos++;
+    }
+    if(s[pos]=='i'){
+      swap(res.first,res.second);
+      pos++;
+    }
+  }
+ 
+  if(flg)return Option(0,0); // debug
+ 
+  if(f)res=mul(Option(-1,0),res);
+  return res;
+}
+ 
+Option solve(){
+  stack< Option > st;
+  st.push(getNum());
+ 
+  while(1){
+    if(abs(st.top().first)>MAX)flg=true;
+    if(abs(st.top().second)>MAX)flg=true;
+    char ch=s[pos];pos++;
+    if(ch=='='||ch==')')break;
+    Option num=getNum();
+    if(abs(num.first)>MAX)flg=true;
+    if(abs(num.second)>MAX)flg=true;
+    if(ch=='*'){
+      Option x=st.top();st.pop();
+      st.push(mul(x,num));
+    }else if(ch=='+'){
+      st.push( num );
+    }else {
+      st.push( multiply(Option(-1,0),num) );
+    }
+ 
+  }
+ 
+  vector<Option> vec;
+  Option res=Option(0,0);
+  while(!st.empty()){
+    vec.push_back(st.top());
+    st.pop();
+  }
+  reverse(vec.begin(),vec.end());
+  for(int i=0;i<(int)vec.size();i++){
+    Option x=vec[i];
+    res=add(x,res);
+    if(abs(res.first)>MAX)flg=true;
+    if(abs(res.second)>MAX)flg=true;
+  }
+  return res;
+}
+ 
+void printF(Option Option){
+  if(flg){cout<<"overflow"<<endl;return;}
+  if(Option.first!=0){
+    cout<<Option.first;
+    if(Option.second>1){
+      cout<<"+"<<Option.second<<"i"<<endl;
+    }else if(Option.second==1){
+      cout<<"+1i"<<endl;
+    }else if(Option.second==0){
+      cout<<endl;
+    }else if(Option.second==-1){
+      cout<<"-1i"<<endl;
+    }else if(Option.second<-1){
+      cout<<Option.second<<"i"<<endl;
+    }
+  }else{
+    if(Option.second>1){
+      cout<<Option.second<<"i"<<endl;
+    }else if(Option.second==1){
+      cout<<"1i"<<endl;
+    }else if(Option.second==0){
+      cout<<"0"<<endl;
+    }else if(Option.second==-1){
+      cout<<"-1i"<<endl;
+    }else if(Option.second<-1){
+      cout<<Option.second<<"i"<<endl;
+    }
+ 
+  }
+}
+ 
+int main(){
+  while(cin>>s){
+    s.push_back('=');
+    pos=0;
+    len=s.size();
+    flg=false;
+    Option ans=solve();
+    printF(ans);
+  }
+  return 0;
+}
+

@@ -1,0 +1,60 @@
+#include<iostream>
+#include<vector>
+
+using namespace std;
+
+vector<int> pre;
+vector<int> mid;
+vector<int> last;
+int cur = 0;
+
+void remake(int l, int r)
+{
+  int pos;
+
+  if(l >= r)
+    return;
+
+  int now = pre[cur++];
+
+  pos = l;
+  for(int i = l; i < r; i++)
+  {
+    if(now == mid[i])
+    {
+      pos = i;
+      remake(l, i);
+      remake(i+1, r);
+      break;
+    }
+  }
+
+  last.push_back(now);
+}
+
+int main()
+{
+  int n;
+  cin >> n;
+
+  pre.resize(n);
+  mid.resize(n);
+
+  for(int i = 0; i < n; i++)
+    cin >> pre[i];
+
+  for(int i = 0; i < n; i++)
+    cin >> mid[i];
+
+  remake(0, n);
+
+  for(int i = 0; i < last.size(); i++)
+  {
+    if(i != n-1)
+        cout << last[i] << " ";
+    else
+      cout << last[i] << endl;
+  }
+
+}
+

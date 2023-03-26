@@ -1,0 +1,78 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef pair<ll, ll> P;
+#define rep(i, n) for (ll i = 0; i < (ll)(n); i++)
+#define reps(i, n) for (ll i = 1; i <= (ll)(n); i++)
+#define rrep(i, n) for (ll i = (ll)n - 1; i >= 0; i--)
+#define rreps(i, n) for (ll i = (ll)n; i > 0; i--)
+#define SORT(x) sort(x.begin(), x.end())
+#define ERASE(x) x.erase(unique(x.begin(), x.end()), x.end())
+#define POSL(x, v) (lower_bound(x.begin(), x.end(), v) - x.begin())
+#define POSU(x, v) (upper_bound(x.begin(), x.end(), v) - x.begin())
+#define all(x) x.begin(), x.end()
+
+template <typename T>
+bool chmax(T &a, const T &b)
+{
+    if (a < b)
+    {
+        a = b;
+        return true;
+    }
+    return false;
+}
+template <typename T>
+bool chmin(T &a, const T &b)
+{
+    if (a > b)
+    {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+struct Edge
+{
+    ll to;
+    ll weight;
+    Edge(ll to, ll weight) : to(to), weight(weight) {}
+};
+typedef vector<vector<ll>> Graph;
+typedef vector<vector<Edge>> WeightedGraph;
+
+int main()
+{
+    ll n;
+    cin >> n;
+    vector<ll> sums(n + 3);
+    rep(i, n)
+    {
+        ll a, b;
+        cin >> a >> b;
+        if (a <= n + 1)
+            sums[a]++;
+        if (b + 1 <= n + 2)
+            sums[b + 1]--;
+    }
+    sums[1]++;
+    sums[n + 2]--;
+    reps(i, n + 2)
+    {
+        sums[i] += sums[i - 1];
+    }
+
+    ll ans = -1;
+    reps(i, n + 1)
+    {
+        chmax(ans, min(i, sums[i]));
+        chmin(ans, sums[ans]);
+    }
+
+    // chmin(ans, sums[ans]);
+
+    cout << ans - 1 << endl;
+
+    return 0;
+}

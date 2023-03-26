@@ -1,0 +1,362 @@
+#line 1 "e.cpp"
+#ifdef LOCAL
+#define _GLIBCXX_DEBUG
+#endif  // LOCAL
+
+#include <bits/stdc++.h>
+
+#line 1 "SPJ-Library/atcoder/dsu.hpp"
+
+
+
+#line 7 "SPJ-Library/atcoder/dsu.hpp"
+
+namespace atcoder {
+
+// Implement (union by size) + (path compression)
+// Reference:
+// Zvi Galil and Giuseppe F. Italiano,
+// Data structures and algorithms for disjoint set union problems
+struct dsu {
+  public:
+    dsu() : _n(0) {}
+    explicit dsu(int n) : _n(n), parent_or_size(n, -1) {}
+
+    int merge(int a, int b) {
+        assert(0 <= a && a < _n);
+        assert(0 <= b && b < _n);
+        int x = leader(a), y = leader(b);
+        if (x == y) return x;
+        if (-parent_or_size[x] < -parent_or_size[y]) std::swap(x, y);
+        parent_or_size[x] += parent_or_size[y];
+        parent_or_size[y] = x;
+        return x;
+    }
+
+    bool same(int a, int b) {
+        assert(0 <= a && a < _n);
+        assert(0 <= b && b < _n);
+        return leader(a) == leader(b);
+    }
+
+    int leader(int a) {
+        assert(0 <= a && a < _n);
+        if (parent_or_size[a] < 0) return a;
+        return parent_or_size[a] = leader(parent_or_size[a]);
+    }
+
+    int size(int a) {
+        assert(0 <= a && a < _n);
+        return -parent_or_size[leader(a)];
+    }
+
+    std::vector<std::vector<int>> groups() {
+        std::vector<int> leader_buf(_n), group_size(_n);
+        for (int i = 0; i < _n; i++) {
+            leader_buf[i] = leader(i);
+            group_size[leader_buf[i]]++;
+        }
+        std::vector<std::vector<int>> result(_n);
+        for (int i = 0; i < _n; i++) {
+            result[i].reserve(group_size[i]);
+        }
+        for (int i = 0; i < _n; i++) {
+            result[leader_buf[i]].push_back(i);
+        }
+        result.erase(
+            std::remove_if(result.begin(), result.end(),
+                           [&](const std::vector<int>& v) { return v.empty(); }),
+            result.end());
+        return result;
+    }
+
+  private:
+    int _n;
+    // root node: -1 * component size
+    // otherwise: parent
+    std::vector<int> parent_or_size;
+};
+
+}  // namespace atcoder
+
+
+#line 8 "e.cpp"
+
+#pragma region debug
+
+#pragma region output
+template <typename T1, typename T2>
+std::ostream &std::operator<<(std::ostream &os, const std::pair<T1, T2> &p) {
+    os << p.first << " " << p.second;
+    return os;
+}
+template <class T>
+std::ostream &std::operator<<(std::ostream &os, const std::vector<T> &v) {
+    for (int i = 0; i < (int)v.size(); i++) {
+        if (i) os << " ";
+        os << v[i];
+    }
+    return os;
+}
+#pragma endregion
+
+#pragma region view
+
+namespace viewer {
+template <typename T>
+void view(const T e) {
+    std::cerr << e;
+}
+
+template <typename T, typename U>
+void view(const std::pair<T, U> &p) {
+    std::cerr << "(";
+    view(p.first);
+    std::cerr << ", ";
+    view(p.second);
+    std::cerr << ")";
+}
+
+template <typename T>
+void view(const std::set<T> &s) {
+    if (s.empty()) {
+        std::cerr << "{ }";
+        return;
+    }
+    std::cerr << "{ ";
+    for (auto &t : s) {
+        view(t);
+        std::cerr << ", ";
+    }
+    std::cerr << "\b\b }";
+}
+
+template <typename T>
+void view(const std::unordered_set<T> &s) {
+    if (s.empty()) {
+        std::cerr << "{ }";
+        return;
+    }
+    std::cerr << "{ ";
+    for (auto &t : s) {
+        view(t);
+        std::cerr << ", ";
+    }
+    std::cerr << "\b\b }";
+}
+
+template <typename T>
+void view(const std::vector<T> &v) {
+    if (v.empty()) {
+        std::cerr << "{ }";
+        return;
+    }
+    std::cerr << "{ ";
+    for (const auto &e : v) {
+        view(e);
+        std::cerr << ", ";
+    }
+    std::cerr << "\b\b }";
+}
+
+template <typename T>
+void view(const std::vector<std::vector<T>> &vv) {
+    std::cerr << "{\n";
+    for (const auto &v : vv) {
+        std::cerr << "\t";
+        view(v);
+        std::cerr << '\n';
+    }
+    std::cerr << "}";
+}
+
+template <typename T, typename U>
+void view(const std::vector<std::pair<T, U>> &v) {
+    std::cerr << "{\n";
+    for (const auto &c : v) {
+        std::cerr << "\t(";
+        view(c.first);
+        std::cerr << ", ";
+        view(c.second);
+        std::cerr << ")\n";
+    }
+    std::cerr << "}";
+}
+
+template <typename T, typename U>
+void view(const std::map<T, U> &m) {
+    std::cerr << "{\n";
+    for (const auto &t : m) {
+        std::cerr << "\t[";
+        view(t.first);
+        std::cerr << "] : ";
+        view(t.second);
+        std::cerr << '\n';
+    }
+    std::cerr << "}";
+}
+
+template <typename T, typename U>
+void view(const std::unordered_map<T, U> &m) {
+    std::cerr << "{\n";
+    for (const auto &t : m) {
+        std::cerr << "\t[";
+        view(t.first);
+        std::cerr << "] : ";
+        view(t.second);
+        std::cerr << '\n';
+    }
+    std::cerr << "}";
+}
+}  // namespace viewer
+
+#pragma endregion
+
+// when debugging : g++ foo.cpp -DLOCAL
+#ifdef LOCAL
+void debug_out() {}
+template <typename Head, typename... Tail>
+void debug_out(Head H, Tail... T) {
+    viewer::view(H);
+    std::cerr << ", ";
+    debug_out(T...);
+}
+#define debug(...)                                                \
+    do {                                                          \
+        std::cerr << __LINE__ << " [" << #__VA_ARGS__ << "] : ["; \
+        debug_out(__VA_ARGS__);                                   \
+        std::cerr << "\b\b]\n";                                   \
+    } while (0)
+#define dump(x)                                      \
+    do {                                             \
+        std::cerr << __LINE__ << " " << #x << " : "; \
+        viewer::view(x);                             \
+        std::cerr << '\n';                           \
+    } while (0)
+
+#else
+#define debug(...) (void(0))
+#define dump(x) (void(0))
+#endif
+
+#pragma endregion
+
+using namespace std;
+using namespace atcoder;
+
+using ll = long long;
+
+struct edge {
+    int from;
+    int to;
+    int is_same;
+};
+
+bool solve() {
+    int E, true_pop, false_pop;
+    cin >> E >> true_pop >> false_pop;
+    if (E == 0 && true_pop == 0 && false_pop == 0) {
+        return false;
+    }
+    int V = true_pop + false_pop;
+
+    vector<edge> edges(E);
+    for (int i = 0; i < E; i++) {
+        cin >> edges[i].from >> edges[i].to;
+        edges[i].from--;
+        edges[i].to--;
+        string a;
+        cin >> a;
+        edges[i].is_same = (a == "yes");
+    }
+
+    if (true_pop == false_pop) {
+        cout << "no" << endl;
+        return true;
+    }
+
+    dsu cc(V), cc_parity(2 * V);
+    for (auto &&edge : edges) {
+        cc.merge(edge.from, edge.to);
+
+        int is_diff = edge.is_same ^ 1;
+        cc_parity.merge((edge.from * 2), (edge.to * 2) ^ is_diff);
+        cc_parity.merge((edge.from * 2) ^ is_diff, (edge.to * 2));
+    }
+
+    auto groups = cc.groups();
+    vector<pair<vector<int>, vector<int>>> partitions;
+    for (auto &&group : groups) {
+        vector<int> true_people, false_people;
+        true_people.push_back(group[0]);
+        for (int idx = 1; idx < group.size(); idx++) {
+            if (cc_parity.same(2 * group[0], 2 * group[idx])) {
+                true_people.push_back(group[idx]);
+            } else {
+                false_people.push_back(group[idx]);
+            }
+        }
+        partitions.push_back({true_people, false_people});
+    }
+
+    int g_size = groups.size();
+    vector<vector<int>> dp(g_size + 1, vector<int>(V + 1, 0));
+    dp[0][0] = 1;
+    for (int group_idx = 0; group_idx < g_size; group_idx++) {
+        int first_size = partitions[group_idx].first.size();
+        int second_size = partitions[group_idx].second.size();
+        for (int to = first_size; to < V + 1; to++) {
+            int from = to - first_size;
+            dp[group_idx + 1][to] += dp[group_idx][from];
+            dp[group_idx + 1][to] = min(dp[group_idx + 1][to], 9);
+        }
+        for (int to = second_size; to < V + 1; to++) {
+            int from = to - second_size;
+            dp[group_idx + 1][to] += dp[group_idx][from];
+            dp[group_idx + 1][to] = min(dp[group_idx + 1][to], 9);
+        }
+    }
+    debug(partitions);
+    debug(dp);
+    // assert(dp[g_size][true_pop] > 0);
+    if (dp[g_size][true_pop] != 1) {
+        cout << "no" << endl;
+        return true;
+    }
+
+    vector<int> first_is_true(g_size);
+    vector<int> answer;
+    int true_remain = true_pop;
+    for (int group_idx = g_size - 1; group_idx >= 0; group_idx--) {
+        int true_try = true_remain - partitions[group_idx].first.size();
+        if (true_try >= 0 && dp[group_idx][true_try] == 1) {
+            first_is_true[group_idx] = 1;
+            auto v = partitions[group_idx].first;
+            true_remain -= v.size();
+            answer.insert(answer.end(), v.begin(), v.end());
+        } else {
+            first_is_true[group_idx] = 0;
+            auto v = partitions[group_idx].second;
+            true_remain -= v.size();
+            answer.insert(answer.end(), v.begin(), v.end());
+        }
+    }
+
+    assert(true_remain == 0);
+    sort(answer.begin(), answer.end());
+
+    for (auto &&elem : answer) {
+        cout << (elem + 1) << '\n';
+    }
+    cout << "end" << endl;
+
+    return true;
+}
+
+int main() {
+    while (solve())
+        ;
+
+    return 0;
+}
+

@@ -1,0 +1,70 @@
+import sys,random,bisect
+from collections import deque,defaultdict
+from heapq import heapify,heappop,heappush
+from itertools import permutations
+from math import log,gcd
+
+
+input = lambda :sys.stdin.readline()
+mi = lambda :map(int,input().split())
+li = lambda :list(mi())
+
+
+class sisoku:
+
+    def __init__(self,s):
+        self.next = 0
+        self.string = s
+    
+    def number(self):
+        res = 0
+        while self.string[self.next] in "0123456789":
+            res = 10 * res + int(self.string[self.next])
+            self.next += 1
+        return res
+    
+    def factor(self):
+        if self.string[self.next]=="(":
+            self.next += 1
+            res = self.expression()
+            self.next += 1
+            return res
+        else:
+            return self.number()
+    
+    
+    def term(self):
+        num = self.factor()
+        while True:
+            if self.string[self.next]=="*":
+                self.next += 1
+                num = num * self.factor() 
+            elif self.string[self.next]=="/":
+                self.next += 1
+                num = num / self.factor() 
+            else:
+                break
+        
+        return num
+    
+    def expression(self):
+        res = self.term()
+        while True:
+            if self.string[self.next] == "+":
+                self.next += 1
+                res = (res + self.term()) 
+            elif self.string[self.next] == "-":
+                self.next += 1
+                res = (res - self.term()) 
+            else:
+                break
+        
+        return res
+
+
+for _ in range(int(input())):
+    S = input()
+    ans = sisoku(S)
+    print(ans.expression())
+
+

@@ -1,0 +1,52 @@
+#define BUF_SIZE 1024
+#define MAX_COLUMN 100
+#define MAX_LAW 100
+
+#include <stdio.h>
+#include <string.h>
+
+int main(void) {
+	char buf[BUF_SIZE];
+	int a_column, a_law, b_law, c, l, i;
+	int mata[MAX_COLUMN][MAX_LAW];
+	int matb[MAX_COLUMN][MAX_LAW];
+	long long result_mat[MAX_COLUMN][MAX_LAW];
+
+	memset(mata, 0, sizeof(mata));
+	memset(matb, 0, sizeof(matb));
+	memset(result_mat, 0, sizeof(result_mat));
+
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d %d %d", &a_column, &a_law, &b_law);
+
+	printf("%d\n",sizeof(result_mat));
+	for (c = 0; c < a_column; c++) {
+		fgets(buf, sizeof(buf) - 1, stdin);
+		for (l = 0; l < a_law; l++) {
+			sscanf(buf, "%d %[^\n]", &mata[c][l], buf);
+		}
+	}
+
+	for (c = 0; c < a_law; c++) {
+		fgets(buf, sizeof(buf) - 1, stdin);
+		for (l = 0; l < b_law; l++) {
+			sscanf(buf, "%d %[^\n]", &matb[c][l], buf);
+		}
+	}
+
+	for (c = 0; c < a_column; c++) {
+		for (l = 0; l < b_law; l++) {
+			for (i = 0; i < a_law; i++) {
+				result_mat[c][l] += mata[c][i] * matb[i][l];
+			}
+			if (l == (b_law - 1)) {
+				printf("%lld\n", result_mat[c][l]);
+			}
+			else {
+				printf("%lld ", result_mat[c][l]);
+			}
+		}
+	}
+	return 0;
+}
+

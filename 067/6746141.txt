@@ -1,0 +1,98 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
+
+type node struct {
+	id     int
+	parent int
+	childs []int
+	depth  int
+}
+
+func exploer(id int, depth int, nodes []node) {
+	u := nodes[id]
+	u.depth = depth
+	nodes[id] = u
+
+	for _, v_id := range u.childs {
+		exploer(v_id, depth+1, nodes)
+	}
+}
+
+func main() {
+	scanner := bufio.NewScanner(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	scanner.Scan()
+	_, err := strconv.Atoi(scanner.Text())
+	if err != nil {
+		panic(err)
+	}
+
+	var nodes []node
+	for scanner.Scan() {
+		var node_ node
+		node_.parent = -1
+		line := scanner.Text()
+		elements := strings.Split(line, " ")
+		for i, v := range elements {
+			if i == 0 {
+				node_.id, _ = strconv.Atoi(v)
+				continue
+			} else if i == 1 {
+				// do nothing
+				continue
+			}
+			child, _ := strconv.Atoi(v)
+			node_.childs = append(node_.childs, child)
+		}
+		nodes = append(nodes, node_)
+	}
+
+	// Tell parent to each node
+	for _, u := range nodes {
+		for _, i := range u.childs {
+			nodes[i].parent = u.id
+		}
+	}
+
+	// Obtain root of tree
+	var root_id int
+	for _, u := range nodes {
+		if u.parent == -1 {
+			// nodes[i].parent = -1
+			root_id = u.id
+			break
+		}
+	}
+
+	// Compute depth
+	exploer(root_id, 0, nodes)
+
+	// Output
+	for i, u := range nodes {
+		var node_type string
+		if u.id == -1 {
+			node_type = "root"
+		} else if len(u.childs) != 0 {
+			node_type = "internal node"
+		} else {
+			node_type = "leaf"
+		}
+
+		var childs_str []string
+		for _, child_id := range u.childs {
+			childs_str = append(childs_str, strconv.Itoa(child_id))
+		}
+
+		fmt.Fprintf(out, "node %d: parent = %d, depth = %d, %s, [%s]\n", i, u.parent, u.depth, node_type, strings.Join(childs_str, ","))
+	}
+}
+

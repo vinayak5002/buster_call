@@ -1,0 +1,28 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <tuple>
+#include <algorithm>
+
+using namespace std;
+
+int main()
+{
+	int N, M; cin >> N >> M;
+	vector<int> D(N), C(M);
+	for (auto& d : D) cin >> d;
+	for (auto& c : C) cin >> c;
+	vector<vector<int>> S(N + 1, vector<int> (M + 1, 1 << 30));
+	using T = tuple<int, int, int>;
+	priority_queue<T, vector<T>, greater<T>> Q;
+	for (Q.push({0, 0, 0}); !Q.empty();) {
+		auto [cd, t, n] = Q.top(); Q.pop();
+		if (S[n][t] <= cd) continue;
+		S[n][t] = cd;
+		if (n >= N) continue;
+		for (; N - n <= M - t; ++t) Q.push({cd + C[t] * D[n], t + 1, n + 1});
+	}
+	cout << *min_element(S.back().begin(), S.back().end()) << endl;
+	return 0;
+}
+

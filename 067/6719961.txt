@@ -1,0 +1,46 @@
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <numeric>
+#include <iomanip>
+#include <string>
+#include <array>
+#include <vector>
+#include <map>
+#include <set>
+#include <bitset>
+#include <queue>
+using namespace std;
+#define rep(x,to) for(int x=0;x<to;++x)
+#define rep2(x,from,to) for(int x=from;x<to;++x)
+typedef long long ll;
+typedef unsigned long long ull;
+
+int main(void)
+{
+    int n;
+    string arv,dept;
+    // 1day = 86400s
+    int DAY_SEC = 86400;
+    
+    while(true) {
+        cin >> n;
+        if(n == 0) break;
+        int time[86410] = {};
+        rep(i,n) {
+            cin >> arv >> dept;
+            int arv_hours = stoi(arv.substr(0,2));
+            int arv_minutes = stoi(arv.substr(3,2));
+            int arv_secs = stoi(arv.substr(6,2));
+            time[arv_hours * 3600 + arv_minutes * 60 + arv_secs]++;
+            int dept_hours = stoi(dept.substr(0,2));
+            int dept_minutes = stoi(dept.substr(3,2));
+            int dept_secs = stoi(dept.substr(6,2));
+            time[dept_hours * 3600 + dept_minutes * 60 + dept_secs]--;
+        }
+        rep(i,DAY_SEC) {
+            time[i+1] += time[i];
+        }
+        cout << *max_element(time, time+DAY_SEC) << endl;
+    }
+}

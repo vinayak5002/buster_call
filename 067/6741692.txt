@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+#define rep(i, st, n) for (ll i = (ll)st; i < (ll)st + (ll)n; i++)
+#define repd(i, st, gl, c) for(ll i = ll(st); i <= ll(gl); i += ll(c))
+#define rrep(i, st, n) for (ll i = (ll)st; i > (ll)st - (ll)n; i--)
+#define rrepd(i, st, gl, c) for(ll i = ll(st); i >= ll(gl); i -= ll(c))
+#define fi first
+#define se second
+#define pb push_back
+#define mp make_pair
+using namespace std;
+using ll = long long;
+using P = pair<ll, ll>;
+using Graph = vector<vector<ll>>;
+ll a, n, cnt, ans;
+const ll inf = 1e18;
+
+bool has_nega_cycle(ll v, vector<vector<ll>> & cost){
+    rep(i, 0, v){
+        if(cost[i][i] < 0) return true; 
+    }
+    return false;
+}
+
+int main(){
+    ll v, e;
+    cin >> v >> e;
+    vector<vector<ll>> cost(v, vector<ll>(v, inf));
+    rep(i, 0, v) cost[i][i] = 0;
+    rep(i, 0, e){ 
+        ll s, t, d;
+        cin >> s >> t >> d;
+        cost[s][t] = d;
+    }
+    rep(k, 0, v){
+        rep(i, 0, v){
+            rep(j, 0, v){
+                ll cost_ik = cost[i][k];
+                ll cost_kj = cost[k][j];
+                if(cost_ik == inf || cost_kj == inf) continue;
+                cost[i][j] = min(cost[i][j], cost_ik + cost_kj);
+            }
+        }
+    }
+    if(has_nega_cycle(v, cost)){
+        cout << "NEGATIVE CYCLE" << endl;
+        return 0;
+    }
+    rep(i, 0, v){
+        if(cost[i][0] == inf) cout << "INF";
+        else cout << cost[i][0];
+        rep(j, 1, v - 1){
+            if(cost[i][j] == inf) cout << "INF";
+            else cout << " " << cost[i][j];
+        }
+        cout << endl;
+    }
+}

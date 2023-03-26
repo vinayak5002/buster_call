@@ -1,0 +1,334 @@
+// 2022-06-24 update
+
+#include <iostream>
+#include <iomanip>
+#include <algorithm>
+#include <vector>
+#include <cmath>
+#include <set>
+#include <map>
+#include <unordered_map>
+#include <string>
+#include <sstream>
+#include <climits>
+#include <bitset>
+#include <deque>
+#include <cassert>
+#include <list>
+#include <queue>
+#include <valarray>
+
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+
+//定数宣言
+constexpr double PI = 3.141592653589793;
+constexpr ll MOD998 = 998244353;
+constexpr ll MOD107 = 1'000'000'007;
+constexpr bool DEBUG = true;
+
+//プロトタイプ宣言
+template <typename T>
+void print(T a);
+ll sum_from_1_to_N(ll N);
+ll sum_from_A_to_B(ll A, ll B);
+ll intPOW(int a, int b);
+ll combination(ll n, ll m);
+ll GCD(ll a, ll b);
+ll LCM(ll a, ll b);
+bool check_Prime(ll N);
+vector<int> Eratosthenes(size_t max_number);
+
+/* RMQ：[0,n-1] について、区間ごとの最小値を管理する構造体
+	update(i,x): i 番目の要素を x に更新。O(log(n))
+	query(a,b): [a,b) での最小の要素を取得。O(log(n))
+*/
+template <typename T>
+struct RMQ
+{
+	const T INF = numeric_limits<T>::max();
+	int n;		   // 葉の数
+	vector<T> dat; // 完全二分木の配列
+	RMQ(int n_) : n(), dat(n_ * 4, INF)
+	{ // 葉の数は 2^x の形
+		int x = 1;
+		while (n_ > x)
+		{
+			x *= 2;
+		}
+		n = x;
+	}
+	void update(int i, T x)
+	{
+		i += n - 1;
+		dat[i] = x;
+		while (i > 0)
+		{
+			i = (i - 1) / 2; // parent
+			dat[i] = min(dat[i * 2 + 1], dat[i * 2 + 2]);
+		}
+	}
+	// the minimum element of [a,b)
+	T query(int a, int b) { return query_sub(a, b, 0, 0, n); }
+	T query_sub(int a, int b, int k, int l, int r)
+	{
+		if (r <= a || b <= l)
+		{
+			return INF;
+		}
+		else if (a <= l && r <= b)
+		{
+			return dat[k];
+		}
+		else
+		{
+			T vl = query_sub(a, b, k * 2 + 1, l, (l + r) / 2);
+			T vr = query_sub(a, b, k * 2 + 2, (l + r) / 2, r);
+			return min(vl, vr);
+		}
+	}
+};
+
+ll solve(int &w, int &h)
+{
+	vector<vector<pair<int, int>>> mass(h, vector<pair<int, int>>(w, make_pair(0, 0)));
+	vector<vector<int>> dp(h, vector<int>(w, INT32_MAX));
+	dp.front().front() = 1;
+
+	for (int i = 0; i < h - 1; ++i)
+	{
+		for (int j = 0; j < w - 1; ++j)
+		{
+			cin >> mass[i][j].first;
+		}
+
+		for (int j = 0; j < w; ++j)
+		{
+			cin >> mass[i][j].second;
+		}
+	}
+
+	for (int j = 0; j < w - 1; ++j)
+	{
+		cin >> mass.back()[j].first;
+	}
+
+	set<pair<int, int>> now_node = {make_pair(0, 0)};
+	while (true)
+	{
+		set<pair<int, int>> next_node;
+
+		for (const auto &now : now_node)
+		{
+			int x = now.first;
+			int y = now.second;
+
+			//上
+			if (x > 0 && mass[x - 1][y].second == 0)
+			{
+				if (dp[x - 1][y] > dp[x][y] + 1)
+				{
+					next_node.insert(make_pair(x - 1, y));
+					dp[x - 1][y] = dp[x][y] + 1;
+				}
+			}
+
+			//右
+			if (y < w - 1 && mass[x][y].first == 0)
+			{
+				if (dp[x][y + 1] > dp[x][y] + 1)
+				{
+					next_node.insert(make_pair(x, y + 1));
+					dp[x][y + 1] = dp[x][y] + 1;
+				}
+			}
+
+			//下
+			if (x < h - 1 && mass[x][y].second == 0)
+			{
+				if (dp[x + 1][y] > dp[x][y] + 1)
+				{
+					next_node.insert(make_pair(x + 1, y));
+					dp[x + 1][y] = dp[x][y] + 1;
+				}
+			}
+
+			//左
+			if (y > 0 && mass[x][y-1].first == 0)
+			{
+				if (dp[x][y-1] > dp[x][y] + 1)
+				{
+					next_node.insert(make_pair(x, y-1));
+					dp[x][y-1] = dp[x][y] + 1;
+				}
+			}
+		}
+
+		now_node = next_node;
+
+		if(next_node.size() ==0)
+		{
+			break;
+		}
+	}
+
+	return dp.back().back();
+}
+
+int main()
+{
+	vector<ll> ans;
+	while (true)
+	{
+		int w, h;
+		cin >> w >> h;
+
+		if (w == 0 && h == 0)
+		{
+			break;
+		}
+		ans.push_back(solve(w, h));
+	}
+
+	for (const auto &x : ans)
+	{
+		if(x == INT32_MAX)
+		{
+			puts("0");
+		}
+		else
+		{
+			cout << x << endl;
+		}
+	}
+}
+
+/****************************************************
+*************ここから下は自作ライブラリ**************
+****************************************************/
+
+//コンテナの中身を表示, debug用
+template <typename T>
+void print(T a)
+{
+	for (const auto &x : a)
+	{
+		cout << x << " ";
+	}
+	puts("");
+	return;
+}
+
+// 1~Nまでの総和を求める
+ll sum_from_1_to_N(ll N)
+{
+	if (N < 1LL)
+	{
+		return 0;
+	}
+
+	if ((N & 1) == 0) // even
+	{
+		return N / 2 * (N + 1);
+	}
+	else // odd
+	{
+		return (N + 1) / 2 * N;
+	}
+}
+
+// 1~Nまでの総和を求める
+ll sum_from_A_to_B(ll A, ll B)
+{
+	return sum_from_1_to_N(B) - sum_from_1_to_N(A);
+}
+
+// a^bを求める
+ll intPOW(int a, int b)
+{
+	ll number = 1LL;
+	for (int i = 1; i <= b; i++)
+	{
+		number *= a;
+	}
+	return number;
+}
+
+// C(n, m)を求める
+ll combination(ll n, ll m)
+{
+	assert(n >= m); // n>=mは保証される
+
+	ll up = 2;
+	ll down = 2;
+	for (int i = n; i > n - m; i--)
+	{
+		up *= i;
+	}
+
+	for (int i = m; i >= 2; i--)
+	{
+		down *= i;
+	}
+
+	return up / down;
+}
+
+// a,bの最大公約数を求める
+long long GCD(long long a, long long b)
+{
+	if (b == 0)
+		return a;
+	else
+		return GCD(b, a % b);
+}
+
+//最小公倍数
+ll LCM(ll a, ll b)
+{
+	return a * b / GCD(a, b);
+}
+
+//素数判定, P->true, not_P->false
+bool check_Prime(ll N)
+{
+	if (N == 2)
+		return true;
+
+	if (N == 1 || (N & 1) == 0)
+		return false;
+
+	for (ll i = 3; i <= sqrt(N); i += 2)
+	{
+		if (N % i == 0)
+			return false;
+	}
+	return true;
+}
+
+/* エラストステネス and 高速素因数分解
+   prime->IsPrime[i]=i; not prime ->最小の素因数 */
+vector<int> Eratosthenes(size_t max_number)
+{
+	vector<int> IsPrime(max_number + 1);
+
+	// tableの初期化
+	for (int i = 1; i < IsPrime.size(); ++i)
+	{
+		IsPrime[i] = i;
+	}
+
+	for (int i = 2; i <= sqrt(max_number); ++i)
+	{
+		for (int j = i; j <= max_number; j += i)
+		{
+			if (IsPrime[j] == j)
+			{
+				IsPrime[j] = i;
+			}
+		}
+	}
+	return IsPrime;
+}

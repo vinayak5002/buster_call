@@ -1,0 +1,60 @@
+#include<bits/stdc++.h>
+using namespace std;
+const double eps=1e-10;
+int sign(double x)
+{
+    if(fabs(x)<=eps)return 0;
+    if(x>0)return 1;
+    return -1;
+}
+struct Point{
+    double x,y;
+    Point(double _x=0,double _y=0):x(_x),y(_y){}
+    Point operator + (Point p){return Point(x+p.x,y+p.y);}
+    Point operator - (Point p){return Point(x-p.x,y-p.y);}
+    Point operator * (double k){return Point(x*k,y*k);}
+    Point operator / (double k){return Point(x/k,y/k);}
+    double norm(){return x*x+y*y;}
+    double abs(){return sqrt(norm());}
+};
+typedef Point Vector;
+double dot(Vector a,Vector b){return a.x*b.x+a.y*b.y;}
+double cross(Vector a,Vector b){return a.x*b.y-a.y*b.x;}
+struct Segment{Point p1,p2;};
+typedef Segment Line;
+struct Circle{
+    Point c;
+    double r;
+    Circle(Point _c=Point(),double _r=0):c(_c),r(_r){}
+};
+Point project(Segment s,Point p)
+{
+    Vector base=s.p2-s.p1;
+    double r=dot(p-s.p1,base)/base.norm();
+    return s.p1+base*r;
+}
+pair<Point,Point>getCrossPoints(Circle c,Line l)
+{
+    Point pr=project(l,c.c);
+    Vector e=(l.p2-l.p1)/(l.p2-l.p1).abs();
+    double base=sqrt(c.r*c.r-(pr-c.c).norm());
+    return make_pair(pr+e*base,pr-e*base);
+}
+int main()
+{
+    double x,y,r;
+    scanf("%lf%lf%lf",&x,&y,&r);
+    Circle c1(Point(x,y),r);
+    int q;
+    scanf("%d",&q);
+    for(int i=1;i<=q;i++){
+        double a,b,c,d;
+        scanf("%lf%lf%lf%lf",&a,&b,&c,&d);
+        Line l;l.p1=Point(a,b);l.p2=Point(c,d);
+        pair<Point,Point>ans=getCrossPoints(c1,l);
+        if(ans.first.x>ans.second.x)swap(ans.first,ans.second);
+        else if(ans.first.x==ans.second.x&&ans.first.y>ans.second.y)swap(ans.first,ans.second);
+        printf("%.10f %.10f %.10f %.10f\n",ans.first.x,ans.first.y,ans.second.x,ans.second.y);
+    }
+    return 0;
+}

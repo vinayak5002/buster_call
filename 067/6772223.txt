@@ -1,0 +1,44 @@
+from collections import deque
+
+n = int(input())
+distance = [0]*100#頂点(vertex)間の距離
+adjacency_directed_matrix = [[0 for i in range(n)] for j in range(n)]
+def bread_first_search(vertex):
+    global d
+    global n
+    global adjacency_directed_matrix
+    u = 0
+    dq = deque()
+    dq.append(vertex)#訪問した数字を格納しておく
+    for i in range(n):
+        distance[i] = 1000000#頂点間の距離の初期化
+    distance[vertex] = 0#自身の頂点までの距離は0に決まってる
+
+    while len(dq) is not 0:
+        u = dq.popleft()
+        for i in range(n):
+            if adjacency_directed_matrix[u][i] is 0:
+                continue#adjacency_directed_matrix[u][i] is 0であれば以下の処理を行わず17行目に戻る
+            if distance[i] is not 1000000:
+                continue#distance[i] is not 1000000であれば以下の処理を行わず17行目に戻る
+            distance[i] = distance[u] + 1
+            dq.append(i)
+        
+    for i in range(n):
+        print(i+1, end='')
+        if distance[i] is 1000000:
+            print(-1)
+        else:
+            print(distance[i])
+
+for i in range(n):
+    a = list(map(int, input().split()))
+    node = a[0]
+    degree = a[1]
+    node = node -1
+    for j in range(degree):
+        adjacency_node = a[j+2]
+        adjacency_node = adjacency_node - 1
+        adjacency_directed_matrix[node][adjacency_node] = 1
+        
+bread_first_search(0)#初めに0から探索

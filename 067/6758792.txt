@@ -1,0 +1,24 @@
+from collections import deque
+
+hillShape = input()
+downHillStack = deque([])
+waterPoolStack = deque([])
+totalArea = 0
+answerList = []
+for i, shape in enumerate(hillShape):
+    if shape == "\\":
+        downHillStack.append(i)
+    elif len(downHillStack) > 0 and shape == "/":
+        startHillPoint = downHillStack.pop()
+        area = i - startHillPoint
+        totalArea += area
+        while len(waterPoolStack) > 0 and waterPoolStack[0][0] > startHillPoint:
+            area += waterPoolStack.pop()[1]
+        waterPoolStack.append([startHillPoint, area])
+
+print(totalArea)
+answerList.append(len(waterPoolStack))
+while len(waterPoolStack) > 0:
+    answerList.append(waterPoolStack.pop()[1])
+
+print(*answerList)

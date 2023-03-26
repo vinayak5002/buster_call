@@ -1,0 +1,125 @@
+using System;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace _220626
+{
+class ProblemC
+{
+  public class DisjointSet<T>
+  {
+    public class Vertex
+    {
+      public T value;
+      public int n;
+      public (Vertex, int) parent;
+      public Vertex(T value)
+      {
+        this.value = value;
+        this.n = 1;
+        this.parent = (this, 0);
+      }
+    }
+    public Dictionary<T, Vertex> vertices;
+    public DisjointSet(IEnumerable<T> values)
+    {
+      vertices = values
+        .Select(v => new Vertex(v))
+        .ToDictionary(v => v.value, v => v);
+    }
+
+    public (Vertex, int) Root(Vertex v)
+    {
+      if (v.parent.Item1 == v) return v.parent;
+      var root = Root(v.parent.Item1);
+      return (root.Item1, v.parent.Item2 + root.Item2);
+    }
+    public (Vertex, int) Root(T v)
+    {
+      return Root(vertices[v]);
+    }
+
+    public void Unite(T v0, T v1, int diff)
+    {
+      var r0 = Root(v0);
+      var r1 = Root(v1);
+      if (r0 == r1) return;
+      Vertex r, c;
+      int pdiff;
+      if( r0.Item1.n >= r1.Item1.n )
+      {
+        r = r0.Item1;
+        c = r1.Item1;
+        pdiff = r0.Item2 + diff - r1.Item2;
+      }
+      else
+      {
+        r = r1.Item1;
+        c = r0.Item1;
+        pdiff = r1.Item2 - r0.Item2 - diff;
+      }
+      r.n += c.n;
+      c.parent = (r, pdiff);
+    }
+  }
+
+  public struct Input
+  {
+    public int n;
+    public int q;
+    public List<int[]> queries;
+  }
+
+  public static Input ReadInput()
+  {
+    var arr = Console.ReadLine().Split(' ').Select(s => int.Parse(s)).ToArray();
+    var n = arr[0];
+    var q = arr[1];
+    var queries = new List<int[]>();
+    for (int i = 0; i < q; i++)
+    {
+      queries.Add(Console.ReadLine().Split(' ').Select(s => int.Parse(s)).ToArray());
+    }
+    return new Input { n = n, q = q, queries = queries };
+  }
+
+  public static int? Diff<T>(DisjointSet<T> ds, T ax, T ay)
+  {
+    var rx = ds.Root(ax);
+    var ry = ds.Root(ay);
+    if (rx.Item1 != ry.Item1) return null;
+    return ry.Item2 - rx.Item2;
+  }
+
+  public static IEnumerable<int?> Execution(Input input)
+  {
+    var ds = new DisjointSet<int>(Enumerable.Range(0, input.n));
+    foreach (var q in input.queries)
+    {
+      switch(q[0])
+      {
+        case 0:
+          ds.Unite(q[1], q[2], q[3]);
+          break;
+        case 1:
+          var diff = Diff(ds, q[1], q[2]);
+          yield return Diff(ds, q[1], q[2]);
+          break;
+      }
+    }
+  }
+
+  public static void Main(string[] args)
+  {
+    var input = ReadInput();
+    foreach (var d in Execution(input))
+    {
+      Console.WriteLine(d != null ? d.ToString() : '?');
+    }
+  }
+}
+}
+
+
+

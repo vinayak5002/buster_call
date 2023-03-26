@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define reps(i,start,end) for(int i = start; i < (int)(end); i++)
+#define ll long long
+#define print(t) cout << t << endl
+#define all(a)  (a).begin(),(a).end()
+// << std::fixed << std::setprecision(0)
+const ll INF = 1LL << 60;
+
+template<class T> void chmin(T& a, T b){
+ if(a > b){
+  a = b;
+ }
+}
+
+template<class T> void chmax(T& a, T b){
+ if(a < b){
+  a = b;
+ }
+}
+
+template<class Tp>
+bool zero (const Tp &x) {
+    return x == 0;
+}
+
+template<class Tp, class... Args>
+bool zero (const Tp &x, const Args& ...args) {
+    return zero(x) and zero(args...);
+}
+//amida
+int main(){
+  while(true){
+    int n,m,a;cin >> n >> m>> a;
+    if(zero(n,m,a))break;
+    // 0indent
+    a--;
+    vector<vector<pair<int,int>>> row(n);
+    rep(i,m){
+      int h,p,q;cin >> h >> p >> q;
+      // 0indent
+      p--;
+      q--;
+      row[p].push_back({h,q});
+      row[q].push_back({h,p});
+    }
+    // 高さ上から巡　ソート
+    rep(i,n){
+      sort(all(row[i]));
+      reverse(all(row[i]));
+    }
+
+    // rep(i,n){
+    //   cout << i << " :";
+    //   rep(j,(int)row[i].size()){
+    //     cout << row[i][j].first << " " <<row[i][j].second << endl;
+    //   }
+    // }
+
+    int now = a;
+    int h = 1000;
+    while(h>=1){
+
+      // cout <<  "here: " << a << " "<< h << endl;
+      int isHere = false;
+
+      // rep(i,(int)row[now].size()){
+      //   // cout << i << endl;
+      //   if(row[now][i].first <=h){
+      //     isHere = true;
+      //     now = row[now][i].second;
+      //     h = (row[now][i].first -1) ;
+      //     break;
+      //   }
+      // }
+      for(auto p:row[now]){
+        auto [f,l] = p;
+        if(f <= h){
+          isHere = true;
+          now = l;
+          h = f-1;
+          break;
+        }
+      }
+      if(!isHere)break;
+    }
+    cout << now+1 << endl;
+  }
+}
+

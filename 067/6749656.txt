@@ -1,0 +1,36 @@
+from heapq import heapify, heappop, heappush
+
+V, E, r = map(int, input().split())
+
+
+C = float("Inf")
+cost = [C for _ in range(V)]
+cost[r] = 0
+
+G = {}
+for i in range(V):
+    G[i] = {}
+
+for _ in range(E):
+    s, t, d = map(int, input().split())
+    G[s][t] = d
+
+seen = [False for _ in range(V)]
+
+L = [(0, r)]
+heapify(L)
+
+while L:
+    s = heappop(L)[1]
+    seen[s] = True
+    for i in G[s].keys():
+        if cost[i] > cost[s] + G[s][i] and not seen[i]:
+            cost[i] = cost[s] + G[s][i]
+            heappush(L, (cost[i], i))
+
+for i in cost:
+    if i == C:
+        print("INF")
+    else:
+        print(i)
+

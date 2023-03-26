@@ -1,0 +1,72 @@
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <numeric>
+#include <iomanip>
+#include <string>
+#include <regex>
+#include <array>
+#include <vector>
+#include <map>
+#include <set>
+#include <bitset>
+using namespace std;
+#define rep(x,to) for(int x=0;x<to;++x)
+#define rep2(x,from,to) for(int x=from;x<to;++x)
+typedef long long ll;
+typedef unsigned long long ull;
+using Graph = map<int, vector<int>>;
+
+// 深さ優先探索
+map<int, bool> visited;
+map<int, int> first_order; // 行きがけ順
+map<int, int> last_order; // 帰りがけ順
+
+void dfs(const Graph &G, int v, int& ptr) {
+     // 行きがけ順をインクリメントしながらメモ
+    first_order.at(v) = ptr++;
+    visited.at(v) = true; // v を訪問済にする
+    
+    // v から行ける各頂点 next_v について
+    for (auto next_v : G.at(v)) {
+        if (visited.at(next_v)) continue; // next_v が探索済だったらスルー
+        dfs(G, next_v, ptr); // 再帰的に探索
+    }
+    // 帰りがけ順をインクリメントしながらメモ
+    last_order.at(v) = ptr++;
+}
+
+int main(void) {
+    int N, u, k, p;
+    cin >> N;
+    Graph G;
+    rep(i,N) {
+        cin >> u >> k;
+        vector<int> v;
+        rep(i,k) {
+            cin >> p;
+            v.push_back(p);
+        }
+        G.insert(make_pair(u,v));
+    }
+    for(auto v: G) {
+        visited[v.first] = false;
+        first_order[v.first] = 0;
+        last_order[v.first] = 0;
+    }
+    int ptr = 1;
+    int s = 0;
+    while(1) {
+        int s = 0;
+        for (auto v: visited) if(!v.second) {
+            s = v.first;
+            break;
+        }
+        if(s == 0) break;
+        dfs(G, s, ptr);
+    }
+    
+    // 各頂点 v の行きがけ順、帰りがけ順を出力
+    for (auto v: G) 
+        cout << v.first << " " << first_order.at(v.first) << " " << last_order.at(v.first) << endl;
+}

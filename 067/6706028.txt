@@ -1,0 +1,59 @@
+#include <stdio.h>
+#define MAX 2000000
+
+int h, A[MAX + 1];
+
+void maxHeapify(int i)
+{
+  int l, r, v;
+  int largest;
+  l = 2 * i;     //左の子
+  r = 2 * i + 1; //右の子
+
+  if (l <= h && A[l] > A[i])
+  {
+    largest = l; //左の子が存在するかつ、左の子が自分より大きければlargestをlにする
+  }
+  else
+  {
+    largest = i; //そうでなければ自分にする
+  }
+
+  if (r <= h && A[r] > A[largest])
+  {
+    largest = r; //右の子が存在するかつ、右の子がlargestより多ければlargestをrにする
+  }
+
+  if (largest != i)
+  {
+    v = A[i];
+    A[i] = A[largest];
+    A[largest] = v; // A[i]とA[largest]を入れ替える
+    maxHeapify(largest);
+  }
+}
+
+int main(void)
+{
+  int i;
+
+  scanf("%d", &h);
+
+  for (i = 1; i <= h; i++)
+  {
+    scanf("%d", &A[i]);
+  }
+
+  for (i = h / 2; i >= 1; i--)
+  { // h / 2より大きいと子が存在しない
+    maxHeapify(i);
+  }
+
+  for (i = 1; i <= h; i++)
+  {
+    printf(" %d", A[i]);
+  }
+  printf("\n");
+
+  return 0;
+}

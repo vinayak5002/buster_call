@@ -1,0 +1,93 @@
+from collections import namedtuple
+
+
+class DualLinkList(object):
+    def __init__(self):
+        self.nil = namedtuple('Node', ['key', 'prev', 'next'])
+        self.nil.next = self.nil
+        self.nil.prev = self.nil
+
+    def insert(self, key):
+        x = namedtuple('Node', ['key', 'prev', 'next'])
+        x.key = key
+        x.next = self.nil.next
+        self.nil.next.prev = x
+        self.nil.next = x
+        x.prev = self.nil
+
+    def listSearch(self, key):
+        cur = self.nil.next
+        while cur != self.nil and cur.key != key:
+            cur = cur.next
+        return cur
+
+    def deleteNode(self, t):
+        if t == self.nil:
+            return
+        t.prev.next = t.next
+        t.next.prev = t.prev
+        # del t
+
+    def deleteFirst(self):
+        self.deleteNode(self.nil.next)
+
+    def deleteLast(self):
+        self.deleteNode(self.nil.prev)
+
+    def deleteKey(self, key):
+        self.deleteNode(self.listSearch(key))
+
+    def get_keys(self):
+        results = []
+        cur = self.nil.next
+        while cur != self.nil:
+            results.append(cur.key)
+            cur = cur.next
+        return results
+
+    def print(self):
+        cur = self.nil.next
+        while cur != self.nil:
+            print(cur.key)
+            cur = cur.next
+
+
+def process_instructions(dll, insts):
+    # line_count = 1
+    for ins in insts:
+        # print('processing line: {0}'.format(line_count))
+        # line_count += 1
+        try:
+            code, key = ins.split()
+        except ValueError:
+            code = ins
+        if code == 'insert':
+            dll.insert(int(key))
+        elif code == 'delete':
+            dll.deleteKey(int(key))
+        elif code == 'deleteFirst':
+            dll.deleteFirst()
+        elif code == 'deleteLast':
+            dll.deleteLast()
+        else:
+            raise ValueError
+    return dll.get_keys()
+
+
+
+if __name__ == '__main__':
+    # データの入力
+    num = int(input())
+    data = [input() for x in range(num)]
+    #data = []
+    #with open('ALDS1_3_C_in9.txt') as f:  # ファイルの読み込み
+    #    for line in f:
+    #       data.append(line.strip())
+    #data = data[1:]
+
+    # リストの処理
+    dll = DualLinkList()
+    results = process_instructions(dll, data)
+
+    # 結果の表示
+    print('{0}'.format(' '.join(map(str, results))))

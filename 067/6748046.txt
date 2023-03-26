@@ -1,0 +1,201 @@
+#include <algorithm>
+#include <bitset>
+//#include <cmath>
+//#include <complex>
+#include <cctype>
+#include <cstdio>
+#include <cstdint>
+#include <deque>
+#include <iomanip>
+#include <iostream>
+#include <iterator>
+#include <climits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+int64_t INF = LLONG_MAX;
+
+template <typename T>
+void print64_t1(T &target, bool one_line_flag = false)
+{
+    if (one_line_flag)
+    {
+        for (auto itr = target.begin(); itr != target.end(); itr++)
+        {
+            if (itr != target.begin())
+                cout << " ";
+            cout << *itr;
+        }
+        cout << endl;
+    }
+    else
+    {
+        for (auto tmp : target)
+        {
+            cout << tmp << endl;
+        }
+    }
+}
+template <typename T>
+void print64_t1(pair<T, T> &target, bool one_line_flag = false)
+{
+    if (one_line_flag)
+    {
+        cout << target.first << " " << target.second << endl;
+    }
+    else
+    {
+        cout << target.first << endl;
+        cout << target.second << endl;
+    }
+}
+
+template <typename T>
+void print64_t2(T target)
+{
+    for (auto itr = target.begin(); itr != target.end(); itr++)
+    {
+        print64_t1(*itr, true);
+    }
+}
+
+template <typename T>
+void print64_t_map1(T target)
+{
+    for (auto itr = target.begin(); itr != target.end(); itr++)
+    {
+        cout << "[" << itr->first << "] " << itr->second << endl;
+    }
+}
+
+template <typename T>
+void print64_t_map2(T target)
+{
+    for (auto itr = target.begin(); itr != target.end(); itr++)
+    {
+        cout << "[" << itr->first << "] ";
+        print64_t1(itr->second, true);
+    }
+}
+
+void make_psinsu(vector<vector<int64_t>> &vec, int64_t p, int64_t depth, vector<int64_t> currentvec = vector<int64_t>())
+{
+    if (depth == 0)
+    {
+        vec.push_back(currentvec);
+        return;
+    }
+
+    for (int64_t i = 0; i < p; i++)
+    {
+        vector<int64_t> tmp = currentvec;
+        tmp.push_back(i);
+        make_psinsu(vec, p, depth - 1, tmp);
+    }
+}
+
+int main()
+{
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    while (1)
+    {
+        int64_t n, m;
+        cin >> n >> m;
+
+        if (n == 0 && m == 0)
+            break;
+
+        vector<int64_t> yakuhin(n), hundou(m);
+
+        for (int64_t i = 0; i < n; i++)
+            cin >> yakuhin[i];
+
+        for (int64_t i = 0; i < m; i++)
+            cin >> hundou[i];
+
+        vector<vector<int64_t>> res;
+        make_psinsu(res, 3, m);
+
+        set<int64_t> can;
+        for (auto tmp : res)
+        {
+            int64_t left = 0;
+            int64_t right = 0;
+
+            for (int64_t i = 0; i < m; i++)
+            {
+                if (tmp.at(i) == 0)
+                {
+                    left += hundou.at(i);
+                }
+                else if (tmp.at(i) == 1)
+                {
+                    right += hundou.at(i);
+                }
+            }
+
+            can.insert(abs(right - left));
+        }
+
+        // print64_t1(can, true);
+
+        set<int64_t>
+            ans;
+        for (int64_t i = 0; i < n; i++)
+        {
+            set<int64_t> next;
+
+            bool flag = false;
+            for (auto c : can)
+            {
+                if (i == 0)
+                {
+                    ans.insert(abs(c - yakuhin.at(i)));
+                    ans.insert(abs(c + yakuhin.at(i)));
+                }
+                else
+                {
+                    if (ans.find(abs(c - yakuhin.at(i))) != ans.end())
+                        next.insert(abs(c - yakuhin.at(i)));
+                    if (ans.find(abs(c + yakuhin.at(i))) != ans.end())
+                        next.insert(abs(c + yakuhin.at(i)));
+
+                    if (c - yakuhin.at(i) == 0)
+                        flag = true;
+                }
+            }
+
+            if (i != 0 and !flag)
+            {
+                ans = next;
+            }
+
+            // print64_t1(ans, true);
+        }
+
+        if (ans.size() == 0)
+        {
+            cout << -1 << endl;
+        }
+        else
+        {
+            cout << *ans.begin() << endl;
+        }
+    }
+
+    return 0;
+}
+

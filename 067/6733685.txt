@@ -1,0 +1,94 @@
+#include <stdio.h>
+#define MAX 8
+
+int row[MAX], col[MAX], dpos[2 * MAX -1], dneg[2 * MAX -1], X[MAX][MAX];
+
+void init(){
+	int i, j;
+	for(i = 0; i < MAX; i++){
+		row[i] = col[i] = -1;
+	}
+	
+	for(i = 0; i < 2 * MAX -1; i++){
+		dpos[i] = dneg[i] = -1;
+	}
+	
+	for(i = 0; i < MAX; i++){
+		for(j = 0; j < MAX; j++){
+			X[i][j] = 0;
+		}
+	}
+}
+
+void print(){
+	int i, j;
+	
+	//初期設定と言葉る場合は不可
+	for(i = 0; i < MAX; i++){
+		for(j = 0; j < MAX; j++){
+			if(X[i][j]){
+				if(row[i] != j){
+					return;
+				}
+			}
+		}
+	}
+	
+	for(i = 0; i < MAX; i++){
+		for(j = 0; j < MAX; j++){
+			if(row[i] == j){
+				printf("Q");
+			}
+			
+			else{
+				printf(".");
+			}
+		}
+		
+		printf("\n");
+	}
+}
+
+void recursive(int i){
+	int k;
+	
+	if(i == MAX){
+		print();
+		//printf("a");
+		return;
+	}
+	
+	for(k = 0; k < MAX; k++){
+		//衝突すれば、kの次の値へ
+		if(col[k] == 1 || dpos[i + k] == 1 || dneg[i - k + (MAX -1)] == 1){
+			continue;
+		}
+		
+		//衝突しないので、配列に値を代入
+		row[i] = k;
+		col[k] = dpos[i + k] = dneg[i - k + (MAX -1)] = 1;
+		
+		//次の行へ
+		recursive(i + 1);
+		
+		//23行目の再帰式を実行した結果、配列に値を代入できなかったら以下を実行
+		row[i] = col[k] = dpos[i + k] = dneg[i - k + (MAX -1)] = -1;
+		//printf("%d", i);
+	}
+}
+
+int main (void){
+	init();
+	int k, i, r, c;
+	scanf("%d", &k);
+	
+	for(i = 0; i < k; i++){
+		scanf("%d", &r);
+		scanf("%d", &c);
+		X[r][c] = 1;
+	}
+	
+	recursive(0);
+	
+	return 0;
+}

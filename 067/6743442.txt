@@ -1,0 +1,74 @@
+import java.util.*;
+import java.io.*;
+
+class disjointForest{
+    int[]rank,parent;
+    int n;
+
+    public disjointForest(int n){
+        rank = new int [n];
+        parent = new int [n];
+        this.n = n;
+        makeSet();
+    }
+
+    void makeSet(){
+        for(int i=0; i<n; i++){
+            parent[i] = i;
+        }
+    }
+
+    int findSet(int x){
+        if(parent[x]!=x){
+            parent[x]=findSet(parent[x]);
+        }
+        return parent[x];
+    }
+
+    void union(int x,int y){
+        int xRoot = findSet(x);
+        int yRoot = findSet(y);
+        if(xRoot==yRoot){
+            return;
+        }
+        if(rank[yRoot]>rank[xRoot]){
+            parent[xRoot] = yRoot;
+        }
+        else if(rank[xRoot]>rank[yRoot]){
+            parent[yRoot]=xRoot;
+        }
+        else{
+            parent[yRoot] = xRoot;
+            rank[xRoot] = rank[xRoot] + 1;
+        }
+    }
+}
+
+class Main{
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in); //scans 
+        int n = sc.nextInt();
+        disjointForest disjoint = new disjointForest(n);
+
+        int q = sc.nextInt();
+
+        for(int i=0; i<q; i++){
+            int com=sc.nextInt();
+            if(com==0){
+                int x=sc.nextInt();
+                int y=sc.nextInt();
+                disjoint.union(x,y);
+            }
+            else{
+                int x=sc.nextInt();
+                int y=sc.nextInt();
+                if(disjoint.findSet(x)==disjoint.findSet(y)){
+                    System.out.println("1");
+                }
+                else{
+                    System.out.println("0");
+                }
+            }
+        }
+    }
+}

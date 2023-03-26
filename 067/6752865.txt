@@ -1,0 +1,55 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <unistd.h>
+using namespace std;
+
+int main(){
+    int n, m;
+    cin >> n >> m;
+    vector<int> V[n];
+
+    for(int i;i<m;i++){
+        int a, b;
+        cin >> a >> b;
+        V[a].push_back(b);
+        V[b].push_back(a);
+    }
+
+    int q;
+    cin >> q;
+    for(int i=0;i<q;i++){
+        int visited[n];
+        for(int i=0;i<n;i++) visited[i] = 0;
+
+        // sleep(1);
+        int a, b;
+        cin >> a >> b;
+        queue<int> Q;
+        Q.push(a);
+        visited[a] = 1;
+        bool found = false;
+        while(!Q.empty() && !found){
+            if(found) break;
+            int next = Q.front();
+            Q.pop();
+            for(int j=0;j<V[next].size();j++){
+                int c = V[next][j];
+                // cout << c << " ";
+                if(!visited[c]){
+                    if(c==b){
+                        cout << "yes" << endl;
+                        found = true;
+                        break;
+                    }
+                    visited[c] = 1;
+                    Q.push(c);
+                }
+            }
+            // cout << endl;
+        }
+        if(!found) cout << "no" << endl;
+    }
+
+    return 0;
+}

@@ -1,0 +1,75 @@
+def solve():
+    from sys import stdin
+    from collections import deque
+    
+    f_i = stdin
+    H, W, N = map(int, f_i.readline().split())
+    
+    W += 2
+    
+    field = '#' * W
+    for i in range(H):
+        line = f_i.readline().rstrip()
+        field += '#' + line + '#'
+    field += '#' * W
+    
+    rec = dict()
+    move = [1, -1, W, -W]
+    
+    # first search
+    r, c = map(int, f_i.readline().split())
+    start = W * r + c
+    q = deque()
+    q.append((0, start))
+    while q:
+        dmg, pos = q.popleft()
+        if pos in rec:
+            continue
+        rec[pos] = dmg
+        
+        for m in move:
+            next_pos = pos + m
+            if next_pos in rec:
+                continue
+            next_cell = field[next_pos]
+            if next_cell == '.':
+                q.appendleft((dmg, next_pos))
+            elif next_cell == '@':
+                q.append((dmg + 1, next_pos))
+    
+    # serach after the second
+    for i in range(N - 1):
+        r, c = map(int, f_i.readline().split())
+        start = W * r + c
+        if start not in rec:
+            return "-1 -1"
+        
+        visited = dict()
+        visited[start] = True
+        q = deque()
+        q.append((0, start))
+        while q:
+            dmg, pos = q.popleft()
+            # if pos in visited:
+            #     continue
+            if dmg > rec[pos]:
+                rec[pos] = dmg
+            
+            for m in move:
+                next_pos = pos + m
+                if next_pos in visited:
+                    continue
+                visited[next_pos] = True
+                next_cell = field[next_pos]
+                if next_cell == '.':
+                    q.appendleft((dmg, next_pos))
+                elif next_cell == '@':
+                    q.append((dmg + 1, next_pos))
+    
+    candidate = ((dmg, pos) for pos, dmg in rec.items() if field[pos] == '.')
+    ans_dmg, ans_pos = min(candidate)
+    ans_r = ans_pos // W
+    ans_c = ans_pos % W
+    return f'{ans_r} {ans_c}'
+
+print(solve())

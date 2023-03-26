@@ -1,0 +1,50 @@
+use std::io;
+
+fn main() {
+
+    let mut n_vec: Vec<i32> = vec![];
+    let mut p_vec: Vec<_> = vec![];
+
+    loop {
+        let mut s = String::new();
+        io::stdin().read_line(&mut s).expect("Error");
+
+        let n = s.trim().parse().unwrap_or(-1);
+        if n <= 0 {
+            break;
+        } else {
+            let mut p = String::new();
+            io::stdin().read_line(&mut p).expect("Error");
+            // &strだとstaticでありブロックを抜けた時点で無効となる。そのため、Stringもしくは整数などに変換
+            let po: Vec<&str> = p.split_whitespace().collect();
+            let pi: Vec<i32> = po.iter().map(|x| x.parse().unwrap_or(0)).collect();
+            p_vec.push(pi);
+            n_vec.push(n);
+        }
+    }
+
+    for (index, value) in n_vec.iter().enumerate() {
+        let n = n_vec[index];
+
+        let mut sum = 0;
+        for i in &p_vec[index] {
+            sum += i;
+        }
+
+        let average: f64 = (sum / n) as f64;
+
+        // α2 = (∑ni=1(si - m)2)/n
+        let mut dist: f64 = 0.0;
+        for i in &p_vec[index] {
+            dist = dist + (*i as f64 - average) * (*i as f64 - average);
+
+        }
+        dist = dist / 5.0;
+
+        // sqrt(α2)
+        dist = dist.sqrt() as f64;
+
+        println!("{}", format!("{:.*}", 8, dist));
+    }
+}
+

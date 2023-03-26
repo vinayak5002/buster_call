@@ -1,0 +1,350 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < n; i++)
+#define rep2(i, x, n) for (int i = x; i <= n; i++)
+#define rep3(i, x, n) for (int i = x; i >= n; i--)
+#define each(e, v) for (auto &e : v)
+#define pb push_back
+#define eb emplace_back
+#define all(x) x.begin(), x.end()
+#define rall(x) x.rbegin(), x.rend()
+#define sz(x) (int)x.size()
+using ll = long long;
+using pii = pair<int, int>;
+using pil = pair<int, ll>;
+using pli = pair<ll, int>;
+using pll = pair<ll, ll>;
+
+template <typename T>
+bool chmax(T &x, const T &y) {
+    return (x < y) ? (x = y, true) : false;
+}
+
+template <typename T>
+bool chmin(T &x, const T &y) {
+    return (x > y) ? (x = y, true) : false;
+}
+
+template <typename T>
+int flg(T x, int i) {
+    return (x >> i) & 1;
+}
+
+template <typename T>
+void print(const vector<T> &v, T x = 0) {
+    int n = v.size();
+    for (int i = 0; i < n; i++) cout << v[i] + x << (i == n - 1 ? '\n' : ' ');
+}
+
+template <typename T>
+void printn(const vector<T> &v, T x = 0) {
+    int n = v.size();
+    for (int i = 0; i < n; i++) cout << v[i] + x << '\n';
+}
+
+template <typename T>
+int lb(const vector<T> &v, T x) {
+    return lower_bound(begin(v), end(v), x) - begin(v);
+}
+
+template <typename T>
+int ub(const vector<T> &v, T x) {
+    return upper_bound(begin(v), end(v), x) - begin(v);
+}
+
+template <typename T>
+void rearrange(vector<T> &v) {
+    sort(begin(v), end(v));
+    v.erase(unique(begin(v), end(v)), end(v));
+}
+
+template <typename T>
+vector<int> id_sort(const vector<T> &v, bool greater = false) {
+    int n = v.size();
+    vector<int> ret(n);
+    iota(begin(ret), end(ret), 0);
+    sort(begin(ret), end(ret), [&](int i, int j) { return greater ? v[i] > v[j] : v[i] < v[j]; });
+    return ret;
+}
+
+struct io_setup {
+    io_setup() {
+        ios_base::sync_with_stdio(false);
+        cin.tie(NULL);
+        cout << fixed << setprecision(15);
+    }
+} io_setup;
+
+const int inf = (1 << 30) - 1;
+const ll INF = (1LL << 60) - 1;
+const int MOD = 1000000007;
+// const int MOD = 998244353;
+
+struct Bipartite_Matching {
+    vector<vector<int>> es;
+    vector<int> d, match;
+    vector<bool> used, used2;
+    const int n, m;
+
+    Bipartite_Matching(int n, int m) : es(n), d(n), match(m), used(n), used2(n), n(n), m(m) {}
+
+    void add_edge(int u, int v) { es[u].push_back(v); }
+
+    void _bfs() {
+        fill(begin(d), end(d), -1);
+        queue<int> que;
+        for (int i = 0; i < n; i++) {
+            if (!used[i]) que.emplace(i), d[i] = 0;
+        }
+        while (!que.empty()) {
+            int i = que.front();
+            que.pop();
+            for (auto &e : es[i]) {
+                int j = match[e];
+                if (j != -1 && d[j] == -1) que.emplace(j), d[j] = d[i] + 1;
+            }
+        }
+    }
+
+    bool _dfs(int now) {
+        used2[now] = true;
+        for (auto &e : es[now]) {
+            int u = match[e];
+            if (u == -1 || (!used2[u] && d[u] == d[now] + 1 && _dfs(u))) {
+                match[e] = now, used[now] = true;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    int bipartite_matching() {
+        fill(begin(match), end(match), -1), fill(begin(used), end(used), false);
+        int ret = 0;
+        while (true) {
+            _bfs();
+            fill(begin(used2), end(used2), false);
+            int flow = 0;
+            for (int i = 0; i < n; i++) {
+                if (!used[i] && _dfs(i)) flow++;
+            }
+            if (flow == 0) break;
+            ret += flow;
+        }
+        return ret;
+    }
+};
+
+struct Union_Find_Tree {
+    vector<int> data;
+    const int n;
+    int cnt;
+
+    Union_Find_Tree(int n) : data(n, -1), n(n), cnt(n) {}
+
+    int root(int x) {
+        if (data[x] < 0) return x;
+        return data[x] = root(data[x]);
+    }
+
+    int operator[](int i) { return root(i); }
+
+    bool unite(int x, int y) {
+        x = root(x), y = root(y);
+        if (x == y) return false;
+        if (data[x] > data[y]) swap(x, y);
+        data[x] += data[y], data[y] = x;
+        cnt--;
+        return true;
+    }
+
+    int size(int x) { return -data[root(x)]; }
+
+    int count() { return cnt; };
+
+    bool same(int x, int y) { return root(x) == root(y); }
+
+    void clear() {
+        cnt = n;
+        fill(begin(data), end(data), -1);
+    }
+};
+
+template <bool directed = true>
+struct Graph {
+    struct edge {
+        int to, id;
+        edge(int to, int id) : to(to), id(id) {}
+    };
+
+    vector<vector<edge>> es;
+    const int n;
+    int m;
+
+    vector<int> deg1, deg2; // 出次数、入次数
+
+    Graph(int n) : es(n), n(n), m(0), deg1(n, 0), deg2(n, 0) {}
+
+    void add_edge(int from, int to) {
+        es[from].emplace_back(to, m);
+        if (!directed) es[to].emplace_back(from, m);
+        m++;
+        deg1[from]++, deg2[to]++;
+    }
+};
+
+template <bool directed = true>
+struct Strongly_Connected_Components {
+    struct edge {
+        int to, id;
+        edge(int to, int id) : to(to), id(id) {}
+    };
+
+    vector<vector<edge>> es, rs;
+    vector<int> vs, comp;
+    vector<bool> used;
+    const int n;
+    int m;
+
+    Strongly_Connected_Components(int n) : es(n), rs(n), vs(n), comp(n), used(n), n(n), m(0) {}
+
+    void add_edge(int from, int to) {
+        es[from].emplace_back(to, m), rs[to].emplace_back(from, m);
+        if (!directed) es[to].emplace_back(from, m), rs[from].emplace_back(to, m);
+        m++;
+    }
+
+    void _dfs(int now) {
+        used[now] = true;
+        for (auto &e : es[now]) {
+            if (!used[e.to]) _dfs(e.to);
+        }
+        vs.push_back(now);
+    }
+
+    void _rdfs(int now, int cnt) {
+        used[now] = true, comp[now] = cnt;
+        for (auto &e : rs[now]) {
+            if (!used[e.to]) _rdfs(e.to, cnt);
+        }
+    }
+
+    Graph<true> decompose() {
+        fill(begin(used), end(used), false);
+        for (int i = 0; i < n; i++) {
+            if (!used[i]) _dfs(i);
+        }
+        fill(begin(used), end(used), false), reverse(begin(vs), end(vs));
+        int cnt = 0;
+        for (auto &e : vs) {
+            if (!used[e]) _rdfs(e, cnt++);
+        }
+        Graph<true> G(cnt);
+        for (int i = 0; i < n; i++) {
+            for (auto &e : es[i]) {
+                int u = comp[i], v = comp[e.to];
+                if (u != v) G.add_edge(u, v);
+            }
+        }
+        return G;
+    }
+
+    int operator[](int k) const { return comp[k]; }
+};
+
+int main() {
+    while (true) {
+        int N, M;
+        cin >> N >> M;
+
+        if (N == 0) break;
+
+        Bipartite_Matching BM(N, N);
+
+        vector<int> u(M), v(M);
+        rep(i, M) {
+            cin >> u[i] >> v[i];
+            u[i]--, v[i]--;
+            BM.add_edge(u[i], v[i]);
+        }
+
+        BM.bipartite_matching();
+
+        vector<int> p(N);
+        rep(i, N) p[BM.match[i]] = i;
+
+        // print(p);
+
+        Strongly_Connected_Components G(N);
+        Union_Find_Tree uf(N);
+
+        rep(i, M) {
+            if (u[i] == BM.match[v[i]]) continue;
+            G.add_edge(u[i], BM.match[v[i]]);
+            uf.unite(u[i], BM.match[v[i]]);
+        }
+        Graph G2 = G.decompose();
+        int K = G2.n;
+        vector<bool> used(K, false);
+
+        vector<vector<int>> deg1(N), deg2(N); // 先頭、末端
+        vector<int> V(K);                     // SCCの代表元
+
+        rep(i, N) {
+            int c = G[i];
+            if (used[c]) continue;
+            V[c] = i;
+            used[c] = true;
+            if (G2.deg1[c] > 0 && G2.deg2[c] == 0) deg1[uf[i]].eb(c);
+            if (G2.deg1[c] == 0 && G2.deg2[c] > 0) deg2[uf[i]].eb(c);
+        }
+
+        vector<pii> ans;
+
+        vector<int> ids;
+        int SX = 0, SY = 0;
+        vector<int> xs1, ys1;
+        vector<int> xs2, ys2;
+
+        rep(i, N) {
+            int X = sz(deg1[i]), Y = sz(deg2[i]);
+            if (X == 0 && Y == 0) continue;
+
+            rep(j, X - 1) xs1.eb(deg1[i][j]);
+            rep(j, Y - 1) ys1.eb(deg2[i][j]);
+
+            xs2.eb(deg1[i].back());
+            ys2.eb(deg2[i].back());
+        }
+
+        int L = sz(xs2);
+        rep(i, L) {
+            int x = xs2[i], y = ys2[(i + 1) % L];
+            ans.eb(V[y], p[V[x]]);
+        }
+
+        int X = sz(xs1), Y = sz(ys1);
+        if (X == 0 && Y == 0) continue;
+
+        rep(j, min(X, Y)) {
+            int x = xs1[j], y = ys1[j];
+            ans.eb(V[y], p[V[x]]);
+        }
+
+        if (X > Y) {
+            rep2(j, Y, X - 1) {
+                int x = xs1[j], y = ys2[0];
+                ans.eb(V[y], p[V[x]]);
+            }
+        }
+        if (Y > X) {
+            rep2(j, X, Y - 1) {
+                int x = xs2[0], y = ys1[j];
+                ans.eb(V[y], p[V[x]]);
+            }
+        }
+
+        cout << sz(ans) << '\n';
+        each(e, ans) cout << e.first + 1 << ' ' << e.second + 1 << '\n';
+    }
+}

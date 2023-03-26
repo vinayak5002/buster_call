@@ -1,0 +1,223 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100000
+#define NIL NULL
+
+struct Node
+{
+  int key;
+  struct Node *p;
+  struct Node *l;
+  struct Node *r;
+};
+
+typedef struct Node *N;
+
+N root;
+
+N treeMinimum(N x)
+{
+  if (x->l != NIL) //一番左のノードを探す
+  {
+    x = x->l;
+  }
+  return x;
+}
+
+N getNext(N x)
+{
+  N y;
+
+  if (x->r != NIL)
+  {
+    return treeMinimum(x->r);
+  }
+
+  y = x->p;
+  while (y != NIL && y->r == x)
+  {
+    x = y;
+    y = y->p;
+  }
+  return y;
+}
+
+void deleteNode(N u)
+{
+  N x;
+  N y; //削除するノード
+
+  if (u->l == NIL || u->r == NIL)
+  {
+    y = u;
+  }
+
+  else
+  {
+    y = getNext(u);
+  }
+
+  if (y->l != NIL)
+  {
+    x = y->l;
+  }
+
+  else
+  {
+    x = y->r;
+  }
+
+  if (x != NIL)
+  {
+    x->p = y->p;
+  }
+
+  if (y->p == NIL)
+  {
+    root = x;
+  }
+
+  else
+  {
+    if (y == y->p->l)
+    {
+      y->p->l = x;
+    }
+
+    else
+    {
+      y->p->r = x;
+    }
+  }
+
+  if (y != u) // uが子を2つもつとき
+  {
+    u->key = y->key;
+  }
+}
+
+void insert(int k)
+{
+  N y = NIL;
+  N x = root;
+  N z;
+
+  z = malloc(sizeof(struct Node));
+  z->key = k;
+  z->l = NIL;
+  z->r = NIL;
+
+  while (x != NIL)
+  {
+    y = x;
+    if (x->key > z->key)
+    {
+      x = x->l;
+    }
+    else
+    {
+      x = x->r;
+    }
+  }
+
+  z->p = y;
+
+  if (y == NIL)
+  {
+    root = z;
+  }
+  else if (y->key > z->key)
+  {
+    y->l = z;
+  }
+  else
+  {
+    y->r = z;
+  }
+}
+
+N find(N u, int k)
+{
+  while (u != NIL && k != u->key)
+  {
+    if (k < u->key)
+    {
+      u = u->l;
+    }
+    else
+    {
+      u = u->r;
+    }
+  }
+  return u;
+}
+void preOrder(struct Node *u)
+{
+  if (u == NIL)
+  {
+    return;
+  }
+
+  printf(" %d", u->key);
+  preOrder(u->l);
+  preOrder(u->r);
+}
+
+void inOrder(struct Node *u)
+{
+  if (u == NIL)
+  {
+    return;
+  }
+
+  inOrder(u->l);
+  printf(" %d", u->key);
+  inOrder(u->r);
+}
+
+int main(void)
+{
+  int m, i, x;
+  char com[MAX];
+
+  scanf("%d", &m);
+
+  for (i = 0; i < m; i++)
+  {
+    scanf("%s", com);
+
+    if (com[0] == 'i')
+    {
+      scanf("%d", &x);
+      insert(x);
+    }
+    else if (com[0] == 'f')
+    {
+      scanf("%d", &x);
+      N t = find(root, x);
+      if (t != NIL)
+      {
+        printf("yes\n");
+      }
+      else
+      {
+        printf("no\n");
+      }
+    }
+    else if (com[0] == 'p')
+    {
+      inOrder(root);
+      printf("\n");
+      preOrder(root);
+      printf("\n");
+    }
+    else if (com[0] == 'd')
+    {
+      scanf("%d", &x);
+      deleteNode(find(root, x));
+    }
+  }
+
+  return 0;
+}

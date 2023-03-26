@@ -1,0 +1,109 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for(int i = 0; i < (int)(n); i++)
+#define rrep(ri,n) for(int ri = (int)(n-1); ri >= 0; ri--)
+#define rep2(i,x,n) for(int i = (int)(x); i < (int)(n); i++)
+#define rrep2(ri,x,n) for(int ri = (int)(n-1); ri >= (int)(x); ri--)
+#define repit(itr,x) for(auto itr = x.begin(); itr != x.end(); itr++)
+#define rrepit(ritr,x) for(auto ritr = x.rbegin(); ritr != x.rend(); ritr++)
+#define ALL(x) x.begin(), x.end()
+using ll = long long;
+using namespace std;
+const ll INF = 1e18;
+const int iINF = 1001001001;
+
+void dijkstra(vector<vector<vector<int>>> &gr, vector<ll> &d, int c, int st, vector<vector<ll>> &ccost){
+  int n = d.size();
+  vector<bool> chk(n, false);
+  rep(i,d.size()) d.at(i) = INF;
+  priority_queue<tuple<ll, ll, int>> q;
+  q.push({0, 0, st});
+  int co = 0;
+  while(!q.empty()){
+    auto [cost, sumd, now] = q.top(); q.pop();
+    if(chk.at(now) == true) continue;
+    cost *= -1;
+    d.at(now) = cost;
+    chk.at(now) = true;
+    co++;
+    if(co == n) break;
+    rep(nx, gr.at(c).at(now).size()) {
+      int nxd = gr.at(c).at(now).at(nx);
+      cerr << nxd << endl;
+      if(nxd == iINF) continue;
+      if(chk.at(nx)) continue;
+      int nxsumd = sumd + nxd;
+      ll nxcost = ccost.at(c).at(nxsumd);
+      if(d.at(nx) <= (nxcost)) continue;
+      q.push({-1*(nxcost), nxsumd, nx});
+      d.at(nx) = cost+nxcost;
+    }
+  }
+}
+
+
+int main() {
+while(1) {
+  int n, m, c;
+  cin >> n >> m >> c;
+  int s, g;
+  cin >> s >> g; s--; g--;
+  if(n == 0) break;
+  vector gr(c, vector(n, vector<ll>(n, INF)));
+  rep(i, m) {
+    ll x, y, d, cc;
+    cin >> x >> y >> d >> cc;
+    x--; y--; cc--;
+    gr.at(cc).at(x).at(y) = min(gr.at(cc).at(x).at(y), d);
+    gr.at(cc).at(y).at(x) = min(gr.at(cc).at(y).at(x), d);
+  }
+
+  vector<int> p(c);
+  rep(i, c) cin >> p.at(i);
+  vector q(c, vector<int>());
+  vector r(c, vector<int>());
+  vector ccost(c, vector<ll>(300000, 0));
+  rep(idx, c) {
+    rep(i, p.at(idx)-1) {
+      int in;
+      cin >> in;
+      q.at(idx).push_back(in);
+    }
+    rep(i, p.at(idx)) {
+      int in;
+      cin >> in;
+      r.at(idx).push_back(in);
+    }
+    ll now = 0;
+    int qidx = 0, ridx = 0;
+    rep2(i, 1, ccost.at(idx).size()) {
+      now += r.at(idx).at(ridx);
+      ccost.at(idx).at(i) = now;
+      if(qidx != p.at(idx)-1 && i == q.at(idx).at(qidx)) {
+        qidx++;
+        ridx++;
+      }
+    }
+  }
+  rep(cidx, c) {
+    auto &ngr = gr.at(cidx);
+    rep(i, n) ngr.at(i).at(i) = 0;
+    rep(i, n)rep(j, n)rep(k, n) {
+      ngr.at(i).at(j) = min(ngr.at(i).at(j), ngr.at(i).at(k) + ngr.at(k).at(j));
+    }
+    rep(i, n)rep(j, n) {
+      if(ngr.at(i).at(j) == INF) continue;
+      ngr.at(i).at(j) = ccost.at(cidx).at(ngr.at(i).at(j));
+    }
+  }
+  vector ss(n, vector(n, INF));
+  rep(i, n)rep(j, n)rep(k, c) ss.at(i).at(j) = min(ss.at(i).at(j), gr.at(k).at(i).at(j));
+  rep(i, n) ss.at(i).at(i) = 0;
+  rep(k, n)rep(i, n)rep(j, n) ss.at(i).at(j) = min(ss.at(i).at(j), ss.at(i).at(k) + ss.at(k).at(j));
+  ll ans = ss.at(s).at(g);
+  if(ans == INF) ans = -1;
+  cout << ans << endl;
+
+}
+
+  return 0;
+}

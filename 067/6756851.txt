@@ -1,0 +1,110 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000001
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 1456
+typedef long long int ll;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+
+ll MAP[MAXN][MAXN];
+int n;
+ll H ,W;
+ll ans;
+/// st.first :　cur位置 / st.second : cur位置の高さ
+
+////Histogramの面積をstackをつかって書き直すパターン///////
+
+void init(){
+    for (int i=1 ; i<=MAXN ; i++) {
+        MAP[0][i] = 0;
+        MAP[i][0] = 0;
+        MAP[i][W+1] = 0;
+    }
+}
+
+//各列に対してヒストグラムの面積を処理するようなプログラムを構成
+
+
+
+ll line_shori(int k){
+    // k行i列への処理
+    ll maxsquare = 0; 
+    stack<pair<ll,ll>> ST;
+    ST.push(make_pair(0,0));
+    ll tmp;
+    ll leftcur;
+    ll rightcur;
+    int prevht=0; //1つの前の高さ
+
+    for (int i=1; i<=W+1 ; i++) { //n+1は壁
+        if (MAP[k][i] > prevht) {
+            //stackに積むだけ
+            ST.push(make_pair(i,MAP[k][i]));
+            prevht = MAP[k][i];
+
+        } else if  (MAP[k][i] == prevht) {
+            //何もしない
+        } else {
+            prevht = MAP[k][i];
+            rightcur = i;
+            tmp=0;
+            // MAP[i]より高い部分をすべて清算する
+            while (ST.top().second > MAP[k][i] && ST.size() > 0 ) {
+                if (ST.top().first==0) {break;}
+                leftcur = ST.top().first;
+                int height = ST.top().second;
+                tmp = height * (rightcur - leftcur ) ;
+                maxsquare = max(maxsquare,tmp);
+                ST.pop();
+            }
+            if (ST.top().second == MAP[k][i]) {
+                //何もしなくてOK
+            } else {
+                // 代わりの場所に積む。
+                ST.push(make_pair(leftcur,MAP[k][i]));
+            }
+
+        }
+    }
+    return maxsquare;
+}
+
+
+int main(){
+    init();
+    cin >> H >> W;
+    ll tmp ,tmp2 ; 
+    for (int i=1 ; i<= H ; i++){
+        for (int j=1; j<=W;j++)  {
+            cin >> tmp   ; 
+            MAP[i][j]= abs(tmp - 1) ; 
+        }
+    }
+
+    for (int j=1; j<= W; j++ ){
+        for (int i=1; i<= H ; i++) {
+            if (MAP[i][j]==0) {MAP[i][j] = 0;}
+            else {MAP[i][j] += MAP[i-1][j] ; }
+        }
+    }
+
+    /*for (int i=1 ; i<= H ; i++){
+        for (int j=1; j<=W;j++)  {
+            printf ("%lld ",MAP[i][j]) ; 
+        }
+        cout << endl;
+    }*/
+
+    for (int k=1 ; k<= H ; k++){
+        ll tmp3;
+        tmp3= line_shori(k);
+        // printf ("Line %d : %lld \n", k, tmp3) ;
+        ans= max (tmp3, ans);
+    }
+
+    printf("%lld\n",ans ) ;
+    return 0;
+}
+

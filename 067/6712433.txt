@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+#define r(i,a,b) for(int i = (int)(a); i < (int)(b); i++)
+
+using namespace std;
+
+bool take[310][310];
+int dp[310][310];
+
+int main() {
+    int n;
+    while(cin >> n, n) {
+        int w[310];
+        r(i,0,n) cin >> w[i];
+        memset(take, false, sizeof(take));
+        memset(dp, 0, sizeof(dp));
+
+        r(i,0,n) {
+            r(j,0,n-i) {
+                int len = i+1;
+                int s = j, t = j+i;
+                r(k,s,t) {
+                    if(take[s][k] && take[k+1][t]) take[s][t] = true;
+                }
+                if(len == 1) {
+                    if(abs(w[s] - w[t]) < 2) {
+                        take[s][t] = true;
+                    }
+                }
+                if(take[s][t]) {
+                    int x = s-1, y = t+1;
+                    while(1) {
+                        if(x < 0 || x >= n || y < 0 || y >= n) break;
+                        if(abs(w[x] - w[y]) >= 2) break;
+                        take[x][y] = true;
+                        x--; y++;
+                    }
+                }
+            }
+        }
+
+        r(i,0,n) r(j,i+1,n) {
+            if(take[i][j]) dp[i][j] = j-i+1;
+        }
+
+        r(i,0,n) r(j,i,n) r(k,i,j) {
+            dp[i][j] = max(dp[i][j], dp[i][k] + dp[k+1][j]);
+        }
+        cout << dp[0][n-1] << endl;
+    }
+    return 0;
+}

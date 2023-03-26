@@ -1,0 +1,20 @@
+require 'tsort'
+class Array
+  include TSort
+  def tsort_each_node
+    self.size.times {|i| yield i}
+  end
+  def tsort_each_child(n)
+    self[n].each {|i| yield i}
+  end
+end
+n,m=gets.split.map(&:to_i)
+g=Array.new(n) {[]}
+m.times do
+  a,b=gets.split.map {|i| i.to_i-1}
+  g[a] << b
+end
+a=g.strongly_connected_components.map {|i| i.map {|j| j+1}.sort}
+n.times do |i|
+  puts a.find {|j| j.include?(i+1)}*' '
+end

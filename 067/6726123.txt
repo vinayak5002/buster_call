@@ -1,0 +1,47 @@
+#include<cstdio>
+#include<vector>
+using namespace std;
+int n, a[1<<20];
+
+
+int solve() {
+  int ans = 0;
+  for (int i = 1; i < (1 << n); i++) {
+    if (__builtin_popcount(i) == 1) {
+      if (a[i]) ans++;
+      continue;
+    }
+    int tmp = 1;
+    for (int j = 0; j < n; j++) if (i & (1 << j)) {
+      int B = 1 << j;
+      if (a[B]) {
+        if (a[i] == 0) return -1;
+        tmp = -1;
+        continue;
+      }
+      int A = i xor B;
+      if (a[i]) {
+        if (a[A]) {
+          tmp = -1;
+          break;
+        }
+      } else {
+        if (a[A]) return -1;
+        tmp = -1;
+        break;
+      }
+    }
+    if (tmp == 1) {
+      ans++;
+      for (int j = 0; j < n; j++) if (i & (1 << j)) {
+        if (a[i xor (1 << j)]) return -1;
+      }
+    }
+  }
+  return ans;
+}
+int main() {
+  scanf("%d", &n);
+  for (int i = 0; i < (1 << n); i++) scanf("%d", &a[i]);
+  printf("%d\n", solve());
+}

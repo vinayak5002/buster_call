@@ -1,0 +1,33 @@
+import java.util.Scanner;
+
+public class Review {
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+        int n = s.nextInt();
+        int[] mat = new int[n + 1];
+        for (int i = 1; i <= n; i++) {
+            int row = s.nextInt();
+            int col = s.nextInt();
+            mat[i-1] = row;
+            mat[i] = col;
+        }
+
+        int[][] dp = new int[n + 1][n + 1];
+        for (int num = 2; num <= n; num++) {
+            for (int first = 1; first <= n - num + 1; first++) {
+                int last = first + num - 1;
+                int minV = Integer.MAX_VALUE;
+                for (int partition = first; partition <= last - 1; partition++) {
+                    minV = Math.min(
+                        minV,
+                        dp[first][partition] + dp[partition + 1][last] + mat[first - 1] * mat[partition] * mat[last]
+                    );
+                }
+                dp[first][last] = minV;
+            }
+        }
+        System.out.println(dp[1][n]);
+        s.close();
+    }
+}
+

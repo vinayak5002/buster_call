@@ -1,0 +1,79 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for (int i=0; i < (n); i++)
+
+/* 基本要素 */
+
+typedef double D;      // 座標値の型。doubleかlong doubleを想定
+typedef complex<D> P;  // Point
+typedef pair<P, P> L;  // Line
+typedef vector<P> VP;
+const D EPS = 1e-9;    // 許容誤差。問題によって変える
+#define X real()
+#define Y imag()
+#define LE(n,m) ((n) < (m) + EPS)
+#define GE(n,m) ((n) + EPS > (m))
+#define EQ(n,m) (abs((n)-(m)) < EPS)
+
+// 内積　dot(a,b) = |a||b|cosθ
+D dot(P a, P b) {
+  return (conj(a)*b).X;
+}
+// 外積　cross(a,b) = |a||b|sinθ
+D cross(P a, P b) {
+  return (conj(a)*b).Y;
+}
+
+/* 多角形 */
+
+// 頂点の順序（sortやmax_elementに必要）
+namespace std {
+  bool operator<(const P a, const P b) {
+    return a.X != b.X ? a.X < b.X : a.Y < b.Y;
+  }
+}
+
+// 凸多角形の内部判定　O(logn)
+// 点が領域内部なら1、境界上なら2、外部なら0を返す
+int inCcwConvex(const VP& ps, P p) {
+  int n = ps.size();
+  P g = (ps[0] + ps[n / 3] + ps[n*2 / 3]) / 3.0;
+  if (g == p) return 1;
+  P gp = p - g;
+
+  int l = 0, r = n;
+  while (l + 1 < r) {
+    int mid = (l + r) / 2;
+    P gl = ps[l] - g;
+    P gm = ps[mid] - g;
+    if (cross(gl, gm) > 0) {
+      if (cross(gl, gp) >= 0 && cross(gm, gp) <= 0) r = mid;
+      else l = mid;
+    }
+    else {
+      if (cross(gl, gp) <= 0 && cross(gm, gp) >= 0) l = mid;
+      else r = mid;
+    }
+  }
+  r %= n;
+  D cr = cross(ps[l] - p, ps[r] - p);
+  return EQ(cr, 0) ? 2 : cr < 0 ? 0 : 1;
+}
+
+int main(){
+  for(;;){
+    double x1=101,y1,x2,y2,x3,y3,xp,yp;
+    cin >> x1 >> y1 >> x2 >> y2 >> x3 >> y3 >> xp >> yp;
+    if(x1 == 101) break;
+    VP ps(3);
+    complex<D> a(x1,y1);
+    complex<D> b(x2,y2);
+    complex<D> c(x3,y3);
+    ps[0] = a;
+    ps[1] = b;
+    ps[2] = c;
+    complex<D> d(xp,yp);
+    if(inCcwConvex(ps,d) >= 1) cout << "YES" << endl;
+    else cout << "NO" << endl;
+  }
+}

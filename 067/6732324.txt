@@ -1,0 +1,141 @@
+#include <stdio.h>
+
+#define MAX_N	100000
+
+struct node
+{
+	int id;
+	int child;
+	int siblings;
+	int parent;
+};
+
+
+node g_buf[MAX_N];
+int depth[MAX_N];
+
+/*
+int depth(int i)
+{
+	int iter = g_buf[i].parent;
+	int cnt = 0;
+	while(iter != -1)
+	{
+		++cnt;
+		iter = g_buf[iter].parent;
+	}
+
+	return cnt;
+}
+*/
+
+void rec(int i, int d)
+{
+	depth[i] = d;
+	if(g_buf[i].siblings != -1)
+	{
+		rec(g_buf[i].siblings, d);
+	}
+
+	if(g_buf[i].child != -1)
+	{
+		rec(g_buf[i].child, d + 1);
+	}
+}
+
+void printNode(int i)
+{
+	//int d = depth(i);
+
+	printf("node %d: parent = %d, depth = %d, ", i, g_buf[i].parent, depth[i]);
+	if( g_buf[i].parent == -1)
+	{
+		printf("root, ");
+	}
+	else if( g_buf[i].child == -1)
+	{
+		printf("leaf, ");
+	}
+	else
+	{
+		printf("internal mode, ");
+	}
+
+	printf("[");
+
+	int child = g_buf[i].child;
+	
+	if( child != -1)
+	{
+		printf("%d", child);
+	}
+
+	if( child != -1)
+	{
+		child = g_buf[child].siblings;
+	}
+
+	while(child != -1)
+	{
+		printf(", %d", child);
+		child = g_buf[child].siblings;
+	}
+	
+	printf("]\n");
+
+}
+		
+int main(void)
+{
+	int n;
+	scanf("%d", &n);
+
+	for(int i = 0; i < n; ++i)
+	{	
+		g_buf[i].id = i;
+		g_buf[i].child = -1;
+		g_buf[i].siblings = -1;
+		g_buf[i].parent = -1;
+	}
+	for(int i = 0; i < n; ++i)
+	{
+		int t, k;
+		scanf("%d %d", &t, &k);
+		int p, p2;
+		
+		for(int j = 0; j < k; ++j)
+		{
+			scanf("%d", &p);
+			
+			if(j == 0)
+			{
+				g_buf[t].child = p;
+			}
+			else
+			{
+				g_buf[p2].siblings = p;	
+			}					
+			g_buf[p].parent = t;
+			p2 = p;
+		}
+	}
+
+
+	int r = -1;
+	for( int i = 0; i < n; ++i)
+	{
+		if( g_buf[i].parent == -1)
+		{
+			r = i;
+		}
+	}
+
+	rec(r, 0);
+	for(int i = 0; i < n; ++i)
+	{
+		printNode(i);
+	}	
+
+
+	return 0;
+}

@@ -1,0 +1,303 @@
+import java.io.BufferedReader
+import java.io.PrintWriter
+import java.util.*
+import kotlin.math.min
+import kotlin.math.roundToInt
+import kotlin.math.sqrt
+
+
+data class Point(val x: Int, val y: Int) {
+    fun move(m: Move): Point = Point(x + m.dx, y + m.dy)
+}
+
+data class Move(val dx: Int, val dy: Int)
+
+sealed class Component {
+    data class White(var step: Int = 0, var visited: Boolean = false) : Component()
+    object Black : Component()
+}
+
+
+data class Maze(val value: MutableList<MutableList<Component>>) {
+    val moves = listOf(
+        Move(1, 0),
+        Move(-1, 0),
+        Move(0, 1),
+        Move(0, -1)
+    )
+
+    val rowCount get() = value.count()
+    val colCount get() = value.first().count()
+
+    fun component(p: Point): Component {
+        val (x, y) = p
+        return value[y][x]
+    }
+
+    fun white(p: Point): Component.White = component(p) as Component.White
+
+    fun countBlack(): Int = value.sumOf { row -> row.count { e -> e is Component.Black } }
+
+    fun inMaze(p: Point): Boolean {
+        val (x, y) = p
+        return 0 <= y && y <= rowCount - 1
+                && 0 <= x && x <= colCount - 1
+    }
+
+    fun isGoal(p: Point): Boolean {
+        val (x, y) = p
+        return y == rowCount - 1 && x == colCount - 1
+    }
+
+    fun nextTiles(p: Point): List<Point> {
+        return moves
+            .map { p.move(it) }
+            .filter { next -> inMaze(next) && component(next) is Component.White }
+    }
+}
+
+data class Matrix(val rowCount: Int, val colCount: Int)
+
+fun main() {
+    val re = System.`in`.bufferedReader()
+    val pw = PrintWriter(System.out)
+
+    // 最短経路を出して、それ以外を塗り潰せば良い
+    // スタートからゴールまでの距離を列挙して、ゴールから逆に辿って経路を返す
+    // 全体のます- 経路の長さ - 黒ます = 塗り潰せる数 = スコア
+
+    val N = re.readInt()
+    val matrice = List(N) { re.readInts().let { (r, c) -> Matrix(r, c) } }
+    val dpRange = MutableList(N) { MutableList(N) { Int.MAX_VALUE / 10 } }
+
+
+    (0..(N - 1)).forEach { i ->
+        dpRange[i][i] = 0
+    }
+
+    (1..(N - 1)).forEach { w ->
+        (0..(N - w - 1)).forEach { i ->
+            val j = i + w
+            (i..(j - 1)).forEach { k ->
+//                println("i $i, j $j, w $w, k $k")
+                dpRange[i][j] =
+                    min(
+                        dpRange[i][j],
+                        dpRange[i][k] + dpRange[k + 1][j] + matrice[i].rowCount * matrice[k].colCount * matrice[j].colCount
+                    )
+            }
+        }
+    }
+
+
+    val ans = dpRange[0][N - 1]
+    pw.println(ans)
+    pw.flush()
+    re.close()
+}
+
+// エラストネスの篩
+fun calcPrimes(upperLimit: Int): List<Int> {
+    val isPrime = BooleanArray(upperLimit + 1) { true }
+    for (i in 2..sqrt(upperLimit.toDouble()).roundToInt()) {
+        if (isPrime[i]) {
+            for (j in i * i..upperLimit step i) {
+                isPrime[j] = false
+            }
+        }
+    }
+    return (2..upperLimit).filter(isPrime::get)
+}
+
+private data class Edge(val from: Int, val to: Int, val weight: Long = 1)
+private data class Vertex(
+    val index: Int, val distance: Long = 0, // 始点から頂点までの距離
+    val edges: MutableSet<Edge> = mutableSetOf()
+)
+
+private const val INF = Long.MAX_VALUE / 10
+
+fun <T> List<T>.intersperse(element: () -> T, surround: Boolean): List<T> =
+    when (surround) {
+        true -> MutableList(this.size) { index -> listOf(this[index], element()) }.flatten().toMutableList()
+            .also { it.add(0, element()) }
+        false -> List(this.size) { index -> listOf(this[index], element()) }.flatten().dropLast(1)
+    }
+
+/**
+ * note: require graph construct cost.
+ */
+private fun dijkstra(edges: Array<Edge>, n: Int, start: Int): LongArray {
+    val graph = Array(n) { Vertex(it) }
+    edges.forEach { (s, t, d) -> graph[s].edges.add(Edge(s, t, d)) }
+    return dijkstra(graph, start)
+}
+
+// @SinceKotlin("1.4")以前でも動くように自前で定義
+inline fun <T> Iterable<T>.sumOf(selector: (T) -> Int): Int = map(selector).sum()
+
+private fun dijkstra(graph: Array<Vertex>, start: Int): LongArray {
+    val distances = LongArray(graph.size) { INF }.apply { this[start] = 0 }
+    val queue =
+        PriorityQueue<Vertex> { o1, o2 -> o1.distance.compareTo(o2.distance) }.apply { add(Vertex(start, 0)) }
+
+    while (queue.isNotEmpty()) {
+        val (current, dist) = queue.remove()
+        if (dist > distances[current]) continue
+
+        for ((_, next, weight) in graph[current].edges) {
+            val totalDist = dist + weight
+
+            if (totalDist < distances[next]) {
+                distances[next] = totalDist
+                queue.add(Vertex(next, totalDist))
+            }
+        }
+    }
+    return distances
+}
+
+// 最小公約数
+tailrec fun gcd(a: Long, b: Long): Long = if (b == 0L) a
+else gcd(b, a % b)
+
+// 最小公倍数
+fun lcm(a: Long, b: Long): Long = a / gcd(a, b) * b
+
+
+class UnionFind(size: Int) {
+    val parnet: MutableList<Int> // 各頂点の親頂点の番号. 自身が根の場合は-1
+    val rank: MutableList<Int> // 各頂点の属する根付き木の頂点数
+
+    init {
+        // 全部根で初期化
+        parnet = MutableList(size) { -1 }
+        this.rank = MutableList(size) { 1 }
+    }
+
+    // 根を求める
+    fun root(x: Int): Int = if (parnet[x] == -1) {
+        x
+    } else {
+        parnet[x] = root(parnet[x]) // 親を根に張り替える(経路圧縮)
+        parnet[x]
+    }
+
+    // xを含むグループと、yを含むグループを併合する
+    fun unite(x: Int, y: Int) {
+        val X = root(x)
+        val Y = root(y)
+        if (X == Y) return // 同じグループの時は何もしない
+        if (rank[X] > rank[Y]) {
+            unite(Y, X) // 常に第一引数を根、第二引数を子として併合する union by size (union by rank)
+            return
+        }
+        if (rank[X] == rank[Y]) {
+            rank[Y] += 1
+        }
+        parnet[X] = root(Y)
+    }
+
+    fun isSame(x: Int, y: Int): Boolean = root(x) == root(y)
+
+}
+
+inline fun <T, R : Comparable<R>> Iterable<T>.maxOf(selector: (T) -> R): R {
+    val iterator = iterator()
+    if (!iterator.hasNext()) throw NoSuchElementException()
+    var maxValue = selector(iterator.next())
+    while (iterator.hasNext()) {
+        val v = selector(iterator.next())
+        if (maxValue < v) {
+            maxValue = v
+        }
+    }
+    return maxValue
+}
+
+inline fun <T, R : Comparable<R>> Iterable<T>.minOf(selector: (T) -> R): R {
+    val iterator = iterator()
+    if (!iterator.hasNext()) throw NoSuchElementException()
+    var minValue = selector(iterator.next())
+    while (iterator.hasNext()) {
+        val v = selector(iterator.next())
+        if (minValue > v) {
+            minValue = v
+        }
+    }
+    return minValue
+}
+
+fun Int.isEven(): Boolean = this % 2 == 0
+
+fun Int.isOdd(): Boolean = !isEven()
+
+fun Int.factorial() = (1..this).reduce { a, b -> a * b }
+
+fun Int.permutation(k: Int = 1) = (k..this).reduce { a, b -> a * b }
+
+fun <T> List<T>.permutations(): Set<List<T>> {
+    val source = this
+    val permutations = mutableSetOf<List<T>>()
+    fun permutation(source: List<T>, perm: List<T>) {
+        if (source.size <= 1) {
+            permutations += perm + source
+        } else {
+            repeat(source.size) {
+                permutation(source.take(it) + source.drop(it + 1), perm + source[it])
+            }
+        }
+    }
+    permutation(source, emptyList())
+    return permutations
+}
+
+fun Int.combination(k: Int = 1) = permutation(k) / k.factorial()
+
+// digitToIntが1.5からなので自前で定義
+fun Char.digitToInt(): Int {
+    @Suppress("DEPRECATION") return Character.digit(this.toInt(), 10).also {
+        if (it < 0) throw IllegalArgumentException("Char $this is not a decimal digit")
+    }
+}
+
+operator fun Regex.contains(text: CharSequence): Boolean = this.matches(text)
+
+fun divisor(value: Long): List<Long> {
+    return (1..(sqrt(value.toDouble()).toLong() + 1)).filter { value % it == 0L }.flatMap {
+        if (value / it == it) listOf(it) else listOf(
+            it, value / it
+        )
+    }//.also { println("value: $value, divisors $it") }
+}
+
+fun primeFactor(value: Long): List<Long> {
+    if (value == 1L) return listOf(1)
+    val max = Math.sqrt(value.toDouble()).toLong()
+    return prime(2, max).filter { value % it == 0L }.also { println("value: $value, primeFactor $it") }
+}
+
+// 範囲内の素数を取得
+// fromだけ指定すると戻り値の個数で素数判定ができる
+fun prime(from: Long, to: Long = from): List<Long> {
+    return (from..to).filter { i ->
+        val max = Math.sqrt(i.toDouble()).toLong()
+        (2..max).all { j -> i % j != 0L }
+    }
+}
+
+
+fun BufferedReader.readInt(): Int = this.readLine()!!.toInt()
+
+fun BufferedReader.readLong(): Long = this.readLine()!!.toLong()
+
+fun BufferedReader.readDouble(): Double = this.readLine()!!.toDouble()
+
+fun BufferedReader.readInts(): List<Int> = this.readLine()!!.split(" ").filter { it.isNotBlank() }.map { it.toInt() }
+
+fun BufferedReader.readLongs(): List<Long> = this.readLine()!!.split(" ").map { it.toLong() }
+
+fun BufferedReader.readDoubles(): List<Double> = this.readLine()!!.split(" ").map { it.toDouble() }
+
+
+fun Double.decimalFormat(decimalCount: Int): String = String.format("%.${decimalCount}f", this)

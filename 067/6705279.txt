@@ -1,0 +1,72 @@
+#include <iostream>
+using namespace std;
+
+struct Card {
+  char suit;
+  int value;
+};
+
+void bubble_sort(Card *a, int n) {
+  bool swapped = true;
+  for (int i = 0; swapped; ++i) {
+    swapped = false;
+    for (int j = n-1; j > i; --j) {
+      if (a[j].value < a[j-1].value) {
+        swap(a[j], a[j-1]);
+        swapped = true;
+      }
+    }
+  }
+}
+
+void selection_sort(Card *a, int n) {
+  for (int i = 0; i < n - 1; i++) {
+    int min_i = i;
+    for (int j = i + 1; j < n; j++) {
+      if (a[j].value < a[min_i].value) {
+        min_i = j;
+      }
+    }
+    if (i != min_i) {
+      swap(a[i], a[min_i]);
+    }
+  }
+}
+
+void print_array(Card *a, int n) {
+  for (int i = 0; i < n; ++i) {
+    if (i > 0) {
+      cout << " ";
+    }
+    cout << a[i].suit << a[i].value;
+  }
+  cout << endl;
+}
+
+int main() {
+  int n;
+  cin >> n;
+
+  Card a[n], b[n];
+  for (int i = 0; i < n; ++i) {
+    cin >> a[i].suit >> a[i].value;
+    b[i] = a[i];
+  }
+
+  bubble_sort(a, n);
+  print_array(a, n);
+  cout << "Stable" << endl;
+
+  selection_sort(b, n);
+  print_array(b, n);
+  bool stable = true;
+  for (int i = 0; i < n; ++i) {
+    if (a[i].suit != b[i].suit) {
+      stable = false;
+      break;
+    }
+  }
+  cout << (stable ? "Stable" : "Not stable") << endl;
+
+  return 0;
+}

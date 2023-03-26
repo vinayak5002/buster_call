@@ -1,0 +1,81 @@
+#include <iostream>
+#include <algorithm>
+using namespace std;
+
+struct edge {
+  int u;
+  int v;
+  int w;
+};
+
+void makeSet(int);
+void unite(int,int);
+void link(int,int);
+int findSet(int);
+bool comp(edge&,edge&);
+int kruskal(void);
+
+int V,E;
+int p[10000];
+int r[10000];
+edge edges[100000];
+
+int main(){
+  int s,t,w;
+
+  cin >> V >> E;
+
+  for(int i=0; i<V; i++) makeSet(i);
+
+  for(int i=0; i<E; i++){
+    cin >> s >> t >> w;
+    edges[i].u = s;
+    edges[i].v = t;
+    edges[i].w = w;
+  }
+
+  cout << kruskal() << endl;
+
+  return 0;
+}
+
+void makeSet(int x){
+  p[x] = x;
+  r[x] = 0;
+}
+
+void unite(int x, int y){
+  link(findSet(x), findSet(y));
+}
+
+void link(int x, int y){
+  if(r[x] > r[y]) p[y] = x;
+  else p[x] = y;
+  if(r[x] == r[y]) r[y] = r[y]+1;
+}
+
+int findSet(int x){
+  if(x != p[x]) p[x] = findSet(p[x]);
+  return p[x];
+}
+
+bool comp(edge &e1, edge &e2){
+  return e1.w < e2.w;
+}
+
+int kruskal(void){
+  int cost = 0;
+
+  sort(edges,edges+E,comp);
+
+  for(int i=0; i<E; i++){
+    edge e = edges[i];
+    if(findSet(e.u) != findSet(e.v)){
+      unite(e.u,e.v);
+	    cost += e.w;
+    }
+  }
+
+  return cost;
+}
+

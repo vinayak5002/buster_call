@@ -1,0 +1,98 @@
+#include<bits/stdc++.h>
+#define int ll
+#define rep(i, N) for(int i = 0; i < (int)N; ++i)
+#define rep1(i, N) for(int i = 1; i <= (int)N; ++i)
+#define per(i, N) for(int i = N-1; i >= 0; --i)
+#define all(v) (v).begin(), (v).end()
+#define rall(v) (v).rbegin(), (v).rend()
+#define bit(n, k) ((n) >> k)
+#define pcnt(n) (__builtin_popcount(n))
+#define TakAo(ans) ans ? cout << "Takahashi\n" : cout << "Aoki\n"
+#define YesNo(ans) ans ? cout << "Yes\n" : cout << "No\n"
+#define endl '\n'
+#define fi first
+#define se second
+#define mkpr make_pair
+#define mktpl make_tuple
+#define eb emplace_back
+
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+using point = struct{ ll x, y; };
+template<class T> using max_heap = priority_queue<T>;
+template<class T> using min_heap = priority_queue<T, vector<T>, greater<T>>;
+template<class T> using vec = vector<T>;
+template<class T> using vvec = vec<vec<T>>;
+template<class T> using vvvec = vec<vvec<T>>;
+template<class T> using vvvvec = vvec<vvec<T>>;
+
+constexpr ld EPS = 1e-10;
+constexpr int INF = 1001001001;
+constexpr ll LINF = 1001001001001001001ll;
+constexpr ll MOD = (1) ? 998244353 : 1e9+7;
+constexpr int NIL = -1;
+constexpr int pm[2] = {1, -1};
+constexpr int dy[4] = {0, 1, 0, -1};
+constexpr int dx[4] = {1, 0, -1, 0};
+
+ll cel(ll a, ll b){ return (a + b - 1) / b;}
+ll Gcd(ll a, ll b){ return b ? Gcd(b, a % b) : a;}
+template<class T> T powi(T x, ll exp){
+    return exp > 0 ? (exp & 1 ? x : 1) * powi(x * x, exp >> 1) : 1;
+}
+ll modpow(ll x, ll exp, ll mod){
+    x %= mod;
+    return exp > 0 ? (exp & 1 ? x : 1) * modpow(x * x, exp >> 1, mod) % mod : 1;
+}
+template<class T> bool chmin(T &a, T b){ return a > b ? (a = b, true) : 0;}
+template<class T>bool chmax(T &a, T b){ return a < b ? (a = b, true) : 0;}
+
+using Pair = pair<int, int>;
+using Tpl = tuple<int, int, int>;
+
+int N, M;
+vvec<char> G(50, vec<char>(50));
+
+bool dp(int h, int w, int d){
+    int d1 = (d + 1) % 4;
+    G[h][w] = '#';
+    rep(i, 4){
+        if(d1 == d) continue;
+        int dir = (d1 - i + 4) % 4;
+        int hy = h - dy[dir], wx = w + dx[dir];
+        if(hy < 0 || N <= hy || wx < 0 || M <= wx) continue;
+        //cout << dir << endl;
+        if(hy == 0 && wx == 0){
+            if(G[0][M - 1] == '.') continue;
+            if(G[N - 1][M - 1] == '.') continue;
+            if(G[N - 1][0] == '.') continue;
+            return 1;
+        }
+        if(G[hy][wx] == '#') continue;
+        if(dp(hy, wx, dir)) return 1;
+    }
+    G[h][w] = '.';
+    return 0;
+}
+
+void Main(){
+    while(1){
+        cin >> N >> M;
+        if(N == 0 && M == 0) break;
+        rep(i, N)rep(j, M){
+            cin >> G[i][j];
+        }
+        cout << (dp(0, 0, 0) ? "YES" : "NO") << endl;
+    }
+}
+
+signed main(){
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    cout << fixed << setprecision(10);
+    Main();
+    return 0;
+}
+

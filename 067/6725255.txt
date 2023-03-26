@@ -1,0 +1,201 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N, M;
+    cin >> N >> M;
+    V<string> S(N);
+    rep(i, N) cin >> S[i];
+    V<string> SS(N + 2);
+    string t;
+    rep(i, M + 2) t += '#';
+    SS[0] = t;
+    SS[N + 1] = t;
+    rep(i, N) { SS[i + 1] = "#" + S[i] + "#"; }
+    S = SS;
+    N += 2, M += 2;
+    show(S);
+    V<char> pdir = {'v', '>', '^', '<'};
+    const int INF = 1 << 30;
+    V<V<V<V<int>>>> dist(N, V<V<V<int>>>(M, V<V<int>>(4, V<int>(4, INF))));
+    using tp = tuple<int, int, int, int>;
+    V<V<V<V<tp>>>> tsid(N, V<V<V<tp>>>(M, V<V<tp>>(4, V<tp>(4))));
+    int gx, gy;
+    const int dx[4] = {1, 0, -1, 0}, dy[4] = {0, 1, 0, -1};
+    deque<tuple<int, int, int, int>> que;
+    int sx, sy, sk, sc;
+    rep(i, N) {
+        rep(j, M) {
+            if (S[i][j] == 'G') {
+                gx = i, gy = j;
+            }
+            rep(k, 4) {
+                if (S[i][j] == pdir[k]) {
+                    dist[i][j][k][2] = 1;
+                    que.push_back({i, j, k, 2});
+                    sx = i, sy = j, sk = k, sc = 2;
+                }
+            }
+        }
+    }
+    while (!que.empty()) {
+        auto [cx, cy, k, c] = que.front();
+        que.pop_front();
+        if (cx == gx and cy == gy) {
+            set<pair<int, int>> st;
+            st.insert({cx, cy});
+            show(make_tuple(cx, cy, k, c));
+            while (!(cx == sx and cy == sy and k == sk and c == sc)) {
+                auto [nx, ny, nk, nc] = tsid[cx][cy][k][c];
+                cx = nx, cy = ny, k = nk, c = nc;
+                st.insert({cx, cy});
+                show(make_tuple(cx, cy, k, c));
+                if (cx == 0 and cy == 0 and k == 0 and c == 0) break;
+            }
+            cout << st.size() << '\n';
+            return 0;
+        }
+        // go ahead
+        rep(_, 1) {
+            if (c == 1 or c == 2) {
+                int nx = cx + dx[k], ny = cy + dy[k];
+                if (!(0 <= nx and nx < N and 0 <= ny and ny < M)) continue;
+                if (S[nx][ny] == '#') continue;
+                int nc = c + 1;
+                if (dist[nx][ny][k][nc] != INF) continue;
+                dist[nx][ny][k][nc] = 1;
+                tsid[nx][ny][k][nc] = {cx, cy, k, c};
+                que.push_back({nx, ny, k, nc});
+            }
+        }
+        // turn right
+        rep(_, 1) {
+            if (c == 2 or c == 3) {
+                int nk = (k + 3) % 4;
+                int nc = c - 2;
+                if (dist[cx][cy][nk][nc] != INF) continue;
+                dist[cx][cy][nk][nc] = 1;
+                tsid[cx][cy][nk][nc] = {cx, cy, k, c};
+                que.push_front({cx, cy, nk, nc});
+            }
+        }
+        // turn left
+        rep(_, 1) {
+            if (c == 0 or c == 1) {
+                int nk = (k + 1) % 4;
+                int nc = c + 2;
+                if (dist[cx][cy][nk][nc] != INF) continue;
+                dist[cx][cy][nk][nc] = 1;
+                tsid[cx][cy][nk][nc] = {cx, cy, k, c};
+                que.push_front({cx, cy, nk, nc});
+            }
+        }
+        // change wall
+        if (c == 0) {
+            rep(_, 1) {
+                // back
+                int nx1 = cx + dx[k] + dx[(k + 3) % 4], ny1 = cy + dy[k] + dy[(k + 3) % 4];
+                int nx2 = cx + dx[(k + 3) % 4], ny2 = cy + dy[(k + 3) % 4];
+                if (!(0 <= nx1 and nx1 < N and 0 <= ny1 and ny1 < M)) continue;
+                if (!(0 <= nx2 and nx2 < N and 0 <= ny2 and ny2 < M)) continue;
+                if (S[nx1][ny1] == '#' and S[nx2][ny2] != '#' and dist[cx][cy][k][1] == INF) {
+                    dist[cx][cy][k][1] = 1;
+                    tsid[cx][cy][k][1] = {cx, cy, k, c};
+                    que.push_front({cx, cy, k, 1});
+                }
+            }
+            rep(_, 1) {
+                // back 2
+                int nx2 = cx + dx[(k + 3) % 4], ny2 = cy + dy[(k + 3) % 4];
+                if (!(0 <= nx2 and nx2 < N and 0 <= ny2 and ny2 < M)) continue;
+                if (S[nx2][ny2] == '#' and dist[cx][cy][k][2] == INF) {
+                    dist[cx][cy][k][2] = 1;
+                    tsid[cx][cy][k][2] = {cx, cy, k, c};
+                    que.push_front({cx, cy, k, 2});
+                }
+            }
+        } else if (c == 1) {
+            rep(_, 1) {
+                // back
+                int nx2 = cx + dx[(k + 3) % 4], ny2 = cy + dy[(k + 3) % 4];
+                if (!(0 <= nx2 and nx2 < N and 0 <= ny2 and ny2 < M)) continue;
+                if (S[nx2][ny2] == '#' and dist[cx][cy][k][2] == INF) {
+                    dist[cx][cy][k][2] = 1;
+                    tsid[cx][cy][k][2] = {cx, cy, k, c};
+                    que.push_front({cx, cy, k, 2});
+                }
+            }
+            rep(_, 1) {
+                // front
+                int nx2 = cx + dx[k], ny2 = cy + dy[k];
+                if (!(0 <= nx2 and nx2 < N and 0 <= ny2 and ny2 < M)) continue;
+                if (S[nx2][ny2] == '#' and dist[cx][cy][k][0] == INF) {
+                    dist[cx][cy][k][0] = 1;
+                    tsid[cx][cy][k][0] = {cx, cy, k, c};
+                    que.push_front({cx, cy, k, 0});
+                }
+            }
+        } else if (c == 2) {
+            rep(_, 1) {
+                // back
+                int nx1 = cx + dx[(k + 2) % 4] + dx[(k + 3) % 4], ny1 = cy + dy[(k + 2) % 4] + dy[(k + 3) % 4];
+                int nx2 = cx + dx[(k + 2) % 4], ny2 = cy + dy[(k + 2) % 4];
+                if (!(0 <= nx1 and nx1 < N and 0 <= ny1 and ny1 < M)) continue;
+                if (!(0 <= nx2 and nx2 < N and 0 <= ny2 and ny2 < M)) continue;
+                if (S[nx1][ny1] == '#' and S[nx2][ny2] != '#' and dist[cx][cy][k][3] == INF) {
+                    dist[cx][cy][k][3] = 1;
+                    tsid[cx][cy][k][3] = {cx, cy, k, c};
+                    que.push_front({cx, cy, k, 3});
+                }
+            }
+            rep(_, 1) {
+                // front
+                int nx1 = cx + dx[(k + 0) % 4] + dx[(k + 3) % 4], ny1 = cy + dy[(k + 0) % 4] + dy[(k + 3) % 4];
+                int nx2 = cx + dx[(k + 0) % 4], ny2 = cy + dy[(k + 0) % 4];
+                if (!(0 <= nx1 and nx1 < N and 0 <= ny1 and ny1 < M)) continue;
+                if (!(0 <= nx2 and nx2 < N and 0 <= ny2 and ny2 < M)) continue;
+                if (S[nx1][ny1] == '#' and S[nx2][ny2] != '#' and dist[cx][cy][k][1] == INF) {
+                    dist[cx][cy][k][1] = 1;
+                    tsid[cx][cy][k][1] = {cx, cy, k, c};
+                    que.push_front({cx, cy, k, 1});
+                }
+            }
+            rep(_, 1) {
+                // front 2
+                int nx2 = cx + dx[(k + 0) % 4], ny2 = cy + dy[(k + 0) % 4];
+                if (!(0 <= nx2 and nx2 < N and 0 <= ny2 and ny2 < M)) continue;
+                if (S[nx2][ny2] == '#' and dist[cx][cy][k][0] == INF) {
+                    dist[cx][cy][k][0] = 1;
+                    tsid[cx][cy][k][0] = {cx, cy, k, c};
+                    que.push_front({cx, cy, k, 0});
+                }
+            }
+        } else {
+            rep(_, 1) {
+                // front
+                int nx2 = cx + dx[(k + 3) % 4], ny2 = cy + dy[(k + 3) % 4];
+                if (!(0 <= nx2 and nx2 < N and 0 <= ny2 and ny2 < M)) continue;
+                if (S[nx2][ny2] == '#' and dist[cx][cy][k][2] == INF) {
+                    dist[cx][cy][k][2] = 1;
+                    tsid[cx][cy][k][2] = {cx, cy, k, c};
+                    que.push_front({cx, cy, k, 0});
+                }
+            }
+        }
+    }
+    cout << -1 << '\n';
+    return 0;
+}
+

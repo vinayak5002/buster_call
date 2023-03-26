@@ -1,0 +1,65 @@
+#include <iostream>
+#include <random>
+#include <regex>
+using namespace std;
+
+struct tree {
+    int n;
+    vector<string> node;
+    vector<int> parent;
+    vector<vector<int>> g;
+    tree () : n(0) {}
+};
+
+bool add_node(tree &t, int &prev_depth) {
+    string s; cin >> s;
+    if (s == "0") return false;
+    int depth = count(s.begin(), s.end(), '.');
+    if (t.n == 0) {
+        t.parent.push_back(-1);
+    } else {
+        int par = t.n - 1;
+        for (int i = depth; i <= prev_depth; ++i) par = t.parent.at(par);
+        t.parent.push_back(par);
+        t.g.at(par).push_back(t.n);
+    }
+    t.node.push_back(s.substr(depth));
+    ++t.n;
+    t.g.push_back({});
+    prev_depth = depth;
+    return true;
+}
+void parse(tree &t, int n) {
+    int tmp = 0;
+    for (int i = 0; i < n; ++i) add_node(t, tmp);
+}
+
+long eval_rec(const tree &t, vector<long> &res, int u) {
+    if (t.node.at(u) == "+") {
+        long ret = 0;
+        for (int v : t.g.at(u)) ret += eval_rec(t, res, v);
+        return ret;
+    } else if (t.node.at(u) == "*") {
+        long ret = 1;
+        for (int v : t.g.at(u)) ret *= eval_rec(t, res, v);
+        return ret;
+    } else {
+        return stol(t.node.at(u));
+    }
+}
+long eval(const tree &t) {
+    vector<long> res(t.n);
+    return eval_rec(t, res, 0);
+}
+
+int main() {
+    int n;
+    while (true) {
+        cin >> n;
+        if (n == 0) return 0;
+        tree t;
+        parse(t, n);
+        cout << eval(t) << endl;
+    }
+    return 0;
+}

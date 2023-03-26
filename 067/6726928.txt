@@ -1,0 +1,162 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long int ull;
+#define chmin(x,y) x = min(x,y)
+#define chmax(x,y) x = max(x,y)
+#define BIG_NUM 2000000000
+#define HUGE_NUM 4000000000000000000 //オーバーフローに注意
+//#define MOD 1000000007
+#define EPS 0.000000001
+
+
+
+#define MOD 998244353
+#define SIZE 1000005
+
+ll N;
+ll A[SIZE];
+ll fact[SIZE],inv_fact[SIZE];
+
+ll mod_pow(ll x,ll count, ll mod){
+
+	if(count == 0)return 1;
+	ll ret = mod_pow(((x%mod)*(x%mod))%mod,count/2,mod);
+	if(count%2 == 1){
+
+		ret = ((ret%mod)*(x%mod))%mod;
+	}
+	return ret;
+}
+
+
+ll euler_phi(ll num){
+
+	 ll ret = num;
+
+	 for(ll i = 2; i*i <= num;  i++){
+			if(num%i == 0) {
+				  ret  = ret/i*(i-1);
+				  while(num%i == 0)num /= i;
+			}
+	  }
+	  if(num != 1) ret = ret/num*(num-1);
+	  return ret;
+}
+
+
+ll extgcd(ll a,ll b,ll &x,ll &y){
+	ll d = a;
+	if(b != 0){
+		d = extgcd(b,a%b,y,x);
+		y -= (a/b)*x;
+	}else{
+		x = 1;
+		y = 0;
+	}
+	return d;
+}
+
+ll mod_inverse(ll a,ll m){
+    ll x,y;
+    extgcd(a,m,x,y);
+    return (m+x%m)%m;
+}
+
+ll nCk(ll n,ll k){
+
+	if(k > n)return 0;
+
+	ll ret = fact[n]*inv_fact[k];
+	ret %= MOD;
+	ret *= inv_fact[n-k];
+
+	return ret%MOD;
+}
+
+ll nPk(ll n,ll k){
+
+	if(k > n)return 0;
+
+	ll ret = fact[n]*inv_fact[n-k];
+
+	return ret%MOD;
+}
+
+
+
+int main(){
+
+	fact[0] = 1;
+	for(ll i = 1; i < SIZE; i++){
+		fact[i] = i*fact[i-1];
+		fact[i] %= MOD;
+	}
+	inv_fact[SIZE-1] = mod_inverse(fact[SIZE-1],MOD);
+	for(ll i = SIZE-1; i >= 1; i--){
+
+		inv_fact[i-1] = inv_fact[i]*i;
+		inv_fact[i-1] %= MOD;
+	}
+
+	scanf("%lld",&N);
+
+	ll minus = 0;
+	ll num1 = 0,num5 = 0,num7 = 0;
+	vector<ll> vec;
+	vec.push_back(-1); //ダミー
+
+	for(ll i = 0; i < N; i++){
+
+		scanf("%lld",&A[i]);
+		if(A[i] == 1 || A[i] == 5 || A[i] == 7){
+
+			minus++;
+			if(A[i] == 1){
+
+				num1++;
+			}else if(A[i] == 5){
+
+				num5++;
+			}else{
+
+				num7++;
+			}
+
+		}else if(A[i] == 6){
+
+			vec.push_back(i);
+		}
+	}
+	vec.push_back(N); //ダミー
+
+	ll ans = 1;
+	for(ll i = 0; i < vec.size()-1; i++){
+		ll num2 = 0,num3 = 0;
+		for(ll k = vec[i]+1; k < vec[i+1]; k++){
+			if(A[k]%2 == 0){
+
+				num2++;
+			}
+			if(A[k]%3 == 0){
+
+				num3++;
+			}
+		}
+
+		ans *= nCk(num2+num3,num2);
+		ans %= MOD;
+	}
+
+	ans *= nCk(N,num1);
+	ans %= MOD;
+	ans *= nCk(N-num1,num5);
+	ans %= MOD;
+	ans *= nCk(N-(num1+num5),num7);
+	ans %= MOD;
+
+	printf("%lld\n",ans);
+
+	return 0;
+}
+

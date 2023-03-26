@@ -1,0 +1,49 @@
+#include <stdio.h>
+
+int n,cur=1;
+int v[101];
+int t[101][2];
+int G[101][101];
+
+int DFS(int d,int ct){
+    int time=ct;
+    v[d] = 1;
+    t[d][0]=time;
+    for (int i=1 ; i<=n ; i++){ 
+        if (G[d][i] == 1 && v[i] == 0){             
+            time=DFS(i,time+1);  
+        }    
+    }
+    time++;
+    t[d][1]=time;
+    return time;
+}
+
+int main(void){
+    int tmp_n,tmp;
+    int k;
+    scanf("%d",&n);
+    for(int i=1;i<=n;i++){
+        for(int j=1;j<=n;j++){
+            G[i][j]=0;
+        }
+    }
+    for(int i=1;i<=n;i++){
+        scanf("%d %d",&tmp_n,&k);
+        for(int j=0;j<k;j++){
+            scanf("%d",&tmp);
+            G[i][tmp]=1;
+        }
+    }
+    
+    for(int i=1;i<=n;i++){
+        if(v[i]==0){
+            cur=DFS(i,cur);
+            cur++;
+        }
+    }
+
+    for(int i=1;i<=n;i++){
+        printf("%d %d %d\n",i,t[i][0],t[i][1]);
+    }
+}

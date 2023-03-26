@@ -1,0 +1,175 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using ld = long double;
+
+//only for atcoder
+//#include<atcoder/all>
+//using namespace atcoder;
+
+#define rep(i,l,r) for(ll i=(l); i<(r); i++)
+#define rrep(i,l,r) for(ll i=(r)-1; i>=(l); i--)
+#define ALL(c) (c).begin(), (c).end()
+#define RALL(c) (c).rbegin(), (c).rend()
+#define SORT(c) sort(ALL(c))
+#define RSORT(c) sort(RALL(c))
+#define MINV(c) *min_element(ALL(c))
+#define MAXV(c) *max_element(ALL(c))
+
+using VI = vector<int>;
+using VVI = vector<VI>;
+using VL = vector<ll>;
+using VVL = vector<VL>;
+using VS = vector<string>;
+using VVS = vector<VS>;
+using VB = vector<bool>;
+using VVB = vector<VB>;
+using VC = vector<char>;
+using VVC = vector<VC>;
+using VD = vector<ld>;
+using VVD = vector<VD>;
+using P = pair<ll,ll>;
+using VP = vector<P>;
+const ll LINF = 2e18;
+const int INF = 2e9;
+ld eps = 1e-7;
+
+ld dist_lp(ld a, ld b, ld c, ld x, ld y){
+  return abs(a*x + b*y + c) / sqrt(pow(a,2) + pow(b,2));
+}
+
+void solve(int N){
+  ld sx, sy, gx, gy;
+  cin >> sx >> sy >> gx >> gy;
+  
+  VVD vec(N,VD(5));
+  rep(i,0,N){
+    rep(j,0,5){
+      cin >> vec[i][j];
+    }
+  }
+  
+  ld a = gy - sy;
+  ld b = - (gx - sx);
+  ld c = gy*(gx-sx) - gx*(gy-sy);
+  
+  VVD near(N,VD(2,1e18));
+  
+  rep(i,0,N){
+    rep(x,0,2){
+      rep(y,0,2){
+        near[i][0] = min(near[i][0], dist_lp(a,b,c,vec[i][x*2],vec[i][y*2+1]));
+      }
+    }
+    near[i][1] = vec[i][4];
+  }
+  
+  rep(i,0,N){
+    if(vec[i][0] < sx && sx < vec[i][2]){
+      ld A = min(abs(sy-vec[i][1]), abs(sy-vec[i][3]));
+      near.push_back({A,vec[i][4]});
+    }
+    if(vec[i][0] < gx && gx < vec[i][2]){
+      ld A = min(abs(gy-vec[i][1]), abs(gy-vec[i][3]));
+      near.push_back({A,vec[i][4]});
+    }
+    if(vec[i][1] < sy && sy < vec[i][3]){
+      ld A = min(abs(sx-vec[i][0]), abs(sx-vec[i][2]));
+      near.push_back({A,vec[i][4]});
+    }
+    if(vec[i][1] < gy && gy < vec[i][3]){
+      ld A = min(abs(gx-vec[i][0]), abs(gx-vec[i][2]));
+      near.push_back({A,vec[i][4]});
+    }
+  }
+  
+  ld ok = 0;
+  ld ng = 1010;
+  rep(i,0,100){
+    ld mid = (ok+ng)/2;
+    bool flag = true;
+    rep(j,0,near.size()){
+      ld D;
+      if(mid > near[j][1]){
+        D = sqrt(pow(mid,2) - pow(mid-near[j][1],2));
+      }
+      else{
+        D = mid;
+      }
+      if(D > near[j][0]){
+        flag = false;
+        break;
+      }
+    }
+    
+    if(flag){
+      ok = mid;
+    }
+    else{
+      ng = mid;
+    }
+  }
+  
+  rep(i,0,N){
+    ld Y;
+    //0
+    Y = (-a*vec[i][0] - c) / b;
+    if(-eps + vec[i][1] < Y  && Y < vec[i][3] + eps){
+      if(-eps + min(sx,gx) < vec[i][0] && vec[i][0] < max(sx,gx) + eps){
+        ok = 0;
+      }
+    }
+    //2
+    Y = (-a*vec[i][2] - c) / b;
+    if(-eps + vec[i][1] < Y  && Y < vec[i][3] + eps){
+      if(-eps + min(sx,gx) < vec[i][2] && vec[i][2] < max(sx,gx) + eps){
+        ok = 0;
+      }
+    }
+    
+    ld X;
+    //1
+    X = (-b*vec[i][1] - c) / a;
+    if(-eps + vec[i][0] < X  && X < vec[i][2] + eps){
+      if(-eps + min(sy,gy) < vec[i][1] && vec[i][1] < max(sy,gy) + eps){
+        ok = 0;
+      }
+    }
+    //3
+    X = (-b*vec[i][3] - c) / a;
+    if(-eps + vec[i][0] < X  && X < vec[i][2] + eps){
+      if(-eps + min(sy,gy) < vec[i][3] && vec[i][3] < max(sy,gy) + eps){
+        ok = 0;
+      }
+    }
+    
+    //in
+    if(-eps + vec[i][0] < min(sx,gx) && max(sx,gx) < vec[i][2] + eps){
+      if(-eps + vec[i][1] < min(sy,gy) && max(sy,gy) < vec[i][3] + eps){
+        ok = 0;
+      }
+    }
+  }
+  
+  cout << setprecision(20) << ok << endl;
+}
+
+int main(){
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  //cin >> T;
+  /*T = 1;
+  for(int i=0; i<T; i++){
+    solve();
+  }*/
+  
+  while(true){
+    int N;
+    cin >> N;
+    if(N == 0){
+      return 0;
+    }
+    solve(N);
+  }
+}

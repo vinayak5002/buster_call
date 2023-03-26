@@ -1,0 +1,118 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define MOD 1000000007
+//#define MOD 998244353
+#define INF 1e18 + 10
+#define EPS 1e-9
+#define F first
+#define S second
+
+#define debug(x) cout<<x<<endl;
+#define repi(i,x,n) for(int i=x;i<n;i++)
+#define rep(i,n) repi(i,0,n)
+#define lp(i,n) repi(i,0,n)
+#define repn(i,n) for(int i=n;i>=0;i--)
+#define int long long
+#define endl "\n"
+
+typedef pair<int,int> PII;
+typedef pair<int,string> PIS;
+typedef pair<string,int> PSI;
+
+template <typename T>
+bool chmax(T &a, const T& b) {
+  if (a < b) {
+    a = b; 
+    return true;
+  }
+  return false;
+}
+
+template <typename T>
+bool chmin(T &a, const T& b) {
+  if (a > b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+struct Node{
+  int parent,cost,rank;
+};
+
+struct UnionFind{
+  vector<Node> data;
+
+  UnionFind(int N){
+    data.resize(N);
+    rep(i,N){
+      data[i].parent=-1;
+      data[i].cost=0;
+      data[i].rank=0;
+    }
+  }
+
+  bool unite(int x, int y,int w) {
+    
+    w+=weight(x);
+    w-=weight(y);
+    x = find(x), y = find(y);
+    if(x == y) return (false);
+    if(data[x].rank > data[y].rank){swap(x, y);w*=-1;}
+    if(data[x].rank==data[y].rank) data[x].rank++;
+    data[y].parent = x;
+    data[y].cost=w;
+    return (true);
+  }
+ 
+  int find(int k) {
+    if(data[k].parent < 0) return (k);
+    int r=find(data[k].parent);
+    data[k].cost+=data[data[k].parent].cost;
+    return (data[k].parent = r);
+  }
+
+  bool isSame(int a,int b){
+    return find(a)==find(b);
+  }
+
+  int weight(int k){
+    find(k);
+    return data[k].cost;
+  }
+
+  int diff(int x,int y){
+    return weight(y)-weight(x);
+  }
+  
+  
+};
+
+
+signed main(){
+  cin.tie(0);	
+  ios::sync_with_stdio(false);
+  int n,q;
+  cin>>n>>q;
+  UnionFind UF(n);
+  rep(i,q){
+    int num;
+    int x,y,z;
+    cin>>num;
+    if(num==0){
+      cin>>x>>y>>z;
+      UF.unite(x,y,z);
+
+    }else{
+      cin>>x>>y;
+      int ans=UF.diff(x,y);
+      if(!UF.isSame(x,y)) cout<<'?'<<endl;
+      else cout<<ans<<endl;
+    }
+  }
+      
+
+  return 0;
+}
+

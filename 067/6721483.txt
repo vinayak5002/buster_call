@@ -1,0 +1,63 @@
+#define PROBLEM "https://onlinejudge.u-aizu.ac.jp/courses/library/3/DSL/1/DSL_1_A"
+#include <bits/stdc++.h>
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+constexpr ll MOD = 1e9 + 7;
+constexpr ll INF = 1e+18;
+constexpr ld EPS = 1e-12L;
+constexpr ld PI = 3.14159265358979323846L;
+
+// based on ACL
+class UnionFind {
+  int _n;
+  // root: -1 * 連結成分サイズ
+  // otherwise: parent
+  vector<int> ps;
+  int num_groups;
+
+public:
+  UnionFind(int n): _n(n), ps(n, -1), num_groups(n) {}
+
+  int unite(int a, int b) {
+    int x = root(a), y = root(b);
+    if(x == y) {
+      return x;
+    }
+    if(-ps[x] < -ps[y]) {
+      swap(x, y);
+    }
+    ps[x] += ps[y];
+    ps[y] = x;
+    num_groups--;
+    return x;
+  }
+  bool same(int a, int b) { return root(a) == root(b); }
+  int root(int a) {
+    if(ps[a] < 0) {
+      return a;
+    }
+    return ps[a] = root(ps[a]);
+  }
+  int size(int a) { return -ps[root(a)]; }
+  int getNum() { return num_groups; }
+};
+
+int main() {
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  int n, q;
+  cin >> n >> q;
+  UnionFind uf(n);
+  while(q--) {
+    int com, x, y;
+    cin >> com >> x >> y;
+    if(com) {
+      cout << uf.same(x, y) << '\n';
+    } else {
+      uf.unite(x, y);
+    }
+  }
+}
+

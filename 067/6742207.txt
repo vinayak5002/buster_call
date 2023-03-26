@@ -1,0 +1,138 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+
+// Node of disjoint set
+class Node{
+private:
+	int parent;
+	int rank;
+	int weight;
+
+public:
+	Node(){
+		parent = 0;
+		rank = 0;
+		weight = 0;
+	}
+
+	Node(int parent){
+		this->parent = parent;
+		rank = 0;
+		weight = 0;
+	}
+
+	void setParent(int parent){
+		this->parent = parent;
+	}
+
+	int getParent(){
+		return parent;
+	}
+
+	void setRank(int rank){
+		this->rank = rank;
+	}
+
+	int getRank(){
+		return rank;
+	}
+
+	void setWeight(int weight){
+		this->weight = weight;
+	}
+
+	int getWeight(){
+		return weight;
+	}
+};
+
+class WUFT{
+private:
+	vector<Node> tree;
+
+public:
+	WUFT(){
+		int n, q;
+		cin >> n >> q;
+
+		// init union find tree
+		for(int i=0; i<n; i++){
+			tree.push_back(Node(i));
+		}
+
+		// execute command
+		for(int i=0; i<q; i++){
+			int query;
+			cin >> query;
+
+			// relate
+			if(query==0){
+				int x, y, z;
+				cin >> x >> y >> z;
+				relate(x, y, z);
+			}
+
+			// diff
+			else if(query==1){
+				int x, y;
+				cin >> x >> y;
+				diff(x, y);
+			}
+		}
+	}
+
+	/*** the orepation for disjoint set ***/
+
+	void relate(int x, int y, int z){
+
+		z += weight(x) - weight(y);
+
+		x = find(x);
+		y = find(y);
+
+		if(tree[x].getRank() > tree[y].getRank()){
+			tree[y].setParent(x);
+			tree[y].setWeight(z);
+		}
+		else{
+			tree[x].setParent(y);
+			z *= -1;
+			tree[x].setWeight(z);
+
+			if(tree[x].getRank() == tree[y].getRank()){
+				tree[y].setRank(tree[y].getRank()+1);
+			}
+		}
+	}
+
+	int find(int x){
+		if(x == tree[x].getParent()){
+			return x;
+		}
+
+		int root = find(tree[x].getParent());
+		tree[x].setWeight(tree[x].getWeight() 
+			+ tree[tree[x].getParent()].getWeight());
+		tree[x].setParent(root);
+
+		return tree[x].getParent();
+	}
+
+	int weight(int x){
+		find(x);
+		return tree[x].getWeight();
+	}
+
+	int diff(int x, int y){
+		if(find(x) == find(y))
+			cout << weight(y) - weight(x) << endl;
+		else
+			cout << "?" << endl;
+	}
+};
+
+int main(){
+	WUFT wuft = WUFT();
+	return 0;
+}

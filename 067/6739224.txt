@@ -1,0 +1,117 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+
+#define rep(i, n) for(int i = 0; i < (int)n; i++)
+#define repp(i, m, n) for(int i = (int)m; i < (int)n; i++)
+
+#define ALL(x) x.begin(),x.end()
+
+#define YESNO(bool) if(bool){cout<<"YES"<<endl;}else{cout<<"NO"<<endl;}
+#define yesno(bool) if(bool){cout<<"yes"<<endl;}else{cout<<"no"<<endl;}
+#define YesNo(bool) if(bool){cout<<"Yes"<<endl;}else{cout<<"No"<<endl;}
+#define keta(x) cout << std::fixed << std::setprecision(15) << (double)x << endl;
+
+
+using Graph = vector<vector<int>>;
+int n;
+
+//BFSを用いて始点sからの距離を求めるアルゴリズム
+vector<int> BFS(const Graph &G, int s){
+
+    vector<int> dist(n, -1);
+    queue<int> todo;
+    dist[s] = 0; //開始の頂点の距離を0にする．
+
+    //キューに追加
+    todo.push(s);
+
+    while(!todo.empty()){
+        int v = todo.front();
+        todo.pop();
+        for(auto next_v : G[v]){
+            if(dist[next_v] != -1) continue;
+            dist[next_v] = dist[v] + 1;
+            todo.push(next_v);
+        }
+    }
+    return dist;
+}
+
+void solve(){
+    string S;
+    map<int, string> V; //頂点番号とその頂点に書かれているもの
+    Graph G(n);
+
+    rep(i, n){
+        cin >> S;
+        V[i] = S;
+    }
+
+    vector<int> oya(n);
+    oya[0] = 0;
+    repp(i, 1, n){
+        int cnt = 0;
+        rep(j, V[i].size()){
+            if(V[i][j] == '.') cnt++;
+            else if(V[i][j] == '+' || V[i][j] == '*') oya[cnt] = i;
+        }
+        G[oya[cnt-1]].push_back(i);
+        G[i].push_back(oya[cnt-1]);
+    }
+
+    //各頂点の点を削除
+    repp(i, 1, n){
+        string T;
+        rep(j, V[i].size()){
+            if(V[i][j] == '.') continue;
+            else T += V[i][j];
+        }
+        V[i] = T;
+    }
+
+    vector<int> depth = BFS(G, 0);
+
+    int maxdepth = 0;
+    rep(i, n){
+        maxdepth = max(maxdepth, depth[i]);
+    }
+
+    vector<vector<int>> dpV(maxdepth);
+    rep(i, n){
+        if(depth[i] == maxdepth) continue;
+        else dpV[depth[i]].push_back(i);
+    }
+
+    for(int i = maxdepth-1; i >= 0; i--){
+        for(auto v : dpV[i]){
+            if(V[v][0] == '+'){
+                int tmp = 0;
+                for(auto chi : G[v]){
+                    if(depth[chi] > i){
+                        tmp += atoi(V[chi].c_str());
+                    }
+                }
+                V[v] = to_string(tmp);
+            }else if(V[v][0] == '*'){
+                int tmp = 1;
+                for(auto chi : G[v]){
+                    if(depth[chi] > i){
+                        tmp *= atoi(V[chi].c_str());
+                    }
+                }
+                V[v] = to_string(tmp);
+            }
+        }
+    }
+
+    cout << V[0] << endl;
+}
+
+int main(){
+    while(1){
+        cin >> n;
+        if(n == 0) break;
+        solve();
+    }
+}

@@ -1,0 +1,63 @@
+#include<bits/stdc++.h>
+#define rep(i,n) for(int i=0; i< (n); i++)
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+const int mod = 998244353;
+const int inf = (1<<30);
+struct cost{
+    int den;
+    int mun;
+    int num;
+};
+bool operator<(cost a,cost b){
+    return a.den<b.den;
+}
+bool operator>(cost a,cost b){
+    return a.den>b.den;
+}
+
+int main(){
+    while(true){
+        int n,m,l;
+        cin>>n>>m>>l;
+        if(n == 0 && m == 0 && l == 0) break;
+        vector<vector<cost>> g(n+1);
+        rep(i,m){
+            int a,b,d,e;
+            cin>>a>>b>>d>>e;
+            cost k ; k.den=e; k.mun=d; k.num=b;
+            g[a].push_back(k); k.num=a;
+            g[b].push_back(k);
+        }
+        vector<vector<int>> d(n+1,vector<int>(l+1,inf));
+        priority_queue<cost,vector<cost>,greater<cost>> q; 
+        cost k2; k2.num=1; k2.den=0; k2.mun=l;
+        q.push(k2);
+        d[1][l] = 0;
+        while(!q.empty()){
+            cost k=q.top(); q.pop();
+            if(d[k.num][k.mun] < k.den) continue;
+            for(cost x : g[k.num] ){
+                if(k.mun >= x.mun){
+                    cost k3; k3.num=x.num; k3.den=k.den; k3.mun=k.mun-x.mun;
+                    if(d[k3.num][k3.mun] > k3.den){
+                        d[k3.num][k3.mun] = k3.den;
+                        q.push(k3);
+                    }
+                }
+                cost k4; k4.num=x.num; k4.den=k.den+x.den; k4.mun=k.mun;
+                 if(d[k4.num][k4.mun] > k4.den){
+                    d[k4.num][k4.mun] = k4.den;
+                    q.push(k4);
+                }
+
+            }
+        }
+        int ans=inf;
+        for(int ans2: d[n]){
+            ans=min(ans2,ans);
+        }
+        cout<<ans<<endl;
+    }
+}

@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (long long  i = 0; i < (long long )(n); i++) 
+#define all(x) (x).begin(),(x).end() 
+#define fix(x) fixed << setprecision(x)
+#define BACK(x) x.rbegin(),x.rend()
+//MOD1 1000000007
+//MOD2 998244353
+#define pb push_back
+#define mp make_pair
+#define bit(n) (1LL<<(n))
+using namespace std;
+using ull = unsigned long long;
+using ll = long long;
+using vl = vector<long long>;
+using vvl = vector<vector<long long>>;
+using vs = vector<string>;
+using pl = pair<long long, long long>;
+template <typename T> inline bool chmin(T& a, const T& b) {bool compare = a > b; if (a > b) a = b; return compare;}
+template <typename T> inline bool chmax(T& a, const T& b) {bool compare = a < b; if (a < b) a = b; return compare;}
+const ll INF = 1LL << 60;
+//#include <atcoder/all>
+//using namespace atcoder;
+//using mint = modint1000000007;
+//using mint = modint998244353;
+int dp[1100][1100];
+int solve2(string S,string T){
+  //最長共通部分文字列を求める。
+  int N = S.size();
+  int M = T.size();
+  //dpテーブルの定義
+  //dp[i][j]は、文字Sのi番目までと、文字Tのj番目まで
+  //を使って、できる最大の共通部分文字列の数と定義
+  //dpテーブルの初期化
+  rep(i,N)rep(j,M)dp[i][j]=0;
+  rep(i,N){
+    rep(j,M){
+      //それぞれの一個前までものが決まっていれば
+      //つまり、それぞれのi+1,j+1を使う前の
+      //i,jに１足したものになる。
+      if(S[i]==T[j])dp[i+1][j+1] = dp[i][j]+1;
+      else dp[i+1][j+1] = max(dp[i][j+1],dp[i+1][j]);
+    }
+  }
+  return dp[N][M];
+}
+void solve(){
+  int Q;cin>>Q;
+  rep(q,Q){
+    string S,T;cin>>S>>T;
+    cout<<solve2(S,T)<<endl;
+  }
+}
+int main(){cin.tie(nullptr);ios::sync_with_stdio(false);solve();}
+

@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for (long long i = 0; i < (long long)(n); ++i)
+
+long long N, W;
+long long v[101], w[101];
+long long dp[101][10001];
+
+int main() {
+    cin >> N >> W;
+    rep(i, N) {
+        cin >> v[i] >> w[i];
+    }
+
+    rep(i, W+1) {
+        dp[0][i] = 0;
+    }
+
+    rep(i, N) {
+        rep(j, W+1) {
+            dp[i+1][j] = dp[i][j];
+            long long cnt = (j - (j % w[i])) / w[i];
+            rep(k, cnt+1) {
+                dp[i+1][j] = max(dp[i+1][j], dp[i][j-w[i]*k] + v[i] * k);
+                if(dp[i+1][j] == 30) {
+                    cout << "i " << i << endl;
+                    cout << "k " << k << endl;
+                }
+            }
+        }
+    }
+
+    cout << dp[N][W] << endl;
+    
+    return 0;
+}

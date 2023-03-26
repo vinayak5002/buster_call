@@ -1,0 +1,161 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#define MAX 500000
+
+
+typedef struct N{
+	int key;
+	struct N *p;
+	struct N *l;
+	struct N *r;
+}Node;
+Node T[MAX];
+
+Node *root,*NIL;
+
+Node *treeMinimum(Node *x){
+	while(x->l != NIL){
+		x= x->l;
+	}
+	return x;
+}
+	
+Node *treeSuccessor(Node *x){
+	if(x->r !=NIL){
+		return treeMinimum(x->r);
+	}
+	Node *y=x->p;
+	while(y!=NIL && x == y->r){
+		x=y;
+		y=y->p;
+	}
+	return y;
+}
+void treeDelete(Node *z){
+	Node *y;
+	Node *x;
+	if(z->l == NIL || z->r==NIL){
+		y=z;
+	}
+	else y=treeSuccessor(z);
+	if(y->l != NIL){
+		x=y->l;
+	}
+	else {
+		x=y->r;
+	}
+	if (x!=NIL){
+		x->p = y->p;
+	}
+	if(y->p==NIL){
+		root = x;
+	}
+	else{
+		if(y==y->p->l){
+			y->p->l=x;
+		}
+		else{
+			y->p->r=x;
+		}
+	}
+	if(y!=z){
+		z->key=y->key;
+	}
+	free(y);
+}
+	
+	
+
+Node *find(Node *u, int k){
+	while(u != NIL && k !=u->key){
+		if(k < u->key){
+			u=u->l;
+		}
+		else{
+			u = u->r;
+		}
+	}
+	return u;
+}
+
+
+void inParse(Node *u){
+	if(u==NIL)return;
+	inParse(u->l);
+	printf(" %d", u->key);
+	inParse(u->r);
+}
+void preParse(Node *u){
+	if(u==NIL)return;
+	printf(" %d",u->key);
+	preParse(u->l);
+	preParse(u->r);
+}
+void insert(int k){
+	Node *y=NIL;
+	Node *x=root;
+	Node *z;
+	
+	z=(Node*)malloc(sizeof(Node));
+	z->key=k;
+	z->l=NULL;
+	z->r=NULL;
+	
+	while(x!=NULL){
+		y=x;
+		if(z->key < x->key){
+			x=x->l;
+		}
+		else{
+			x=x->r;
+		}
+	}
+	z->p=y;
+	if(y==NIL){
+		root=z;
+	}
+	else{
+		if(z->key < y->key){
+			y->l=z;
+		}
+		else{
+			y->r=z;
+		}
+	}
+}
+
+int main(){
+	int n, i, x;
+  char com[20];
+  scanf("%d", &n);
+
+  for ( i = 0; i < n; i++ ){
+    scanf("%s", com);
+  	if(com[0]=='f'){
+  		scanf("%d", &x);
+  		Node *t = find(root,x);
+  		if(t != NIL){
+  			printf("yes\n");
+  		}
+  		else{
+  			printf("no\n");
+  		}
+  	}
+    else if ( com[0]== 'i' ){
+      scanf("%d", &x);
+      insert(x);
+    }
+  	else if ( com[0] == 'p'){
+      inParse(root);
+      printf("\n");
+      preParse(root);
+      printf("\n");
+    }
+  	else if (com[0]=='d'){
+  		scanf("%d", &x);
+  		treeDelete(find(root,x));
+  	}
+  }
+  return 0;
+}

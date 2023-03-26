@@ -1,0 +1,60 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+struct node
+{
+    int id;
+    int parent;
+    int depth;
+    //int type; //0:root, 1:internal node, 2:leaf
+    vector<int> children;
+};
+
+
+int main(){
+    int n;
+    cin >> n;
+    node data[n];
+    for(int i=0;i<n;i++){
+        data[i].depth = 0;
+        data[i].parent = -1;
+    }
+    for(int i=0;i<n;i++){
+        int id;
+        cin >> id;
+        data[id].id = id;
+        int c_num;
+        cin >> c_num;
+        for(int j=0;j<c_num;j++){
+            int child;
+            cin >> child;
+            data[child].parent = data[id].id;
+            //data[child].depth = data[id].depth + 1;
+            data[id].children.push_back(child);
+        }
+    }
+
+    for(int i=0;i<n;i++){
+        node temp = data[i];
+        // if(i>0)temp.depth = data[temp.parent].depth + 1;
+        node p = temp;
+        while(p.parent != -1){
+            temp.depth++;
+            p = data[p.parent];
+        }
+        cout << "node " << temp.id << ": parent = " << temp.parent << ", depth = " << temp.depth;
+        if(temp.parent == -1){
+            cout << ", root, [";
+        }else if(temp.children.size()==0){
+            cout << ", leaf, [";
+        }else{
+            cout << ", internal node, [";
+        }
+        for(int k=0;k<temp.children.size();k++){
+            cout << (k>0?", ":"") << temp.children[k];
+        }
+        cout << "]" << endl;
+    }
+    return 0;
+}

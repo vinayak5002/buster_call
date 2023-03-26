@@ -1,0 +1,89 @@
+#if !__INCLUDE_LEVEL__
+
+#include __FILE__
+
+struct S{
+    ll sum,left,right,ALL;
+    S():sum(0),left(0),right(0),ALL(0){}
+    S(ll x){
+        sum = x;
+        left = max(x,0);
+        right = max(x,0);
+        ALL = max(x,0);
+    }
+};
+S op(S L,S R){
+    S ans;
+    ans.sum= L.sum + R.sum;
+    ans.left = max(L.left,L.sum+R.left);
+    ans.right = max(R.right,L.right+R.sum);
+    ans.ALL = max({L.ALL,R.ALL,L.right+R.left});
+    return ans;
+}
+S e(){return S(0);}
+//構築
+//segtree<S,op,e> seg(A);
+//メソッド
+//seg.set(i,x);A[i]=x
+//seg.get(i);A[i]を取得
+//seg.prod(l,r);op(A[l]~A[r-1])を取得
+//seg.all_prod();op(A[0]~A[N-1])を取得
+//l=seg.min_left<fmin>(i);i~Nでにぶたん
+//r=seg.max_right<fmin>(i);0~iでにぶたん
+int main()
+{
+    while(1){
+        ll N;cin >> N;
+        if(N==0)break;
+        segtree<S,op,e> seg(N);
+        rep(i,N){
+            ll a;cin >> a;
+            seg.set(i,S(a));
+        }
+        cout << seg.all_prod().ALL << endl;
+    }
+}
+
+#else
+
+#include <bits/stdc++.h>
+#include <atcoder/all>
+using namespace std;
+using namespace atcoder;
+#define rep(i, n) for(int i = 0; i < n; i++)
+#define rrep(i, n) for(int i = n-1; i >= 0; i--)
+#define range(i, m, n) for(int i = m; i < n; i++)
+#define fore(i,a) for(auto &i:a)
+#define all(v) v.begin(), v.end()
+#define rall(v) v.rbegin(), v.rend()
+#define Sum(v) accumulate(all(v),0)
+#define minv(v) *min_element(all(v))
+#define maxv(v) *max_element(all(v))
+typedef long long ll;
+typedef vector<ll> vl;
+typedef vector<vector<ll>> vvl;
+const ll INF = 1e16;
+const ll MOD1 = 1000000007;
+const ll MOD2 = 998244353;
+template<class T> inline bool chmax(T& a, T b) { if (a < b) { a = b; return 1; } return 0; }
+template<class T> inline bool chmin(T& a, T b) { if (a > b) { a = b; return 1; } return 0; }
+ll SN(char s){return ll(s-'0');}
+ll SN(string s){return stoll(s);}
+int alpN(char s){return int(s-'a');}
+int AlpN(char s){return int(s-'A');}
+using Graph = vector<vector<ll>>;
+using GraphCost = vector<vector<pair<ll,ll>>>;
+using mint1 = modint1000000007;
+using mint2 = modint998244353;
+using pll = pair<long long, long long>;
+template <class T>ostream &operator<<(ostream &o,const vector<T>&v){for(int i=0;i<(int)v.size();i++)o<<(i>0?" ":"")<<v[i];return o;}//vector空白区切り出力
+ostream& operator<<(ostream& os, const mint1& N) {return os << N.val();}//mint出力。デフォはmint1
+ostream& operator<<(ostream& os, const mint2& N) {return os << N.val();}
+template<class T> bool contain(const std::string& s, const T& v) {
+    return s.find(v) != std::string::npos;
+}
+ll max(int x,ll y){return max((ll)x,y);}
+ll max(ll x,int y){return max(x,(ll)y);}
+ll min(int x,ll y){return min((ll)x,y);}
+ll min(ll x,int y){return min(x,(ll)y);}
+#endif

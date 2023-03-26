@@ -1,0 +1,76 @@
+#include<stdio.h>
+#define N 41
+
+typedef struct{
+	int left;
+	int right;
+}node;
+
+node tree[N];
+int pre[N];
+int in[N];
+int n;
+int c;
+
+int build(int start,int last){
+	int i,j;
+	if(start==last)
+		return in[start];
+		
+	else if(start > last)
+		return 0;
+	else{
+		for(i=1;i<=n;i++){
+			for(j=start;j<=last;j++){
+				if(pre[i]==in[j]){
+					tree[pre[i]].left=build(start,j-1);
+					tree[pre[i]].right=build(j+1,last);
+					return pre[i];
+				}
+			}
+		}
+	}
+	
+}
+
+void postorder(int num){
+	
+	if(tree[num].left != 0)
+		postorder(tree[num].left);
+	
+	if(tree[num].right != 0)
+		postorder(tree[num].right);
+		
+	c++;
+	if(c < n)
+		printf("%d ",num);
+	else 
+		printf("%d\n",num);
+	
+	
+
+	return;
+	
+}
+
+int main(){
+	int i;
+	int root;
+	
+	scanf("%d",&n);
+	
+	for(i=1;i<=n;i++)
+		scanf("%d",&pre[i]);
+	
+	for(i=1;i<=n;i++)
+		scanf("%d",&in[i]);
+		
+	root=build(1,n);
+	
+	postorder(root);
+	
+	return 0;
+	
+}
+
+

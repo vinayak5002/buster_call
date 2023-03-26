@@ -1,0 +1,201 @@
+#include<stdio.h>
+#include<stdlib.h>
+#define NIL NULL
+
+struct node {
+    int key;
+    struct node *left;
+    struct node *right;
+    struct node *parent;
+} ;
+
+typedef struct node * Node;
+Node root;
+
+Node min(Node x)
+{
+    while(x->left!=NIL)
+    {
+        x=x->left;
+    }
+    return x;
+}
+
+Node sec(Node x)
+{
+    if(x->right!=NIL)
+    {
+        return min(x->right);
+    }
+    Node y=x->parent;
+    while(y!=NIL && x==y->right)
+    {
+        x=y;
+        y=y->parent;
+    }
+    return y;
+}
+
+void Del(Node x)
+{
+    Node y;
+    Node z;
+
+    if(x->left==NIL||x->right==NIL)
+    {
+        y=x;
+    }
+    else
+    {
+        y=sec(x);
+    }
+
+    if(y->left!=NIL)
+    {
+        z=y->left;
+    }
+    else
+    {
+        z=y->right;
+    }
+
+    if(z!=NIL)
+    {
+        z->parent=y->parent;
+    }
+    if(y->parent==NIL)
+    {
+        root = z;
+    }
+    else
+    {
+        if(y==y->parent->left)
+        {
+            y->parent->left=z;
+        }
+        else
+        {
+            y->parent->right=z;
+        }
+    }
+
+    if(y!=z)
+    {
+        x->key=y->key;
+    }
+    free(y);
+}
+
+Node find(Node a, int b)
+{
+    while(a!=NIL && b!=a->key)
+    {
+        if(b<a->key)
+        {
+            a=a->left;
+        }
+        else
+        {
+            a=a->right;
+        }
+    }
+    return a;
+}
+
+void insert(int point)
+{
+    Node y = NIL;
+    Node x = root;
+    Node z;
+
+    z=malloc(sizeof(struct node));
+    z->key=point;
+    z->left=NIL;
+    z->right=NIL;
+
+    while(x!=NIL)
+    {
+        y=x;
+        if(z->key < x->key)
+        {
+            x=x->left;
+        }
+        else
+        {
+            x=x->right;
+        }
+    }
+    z->parent=y;
+    if(y==NIL)
+    {
+        root = z;
+    }
+    else
+    {
+        if(z->key < y->key)
+        {
+            y->left=z;
+        }
+        else
+        {
+            y->right=z;
+        }
+    }
+}
+
+void f_print(Node x)
+{
+    if(x==NIL) return;
+    f_print(x->left);
+    printf(" %d", x->key);
+    f_print(x->right);
+}
+
+void s_print(Node x)
+{
+    if(x==NIL) return;
+    printf(" %d", x->key);
+    s_print(x->left);
+    s_print(x->right);
+}
+
+int main(void)
+{
+    int n, x, y, i;
+    char cmd[10];
+
+    scanf("%d", &n);
+
+    for(i=0;i<n;i++)
+    {
+        scanf("%s", cmd);
+        if(cmd[0]=='f')
+        {
+            scanf("%d", &y);
+            Node t =find(root, y);
+            if(t!=NIL)
+            {
+                printf("yes\n");
+            }
+            else printf("no\n");
+        }
+        if(cmd[0]=='i')
+        {
+            scanf("%d", &x);
+            insert(x);
+        }
+        else if(cmd[0]=='p')
+        {
+            f_print(root);
+            printf("\n");
+            s_print(root);
+            printf("\n");
+        }
+        else if(cmd[0]=='d')
+        {
+            scanf("%d", &y);
+            Del(find(root, y));
+        }
+    }
+    return 0;
+}

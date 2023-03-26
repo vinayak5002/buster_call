@@ -1,0 +1,122 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+class ConsoleInput
+{
+    private readonly TextReader _stream;
+    private readonly char _separator = ' ';
+    private readonly Queue<string> inputStream;
+    public ConsoleInput(TextReader stream, char separator = ' ')
+    {
+        this._separator = separator;
+        this._stream = stream;
+        inputStream = new Queue<string>();
+    }
+    public string Read
+    {
+        get
+        {
+            if (inputStream.Count != 0) return inputStream.Dequeue();
+            string[] tmp = _stream.ReadLine()!.Split(_separator);
+            for (int i = 0; i < tmp.Length; ++i)
+                inputStream.Enqueue(tmp[i]);
+            return inputStream.Dequeue();
+        }
+    }
+    public string ReadLine { get { return _stream.ReadLine()!; } }
+    public int ReadInt { get { return int.Parse(Read); } }
+    public long ReadLong { get { return long.Parse(Read); } }
+    public double ReadDouble { get { return double.Parse(Read); } }
+    public string[] ReadStrArray(long N)
+    {
+        var ret = new string[N];
+        for (long i = 0; i < N; ++i)
+            ret[i] = Read;
+        return ret;
+    }
+    public int[] ReadIntArray(long N) { var ret = new int[N]; for (long i = 0; i < N; ++i) ret[i] = ReadInt; return ret; }
+    public long[] ReadLongArray(long N) { var ret = new long[N]; for (long i = 0; i < N; ++i) ret[i] = ReadLong; return ret; }
+    public double[] ReadDoubleArray(long N) { var ret = new double[N]; for (long i = 0; i < N; ++i) ret[i] = ReadDouble; return ret; }
+    public bool isEOF
+    {
+        get { return _stream.Peek() == -1; }
+    }
+}
+public partial class Program
+{
+    public static void Generate()
+    {
+    }
+    private static void SetFlushOff()
+    {
+        var sw = new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = false };
+        Console.SetOut(sw);
+    }
+    private static void Flush() => Console.Out.Flush();
+    public static void Main(string[] args)
+    {
+#if DEBUG
+        Generate();
+#endif
+        var sw = new StreamWriter(Console.OpenStandardOutput())
+        {
+            AutoFlush =
+#if DEBUG
+        true
+#else
+            false
+#endif
+        };
+        Console.SetOut(sw);
+        new Program().Solve(new ConsoleInput(
+#if DEBUG
+        new StreamReader("./inputData.txt")
+#else
+            Console.In
+#endif
+        , ' '));
+        Console.Out.Flush();
+    }
+}
+public partial class Program
+{
+    private void Solve(ConsoleInput cin)
+    {
+        var N = cin.ReadInt;
+        // D_0, ..., D_N
+        var D = new int[N + 1];
+        for (int i = 0; i < N; i++)
+        {
+            D[i] = cin.ReadInt;
+            D[i + 1] = cin.ReadInt;
+        }
+        // D_i...D_jの計算の回数
+        var EndToEnd = new int[N + 1, N + 1];
+        // 2個
+        for (int i = 0; i + 1 <= N; i++)
+        {
+            EndToEnd[i, i + 1] = 0;
+        }
+        // 3個, D_i D_{i+1} D_{i+2}
+        for (int i = 0; i + 2 <= N; i++)
+        {
+            EndToEnd[i, i + 2] = D[i] * D[i + 1] * D[i + 2];
+        }
+        // (m+1)個, D_i ... D_{i+m}
+        for (int m = 3; m + 1 <= N + 1; m++)
+        {
+            var Indices = Enumerable.Range(1, m - 1);
+            for (int i = 0; i + m <= N; i++)
+            {
+                // k = 1, ..., m-1
+                EndToEnd[i, i + m] = Indices.Min(k =>
+                    EndToEnd[i, i + k] + EndToEnd[i + k, i + m] + D[i] * D[i + k] * D[i + m]
+                );
+            }
+        }
+        System.Console.WriteLine(EndToEnd[0, N]);
+    }
+}

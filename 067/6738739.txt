@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ld = long double;
+
+int main() {
+    int n, k, t, u, v, l; cin >> n >> k >> t >> u >> v >> l;
+    vector<int> ds(n); for (auto& x : ds) cin >> x;
+
+    int hold = 0;
+    ld time = 0.0;
+    int iter = 0, now = 0;
+    while(1) {
+        if (now == l) break;
+        // 人参を持っていない-> 次の人参まで
+        if (hold == 0) {
+            // ゴールが目標
+            if (iter == n) {
+                time += (ld)(l - now) / (ld)u;
+                now = l;
+            }
+            // 次の人参が目標
+            else {
+                time += (ld)(ds[iter] - now) / (ld)u;
+                now = ds[iter];
+                iter++;
+                hold++;
+            }
+        }
+        // 人参を持っている
+        else {
+            // 人参を消費した
+            hold--;
+
+            // ゴールが近い
+            if (now + v*t >= l) {
+                time += (ld)(l - now) / (ld)v;
+                now = l;
+            }
+            else {
+                int nxt = upper_bound(ds.begin(), ds.end(), now + v*t) - ds.begin() - 1;
+                // 消費中に次の人参に届かない
+                if (iter > nxt) {
+                    time += t;
+                    now += t*v;
+                }
+                else {
+                    // 人参をこぼしてしまう
+                    if (iter + (k - hold) <= nxt) {
+                        nxt = iter + (k - hold);
+                        time += (ld)(ds[nxt] - now) / (ld)v;
+                        now = ds[nxt];
+                        hold = k + 1;
+                        iter = nxt + 1;
+                    }
+                    // こぼさない
+                    else {
+                        time += t;
+                        now += t*v;
+                        hold += nxt - iter;
+                        iter = nxt + 1;
+                    }
+                }
+            }
+
+        }
+
+    }
+
+    cout << fixed << setprecision(8);
+    cout << time << endl;
+}
+

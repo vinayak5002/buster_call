@@ -1,0 +1,127 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define PB push_back
+// #define int long long
+#define ll long long
+#define vi vector<int>
+#define siz(a) ((int)((a).size()))
+#define rep(i, a, b) for (int i = (a); i <= (b); ++i)
+#define per(i, a, b) for (int i = (a); i >= (b); --i)
+
+const int N = 40, M = 1e6, inf = 1e9;
+int a, b, A, B, C;
+char p[N + 5][N + 5];
+
+struct flow {
+	int head[M + 5], top, dep[M + 5], cur[M + 5], S, T;
+	struct road {
+		int lst, v, w;
+	} s[M + 5];
+
+	void init() {
+		top = 1;
+		memset(head, 0, sizeof(head));
+	}
+	void add(int n, int m, int k) {
+		s[++top] = (road) {head[n], m, k};
+		head[n] = top;
+		s[++top] = (road) {head[m], n, 0};
+		head[m] = top;
+	}
+	bool bfs() {
+		memset(dep, 0, sizeof(dep));
+		memcpy(cur, head, sizeof(cur));
+		dep[S] = 1;
+		queue<int> qu;
+		qu.push(S);
+		while(siz(qu)) {
+			int u = qu.front();
+			qu.pop();
+			for(int i = head[u]; i; i = s[i].lst) {
+				int v = s[i].v, w = s[i].w;
+				if(dep[v] || !w) continue;
+				dep[v] = dep[u] + 1;
+				qu.push(v);
+			}
+		}
+		return dep[T];
+	}
+	int dfs(int n, int mx) {
+		if(n == T) return mx;
+		int res = 0;
+		for(int i = cur[n]; i; i = s[i].lst) {
+			cur[n] = i;
+			int v = s[i].v, w = s[i].w;
+			if(dep[v] != dep[n] + 1 || !w) continue;
+			int tmp = dfs(v, min(mx, w));
+			mx -= tmp;
+			res += tmp;
+			s[i].w -= tmp;
+			s[i ^ 1].w += tmp;
+			if(!mx) break;
+		}
+		if(!res) dep[n] = -1;
+		return res;
+	}
+	int dinic() {
+		int res = 0;
+		while(bfs()) while(int tmp = dfs(S, inf)) {
+			res += tmp;
+		}
+		return res;
+	}
+} F;
+
+int id(int i, int j, int o) {return (i - 1) * b + j + o * a * b;}
+
+signed main() {
+	// freopen("in.in", "r", stdin);
+	ios::sync_with_stdio(0);
+	cin.tie(0), cout.tie(0);
+	cin >> a >> b >> A >> B >> C;
+	rep(i, 1, a) cin >> (p[i] + 1);
+	F.init();
+	F.S = 0, F.T = id(a, b, 3) + 1;
+	// 0：行黑 1：列黑 2：行白 3：列白
+	// B : 0 1
+	// W : 3 2
+	#define S F.S
+	#define T F.T
+	rep(i, 1, a) rep(j, 1, b) {
+		F.add(id(i, j, 2), id(i, j, 0), inf);
+		F.add(id(i, j, 1), id(i, j, 3), inf);
+		F.add(S, id(i, j, 0), A);
+		F.add(S, id(i, j, 3), A);
+		F.add(id(i, j, 1), T, A);
+		F.add(id(i, j, 2), T, A);
+		if(p[i][j] == '#') {
+			F.add(id(i, j, 2), T, inf);
+			F.add(S, id(i, j, 3), inf);
+			F.add(id(i, j, 0), id(i, j, 1), C);
+		}
+		else {
+			F.add(id(i, j, 1), id(i, j, 0), inf);
+			F.add(id(i, j, 3), id(i, j, 0), C);
+			F.add(id(i, j, 1), id(i, j, 2), C);
+		}
+		if(i == 1) {
+			F.add(id(i, j, 1), T, B);
+			F.add(S, id(i, j, 3), B);
+		}
+		else {
+			F.add(id(i, j, 1), id(i - 1, j, 1), B);
+			F.add(id(i - 1, j, 3), id(i, j, 3), B);
+		}
+		if(j == 1) {
+			F.add(S, id(i, j, 0), B);
+			F.add(id(i, j, 2), T, B);
+		}
+		else {
+			F.add(id(i, j - 1, 0), id(i, j, 0), B);
+			F.add(id(i, j, 2), id(i, j - 1, 2), B);
+		}
+	}
+	cout << F.dinic();
+	return 0;
+}

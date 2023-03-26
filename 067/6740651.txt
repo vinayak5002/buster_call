@@ -1,0 +1,89 @@
+
+#if 1
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <queue>
+#include <stack>
+#include <array>
+#include <deque>
+#include <algorithm>
+#include <utility>
+#include <cstdint>
+#include <functional>
+#include <iomanip>
+#include <numeric>
+#include <assert.h>
+#include <bitset>
+#include <list>
+#include <cmath>
+//#include <atcoder/all>
+
+auto& in = std::cin;
+auto& out = std::cout;
+#define all_range(C) std::begin(C), std::end(C)
+const int MOD = 10007;
+
+int N;
+std::string leader;
+
+int dp[1200][1 << 3];
+bool used[1200][1 << 3];
+
+int func(int i, unsigned have) {
+
+    //if (have == 0) {
+    //    return 0;
+    //}
+    if (i == N) {
+        return 1;
+    }
+    auto& memo = dp[i][have];
+    if (used[i][have]) {
+        return memo;
+    }
+    used[i][have] = true;
+    memo = 0;
+
+    unsigned lmask = 0;
+    if (leader[i] == 'J') { lmask = (1 << 0); }
+    if (leader[i] == 'O') { lmask = (1 << 1); }
+    if (leader[i] == 'I') { lmask = (1 << 2); }
+
+    for (unsigned today = 1; today < (1<<3); today++)
+    {
+        if ((today & lmask) == 0) {
+            continue;
+        }
+        if ((have & today) == 0) {
+            continue;
+        }
+        memo += func(i + 1, today);
+        if (memo >= MOD) { memo -= MOD; }
+    }
+    return memo;
+}
+
+
+int main()
+{
+    using std::endl;
+    in.sync_with_stdio(false);
+    out.sync_with_stdio(false);
+    in.tie(nullptr);
+    out.tie(nullptr);
+
+    in >> N;
+    in >> leader;
+    out << func(0, 1) << endl;
+
+
+    return 0;
+}
+#endif
+

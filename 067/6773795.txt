@@ -1,0 +1,106 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Node {
+   public:
+    unsigned int dt;
+    Node* nx;
+    Node* pv;
+};
+
+bool empty(Node*& head) {
+    return head == nullptr;
+}
+
+void InsertFirst(Node*& head, Node*& tail, unsigned int ndt) {
+    Node* nNode = new Node;
+    nNode->nx = head;
+    nNode->pv = nullptr;
+    head = nNode;
+    if (tail == nullptr) tail = nNode;
+    if (head != tail) {
+        nNode->nx->pv = nNode;
+    }
+    nNode->dt = ndt;
+}
+
+void DeleteFirst(Node*& head, Node*& tail) {
+    Node* tmp = head;
+    if (!empty(head)) {
+        if (head != tail) {
+            head->nx->pv = nullptr;
+            head = head->nx;
+
+        } else {
+            head = nullptr;
+            tail = nullptr;
+        }
+        delete tmp;
+    }
+}
+void DeleteLast(Node*& head, Node*& tail) {
+    Node* tmp = tail;
+    if (!empty(head)) {
+        if (head != tail) {
+            tail->pv->nx = nullptr;
+            tail = tail->pv;
+
+        } else {
+            head = nullptr;
+            tail = nullptr;
+        }
+        delete tmp;
+    }
+}
+void SDel(Node*& head, Node*& tail, unsigned int x) {
+    Node* tmp = head;
+    if (empty(head)) return;
+    while (tmp != nullptr && tmp->dt != x ) {
+        tmp = tmp->nx;
+    }
+    if (tmp == head && tmp != nullptr) {
+        head = tmp->nx;
+        head->pv = nullptr;
+        delete tmp;
+    } else if (tmp != nullptr) {
+        tmp->pv->nx = tmp->nx;
+        (tmp != tail) ? tmp->nx->pv = tmp->pv : tail = tmp->pv;
+        delete tmp;
+    }
+}
+void prnt(Node*& head) {
+    Node* tmp = head;
+    if (tmp != nullptr){
+        cout << tmp->dt;
+        tmp = tmp->nx;
+    }
+    while (tmp != nullptr) {
+        cout << ' ' << tmp->dt;
+        tmp = tmp->nx;
+    }
+    cout << endl;
+}
+
+int main() {
+    unsigned int q, d;
+    Node* head = nullptr;
+    Node* tail = nullptr;
+    string s;
+    cin >> q;
+    while (q--) {
+        cin >> s;
+        if (s == "insert") {
+            cin >> d;
+            InsertFirst(head, tail, d);
+        } else if (s == "delete") {
+            cin >> d;
+            SDel(head, tail, d);
+        } else if (s == "deleteFirst") {
+            DeleteFirst(head, tail);
+        } else if (s == "deleteLast") {
+            DeleteLast(head, tail);
+        }
+    }
+    prnt(head);
+    return 0;
+}

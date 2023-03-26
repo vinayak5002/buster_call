@@ -1,0 +1,117 @@
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <numeric>
+#include <iomanip>
+#include <string>
+#include <regex>
+#include <array>
+#include <vector>
+#include <map>
+#include <set>
+#include <bitset>
+#include <queue>
+using namespace std;
+#define rep(x,to) for(int x=0;x<to;++x)
+#define rep2(x,from,to) for(int x=from;x<to;++x)
+typedef long long ll;
+typedef unsigned long long ull;
+const int LINF = 1e18;
+
+struct UnionFind {
+  vector<int> par;
+
+  UnionFind(int n) : par(n) {
+    for (int i = 0; i < n; i++) {
+      par[i] = i;
+    }
+  }
+
+  int find(int x) {
+    if (par[x] == x)
+      return x;
+    else {
+      par[x] = find(par[x]);
+      return par[x];
+    }
+  }
+
+  void unite(int x, int y) {
+    x = find(x);
+    y = find(y);
+    par[y] = x;
+  }
+  
+  bool same(int x, int y) {
+    x = find(x);
+    y = find(y);
+    return x == y;
+  }
+};
+
+struct Edge{
+  int a, b;
+  double cost;
+  
+  bool operator<(const Edge& o) { 
+    return cost < o.cost; 
+  }
+};
+
+struct Graph{
+  // 頂点数
+  int n;
+  // 辺集合
+  vector<Edge> es;
+  
+  double kruskal() {
+    sort(es.begin(), es.end());
+    
+    UnionFind uf(n);
+    double min_cost = 0.0;
+    rep(ei, (int)es.size()) {
+      Edge &e = es[ei];
+      if(!uf.same(e.a, e.b)) {
+        // 辺を追加しても閉路ができないなら、その辺を採用する
+        min_cost += e.cost;
+        uf.unite(e.a, e.b);
+      }
+    }
+    return min_cost;
+  }
+};
+
+int main() {
+  double x, y, z, r;
+  while(true) {
+    vector<map<char, double>> sphere;
+    Graph g;
+    cin >> g.n;
+    if(g.n == 0) break;
+    rep(i,g.n) {
+      map<char, double> mp;
+      cin >> x >> y >> z >> r;
+      mp['x'] = x, mp['y'] = y, mp['z'] = z, mp['r'] = r;
+      sphere.push_back(mp);
+    }
+    rep(i,g.n) {
+      rep(j,i) {
+        Edge e;
+        double dx = sphere[i]['x'] - sphere[j]['x'];
+        double dy = sphere[i]['y'] - sphere[j]['y'];
+        double dz = sphere[i]['z'] - sphere[j]['z'];
+        
+        double dist = sqrt(dx * dx + dy * dy + dz * dz);
+        e.a = i;
+        e.b = j;
+        if(dist < sphere[i]['r'] + sphere[j]['r']) {
+          e.cost = 0.0;
+        } else {
+          e.cost = dist - (sphere[i]['r'] + sphere[j]['r']);
+        }
+        g.es.push_back(e);
+      }
+    }
+    cout << fixed << setprecision(3) <<  g.kruskal() << endl; 
+  }
+}

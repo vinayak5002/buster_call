@@ -1,0 +1,93 @@
+#include <iostream>
+#include <strin>
+
+using namespace std;
+
+struct Elem {
+    int key;
+    Elem *prev = NULL;
+    Elem *next = NULL;
+};
+
+Elem *head = NULL;
+Elem *tail = NULL;
+
+void insert(int x) {
+    Elem *elem = new Elem();
+    elem->key = x;
+    elem->next = head;
+    if (head == NULL)
+        tail = elem;
+    else
+        head->prev = elem;
+    head = elem;
+}
+
+void deleteFirst() {
+    head = head->next;
+    if (head != NULL)
+        head->prev = NULL;
+    else
+        tail = NULL;
+}
+
+void deleteLast() {
+    tail = tail->prev;
+    if (tail != NULL)
+        tail->next = NULL;
+    else
+        head = NULL;
+}
+
+void _delete(int x) {
+    Elem *temp = head;
+    while (temp != NULL) {
+        if (temp->key == x) {
+            if (temp == head) {
+                deleteFirst();
+            }
+            else if (temp == tail) {
+                deleteLast();
+            }
+            else {
+                temp->prev->next = temp->next;
+                temp->next->prev = temp->prev;
+            }
+            break;
+        }
+        temp = temp->next;
+    }
+}
+
+int main() {
+    int n, x;
+    string s;
+    cin >> n;
+    while (n--) {
+        cin >> s;
+        if (s == "insert") {
+            cin >> x;
+            insert(x);
+        }
+        if (s == "delete") {
+            cin >> x;
+            _delete(x);
+        }
+        if (s == "deleteFirst") {
+            deleteFirst();
+        }
+        if (s == "deleteLast") {
+            deleteLast();
+        }
+    }
+
+    while (head != NULL) {
+        cout << head->key;
+        if (head != tail)
+            cout << " ";
+        head = head->next;
+    }
+    cout << endl;
+
+    return 0;
+}

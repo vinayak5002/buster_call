@@ -1,0 +1,162 @@
+#include <stdlib.h>
+#include <stdio.h>
+
+struct node
+{
+  struct node *right;
+  struct node *left;
+  struct node *parent;
+  int key;
+};
+typedef struct node *Node;
+#define NIL NULL
+
+Node root;
+
+Node treeSearch(Node u, int k){
+  if (u == NULL || u->key == k)
+    return u;
+
+  //キーと子の比較(再帰的処理)
+  if (u->key < k)
+    return treeSearch(u->right, k);
+  return treeSearch(u->left, k);
+}
+
+void insert(int k){
+  struct node *ptr, *parent_p, *node_p;
+  ptr = (Node)malloc(sizeof(struct node));
+  if (ptr == NIL){
+    printf("insertできません");
+  }else{
+    ptr->key = k;
+    ptr->left = NIL;
+    ptr->right = NIL;
+    if (root == NIL){
+      root = ptr;
+      root->left = NIL;
+      root->right = NIL;
+    }
+    else
+    {
+      parent_p = NIL;
+      node_p = root;
+      while (node_p != NIL){
+        parent_p = node_p;
+        if (k < node_p->key){
+          node_p = node_p->left;
+        }
+        else{
+          node_p = node_p->right;
+        }
+      }
+      if (k < parent_p->key){
+        ptr->parent = parent_p;
+        parent_p->left = ptr;
+      }else{
+        ptr->parent = parent_p;
+        parent_p->right = ptr;
+      }
+    }
+  }
+}
+
+Node min_node(Node u){
+    Node tmp = u;
+    while(tmp!=NIL&&tmp->left!=NIL){
+        tmp = tmp->left;
+    }
+
+    return tmp;
+}
+
+void delete(Node n){
+    Node tmp = n;
+    if(tmp == NIL){
+        return;
+    }
+
+    if(tmp->left==NIL && tmp->right == NIL){
+        if(tmp != root){
+            if(tmp->parent->left == tmp){
+                tmp->parent->left = NIL;
+            }else{
+                tmp->parent->right = NIL;
+            }
+        }else{
+            root = NIL;
+        }
+    }else if(tmp->left!=NIL && tmp->right!=NIL){
+        Node min = min_node(tmp->right);
+        delete(min);
+        tmp = min;
+    }else if(tmp->left!=NIL || tmp->right!=NIL){
+        Node child;
+        if(tmp->left!=NIL){
+            child = tmp->left;
+        }else{
+            child = tmp->right;
+        }
+        if(tmp!=root){
+            if(tmp==tmp->parent->left){
+                tmp->parent->left = child;
+            }else{
+                tmp->parent->right = child;
+            }
+        }else{
+            root = child;
+        }
+    }
+}
+
+void inorder(Node u){
+    if (u == NIL)
+      return;
+
+    inorder(u->left);
+
+    printf(" %d", u->key);
+
+    inorder(u->right);
+}
+
+void preorder(Node u){
+    if (u == NIL)
+      return;
+
+    printf(" %d", u->key);
+
+    preorder(u->left);
+
+    preorder(u->right);
+}
+
+int main(){
+  int n, i, x;
+  char com[20];
+  scanf("%d", &n);
+
+  for ( i = 0; i < n; i++ ){
+    scanf("%s", com);
+    if ( com[0] == 'f' ){
+      scanf("%d", &x);
+      Node t = treeSearch(root, x);
+      if ( t != NIL ) printf("yes\n");
+      else printf("no\n");
+    } else if (com[0] == 'd'){
+        scanf("%d",&x);
+        delete(treeSearch(root,x));
+    } else if ( com[0] == 'i' ){
+      scanf("%d", &x);
+      insert(x);
+    } else if ( com[0] == 'p' ){
+      inorder(root);
+      printf("\n");
+      preorder(root);
+      printf("\n");
+    }
+  }
+
+  return 0;
+}
+

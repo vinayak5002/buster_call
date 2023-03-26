@@ -1,0 +1,33 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    int n;
+    while(cin >> n, n){
+        map<int,vector<pair<int,int>>> mp;
+        for(int i = 0; i < n; i++){
+            int month, d, h, mi, id;
+            char c;
+            scanf("%d/%d %d:%d %c %d", &month, &d, &h, &mi, &c, &id);
+            mp[month * 31 + d].emplace_back(h * 60 + mi, (c == 'I' ? 1 : -1) * (id + 1));
+        }
+        vector<int> cnt(1001);
+        for(auto p:mp){
+            vector<pair<int,int>> vec = p.second;
+            vector<vector<int>> tb(1440);
+            for(int i = 0; i < vec.size(); i++){
+                tb[vec[i].first].push_back(vec[i].second);
+            }
+            set<int> S;
+            for(int i = 0; i < 1440; i++){
+                for(auto &&v:tb[i]){
+                    if(v > 0)S.insert(v);
+                    else S.erase(-v);
+                }
+                if(S.count(1))for(auto &&v:S)cnt[v]++;
+            }
+        }
+        int ans = *max_element(cnt.begin() + 2, cnt.end());
+        cout << ans << '\n';
+    }
+}

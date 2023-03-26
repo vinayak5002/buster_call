@@ -1,0 +1,74 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<pair<int,int>> X;
+vector<vector<char>> A(4,vector<char>(4));
+int memo[65536];
+
+int dfs(int n,int nw){
+  //cout << n << " " << nw << endl;
+  //if(nw == 65471 )cout << n << endl;
+  if(nw == 0){
+    return memo[nw] = 0;
+  }else if(memo[nw]){
+    return memo[nw];
+  }
+   int ret = -1;
+  for(int i = 0; X.size() > i; i++){
+    for(int j = -X[i].first+1; 4 > j; j++){
+      for(int k = -X[i].second+1; 4 > k; k++){
+        int nwc = -1;
+        bool ok = true;
+        int mns = 0;
+        for(int l = 0; X[i].first > l && ok; l++){
+          for(int m = 0; X[i].second > m && ok; m++){
+            int nwy = j+l;
+            int nwx = k+m;
+            if(nwy < 0 || 3 < nwy || nwx < 0 || 3 < nwx)continue;
+            
+            if(!((1<<(nwy*4+nwx)) & nw))continue;
+            //cout << "!!" << nwy << " " << nwx << endl;
+            mns += (1<<(nwy*4+nwx));
+           // if(n == 0 && i == 1 && nwy == 1 && nwx == 2)cout << nw-mns << endl;
+            if(nwc == -1){
+              nwc = A[nwy][nwx];
+            }else if(nwc != A[nwy][nwx]){
+              ok = false;
+              break;
+            }
+          }
+        }
+        // if(n == 0 && i == 1 && j == 1 && k == 2){
+        //   cout << ok << " " << nwc << " " << mns << endl;
+        // }
+        //cout << i << " " << j << " " << k <<endl;
+        if(mns == 0)continue;
+        if(ok && nwc!=-1){
+          if(ret == -1)ret = dfs(n+1,nw-mns)+1;
+          else ret = min(ret,(dfs(n+1,nw-mns)+1));
+        }
+
+      }
+    }
+  }
+   return memo[nw] = ret;
+}
+
+int main(){
+  int n;cin>>n;
+  for(int i = 0; n > i; i++){
+    int x,y;cin>>x>>y;X.push_back({x,y});
+  }
+  
+  int nw = 1;
+  for(int i = 0; 4 > i; i++){
+    for(int j = 0; 4 > j; j++){
+      cin>>A[i][j];
+      nw *= 2;
+    }
+  }
+  cout << dfs(0,nw-1) << endl;
+  //cout << memo[65535-3] << endl;
+
+}

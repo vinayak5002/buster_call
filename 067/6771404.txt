@@ -1,0 +1,106 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+void solve(int N) {
+    V<int> x(N), y(N);
+    V<char> c(N);
+    map<ll, int> mp;
+    const ll INF = 1000000000LL;
+    rep(i, N) {
+        cin >> x[i] >> y[i] >> c[i];
+        mp[x[i] * INF + y[i]] = i;
+        if (c[i] == 'x') {
+            mp[(x[i] + 1) * INF + y[i]] = i;
+        } else {
+            mp[x[i] * INF + y[i] + 1] = i;
+        }
+    }
+    V<int> seen(N, 0);
+    const int dx[4] = {1, 0, -1, 0}, dy[4] = {0, 1, 0, -1};
+    rep(i, N) {
+        if (seen[i]) continue;
+        bool found = false;
+        rep(_, 2) {
+            bool ok = true;
+            queue<int> que;
+            que.push(i);
+            map<ll, int> s;
+            int hx = x[i], hy = y[i], fx = hx, fy = hy;
+            if (c[i] == 'x') {
+                fx++;
+            } else {
+                fy++;
+            }
+            s[hx * INF + hy] = _;
+            s[fx * INF + fy] = _ ^ 1;
+            while (!que.empty()) {
+                int id = que.front();
+                que.pop();
+                array<int, 2> cx, cy;
+                cx[0] = cx[1] = x[id];
+                cy[0] = cy[1] = y[id];
+                if (c[id] == 'x') {
+                    cx[1]++;
+                } else {
+                    cy[1]++;
+                }
+                rep(j, 2) {
+                    rep(k, 4) {
+                        int nx = cx[j] + dx[k], ny = cy[j] + dy[k];
+                        if (nx == cx[j ^ 1] and ny == cy[j ^ 1]) continue;
+                        if (mp.count(nx * INF + ny)) {
+                            int id2 = mp[nx * INF + ny];
+                            if (s.count(nx * INF + ny) and s[nx * INF + ny] != s[cx[j] * INF + cy[j]]) {
+                                ok = false;
+                                break;
+                            } else {
+                                if (s.count(nx * INF + ny) == 0) que.push(id2);
+                                s[nx * INF + ny] = s[cx[j] * INF + cy[j]];
+                                if (nx == x[id2] and ny == y[id2]) {
+                                    if (c[id2] == 'x') {
+                                        s[(nx + 1) * INF + ny] = 1 - s[nx * INF + ny];
+                                    } else {
+                                        s[nx * INF + ny + 1] = 1 - s[nx * INF + ny];
+                                    }
+                                } else {
+                                    s[x[id2] * INF + y[id2]] = 1 - s[nx * INF + ny];
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!ok) break;
+            }
+            if (ok) {
+                for (auto [coo, dir] : s) seen[mp[coo]] = 1;
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            cout << "No" << '\n';
+            return;
+        }
+    }
+    cout << "Yes" << '\n';
+    return;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N;
+    while (cin >> N, N != 0) solve(N);
+    return 0;
+}
+

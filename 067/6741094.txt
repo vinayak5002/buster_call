@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+constexpr ll inf = (1LL << 62);
+
+struct UnionFind {
+    UnionFind(ll n)
+    {
+        par.resize(n);
+        rank.resize(n);
+        for (ll i = 0; i < n; ++i) {
+            par[i] = i;
+            rank[i] = 0;
+        }
+    }
+    ll root(ll x)
+    {
+        if (par[x] == x) {
+            return x;
+        } else {
+            return par[x] = root(par[x]);
+        }
+    }
+    void unite(ll x, ll y)
+    {
+        ll px = root(x), py = root(y);
+        if (px == py)
+            return;
+        if (rank[px] < rank[py]) {
+            par[px] = py;
+        } else {
+            par[py] = px;
+            if (rank[px] == rank[py])
+                rank[px]++;
+        }
+    }
+    bool same(ll x, ll y)
+    {
+        return root(x) == root(y);
+    }
+    vector<ll> par;   //par[i]がiの親
+    vector<ll> rank;  //iの高さ
+};
+struct Edge {
+    long from;
+    long to;
+    long cost;
+};
+
+bool comp(const Edge& e1, const Edge& e2)
+{
+    return e1.cost < e2.cost;
+}
+
+long kruscal(vector<Edge>& edges, ll v_size)
+{
+    sort(edges.begin(), edges.end(), comp);  //昇順ソート
+    UnionFind uf(v_size);
+    ll sum = 0;
+    for (auto& e : edges) {
+        if (!uf.same(e.from, e.to)) {
+            uf.unite(e.from, e.to);
+            sum += e.cost;
+        }
+    }
+    return sum;
+}
+
+int main()
+{
+    ll V, E;
+    cin >> V >> E;
+    vector<ll> s(E), t(E), w(E);
+    vector<Edge> edges;
+    for (ll i = 0; i < E; ++i) {
+        cin >> s[i] >> t[i] >> w[i];
+        edges.push_back(Edge{s[i], t[i], w[i]});
+    }
+    cout << kruscal(edges, V) << endl;
+}

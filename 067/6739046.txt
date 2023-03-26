@@ -1,0 +1,113 @@
+def inputLine():
+    return [int(x) for x in input().split(" ")]
+
+
+class DisjointSet:
+    def __init__(self, n) -> None:
+        self.p = [i for i in range(n)]
+        self.rank = [0 for _ in range(n)]
+
+    def unite(self, x, y):
+        root_x = self.findSet(x)
+        root_y = self.findSet(y)
+
+        if self.rank[root_x] > self.rank[root_y]:
+            self.p[root_y] = root_x# xを最上位rootに
+        else:
+            self.p[root_x] = root_y
+            if self.rank[root_x] == self.rank[root_y]:
+                self.rank[root_y] += 1# 同じ高さなら高さ増える
+
+
+    def findSet(self, x):
+        if self.p[x] != x:# root部分まで繰り返す
+            x = self.findSet(self.p[x])
+
+        return x
+
+    def same(self, x, y):
+        root_x = self.findSet(x)
+        root_y = self.findSet(y)
+
+        return root_x == root_y
+
+
+class DisjointSetWeight(DisjointSet):
+    no_weight = -100000
+    def __init__(self, n) -> None:
+        super().__init__(n)
+        self.weights = [0 for _ in range(n)]
+
+    #問題3用のunite
+    def weightUnite(self, x, y, w):
+        sum_w = 0
+        new_y = y
+        # yからwを超えない部分まで見つける
+        while sum_w < w and new_y != self.p[new_y]:
+            before_w = sum_w
+            before_y = new_y
+            sum_w += self.weights[new_y]
+            new_y = self.p[new_y]
+        
+        if sum_w < w:
+            self.p[new_y] = x# xを最上rootに
+            self.weights[new_y] = w - sum_w
+            self.rank[x] = self.rank[new_y] + 1
+        else:
+            self.p[x] = new_y
+            self.p[before_y] = x
+
+            self.weights[before_y] = w - before_w
+            self.weights[x] = sum_w - w
+
+            # 問題では使わんがrank更新
+            self.rank[x] = self.rank[new_y]
+            tmp_new_y = new_y
+            while True:
+                self.rank[tmp_new_y] += 1
+
+                if self.p[tmp_new_y] == tmp_new_y:
+                    break
+                tmp_new_y = self.p[tmp_new_y]
+
+    def calcWeight2Root(self, x):
+        sum_w = 0
+        while self.p[x] != x:# root部分まで繰り返す
+            sum_w += self.weights[x]
+            x = self.p[x]
+            #print("総和", sum_w, x, self.p[x])
+
+        return sum_w
+
+    def diff(self, x, y):
+        if self.same(x, y):
+            w_x = self.calcWeight2Root(x)
+            w_y = self.calcWeight2Root(y)
+            return w_y - w_x
+        else:
+            return None
+
+
+
+if __name__ == "__main__":
+    [N, Q] = inputLine()
+    DSInst = DisjointSetWeight(N)
+
+    for _ in range(Q):
+        input_list = inputLine()
+
+        if input_list[0] == 0:
+            [_, x, y, w] = input_list
+            DSInst.weightUnite(x, y, w)
+            #print(DSInst.weights, DSInst.p, DSInst.rank)
+
+        elif input_list[0] == 1:
+            [_, x, y] = input_list
+            ans = DSInst.diff(x, y)
+            if ans is None:
+                print("?")
+            else:
+                print(ans)
+
+
+

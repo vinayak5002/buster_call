@@ -1,0 +1,44 @@
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+
+//m5261183 Shunsei Yamagishi
+
+void makePostOrder(int *, int *, int *, int, int);
+int pop = 0, insert = 0;
+
+int main(){
+    int n, *preorder, *inorder, *postorder;
+
+    scanf("%d", &n);
+    preorder = (int *)malloc(n * sizeof(int));
+    postorder = (int *)malloc(n * sizeof(int));
+    inorder = (int *)malloc(n * sizeof(int));
+
+
+    for(int i = 0; i < n; i++) scanf("%d", &preorder[i]);
+    for(int i = 0; i < n; i++) scanf("%d", &inorder[i]);
+
+    makePostOrder(preorder, postorder, inorder, 0, n);
+    for(int i = 0; i < n - 1 ; i++) printf("%d ", inorder[i]);
+    printf("%d\n", inorder[n-1]);
+
+
+    return 0;
+}
+
+void makePostOrder(int *preorder, int *postorder, int *inorder, int left, int right){
+    int parent;
+    int index = 0;
+
+    if(left >= right) return;
+    parent = preorder[pop++];
+    while(1){
+        if(inorder[index] == parent) break; 
+        index++;
+    }
+    makePostOrder(preorder, postorder, inorder, left, index);
+    makePostOrder(preorder, postorder, inorder, index + 1, right);
+
+    inorder[insert++] = parent;
+}

@@ -1,0 +1,81 @@
+#pragma region
+
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <set>
+#include <map>
+#include <algorithm>
+#include <functional>
+#include <utility>
+#include <bitset>
+#include <cmath>
+#include <numeric> // gcd, lcm
+#include <cstdlib>
+#include <ctime>
+#include <cstdio>
+#include <cassert>
+#include <iomanip>
+using namespace std;
+
+using ull = unsigned long long;
+using ll = long long;
+using vi = vector<int>;
+using vll = vector<ll>;
+using vvi = vector<vi>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using pii = pair<int,int>;
+using vpii = vector<pii>;
+
+#pragma endregion
+
+const int INF = (1 << 30);
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+
+    int n; cin >> n;
+    vector<vpii> g(n);
+    for(int i=0; i<n; ++i){
+        int s, t, c; cin >> s >> t >> c;
+        g[s].push_back({c,t});
+        g[t].push_back({c,s});
+    }
+    int start = 0;
+    vi d(n, INF); d[start] = 0;
+    priority_queue<pii, vpii, greater<pii>> pq;
+    pq.push({d[start], start});
+    while(not pq.empty()){
+        auto [du, u] = pq.top(); pq.pop();
+        if(du > d[u]) continue;
+        for(auto [c,v]: g[u]){
+            if(d[v] > d[u] + c){
+                d[v] = d[u] + c;
+                pq.push({d[v], v});
+            }
+        }
+    }
+    start = max_element(d.begin(), d.end()) - d.begin();
+    d.assign(n, INF); d[start] = 0;
+    pq.push({d[start], start});
+    while(not pq.empty()){
+        auto [du, u] = pq.top(); pq.pop();
+        if(du > d[u]) continue;
+        for(auto [c,v]: g[u]){
+            if(d[v] > d[u] + c){
+                d[v] = d[u] + c;
+                pq.push({d[v], v});
+            }
+        }
+    }
+    cout << *max_element(d.begin(), d.end()) << endl;
+
+    return 0;
+}

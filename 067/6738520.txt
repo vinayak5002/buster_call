@@ -1,0 +1,36 @@
+#!/usr/bin/env pypy3
+import sys
+
+readline = sys.stdin.readline
+
+def f(x):
+    return x * (x + 1) * (x + 2) // 6
+
+def main(): 
+
+    A = list()
+    for i in range(200):
+        A.append(f(i))
+
+    L = INF = 10 ** 6 + 1
+    dp, odd_dp = [[INF] * L for _ in range(2)]
+    dp[0] = odd_dp[0] = 0
+
+    for a in A:
+        for j in range(a, L):
+            if dp[j] > dp[j-a] + 1:
+                dp[j] = dp[j-a] + 1
+        if a % 2:
+            for j in range(a, L):
+                if odd_dp[j] > odd_dp[j-a] + 1:
+                    odd_dp[j] = odd_dp[j-a] + 1
+
+    while True:
+        N = int(readline())
+        if N == 0:
+            break
+        print(dp[N], odd_dp[N])
+
+if __name__ == '__main__':
+    main()
+

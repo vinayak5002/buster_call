@@ -1,0 +1,69 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for(int i = 0; i < (n); i++)
+using namespace std;
+typedef long long ll;
+
+class union_find {
+  private:
+    vector<int> parent;
+
+  public:
+    union_find(int n) : parent(n, -1) {}
+    int unite(int x, int y) {
+        x = root(x), y = root(y);
+        if(x != y) {
+            if(size(x) < size(y)) swap(x, y);
+            parent[x] += parent[y];
+            parent[y] = x;
+            return x;
+        }
+        return -1;
+    }
+    int root(int x) { return parent[x] < 0 ? x : parent[x] = root(parent[x]); }
+    int size(int x) { return -parent[root(x)]; }
+    bool same(int x, int y) { return root(x) == root(y); }
+};
+
+int main(){
+    cin.tie(0);
+    ios::sync_with_stdio(0);
+    
+    while(true) {
+        int n,m; cin >> n >> m; if(n == 0 && m == 0) break;
+        vector<int> h(n);
+        rep(i,n) cin >> h[i];
+
+        vector<tuple<int,int,int>> edges(m);
+        for(auto &[u, v, c] : edges) cin >> u >> v >> c, u--, v--;
+
+        int mi = 1e9;
+        {
+            vector<int> h2 = h;
+            h2.push_back(-1);
+            for(int target : h2) {
+                union_find uf(n);
+                for(auto [u, v, c] : edges)
+                    if(h[u] > target && h[v] > target) uf.unite(u, v);
+
+                vector<int> vs; // 生き残り
+                rep(i,n) if(h[i] > target) vs.push_back(i);
+                if(!vs.empty() && uf.size(vs[0]) != (int)vs.size()) mi = min(mi, target);
+            }
+        }
+
+        if(mi == -1){ cout << 0 << endl; continue; }
+
+        for(int &x : h) x = min(x, mi);
+        vector<tuple<int,int,int,int>> new_edges;
+        for(auto [u, v, c] : edges) new_edges.push_back({min(h[u], h[v]), -c, u, v});
+        sort(new_edges.rbegin(), new_edges.rend());
+
+        union_find uf(n);
+        ll cost = 0;
+        for(auto [_, c, u, v] : new_edges) {
+            c = -c;
+            if(uf.unite(u, v) != -1) cost += c;
+        }
+        cout << cost << endl;
+    }
+}

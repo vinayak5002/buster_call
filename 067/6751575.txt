@@ -1,0 +1,42 @@
+class DisjointSet: 
+    def __init__(self, num_nodes) -> None:
+        self.p = [idx for idx in range(num_nodes)]
+        self.rank = [0] * num_nodes
+
+    def make_set(self, x: int): 
+        self.p[x] = x 
+        self.rank[x] = 0
+    
+    def link(self, x, y): 
+        if self.rank[x] > self.rank[y]: 
+            self.p[y] = x
+        else: 
+            self.p[x] = y
+            if self.rank[x] == self.rank[y]: 
+                self.rank[y] += 1
+
+    def find_set(self, x): 
+        if x != self.p[x]: 
+            self.p[x] = self.find_set(self.p[x])
+        return self.p[x]
+
+    def union(self, x, y): 
+        self.link(self.find_set(x), self.find_set(y))
+
+    def is_same(self, x, y):
+        return self.find_set(x) == self.find_set(y) 
+    
+
+def solution():
+        num_nodes, num_ops = map(int, input().split()) 
+        ds = DisjointSet(num_nodes)
+
+        for _ in range(num_ops):
+            op, x, y = map(int, input().split())
+            if op == 0:
+                ds.union(x, y)
+            elif op == 1:
+                print(1 if ds.is_same(x, y) else 0)
+
+
+s = solution()

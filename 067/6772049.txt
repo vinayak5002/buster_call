@@ -1,0 +1,80 @@
+#include <stdio.h>
+#define N 100
+#define NIL 0
+#define F 1
+#define L 2
+static const int infty = (1<<21); /*1の21ビット左シフト*/
+
+int n, list[N][N];
+
+void dij()
+{
+    int i, j, min, point;
+    int omomi[N], status[N];
+
+    for(i=0;i<n;i++)
+    {
+        omomi[i]=infty;
+        status[i]=NIL;
+    } /*それぞれ初期化*/
+
+    omomi[0] = 0; /*まだ、辺がつながっていないので重みなし*/
+    status[0]=F; /*1回目の訪問*/
+    for(;;)
+    {
+        min=infty; /*初期化、最小値を大きな値にする*/
+        point=-1; /*初期化*/
+        for(i=0;i<n;i++)
+        {
+            if(min>omomi[i] && status[i]!=L) /*最小値より重みが小さく、訪問可能箇所が存在*/
+            {
+                point=i;
+                min=omomi[i];
+            } /*それぞれ値更新*/
+        }
+        if(point==-1) break; /*移動する頂点がない時、抜ける*/
+        status[point]=L; /*訪問済みにする*/
+        for(j=0;j<n;j++)
+        {
+            if(status[j]!=L && list[point][j]!=infty)
+            {
+                if(omomi[j]>omomi[point]+list[point][j])
+                {
+                    omomi[j]=omomi[point]+list[point][j];
+                    status[j]=F;
+                }
+            }
+        }
+    }
+    for(i=0;i<n;i++)
+    {
+        printf("%d %d\n", i, omomi[i]==infty? -1 : omomi[i]);
+    }
+}
+
+int main(void)
+{
+    int i, j, num, jigen, v, o;
+
+    scanf("%d", &n);
+    for(i=0;i<n;i++)
+    {
+        for(j=0;j<n;j++)
+        {
+            list[i][j]=infty; /*初期化*/
+        }
+    }
+
+    for(i=0;i<n;i++)
+    {
+        scanf("%d %d", &num, &jigen);
+        for(j=0;j<jigen;j++)
+        {
+            scanf("%d %d", &v, &o);
+            list[num][v]=o; /*頂点numと辺でつながる頂点への重みを記録*/
+        }
+    }
+    dij();
+
+    return 0;
+}

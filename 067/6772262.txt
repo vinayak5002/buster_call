@@ -1,0 +1,469 @@
+import sys
+input = lambda: sys.stdin.readline().rstrip()
+inf = float('inf')
+
+class RootedTree:
+
+  def __init__(self, G: list, root: int, cp=False, lca=False):
+    self._n = len(G)
+    self._G = G
+    self._root = root
+    self._height = -1
+    self._toposo = []
+    self._dist = []
+    self._descendant_num = []
+    self._child = []
+    self._child_num = []
+    self._parents = []
+    self._diameter = -1
+    self._bipartite_graph = []
+    self._cp = cp
+    self._lca = lca
+    self._rank = []
+    K = 1
+    while 1 << K < self._n:
+      K += 1
+    self._K = K
+    self._doubling = [[-1]*self._n for _ in range(self._K)]
+    self._calc_dist_toposo()
+    if cp:
+      self._calc_child_parents()
+    if lca:
+      self._calc_doubling()
+
+  def __len__(self) -> int:
+    "Return the number of vertex of self. / O(1)"
+    return self._n
+
+  def __str__(self) -> str:
+    "Print Rooted Tree. / O(N) or O(1)"
+    self._calc_child_parents()
+    ret = ["<RootedTree> ["]
+    ret.extend(
+      [f'  dist:{d} - v:{str(i).zfill(2)} - p:{str(self._parents[i]).zfill(2)} - child:{self._child[i]}'
+       for i,d in sorted(enumerate(self._dist), key=lambda x: x[1])]
+      )
+    ret.append(']')
+    return '\n'.join(ret)
+
+  def _calc_dist_toposo(self) -> None:
+    "Calc dist and toposo. / O(N)"
+    todo = [self._root]
+    self._dist = [-1] * self._n
+    self._rank = [-1] * self._n
+    self._dist[self._root] = 0
+    self._rank[self._root] = 0
+    self._toposo = [self._root]
+
+    while todo:
+      v = todo.pop()
+      d = self._dist[v]
+      r = self._rank[v]
+      for x,c in self._G[v]:
+        if self._dist[x] != -1:
+          continue
+        self._dist[x] = d + c
+        self._rank[x] = r + 1
+        todo.append(x)
+        self._toposo.append(x)
+    return
+
+  def _calc_child_parents(self) -> None:
+    "Calc child and parents. / O(N)"
+    if self._child and self._child_num and self._parents:
+      return
+    self._child_num = [0] * self._n
+    self._child = [[] for _ in range(self._n)]
+    self._parents = [-1] * self._n
+
+    for v in self._toposo[::-1]:
+      for x,_ in self._G[v]:
+        if self._rank[x] < self._rank[v]:
+          self._parents[v] = x
+          continue
+        self._child[v].append(x)
+        self._child_num[v] += 1
+    return
+
+  def get_dist(self) -> list:
+    "Return dist. / O(N)"
+    return self._dist
+
+  def get_toposo(self) -> list:
+    "Return toposo. / O(N)"
+    return self._toposo
+
+  def get_height(self) -> int:
+    "Return height. / O(N)"
+    if self._height > -1:
+      return self._height
+    self._height = max(self._dist)
+    return self._height
+
+  def get_descendant_num(self) -> list:
+    "Return descendant_num. / O(N)"
+    if self._descendant_num:
+      return self._descendant_num
+    self._descendant_num = [1] * self._n
+
+    for v in self._toposo[::-1]:
+      for x,c in self._G[v]:
+        if self._dist[x] < self._dist[v]:
+          continue
+        self._descendant_num[v] += self._descendant_num[x]
+
+    for i in range(self._n):
+      self._descendant_num[i] -= 1
+    return self._descendant_num
+
+  def get_child(self) -> list:
+    "Return child / O(N)"
+    if self._child:
+      return self._child
+    self._calc_child_parents()
+    return self._child
+
+  def get_child_num(self) -> list:
+    "Return child_num. / O(N)"
+    if self._child_num:
+      return self._child_num
+    self._calc_child_parents()
+    return self._child_num
+
+  def get_parents(self) -> list:
+    "Return parents. / O(N)"
+    if self._parents:
+      return self._parents
+    self._calc_child_parents()
+    return self._parents
+
+  def get_diameter(self) -> int:
+    "Return diameter of tree. / O(N)"
+    if self._diameter > -1:
+      return self._diameter
+    s = self._dist.index(self.get_height())
+    todo = [s]
+    ndist = [-1] * self._n
+    ndist[s] = 0
+    while todo:
+      v = todo.pop()
+      d = ndist[v]
+      for x, c in self._G[v]:
+        if ndist[x] != -1:
+          continue
+        ndist[x] = d + c
+        todo.append(x)
+    self._diameter = max(ndist)
+    return self._diameter
+
+  def get_bipartite_graph(self) -> list:
+    "Return [1 if root else 0]. / O(N)"
+    if self._bipartite_graph:
+      return self._bipartite_graph
+    self._bipartite_graph = [-1] * self._n
+    self._bipartite_graph[self._root] = 1
+    todo = [self._root]
+    while todo:
+      v = todo.pop()
+      nc = 0 if self._bipartite_graph[v] else 1
+      for x,_ in self._G[v]:
+        if self._bipartite_graph[x] != -1:
+          continue
+        self._bipartite_graph[x] = nc
+        todo.append(x)
+    return self._bipartite_graph
+
+  def _calc_doubling(self) -> None:
+    "Calc doubling if self._lca. / O(NlogN)"
+    if not self._parents:
+      self._calc_child_parents()
+    for i in range(self._n):
+      self._doubling[0][i] = self._parents[i]
+
+    for k in range(self._K-1):
+      for v in range(self._n):
+        if self._doubling[k][v] < 0:
+          self._doubling[k+1][v] = -1
+        else:
+          self._doubling[k+1][v] = self._doubling[k][self._doubling[k][v]]
+    return
+
+  def get_lca(self, u: int, v: int) -> int:
+    "Return LCA of (u, v). / O(logN)"
+    if self._dist[u] < self._dist[v]:
+      u, v = v, u
+    for k in range(self._K):
+      if ((self._dist[u] - self._dist[v]) >> k) & 1:
+        u = self._doubling[k][u]
+
+    if u == v:
+      return u
+    for k in range(self._K-1, -1, -1):
+      if self._doubling[k][u] != self._doubling[k][v]:
+        u = self._doubling[k][u]
+        v = self._doubling[k][v]
+    return self._doubling[0][u]
+
+  def get_dist(self, u: int, v: int) -> int:
+    "Return dist(u - v). / O(logN)"
+    return self._dist[u] + self._dist[v] - 2*self._dist[self.get_lca(u, v)]
+
+  def is_on_path(self, u: int, v: int, a: int) -> bool:
+    "Return True if (a is on path(u - v)) else False. / O(logN)"
+    return self.get_dist(u, a) + self.get_dist(a, v) == self.get_dist(u, v)
+
+
+class TreeQuery(RootedTree):
+  "Need Class-RootedTree and Class-FenwickTree."
+
+  def __init__(self, G: list, root: int, vertexcost=[], cp=False, lca=False) -> None:
+    super().__init__(G, root, cp, lca)
+
+    if not vertexcost:
+      vertexcost = [0]*self._n
+
+    todo = []
+
+    path = []
+    pathdepth = []
+
+    vcost1 = []
+    vcost2 = []
+    ecost1 = []
+    ecost2 = []
+
+    nodein = [-1] * self._n
+    nodeout = [-1] * self._n
+
+    curtime = -1
+
+    depth = [-1] * self._n
+    depth[self._root] = 0
+
+    todo = [(self._root, 0, 0, vertexcost[self._root])]
+    while todo:
+      curtime += 1
+      cn, cd, vc, ec = todo.pop()
+      if cn >= 0:  # 行きがけ
+        if nodein[cn] == -1:
+          nodein[cn] = curtime
+        depth[cn] = cd
+        pathdepth.append(cd)
+        path.append(cn)
+
+        ecost1.append(vc)
+        ecost2.append(vc)
+        vcost1.append(ec)
+        vcost2.append(ec)
+        if len(G[cn]) == 1:
+          nodeout[cn] = curtime + 1
+        for nn, nv in self._G[cn][::-1]:
+          if depth[nn] != -1:
+            continue
+          todo.append((~cn, cd, nv, -vertexcost[nn]))
+          todo.append((nn, cd+1, nv, vertexcost[nn]))
+      else:
+        cn = ~cn
+        if nodein[cn] == -1:
+          nodein[cn] = curtime
+        path.append(cn)
+        ecost1.append(0)
+        ecost2.append(-vc)
+        vcost1.append(0)
+        vcost2.append(ec)
+        pathdepth.append(cd)
+        nodeout[cn] = curtime + 1
+
+    path.append(-1)
+    pathdepth.append(-1)
+    vcost1.append(0)
+    vcost2.append(-vertexcost[self._root])
+    ecost1.append(0)
+    ecost2.append(0)
+
+    # ---------------------- #
+
+    self._nodein = nodein
+    self._nodeout = nodeout
+    self._vertexcost = vertexcost
+    self._path = path
+    self._vertexcost = vertexcost
+    
+    self._vcost1 = FenwickTree(len(vcost1))
+    self._vcost2 = FenwickTree(len(vcost2))
+    self._ecost1 = FenwickTree(len(ecost1))
+    self._ecost2 = FenwickTree(len(ecost2))
+
+    self._pathdepth = []
+    # self._pathdepth = SegmetTreee(len(pathdepth), op=lambda x,y:min(x,y), defaultdict=inf, V=pathdepth)
+
+    # ---------------------- #
+
+
+    for i,vc1 in enumerate(vcost1):
+      self._vcost1.add(i, vc1)
+    for i,vc2 in enumerate(vcost2):
+      self._vcost2.add(i, vc2)
+    for i,ec1 in enumerate(ecost1):
+      self._ecost1.add(i, ec1)
+    for i,ec2 in enumerate(ecost2):
+      self._ecost2.add(i, ec2)
+
+    return
+
+  def lca(self, x, y):
+    l = min(self._nodein[x], self._nodein[y])
+    r = max(self._nodeout[x], self._nodeout[y])
+    ind = self._pathdepth.prod(l, r)
+    return self._path[ind]
+
+  def lca_mul(self, L: list):
+    l, r = inf, -inf
+    for li in L:
+      l = min(l, self._nodein[li])
+      r = max(r, self._nodeout[li])
+    ind = self._pathdepth.prod(l, r)
+    return self._path[ind]
+
+  def subtree_vcost(self, x):
+    l = self._nodein[x]
+    r = self._nodeout[x]
+    return self._vcost1.sum(l, r)
+
+  def subtree_ecost(self, x):
+    l = self._nodein[x]
+    r = self._nodeout[x]
+    return self._eost1(l+1, r)
+
+  def pathQueryFromRootVertexCost(self, x):
+    return self._vcost2.sum(0, self._nodein[x]+1)
+
+  def pathQueryFromRootEdgeCost(self, x):
+    return self._ecost2.sum(0, self._nodein[x]+1)
+
+  def pathQueryVertexCost(self, x, y):
+    a = self.lca(x, y)
+    return self.pathQueryFromRootVertexCost(x) + self.pathQueryFromRootVertexCost(y) - 2 * self.pathQueryFromRootVertexCost(a) + self._vertexcost[a]
+
+  def pathQueryEdgeCost(self, x, y):
+    a = self.lca(x, y)
+    return self.pathQueryFromRootEdgeCost(x) + self.pathQueryFromRootEdgeCost(y) - 2 * self.pathQueryFromRootEdgeCost(a)
+
+  def add_vertex(self, x: int, w: int) -> None:
+    "Add w to vertex x. / O(logN)"
+    l = self._nodein[x]
+    r = self._nodeout[x]
+    self._vcost1.add(l, w)
+    self._vcost1.add(r+1, -w)
+
+    self._vcost2.add(l, w)
+    self._vcost2.add(r+1, -w)
+    return
+
+  def add_edge(self, u: int, v: int, w: int) -> None:
+    "Add w to edge(u - v). / O(logN)"
+    if self._rank[u] < self._rank[v]:
+      u, v = v, u
+    l = self._nodein[u]
+    r = self._nodeout[u]
+    self._ecost1.add(l, w)
+    self._ecost1.add(r+1, -w)
+    self._ecost2.add(l, w)
+    self._ecost2.add(r+1, -w)
+    return
+
+
+class FenwickTree:
+  # interface: 0-indexed
+
+  def __init__(self, n: int):
+    "Build a new fenwick tree. / O(N)"
+    assert 0 <= n <= 10**8
+    self._size = n
+    self._tree = [0] * (n+1)
+    self._depth = n.bit_length()
+
+  def _sum(self, i):
+    "Return sum([0, i)) of a. / O(logN)"
+    i += 1  # 1-indexed
+    ret = 0
+    while i > 0:
+      ret += self._tree[i]
+      i -= i & -i
+    return ret
+
+  def sum(self, l: int, r: int):
+    "Return sum([l, r)] of a. / O(logN)"
+    assert 0 <= l <= r <= self._size
+    return self._sum(r-1) - self._sum(l-1)
+
+  def get(self, i: int):
+    "Return a[i]. / O(logN)"
+    return self.sum(i, i)
+
+  def add(self, p: int, x) -> None:
+    "Add x to a[p]. / O(logN)"
+    p += 1  # 1-indexed.
+    assert 1 <= p <= self._size
+    while p <= self._size:
+      self._tree[p] += x
+      p += p & -p
+    return
+
+  def lower_bound(self, w):
+    "Return 累積和がx以上になる最小のindexと、その直前までの累積和 / O(logN)"
+    '''
+    FenwickTreeを集合として管理
+    fw.add(a, 1) -> 集合にaを追加
+    fw.add(a,-1) -> 集合からaを削除
+    fw.sum(a)    -> aが何番目に小さいかを返す
+    fw.lower_bound(w) -> w番目に小さい要素aを変える
+    '''
+    acc, pos = 0, 0
+    for i in range(self._depth, -1, -1):
+      k = pos + (1 << i)
+      if k <= self.size and acc + self._tree[k] < w:
+        acc += self._tree[k]
+        pos += 1 << i
+    return pos+1, acc
+
+  def __str__(self) -> str:
+    # あとで改善する バグは認める
+    ret = [[] for _ in range(self._depth+1)]
+    for i in range(1, self._size+1):
+      a = (i & -i).bit_length()
+      print(a, ret)
+      print(i, self._tree)
+      ret[a].append(' '*(i & -i))
+      ret[a].append(self._tree[i])
+    s = '<FenwickTree> [\n'
+    for i in ret[::-1]:
+      s += ''.join(map(str, i)) + '\n'
+    return s
+
+#  -----------------------  #
+
+n = int(input())
+G = [[] for _ in range(n)]
+
+for i in range(n):
+  k = list(map(int, input().split()))
+  for v in k[1:]:
+    G[i].append((v, 0))
+    G[v].append((i, 0))
+
+tree = TreeQuery(G, 0, cp=True)
+tree._calc_child_parents()
+parents = tree.get_parents()
+
+q = int(input())
+for _ in range(q):
+  qu = list(map(int, input().split()))
+  if qu[0] == 0:
+    v, w = qu[1:]
+    tree.add_edge(v, parents[v], w)
+  else:
+    u = qu[1]
+    ans = tree.pathQueryFromRootEdgeCost(u)
+    print(ans)
+

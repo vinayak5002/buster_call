@@ -1,0 +1,116 @@
+#include <iostream>
+
+struct Card
+{
+	char c;
+	int n;
+};
+
+void printCardArray( Card arr[], int size );
+int bubbleSort( Card arr[], int size );
+int selectionSort( Card arr[], int size );
+bool arraysAreEqual( const Card bubbleSort[], const Card otherSort[], int size );
+
+int main()
+{
+	int size;
+	std::cin >> size;
+	Card* bubbleArr = new Card[size];
+	Card* selectArr = new Card[size];
+
+	for( int i = 0; i < size; i++ )
+	{
+		std::cin >> bubbleArr[i].c;
+		std::cin >> bubbleArr[i].n;
+		selectArr[i] = bubbleArr[i];
+	}
+
+	bubbleSort( bubbleArr, size );
+	selectionSort( selectArr, size );
+
+	printCardArray( bubbleArr, size );
+	std::cout << "Stable" << std::endl; // We know from theory that bubble sort is stable
+
+	printCardArray( selectArr, size );
+	std::cout << (arraysAreEqual( bubbleArr, selectArr, size ) ? "Stable" : "Not stable") << std::endl;
+
+	delete[] bubbleArr;
+	delete[] selectArr;
+
+	return 0;
+}
+
+void printCardArray( Card arr[], int size )
+{
+	for( int i = 0; i < size - 1; i++ )
+	{
+		std::cout << arr[i].c << arr[i].n << ' ';
+	}
+	std::cout << arr[size - 1].c << arr[size - 1].n << std::endl;
+}
+
+int bubbleSort( Card arr[], int size )
+{
+	int totalSwap = 0;
+
+	for( int i = 0; i < size; i++ )
+	{
+		for( int j = size - 1; j > i; j-- )
+		{
+			if( arr[j].n < arr[j - 1].n )
+			{
+				// Swap
+				Card temp = arr[j];
+				arr[j] = arr[j - 1];
+				arr[j - 1] = temp;
+
+				totalSwap++;
+			}
+		}
+	}
+
+	return totalSwap;
+}
+
+int selectionSort( Card arr[], int size )
+{
+	int totalSwap = 0;
+
+	for( int i = 0; i < size; i++ )
+	{
+		int mini = i;
+		for( int j = i; j < size; j++ )
+		{
+			if( arr[j].n < arr[mini].n )
+			{
+				mini = j;
+			}
+		}
+
+		if( i != mini )
+		{
+			// Swap
+			Card temp = arr[i];
+			arr[i] = arr[mini];
+			arr[mini] = temp;
+
+			totalSwap++;
+		}
+	}
+
+	return totalSwap;
+}
+
+bool arraysAreEqual( const Card bubbleSort[], const Card otherSort[], int size )
+{	
+	// Assuming the arrays are of equal size
+	for( int i = 0; i < size; i++ )
+	{
+		if( bubbleSort[i].c != otherSort[i].c || bubbleSort[i].n != otherSort[i].n )
+		{
+			return false;
+		}
+	}
+
+	return true;
+}

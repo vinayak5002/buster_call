@@ -1,0 +1,91 @@
+#include<iostream>
+#include<vector>
+#include<algorithm>
+using namespace std;
+
+class RUQ{
+private:
+	const int INF = 2147483647;
+	vector<int> segment;
+	vector<int> lazy;
+	int N;
+
+public:
+	RUQ(){
+		int n, q;
+		cin >> n >> q;
+
+		initRUQ(n);
+
+		for(int i=0; i<q; i++){
+			int com;
+			cin >> com;
+
+			if(com==0){
+				int s, t, x;
+				cin >> s >> t >> x;
+				update(s, t, x);
+			}
+			else if(com==1){
+				int k;
+				cin >> k;
+				find(k);
+			}
+		}
+	}
+
+	void initRUQ(int n_){
+		N=1;
+
+		while(N < n_){
+			N *= 2;
+		}
+
+		segment.resize(2*N-1);
+		lazy.resize(2*N-1);
+
+		for(int i=0; i<segment.size(); i++){
+			segment[i] = lazy[i] = INF;
+		}
+	}
+
+	void update(int s, int t, int x){
+		lazy[N+1 + s] = x;
+		lazy[N+1 + t] = x;
+		query(s, t+1, 0, 0, N, x);
+	}
+
+	void eval(int k){
+		if(lazy[k] == INF) return;
+
+		segment[k] = lazy[k];
+
+		if(k < N-1){
+			lazy[2*k+1] = lazy[k];
+			lazy[2*k+2] = lazy[k];
+		}
+		lazy[k] = INF;
+	}
+
+	void query(int a, int b, int k, int l, int r, int x){
+		eval(k);
+		if(a<=l && r<=b) {
+			lazy[k] = x;
+			eval(k);
+		}
+		else if (a < r && l < b) {
+			query(a, b, k*2+1, l, (l+r)/2, x);
+			query(a, b, k*2+2, (l+r)/2, r, x);
+			segment[k] = min(segment[k*2+1], segment[k*2+2]);
+		}
+	}
+
+	void find(int k){
+		cout << segment[N-1 + k] << endl;
+	}
+};
+
+int main(){
+	RUQ ruq = RUQ();
+	return 0;
+}

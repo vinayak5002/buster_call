@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using Graph = vector<vector<int>>;
+vector<int> dist;
+
+void bfs(const Graph& G, int s) {
+	queue<int> que;
+	que.push(s);
+	
+	while(!que.empty()) {    
+		int v = que.front();
+		que.pop();
+
+		for(auto e: G[v]){
+			if(dist[e] >= 0) continue;
+
+			dist[e] = dist[v] + 1;  
+			que.push(e);
+		}
+	}
+}
+
+int main() {
+	int N; 
+	cin >> N;
+	dist.assign(N, -1);
+	dist[0] = 0;
+
+	Graph G(N);
+	for (int i = 0; i < N; i++){
+		int a, n;
+		cin >> a >> n;
+        for (int j = 0; j < n; j++){
+            int b;
+            cin >> b;
+            G[a - 1].push_back(b - 1);
+        }
+    }
+	
+    bfs(G, 0);
+
+    for (int i = 0; i < N; i++) {
+        cout << i + 1 << " " << dist[i] << endl;
+    }
+	
+}

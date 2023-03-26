@@ -1,0 +1,89 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+
+public class Main {
+
+	static int[] maxHeap;
+	static StringBuilder sb = new StringBuilder();
+	static final int NULL = -1;
+
+	public static void main(String[] args) throws IOException{
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		PrintWriter out = new PrintWriter(System.out);
+
+		int n = Integer.parseInt(br.readLine());
+
+		maxHeap = new int[n];
+
+		String[] num;
+		String input;
+
+		for(int i=0; i<n; i++)
+			maxHeap[i] = NULL;
+
+		//入力&格納
+		input = br.readLine();
+		num = input.split(" ");
+
+		for(int i=0; i<n; i++) {
+
+			int k = Integer.parseInt(num[i]);
+			maxHeap[i] = k;
+		}
+
+		for(int i=n-1; i>=0; i--)
+			maxHeapify(i, n);
+
+		//出力
+		for(int i=0; i<n; i++) {
+
+			out.print(" " + maxHeap[i]);
+		}
+
+		out.flush();
+	}
+
+	//並び替え
+	static void maxHeapify(int id, int n) {
+
+		int l=-1, r=-1;
+		int largest, largestId;
+
+		if(id*2 +1 < n)
+			l = maxHeap[id*2 +1];
+
+		if(id*2 +2 < n)
+			r = maxHeap[id*2 +2];
+
+
+		//左の子、自分自身、右の子の中で最大のものをlargestに格納
+		if(l != -1 && l > maxHeap[id]) {
+			largest = l;
+			largestId = id*2 +1;
+		}
+		else {
+			largest = maxHeap[id];
+			largestId = id;
+		}
+
+		if(r != -1 && r > largest) {
+			largest = r;
+			largestId = id*2 +2;
+		}
+
+		//largestが自分自身でないのなら入れ替えて、子に対して再帰的な処理を行う
+		if(largest != maxHeap[id]) {
+
+			int tmp = maxHeap[id];
+			maxHeap[id] = largest;
+			maxHeap[largestId] = tmp;
+
+			maxHeapify(largestId, n);
+
+		}
+	}
+}
+

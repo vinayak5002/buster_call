@@ -1,0 +1,104 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long int ull;
+#define chmin(x,y) x = min(x,y)
+#define chmax(x,y) x = max(x,y)
+#define BIG_NUM 2000000000
+#define HUGE_NUM 4000000000000000000 //オーバーフローに注意
+#define MOD 1000000007
+#define EPS 0.000000001
+
+
+
+#define SIZE 1005
+
+struct Edge{
+	Edge(int arg_to,ll arg_value){
+		to = arg_to;
+		value = arg_value;
+	}
+	int to;
+	ll value;
+};
+
+int N,M;
+map<ll,bool> visited[SIZE];
+vector<Edge> G[SIZE];
+
+
+//最大公約数
+ll gcd(ll x,ll y){
+
+	x = abs(x);
+	y = abs(y);
+
+	if(x < y){
+		swap(x,y);
+	}
+	if(y == 0){
+		return x;
+	}else{
+		return gcd(y,x%y);
+	}
+}
+
+//最小公倍数
+ll lcm(ll x,ll y){
+
+	return (x*y)/gcd(x,y);
+}
+
+void dfs(int node,ll LCM){
+
+	if(visited[node][LCM]){
+
+		return;
+	}
+
+	visited[node][LCM] = true;
+
+	for(int i = 0; i < G[node].size(); i++){
+
+		int next = G[node][i].to;
+		ll next_LCM = lcm(LCM,G[node][i].value);
+
+		dfs(next,next_LCM);
+	}
+}
+
+
+int main(){
+
+	scanf("%d %d",&N,&M);
+
+	int a,b,c;
+
+	for(int i = 0; i < M; i++){
+
+		scanf("%d %d %d",&a,&b,&c);
+		a--;
+		b--;
+		G[a].push_back(Edge(b,c));
+	}
+
+	dfs(0,1);
+
+	if(visited[N-1].size() == 0){
+
+		printf("IMPOSSIBLE\n");
+		return 0;
+	}
+
+	ll mini = HUGE_NUM,maxi = -HUGE_NUM;
+	for(auto at = visited[N-1].begin(); at != visited[N-1].end(); at++){
+
+		chmin(mini,at->first);
+		chmax(maxi,at->first);
+	}
+
+	printf("%lld %lld\n",mini,maxi);
+
+	return 0;
+}
+

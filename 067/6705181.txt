@@ -1,0 +1,170 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+//構造体
+struct node{
+  struct node *right;
+  struct node *left;
+  struct node *parent;
+  int key;
+};
+
+typedef struct node * Node;
+#define NIL NULL
+
+Node root;
+
+//ノード探索
+Node find(Node u,int k){
+	while(u!=NIL&&k!=u->key){
+        //接点k＜keyのとき
+		if(k<u->key){
+			u=u->left;
+		}
+		else{
+			u=u->right;
+		}
+	}
+	return u;
+}
+
+Node minimum(Node x){
+    //xの左の子がNILになるまで
+    while(x->left!=NIL){
+        x=x->left;
+    }
+    return x;
+}
+
+//ノードを入れ替える
+Node Successor(Node x){
+    //xの右の子がいない
+    if(x->right!=NIL){
+        return minimum(x->right);
+    }
+    Node y=x->parent;
+    //ｙのノードがNILでないかつｘのノードがｙの右の子と等価
+    while(y!=NIL && x==y->right){
+        //ｘのノード＝ｙのノード
+        x=y;
+        y=y->parent;
+    }
+    return y;
+}
+
+void Delet(Node z){
+    Node y;
+    Node x;
+
+    //zのノードに子がいないとき
+    if(z->left==NIL||z->right==NIL){y=z;}
+    //子がいるとき
+    else{y=Successor(z);}
+    //ｙのノードに左の子がいないとき
+    if(y->left!=NIL){x=y->left;}
+    //ｙのノードに左の子がいないとき
+    else{x=y->right;}
+    //ｘのノードがNILのとき
+    if(x!=NIL){x->parent=y->parent;}
+    //ｙの親がいない場合
+    if(y->parent==NIL){root=x;}
+    //ｙの親がいるとき
+    else{
+        if(y==y->parent->left){
+            y->parent->left=x;
+        }
+        else{
+            y->parent->right=x;
+        }
+    }
+
+    if(y!=z){
+        z->key=y->key;
+    }
+    free(y);
+}
+
+void insert(int k){
+  Node y = NIL;
+  Node x = root;
+  Node z;
+
+  z = malloc(sizeof(struct node));
+  z->key = k;
+  z->left = NIL;
+  z->right = NIL;
+
+	while(x!=NIL){
+		y=x;
+		if(z->key<x->key){
+			x=x->left;
+		}
+		else{
+			x=x->right;
+		}
+	}
+	z->parent=y;
+	if(y==NIL){
+		root=z;
+	}
+	else{
+		if(z->key<y->key){
+			y->left=z;
+		}
+		else{
+			y->right=z;
+		}
+	}
+}
+
+void inorder(Node u){
+	if(u==NIL){
+		return;
+	}
+	inorder(u->left);
+	printf(" %d",u->key);
+	inorder(u->right);
+}
+void preorder(Node u){
+	if(u==NIL){
+		return;
+	}
+	printf(" %d",u->key);
+	preorder(u->left);
+	preorder(u->right);
+}
+
+int main(void){
+  int n, i, x;
+  char com[20];
+  scanf("%d", &n);
+
+  for ( i = 0; i < n; i++ ){
+    scanf("%s", com);
+    if ( com[0] == 'f' ){
+      scanf("%d", &x);
+      Node t = find(root, x);
+      if ( t != NIL ) printf("yes\n");
+      else printf("no\n");
+    } 
+    else if ( com[0] =='i'){
+      scanf("%d", &x);
+      insert(x);
+    } 
+    else if ( com[0] =='p'){
+      inorder(root);
+      printf("\n");
+      preorder(root);
+      printf("\n");
+    } 
+    else if (com[0] =='d')
+    {
+        scanf("%d",&x);
+        Delet(find(root,x));
+    }
+    
+
+  }
+
+  return 0;
+}

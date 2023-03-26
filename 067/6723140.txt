@@ -1,0 +1,30 @@
+n,t,q=gets.split.map(&:to_i)
+ad=[]
+n.times {ad << gets.split.map(&:to_i)+[nil]}
+q.times {|i| ad[gets.to_i-1][2]=i}
+pos=Array.new(n)
+ad.sort!
+(n-1).times do |i|
+  if ad[i][1]==1 && ad[i+1][1]==2 then
+    av=(ad[i][0]+ad[i+1][0])/2
+    if av-ad[i][0]<=t then
+      pos[i]=pos[i+1]=av
+    else
+      pos[i]=ad[i][0]+t
+      pos[i+1]=ad[i+1][0]-t
+    end
+  end
+end
+n.times do |i|
+  next if pos[i]
+  pos[i]=[ad[i][0]-t,(i==0 ? -Float::INFINITY : pos[i-1])].max if ad[i][1]==2
+end
+(0...n).reverse_each do |i|
+  next if pos[i]
+  pos[i]=[ad[i][0]+t,(i==n-1 ? Float::INFINITY : pos[i+1])].min
+end
+ans=Array.new(q)
+n.times do |i|
+  ans[ad[i][2]]=pos[i] if ad[i][2]
+end
+puts ans

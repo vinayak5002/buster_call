@@ -1,0 +1,94 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+
+#define rep(i, n) for(int i = 0; i < (int)n; i++)
+#define repp(i, m, n) for(int i = (int)m; i < (int)n; i++)
+
+#define ALL(x) x.begin(),x.end()
+
+#define YESNO(bool) if(bool){cout<<"YES"<<endl;}else{cout<<"NO"<<endl;}
+#define yesno(bool) if(bool){cout<<"yes"<<endl;}else{cout<<"no"<<endl;}
+#define YesNo(bool) if(bool){cout<<"Yes"<<endl;}else{cout<<"No"<<endl;}
+#define keta(x) cout << std::fixed << std::setprecision(15) << (double)x << endl;
+
+const int MAXN = 7368792;
+int n;
+
+//.の数を数える(ope)
+int cnt_p(string S){
+    int cnt = 0;
+    rep(i, S.size()){
+        if(S[i] == '.') cnt++;
+    }
+    if(S[S.size()-1] != '+' && S[S.size()-1] != '*') cnt = -1;
+    return cnt;
+}
+
+//.の数を数える(ope and num)
+int cnt_p2(string S){
+    int cnt = 0;
+    rep(i, S.size()){
+        if(S[i] == '.') cnt++;
+    }
+    return cnt;
+}
+
+void solve(){
+    vector<string> a(n);
+    rep(i, n) cin >> a[i];
+
+    //aのサイズが1まで繰り返す
+    while(a.size() != 1){
+        vector<string> tmp_a;
+        int max_p = 0; //.の個数の最大値
+        rep(i, a.size()){
+            int cnt = cnt_p(a[i]);
+            if(cnt == -1) continue;
+            max_p = max(max_p, cnt);
+        }
+
+        rep(i,a.size()){
+            //もう一度みる．
+            int cnt = cnt_p(a[i]);
+            char ope;
+            int tmp_ans;
+            if(cnt == max_p){
+                ope = a[i][cnt];
+                if(ope == '+') tmp_ans = 0;
+                else tmp_ans = 1;
+                while(i+1 < n && cnt_p2(a[i+1]) == max_p+1){
+                    string tmp_num;
+                    repp(k, max_p+1, a[i+1].size()){
+                        tmp_num += a[i+1][k];
+                    }
+                    if(ope == '+') tmp_ans += stoi(tmp_num);
+                    else tmp_ans *= stoi(tmp_num);
+                    i++;
+                }
+                string po;
+                rep(j, max_p){
+                    po += '.';
+                }
+                po += to_string(tmp_ans);
+                tmp_a.push_back(po);
+            }else{
+                tmp_a.push_back(a[i]);
+            }
+        }
+        a.clear();
+        for(auto s : tmp_a){
+            a.push_back(s);
+        }
+    }
+
+    cout << a[0] << endl;
+}
+
+int main(){
+    while(1){
+        cin >> n;
+        if(n == 0) break;
+        solve();
+    }
+}

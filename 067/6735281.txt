@@ -1,0 +1,60 @@
+#include <iostream>
+#include <array>
+#include <list>
+
+#define N 100
+
+#define NOT_VISITED 0
+#define VISITED 1
+
+using adjacent_list = std::array<std::list<int>, N>;
+
+int nv, ne;
+std::array<int, N> nodes;
+adjacent_list adj_list;
+
+int search(int idx) {
+  // std::cout << idx << "\n";
+  if(nodes[idx] == VISITED) {
+    return 1;
+  }
+
+  nodes[idx] = VISITED;
+  for(auto it = adj_list[idx].begin(); it != adj_list[idx].end(); ++it) {
+    search(*it);
+  }
+
+  return 0;
+}
+
+int main() {
+  std::cin >> nv >> ne;
+
+  for(int i = 0; i < ne; ++i) {
+    int s, t;
+    std::cin >> s >> t;
+
+    adj_list[s].push_back(t);
+  }
+
+  for(int i = 0; i < nv; ++i) {
+    for(auto v : nodes)
+      v = 0;
+    if(search(i) == 1) {
+      std::cout << "1\n";
+      break;
+    }
+  }
+
+  /*
+  for(int i = 0; i < nv; ++i) {
+    for(auto it = adj_list[i].begin(); it != adj_list[i].end(); ++it) {
+      std::cout << *it << " ";
+    }
+    std::cout << "\n";
+  }
+  */
+
+  return 0;
+}
+

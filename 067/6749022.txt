@@ -1,0 +1,50 @@
+#include<bits/stdc++.h>
+using namespace std;
+#pragma GCC target("avx2")
+#pragma GCC optimize("O3")
+using ll = long long;
+using pii = pair<ll, ll>;
+int dx[4] = {1, 0, -1, 0}, dy[4] = {0, 1, 0, -1};
+
+int bfs(vector<vector<ll>> g, pii s, pii t){
+	queue<pii> q;
+	q.push(s);
+	g[s.first][s.second] = 1;
+	while(!q.empty()){
+		auto test = q.front();
+		q.pop();
+		
+		for (int i = 0; i < 4; i++){
+			if (g[test.first + dx[i]][test.second + dy[i]] != 0) continue;
+			g[test.first + dx[i]][test.second + dy[i]] = g[test.first][test.second] + 1;
+			q.push({test.first + dx[i], test.second + dy[i]});
+		}
+	}
+
+	return g[t.first][t.second] + 1;
+}
+
+int main(){
+ios::sync_with_stdio(false);
+std::cin.tie(nullptr);
+	while (1){
+		int n, m;
+		cin >> m >> n;
+		if (n == 0) return 0;
+		
+		vector<vector<ll>> g(2 * n + 1, vector<ll> (2 * m + 1, -1));
+		for (int i = 1; i < 2 * n; i++){
+			for (int j = 1; j < 2 * m; j++){
+				if (i & 1 && j & 1) g[i][j] = 0;
+				else if (i & 1 || j & 1) {
+					int t;
+					cin >> t;
+					g[i][j] = t ? -1 : 0;
+				}
+			}
+		}	
+
+		cout << bfs(g, {1, 1}, {2 * n - 1, 2 * m - 1}) / 2 << endl;
+	}
+	
+}

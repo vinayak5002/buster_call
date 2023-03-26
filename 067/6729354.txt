@@ -1,0 +1,44 @@
+import random
+
+n = int(input())
+edges = [[] for _ in range(n)]
+for _ in range(n - 1):
+    u, v = map(int, input().split())
+    u -= 1
+    v -= 1
+    edges[u].append(v)
+    edges[v].append(u)
+
+used = [False] * n
+used[0] = True
+stack = [0]
+route = [0]
+while stack:
+    pos = stack.pop()
+    for npos in edges[pos]:
+        if used[npos]:
+            continue
+        used[npos] = True
+        stack.append(npos)
+        route.append(npos)
+
+MOD = random.randrange(1 << 60, 1 << 63)
+a = random.randrange(1, 1 << 20)
+b = random.randrange(1, 1 << 20)
+hash_ = [0] * n
+cnt = {}
+ans = 0
+used = [False] * n
+for pos in route[::-1]:
+    used[pos] = True
+    for npos in edges[pos]:
+        if not used[npos]:
+            continue
+        hash_[pos] += hash_[npos] * a + b
+        hash_[pos] %= MOD
+    h = hash_[pos]
+    ans += cnt.get(h, 0)
+    cnt[h] = cnt.get(h, 0) + 1
+
+print(ans)
+

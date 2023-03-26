@@ -1,0 +1,48 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    while(true){
+        string s1, s2;
+        cin >> s1;
+        if(s1 == ".") return 0;
+        cin >> s2;
+        if(s1 == s2){
+            cout << "IDENTICAL" << '\n';
+            continue;
+        }
+        bool chance = true;
+        bool in_db = false;
+        int64_t j = 0;
+        for(int64_t i = 0; i < s1.size(); i++){
+            if(j >= s2.size()){
+                cout << "DIFFERENT" << '\n';
+                goto nxt_s;
+            }
+            if(s1[i] == '"' and s2[j] == '"'){
+                in_db = not in_db;
+                j++; continue;
+            }
+            if(s1[i] == s2[j]){
+                j++; continue;
+            };
+            if(not in_db and s1[i] != s2[j]){
+                cout << "DIFFERENT" << '\n';
+                goto nxt_s;
+            }
+            if(chance){
+                while(s1[i] != '"') i++;
+                while(s2[j] != '"') j++;
+                i--; j--;
+                chance = false;
+            }else{
+                cout << "DIFFERENT" << '\n';
+                goto nxt_s;
+            }
+            j++;
+        }
+        if(j == s2.size()) cout << "CLOSE" << '\n';
+        else cout << "DIFFERENT" << '\n';
+    nxt_s:;
+    }
+}

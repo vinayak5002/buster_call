@@ -1,0 +1,212 @@
+class RootedTree:
+
+  def __init__(self, G: list, root: int, cp=False, lca=False):
+    self._n = len(G)
+    self._G = G
+    self._root = root
+    self._height = -1
+    self._toposo = []
+    self._dist = []
+    self._descendant_num = []
+    self._child = []
+    self._child_num = []
+    self._parents = []
+    self._diameter = -1
+    self._bipartite_graph = []
+    K = 1
+    while 1 << K < self._n:
+      K += 1
+    self._K = K
+    self._doubling = [[-1]*self._n for _ in range(self._K)]
+    self._calc_dist_toposo()
+    if cp:
+      self._calc_child_parents()
+    if lca:
+      self._calc_doubling()
+
+  def __len__(self) -> int:
+    "Return the number of vertex of self. / O(1)"
+    return self._n
+
+  def __str__(self) -> str:
+    "Print Rooted Tree. / O(N) or O(1)"
+    self._calc_child_parents()
+    ret = ["<RootedTree> ["]
+    ret.extend(
+      [f'  dist:{d} - v:{str(i).zfill(2)} - p:{str(self._parents[i]).zfill(2)} - child:{self._child[i]}'
+       for i,d in sorted(enumerate(self._dist), key=lambda x: x[1])]
+      )
+    ret.append(']')
+    return '\n'.join(ret)
+
+  def _calc_dist_toposo(self) -> None:
+    "Calc dist and toposo. / O(N)"
+    todo = [self._root]
+    self._dist = [-1] * self._n
+    self._dist[self._root] = 0
+    self._toposo = [self._root]
+
+    while todo:
+      v = todo.pop()
+      d = self._dist[v]
+      for x,c in self._G[v]:
+        if self._dist[x] != -1:
+          continue
+        self._dist[x] = d + c
+        todo.append(x)
+        self._toposo.append(x)
+    return
+
+  def _calc_child_parents(self) -> None:
+    "Calc child and parents. / O(N)"
+    if self._child and self._child_num and self._parents:
+      return
+    self._child_num = [0] * self._n
+    self._child = [[] for _ in range(self._n)]
+    self._parents = [-1] * self._n
+
+    for v in self._toposo[::-1]:
+      for x,c in self._G[v]:
+        if self._dist[x] < self._dist[v]:
+          self._parents[v] = x
+          continue
+        self._child[v].append(x)
+        self._child_num[v] += 1
+    return
+
+  def get_dist(self) -> list:
+    "Return dist. / O(N)"
+    return self._dist
+
+  def get_toposo(self) -> list:
+    "Return toposo. / O(N)"
+    return self._toposo
+
+  def get_height(self) -> int:
+    "Return height. / O(N)"
+    if self._height > -1:
+      return self._height
+    self._height = max(self._dist)
+    return self._height
+
+  def get_descendant_num(self) -> list:
+    "Return descendant_num. / O(N)"
+    if self._descendant_num:
+      return self._descendant_num
+    self._descendant_num = [1] * self._n
+
+    for v in self._toposo[::-1]:
+      for x,c in self._G[v]:
+        if self._dist[x] < self._dist[v]:
+          continue
+        self._descendant_num[v] += self._descendant_num[x]
+
+    for i in range(self._n):
+      self._descendant_num[i] -= 1
+    return self._descendant_num
+
+  def get_child(self) -> list:
+    "Return child / O(N)"
+    if self._child:
+      return self._child
+    self._calc_child_parents()
+    return self._child
+
+  def get_child_num(self) -> list:
+    "Return child_num. / O(N)"
+    if self._child_num:
+      return self._child_num
+    self._calc_child_parents()
+    return self._child_num
+
+  def get_parents(self) -> list:
+    "Return parents. / O(N)"
+    if self._parents:
+      return self._parents
+    self._calc_child_parents()
+    return self._parents
+
+  def get_diameter(self) -> int:
+    "Return diameter of tree. / O(N)"
+    if self._diameter > -1:
+      return self._diameter
+    s = self._dist.index(self.get_height())
+    todo = [s]
+    ndist = [-1] * self._n
+    ndist[s] = 0
+    while todo:
+      v = todo.pop()
+      d = ndist[v]
+      for x, c in self._G[v]:
+        if ndist[x] != -1:
+          continue
+        ndist[x] = d + c
+        todo.append(x)
+    self._diameter = max(ndist)
+    return self._diameter
+
+  def get_bipartite_graph(self) -> list:
+    "Return [1 if root else 0]. / O(N)"
+    if self._bipartite_graph:
+      return self._bipartite_graph
+    self._bipartite_graph = [-1] * self._n
+    self._bipartite_graph[self._root] = 1
+    todo = [self._root]
+    while todo:
+      v = todo.pop()
+      nc = 0 if self._bipartite_graph[v] else 1
+      for x,_ in self._G[v]:
+        if self._bipartite_graph[x] != -1:
+          continue
+        self._bipartite_graph[x] = nc
+        todo.append(x)
+    return self._bipartite_graph
+
+  def _calc_doubling(self):
+    if not self._parents:
+      self._calc_child_parents()
+    for i in range(self._n):
+      if i == self._root:
+        continue
+      self._doubling[0][i] = self._parents[i]
+
+    for k in range(self._K-1):
+      for v in range(self._n):
+        if self._doubling[k][v] < 0:
+          self._doubling[k+1][v] = -1
+        else:
+          self._doubling[k+1][v] = self._doubling[k][self._doubling[k][v]]
+
+  def get_lca(self, u, v):
+    if self._dist[u] < self._dist[v]:
+      u, v = v, u
+    for k in range(self._K):
+      if (self._dist[u] - self._dist[v]) >> k & 1:
+        u = self._doubling[k][u]
+
+    if u == v:
+      return u
+    for k in range(self._K-1, -1, -1):
+      if self._doubling[k][u] != self._doubling[k][v]:
+        u = self._doubling[k][u]
+        v = self._doubling[k][v]
+
+    return self._doubling[0][u]
+
+#  -----------------------  #
+
+n = int(input())
+G = [[] for _ in range(n)]
+for i in range(n):
+  k = list(map(int, input().split()))
+  for x in k[1:]:
+    G[i].append((x, 1))
+    G[x].append((i, 1))
+
+tree = RootedTree(G, 0, lca=True)
+
+q = int(input())
+for _ in range(q):
+  u, v = map(int, input().split())
+  print(tree.get_lca(u, v))
+

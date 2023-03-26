@@ -1,0 +1,102 @@
+def solve():
+    from sys import stdin
+    from collections import deque
+    
+    f_i = stdin
+    H, W, N = map(int, f_i.readline().split())
+    
+    W += 2
+    
+    field = '#' * W
+    for i in range(H):
+        line = f_i.readline().rstrip()
+        field += '#' + line + '#'
+    field += '#' * W
+    
+    rec = dict()
+    avoids = dict()
+    move = [1, -1, W, -W]
+    
+    # first search
+    # Also create an adjacency list.
+    r, c = map(int, f_i.readline().split())
+    start = W * r + c
+    rec[start] = 0
+    avoids[start] = set()
+    avoids[start].add(start)
+    q = deque()
+    q.append((0, start))
+    adj = dict() # adj[key]: (position, damage to move)
+    cnt = 0
+    while q:
+        cnt += 1
+        dmg, pos = q.popleft()
+        adj_pos = []
+        for m in move:
+            next_pos = pos + m
+            next_cell = field[next_pos]            
+            if next_cell == '.':
+                adj_pos.append((next_pos, False))
+                if next_pos not in rec:
+                    q.appendleft((dmg, next_pos))
+                    rec[next_pos] = dmg
+                    avoids[start].add(next_pos)
+            elif next_cell == '@':
+                adj_pos.append((next_pos, True))
+                if next_pos not in rec:
+                    q.append((dmg + 1, next_pos))
+                    rec[next_pos] = dmg + 1
+                    avoids[start].add(next_pos)
+        adj[pos] = adj_pos
+        
+    #
+    # for k, v in adj.items():
+    #     print(k, v)
+    #
+    
+    # serach after the second
+    for i in range(N - 1):
+        r, c = map(int, f_i.readline().split())
+        start = W * r + c
+        if start not in rec:
+            return "-1 -1"
+        
+        visited = dict()
+        visited[start] = True
+        q = deque()
+        q.append((0, start))
+        avoids[start] = set()
+        tmp_avoid = set()
+        while q:
+            cnt += 1
+            dmg, pos = q.popleft()
+            # print(pos // W, pos % W, dmg) # test
+            
+            if pos in tmp_avoid:
+                # print('avoid')
+                continue
+            
+            if pos in avoids and dmg <= rec[pos] and pos in avoids[pos]:
+                # print('avoid_rec')
+                tmp_avoid.add(pos)
+                continue
+            elif dmg > rec[pos]:
+                rec[pos] = dmg
+                avoids[start].add(pos)
+            
+            for next_pos, dmg_to_move in adj[pos]:
+                if next_pos in visited:
+                    continue
+                visited[next_pos] = True
+                if dmg_to_move:
+                    q.append((dmg + 1, next_pos))
+                else:
+                    q.appendleft((dmg, next_pos))
+    
+    candidate = ((dmg, pos) for pos, dmg in rec.items() if field[pos] == '.')
+    ans_dmg, ans_pos = min(candidate)
+    ans_r = ans_pos // W
+    ans_c = ans_pos % W
+    return f'{ans_r} {ans_c}'
+
+print(solve())

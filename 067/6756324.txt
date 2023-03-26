@@ -1,0 +1,36 @@
+#!/usr/bin/env pypy3
+from heapq import heapify, heappush, heappop
+import sys
+sys.setrecursionlimit(1<<30)
+
+read = sys.stdin.read
+readline = sys.stdin.readline
+readlines = sys.stdin.readlines
+
+def dijkstra(E, V, s):
+    INF = 1 << 60
+    dist = [INF] * V
+    dist[s] = 0
+    que = [[0, s]]
+
+    while que:
+        dst, cur = heappop(que)
+        if dst > dist[cur]:
+            continue
+        for nxt, cst in E[cur]:
+            tmp = dst + cst
+            if tmp < dist[nxt]:
+                dist[nxt] = tmp
+                heappush(que, [tmp, nxt])
+
+    return dist
+
+if __name__ == '__main__':
+    V, E, r = map(int, readline().split())
+    Edge = [list() for _ in range(V)]
+    for _ in range(E):
+        s, t, d = map(int, readline().split())
+        Edge[s].append([t, d])
+    INF = 1 << 60
+    print(*['INF' if ans == INF else ans for ans in dijkstra(Edge, V, r)], sep='\n')
+

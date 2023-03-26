@@ -1,0 +1,170 @@
+use std::collections::hash_map::HashMap;
+use std::collections::vec_deque::VecDeque;
+use std::io::Read;
+
+#[derive(Debug)]
+struct WeightedPath {
+    pub f: usize,
+    pub t: usize,
+    pub w: isize,
+}
+impl WeightedPath {
+    fn new(f: usize, t: usize, w: isize) -> Self {
+        Self { f, t, w }
+    }
+}
+
+fn solve(
+    paths: &[WeightedPath],
+    v: usize,
+    start: usize,
+) -> Result<Vec<Option<isize>>, &'static str> {
+    let mut edge_map = HashMap::new();
+    for e in paths {
+        let t = edge_map.entry(&e.f).or_insert(Vec::new());
+        t.push(e);
+    }
+    println!("{:?}", edge_map);
+
+    let mut distances = Vec::<Option<isize>>::new();
+    distances.resize(v, None);
+    let mut queue = VecDeque::new();
+    distances[start] = Some(0);
+    for e in &edge_map[&start] {
+        queue.push_back(e);
+    }
+    let mut count = 0;
+    while queue.len() > 0 {
+        count += 1;
+        if count > paths.len() * 2 {
+            return Err("NEGATIVE CYCLE");
+        }
+        let e = queue.pop_front().unwrap();
+        println!("e: {:?}", e);
+        let cost = e.w + distances[e.f].unwrap();
+        let old_cost = distances[e.t];
+        println!("{}->{}: {} (old: {:?})", e.f, e.t, cost, old_cost);
+        if let Some(old_cost) = old_cost {
+            if old_cost <= cost {
+                continue;
+            }
+        }
+        println!("updated!");
+        distances[e.t] = Some(cost);
+        println!("distances: {:?}", distances);
+
+        if let Some(edges) = edge_map.get(&e.t) {
+            for e in edges {
+                queue.push_back(e);
+            }
+        }
+        println!("queue: {:?}", queue);
+    }
+    println!("distances: {:?}", distances);
+    Ok(distances)
+
+    //Err("NEGATIVE CYCLE")
+}
+
+fn solve_input(input: &str) -> Result<Vec<Option<isize>>, &'static str> {
+    let v: Vec<Vec<isize>> = input
+        .trim()
+        .split('\n')
+        .collect::<Vec<&str>>()
+        .iter()
+        .map(|s| {
+            s.trim()
+                .split(' ')
+                .map(|s| s.parse::<isize>().unwrap())
+                .collect::<Vec<isize>>()
+        })
+        .collect();
+    let mut it = v.iter();
+    let params: &Vec<isize> = &*it.next().unwrap();
+    let v = params[0] as usize;
+    let start = params[2] as usize;
+    let paths: Vec<WeightedPath> = it
+        .map(|v| WeightedPath::new(v[0] as usize, v[1] as usize, v[2]))
+        .collect();
+    solve(&paths, v, start)
+}
+
+fn main() {
+    let mut input = String::new();
+    std::io::stdin().read_to_string(&mut input).unwrap();
+    match solve_input(&input) {
+        Ok(v) => {
+            for e in v {
+                match e {
+                    Some(d) => {
+                        println!("{}", d)
+                    }
+                    None => {
+                        println!("INF")
+                    }
+                }
+            }
+        }
+        Err(s) => {
+            println!("{}", s)
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn sample1() {
+        let paths = vec![
+            /*
+            0--(2)--1--(1)---3
+            |       |        |
+            |      (-5)     (2)
+            |       |        |
+            +--(3)- 2 -------+
+
+            */
+            WeightedPath::new(0, 1, 2),
+            WeightedPath::new(0, 2, 3),
+            WeightedPath::new(1, 2, -5),
+            WeightedPath::new(1, 3, 1),
+            WeightedPath::new(2, 3, 2),
+        ];
+        assert_eq!(
+            solve(&paths, 4, 0),
+            Ok(vec![Some(0), Some(2), Some(-3), Some(-1)])
+        );
+    }
+    #[test]
+    fn sample2() {
+        let input = "
+4 6 0
+0 1 2
+0 2 3
+1 2 -5
+1 3 1
+2 3 2
+3 1 0
+";
+
+        assert_eq!(solve_input(input), Err("NEGATIVE CYCLE"));
+    }
+    #[test]
+    fn sample3() {
+        let input = "
+4 5 1
+0 1 2
+0 2 3
+1 2 -5
+1 3 1
+2 3 2
+";
+
+        assert_eq!(
+            solve_input(input),
+            Ok(vec![None, Some(0), Some(-5), Some(-3)])
+        );
+    }
+}
+

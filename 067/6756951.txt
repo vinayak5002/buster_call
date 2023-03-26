@@ -1,0 +1,86 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000001
+#define NIL -2000000002
+#define INF 2000000
+#define MAXN 150
+typedef long long int ll;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+
+struct vertex {
+    int con;
+    vector<pair<int,int>> edge; // cost, to
+
+};
+
+vertex VS[MAXN];
+
+ll V, E;
+ll ans;
+
+
+ll calc_cost(int u, int v){
+    ll res = INF;
+    for (int i=0; i<VS[u].edge.size() ; i++) {
+        if ( VS[u].edge[i].second == v ) {res= VS[u].edge[i].first;  } 
+    }
+    // printf( "%d -> %d : %lld  \n", u, v, res );
+    return res;
+}
+
+ll doDFS(int s){
+    // sからスタートしてsに戻る順路のうち最小コストを返す。
+    ll cost = INF;
+    
+    vector<int> v ;
+    for (int i=0; i<V; i++ ) {
+        v.push_back(i);
+    }
+    int n=1;
+    //vector<char> words = {'a', 'i', 'u', 'e', 'o'};
+    do {
+        // cout << n++ << ": ";
+        for (int i = 0; i < v.size(); i++) {
+           // cout << v[i];
+           //cout << words[v[i]];
+        }
+        //cout << "\n";
+        ll tmpcost = 0 ;
+        for (int i = 0 ; i < v.size() ; i++) {
+            if ( i < v.size() - 1 ) { tmpcost += calc_cost(v[i],v[i+1]);}
+            else { tmpcost += calc_cost(v[i],v[0]);}
+            if (tmpcost >= INF) { tmpcost = INF ; break;}
+        }       
+        //cout << "ANS : " << tmpcost ; 
+        //cout << "\n";
+        cost = min (cost, tmpcost);
+    } while (next_permutation(v.begin(), v.end()));
+
+    return cost ;
+}
+
+
+int main(){
+    cin >> V >> E ;
+    //頂点の番号は 0からV-1; 
+    ll tmp ,tmp2 , tmp3; 
+    for (int i=1 ; i<= E ; i++){
+        cin >> tmp >> tmp2 >> tmp3 ;
+        VS[tmp].edge.push_back(make_pair(tmp3, tmp2));
+    }
+
+    /*for(int u=0; u<V; u++) {
+        for (int i=0; i<VS[u].edge.size() ; i++) {
+             printf ("%d ", VS[u].edge[i].second); 
+        }
+        cout << endl;
+    }*/
+
+    ans=doDFS(1) ;
+    if (ans == INF) {ans = -1;}
+    printf("%lld\n",ans ) ;
+    return 0;
+}
+
+

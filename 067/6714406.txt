@@ -1,0 +1,109 @@
+//#include <atcoder/all>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <deque>
+#include <exception>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <iosfwd>
+#include <iostream>
+#include <istream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <locale>
+#include <map>
+#include <memory>
+#include <new>
+#include <numeric>
+#include <ostream>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <stdexcept>
+#include <streambuf>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <valarray>
+#include <vector>
+#include <array>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <forward_list>
+#include <future>
+#include <initializer_list>
+#include <mutex>
+#include <random>
+#include <ratio>
+#include <regex>
+#include <scoped_allocator>
+#include <system_error>
+#include <thread>
+#include <tuple>
+#include <typeindex>
+#include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
+using namespace std;
+typedef long long ll;
+typedef pair<ll,ll> pll;
+typedef vector<int> vint;
+typedef vector<vector<int> > vvint;
+typedef vector<long long> vll;
+typedef vector<vector<long long> > vvll;
+typedef vector<pair<ll,ll>> vpll;
+typedef vector<string> vst;
+typedef vector<bool> vbo;
+typedef vector<vector<bool>> vvbo;
+#define rep(i,a) for(int i=0;i<a;i++)
+#define REP(i,a,b) for(int i=a;i<b;i++)
+#define rrep(i,a,b) for(int i=a;i>=b;i--)
+#define ALL(v) (v).begin(),(v).end()
+#define RALL(v) (v).rbegin(),(v).rend()
+ll gcd(ll a,ll b){return a?gcd(b%a,a):b;}
+ll lcm(ll a,ll b){return a / gcd(a,b) * b;}
+void oye(){cout << "Yes" << endl;}
+void ono(){cout << "No"  << endl;}
+//ll mod=998244353;
+//ll mod=1e9+7;
+int m;
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(0);
+  int n;
+  while(true){
+    cin>>n;
+    if(n==0) return 0;
+    vint w(n);
+    rep(i,n) cin>>w[i];
+    vvint dp(n,vint(n+1,-1));
+    m=n;
+    auto dfs = [&](auto&& dfs, int l = 0, int r = m) -> int {
+      if(r-l <= 1) return 0;
+      if ((r-l) == 2){
+        if(abs(w[l]-w[l+1]) <= 1){
+            return 2;
+        }
+        else{
+          return 0;
+        }
+      }
+      int &d = dp[l][r];
+      if(d!=-1) return d;
+      if (abs(w[l] - w[r-1]) <= 1 && dfs(dfs,l+1,r-1)==r-l-2){
+        d=r-l;
+      }
+      REP(i,l+1,r){
+        d=max(d,dfs(dfs,l,i)+dfs(dfs,i,r));
+      }
+      return d;
+    };
+    cout<<dfs(dfs,0,n)<<endl;
+  }
+}

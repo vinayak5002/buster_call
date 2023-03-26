@@ -1,0 +1,60 @@
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <numeric>
+#include <iomanip>
+#include <string>
+#include <array>
+#include <vector>
+#include <map>
+#include <set>
+#include <bitset>
+#include <queue>
+using namespace std;
+#define rep(x,to) for(int x=0;x<to;++x)
+#define rep2(x,from,to) for(int x=from;x<to;++x)
+typedef long long ll;
+typedef unsigned long long ull;
+const ll LINF = 1e18;
+typedef pair<ll, int> P;
+struct Edge {
+    ll to;
+    ll cost;
+};
+
+vector<ll> dijkstra(const vector<vector<Edge>> &G, int s, int n) {
+    vector<ll> dis(n, LINF);
+    priority_queue<P, vector<P>, greater<P>> pq;  // 「仮の最短距離, 頂点」が小さい順に並ぶ
+    dis[s] = 0;
+    pq.emplace(dis[s], s);
+    while (!pq.empty()) {
+        P p = pq.top();
+        pq.pop();
+        int v = p.second;
+        if (dis[v] < p.first) {  // 最短距離で無ければ無視
+            continue;
+        }
+        for (auto &e : G[v]) {
+            if (dis[e.to] > dis[v] + e.cost) {  // 最短距離候補なら priority_queue に追加
+                dis[e.to] = dis[v] + e.cost;
+                pq.emplace(dis[e.to], e.to);
+            }
+        }
+    }
+    return dis;
+}
+int main() {
+    int n, m, r, b, e, c;
+    cin >> n >> m >> r;
+    vector<vector<Edge>> Graph(n);
+    rep(i,m) {
+        cin >> b >> e >> c;
+        Edge edge = { e, c };
+        Graph[b].push_back(edge);
+    }
+    auto res = dijkstra(Graph, r, n);
+    rep(i,n) {
+        if(res[i] != LINF) cout << res[i] << endl;
+        else cout << "INF" << endl;
+    }
+}

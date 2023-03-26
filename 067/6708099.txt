@@ -1,0 +1,74 @@
+#include <iostream>
+using namespace std;
+
+struct Card
+{
+    char c;
+    int k;
+};
+
+int partition(Card A[], int p, int r){
+    Card x = A[r];
+    int i = p-1;
+    for(int j=p;j<r;j++){
+        if(A[j].k<=x.k){
+            i++;
+            Card temp = A[j];
+            A[j] = A[i];
+            A[i] = temp;
+        }
+    }
+    A[r] = A[i+1];
+    A[i+1] = x;
+    return i+1;
+}
+
+void quickSort(Card A[], int p, int r){
+    if(p<r){
+        int q = partition(A, p, r);
+        quickSort(A, p, q-1);
+        quickSort(A, q+1, r);
+    }
+}
+
+void BubbleSort(int n, struct Card A[]){
+    int i,j;
+    for(i=n;i>0;i--){
+        for(j=0;j<i-1;j++){
+            if(A[j].k>A[j+1].k){
+                Card temp = A[j];
+                A[j] = A[j+1];
+                A[j+1] = temp;
+            }
+        }
+    }
+}
+
+void Compare(int n, struct Card A[], struct Card B[]){
+    bool same = true;
+    for(int i=0;i<n;i++){
+        if(A[i].c!=B[i].c || A[i].k!=B[i].k){
+            same = false;
+            break;
+        }
+    }
+    if(same){
+        cout << "Stable" << endl;
+    }else{
+        cout << "Not stable" << endl;
+    }
+}
+
+
+int main(){
+    int n;
+    cin >> n;
+    Card A[n], B[n];
+    for(int i=0;i<n;i++) cin >> A[i].c >> A[i].k;
+    for(int i=0;i<n;i++) B[i]=A[i];
+
+    BubbleSort(n, B);
+    quickSort(A, 0, n-1);
+    Compare(n, A, B);
+    for(int i=0;i<n;i++) cout << A[i].c << " " << A[i].k << endl;
+}

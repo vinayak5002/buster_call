@@ -1,0 +1,53 @@
+#include <stdio.h>
+
+void maxHeapify(int x, int* a, int n)
+{
+    int l, r, max;//左子、右子、最大値(左子、右子、自分の中)のインデックス変数
+    int tmp;//交換のための臨時変数
+    l = 2 * x;
+    r = 2 * x + 1;//左子、右子インデックスの算出
+
+    if( l <= n && a[l] > a[x])  max = l;//もし左子が存在する と 左子 > 自分なら max = 左子
+    else    max = x;//もし左子が存在しない　あるいは　左子 < 自分なら max = 自分
+    if( r <= n && a[r] > a[max])  max = r;//もし右子が存在する と 左子 > max(l,i)なら max = 右子
+
+    if( max != x )//自分が最大じゃないと（交換する必要があるなら）
+    {
+        tmp = a[x];
+        a[x] = a[max];
+        a[max] = tmp;//xとmaxの値の交換
+        maxHeapify(max, a, n);//xの子の中大きい値を持つ子を再帰的にheapify
+    }
+}
+
+void build_MaxHeap(int* a, int n)
+{
+    int i;
+    for(i = n / 2; i >= 1; i--)
+    {
+        maxHeapify(i, a, n);
+    }
+}
+
+int main(void)
+{
+    int i,n;//i は loop変数、 n はノードの数
+    scanf("%d", &n);//nを読み込み
+
+    int array[n+1];//計算を容易するため、array[0]を使わない、array[1]---array[n]が二分木の中身
+
+    for( i = 1; i < n + 1; i++ )//読み込む
+    {
+        scanf("%d",&array[i]);
+    }
+
+    build_MaxHeap(array, n);
+
+    for( i = 1; i < n + 1; i++ )//出力
+    {
+        printf(" %d", array[i]);  
+    }
+    printf("\n");
+    
+    return 0;
+}

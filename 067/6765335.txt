@@ -1,0 +1,68 @@
+import sys
+input = lambda: sys.stdin.readline().rstrip()
+sys.setrecursionlimit(10**6)
+
+from collections import defaultdict
+class UnionFind:
+
+  def __init__(self, n):
+    self._n = n
+    self._parents = [-1] * n
+
+  def _find(self, x) -> int:
+    if self._parents[x] < 0:
+      return x
+    self._parents[x] = self._find(self._parents[x])
+    return self._parents[x]
+
+  def unite(self, x, y) -> None:
+    x, y = self._find(x), self._find(y)
+    if x == y:
+      return
+    if self._parents[x] > self._parents[y]:
+      x, y = y, x
+    self._parents[x] += self._parents[y]
+    self._parents[y] = x
+
+  def size(self, x) -> None:
+      return -self._parents[self._find(x)]
+
+  def same(self, x, y) -> bool:
+      return self._find(x) == self._find(y)
+
+  def members(self, x) -> list:
+      root = self._find(x)
+      return [i for i in range(self._n) if self._find(i) == root]
+
+  def roots(self) -> list:
+      return [i for i,x in enumerate(self._parents) if x < 0]
+
+  def group_count(self) -> int:
+      return len(self.roots())
+
+  def all_group_members(self) -> list:
+    group_members = defaultdict(list)
+    for member in range(self._n):
+      group_members[self._find(member)].append(member)
+    return group_members
+
+  def refresh(self) -> None:
+    for i in range(self._n):
+      self._find(i)
+
+  def __str__(self) -> str:
+    return '\n'.join(f'{r}: {m}' for r, m in self.all_group_members().items())
+
+#  -----------------------  #
+
+n, q = map(int, input().split())
+
+uf = UnionFind(n)
+
+for _ in range(q):
+  com, x, y = map(int, input().split())
+  if com == 0:
+    uf.unite(x, y)
+  else:
+    print(1 if uf.same(x, y) else 0)
+

@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <string.h>
+
+#define L 14
+#define M 1000000
+char H[M][L];
+
+int h1(int key)
+{
+	return key%M;
+}
+
+int h2(int key)
+{
+	return 1+(key%(M-1));
+}
+
+int getChar(char m)//文字を数字に変換//
+{
+	if(m=='A') return 1;
+	else if(m=='T') return 2;
+	else if(m=='G') return 3;
+	else if(m='C') return 4;
+	else return 0;
+}
+
+
+long getkey(char A[])
+{
+	long sum=0,p=1,i;
+	for(i=0;i<strlen(A);i++)
+	{
+		sum=sum+p*(getChar(A[i]));
+		p=p*5;
+	}
+	return sum;
+}
+
+int insert(char A[])
+{
+	long i,n,key,h;//longはintの拡大版みたいなやつ//
+	key=getkey(A);
+	for(i=0;;i++)
+	{
+		h=(h1(key)+i*h2(key))%M;
+		if(strcmp(H[h],A)==0) return 1;
+		else if(strlen(H[h])==0) 
+		{
+			strcpy(H[h],A);
+			return 0;
+		}
+	}
+	return 0;
+}
+	
+int find(char A[])
+{
+	long i,h,key;
+	key=getkey(A);
+	for(i=0;;i++)
+	{
+		h=(h1(key)+i*h2(key))%M;
+		if(strcmp(H[h],A)==0) return 1;
+		else if(strlen(H[h])==0) return 0;
+	}
+	return 0;
+}
+		
+
+int main(void)
+{
+int n,i,h;
+	char A[14],c[9];
+	for(i=0;i<M;i++)
+	{
+		H[i][0]='\0';
+	}
+	scanf("%d",&n);
+	for(i=0;i<n;i++)
+	{
+		scanf("%s %s",c,A);
+	
+	if(c[0]=='i')
+	{
+		insert(A);
+	}
+	else 
+	{
+		if(find(A))
+		{
+			printf("yes\n");
+		}
+		else{
+			printf("no\n");
+		}
+	}
+	}
+	return 0;
+}
+	

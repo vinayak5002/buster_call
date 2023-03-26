@@ -1,0 +1,47 @@
+
+INF = 10**10
+
+while True:
+    n, m = map(int, input().split())
+    if n == m == 0:
+        break
+    a = list(map(int, input().split()))
+    w = list(map(int, input().split()))
+    w += [-k for k in w]
+    s = set()
+    m += m
+    for bit in range(1 << m):
+        k = 0
+        for i in range(m):
+            if bit >> i & 1:
+                k += w[i]
+        if k>0:
+            s.add(k)
+
+    for i in range(n):
+        if a[i] in s:
+            a[i] = INF
+    a.sort()
+    while a and a[-1] == INF:
+        a.pop()
+    if len(a) == 0:
+        print(0)
+        continue
+
+    x = []
+    for b in a:
+        y = set()
+        for k in s:
+            if b - k > 0:
+                y.add(b - k)
+            else:
+                y.add(k - b)
+        x.append(y)
+    ss = x[0]
+    for v in x:
+        ss &= v
+    if ss:
+        print(min(ss))
+    else:
+        print(-1)
+

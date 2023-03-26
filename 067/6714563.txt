@@ -1,0 +1,177 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+typedef vector<int> vi;
+typedef vector<ll> vl;
+typedef vector<vector<int>> vvi;
+typedef vector<vector<ll>> vvl;
+
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+typedef vector<pii> vpii;
+typedef vector<pll> vpll;
+
+typedef tuple<ll, ll, ll, ll, ll> tl5;
+typedef tuple<ld, ld, ld, ld, ld> tld5;
+
+#define FOR(i, a, b) for(ll i=(a); i<(b); ++i)
+#define REP(i, n) FOR(i, 0, n)
+#define NREP(i, n) FOR(i, 1, n+1)
+
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return 1; } return 0; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return 1; } return 0; }
+
+ll isfin = 0;
+
+const ld EPS = 1e-5, eps = 1e-3;
+const ld INF = 1e15;
+ll N;
+
+
+ld dist(ld X, ld Y, ld H, ld x, ld y, ld h) {
+    return sqrt((X-x)*(X-x)+(Y-y)*(Y-y)+(H-h)*(H-h));
+}
+
+ld px, py;
+
+ld one_line(ld fx, ld fy, ld sx, ld sy, ld tx, ld ty) {
+    ld mx = (sx + tx) / 2, my = (sy + ty) / 2;
+    
+    if(dist(sx, sy, 0, tx, ty, 0) < eps) {
+        px = mx, py = my;
+        return dist(fx, fy, 0, mx, my, 0);
+    }
+    
+    vector<tuple<ld, ld, ld>> vec(3);
+    for(int i = 0; i < 3; ++i) {
+        ld x, y;
+        if(i == 0) {x = sx, y = sy;}
+        else if(i == 1) {x = mx, y = my;}
+        else {x = tx, y = ty;}
+        
+        ld d = dist(fx, fy, 0, x, y, 0);
+        vec[i] = {d, x, y};
+    }
+    sort(vec.begin(), vec.end());
+    
+    return one_line(fx, fy, get<1>(vec[0]), get<2>(vec[0]), get<1>(vec[1]), get<2>(vec[1]));
+}
+
+ld RX, RY, rx, ry;
+
+ld two_lines(ld SX, ld SY, ld TX, ld TY, ld sx, ld sy, ld tx, ld ty) {
+    ld MX = (SX + TX) / 2, MY = (SY + TY) / 2;
+    if(dist(SX, SY, 0, TX, TY, 0) < eps) {
+        ld d = one_line(MX, MY, sx, sy, tx, ty);
+        RX = MX, RY = MY, rx = px, ry = py;
+        return d;
+    }
+    
+    vector<tuple<ld, ld, ld>> vec(3);
+    for(int i = 0; i < 3; ++i) {
+        ld X, Y;
+        if(i == 0) {X = SX, Y = SY;}
+        else if(i == 1) {X = MX, Y = MY;}
+        else {X = TX, Y = TY;}
+        
+        ld d = one_line(X, Y, sx, sy, tx, ty);
+        vec[i] = {d, X, Y};
+    }
+    sort(vec.begin(), vec.end());
+    
+    return two_lines(get<1>(vec[0]), get<2>(vec[0]), get<1>(vec[1]), get<2>(vec[1]), sx, sy, tx, ty);
+}
+
+ld UX, UY, ux, uy;
+
+ld shortest_point(ld SX, ld SY, ld TX, ld TY, ld sx, ld sy, ld tx, ld ty) {
+    ld res = INF;
+    
+    ld fx, fy;
+    
+    for(int i = 0; i < 2; ++i) {
+        if(chmin(res, two_lines(SX, SY, TX, TY, sx, sy, sx, ty))) {
+            UX = RX, UY = RY, ux = rx, uy = ry;
+        }
+        if(chmin(res, two_lines(SX, SY, TX, TY, sx, sy, tx, sy))) {
+            UX = RX, UY = RY, ux = rx, uy = ry;
+        }
+        if(chmin(res, two_lines(SX, SY, TX, TY, tx, sy, tx, ty))) {
+            UX = RX, UY = RY, ux = rx, uy = ry;
+        }
+        if(chmin(res, two_lines(SX, SY, TX, TY, sx, ty, tx, ty))) {
+            UX = RX, UY = RY, ux = rx, uy = ry;
+        }
+        
+    }
+    
+    return res;
+}
+
+bool isOK_one(ld X, ld Y, ld rad, ld x, ld y, ld h) {
+    if(dist(X, Y, 0, x, y, 0) > rad + EPS) {return true;}
+    else {
+        if(dist(X, Y, rad, x, y, min(h, rad)) > rad + EPS) {return true;}
+        else {return false;}
+    }
+}
+
+bool isOK_search(ld rad, vector<tld5> points) {
+    bool flg = 1;
+    
+    REP(i, N) {
+        auto [X, Y, x, y, h] = points[i];
+        
+        flg &= isOK_one(X, Y, rad, x, y, h);
+    }
+    
+    return flg;
+}
+
+void solve() {
+    cin >> N;
+    if(N == 0) {
+        isfin = 1;
+        return;
+    }
+    
+    ll ax, ay, bx, by;
+    cin >> ax >> ay >> bx >> by;
+    vector<tl5> blocks(N);
+    REP(i, N) {
+        ll mx, my, Mx, My, h; cin >> mx >> my >> Mx >> My >> h;
+        blocks[i] = {mx, my, Mx, My, h};
+    }
+    
+    vector<tld5> points(N);
+    REP(i, N) {
+        auto [minx, miny, maxx, maxy, h] = blocks[i];
+        shortest_point(ax, ay, bx, by, minx, miny, maxx, maxy);
+        points[i] = {UX, UY, ux, uy, h};
+        // cout << i << " " << UX << " " << UY << " " << ux << " " << uy << " " << h << endl;
+    }
+    
+    ld ok = 0.0, ng = 1050.0;
+    while(abs(ok-ng)>EPS) {
+        ld mid = (ok + ng) / 2;
+        if(isOK_search(mid, points)) {ok = mid;}
+        else {ng = mid;}
+    }
+    
+    cout << fixed << setprecision(10);
+    cout << ok << endl;
+    
+    return;    
+}
+
+int main(void){
+    while(1) {
+        solve();
+        if(isfin) {break;}
+    }
+    
+    return 0;
+}

@@ -1,0 +1,51 @@
+fn main() {
+    let mut s = read::<String>();
+    let n: usize = read();
+    let datas: Vec<Vec<String>> = read_vec2(n);
+    for d in datas {
+        let ins = d[0].as_str();
+        let a = d[1].parse::<usize>().unwrap();
+        let b = d[2].parse::<usize>().unwrap();
+        match ins {
+            "replace" => s = replace(&s, a, b, d[3].as_str()),
+            "reverse" => s = reverse(&s, a, b),
+            "print" => print(&s, a, b),
+            _ => (),
+        }
+    }
+}
+
+fn print(s: &str, a: usize, b: usize) {
+    println!("{}", &s[a..(b + 1)]);
+}
+
+fn reverse(s: &str, a: usize, b: usize) -> String {
+    return replace(
+        s,
+        a,
+        b,
+        (&s[a..(b + 1)]).chars().rev().collect::<String>().as_str(),
+    );
+}
+
+fn replace(s: &str, a: usize, b: usize, p: &str) -> String {
+    return format!("{}{}{}", &s[0..a], p, &s[(b + 1)..s.len()]);
+}
+
+fn read<T: std::str::FromStr>() -> T {
+    let mut s = String::new();
+    std::io::stdin().read_line(&mut s).ok().unwrap();
+    s.trim().parse().ok().unwrap()
+}
+
+fn read_vec<T: std::str::FromStr>() -> Vec<T> {
+    read::<String>()
+        .split_whitespace()
+        .map(|e| e.parse().ok().unwrap())
+        .collect()
+}
+
+fn read_vec2<T: std::str::FromStr>(n: usize) -> Vec<Vec<T>> {
+    (0..n).map(|_| read_vec()).collect()
+}
+

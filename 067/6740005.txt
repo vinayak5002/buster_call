@@ -1,0 +1,432 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/*
+insert x: 連結リストの先頭にキー x を持つ要素を継ぎ足す
+delete x: キー x を持つ最初の要素を連結リストから削除する
+deleteFirst: リストの先頭の要素を削除する
+deleteLast: リストの末尾の要素を削除する
+*/
+
+struct doubleList{
+	
+	struct doubleList *prev;
+	int value;
+	struct doubleList *next;
+	
+};
+typedef struct doubleList DL;
+
+
+
+
+void insert(int key);	//連結リストの先頭にキー x を持つ要素を継ぎ足す
+void delete(int key);	//キー x を持つ最初の要素を連結リストから削除する
+void deleteFirst(void);	//リストの先頭の要素を削除する
+void deleteLast(void);	//リストの末尾の要素を削除する
+
+
+void initialize(DL *p);
+void displayAll(DL *p);
+
+
+DL* gotoHead(DL *p);
+
+
+
+DL *listHead;
+DL *listTail;
+
+
+int size;
+
+int main(void)
+{
+	
+	int n;
+	int i;
+	int key;
+	
+	size = 0;
+	
+	char order[100];
+	char str[100];
+	
+	//まずリストヘッドの領域を取る。
+	listHead = (DL*)malloc(sizeof(DL));
+	
+	//リストヘッドの初期化
+	//initialize(listHead);
+	listHead = NULL;
+	
+	
+	//命令数nの入力
+	fgets(order, sizeof(order), stdin);
+	sscanf(order, "%d", &n);
+	
+	for(i=0; i<n; i++){
+		
+		//命令の入力
+		fgets(order, sizeof(order), stdin);
+		
+		//deleteFirstの場合：
+		if(strcmp(order, "deleteFirst\n") == 0){
+			
+			deleteFirst();
+			
+		}
+		
+		
+		//deleteLAstの場合：
+		else if(strcmp(order, "deleteLast\n") == 0){
+			
+			deleteLast();
+			
+		}
+		
+		
+		//それ以外の場合：
+		else{
+			
+			//命令を文字列と数値に分解
+			sscanf(order, "%s %d\n", str, &key);
+			
+			//insertの場合
+			if(strcmp(str, "insert") == 0){
+				
+				//printf("do insert %d\n", key);
+				insert(key);
+				
+			}
+			
+			//deleteの場合
+			else if(strcmp(str, "delete") == 0){
+				
+				//printf("do delete %d\n", key);
+				delete(key);
+				
+			}
+			
+			//それ以外だった場合
+			else{
+				
+				//printf("無効な入力です。\n");
+				
+			}
+			
+			
+		}
+		
+		//displayAll(listHead);
+		
+	}
+	
+	displayAll(listHead);
+	
+	return 0;
+	
+}
+
+
+
+void initialize(DL *p){
+	
+	p->prev = NULL;
+	p->value = 0;
+	p->next = NULL;
+	
+}
+
+
+
+void displayAll(DL *p){
+	
+	if(p == NULL){
+		
+		return;
+		
+	}
+	
+	while(1){
+		
+		printf("%d", p->value);
+		
+		if(p->next == NULL){
+			
+			break;
+			
+		}
+		else{
+			
+			printf(" ");
+			
+		}
+		
+		p = p->next;
+		
+	}
+	
+	printf("\n");
+	
+}
+
+
+
+void insert(int key){
+	
+	DL *p = (DL*)malloc(sizeof(DL));
+	p->prev = NULL;
+	p->value = key;
+	p->next = listHead;
+	
+	//printf("listHead = %p, size = %d\n", listHead, size);
+	
+	//リストヘッド（元）のprevに、今作ったポインタを繋げる
+	if(size > 0){
+		
+		listHead->prev = p;
+		
+	}
+	else{
+		
+		listHead = p;
+		listTail = p;
+		
+	}
+	
+	//リストヘッドを更新する。
+	listHead = p;
+	
+	size++;
+	
+}
+
+
+void delete(int key){
+	
+	//リストヘッドからチェック開始
+	DL *p;
+	
+	
+	//最終的に削除できたかを管理
+	int isDeleted = 0;
+	
+	while(1){
+		
+		
+		//pの値がkeyと一致した場合：
+		//if(p->value == key){
+		if(listHead->value == key){
+			
+			//作業用の変数pにリストヘッドを移す
+			p = listHead;
+			
+			//この時点でリストヘッドは先頭に戻る
+			listHead = gotoHead(listHead);
+			
+			//1つ前の要素があるなら（＝最初の要素でなければ）、「1つ前の要素の、次の要素（＝今現在は自分が入っている）へのリンク」に、自分の次の要素を入れる（＝自分をスキップする形にする）
+			if(p->prev != NULL){
+				
+				if(p->next != NULL){
+					
+					p->prev->next = p->next;
+					
+				}
+				else{
+					
+					p->prev->next = NULL;
+					
+				}
+				
+				
+			}
+			
+			//最初の要素だった場合はリストヘッドを1つ進める。
+			else{
+				
+				listHead = listHead->next;
+				
+			}
+			
+			//次の要素があるなら（＝最後の要素でなければ）、「1つ次の要素の、前の要素（＝今現在は自分が入っている）へのリンク」に、自分の前の要素を入れる（＝自分をスキップする形にする）」
+			if(p->next != NULL){
+				
+				if(p->prev != NULL){
+					
+					p->next->prev = p->prev;
+					
+				}
+				else{
+					
+					p->next->prev = NULL;
+					
+				}
+				
+			}
+			
+			//最後の要素だった場合はリストテイルを1つ戻す。
+			else{
+				
+				listTail = listTail->prev;
+				
+			}
+			
+			//********************************************この時点で、1つ前からも1つ先からも、両方ともから自分はアクセスされない。	→	削除完了。******************************************
+			
+			//ついでにpにNULLを入れる。
+			p = NULL;
+			free(p);
+			
+			//削除に成功した、という印。
+			isDeleted = 1;
+			
+			//削除したらループを抜ける。s
+			break;
+			
+		}
+		
+		
+		//次の要素がもうない（＝最後の要素）の場合、ループを抜ける。
+		//if(p->next == NULL){
+		else if(listHead->next == NULL){
+			
+			listHead = gotoHead(listHead);
+			break;
+			
+		}
+		
+		
+		//現在地を1つ進める。
+		//p = p->next;
+		listHead = listHead->next;
+		
+		//displayAll(listHead);
+		
+	}
+	
+	
+	//削除した場合とできなかった場合のメッセージ
+	if(isDeleted){
+		
+		//printf("%d を削除しました\n\n", key);
+		
+	}
+	else{
+		
+		//printf("%d は見つかりませんでした\n\n", key);
+		
+	}
+	
+	size--;
+	
+}
+
+
+//リストの先頭の要素を削除する
+void deleteFirst(void){
+	
+	//次の要素があったら、1つ進んでから、元いた位置へのリンクを切る。
+	if(listHead->next != NULL){
+		
+		//1つ進んでから
+		listHead = listHead->next;
+		
+		//元いた位置へのリンクを切る。
+		free(listHead->prev);
+		listHead->prev = NULL;
+		
+	}
+	
+	//次の要素がなかったら、自分をNULLにする。
+	else{
+		
+		//
+		listHead = NULL;
+		
+	}
+	
+	size--;
+	
+}
+
+
+
+//リストの末尾の要素を削除する
+void deleteLast(void){
+	
+	/*
+	DL *p = listHead;
+	
+	while(p->next != NULL){
+		
+		p = p->next;
+		
+	}
+	
+	
+	//printf("p->value = %d\n", p->value);
+	
+	
+	//1つ前の要素があったら（＝要素が自分だけじゃなかったら）
+	if(p->prev != NULL){
+		
+		//printf("p->prev->next->value = %d\n", p->prev->next->value);
+		
+		//1つ前の要素の、次の要素へのリンク（＝自分へのリンク）をNULLにする。（自分が最後の要素だから）
+		p->prev->next = NULL;
+		
+		
+		//printf("p->prev->next = %p\n", p->prev->next);
+		
+		//自分自身を消す。
+		free(p);
+		p = NULL;
+		
+	}
+	else{
+		
+		free(p);
+		p = NULL;
+		
+	}
+	
+	*/
+	
+	//printf("listTail->value = %d\n", listTail->value);
+	size--;
+	
+	if(size > 0){
+		
+		listTail = listTail->prev;
+		listTail->next = NULL;
+		
+	}
+	
+	
+	//サイズが0になったら（＝要素が元々1つしかなく、それを今消したところだったら）、リストヘッドをNULLにする。
+	if(size == 0){
+		
+		listHead = NULL;
+		listTail = NULL;
+		
+	}
+	
+	
+}
+
+
+
+//リストの先頭まで戻る関数
+DL* gotoHead(DL *p){
+	
+	while(p->prev != NULL){
+		
+		p = p->prev;
+		
+	}
+	
+	return p;
+	
+}
+

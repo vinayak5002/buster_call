@@ -1,0 +1,98 @@
+#include<stdio.h>
+#include<ctype.h>
+
+struct Dice{
+	int number[6];
+};
+
+int main(){
+	char buf[256] = {};
+	struct Dice dice[100];//サイコロa
+	int flag = 0,num_dice;//正否判定flag(0:false,1:true),サイコロの数num_dice
+	int memo_dice[6] = {}, inst, count = 0;//ダイスBのコピーmemo_dice,代入用変数inst,正否カウントcount
+
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d", &num_dice);
+
+	for (int i = 0; i < num_dice; i++){
+		fgets(buf, sizeof(buf) - 1, stdin);
+		char* p = buf;
+
+		for (int j = 0; j < 6; j++){
+			sscanf(p, "%d", &dice[i].number[j]);//サイコロaの数を入力
+
+			while (isdigit(*p)){
+				p++;
+			}
+			while (isspace(*p)){
+				p++;
+			}
+		}
+	}
+	for (int dice1 = 0; dice1 < num_dice; dice1++){
+		for (int dice2 = 0; dice2 < num_dice; dice2++){
+			if (dice1 != dice2){
+				for (int i = 0; i < 6; i++){
+					for (int reset = 0; reset < 6; reset++)memo_dice[reset] = dice[dice1].number[reset];//メモをダイスBで初期化
+					if (i < 4){
+						for (int ver = 0; ver < i; ver++){
+							inst = memo_dice[0];
+							memo_dice[0] = memo_dice[1];
+							memo_dice[1] = memo_dice[5];
+							memo_dice[5] = memo_dice[4];
+							memo_dice[4] = inst;
+						}
+					}
+					else{
+						if (i == 4){
+							inst = memo_dice[0];
+							memo_dice[0] = memo_dice[3];
+							memo_dice[3] = memo_dice[5];
+							memo_dice[5] = memo_dice[2];
+							memo_dice[2] = inst;
+							inst = memo_dice[0];
+							memo_dice[0] = memo_dice[1];
+							memo_dice[1] = memo_dice[5];
+							memo_dice[5] = memo_dice[4];
+							memo_dice[4] = inst;
+						}
+						else{
+							inst = memo_dice[0];
+							memo_dice[0] = memo_dice[2];
+							memo_dice[2] = memo_dice[5];
+							memo_dice[5] = memo_dice[3];
+							memo_dice[3] = inst;
+							inst = memo_dice[0];
+							memo_dice[0] = memo_dice[1];
+							memo_dice[1] = memo_dice[5];
+							memo_dice[5] = memo_dice[4];
+							memo_dice[4] = inst;
+						}
+					}
+					for (int j = 0; j < 4; j++){
+						for (int hor = 0; hor < j; hor++){
+							inst = memo_dice[0];
+							memo_dice[0] = memo_dice[3];
+							memo_dice[3] = memo_dice[5];
+							memo_dice[5] = memo_dice[2];
+							memo_dice[2] = inst;
+						}
+						for (int i = 0; i < 6; i++){
+							if (dice[dice2].number[i] == memo_dice[i])count++;
+						}
+						if (count == 6){
+							printf("No\n");
+							return 0;
+						}
+						else{
+							count = 0;
+						}
+					}
+				}
+			}
+		}
+	}
+	printf("Yes\n");
+	
+	return 0;
+}

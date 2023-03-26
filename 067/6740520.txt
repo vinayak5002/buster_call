@@ -1,0 +1,57 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    int N, M, K;
+    cin >> N >> M >> K;
+    vector<int> D(M);
+    vector<bool> L(N);
+    for(auto &&v:D){
+        cin >> v;
+        L[--v] = true;
+    }
+    vector<vector<int>> A(N, vector<int>(K));
+    for(int i = 0; i < N; i++){
+        for(int j = 0; j < K; j++){
+            cin >> A[i][j];
+            A[i][j]--;
+        }
+    }
+    map<array<int,16>,int> mp;
+    queue<array<int,16>> nxt;
+    array<int,16> a;
+    for(int i = 0; i < 16; i++){
+        a[i] = (i < M ? D[i] : -1);
+    }
+    sort(a.rbegin(), a.rend());
+    nxt.push(a);
+    mp[a] = 0;
+    auto f = [&](int to){
+        array<int,16> b;
+        for(int i = 0; i < 16; i++){
+            if(a[i] == -1){
+                b[i] = -1;
+                continue;
+            }
+            b[i] = A[a[i]][to];
+            if(!L[b[i]])b[i] = -1;
+        }
+        sort(b.rbegin(), b.rend());
+        return b;
+    };
+    while(!nxt.empty()){
+        a = nxt.front();
+        nxt.pop();
+        int d = mp[a];
+        if(a[0] == -1){
+            cout << d << endl;
+            return 0;
+        }
+        for(int i = 0; i < K; i++){
+            auto b = f(i);
+            if(mp.find(b) != mp.end())continue;
+            mp[b] = d + 1;
+            nxt.push(b);
+        }
+    }
+}

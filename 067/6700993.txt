@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+
+using ll = long long;
+vector<ll> Bfs(const vector<vector<ll>>& G,ll s){
+	const ll INF = (1LL << 60);
+	int n = G.size();
+	vector<ll> d(n, -1);
+	d[s]=0;
+	queue<ll> q; q.emplace(s);
+	while(!q.empty()){
+		int u=q.front(); q.pop();
+		for(int v:G[u]) if(d[v]==INF) {
+			d[v]=d[u]+1;
+			q.emplace(v);
+		}
+	}
+	return d;
+}
+
+int main() {
+    int n; cin >> n;
+    ll u, k;
+    vector<vector<ll>> g(n);
+    for(ll i = 0; i < n; i++){
+        cin >> u >> k;
+        u--;
+        ll a;
+        for(ll j = 0; j < k; j++){
+            cin >> a;
+            a--;
+            g[u].push_back(a);
+        }
+    }
+    vector<ll> dis = Bfs(g, 0);
+    for(ll i = 0; i < n; i++) cout << i + 1 << ' ' << dis[i] << endl;
+}

@@ -1,0 +1,62 @@
+n = int(input())
+dfs = [list(map(int,input().split())) for i in range(n)] # [頂点番号,出次数,隣接する頂点番号]
+
+
+def is_searched(v,serched_list): # vが探索済みかを判定
+    for i in range(v[1]): # 辺が探索済み
+        flag = (v[0],v[2+i]) in serched_list
+        if flag:
+            pass
+        else:
+            return False
+    return True
+
+
+
+ans = [[i+1] for i in range(n)]
+d=1 # 頂点の発見時刻
+f=1 # 頂点の完了時刻
+
+serch = [dfs[0]] # 初期化
+ans[0].append(1) # 初期化
+searched =[] # 探索済みの辺と頂点を保存
+while serch != []:
+
+    v = serch[-1] # スタック最後尾の頂点
+    # print("v:",v)
+    if v[1] == 0 or is_searched(v,searched): # 次の頂点が無いorvから出る辺が探索済みならば、vをスタックから削除
+        d+=1
+        f+=1
+        tmp = serch.pop(-1)
+        ans[tmp[0]-1].append(f)
+        searched.append(tmp[0])
+        # print(tmp[0],"を削除\n")
+    else:
+        u = dfs[v[2]-1] # 次の頂点
+        if ((v[0],u[0]) in searched): # vuが探索済みならば更新
+            for i in range(v[1]):
+                u = dfs[v[2]+i]
+                # print("更新",searched)
+                if((v[0],u[0]) not in searched): # 新しいuvが未探索で終了
+                    break
+        
+        if u[0] in searched: # 次の頂点が探索済みならば、vを削除
+            d+=1
+            f+=1
+            tmp = serch.pop(-1)
+            ans[tmp[0]-1].append(f)
+            searched.append(tmp[0])
+            # print(tmp[0],"を削除\n")
+            continue
+        
+        searched.append((v[0],u[0])) # 探索済みとする
+        d+=1
+        f+=1
+        serch.append(u) # スタックにuを追加
+        ans[u[0]-1].append(d)
+        # print(u[0],"を追加\n")
+
+for i in range(n):    
+    print(ans[i][0],ans[i][1],ans[i][2])
+
+

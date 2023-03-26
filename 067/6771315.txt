@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+template <class T>
+using ve = vector<T>;
+template <class T>
+using vv = vector<vector<T>>;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define repg(i, j, n) for (int i = (int)j; i < (int)(n); i++)
+#define repi(i, n) for (int i = (int)(n)-1; i >= 0; i--)
+#define repig(i, j, n) for (int i = (int)(n)-1; i >= (int)j; i--)
+
+int main() {
+    /*
+https://qiita.com/drken/items/ace3142967c4f01d42e9#%E5%80%8B%E6%95%B0%E5%88%B6%E9%99%90%E3%81%AA%E3%81%97%E3%83%8A%E3%83%83%E3%83%97%E3%82%B5%E3%83%83%E3%82%AF
+    */
+    int N, W;
+    cin >> N >> W;
+    ve<int> val(N);
+    ve<int> wei(N);
+    rep(i, N) cin >> val[i] >> wei[i];
+    ve<ve<int>> dp(N, ve<int>(W + 1, 0));
+
+    rep(k, W + 1) if (k - wei[0] >= 0) dp[0][k] = dp[0][k - wei[0]] + val[0];
+    repg(i, 1, N) {
+        rep(k, W + 1) {
+            if (k - wei[i] >= 0)
+                dp[i][k] = max(dp[i][k - wei[i]] + val[i], dp[i - 1][k]);
+            else
+                dp[i][k] = dp[i - 1][k];
+        }
+    }
+    int ans = 0;
+    rep(i, W + 1) ans = max(ans, dp[N - 1][i]);
+    cout << ans << endl;
+}

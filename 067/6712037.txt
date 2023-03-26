@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define For(i,a,b) for(int i = (int)(a); i < (int)(b); i++)
+#define Rep(i,n) For(i,0,n)
+#define dbg(x) cout<<#x"="<<x<<endl
+
+#define MAX_N 300+1
+#define MAX_W 1000+1
+
+int N;
+int w[MAX_N];
+int dp[MAX_N][MAX_N];
+
+int main(int argc, char const *argv[])
+{
+	while(1){
+		scanf("%d", &N);
+		if(N == 0) break;
+		Rep(i,N){
+			scanf("%d", &w[i]);
+		}
+		Rep(i,MAX_N)Rep(j,MAX_N) dp[i][j] = 0;
+		Rep(l,N){
+			for(int s = 0, e = l; e < N; s++,e++){
+				For(i,s,e){
+					dp[s][e] = max(dp[s][e], dp[s][i]+dp[i+1][e]);
+				}
+				if((e-s-1)%2 == 0 && (e-s-1)/2 == dp[s+1][e-1] && abs(w[e]-w[s]) <= 1) dp[s][e] = max(dp[s][e], dp[s+1][e-1]+1);
+			}
+		}
+		printf("%d\n", dp[0][N-1]*2);
+	}
+	return 0;
+}

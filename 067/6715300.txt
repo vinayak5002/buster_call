@@ -1,0 +1,103 @@
+#include<stdio.h>
+#include<math.h>
+typedef long double ld;
+const ld eps = 1e-9;
+typedef struct {
+    ld x, y;
+} pt;
+ld mag(pt p) {
+    return sqrt(p.x*p.x + p.y*p.y);
+}
+pt add(pt a, pt b) {
+    pt c;
+    c.x = a.x + b.x;
+    c.y = a.y + b.y;
+    return c;
+}
+pt sub(pt a, pt b) {
+    pt c;
+    c.x = a.x - b.x;
+    c.y = a.y - b.y;
+    return c;
+}
+pt mult(pt a, ld val) {
+    a.x *= val;
+    a.y *= val;
+    return a;
+}
+pt div(pt a, ld val) {
+    a.x /= val;
+    a.y /= val;
+    return a;
+}
+ld cross(pt a, pt b) {
+    return a.x*b.y - a.y*b.x;
+}
+ld dot(pt a, pt b) {
+    return a.x*b.x + a.y*b.y;
+}
+
+pt poly[5000];
+
+int main() {
+    int n; scanf("%d", &n);
+    ld x, y, tpolyar = 0;
+    for (int i = 0; i < n; ++i) {
+        scanf("%Lf%Lf", &x, &y);
+        poly[i].x = x;
+        poly[i].y = y;
+        
+        if (i > 1)
+            tpolyar += cross(sub(poly[i - 1], poly[0]), sub(poly[i], poly[0]));
+    }
+
+    ld longest = 0, shortest = 4e+7;
+    for (int i = 0; i < n; ++i) {
+        int j = (i + 1) % n;
+        ld runar = cross(sub(poly[j], poly[i]), sub(poly[(j + 1) % n], poly[i]));
+        while (2*runar - tpolyar <= eps) {
+            j = (j + 1) % n;
+            runar += cross(sub(poly[j], poly[i]), sub(poly[(j + 1) % n], poly[i]));
+        }
+
+        ld lar = runar - 0.5*tpolyar;
+        ld rar = cross(sub(poly[j], poly[i]), sub(poly[(j + 1) % n], poly[i])) - lar;
+        pt arbsct = div(add(mult(poly[j], lar), mult(poly[(j + 1) % n], rar)), lar + rar);
+        ld l = mag(sub(arbsct, poly[i]));
+ 
+        if (l - longest > eps)
+            longest = l;
+ 
+        if (shortest - l > eps)
+            shortest = l;
+ 
+        ld theta = asin(cross(sub(poly[(j + 1) % n], poly[j]), sub(poly[i], poly[(i + 1) % n])) / (mag(sub(poly[(j + 1) %n], poly[j])) * mag(sub(poly[i], poly[(i + 1) % n]))));
+        ld alpha = acos(dot(sub(arbsct, poly[i]), sub(poly[(i + 1) % n], poly[i])) / (l * mag(sub(poly[(i + 1) % n], poly[i]))));
+        if (M_PI_2 - alpha - theta/2 > eps && alpha + theta > eps) {
+            ld r1 = l * sin(alpha) * sqrt(sin(alpha + theta)) / (cos(theta/2) * (sqrt(sin(alpha + theta)) + sqrt(sin(alpha))));
+            ld r2 = r1 * sqrt(sin(alpha + theta) / sin(alpha));
+            ld b1 = r1 * cos(alpha + theta/2) / sin(alpha);
+            ld b2 = r2 * cos(alpha + theta/2) / sin(alpha + theta);
+ 
+            if (b1 - mag(sub(poly[(i + 1) % n], poly[i])) <= eps && b2 - mag(sub(poly[(j + 1) % n], arbsct)) <= eps)
+                if (shortest - (r1 + r2) > eps)
+                    shortest = r1 + r2;
+        }
+ 
+        theta = asin(cross(sub(poly[(j + 1) % n], poly[j]), sub(poly[(n + i - 1) % n], poly[i])) / (mag(sub(poly[(j + 1) % n], poly[j])) * mag(sub(poly[(n + i - 1) % n], poly[i]))));
+        alpha = acos(dot(sub(arbsct, poly[i]), sub(poly[(n + i - 1) % n], poly[i])) / (l * mag(sub(poly[(n + i - 1) % n], poly[i]))));
+        if (M_PI_2 - alpha + theta/2 > eps && alpha - theta > eps) {
+            ld r1 = l * sin(alpha) * sqrt(sin(alpha - theta)) / (cos(theta/2) * (sqrt(sin(alpha - theta)) + sqrt(sin(alpha))));
+            ld r2 = r1 * sqrt(sin(alpha - theta) / sin(alpha));
+            ld b1 = r1 * cos(alpha - theta/2) / sin(alpha);
+            ld b2 = r2 * cos(alpha - theta/2) / sin(alpha - theta);
+ 
+            if (b1 - mag(sub(poly[(n + i - 1) % n], poly[i])) <= eps && b2 - mag(sub(poly[j], arbsct)) <= eps)
+                if (shortest - (r1 + r2) > eps)
+                    shortest = r1 + r2;
+        }
+    }
+
+    printf("%.6Lf\n%.6Lf\n", shortest, longest);
+    return 0;
+}

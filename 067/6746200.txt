@@ -1,0 +1,59 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+
+struct tree {
+    int name;
+    int parent = -1;
+    int hight = 0;
+
+};
+
+vector<tree> vec;
+
+int retroot (tree t) {
+    if (t.parent == -1) return t.name;
+    else return retroot(vec.at(t.parent));
+}
+
+
+
+int main() {
+    int n, q;
+    cin >> n >> q;
+
+    for (int i = 0; i < n; i++) {
+        tree t;
+        t.name = i;
+        vec.push_back(t);
+    }
+
+    for (int i = 0; i < q; i++) {
+        int com, x, y;
+        cin >> com >> x >> y;
+        int rootx = retroot(vec.at(x));
+        int rooty = retroot(vec.at(y));
+
+        if (com == 0) {
+
+            if (rootx != rooty) {
+                if (vec.at(rootx).hight >= vec.at(rooty).hight) {
+                    vec.at(rootx).hight = max(vec.at(rootx).hight, vec.at(rooty).hight + 1);
+                    vec.at(rooty).parent = rootx;
+                }
+                else {
+                    vec.at(rooty).hight = max(vec.at(rooty).hight, vec.at(rootx).hight + 1);
+                    vec.at(rootx).parent = rooty;
+                }
+            }
+        }
+
+        if (com == 1) {
+            cout << (rootx == rooty ? 1 : 0) << endl;
+        }
+
+    }
+
+    return 0;
+}
+

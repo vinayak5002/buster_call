@@ -1,0 +1,135 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+void solve(int N) {
+    V<V<int>> res(N, V<int>(N, -1));
+    V<int> wc(N, 0), dc(N, N - 1);
+    int M;
+    cin >> M;
+    rep(i, M) {
+        int x, y;
+        cin >> x >> y;
+        x--, y--;
+        res[x][y] = 1;
+        res[y][x] = 0;
+        wc[x]++;
+        dc[x]--, dc[y]--;
+    }
+    int ans = 0;
+    auto rec = [&](auto f, int x, int y) -> void {
+        if (x == N) {
+            // check
+            rep(i, N) if (wc[i] != N / 2) return;
+            ans++;
+            return;
+        }
+        if (y == N) {
+            f(f, x + 1, 0);
+            return;
+        }
+        if (x == y) {
+            f(f, x, y + 1);
+            return;
+        }
+        // decide some play's result
+        V<pair<int, int>> a;
+        while (true) {
+            int ind = -1;
+            rep(i, N) {
+                // dc[i] = play remains
+                // win / lose count
+                if (wc[i] > N / 2 or N - 1 - dc[i] - wc[i] > N / 2) {
+                    for (auto [x, y] : a) {
+                        res[x][y] = -1;
+                        res[y][x] = -1;
+                        wc[x]--;
+                        dc[x]++, dc[y]++;
+                    }
+                    return;
+                }
+                if (wc[i] == N / 2 and N - 1 - dc[i] - wc[i] < N / 2) {
+                    rep(j, N) {
+                        if (i == j) continue;
+                        if (res[i][j] == -1) {
+                            res[i][j] = 0;
+                            res[j][i] = 1;
+                            a.push_back({j, i});
+                            wc[j]++;
+                            dc[i]--, dc[j]--;
+                        }
+                    }
+                    ind = i;
+                    break;
+                }
+                if (wc[i] < N / 2 and N - 1 - dc[i] - wc[i] == N / 2) {
+                    rep(j, N) {
+                        if (i == j) continue;
+                        if (res[i][j] == -1) {
+                            res[i][j] = 1;
+                            res[j][i] = 0;
+                            a.push_back({i, j});
+                            wc[i]++;
+                            dc[i]--, dc[j]--;
+                        }
+                    }
+                    ind = i;
+                    break;
+                }
+            }
+            if (ind == -1) break;
+        }
+        if (res[x][y] != -1) {
+            f(f, x, y + 1);
+            for (auto [x, y] : a) {
+                res[x][y] = -1;
+                res[y][x] = -1;
+                wc[x]--;
+                dc[x]++, dc[y]++;
+            }
+            return;
+        }
+        res[x][y] = 1;
+        res[y][x] = 0;
+        wc[x]++;
+        dc[x]--, dc[y]--;
+        f(f, x, y + 1);
+        wc[x]--;
+        res[x][y] = 0;
+        res[y][x] = 1;
+        wc[y]++;
+        f(f, x, y + 1);
+        res[x][y] = -1;
+        res[y][x] = -1;
+        wc[y]--;
+        dc[x]++, dc[y]++;
+        for (auto [x, y] : a) {
+            res[x][y] = -1;
+            res[y][x] = -1;
+            wc[x]--;
+            dc[x]++, dc[y]++;
+        }
+        return;
+    };
+    rec(rec, 0, 0);
+    cout << ans << '\n';
+    return;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N;
+    while (cin >> N, N != 0) solve(N);
+    return 0;
+}
+

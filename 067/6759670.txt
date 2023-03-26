@@ -1,0 +1,116 @@
+import java.util.Scanner;
+
+class Cell {
+	private int data;
+	private Cell next;
+	private Cell prev;
+	
+	Cell(int x){ data=x; next=null; prev=null;}
+	
+	void setNext(Cell n){ next=n; }
+	
+	void setPrev(Cell p){ prev=p; }
+	
+	Cell getNext(){ return next; }
+	
+	Cell getPrev(){ return prev; }
+	
+	int getData(){ return data; }
+	
+}
+
+class DoubleLinkList {
+	Cell Fdummy;
+	Cell Rdummy;
+	int num=0;
+	
+	DoubleLinkList(){
+		Fdummy=new Cell(-1);
+		Rdummy=new Cell(-1);
+		Fdummy.setNext(Rdummy);
+		Rdummy.setPrev(Fdummy);
+	}
+	
+	void insert(int x){
+		Cell a=new Cell(x);
+		a.setPrev(Fdummy);
+		a.setNext(Fdummy.getNext());
+		Fdummy.setNext(a);
+		a.getNext().setPrev(a);
+		num++;
+	}
+	
+	void delete(int x){
+		Cell p=Fdummy.getNext();
+		while(p!=null){
+			if(p.getData() == x){
+				p.getPrev().setNext(p.getNext());
+				p.getNext().setPrev(p.getPrev());
+				num--;
+				return;
+			}
+			p=p.getNext();
+		}
+	}
+	
+	void deleteFirst(){
+		Fdummy.getNext().getNext().setPrev(Fdummy);
+		Fdummy.setNext(Fdummy.getNext().getNext());
+		num--;
+	}
+	
+	void deleteLast(){
+		Rdummy.getPrev().getPrev().setNext(Rdummy);
+		Rdummy.setPrev(Rdummy.getPrev().getPrev());
+		num--;
+	}
+	
+	void printa(){
+		Cell p=Fdummy.getNext();
+		while(num>0){
+			if(num>1)
+				System.out.printf("%d ",p.getData());
+			else 
+				System.out.printf("%d\n",p.getData());
+			p=p.getNext();
+			num--;
+		}
+	}
+	
+}
+
+
+
+class alds_3_c {
+	
+	public static void main(String[] args){
+		Scanner scan=new Scanner(System.in);
+		DoubleLinkList L=new DoubleLinkList();
+		
+		int n=scan.nextInt();
+		
+		for(int i=0;i<n;i++){
+			String com=scan.next();
+			
+			if(com.equals("insert")){
+				L.insert(scan.nextInt());
+			}
+			
+			else if(com.equals("delete")){
+				L.delete(scan.nextInt());
+			}
+			
+			else if(com.equals("deleteFirst")){
+				L.deleteFirst();
+			}
+			
+			else if(com.equals("deleteLast")){
+				L.deleteLast();
+			}
+			
+		}
+		
+		L.printa();
+		
+	}
+}

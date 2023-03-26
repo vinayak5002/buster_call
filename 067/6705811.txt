@@ -1,0 +1,203 @@
+#include<stdio.h>
+
+#define e -1 //値の入らない部分に代入
+#define M_MAX 500000 //上限
+
+int num[M_MAX+1]; //各要素は節点k(1≦k≦M_MAX)の数値
+int left[M_MAX+1]; //各要素は節点kの左の子
+int right[M_MAX+1]; //各要素は節点kの右の子
+int parent[M_MAX+1]; //各要素は節点kの親(
+
+void insert_n(int n,int i)
+{
+	int j=0;
+	num[i] = n;
+	while(1){
+		if(n < num[j]){ //二分木の左側
+			if(left[j] == e){
+				left[j] = i;
+				parent[i] = j;
+				break;
+			}else{
+				j = left[j];
+			}
+		}else if(num[j] < n){ //二分木の右側
+			if(right[j] == e){
+				right[j] = i;
+				parent[i] = j;
+				break;
+			}else{
+				j = right[j];
+			}
+		}else{break;} //例外：初回のみ通る
+	}
+}
+
+void find_n(int n) //nは調べる値
+{
+	int i=0;
+	while(1){
+		if(left[i] == e && right[i] == e){ //子が存在しない
+			if(num[i] != n){ //nが二分木上に存在しない
+				printf("no\n");
+				break;
+			}else{ //num[i]がnに等しい
+				printf("yes\n");
+				break;
+			}
+		}else{ //左か右の子少なくとも片方が存在する
+			if(num[i] == n){
+				printf("yes\n");
+				break;
+			}
+			
+			//左/右の子が存在せず、nがnum[i]より小さい/大きい
+			if((left[i] == e && n < num[i])||(right[i] == e && num[i] < n)){
+				printf("no\n");
+				break;
+			}else{ //まだ探索可能
+				if(n < num[i]){ //二分木の左側
+					i = left[i];
+				}else{ //二分木の右側
+					i = right[i];
+				}
+			}
+		}
+	}
+}
+
+void delete_n(int n) //nは削除する値
+{
+	int i=0; //iは探索中の節点番号
+	int tmp_l;
+	
+	while(1){
+		if(left[i] == e && right[i] == e){ //子が存在しない
+			if(num[i] != n){ //nが二分木上に存在しない
+				break;
+			}else{ //節点番号iを削除
+				if(n < parent[i]){ //削除する節点が親の左側
+					left[parent[i]] = e;
+				}else{
+					right[parent[i]] = e;
+				}
+				break; //ループ終了
+			}
+		}else{ //少なくとも片方に子が存在する
+			if(n == num[i] && left[i] != e && right[i] != e){ //節点番号iを削除(両方の子が存在する)
+				//上書きする節点の探索
+				tmp_l = right[i]; //右側を探索
+				while(left[tmp_l] != e){ //右側の最小値を見つけるまで
+					tmp_l = left[tmp_l];
+				}
+				//節点の上書き
+				num[i] = num[tmp_l];
+				//節点番号tmp_lの要素を削除
+				if(right[tmp_l] != e){ //右の子が存在する
+					//繋ぎ替え
+					parent[right[tmp_l]] = parent[tmp_l];
+					if(num[right[tmp_l]] < num[parent[tmp_l]]){ //右の子が親より小さい
+						left[parent[tmp_l]] = right[tmp_l];
+					}else{ //右の子が親より大きい
+						right[parent[tmp_l]] = right[tmp_l];
+					}
+				}else{
+					right[parent[tmp_l]] = e;
+				}
+				break; //ループ終了
+				
+			}else if(n == num[i]){ //節点番号iを削除(片方のみ子が存在する)
+				if(left[i] != e){ //左側の子が存在する
+					parent[left[i]] = parent[i];
+					if(n < num[parent[i]]){ //削除する節点が親の左側
+						left[parent[i]] = left[i];
+					}else{ //削除する節点が親の右側
+						right[parent[i]] = left[i];
+					}
+				}else{ //右側の子が存在する
+					parent[right[i]] = parent[i];
+					if(n < num[parent[i]]){ //削除する節点が親の左側
+						left[parent[i]] = right[i];
+					}else{ //削除する節点が親の右側
+						right[parent[i]] = right[i];
+					}
+				}
+				break; //ループ終了
+				
+			}else{ //まだ探索可能
+				if(n < num[i]){ //二分木の左側
+					i = left[i];
+				}else{ //二分木の右側
+					i = right[i];
+				}
+			}
+		}
+	}
+}
+
+void print_mid(int i)
+{
+	if(left[i] != e){ //左の子が存在
+		print_mid(left[i]);
+	}
+	printf(" %d", num[i]);
+	if(right[i] != e){ //右の子が存在
+		print_mid(right[i]);
+	}
+}
+
+void print_first(int i)
+{
+	printf(" %d", num[i]);
+	if(left[i] != e){ //左の子が存在
+		print_first(left[i]);
+	}
+	if(right[i] != e){ //右の子が存在
+		print_first(right[i]);
+	}
+}
+
+int main(void)
+{
+	int m; //命令数
+	char com[8]; //命令
+	int n; //入力されたキー値
+	char str[32];
+	
+	int i;
+	
+	fgets(str, sizeof(str)-1, stdin);
+	sscanf(str, "%d", &m);
+	
+	for(i=0; i<m; i++){ //命令数分の初期化(iは1から)
+		//例外としてparentの初期値は0
+		num[i] = e;
+		left[i] = e;
+		right[i] = e;
+		parent[i] = 0;
+	}
+	
+	for(i=0; i<m; i++){
+		fgets(str, sizeof(str), stdin);
+		sscanf(str, "%s%d", com, &n);
+		if(com[0] == 'i'){ //insert命令
+			insert_n(n, i);
+		}else if(com[0] == 'f'){ //find命令
+			find_n(n);
+		}else if(com[0] == 'd'){ //delete命令
+			delete_n(n);
+		}else{ //print命令
+			//中間順巡回アルゴリズム
+			print_mid(0);
+			printf("\n");
+			//先行順巡回アルゴリズム
+			print_first(0);
+			//printf("\n");
+		}
+	}
+	/*for(i=0; i<m; i++){
+		printf("num[%d]=%d, left=%d, right=%d, parent=%d\n", i, num[i], left[i], right[i], parent[i]);
+	}*/
+	
+	return 0;
+}

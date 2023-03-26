@@ -1,0 +1,130 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct UnionFind
+{
+    int n;
+    vector<int> parent;
+    vector<int> rank;
+    vector<vector<int>> groups;
+    int group_count;
+    bool groups_made = false;
+
+    UnionFind (int _n)
+    {
+        n = _n;
+        parent.resize(n);
+        rank.resize(n);
+
+        for (int i = 0; i < n; i++)
+        {
+            parent[i] = i;
+            rank[i] = 0;
+        }
+    }
+
+    int root(int x)
+    {
+        if (parent[x] == x)
+            return x;
+
+        else
+        {
+            int r = root(parent[x]);
+            parent[x] = r;
+            return r;
+        }
+    }
+
+    void merge(int x, int y)
+    {
+        x = root(x);
+        y = root(y);
+
+        if (x == y)
+            return;
+
+        if (rank[x] < rank[y])
+            swap(x, y);
+
+        if (rank[x] == rank[y])
+            ++rank[x];
+
+        parent[y] = x;
+    }
+
+    bool same(int x, int y)
+    {
+        return root(x) == root(y);
+    }
+
+    void make_group()
+    {
+        groups_made = true;
+
+        vector<int> parents, r_parents(n);
+        for (int i = 0; i < n; i++)
+        {
+            if (i == root(i))
+            {
+                parents.push_back(i);
+                r_parents[i] = (int)parents.size() - 1;
+            }
+        }
+
+        groups.resize(parents.size());
+
+        for (int i = 0; i < n; i++)
+        {
+            groups[r_parents[root(i)]].push_back(i);
+        }
+    }
+
+    vector<vector<int>> groups_data()
+    {
+        if (!groups_made)
+            make_group();
+        
+        return groups;
+    }
+};
+
+#define T tuple<int, int, int>
+int n, a;
+vector<T> g;
+
+int main()
+{
+    cin >> n;
+    for (int i = 0; i < n; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            cin >> a;
+
+            if (a == -1)
+                continue;
+
+            if (i <= j)
+                continue;
+
+            g.push_back({a, i, j});
+        }
+    }
+
+    sort(g.begin(), g.end());
+    UnionFind uf(n);
+    long long ans = 0;
+
+    for (auto [cost, x, y] : g)
+    {
+        if (uf.same(x, y))
+            continue;
+
+        ans += cost;
+        uf.merge(x, y);
+    }
+
+    cout << ans << '\n';
+    return 0;
+}

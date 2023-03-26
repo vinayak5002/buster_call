@@ -1,0 +1,76 @@
+#include<iostream>
+#include<algorithm>
+#include<map>
+#include<queue>
+#include<stack>
+#include<set>
+#include<bitset>
+#include<vector>
+#include<string>
+
+#define rep(i,n) for(int i=0;i<(n);i++)
+using namespace std;
+using ll=long long;
+using P=pair<int,int>;
+using P_S=pair<int,string>;
+
+int n;
+int all_min=1001;
+vector<ll>w;
+vector<ll>c;
+vector<bool>seen;
+
+ll solve1(){
+    ll ans1=0;
+    rep(i,n){
+        if(seen[i]==false){
+            vector<int>num;
+            seen[i]=true;
+            int search=c[i];
+            int flag=0;
+            ll sum=w[i];
+            int min_num=w[i],len=1;
+            while(1){
+                rep(j,n){
+                    if(w[j]==search){
+                        if(seen[j]){
+                            flag=1;
+                            break;
+                        }
+                        len++;
+                        if(min_num>w[j]) min_num=w[j];
+                        sum+=w[j];
+                        seen[j]=true;
+                        search=c[j];
+                        break;
+                    }
+                }
+                if(flag)break;
+            }
+            /*rep(j,num.size())cout<<num[j]<<" ";
+            cout<<endl;*/
+            ans1+=min(sum+(len-2)*min_num,sum+min_num+(len+1)*all_min);
+        }
+    }
+    return ans1;
+}
+
+int main()
+{
+    cin>>n;
+    w.resize(n);
+    c.resize(n);
+    seen.resize(n);
+    rep(i,n) seen[i]=false;
+
+    rep(i,n) {
+        ll a;
+        cin>>a;
+        if(all_min>a)all_min=a;
+        w[i]=c[i]=a;
+    }
+    sort(c.begin(),c.end());
+    //rep(i,n)cout<<c[i]<<" ";
+    //cout<<endl;
+    cout<<solve1()<<endl;
+}

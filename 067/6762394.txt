@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+#define chmin(a, b) ((a)=min((a), (b)))
+#define chmax(a, b) ((a)=max((a), (b)))
+#define fs first
+#define sc second
+#define eb emplace_back
+using namespace std;
+ 
+typedef long long ll;
+typedef pair<int, int> P;
+typedef tuple<int, int, int> T;
+ 
+const ll MOD=1e9+7;
+const ll INF=1e18;
+ 
+int dx[]={1, -1, 0, 0};
+int dy[]={0, 0, 1, -1};
+
+int mp[55][55];
+int check[55][55];
+
+int dx2[] = {-1,0,1,1,1,0,-1,-1};
+int dy2[] = {1,1,1,0,-1,-1,-1,0};
+
+int main(){
+
+    while(true){
+        int w,h;
+        int ans = 0;
+        cin >> w >> h;
+        if(w + h == 0) break;
+        for(int i = 0;i < h;i++){
+            for(int j = 0;j < w;j++){
+                cin >> mp[i][j];
+                check[i][j] = 0;
+            }
+        }
+        for(int i = 0;i < h;i++){
+            for(int j = 0;j < w;j++){
+                if(mp[i][j] == 1 && check[i][j] == 0){
+                    ans++;
+                    queue<P> que;
+                    que.push(P(i,j));
+                    while(!que.empty()){
+                        P q = que.front(); que.pop();
+                        if(check[q.fs][q.sc] != 0) continue;
+                        check[q.fs][q.sc] = 1;
+                        for(int k = 0;k < 8;k++){
+                            int ni = q.fs + dx2[k];
+                            int nj = q.sc + dy2[k];
+                            if(min(ni,nj) >= 0 && ni < h && nj < w && mp[ni][nj] == 1 && check[ni][nj] == 0){
+                                que.push(P(ni,nj));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        cout << ans << endl;
+    }
+
+}

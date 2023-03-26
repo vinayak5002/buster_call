@@ -1,0 +1,233 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <map>
+#include <algorithm>
+#include <queue>
+#include <set>
+#include <stack>
+#include <iomanip>
+// clang-format off
+#define rep(i, s ,n) for(int i=s, i##_len=(n); i<i##_len; ++i)
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return 1; } return 0; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return 1; } return 0; }
+#define SZ(x) ((int)(x).size())
+using ll = long long;
+// 2^60
+const ll INF = 1LL << 60;
+// lower_bound(ALL(a), 4)
+#define ALL(a)  (a).begin(),(a).end()
+int gcd(int a,int b){return b?gcd(b,a%b):a;}
+int dx[4]={1,0,-1,0};
+int dy[4]={0,1,0,-1};
+using namespace std;
+using Graph = vector<vector<int>>;
+// clang-format on
+
+// 幅優先の例
+// 入力: グラフ G と，探索の始点 s
+// 出力: s から各頂点への最短路長を表す配列
+vector<int> BFS(const Graph &G, int s)
+{
+    int N = (int)G.size(); // 頂点数
+    // vector<bool> seen(N, false);
+    vector<int> dist(N, -1); // 全頂点を「未訪問」に初期化
+    queue<int> que;
+
+    dist[s] = 0;
+    que.push(s);
+
+    while (!que.empty())
+    {
+        int v = que.front();
+        que.pop();
+
+        for (int x : G[v])
+        {
+            if (dist[x] != -1)
+                continue;
+
+            dist[x] = dist[v] + 1;
+            que.push(x);
+        }
+    }
+    return dist;
+}
+
+// 0: not visited
+// 1: visited (calculateing)
+// 2: visited (calculated)
+// ^ はhttps://qiita.com/drken/items/a803d4fc4a727e02f7ba#4-6-%E3%82%B5%E3%82%A4%E3%82%AF%E3%83%AB%E6%A4%9C%E5%87%BA
+// のfinished[v] := 帰りがけ順の意味で v が訪問済みであることを表す
+// と同義
+// 1に訪れた場合、それはcircleに含まれることを意味する
+vector<int> state;
+
+// 弱連結成分(任意の頂点に対してs->tもしくはt->sどちらかにはパスがある)に1つ以下のサイクルがあるという条件下で、サイクル頂点をcircleにつめる
+// 返り値はcycle内である場合には起点となった頂点番号。それ以外は-1
+// dfsが終わったときにはvが辿れる頂点は全てstate=2になっていることに注意
+
+// 有向グラフを想定している。無向グラフに対応するには辿り元に戻らないように注意
+// けんちょん記事の場合はグラフ全体で1つ以下のサイクルがあることを条件にしているのでこちらの方が良い。
+int dfs(const Graph &G, int v, vector<int> &cycle, int from)
+{
+    if (state[v] == 1)
+        return v;
+    if (state[v] == 2)
+        return -1;
+    state[v] = 1;
+
+    int any = -1;
+    for (int x : G[v])
+    {
+        if (x==from) continue;
+        int r = dfs(G, x, cycle, v);
+        any = max(any, r);
+    }
+    state[v] = 2;
+
+    if (any == -1)
+        return -1;
+
+    cycle.push_back(v);
+    // circleの起点に戻ってきたのでそれ以降はcircleではない
+    if (any == v)
+    {
+        return -1;
+    }
+    return any;
+}
+
+int main()
+{
+    // 頂点数 (サイクルを一つ含むグラフなので辺数は N で確定)
+    int N;
+    cin >> N;
+
+    // グラフ入力受取
+    Graph G(N);
+    for (int i = 0; i < N; ++i)
+    {
+        int a, b;
+        cin >> a >> b;
+        --a, --b; // 頂点番号が 1-indexed で与えられるので 0-indexed にする
+        G[a].push_back(b);
+        G[b].push_back(a);
+    }
+
+    vector<int> cycle2;
+    state.assign(N, 0);
+    dfs(G, 0, cycle2, -1);
+
+    set<int> cycle;
+    for (auto x : cycle2)
+    {
+        cycle.insert(x);
+    }
+
+    // クエリに答える
+    int Q;
+    cin >> Q;
+    for (int _ = 0; _ < Q; ++_)
+    {
+        int a, b;
+        cin >> a >> b;
+        --a, --b;
+        if (cycle.count(a) != 0 && cycle.count(b) != 0)
+            cout << 2 << endl;
+        else
+            cout << 1 << endl;
+    }
+}
+
+/*
+int main()
+{
+    cout << fixed << setprecision(16);
+    int n;
+    cin >> n;
+    vector<int> hate(n);
+    vector<int> hate2(n);
+    rep(i, 0, n)
+    {
+        cin >> hate[i];
+        --hate[i];
+    }
+    rep(i, 0, n)
+    {
+        cin >> hate2[i];
+    }
+    Graph G(n);
+    rep(i, 0, n)
+    {
+        G[i].push_back(hate[i]);
+    }
+
+    ll total = 0;
+    state.assign(n, 0);
+    rep(i, 0, n)
+    {
+        if (state[i] != 0)
+            continue;
+
+        vector<int> circle;
+        dfs(G, i, circle);
+        if (circle.empty())
+            continue;
+
+        ll minval = INF;
+        for (auto x : circle)
+        {
+            minval = min(minval, ll(hate2[x]));
+        }
+        total += minval;
+    }
+    cout << total << endl;
+}
+*/
+
+/*
+int main()
+{
+    cout << fixed << setprecision(16);
+    int n;
+    cin >> n;
+    vector<int> hate(n);
+    vector<int> hate2(n);
+    vector<tuple<int, int, int>> v(n);
+    rep(i, 0, n)
+    {
+        cin >> hate[i];
+        --hate[i];
+    }
+    rep(i, 0, n)
+    {
+        cin >> hate2[i];
+    }
+    rep(i, 0, n)
+    {
+        v[i] = {hate2[i], i, hate[i]};
+    }
+    ll ret = 0;
+    sort(v.begin(), v.end(),greater<tuple<int,int,int>>());
+    // reverse(v.begin(), v.end());
+    Graph G(n);
+    for (auto x : v)
+    {
+        seen.assign(n, false);
+        // first からsecondへ辿れるか
+        dfs(G, get<2>(x));
+        if (seen[get<1>(x)])
+        {
+            ret += get<0>(x);
+        }
+        else
+        {
+            G[get<1>(x)].push_back(get<2>(x));
+        }
+    }
+
+    cout << ret << endl;
+}
+*/
+

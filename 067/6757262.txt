@@ -1,0 +1,94 @@
+#pragma GCC target("avx2")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long int ull;
+#define chmin(x,y) x = min(x,y)
+#define chmax(x,y) x = max(x,y)
+#define BIG_NUM 2000000000
+#define HUGE_NUM 4000000000000000000 //オーバーフローに注意
+#define MOD 1000000007
+#define EPS 0.000000001
+
+
+
+
+
+#define MOD 998244353
+#define SIZE 2005
+
+vector<int> G[SIZE];
+ll N,K;
+ll A[SIZE];
+ll dp[SIZE][SIZE];
+
+void rec(ll node){
+
+	//答えない
+	dp[node][0] = 1; //■葉方向のノードは自分の正解を前提としているので、自分含め葉方向の和は0
+
+	if(A[node] <= K){ //答える
+
+		vector<ll> work(SIZE,0);
+
+		dp[node][A[node]] = 1;
+
+		for(int i = 0; i < G[node].size(); i++){ //逐次子をマージしていく
+
+			int child = G[node][i];
+			rec(child); //■子を先に処理
+
+			for(int now = 0; now <= K; now++){
+				for(int next = 0; now+next <= K; next++){
+					if(now == 0){ //■自分が0なら子も0
+
+						work[0] = 1;
+						continue;
+					}
+
+					work[now+next] += (dp[node][now]*dp[child][next])%MOD;
+					work[now+next] %= MOD;
+				}
+			}
+			for(int a = 0; a <= K; a++){
+
+				dp[node][a] = work[a];
+				work[a] = 0;
+			}
+		}
+	}
+}
+
+int main(){
+
+	scanf("%lld %lld",&N,&K);
+
+	for(ll i = 0; i < N; i++){
+
+		scanf("%lld",&A[i]);
+	}
+
+	int pre;
+	for(int i = 1; i < N; i++){
+
+		scanf("%d",&pre);
+		pre--;
+
+		G[pre].push_back(i);
+	}
+
+	rec(0);
+
+	/*for(int i = 0; i <= K; i++){
+
+		printf("dp[0][%d]:%lld\n",i,dp[0][i]);
+	}*/
+
+	printf("%lld\n",(dp[0][K]));
+
+	return 0;
+}
+

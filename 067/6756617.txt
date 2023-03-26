@@ -1,0 +1,134 @@
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <deque>
+#include <exception>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <iosfwd>
+#include <iostream>
+#include <istream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <locale>
+#include <map>
+#include <memory>
+#include <new>
+#include <numeric>
+#include <ostream>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <stdexcept>
+#include <streambuf>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+#if __cplusplus >= 201103L
+#include <array>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <forward_list>
+#include <future>
+#include <initializer_list>
+#include <mutex>
+#include <random>
+#include <ratio>
+#include <regex>
+#include <scoped_allocator>
+#include <system_error>
+#include <thread>
+#include <tuple>
+#include <type_traits>
+#include <typeindex>
+#include <unordered_map>
+#include <unordered_set>
+#endif
+
+template <typename A, typename B> bool cmin(A &a, const B &b) {
+  return a > b ? (a = b, true) : false;
+}
+template <typename A, typename B> bool cmax(A &a, const B &b) {
+  return a < b ? (a = b, true) : false;
+}
+const double PI = acos(-1);
+const double EPS = 1e-9;
+int inf = sizeof(int) == sizeof(long long) ? 2e18 : 1e9 + 10;
+int dx[] = {0, 1, 0, -1};
+int dy[] = {1, 0, -1, 0};
+#define rep(i, n) for (int i = 0; i < (n); ++i)
+using namespace std;
+using ll = long long;
+using P = pair<int, int>;
+const static int N = 100, WHITE = 0, GRAY = 1, BLACK = 2;
+int n, color[N], M[N][N], d[N], p[N];
+
+void dijkstra(int s) {
+  rep(i, N) {
+    color[i] = WHITE;
+    d[i] = inf;
+  }
+
+  d[s] = 0;
+  p[s] = -1;
+  while (true) {
+    int mincost = inf, u;
+    rep(i, n) {
+      if (color[i] != BLACK && d[i] < mincost) {
+        mincost = d[i];
+        u = i;
+      }
+    }
+
+    if (mincost == inf) {
+      break;
+    }
+
+    color[u] = BLACK;
+
+    rep(i, n) {
+      if (color[i] != BLACK && M[u][i] != inf) {
+        if (d[u] + M[u][i] < d[i]) {
+          d[i] = d[u] + M[u][i];
+          p[i] = u;
+          color[i] = GRAY;
+        }
+      }
+    }
+  }
+
+  rep(i, n) {
+    cout << i << " " << d[i] << endl;
+  }
+}
+
+int main()
+{
+  rep (i, N) {
+    rep(j, N) {
+      M[i][j] = inf;
+    }
+  }
+
+  cin >> n;
+  int u, k, c, v;
+  rep(i, n) {
+    cin >> u >> k;
+    rep(j, k) {
+      cin >> c >> v;
+      M[u][c] = v;
+    }
+  }
+
+  dijkstra(0);
+  return 0;
+}
+

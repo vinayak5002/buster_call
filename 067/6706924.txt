@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N, M, T, P;
+    while (cin >> N >> M >> T >> P, N != 0) {
+        V<V<int>> cnt(N, V<int>(M, 1));
+        rep(tt, T) {
+            int d, c;
+            cin >> d >> c;
+            V<V<int>> nex(N, V<int>(M, 0));
+            if (d == 1) {
+                for (int x = c; x < N; x++) {
+                    for (int y = 0; y < M; y++) {
+                        nex[x - c][y] += cnt[x][y];
+                    }
+                }
+                for (int x = 0; x < c; x++) {
+                    for (int y = 0; y < M; y++) {
+                        nex[c - x - 1][y] += cnt[x][y];
+                    }
+                }
+            } else {
+                for (int y = c; y < M; y++) {
+                    for (int x = 0; x < N; x++) {
+                        nex[x][y - c] += cnt[x][y];
+                    }
+                }
+                for (int y = 0; y < c; y++) {
+                    for (int x = 0; x < N; x++) {
+                        nex[x][c - y - 1] += cnt[x][y];
+                    }
+                }
+            }
+            cnt = nex;
+        }
+        int ans = 0;
+        rep(pp, P) {
+            int x, y;
+            cin >> x >> y;
+            cout << cnt[x][y] << '\n';
+        }
+    }
+    return 0;
+}
+

@@ -1,0 +1,84 @@
+from collections import deque
+import sys
+def input(): return sys.stdin.readline().rstrip()  # 文字列
+
+
+def create_array(*dims, initial=0):
+    """初期値initialでdim[0]*dim[1]*...*dim[n]の配列を生成"""
+    n = len(dims)
+    code = "[" * n + "{}] * {}" + " for _ in range({})]" * (n - 1)
+    return eval(code.format(initial, *reversed(dims)))
+
+
+board = create_array(50, 50, 50, 50, initial=0)
+r = [[0] * 50 for _ in range(50)]
+l = [[0] * 50 for _ in range(50)]
+route = ((1, 0), (-1, 0), (0, 1), (0, -1))
+que = [0] * (50**4)
+
+
+while True:
+    W, H = map(int, input().split())
+    if H == W == 0:
+        break
+    for i1 in range(H):
+        for i2 in range(W):
+            for i3 in range(H):
+                for i4 in range(W):
+                    board[i1][i2][i3][i4] = 0
+
+    for i in range(H):
+        s = input()
+        tmp = s[:W]
+        pmt = (s[W + 1:])[::-1]
+
+        for j in range(W):
+            if tmp[j] == ".":
+                l[i][j] = 1
+            elif tmp[j] == "#":
+                l[i][j] = 0
+            elif tmp[j] == "L":
+                x, y = i, j
+                l[i][j] = 1
+            else:
+                xx, yy = i, j
+                l[i][j] = 1
+
+            if pmt[j] == ".":
+                r[i][j] = 1
+            elif pmt[j] == "#":
+                r[i][j] = 0
+            elif pmt[j] == "R":
+                z, w = i, j
+                r[i][j] = 1
+            else:
+                zz, ww = i, j
+                r[i][j] = 1
+
+    board[x][y][z][w] = 1
+    que.append((x, y, z, w))
+    k = 1
+    while que:
+        x, y, z, w = que[k]
+        k -= 1
+        for i, j in route:
+            a, b, c, d = x + i, y + j, z + i, w + j
+            if 0 <= a < H and 0 <= b < W and 0 <= c < H and 0 <= d < W:
+                if l[a][b] and r[c][d]:
+                    if board[a][b][c][d] == 0:
+                        board[a][b][c][d] = 1
+                        que[k] = (a, b, c, d)
+                        k += 1
+                elif l[a][b]:
+                    if board[a][b][z][w] == 0:
+                        board[a][b][z][w] = 1
+                        que[k] = (a, b, z, w)
+                        k += 1
+                elif r[a][b]:
+                    if board[x][y][c][d] == 0:
+                        board[x][y][c][d] = 1
+                        que[k] = (x, y, c, d)
+                        k += 1
+
+    print("Yes" if board[xx][yy][zz][ww] else "No")
+

@@ -1,0 +1,54 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int V,E;
+int edge[1000][2];
+//0:new 1:Active 2:
+int v_statue[100];
+
+
+
+bool dfs(int node){
+    v_statue[node] = 1;
+    for(int i=0;i<E;i++){
+        if(edge[i][0] != node) continue;
+
+        if(v_statue[edge[i][1]] == 1) return false;
+        else if(v_statue[edge[i][1]]  == 0){
+            if (dfs(edge[i][1]) == false) return false;
+        }
+    }
+    v_statue[node] = 2;
+    return true;
+}
+
+bool cyclic(){
+    for(int i=0;i<100;i++) v_statue[i]=0;
+    for(int i=0;i<V;i++){
+        if(v_statue[i] == 0){
+            if(dfs(i) == false){
+                return false;
+            }
+        }
+    }
+
+    return true;
+
+}
+
+
+int main(){
+    cin >> V >> E;
+
+    for(int i=0; i<E;i++){
+        cin >> edge[i][0] >> edge[i][1];
+    }
+
+    if(cyclic()) cout << "0" << endl;
+    else cout << "1" << endl;
+    
+    return 0;
+}
+

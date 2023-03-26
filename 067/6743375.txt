@@ -1,0 +1,251 @@
+#include <bits/extc++.h>
+
+using namespace std;
+
+#define rep(i,n) for(int i=0;i<(n);++i)
+#define reps(i,s,n) for(int i=(s);i<=(n);++i)
+#define all(x) begin(x), end(x)
+#define Fixed fixed << setprecision(12)
+#define updiv(a,b) (((a) + (b) - 1) / (b))
+constexpr int32_t INF  = 0x3f3f3f3f;
+constexpr int64_t LINF = 0x3f3f3f3f3f3f3f3fLL;
+constexpr int mod = 1e9+7;
+// constexpr int mod = 998244353;
+
+template <class Func>
+class FixPoint : Func {
+public:
+    explicit constexpr FixPoint(Func&& f) noexcept : Func(forward<Func>(f)) {}
+
+    template <class... Args>
+    constexpr decltype(auto) operator()(Args&&... args) const {
+        return Func::operator()(*this, std::forward<Args>(args)...);
+    }
+};
+
+template <class Func>
+static inline constexpr decltype(auto) makeFixPoint(Func&& f) noexcept {
+    return FixPoint<Func>{forward<Func>(f)};
+}
+
+template <class A, class B> inline bool chmax(A &a, const B &b) { return b > a && (a = b, true); }
+template <class A, class B> inline bool chmin(A &a, const B &b) { return b < a && (a = b, true); }
+
+template <class T> using max_heap = priority_queue<T>;
+template <class T> using min_heap = priority_queue<T,vector<T>,greater<T> >;
+template <class A, class B> using umap = unordered_map<A,B>;
+template <class A, class B> using uset = unordered_set<A,B>;
+
+template <class T> using Set = __gnu_pbds::tree<T, __gnu_pbds::null_type, less<T>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
+
+template <class T> inline void bye(T x) { cout << x << '\n'; exit(0); }
+
+constexpr int dx[] = {1, 0, -1, 0, 1, 1, -1, -1};
+constexpr int dy[] = {0, -1, 0, 1, 1, -1, -1, 1};
+
+template< typename T = int >
+struct Edge {
+    int from, to;
+    T cost;
+    int idx;
+
+    Edge() = default;
+
+    Edge(int from, int to, T cost = 1, int idx = -1) : from(from), to(to), cost(cost), idx(idx) {}
+
+    operator int() const { return to; }
+};
+
+template< typename T = int >
+struct Graph {
+    vector< vector< Edge< T > > > g;
+    int es;
+
+    Graph() = default;
+
+    explicit Graph(int n) : g(n), es(0) {}
+
+    size_t size() const {
+        return g.size();
+    }
+
+    void add_directed_edge(int from, int to, T cost = 1) {
+        g[from].emplace_back(from, to, cost, es++);
+    }
+
+    void add_edge(int from, int to, T cost = 1) {
+        g[from].emplace_back(from, to, cost, es);
+        g[to].emplace_back(to, from, cost, es++);
+    }
+
+    void read(int M, int padding = -1, bool weighted = false, bool directed = false) {
+        for(int i = 0; i < M; i++) {
+            int a, b;
+            cin >> a >> b;
+            a += padding;
+            b += padding;
+            T c = T(1);
+            if(weighted) cin >> c;
+            if(directed) add_directed_edge(a, b, c);
+            else add_edge(a, b, c);
+        }
+    }
+
+    inline vector< Edge< T > > &operator[](const int &k) {
+        return g[k];
+    }
+
+    inline const vector< Edge< T > > &operator[](const int &k) const {
+        return g[k];
+    }
+};
+
+template< typename T = int >
+using Edges = vector< Edge< T > >;
+
+template< typename T = int >
+struct LowLink : Graph< T > {
+public:
+    using Graph< T >::Graph;
+    vector< int > ord, low, articulation;
+    vector< Edge< T > > bridge;
+    using Graph< T >::g;
+
+    virtual void build() {
+        used.assign(g.size(), 0);
+        ord.assign(g.size(), 0);
+        low.assign(g.size(), 0);
+        int k = 0;
+        for(int i = 0; i < (int) g.size(); i++) {
+            if(!used[i]) k = dfs(i, k, -1);
+        }
+    }
+
+    explicit LowLink(const Graph< T > &g) : Graph< T >(g) {}
+
+private:
+    vector< int > used;
+
+    int dfs(int idx, int k, int par) {
+        used[idx] = true;
+        ord[idx] = k++;
+        low[idx] = ord[idx];
+        bool is_articulation = false, beet = false;
+        int cnt = 0;
+        for(auto &to : g[idx]) {
+            if(to == par && !exchange(beet, true)) {
+                continue;
+            }
+            if(!used[to]) {
+                ++cnt;
+                k = dfs(to, k, idx);
+                low[idx] = min(low[idx], low[to]);
+                is_articulation |= par >= 0 && low[to] >= ord[idx];
+                if(ord[idx] < low[to]) bridge.emplace_back(to);
+            } else {
+                low[idx] = min(low[idx], ord[to]);
+            }
+        }
+        is_articulation |= par == -1 && cnt > 1;
+        if(is_articulation) articulation.push_back(idx);
+        return k;
+    }
+};
+
+template< typename T = int >
+struct TwoEdgeConnectedComponents : LowLink< T > {
+public:
+    using LowLink< T >::LowLink;
+    using LowLink< T >::g;
+    using LowLink< T >::ord;
+    using LowLink< T >::low;
+    using LowLink< T >::bridge;
+
+    vector< int > comp;
+    Graph< T > tree;
+    vector< vector< int > > group;
+
+    int operator[](const int &k) const {
+        return comp[k];
+    }
+
+    void build() override {
+        LowLink< T >::build();
+        comp.assign(g.size(), -1);
+        int k = 0;
+        for(int i = 0; i < (int) comp.size(); i++) {
+            if(comp[i] == -1) dfs(i, -1, k);
+        }
+        group.resize(k);
+        for(int i = 0; i < (int) g.size(); i++) {
+            group[comp[i]].emplace_back(i);
+        }
+        tree = Graph< T >(k);
+        for(auto &e : bridge) {
+            tree.add_edge(comp[e.from], comp[e.to], e.cost);
+        }
+    }
+
+    explicit TwoEdgeConnectedComponents(const Graph< T > &g) : Graph< T >(g) {}
+
+private:
+    void dfs(int idx, int par, int &k) {
+        if(par >= 0 && ord[par] >= low[idx]) comp[idx] = comp[par];
+        else comp[idx] = k++;
+        for(auto &to : g[idx]) {
+            if(comp[to] == -1) dfs(to, idx, k);
+        }
+    }
+};
+
+signed main() {
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+
+    int n, m;
+    cin >> n >> m;
+
+    vector<int> w(n);
+
+    for (int i = 0; i < n; ++i) {
+        cin >> w[i];
+    }
+
+    TwoEdgeConnectedComponents<> g(n);
+
+    for (int i = 0; i < m; ++i) {
+        int u, v;
+        cin >> u >> v;
+        --u, --v;
+        g.add_edge(u, v);
+    }
+
+    g.build();
+
+    auto &tree = g.tree;
+    auto &comp = g.comp;
+    auto &group = g.group;
+
+    int sz = tree.size();
+
+    vector<int> weight(sz);
+
+    for (int i = 0; i < n; ++i) {
+        weight[comp[i]] += w[i];
+    }
+
+    int res = 0;
+    auto dfs = makeFixPoint([&](auto rec, int cur, int pre, int sum) -> void {
+        chmax(res, sum);
+        for (auto e : tree[cur]) {
+            if (e == pre) continue;
+            rec(e, cur, sum + weight[e]);
+        }
+    });
+
+    dfs(comp[0], -1, weight[comp[0]]);
+
+    cout << res << '\n';
+
+    return(0);
+}

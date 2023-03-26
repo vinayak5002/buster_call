@@ -1,0 +1,139 @@
+#include<bits/stdc++.h>
+//#include<atcoder/all>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+//using namespace atcoder;
+typedef long long ll;
+const ll INF = 1e18;
+//typedef modint1000000007 mint;
+//
+
+int main(){
+	int n, K;
+	cin >> n >> K;
+	//3次元座標圧縮, 3次元累積和
+	ll x1,y1,z1,x2,y2,z2;
+	vector<ll> xlist;
+	vector<ll> ylist;
+	vector<ll> zlist;
+	vector<ll> dx1(n);
+	vector<ll> dx2(n);
+	vector<ll> dy1(n);
+	vector<ll> dy2(n);
+	vector<ll> dz1(n);
+	vector<ll> dz2(n);
+	for (int i=0; i<n; i++){
+		cin >> x1 >> y1 >> z1 >> x2 >> y2 >> z2;
+		xlist.push_back(x1);
+		xlist.push_back(x2);
+		ylist.push_back(y1);
+		ylist.push_back(y2);
+		zlist.push_back(z1);
+		zlist.push_back(z2);
+		dx1[i] = x1;
+		dx2[i] = x2;
+		dy1[i] = y1;
+		dy2[i] = y2;
+		dz1[i] = z1;
+		dz2[i] = z2;
+	}
+	sort(xlist.begin(), xlist.end());
+	sort(ylist.begin(), ylist.end());
+	sort(zlist.begin(), zlist.end());
+	vector<ll> xv;
+	vector<ll> yv;
+	vector<ll> zv;
+	unordered_map<ll,int> x_c;
+	unordered_map<ll,int> y_c;
+	unordered_map<ll,int> z_c;
+	int xsize, ysize, zsize;
+	ll tmp = -1;
+	int cnt = 0;
+	for (int i:xlist){
+		if (tmp < i){
+			tmp = i;
+			x_c[tmp] = cnt;
+			xv.push_back(tmp);
+			cnt += 1;
+		}
+	}
+	xsize = cnt;
+	tmp = -1;
+	cnt = 0;
+	for (int i:ylist){
+		if (tmp < i){
+			tmp = i;
+			y_c[tmp] = cnt;
+			yv.push_back(tmp);
+			cnt += 1;
+		}
+	}
+	ysize = cnt;
+	tmp = -1;
+	cnt = 0;
+	for (int i:zlist){
+		if (tmp < i){
+			tmp = i;
+			z_c[tmp] = cnt;
+			zv.push_back(tmp);
+			cnt += 1;
+		}
+	}
+	zsize = cnt;
+	//cout << xsize << " " << ysize << " " << zsize << endl;
+	vector<ll> xp(xsize-1);
+	vector<ll> yp(ysize-1);
+	vector<ll> zp(zsize-1);
+	for (int i=0; i<xsize-1; i++){
+		xp[i] = xv[i+1] - xv[i];
+	}
+	for (int i=0; i<xsize-1; i++){
+		yp[i] = yv[i+1] - yv[i];
+	}
+	for (int i=0; i<xsize-1; i++){
+		zp[i] = zv[i+1] - zv[i];
+	}
+	vector<vector<vector<int>>> imos(xsize, vector<vector<int>>(ysize, vector<int>(zsize)));
+	for (int i=0; i<n; i++){
+		imos[x_c[dx1[i]]][y_c[dy1[i]]][z_c[dz1[i]]] += 1;
+		imos[x_c[dx1[i]]][y_c[dy1[i]]][z_c[dz2[i]]] -= 1;
+		imos[x_c[dx1[i]]][y_c[dy2[i]]][z_c[dz1[i]]] -= 1;
+		imos[x_c[dx2[i]]][y_c[dy1[i]]][z_c[dz1[i]]] -= 1;
+		imos[x_c[dx2[i]]][y_c[dy2[i]]][z_c[dz1[i]]] += 1;
+		imos[x_c[dx1[i]]][y_c[dy2[i]]][z_c[dz2[i]]] += 1;
+		imos[x_c[dx2[i]]][y_c[dy1[i]]][z_c[dz2[i]]] += 1;
+		imos[x_c[dx2[i]]][y_c[dy2[i]]][z_c[dz2[i]]] -= 1;
+	}
+	for (int i=1; i<xsize; i++){
+		for (int j=0; j<ysize; j++){
+			for (int k=0; k<zsize; k++){
+				imos[i][j][k] += imos[i-1][j][k];
+			}
+		}
+	}
+	for (int j=1; j<ysize; j++){
+		for (int i=0; i<xsize; i++){	
+			for (int k=0; k<zsize; k++){
+				imos[i][j][k] += imos[i][j-1][k];
+			}
+		}
+	}
+	for (int k=1; k<zsize; k++){
+		for (int i=0; i<xsize; i++){
+			for (int j=0; j<ysize; j++){
+				imos[i][j][k] += imos[i][j][k-1];
+			}
+		}
+	}
+	ll ans = 0;
+	for (int i=0; i<xsize-1; i++){
+		for (int j=0; j<ysize-1; j++){
+			for (int k=0; k<zsize-1; k++){
+				if (imos[i][j][k] >= K){
+					ans += xp[i] * yp[j] * zp[k];
+				}
+			}
+		}
+	}
+	cout << ans << endl;
+}

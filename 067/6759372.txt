@@ -1,0 +1,49 @@
+#include<stdio.h>
+#include<math.h>
+#include<ctype.h>
+
+int main(){
+	char buf[10000];
+	double score[1100], num, heikin = 0;//点数score,人数num,平均点heikin
+	double a = 0;//標準偏差a
+
+	while (1){
+		fgets(buf, sizeof(buf) - 1, stdin);
+		sscanf(buf, "%lf", &num);
+
+		if (num == 0)break;
+
+		fgets(buf, sizeof(buf) - 1, stdin);
+		char *p = buf;
+
+		for (int i = 0; i < num; i++){
+			sscanf(p, "%lf", &score[i]);
+
+
+			if (*p == '-'){
+				p++;
+			}
+			while (isdigit(*p)){
+				p++;
+			}
+			while (isspace(*p)){
+				p++;
+			}
+			heikin += score[i];//点数の合計
+		}
+		heikin /= num;//平均算出
+
+		for (int i = 0; i < num; i++){
+			a += pow(score[i] - heikin, 2);
+		}
+		a /= num;
+		a = sqrt(a);
+
+		printf("%lf\n",a);
+
+		a = 0;
+		heikin = 0;
+	}
+
+	return 0;
+}

@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+namespace {
+    int n, position;
+    vector<int> pre, in, post;
+}  // namespace
+
+void rec(int l, int r);
+void solve();
+
+int main() {
+    int k;
+    cin >> n;
+
+    for (int i = 0; i < n; i++) {
+        cin >> k;
+        pre.push_back(k);
+    }
+
+    for (int i = 0; i < n; i++) {
+        cin >> k;
+        in.push_back(k);
+    }
+
+    solve();
+}
+
+void rec(int l, int r) {
+    if (l >= r) {
+        return;
+    }
+    int root = pre.at(position);
+    position++;
+    int m = distance(in.begin(), find(in.begin(), in.end(), root));
+    rec(l, m);
+    rec(m + 1, r);
+    post.push_back(root);
+    return;
+}
+
+void solve() {
+    position = 0;
+    rec(0, pre.size());
+    for (int i = 0; i < n; i++) {
+        if (i) {
+            cout << " ";
+        }
+        cout << post.at(i);
+    }
+    cout << endl;
+}

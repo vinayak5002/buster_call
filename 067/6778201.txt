@@ -1,0 +1,95 @@
+
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+
+	public static void main(String[] args) {
+
+		PrintWriter out = new PrintWriter(System.out);
+		Scanner sc = new Scanner(System.in);
+		
+		int n = sc.nextInt();
+		
+		int[] a = new int[n];
+
+		for(int i = 0; i < n; i++) {
+			a[i] = sc.nextInt();
+		}
+
+		List<Integer> g = new ArrayList<Integer>();
+
+		int tmp = 1;
+		g.add(tmp);
+				
+		while(true) {
+			tmp = 3 * g.get(0) + 1;
+			if(tmp < n) {
+				g.add(0, tmp);
+			} else {
+				break;
+			}
+		}
+		
+		int cnt = shellSort(a, n, g);
+			
+		out.println(g.size());
+		printArrOnLine(g, out);
+		out.println(cnt);
+		printArr(a, n, out);
+		
+	    out.flush();
+	    sc.close();
+
+	}
+	
+	private static int insertSort(int[] a, int n, int g) {
+		
+	    int v,j,cnt = 0;
+	    for(int i = g; i < n; i++) {
+	    	
+	    	v = a[i];
+	    	j = i - g;
+	    	while(j >= 0 && a[j] > v) {
+	    		
+	    		a[j+g] = a[j];
+	    		j = j - g;
+	    		cnt++;
+	    	}
+	    	a[j+g] = v;
+	    }
+	    
+	    return cnt;
+
+	}
+	
+	private static int shellSort(int[] a, int n, List<Integer> g) {
+		
+		int cnt = 0;
+		
+		for(int i = 0 ; i < g.size(); i++) {
+			cnt += insertSort(a, n, g.get(i));
+		}
+		return cnt;
+	}
+	
+	private static void printArrOnLine(List<Integer> a, PrintWriter out) {
+    	for(int s = 0; s < a.size(); s++) {
+    		if(s != 0) out.print(" ");
+    		out.print(a.get(s));
+    		
+    	}out.println();
+    	
+	}
+	private static void printArr(int[] a, int n, PrintWriter out) {
+    	for(int s = 0; s < n; s++) {
+    		out.println(a[s]);
+    		
+    	}
+    	
+	}
+
+}
+

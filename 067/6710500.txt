@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+
+
+using namespace std;
+
+
+bool feasible(vector<vector<bool>> &board, int r, int c) {
+    for (int i = 0; i < 8; i++) {
+        if (board[r][i]) {
+            return false;
+        }
+        if (board[i][c]) {
+            return false;
+        }
+    }
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (board[i][j] && abs(i - r) == abs(j - c)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+
+bool place(vector<vector<bool>> &board, int remaining) {
+    if (remaining == 0) {
+        return true;
+    }
+    bool ret = false;
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (!feasible(board, i, j)) {
+                continue;
+            }
+            board[i][j] = true;
+            if (place(board, remaining - 1)) {
+                return true;
+            }
+            board[i][j] = false;
+        }
+    }
+    return false;
+}
+
+
+int main() {
+    int k;
+    cin >> k;
+
+    vector<vector<bool>> board(8, vector<bool>(8));
+    for (int i = 0; i < k; i++) {
+        int r, c;
+        cin >> r >> c;
+        board[r][c] = true;
+    }
+
+    assert(place(board, 8 - k));
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8; j++) {
+            if (board[i][j]) {
+                cout << "Q";
+            } else {
+                cout << ".";
+            }
+        }
+        cout << endl;
+    }
+}
+

@@ -1,0 +1,81 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll=long long;
+
+ll solve(int n,int m){
+    vector<ll> a(n),w(m);
+    for(int i=0;i<n;i++){
+        cin>>a[i];
+    }
+    for(int i=0;i<m;i++){
+        cin>>w[i];
+    }
+    vector<ll> sumw;
+    for(int bit=0;bit<(1<<m);bit++){
+        vector<ll> usew;
+        for(int i=0;i<m;i++){
+            if(bit&(1<<i)){
+                usew.push_back(w[i]);
+            }
+        }
+        int s=usew.size();
+        for(int code=0;code<(1<<s);code++){
+            ll sum=0;
+            for(int i=0;i<s;i++){
+                if(code&(1<<i)){
+                    sum+=usew[i];
+                }else{
+                    sum-=usew[i]; 
+                } 
+            }
+            sumw.push_back(sum);
+        }
+    }
+    set<ll> st;
+    map<ll,int> mp;
+    for(ll sum:sumw){
+        st.insert(abs(sum+a[0]));
+        st.insert(abs(sum-a[0]));
+        if(mp[abs(sum+a[0])]==0) mp[abs(sum+a[0])]++;
+        if(mp[abs(sum-a[0])]==0) mp[abs(sum-a[0])]++;
+    }
+    for(int i=1;i<n;i++){
+        bool ex0=false;
+        for(ll sum:sumw){
+            if(sum+a[i]==0) ex0=true;
+            if(sum-a[i]==0) ex0=true;
+        }
+        if(ex0){
+            for(ll b:st){
+                mp[b]++;
+            }
+        }
+        for(ll sum:sumw){
+            if(st.find(abs(sum+a[i]))!=st.end()){
+                if(mp[abs(sum+a[i])]==i) mp[abs(sum+a[i])]++;
+            }
+            if(st.find(abs(sum-a[i]))!=st.end()){
+                if(mp[abs(sum-a[i])]==i) mp[abs(sum-a[i])]++;
+            }
+        }
+    }
+    for(ll b:st){
+        if(mp[b]==n){
+            return b;
+        }
+    }
+    return -1;
+}
+
+int main(){
+    vector<ll> ans;
+    while(1){
+        int n,m;
+        cin>>n>>m;
+        if(n==0&&m==0) break;
+        ans.push_back(solve(n,m));
+    }
+    for(ll a:ans){
+        cout<<a<<endl;
+    }
+}

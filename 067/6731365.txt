@@ -1,0 +1,116 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+namespace {
+    const int NIL = -1;
+    const int LIM = 100000;
+}  // namespace
+
+struct Node {
+    int parent, left, right;
+    Node() {
+        parent = NIL;
+        left = NIL;
+        right = NIL;
+    }
+};
+
+namespace {
+    vector<Node> tree(LIM);
+    vector<int> depth(LIM);
+    vector<int> height(LIM);
+}  // namespace
+
+void setDepth(int id, int d);
+int setHeight(int id);
+int getSibling(int id);
+void print(int id);
+
+int main() {
+    int n, id, left, right, root;
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        cin >> id >> left >> right;
+        tree.at(id).left = left;
+        tree.at(id).right = right;
+        if (left != NIL) {
+            tree.at(left).parent = id;
+        }
+        if (right != NIL) {
+            tree.at(right).parent = id;
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (tree.at(i).parent == NIL) {
+            root = i;
+        }
+    }
+
+    setDepth(root, 0);
+    setHeight(root);
+
+    for (int i = 0; i < n; i++) {
+        print(i);
+    }
+}
+
+void setDepth(int id, int d) {
+    if (id == NIL) {
+        return;
+    }
+    depth.at(id) = d;
+    setDepth(tree.at(id).left, d + 1);
+    setDepth(tree.at(id).right, d + 1);
+}
+
+int setHeight(int id) {
+    int h1 = 0, h2 = 0;
+    if (tree.at(id).left != NIL) {
+        h1 = setHeight(tree.at(id).left) + 1;
+    }
+    if (tree.at(id).right != NIL) {
+        h2 = setHeight(tree.at(id).right) + 1;
+    }
+    height.at(id) = max(h1, h2);
+    return height.at(id);
+}
+
+int getSibling(int id) {
+    if (tree.at(id).parent == NIL) {
+        return NIL;
+    }
+    if (tree.at((tree.at(id).parent)).left != id &&
+        tree.at((tree.at(id).parent)).left != NIL) {
+        return tree.at((tree.at(id).parent)).left;
+    }
+    if (tree.at((tree.at(id).parent)).right != id &&
+        tree.at((tree.at(id).parent)).right != NIL) {
+        return tree.at((tree.at(id).parent)).right;
+    }
+    return NIL;
+}
+
+void print(int id) {
+    cout << "node " << id << ": ";
+    cout << "parent = " << tree.at(id).parent << ", ";
+    cout << "sibling = " << getSibling(id) << ", ";
+    int degree = 0;
+    if (tree.at(id).left != NIL) {
+        degree++;
+    }
+    if (tree.at(id).right != NIL) {
+        degree++;
+    }
+    cout << "degree = " << degree << ", ";
+    cout << "depth = " << depth.at(id) << ", ";
+    cout << "height" << height.at(id) << ", ";
+
+    if (tree.at(id).parent == NIL) {
+        cout << "root" << endl;
+    } else if (degree == 0) {
+        cout << "leaf" << endl;
+    } else {
+        cout << "internal node" << endl;
+    }
+}

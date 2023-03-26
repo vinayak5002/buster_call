@@ -1,0 +1,74 @@
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+
+//m5261183 Shunsei Yamagishi
+
+int circleSearch(int **, int);
+int DFS(int **, int, int, int);
+void initAdj(int **, int);
+
+int *val;
+
+int main(){
+    int numV, numE;
+    int **G;
+    int n;
+    int s, t;
+
+    scanf("%d%d", &numV, &numE);
+    G = (int **)malloc(numV * sizeof(int *));
+    val = (int * )malloc(numV * sizeof(int));
+
+    for(int i = 0; i < numV; i++) G[i] = (int *)malloc(numV * sizeof(int));
+
+    initAdj(G, numV);
+
+    if(numV < numE) n = numE;
+    else n = numV;
+
+    for(int i = 0; i < n; i++){
+        scanf("%d%d", &s, &t);
+        G[s][t] = 1;
+    }
+
+    printf("%d\n", circleSearch(G, numV));
+
+    //for(int i = 0; i < numV; i++) printf("%d", val[i]);
+    //printf("\n");
+
+    for(int i = 0; i < numV; i++) free(G[i]);
+    free(G);
+
+    return 0;
+}
+
+void initAdj(int **Adj, int n){
+    for(int i = 0; i < n ; i++){
+        for(int j = 0; j < n ; j++)
+        Adj[i][j] = 0;
+    }
+}
+
+int circleSearch(int **G, int numV){
+    for(int i = 0 ; i < numV; i++){
+        for(int i = 0; i < numV; i++) val[i] = 0;
+        if(DFS(G, numV, i, 0) == 1) return 1;
+    }
+    return 0;
+}
+
+int DFS(int **G, int numV, int node, int flag){
+    int time;
+
+    val[node]++;
+    for(time = 0; time < numV; time++){
+        if(G[node][time] != 0 & val[time] == 0) {
+            flag = DFS(G, numV, time, flag);
+            //val[time]++;
+        }
+        else if(G[node][time] != 0 & val[time] == 1) flag = 1;
+    }
+    val[node]++;
+    return flag;
+}

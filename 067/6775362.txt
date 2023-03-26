@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define ALL(v) v.begin(),v.end()
+#define sz(v) (int)v.size()
+
+void solve(int w, int h, int t, int p) {
+  vector<vector<int>> paper(h, vector<int>(w, 1)), pred(h, vector<int>(w, 1)); 
+  int w_now = w, h_now = h;
+  for(int i = 0; i < t; i++) {
+    int d, c;
+    cin >> d >> c;
+    pred = paper;
+    for(int i = 0; i < h; i++) {
+      fill(ALL(paper[i]), 0);
+    }
+    if(d==1) { // 垂直折れ線
+      for(int i = 0; i < h; i++) {
+        for(int j = 0; j < w; j++) {
+          if(j >= c) paper[i][j-c] = pred[i][j];
+          else paper[i][c-1-j] += pred[i][j];
+        }
+      }
+    } else if(d==2) { // 水平折れ線
+      for(int i = 0; i < h; i++) {
+        for(int j = 0; j < w; j++) {
+          if(i >= c) paper[i-c][j] = pred[i][j];
+          else paper[c-1-i][j] += pred[i][j];
+        }
+      }
+  }
+  for(int i = 0; i < p; i++) {
+    int x, y;
+    cin >> x >> y;
+    cout << paper[y][x] << endl;
+  }
+}
+
+int main(){
+  int n, m, t, p;
+  while(true) {
+    cin >> n >> m >> t >> p;
+    if(n==0 && m==0 && t==0 && p==0) break; 
+    solve(n, m, t, p);
+  }
+  return 0;
+}

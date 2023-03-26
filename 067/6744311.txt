@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define NAME_LEN 10
+#define N_MAX 100000 //n number or max total number of input sets
+
+typedef struct
+{
+    char name[NAME_LEN];
+    int time_;
+}PROCESS;
+
+int n; //n number
+int q; //quantum number
+
+PROCESS process[N_MAX];
+int head = 0; int  tail = 0;
+
+bool isEmpty()
+{
+    if (head == tail)
+    {
+        return true;
+    }
+    return false;
+}
+
+PROCESS deque()
+{
+    PROCESS x = process[head];
+    if (head+1 == n)
+    {
+        head = 0;
+    }
+    else
+    {
+        head = head+1;
+    }
+    return x;
+}
+
+void unque(PROCESS new_data)
+{
+    process[tail] = new_data;
+    if (tail+1 == n)
+    {
+        tail = 0;
+    }
+    else
+    {
+        tail = tail+1;
+    }
+}
+
+int main()
+{
+    scanf("%d", &n);
+    scanf("%d", &q);
+    int usedTime = 0;
+    PROCESS new_data;
+    int len = n;
+    int count = 0;
+
+    for (int i=0; i<len; i++)
+    {
+        char ch ='\0';
+        scanf("%c", &ch); //to get \n
+        scanf("%s",new_data.name);
+        scanf("%d", &new_data.time_);
+        unque(new_data);
+    }
+
+    //n= count; //number of processes stored
+    PROCESS doneData;
+    for (int i = 0; i<n; i++)
+    {
+        if(process[head].time_<=q)
+        {
+            doneData = deque();
+            printf("%s %d\n",doneData.name, doneData.time_+usedTime);
+            usedTime = usedTime + doneData.time_;
+        }
+        else if (process[head].time_ > q)
+        {
+            process[head].time_ = process[head].time_ - q;
+            usedTime = usedTime + q;
+            PROCESS renewedData = deque();
+            unque(renewedData);
+            i--;
+        }
+    }
+}
+
+
+

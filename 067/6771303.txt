@@ -1,0 +1,50 @@
+#!/usr/bin/env pypy3
+from collections import Counter, deque, defaultdict
+from itertools import permutations, combinations, accumulate, product, chain
+from functools import lru_cache
+from bisect import bisect, bisect_left, insort, insort_left
+from heapq import heapify, heappush, heappop
+from array import array
+from decimal import Decimal
+from copy import deepcopy
+from pprint import pprint
+from string import ascii_uppercase, ascii_lowercase, ascii_letters
+from math import factorial, floor, ceil, sqrt, log, log2, log10
+from math import sin, cos, tan, asin, acos, atan, degrees, radians
+import math
+import sys
+sys.setrecursionlimit(1<<30)
+
+read = sys.stdin.read
+readline = sys.stdin.readline
+readlines = sys.stdin.readlines
+
+if __name__ == '__main__':
+    while True:
+        N, W, D = map(int, readline().split())
+        if N == W == D == 0:
+            break
+        C = [[D, W]]
+        for _ in range(N):
+            p, s = map(int, readline().split())
+            p -= 1
+            d, w = C.pop(p)
+            s %= d+w
+            if s <= w:
+                p1 = [d*s, d, s]
+                p2 = [d*(w-s), d, w-s]
+                p1, p2 = sorted([p1, p2])
+            else:
+                t = s-w
+                p1 = [t*w, t, w]
+                p2 = [(d-t)*w, d-t, w]
+                p1, p2 = sorted([p1, p2])
+            C.append(p1[1:])
+            C.append(p2[1:])
+        ans = list()
+        for c in C:
+            d, w = c
+            ans.append(d*w)
+        ans.sort()
+        print(*ans)
+                            

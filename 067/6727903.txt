@@ -1,0 +1,28 @@
+require 'set'
+while (n,m=gets.split.map(&:to_i))!=[0,0] do
+  a=gets.split.map(&:to_i)
+  w=gets.split.map(&:to_i)
+  h=Hash.new
+  (3**m).times do |b|
+    t=0
+    m.times do |i|
+      case b/3**i%3
+      when 1; t+=w[i]
+      when 2; t-=w[i]
+      end
+    end
+    a.each_with_index do |i,j|
+      h[(t-i).abs]=Set.new if !h[(t-i).abs]
+      h[(t-i).abs] << j
+    end
+  end
+  catch do |t|
+    h.sort.each do |i|
+      if (i[1]|h[0]).size==n then
+        puts i[0]
+        throw t
+      end
+    end
+    puts -1
+  end
+end

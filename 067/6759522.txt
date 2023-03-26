@@ -1,0 +1,170 @@
+// 回転(11_A)させて上面を一致させ、11_Bに投げて判定する
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <math.h>
+
+typedef struct{
+	int suf[7]; // suf[0]は使わない
+	// N   5
+	// W 4 1 3 6 E
+	// S   2
+}dice;
+
+void dice_turn(dice a, char code);
+
+int main(){
+	int pattern[7][7] =
+	{ { 0 },
+	{ 0, 0, 3, 5, 2, 4, 0 },
+	{ 0, 4, 0, 1, 6, 0, 3 },
+	{ 0, 2, 6, 0, 0, 1, 5 },
+	{ 0, 5, 1, 0, 0, 6, 2 },
+	{ 0, 3, 0, 6, 1, 0, 4 },
+	{ 0, 0, 4, 2, 5, 3, 0 } };
+	char buf[4000];
+	char *p;
+	int dice_tmp[7];
+	dice a, b;
+	int top, front;
+	char code;
+	
+	// dice a
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d %d %d %d %d %d", &dice_tmp[1], &dice_tmp[2], &dice_tmp[3],
+		&dice_tmp[4], &dice_tmp[5], &dice_tmp[6]);
+	for (int i = 1; i <= 7; i++){
+		a.suf[i] = dice_tmp[i];
+	}
+	// dice b
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d %d %d %d %d %d", &dice_tmp[1], &dice_tmp[2], &dice_tmp[3],
+		&dice_tmp[4], &dice_tmp[5], &dice_tmp[6]);
+	for (int i = 1; i <= 7; i++){
+		b.suf[i] = dice_tmp[i];
+	}
+	// 一つしかない面の数字を探す(key値)
+	int key;
+	for (int i = 1; i <= 6; i++){
+		int cnt = 0;
+		for (int j = 1; j <= 6; j++){
+			if (a.suf[i] == a.suf[j]) cnt++;
+		}
+		if (cnt == 1) {
+			key = a.suf[i];
+			break;
+		}
+	}
+	// key値がaのどこにあるか
+	int a_key;
+	for (int i = 1; i <= 6; i++){
+		if (a.suf[i] == key){
+			a_key = i;
+		}
+	}
+	// a回転
+	if (a_key == 1){
+		; // nothing
+	}
+	else if (a_key == 2){
+		dice_turn(a, 'N');
+	}
+	if (a_key == 3){
+		dice_turn(a, 'W');
+	}
+	else if (a_key == 4){
+		dice_turn(a, 'E');
+	}
+	else if (a_key == 5){
+		dice_turn(a, 'S');
+	}
+	else if (a_key == 6){
+		dice_turn(a, 'W');
+		dice_turn(a, 'W');
+	}
+	// key値がbのどこにあるか
+	int b_key;
+	for (int i = 1; i <= 6; i++){
+		if (b.suf[i] == key){
+			b_key = i;
+		}
+	}
+	// b回転
+	if (b_key == 1){
+		; // nothing
+	}
+	else if (b_key == 2){
+		dice_turn(b, 'N');
+	}
+	if (b_key == 3){
+		dice_turn(b, 'W');
+	}
+	else if (b_key == 4){
+		dice_turn(b, 'E');
+	}
+	else if (b_key == 5){
+		dice_turn(b, 'S');
+	}
+	else if (b_key == 6){
+		dice_turn(b, 'W');
+		dice_turn(b, 'W');
+	}	
+	// 判定
+	int flag = 1;
+	for (int i = 2; i <=2; i++){
+		// dice aの側面(11_B) 
+		top = b.suf[1];
+		front = b.suf[i];
+		for (int j = 1; j <= 6; j++){
+			if (top == a.suf[j]) top = j;
+			if (front == a.suf[j]) front = j;
+		}
+		if (b.suf[pattern[1][i]] != a.suf[pattern[top][front]]){
+			flag = 0;
+		}
+	}
+	// 出力
+	if (flag == 1){
+		printf("Yes\n");
+	}
+	else {
+		printf("No\n");
+	}
+
+	return 0;
+}
+
+void dice_turn(dice a, char code){
+	int tmp;
+	switch (code){
+	case 'N':
+		tmp = a.suf[1];
+		a.suf[1] = a.suf[2];
+		a.suf[2] = a.suf[6];
+		a.suf[6] = a.suf[5];
+		a.suf[5] = tmp;
+		break;
+	case 'E':
+		tmp = a.suf[1];
+		a.suf[1] = a.suf[4];
+		a.suf[4] = a.suf[6];
+		a.suf[6] = a.suf[3];
+		a.suf[3] = tmp;
+		break;
+	case 'W':
+		tmp = a.suf[1];
+		a.suf[1] = a.suf[3];
+		a.suf[3] = a.suf[6];
+		a.suf[6] = a.suf[4];
+		a.suf[4] = tmp;
+		break;
+	case 'S':
+		tmp = a.suf[1];
+		a.suf[1] = a.suf[5];
+		a.suf[5] = a.suf[6];
+		a.suf[6] = a.suf[2];
+		a.suf[2] = tmp;
+		break;
+	defaults:; // nothing
+	}
+}

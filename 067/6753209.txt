@@ -1,0 +1,189 @@
+
+
+
+import static java.util.Collections.list;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Scanner;
+
+
+
+public class JuesVitualColaConPrioridad {
+    
+    private  int[] element = new int[100];
+     protected  int size = 0;
+     
+     
+     
+     public void  Insert(int x) throws Exception{
+         if(size == element.length)
+              resize();
+         
+         filtrarHaciaArriva(size,x);
+         size ++ ;
+     }
+    
+      private void resize() throws Exception{
+            
+              if(size == 2000000000){
+                     throw  new Exception(" la lista llego al maximo de elementos");
+                  }
+      
+          int[] nuevoElemento = new int [element.length + 100];
+          System.arraycopy(element,0,nuevoElemento,0, size);
+          element = nuevoElemento;
+      
+      }
+      
+     private void  filtrarHaciaArriva(int posicion, int elem){
+          
+         while (posicion > 0){
+             
+             int padre = (posicion -1)/2;
+             if(element[padre] < elem ){
+             
+             element[posicion] = element[padre];
+             posicion = padre;
+             
+             }
+             else break;
+            }
+         element[posicion] = elem;
+        }
+     
+     
+     public int extraer(){
+     int x  = element[0];
+      
+     int ultimoElemt = element[size -1];
+      size --;
+      
+      filtrarHaciaAbajo(0,ultimoElemt);
+      
+      return x;
+      
+     } 
+     
+     
+     
+     private void filtrarHaciaAbajo(int posicion,int elemFiltrar){
+         
+         while (posicion < size/2){
+         
+              int hijoizq = 2*posicion +1 ;
+         
+         int p = 2*posicion + 2;
+          
+         if( p < size && element[hijoizq] < element[hijoizq +1]){
+             hijoizq ++;
+         }
+         if(elemFiltrar > element[hijoizq]){
+             
+             element[posicion] = element[hijoizq];
+             posicion = hijoizq;
+         }
+             else {
+                     break;
+             }    
+         }
+         
+         element[posicion] = elemFiltrar ; 
+         
+         }
+         
+    public static void main(String[] args) throws Exception {
+        
+   
+            
+       
+        
+        List almacen = new LinkedList();
+        JuesVitualColaConPrioridad apk = new JuesVitualColaConPrioridad();
+        int dato;
+       
+         boolean bandera = true; // para terminar el programa 
+         
+         while(bandera){
+          
+       
+       Scanner entrada = new Scanner(System.in);
+       
+        String linededatos  = entrada.nextLine();
+        String operacion ="" ;
+        
+    
+    
+         if(linededatos.length() > 6  ){
+            
+             if(linededatos.substring(0,6).compareTo("insert") == 0){
+                 
+             //extraer los datos 
+             
+            
+             operacion = "insertCorrecta";
+             
+             }
+             else{
+             operacion = linededatos;
+             
+             
+             
+             }
+         
+         
+         }
+         else {
+             operacion = linededatos;
+        
+         }
+          switch (operacion) {
+              
+              
+              case "insertCorrecta":
+                  
+                  
+                  apk.Insert( Integer.parseInt( linededatos.substring(7)));
+                  
+                 // System.out.println("por fin la insercion fue completada");
+                  
+                   break;
+       
+        
+              case "insert":
+                   
+                   System.out.println("la para insertar datos tiene que ser en este formato insert ###...");
+                   
+                
+                  break;
+                  
+             case "extract":
+                 
+                 
+                 almacen.add( apk.extraer());
+               
+                  
+                   break;
+                   
+             case  "end" :
+                  for (int i = 0; i < almacen.size(); i++) {
+                      
+                   System.out.println( almacen.get(i));
+                     
+                 }
+                 
+                  bandera = false;
+                    break;
+                    
+            default:
+                 System.out.println("operacion no admitida");
+                
+                new Exception("operacion desconocidad");
+                
+            }
+        
+        
+        
+         }}
+         
+    }
+

@@ -1,0 +1,54 @@
+#include<bits/stdc++.h>
+// #include<atcoder/segtree>
+using namespace std;
+// using namespace atcoder;
+
+bool tf[2501][2501];
+
+void solve(){
+    while(1){
+        int n;
+        cin >> n;
+        if(n == 0) return;
+        vector<int> A(n);
+        int tot = 0;
+        for(int i = 0; i < n; i++){
+            cin >> A[i];
+            tot += A[i];
+        }
+        for(int i = 0; i <= tot; i++) for(int j = 0; j <= tot; j++) tf[i][j] = false;
+        tf[0][0] = true;
+        tot = 0;
+        for(auto a:A){
+            tot += a;
+            for(int i = tot; i >= 0; i--) for(int j = tot - i; j >= 0; j--){
+                if(i >= a) tf[i][j] |= tf[i - a][j];
+                if(j >= a) tf[i][j] |= tf[i][j - a];
+                
+            }
+        }
+        int ans = 0;
+        for(int i = 0; i <= tot; i++) for(int j = 0; j <= tot; j++){
+            if(tf[i][j]){
+                int tmp = tot - i - j;
+                if(i < tmp) tmp = i;
+                if(j < tmp) tmp = j;
+                if(tmp > ans) ans = tmp;
+            }
+        }
+        cout << ans << "\n";
+    }
+}
+
+int main(){
+    cin.tie(0)->sync_with_stdio(0);
+    int t;
+    t = 1;
+    // cin >> t;
+    while(t--) solve();
+}
+    
+    
+
+
+

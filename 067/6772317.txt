@@ -1,0 +1,122 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < n; ++i)
+typedef long long ll;
+using namespace std;
+
+const int dx[] = {-1, -1, 0, 1, 1, 1, 0, -1};
+const int dy[] = {0, -1, -1, -1, 0, 1, 1, 1};
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+
+    vector<string> S(8);
+    rep(i, 8) cin >> S[i];
+
+    int turn = 0;
+    int loop_cnt = 128;
+    while (loop_cnt--) {
+        vector<string> next = S;
+
+        int ma = 0;
+
+        if (turn % 2 == 0) {
+            rep(i, 8) rep(j, 8) {
+                if (S[i][j] != '.') continue;
+
+                vector<string> cf = S;
+                int cur = 0;
+                rep(ax, 8) {
+                    bool flag = false;
+
+                    int cnt = 0;
+                    for (int k = 1; k < 8; ++k) {
+                        int ny = i + dy[ax] * k;
+                        int nx = j + dx[ax] * k;
+
+                        if (ny < 0 || ny >= 8 || nx < 0 || nx >= 8) break;
+                        if (cf[ny][nx] == '.') break;
+
+                        if (cf[ny][nx] == 'o') {
+                            flag = true;
+                            break;
+                        }
+                        if (cf[ny][nx] == 'x')
+                            cnt++;
+                        else
+                            break;
+                    }
+
+                    if (flag) {
+                        cf[i][j] = 'o';
+                        cur += cnt;
+
+                        for (int k = 1; k <= cnt; ++k) {
+                            int ny = i + dy[ax] * k;
+                            int nx = j + dx[ax] * k;
+                            cf[ny][nx] = 'o';
+                        }
+                    }
+                }
+                if (cur > ma) {
+                    next = cf;
+                    ma = cur;
+                }
+            }
+        }
+
+        else {
+            for (int i = 7; i >= 0; --i) {
+                for (int j = 7; j >= 0; --j) {
+                    if (S[i][j] != '.') continue;
+
+                    vector<string> cf = S;
+                    int cur = 0;
+                    rep(ax, 8) {
+                        bool flag = false;
+
+                        int cnt = 0;
+                        for (int k = 1; k < 8; ++k) {
+                            int ny = i + dy[ax] * k;
+                            int nx = j + dx[ax] * k;
+
+                            if (ny < 0 || ny >= 8 || nx < 0 || nx >= 8) break;
+                            if (cf[ny][nx] == '.') break;
+
+                            if (cf[ny][nx] == 'x') {
+                                flag = true;
+                                break;
+                            }
+                            if (cf[ny][nx] == 'o')
+                                cnt++;
+                            else
+                                break;
+                        }
+
+                        if (flag) {
+                            cf[i][j] = 'x';
+                            cur += cnt;
+
+                            for (int k = 1; k <= cnt; ++k) {
+                                int ny = i + dy[ax] * k;
+                                int nx = j + dx[ax] * k;
+                                cf[ny][nx] = 'x';
+                            }
+                        }
+                    }
+                    if (cur > ma) {
+                        next = cf;
+                        ma = cur;
+                    }
+                }
+            }
+        }
+        turn++;
+        S = next;
+    }
+
+    rep(i, 8) cout << S[i] << "\n";
+
+    return 0;
+}
+

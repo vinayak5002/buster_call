@@ -1,0 +1,61 @@
+/*
+AOJ #0691:round sugoroku
+2022/07/02 29/48 WA
+ */
+#include <stdio.h>
+int N,A;
+char S[200001];
+
+int main()
+{
+  int left_c=0,right_c=0,r_max,l_min,first=0;
+  unsigned long long l_sum=0,r_sum=0,ret;
+  int i;
+  scanf("%d %d",&N,&A);
+  scanf("%s",S);
+
+  for(i=0;i<N;i++)
+    if(S[i]=='#')
+      {
+	if(first==0)
+	  {
+	    first=1;
+	    l_min=i+1;
+	  }
+      if(i<A)
+	{
+	  left_c++;
+	  l_sum += (i+1);
+	}
+      else
+	{
+	  right_c++;
+	  r_sum += (i+1);
+	  r_max=i+1;
+	}
+      }
+
+  int d;
+  if(left_c == right_c)
+    {
+      ret = 2*r_sum;
+      ret -= (2*l_sum - l_min + A);
+
+    }
+  else if(left_c < right_c)
+    {
+      ret = 2*r_sum-r_max;
+      ret -= (2*l_sum + A);
+    }
+  else
+    {
+      d=left_c-right_c;
+      ret=2*r_sum+2*d*(N+1);
+      ret -= (2*l_sum - l_min + A);
+    }
+  printf("%lld\n",ret);
+  return(0);
+
+}
+
+

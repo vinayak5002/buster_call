@@ -1,0 +1,62 @@
+// 20D8102006D 松波俊介
+// 深さ優先探索
+
+#include <iostream>
+#include <vector>
+
+void input_vertices(std::vector< std::vector<int> > &v){
+    int n;
+    std::cin >> n;
+
+    v.push_back(std::vector<int>());
+    v[0].push_back(n);
+
+    for(int i=1; i<=n; i++){
+        int u, k;
+        std::cin >> u >> k;
+        v.push_back(std::vector<int>());
+        v[i].push_back(k);
+        for(int j=0; j<k; j++){
+            int v_i;
+            std::cin >> v_i;
+            v[i].push_back(v_i);
+        }
+    }
+}
+
+void dfs(std::vector< std::vector<int> > v, std::vector<int> &d, std::vector<int> &f, int start, int &cnt){
+    std::vector<int> stack(1, start);
+    d[start] = ++cnt;
+    while(!stack.empty()){
+        int last = stack.back();
+        bool flag = true;
+        for(int i=1; i<=v[last][0]; i++){
+            if(d[v[last][i]]>0){
+                continue;
+            }else{
+                stack.push_back(v[last][i]);
+                d[stack.back()] = ++cnt;
+                flag = false;
+                break;
+            }
+        }
+        if(flag){
+            stack.pop_back();
+            f[last] = ++cnt;
+        }
+    }
+}
+
+int main(){
+    std::vector< std::vector<int> > v;
+    input_vertices(v);
+    std::vector<int> d(v.size(), -1);
+    std::vector<int> f(v.size(), -1);
+    int cnt = 0;
+    for(int i=1; i<=v.size(); i++){
+        if(d[i]<0) dfs(v,d,f,i,cnt);
+    }
+    for(int i=1; i<v.size(); i++){
+        std::cout << i << " " << d[i] << " " << f[i] << "\n";
+    }
+}

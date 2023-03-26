@@ -1,0 +1,72 @@
+module Main where
+
+import Data.Functor
+
+type Pos = (Float, Float)
+newtype Circle = Circle (Pos, Float)
+
+cPos (Circle (p, r)) = p
+cRadius (Circle (p, r)) = r
+
+pLength (p1x, p1y) (p2x, p2y) = sqrt $ x*x + y*y where
+  x = p2x - p1x
+  y = p2y - p1y
+
+distLargeSmall c1 c2 = (dist, large, small) where
+  Circle (p1, r1) = c1
+  Circle (p2, r2) = c2
+  dist = pLength p1 p2
+  large = max r1 r2
+  small = min r1 r2
+
+diffDistRadius c1 c2 = diff where
+  (dist, large, small) = distLargeSmall c1 c2
+  diff = dist - (large + small)
+
+diffLargeAndSmallDist c1 c2 = diff where
+  (dist, large, small) = distLargeSmall c1 c2
+  diff = large - (dist + small)
+  
+
+eps = 1e-4
+
+isSeperated c1 c2 = diff > eps  where
+  diff = diffDistRadius c1 c2
+
+isCircumscribed c1 c2 = abs diff <= eps where
+  diff = diffDistRadius c1 c2
+
+isCrossing c1 c2 = diffDR < -eps && diffLS < -eps where
+  diffDR = diffDistRadius c1 c2
+  diffLS = diffLargeAndSmallDist c1 c2
+
+isInscribed c1 c2 = abs diff <= eps where
+  diff = diffLargeAndSmallDist c1 c2
+
+isIntensions c1 c2 = diff > eps where
+  diff = diffLargeAndSmallDist c1 c2
+  
+c2type c1 c2
+  | isSeperated c1 c2 = 4
+  | isCircumscribed c1 c2 = 3
+  | isCrossing c1 c2 = 2
+  | isInscribed c1 c2 = 1
+  | isIntensions c1 c2 = 0
+  | otherwise = -1
+
+readFloat :: String -> Float
+readFloat = read
+
+inputCircle :: IO Circle
+inputCircle = do
+  ss <- map readFloat . words <$> getLine
+  let [x, y, r] = ss
+  return $ Circle ((x, y), r)
+
+main :: IO ()
+main = do
+  c1 <- inputCircle
+  c2 <- inputCircle
+  print $ c2type c1 c2
+
+

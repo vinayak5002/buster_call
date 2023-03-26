@@ -1,0 +1,106 @@
+#include <iostream>
+
+#define BYTE_SIZE 8
+#define POSSIBLE_SEARCHES 16777216 // 4^12
+
+using namespace std;
+class BitScale
+{
+public:
+	BitScale( int numBits )
+		:
+		numBits( numBits ),
+		numBytes( numBits / BYTE_SIZE )
+	{
+		bits = new unsigned short[numBytes]();
+	}
+	~BitScale()
+	{
+		delete[] bits;
+	}
+public:
+	void setBit( int bitPos )
+	{
+		bits[bitPos / BYTE_SIZE] |= (1 << bitPos % BYTE_SIZE);
+	}
+	void setBit( string str )
+	{
+		int bitPos = convertToIndex( str );
+		bits[bitPos / BYTE_SIZE] |= (1 << bitPos % BYTE_SIZE);
+	}
+	bool getBit( int bitPos ) const
+	{
+		return bits[bitPos / BYTE_SIZE] & (1 << bitPos % BYTE_SIZE);
+	}
+	bool getBit( string str ) const
+	{
+		return getBit( convertToIndex( str ) );
+	}
+private:
+	int convertToIndex( string str ) const
+	{
+		int i = 0;
+		int pow = 1;
+		for( char c : str )
+		{
+			int n;
+			switch( c )
+			{
+			case 'A':
+				n = 1;
+				break;
+			case 'C':
+				n = 2;
+				break;
+			case 'T':
+				n = 3;
+				break;
+			case 'G':
+				n = 4;
+				break;
+			}
+
+			i += n * pow;
+			pow *= 4;
+		}
+
+		return i - 1;
+	}
+private:
+	unsigned short* bits;
+	int numBytes;
+	int numBits;
+};
+
+int main()
+{
+	BitScale bs( POSSIBLE_SEARCHES );
+	int size;
+	cin >> size;
+
+	for( int i = 0; i < size; i++ )
+	{
+		string cmd;
+		string code;
+		cin >> cmd;
+		cin >> code;
+
+		if( cmd[0] == 'i' )
+		{
+			bs.setBit( code );
+		}
+		else
+		{
+			if( bs.getBit( code ) )
+			{
+				cout << "yes" << endl;
+			}
+			else
+			{
+				cout << "no" << endl;
+			}
+		}
+	}
+
+	return 0;
+}

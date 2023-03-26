@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using VI = vector<int>;
+using VVI = vector<VI>;
+using P = pair<int, int>;
+
+const int MAX = 10000001;
+
+int check_route(const VVI& route, const int from, const int to, const int n) {
+    VI distance(n + 1, MAX);
+    distance[from] = 0;
+    deque<P> dq;
+    dq.push_back(make_pair(from, 0));
+    while (!dq.empty()) {
+        P p = dq.front();
+        dq.pop_front();
+        if (p.first == to) continue;
+        for (int i = 1; i < (int)route[p.first].size(); ++i) {
+            if (i == p.first || route[p.first][i] == MAX) continue;
+            if (distance[i] < p.second + route[p.first][i]) continue;
+            dq.push_back(make_pair(i, p.second + route[p.first][i]));
+            distance[i] = p.second + route[p.first][i];
+        }
+    }
+    if (distance[to] == MAX)
+        return -1;
+    else
+        return distance[to];
+}
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+    while (true) {
+        int n, k;
+        cin >> n >> k;
+        if (n == 0 && k == 0) break;
+
+        VVI route(n + 1, VI(n + 1, MAX));
+
+        for (int i = 0; i < k; ++i) {
+            int x, a, b, c, d, e;
+            cin >> x;
+            if (x == 0) {
+                cin >> a >> b;
+                cout << check_route(route, a, b, n) << endl;
+            } else {
+                cin >> c >> d >> e;
+                route[c][d] = min(route[c][d], e);
+                route[d][c] = min(route[d][c], e);
+                route[c][c] = 0;
+                route[d][d] = 0;
+            }
+        }
+    }
+    return 0;
+}

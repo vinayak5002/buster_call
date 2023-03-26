@@ -1,0 +1,177 @@
+#include<iostream>
+#include<algorithm>
+#include<map>
+#include<queue>
+#include<stack>
+#include<set>
+#include<bitset>
+#include<vector>
+#include<string>
+
+#define rep(i,n) for(int i=0;i<(n);i++)
+using namespace std;
+using ll=long long;
+using P=pair<int,int>;
+using P_S=pair<int,string>;
+int n;
+
+struct node{
+    int key;
+    int right;
+    int left;
+    int parent;
+
+    node(){
+        right=left=-1;
+        parent=-1;
+    }
+};
+
+struct BST{
+    node t[600000];
+    int size;
+    int root;
+    BST(){
+        size=root=0;
+    }
+
+    void insert(int z){
+        if(size==0){
+            t[0].key=z;
+            size++;
+        }
+        else{
+            int p=root;
+            node x=t[root];
+            while(1){
+                if(x.key>z){
+                    if(x.left==-1){
+                        t[p].left=size;
+                        t[size].key=z;
+                        t[size].parent=p;
+                        size++;
+                        break;
+                    }
+                    else{
+                        p=x.left;
+                        x=t[x.left];
+                    }
+                }
+                else{
+                    if(x.right==-1){
+                        t[p].right=size;
+                        t[size].key=z;
+                        t[size].parent=p;
+                        size++;
+                        break;
+                    }
+                    else{
+                        p=x.right;
+                        x=t[x.right];
+                    }
+                }
+            }
+        }
+    }
+
+    void print_inord(int id){
+        if(id==-1)return;
+        print_inord(t[id].left);
+        cout<<" "<<t[id].key;
+        print_inord(t[id].right);
+    }
+
+    void print_preord(int id){
+        if(id==-1) return;
+        cout<<" "<<t[id].key;
+        print_preord(t[id].left);
+        print_preord(t[id].right);
+    }
+
+    void find(int id,int k){
+        if(id==-1) {
+            cout<<"no"<<endl;
+            return;
+        }
+        if(t[id].key==k) cout<<"yes"<<endl;
+        else{
+            if(t[id].key>k) find(t[id].left,k);
+            else find(t[id].right,k);
+        }
+    }
+
+    void del(int k){
+        int now=root,del_id=-1;
+        while(1){
+            if(t[now].key==k) {
+                del_id=now;
+                break;
+            }
+            if(t[now].key>k) now=t[now].left;
+            else now=t[now].right;
+        }
+        int child_num=0;
+        if(t[del_id].right!=-1) child_num++;
+        if(t[del_id].left!=-1) child_num++;
+
+        if(child_num==0){
+            int p=t[del_id].parent;
+            if(t[p].left==del_id) t[p].left=-1;
+            if(t[p].right==del_id) t[p].right=-1;
+        }
+        else if(child_num==1){
+            int p=t[del_id].parent;
+            int c;
+            if(t[del_id].left!=-1) c=t[del_id].left;
+            else c=t[del_id].right;
+
+            if(t[p].key>t[del_id].key) t[p].left=c;
+            else t[p].right=c;
+
+            t[c].parent=p;
+        }
+        else{
+            int p=t[del_id].parent;
+            int c=t[del_id].right;
+            while(t[c].left!=-1){
+                c=t[c].left;
+            }
+            //cout<<t[del_id].key<<" "<<t[c].key<<endl;
+            swap(t[c].key,t[del_id].key);
+
+            if(t[t[c].parent].left==c) t[t[c].parent].left=-1;
+            else t[t[c].parent].right=-1;
+        }
+    }
+};
+
+int main()
+{
+    cin>>n;
+    BST bst;
+    rep(i,n){
+        string s;
+        cin>>s;
+        if(s[0]=='i'){
+            int a;
+            cin>>a;
+            bst.insert(a);
+        }
+        else if(s[0]=='p'){
+            bst.print_inord(0);
+            cout<<endl;
+            bst.print_preord(0);
+            cout<<endl;
+        }
+        else if(s[0]=='f'){
+            int a;
+            cin>>a;
+            bst.find(0,a);
+        }
+        else if(s[0]=='d'){
+            int a;
+            cin>>a;
+            bst.del(a);
+        }
+    }
+}

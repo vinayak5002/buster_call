@@ -1,0 +1,216 @@
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <string>
+#include <math.h>
+#include <iomanip>
+#include <fstream>
+#include <map>
+#include <set>
+#include <queue>
+#include <list>
+#include <iomanip>
+#include <numeric>
+#include <bitset>
+//#include <atcoder/all>
+using namespace std;
+//using namespace atcoder;
+
+template<typename T1, typename T2>
+class myPair : public std::pair<T1, T2>{
+    using std::pair<T1, T2>::pair;
+    public:
+    inline const myPair<T1, T2> operator+(const myPair<T1, T2> &p) { return {this->first + p.first, this->second + p.second}; }
+    inline const myPair<T1, T2> operator-(const myPair<T1, T2> &p) { return {this->first - p.first, this->second - p.second}; }
+    template<typename U> inline const  myPair<T1, T2> operator*(const U &p) { return {this->first * p, this->second * p}; }
+    template<typename U> inline const  myPair<T1, T2> operator/(const U &p) { return {this->first / p, this->second / p}; }
+    inline myPair& operator+=(const myPair<T1, T2> &p) {
+        *this = *this + p;
+        return *this;
+    }
+    inline myPair& operator-=(const myPair<T1, T2> &p) {
+        *this = *this - p;
+        return *this;
+    }
+    template<typename U> inline myPair& operator*=(const U &x) {
+        *this = *this * x;
+        return *this;
+    }
+    template<typename U> inline myPair& operator/=(const U &x) {
+        *this = *this / x;
+        return *this;
+    }
+};
+#define pair myPair
+
+
+using ll = long long;
+//using mint = modint1000000007;
+//using mint_ = modint998244353;
+using P = pair<int,int>;
+using PL = pair<ll,ll>;
+using V = vector<int>;
+using VL = vector<ll>;
+using VD = vector<double>;
+using VC = vector<char>;
+using VP = vector<P>;
+using VS = vector<string>;
+//using VM = vector<mint>;
+//using VM_ = vector<mint_>;
+using VV = vector<V>;
+using VVL = vector<VL>;
+using VVD = vector<VD>;
+using VVC = vector<VC>;
+using VVP = vector<VP>;
+using VVS = vector<VS>;
+//using VVM = vector<VM>;
+//using VVM_ = vector<VM_>;
+const int INF  = 1001001001;
+const ll INFL = 1001001001001001001;
+const ll MOD = 1000000007;
+const ll MOD_ = 998244353;
+const V DH = {0,1,0,-1};
+const V DW = {1,0,-1,0};
+struct grid{
+    int h, w;
+    inline const grid operator+(const grid &p) { return {this->h + p.h, this->w + p.w}; }
+    inline const grid operator-(const grid &p) { return {this->h - p.h, this->w - p.w}; }
+    inline const grid operator*(const int &p) { return {this->h * p, this->w * p}; }
+};
+#define rep(i, j, n) for(ll i = (ll)(j); i < (ll)(n); i++)
+#define repb(i, j, n) for(ll i = (ll)(n-1); i >= (ll)(j); i--)
+#define reps(i, j, n) for(ll i = (ll)(j); i <= (ll)(n); i++)
+#define repsb(i, j, n) for(ll i = (ll)(n); i >= (ll)(j); i--)
+#define all(a) (a).begin(),(a).end()
+
+template<typename T>
+ostream &operator<<(ostream &os, const vector< T > &v) {
+    for(int i=0; i<(int)v.size(); i++){
+        os << v[i] << (i+1 != (int)v.size() ? " " : "");
+    }
+    return os;
+}
+
+template<typename T>
+istream &operator>>(istream &is, vector<T> &v){
+    for(T &in : v) is >> in;
+    return is;
+}
+
+template<typename T1, typename T2>
+ostream &operator<<(ostream &os, const pair<T1, T2>& p) {
+  os << p.first << " " << p.second;
+  return os;
+}
+
+template<typename T1, typename T2>
+istream &operator>>(istream &is, pair<T1, T2> &p) {
+  is >> p.first >> p.second;
+  return is;
+}
+
+ostream &operator<<(ostream &os, const grid& p) {
+    os << p.h << " " << p.w;
+    return os;
+}
+
+template<class T>
+vector<int> compress(vector<T> &v, int a = 0){
+    vector<T> w = v;
+    vector<int> ret(v.size());
+    sort(w.begin(), w.end());
+    w.erase(unique(w.begin(), w.end()), w.end());
+    for(int i=0; i<v.size(); i++){
+        ret[i] = lower_bound(w.begin(), w.end(), v[i]) - w.begin() + a;
+    }
+    return ret;
+}
+
+void Yes(bool a){
+    if(a) cout << "Yes\n";
+    else cout << "No\n";
+}
+
+template<class T> bool chmin(T& a, T b){
+    if(a > b){
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template<class T> bool chmax(T& a, T b){
+    if(a < b){
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template<class T> T power(T x, ll n) {
+    T ret = 1;
+    while (n > 0) {
+        if (n & 1) ret = ret * x/* % MOD*/;
+        x = x * x/* % MOD*/;
+        n >>= 1;
+    }
+    return ret;
+}
+
+ll round_up(ll a, ll b){
+    return (a + b - 1) / b;
+}
+
+ll gcd(ll a, ll b){
+    if(a % b == 0){
+        return(b);
+    }else{
+        return(gcd(b, a % b));
+    }
+}
+
+ll lcm(ll a, ll b){
+    return a / gcd(a, b) * b ;
+}
+
+grid search_c(VS &S,char c){
+    int h = S.size(), w = S.front().size();
+    rep(i,0,h) rep(j,0,w){
+        if(S[i][j] == c){
+            grid tmp = {(int)i, (int)j};
+            return tmp;
+        }
+    }
+}
+
+int main(void){
+	
+    //input
+
+    V answers;
+    while(1){
+        int h, w;
+        cin>> h >> w;
+        if(h == 0 && w == 0) break;
+        VS S(h);
+        cin >> S;
+        string s;
+        cin >> s;
+
+        //calculate
+
+        int ans = 0;
+        grid cu = {0, 0};
+        for(char c : s){
+            grid ne = search_c(S, c);
+            grid dif = ne - cu;
+            ans += abs(dif.h) + abs(dif.w) + 1;
+            cu = ne;
+        }
+        answers.push_back(ans);
+
+    }
+    for(auto i : answers) cout << i << endl;
+    return 0;
+
+}

@@ -1,0 +1,62 @@
+N, K = map(int, input().split())
+
+C = []
+R = []
+for _ in range(N):
+    c, r = map(int, input().split())
+    C.append(c)
+    R.append(r)
+
+links = [[] for _ in range(N)]
+for _ in range(K):
+    a, b = map(int, input().split())
+    a -= 1
+    b -= 1
+    links[a].append(b)
+    links[b].append(a)
+
+
+import queue
+def bfs(s, r):
+    visited = [-1] * N
+    visited[s] = 0
+    que = queue.deque([s])
+    while que:
+        x = que.popleft()
+        np = visited[x] + 1
+        for nx in links[x]:
+            if visited[nx] != -1:
+                continue
+            visited[nx] = np
+            if np < r:
+                que.append(nx)
+
+    return visited
+
+links2 = [[] for _ in range(N)]
+for i in range(N):
+    visited = bfs(i, R[i])
+    for j, v in enumerate(visited):
+        if i == j:
+            continue
+        if v != -1:
+            links2[i].append((j, C[i]))
+
+
+inf = float("inf")
+import heapq
+hq = [(0, 0)]
+visited = [inf] * N
+visited[0] = 0
+while hq:
+    p, x = heapq.heappop(hq)
+    if p > visited[x]:
+        continue
+    for nx, c in links2[x]:
+        np = visited[x] + c
+        if np >= visited[nx]:
+            continue
+        visited[nx] = np
+        heapq.heappush(hq, (np, nx))
+
+print(visited[N-1])

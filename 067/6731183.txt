@@ -1,0 +1,56 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long int ull;
+#define chmin(x,y) x = min(x,y)
+#define chmax(x,y) x = max(x,y)
+#define BIG_NUM 2000000000
+#define HUGE_NUM 4000000000000000000 //オーバーフローに注意
+#define MOD 1000000007
+#define EPS 0.000000001
+
+
+
+#define SIZE 205
+
+
+ll N;
+ll A[SIZE];
+
+int main(){
+
+	scanf("%lld",&N);
+
+	ll sum = 0;
+	map<ll,bool> MAP[2];
+
+	int now = 0,next = 1;
+
+	MAP[now][0] = true;
+
+	for(ll i = 1; i <= N; i++){
+
+		scanf("%lld",&A[i]);
+
+		sum += A[i];
+		for(auto at = MAP[now].begin(); at != MAP[now].end(); at++){
+
+			MAP[next][at->first] = true; //足さない
+			MAP[next][at->first + A[i]] = true;	 //足す
+		}
+		MAP[now].clear();
+		swap(now,next);
+	}
+
+	ll ans = HUGE_NUM;
+	for(auto at = MAP[now].begin(); at != MAP[now].end(); at++){
+
+		chmin(ans,abs(at->first - (sum-at->first)));
+	}
+
+	printf("%lld\n",ans);
+
+
+	return 0;
+}
+

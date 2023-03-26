@@ -1,0 +1,85 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N, M, cap;
+    while (cin >> N >> M >> cap, !(N == 0 and M == 0 and cap == 0)) {
+        V<string> SS;
+        string src, dst;
+        cin >> src >> dst;
+        SS.push_back(src);
+        SS.push_back(dst);
+        V<string> c1(N), c2(N);
+        V<int> d(N);
+        rep(i, N) {
+            cin >> c1[i] >> c2[i] >> d[i];
+            SS.push_back(c1[i]);
+            SS.push_back(c2[i]);
+        }
+        V<string> S(M);
+        rep(i, M) {
+            cin >> S[i];
+            SS.push_back(S[i]);
+        }
+        sort(SS.begin(), SS.end());
+        SS.erase(unique(SS.begin(), SS.end()), SS.end());
+        int NV = SS.size();
+        V<V<pair<int, ll>>> G(NV);
+        rep(i, N) {
+            int a = lower_bound(SS.begin(), SS.end(), c1[i]) - SS.begin();
+            int b = lower_bound(SS.begin(), SS.end(), c2[i]) - SS.begin();
+            G[a].push_back({b, d[i]});
+            G[b].push_back({a, d[i]});
+        }
+        V<int> gas(NV, 0);
+        rep(i, M) {
+            int a = lower_bound(SS.begin(), SS.end(), S[i]) - SS.begin();
+            gas[a] = 1;
+        }
+        const ll INF = 1LL << 60;
+        cap *= 10;
+        V<V<ll>> dist(NV, V<ll>(cap + 1, INF));
+        int s = lower_bound(SS.begin(), SS.end(), src) - SS.begin();
+        int g = lower_bound(SS.begin(), SS.end(), dst) - SS.begin();
+        dist[s][cap] = 0;
+        priority_queue<tuple<ll, int, int>> que;
+        que.push({0, s, cap});
+        while (!que.empty()) {
+            auto [d, cv, ccap] = que.top();
+            que.pop();
+            d = -d;
+            if (cv == g) {
+                cout << d << '\n';
+                return 0;
+            }
+            if (dist[cv][ccap] != d) continue;
+            if (gas[cv] and ccap < cap) {
+                dist[cv][ccap + 1] = d;
+                que.push({-d, cv, ccap + 1});
+            }
+            for (auto [nex, cost] : G[cv]) {
+                if (ccap >= cost) {
+                    if (dist[nex][ccap - cost] > d + cost) {
+                        dist[nex][ccap - cost] = d + cost;
+                        que.push({-(d + cost), nex, ccap - cost});
+                    }
+                }
+            }
+        }
+        cout << -1 << '\n';
+    }
+    return 0;
+}
+

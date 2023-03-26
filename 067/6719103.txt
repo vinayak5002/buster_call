@@ -1,0 +1,87 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+struct UF {
+    V<int> par;
+    UF(int n) : par(n, -1) {}
+    int leader(int x) { return par[x] < 0 ? x : par[x] = leader(par[x]); }
+    bool merge(int x, int y) {
+        x = leader(x), y = leader(y);
+        if (x == y) return false;
+        if (par[x] > par[y]) swap(x, y);
+        par[x] += par[y];
+        par[y] = x;
+        return true;
+    }
+    int size(int x) { return -par[leader(x)]; }
+};
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N;
+    while (cin >> N, N != 0) {
+        V<int> l(N), t(N), r(N), b(N);
+        rep(i, N) cin >> l[i] >> t[i] >> r[i] >> b[i];
+        V<int> zx = {-1, 1000001}, zy = {-1, 1000001};
+        rep(i, N) {
+            zx.push_back(l[i]);
+            zx.push_back(r[i]);
+            zy.push_back(b[i]);
+            zy.push_back(t[i]);
+        }
+        sort(zx.begin(), zx.end());
+        zx.erase(unique(zx.begin(), zx.end()), zx.end());
+        sort(zy.begin(), zy.end());
+        zy.erase(unique(zy.begin(), zy.end()), zy.end());
+        rep(i, N) {
+            l[i] = lower_bound(zx.begin(), zx.end(), l[i]) - zx.begin();
+            r[i] = lower_bound(zx.begin(), zx.end(), r[i]) - zx.begin();
+            b[i] = lower_bound(zy.begin(), zy.end(), b[i]) - zy.begin();
+            t[i] = lower_bound(zy.begin(), zy.end(), t[i]) - zy.begin();
+        }
+        int H = zx.size(), W = zy.size();
+        V<V<ll>> imos(H + 1, V<ll>(W + 1, 0));
+        rep(i, N) {
+            imos[l[i]][b[i]] += 1LL << i;
+            imos[l[i]][t[i]] -= 1LL << i;
+            imos[r[i]][b[i]] -= 1LL << i;
+            imos[r[i]][t[i]] += 1LL << i;
+        }
+        rep(x, H + 1) rep(y, W) imos[x][y + 1] += imos[x][y];
+        rep(x, H) rep(y, W + 1) imos[x + 1][y] += imos[x][y];
+        int M = (H + 1) * (W + 1);
+        UF uf(M);
+        const int dx[4] = {1, 0, -1, 0}, dy[4] = {0, 1, 0, -1};
+        rep(x, H + 1) {
+            rep(y, W + 1) {
+                rep(k, 4) {
+                    int nx = x + dx[k], ny = y + dy[k];
+                    if (!(0 <= nx and nx <= H and 0 <= ny and ny <= W)) continue;
+                    if (imos[x][y] == imos[nx][ny]) uf.merge(x * (W + 1) + y, nx * (W + 1) + ny);
+                }
+            }
+        }
+        int ans = 0;
+        rep(x, H + 1) {
+            rep(y, W + 1) {
+                if (x * (W + 1) + y == uf.leader(x * (W + 1) + y)) {
+                    ans++;
+                }
+            }
+        }
+        cout << ans << '\n';
+    }
+    return 0;
+}
+

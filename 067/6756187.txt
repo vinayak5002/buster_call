@@ -1,0 +1,120 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define reps(i,start,end) for(int i = start; i < (int)(end); i++)
+#define ll long long
+#define print(t) cout << t << endl
+#define all(a)  (a).begin(),(a).end()
+// << std::fixed << std::setprecision(0)
+const ll INF = 1LL << 60;
+
+template<class T> void chmin(T& a, T b){
+ if(a > b){
+  a = b;
+ }
+}
+
+template<class T> void chmax(T& a, T b){
+ if(a < b){
+  a = b;
+ }
+}
+
+template<class Tp>
+bool zero (const Tp &x) {
+    return x == 0;
+}
+
+template<class Tp, class... Args>
+bool zero (const Tp &x, const Args& ...args) {
+    return zero(x) and zero(args...);
+}
+
+bool isFind(queue<pair<int,int>> u, pair<int,int> s){
+  bool isThere = false;
+  rep(i,(int)u.size()){
+    int k = u.front().first;
+    int l = u.front().second;
+    u.pop();
+    u.push({k,l});
+    if(k == s.first && l == s.second){
+      isThere = true;
+    }
+  }
+  return isThere;
+}
+int main(){
+  while(true){
+    int w,h; cin >> w >> h;
+    if(zero(w,h))break;
+    vector<vector<int>> c(h,vector<int> (w));
+    rep(i,h){
+      rep(j,w){
+        cin >> c[i][j];
+      }
+    }
+
+    //探索して見つけたとこからbfs,探査したら０にする
+    int cnt = 0;
+    rep(i,h){
+      rep(j,w){
+        if(c[i][j] == 1){
+          queue<pair<int,int>> que;
+          que.push({i,j});
+          while(!que.empty()){
+            // k:h   l:w
+            int k = que.front().first;
+            int l = que.front().second;
+            que.pop();
+            c[k][l] = 0;
+            // 上下左右
+            if(k>0 && c[k-1][l] == 1){
+              if(!isFind(que,{k-1,l})){
+                que.push({k-1,l});
+              }
+              }
+            if(k<h-1 && c[k+1][l] == 1){
+              if(!isFind(que,{k+1,l})){
+                que.push({k+1,l});
+              }
+            }
+            if(l>0 && c[k][l-1] == 1){
+              if(!isFind(que,{k,l-1})){
+                que.push({k,l-1});
+              }
+            }
+            if(l<w-1 && c[k][l+1] == 1){
+              if(!isFind(que,{k,l+1})){
+                que.push({k,l+1});
+              }
+            }
+            // 斜め
+            if(k>0 && l>0 && c[k-1][l-1] == 1){
+              if(!isFind(que,{k-1,l-1})){
+                que.push({k-1,l-1});
+              }
+            }
+            if(k>0 && l<w-1 && c[k-1][l+1] == 1){
+              if(!isFind(que,{k-1,l+1})){
+                que.push({k-1,l+1});
+              }
+            }
+            if(k<h-1 && l>0 && c[k+1][l-1] == 1){
+              if(!isFind(que,{k+1,l-1})){
+                que.push({k+1,l-1});
+              }
+            }
+            if(k<h-1&& l<w-1 && c[k+1][l+1] == 1){
+              if(!isFind(que,{k+1,l+1})){
+                que.push({k+1,l+1});
+              }
+            }
+          }
+          cnt++;
+        }
+      }
+    }
+    cout << cnt << endl;
+  }
+}
+

@@ -1,0 +1,23 @@
+v,e= map(int, input().split())
+#隣接行列を作る
+inf = float("inf")
+a = [[inf] * v for i in range(v)]
+for j in range(e):
+  s,t,d=map(int,input().split())
+  a[s][t] = d
+
+#2のv乗列×v行のinf行列を作る
+dp = [[inf] * v for k in range(2**v)]
+
+#開始地点を0
+dp[0][0] = 0
+
+for l in range(2**v):
+  for m in range(v): #次の頂点について考える
+    if (l >> m & 1) == 0: #既に回った頂点かどうかを調べる　確定されていなければ進める
+      for n in range(v): #頂点を回る
+        if not n == m:
+          dp[l|1<<m][m] = min(dp[l|1<<m][m], dp[l][n] + a[n][m])
+        
+#dp[2**v-1][0]でちゃんと値がある（始点に帰ってきている）ならその時のコストを表示
+print(-1) if dp[2**v-1][0] == inf else print(dp[2**v-1][0])

@@ -1,0 +1,145 @@
+#include<stdio.h>
+#include<limits.h>
+#define N 100
+
+int dist[N];
+int matrix[N][N], n;//matrixは隣接行列,nは入力した節点数
+
+int Queue[N+1];//待ち行列を定義する
+int head, tail;//待ち行列の必要変数を定義する
+
+int head = 0;
+int tail = 0;
+
+int isEmpty()
+{
+	if(head == tail)
+	{
+		return 1; 
+	}
+	else
+	{
+		return 0;
+	}
+}//待ち行列が空なら1を、そうでなければ0を返す
+
+int isFull()
+{
+	if(head == (tail + 1) % N)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}//待ち行列が満杯なら1を、そうでなければ0を返す
+
+void enqueue(int x){
+	if(isFull() == 1)
+	{
+		printf("full\n");
+	}
+	else
+	{
+		Queue[tail] = x;
+		if(tail + 1 == N)
+		{
+			tail = 0;
+		}
+		else
+		{
+			tail++;
+		}
+	}
+}//待ち行列が満杯でなければ、プロセスxを待ち行列に入れて、tailを更新する
+
+int dequeue(){
+	int x;
+	if(isEmpty() == 1)
+	{
+		printf("full\n");
+	}
+	else
+	{
+		x = Queue[head];
+		if(head + 1 == N)
+		{
+			head = 0;
+		}
+		else
+		{
+			head++;
+		}
+	}
+	
+	return x;
+}//待ち行列が空でなければ、head位置のプロセスを返して、headを更新する
+
+
+
+void bfs(int x)
+{
+    int i, j, col;//for loop
+
+    enqueue(x);
+    for(i = 0; i < n; i++)
+    {
+        dist[i] = INT_MAX;
+    }
+    dist[x] = 0;
+
+    while (isEmpty() == 0)
+    {
+        j = dequeue();
+        for(col = 0; col < n; col++)
+        {
+            if( matrix[j][col] == 0 )   continue;
+            if( dist[col] != INT_MAX )  continue;
+            dist[col] = dist[j] + 1;
+            enqueue(col);
+        }
+    }
+    
+    for(i = 0; i < n; i++)
+    {
+        int res;
+        if(dist[i] != INT_MAX)  res = dist[i];
+        else    res = -1;
+        printf("%d %d\n",i+1, res);
+    }
+}
+
+
+
+int main(void)
+{
+    int i,j;//i,j for loop
+    int index1, index2, n_adj;//index1は行、index2は列、 n_adjは今の点が隣接する点の個数
+    scanf("%d",&n);//nを読み取る
+
+    for(i = 0; i < n ; i++)
+    {
+        for(j = 0 ; j < n; j++)
+        {
+            matrix[i][j] = 0;//行列の初期化
+        }
+    }
+
+    for(i = 0; i < n ; i++)//入力を読み取る
+    {
+        scanf("%d %d",&index1, &n_adj);//各行に対して、一つ目の数は今の点の番号(行列の行)、二つ目は今の点が隣接する点の個数
+        index1--;//実はindex1の値はiと同じである
+        for(j = 0; j < n_adj; j++)//今の点が隣接する点を読み取る
+        {
+            scanf("%d",&index2);
+            index2--;
+            matrix[index1][index2] = 1;//該当するところを1にする
+        }
+    }//index1, index2から１を減らすのは入力が1から始まり、行列は0から始まるからである
+
+    bfs(0);//探索開始
+
+    return 0;
+}
+

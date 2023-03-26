@@ -1,0 +1,146 @@
+// #define _GLIBCXX_DEBUG
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+using namespace std;
+//using namespace atcoder;
+
+#define int long long
+#define all(x) (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+#define rep(i, n) for (int i = 0; i < n; ++i)
+#define REP(i, n) for (int i = 0; i < n; ++i)
+#define range(i,a,b) ((a)<=(i) && (i)<(b))
+#define debug(x) cout << #x << " = " << (x) << endl;
+#define fs first
+#define sc second
+#define pb push_back
+#define eb emplace_back
+#define SP << " " <<
+
+typedef long long ll;
+typedef pair<int, int> P;
+typedef tuple<int, int, int> T;
+typedef vector<int> vec;
+typedef vector<P> pvec;
+typedef vector<vector<int>> vvec;
+typedef vector<vector<P>> pvvec;
+typedef priority_queue<int> PQI;
+typedef priority_queue<P> PQP;
+typedef priority_queue<int,vector<int>,greater<int>> PQIG;
+typedef priority_queue<P,vector<P>,greater<P>> PQPG;
+
+const vector<int> DX = {0, -1, 0, 1, 1, 1, -1, -1};
+const vector<int> DY = {1, 0, -1, 0, 1, -1, 1, -1};
+constexpr int MOD = (1000000007);
+// const int MOD = (998244353);
+// const int INF = (1 << 30); // 1073741824
+const ll INF = (1LL << 60); // 1152921504606846976
+const double PI = (3.141592653589794);
+const double EPS = (0.0000000001); // 10^(-10)
+
+template<class T> inline bool chmin(T& a, T b) {if (a > b) {a = b; return 1;} return 0;}
+template<class T> inline bool chmax(T& a, T b) {if (a < b) {a = b; return 1;} return 0;}
+template<class T> inline T ceil(T a, T b) {return T((a + b - 1) / b);}
+template<class T> inline T round(T a, T b) {return T(a / b);}
+template< typename T1, typename T2 > istream &operator>>(istream &is, pair< T1, T2 > &p) { is >> p.first >> p.second; return is; }
+template <class T> inline void out(T &a) { bool flag=true; for(auto&x:a){if(flag) {flag=false;} else{ cout << ' '; } cout<<x; } cout << endl; }
+
+
+
+//----------------------------------------------------------------
+int nmax=200000; // 2*(10^5)
+vvec G(nmax);
+
+struct sai{
+  vvec rr={{0,3,5,2,4,0},
+          {4,0,1,6,0,3},
+          {2,6,0,0,1,5},
+          {5,1,0,0,6,2},
+          {3,0,6,1,0,4},
+          {0,4,2,5,3,0}};
+  int tf(int t,int f){
+    return rr[t-1][f-1];
+  };
+  vec four(int t,int f){
+    int r=tf(t,f);
+    return vector<int>{f,r,7-f,7-r}; // 手前、右、奥、左 // x, y, -x, -y
+  }
+};
+
+const vector<int> dx = {1, 0, -1, 0, 1, 1, -1, -1};
+const vector<int> dy = {0, 1, 0, -1, 1, -1, 1, -1};
+
+int h[300][300];
+int me[300][300];
+
+void solve4ts()
+{
+  
+  
+  int n;
+  cin>>n;
+  if(n==0) exit(0);
+  sai saikoro;
+  
+  int geta=150;
+  rep(i,300) rep(j,300){
+    h[i][j]=0;
+    me[i][j]=0;
+  }
+  rep(_,n){
+    
+    int x=geta; int y=geta;
+    int t,f; cin>>t>>f;
+    while(true){
+      bool koro=false;
+      vec four = saikoro.four(t,f);
+      for(int c=6;c>=4;c--){
+        rep(dir,4){
+          if(c==four[dir]){
+            int nx=x+dx[dir];
+            int ny=y+dy[dir];
+            if(h[nx][ny]<h[x][y]){
+              int nt,nf;
+              int r=saikoro.tf(t,f);
+              if(dir==0) nt=7-f,nf=t;
+              if(dir==1) nt=7-r,nf=f;
+              if(dir==2) nt=f,nf=7-t;
+              if(dir==3) nt=r,nf=f;
+              t=nt; f=nf; x=nx; y=ny;
+              koro=true;
+              break;
+            }
+          }
+        }
+        if(koro) break;
+      }
+      if(!koro) break;
+    }
+    h[x][y]++;
+    me[x][y]=t;
+  }
+  vec count(10);
+  rep(i,300) rep(j,300) count[me[i][j]]++;
+  for(int i=1;i<=6;i++){
+    if(i==6) cout<<count[i];
+    else cout<<count[i]<<" ";
+  }
+  cout<<endl;
+}
+//-----------------------------------------------------------------
+
+signed main(){ ios::sync_with_stdio(false); cin.tie(0); cout << fixed << setprecision(15);
+  int repeat = INF;
+  // cin >> repeat;
+  while(repeat--) solve4ts();
+}
+
+/*
+
+g++ -std=c++1z code.cpp
+
+./a.out
+
+python3 expander.py code.cpp
+
+*/

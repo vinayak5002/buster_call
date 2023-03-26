@@ -1,0 +1,67 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const ll INF = (1LL << 60);
+struct edge{
+    int to;
+    ll w;
+    edge(int t, ll we){
+        to = t;
+        w = we;
+    }
+};
+
+ vector<ll> dijkstra(vector< vector < edge > >G, int st, int N){
+    vector<ll> dist(N, INF);
+    dist[st] = 0;
+ 
+    priority_queue<pair<ll, int> > pq;
+    pq.push(make_pair(0, st));
+ 
+    while(!pq.empty()){
+        auto t = pq.top();
+        pq.pop();
+ 
+        int v = t.second;
+        ll w = -t.first;
+        //if(dist[v] < w) continue; 枝刈りをしない
+ 
+        for(auto e:G[v]){
+            int to = e.to;
+            ll c = e.w;
+ 
+            if(dist[v] + c < dist[to]){
+                dist[to] = dist[v] + c;
+                pq.push(make_pair(-dist[to], to));
+            }
+        }
+    }
+ 
+    return dist;
+ 
+}
+
+int main(){
+    int N, M;
+    cin >> N >> M;
+    vector<vector<edge> >G(N + 1, vector<edge>());
+    for(int i=0;i<M;i++){
+        int a,b; ll c;
+        cin >> a >> b >> c;
+        --a;--b;
+        G[a].push_back(edge(b, c));
+    }
+
+    auto dist = dijkstra(G, 0, N+1);
+
+    //cout << dist[N-1] << endl;
+    for(int i=0;i<N;i++){
+        if(dist[i]==INF)cout << "INF";
+        else cout << dist[i];
+        cout << "\n";
+    }
+
+
+
+    return 0;
+}

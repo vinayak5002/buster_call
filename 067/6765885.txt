@@ -1,0 +1,29 @@
+#include <bits/stdc++.h>
+
+struct Vector {
+	double x, y;
+	Vector() : x(0), y(0) {}
+	Vector(double x, double y) : x(x), y(y) {}
+	double sqabs() const { return x * x + y * y; }
+	double abs() const { return std::hypot(x, y); }
+	Vector scale(double k) const { return Vector(k * x, k * y); }
+	double cos(const Vector &target) const { return x * target.x + y * target.y; }
+	double sin(const Vector &target) const { return x * target.y - y * target.x; }
+	Vector &operator+=(const Vector &other){ x += other.x; y += other.y; return *this; }
+	Vector &operator-=(const Vector &other){ x -= other.x; y -= other.y; return *this; }
+	friend Vector operator+(Vector left, const Vector &right){ return left += right; }
+	friend Vector operator-(Vector left, const Vector &right){ return left -= right; }
+};
+
+int main(){
+	Vector p1, p2;
+	int q;
+	std::cin >> p1.x >> p1.y >> p2.x >> p2.y >> q;
+	while(q--){
+		Vector p;
+		std::cin >> p.x >> p.y;
+		Vector a = p2 - p1, b = p - p1;
+		Vector ans = p1 + a.scale(a.cos(b) / a.sqabs());
+		std::cout << std::setprecision(20) << ans.x << " " << ans.y << std::endl;
+	}
+}

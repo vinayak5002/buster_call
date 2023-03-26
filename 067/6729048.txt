@@ -1,0 +1,242 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+#define DIGIT  9
+const long M = 1000000000;  // 10^9
+
+struct Big_int {
+    int sgn;
+    vector<long> num;
+    Big_int(string);
+    friend bool operator==(const Big_int&, const Big_int&);
+    friend bool operator<(const Big_int&, const Big_int&);
+    friend Big_int operator+(const Big_int&, const Big_int&);
+    void print(); 
+};
+
+void print_num(const vector<long>& m)
+{
+    vector<long> n = m;
+    int d = n.size();
+    if (d > 0) {
+	cout << n.back();
+	n.pop_back();
+    }
+    while (--d > 0) {
+	long l = n.back();
+	for (int m = M/10; m > 0; m /= 10) {
+	    cout << l / m;
+	    l %= m;
+	}
+	n.pop_back();
+    }
+}
+
+void Big_int::print()
+{
+    if (this->sgn < 0)
+	cout << "-";
+    print_num(this->num);
+}
+
+Big_int::Big_int(string x)
+{
+    int s = 1;
+    vector<long> n;
+    if (x.empty())
+	return;
+    
+    if (x[0] == '-') {
+	s = -1;
+	x = x.substr(1, x.length() - 1);
+    }
+    int i = x.length() % DIGIT;
+    int j = x.length() / DIGIT;
+    
+    while (--j >= 0) {
+	n.push_back(stoi(x.substr(i + DIGIT * j, DIGIT)));
+    }
+    if (i != 0)
+	n.push_back(stoi(x.substr(0, i)));
+      
+    sgn = s;
+    num = n;
+}
+
+// N - m > 0 なら 1、 n - m = 0 なら 0, n - m < 0 なら -1 を返す。 
+long num_cmp(const vector<long> n, const vector<long> m)
+{
+    if (n.size() > m.size())
+	return 1;
+    if (n.size() < m.size())
+	return -1;
+    for (int i = n.size() - 1; i >= 0; --i) {
+	if (n[i] > m[i])
+	    return 1;
+	else if (n[i] < m[i])
+	    return -1;
+    }
+    return 0;  // n == m
+}
+
+
+bool operator==(const Big_int& a, const Big_int& b)
+{
+    if (a.sgn != b.sgn)
+	return false;
+    if (num_cmp(a.num, b.num) == 0)
+	return true;
+    else
+	return false;
+}
+
+bool operator<(const Big_int& a, const Big_int& b)
+{
+    if (a.sgn > b.sgn)
+	return false;
+    if (a.sgn < b.sgn)
+	return true;
+
+    vector<long> a1, b1;
+    if (a.sgn < 0) {
+	a1 = b.num;
+	b1 = a.num;
+    } else {
+	a1 = a.num;
+	b1 = b.num;
+    }
+
+    if (num_cmp(a1, b1) < 0)
+	return true;
+    else
+	return false;
+}
+
+// n と m の和
+vector<long> sum(const vector<long>& n, const vector<long>& m)
+{
+    vector<long> a, b;
+    // a = max(n, m), b = min(n, m)
+    if (num_cmp(n, m) < 0) {
+	a = m;
+	b = n;
+    } else {
+	a = n;
+	b = m;
+    }
+    int s = a.size();
+    // a と b の桁を揃える
+    if (b.size() < s) 
+	for (int i = 0; i < s - b.size(); ++i)
+	    b.push_back(0);
+    
+    vector<long> c;
+    for (int i = 0; i < s; i++) {
+	long p = a[i] + b[i];
+	long q = p / M;       // q == 0, 1
+	long r = p % M;       // 0 <= r < M
+	c.push_back(r);
+	if (q != 0) {             // 桁上がり
+	    if (i < s - 1)        // 最上位の桁ではないとき
+		a[i+1] += q;  
+	    else
+		c.push_back(q);   // 最上位の桁のとき
+	}
+    }
+#ifdef DBG
+    cout << "sum(): a = ";  print_num(a);  cout << ", b = ";   print_num(b);
+    cout << "  ===>  a + b = ";  print_num(c);  cout << endl;
+#endif
+
+    return c;
+}
+
+// n と m の差
+vector<long> dif(const vector<long>& n, const vector<long>& m)
+{
+    vector<long> a, b, c;
+    int d = num_cmp(n, m);
+    if (d < 0) {
+	a = m;
+	b = n;
+    } else if (d > 0) {
+	a = n;
+	b = m;
+    } else {
+	c.push_back(0);
+	return c;
+    }
+    
+#ifdef DBG
+    cout << "dif(): a = ";  print_num(a);  cout << ", b = ";   print_num(b);
+    cout << flush;
+#endif 
+    int s = a.size();
+    // a と b の桁を揃える
+    if (b.size() < s) {
+	for (int i = 0; i < s - b.size(); ++i)
+	    b.push_back(0);
+    }
+    
+    for (int i = 0; i < s; i++) {
+	if (a[i] < b[i]) {
+	    a[i+1] -= 1;
+	    a[i] += M;
+	}
+	long p = a[i] - b[i];
+	if ((i < s - 1) || (p != 0))
+	    c.push_back(p);
+    }
+
+    while (c.back() == 0) 
+	c.pop_back();
+    if (c.empty())
+	c.push_back(0);
+#ifdef DBG
+    cout << "  ===>  |a - b| = ";  print_num(c);  cout << endl;
+#endif
+    return c;
+}
+
+Big_int operator+(const Big_int& a, const Big_int& b)
+{
+    Big_int c("");
+    if (a.sgn == b.sgn) {
+	c.sgn = a.sgn;
+	c.num = sum(a.num, b.num);
+    } else {
+	c.num = dif(a.num, b.num);
+	if (a.sgn > 0) {       // a >= 0, b < 0
+	    if (num_cmp(a.num, b.num) >= 0)
+		c.sgn = 1;
+	    else
+		c.sgn = -1;
+	} else {               // a < 0, b >= 0
+	    if (num_cmp(a.num, b.num) <= 0)
+		c.sgn = 1;
+	    else
+		c.sgn = -1;
+	}
+    }
+
+    return c;
+}
+
+int main()
+{
+    string A, B;
+    
+    cin >> A >> B;
+    Big_int a(A), b(B);
+    Big_int c = a + b;
+
+    c.print();
+    cout << endl;
+    
+    return 0;
+}
+    
+

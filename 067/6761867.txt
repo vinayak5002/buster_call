@@ -1,0 +1,83 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define for_(i, a, b) for(int i = (a);i < (b);++i)
+#define rfor_(i, a, b) for(int i = (b)-1;i >= (a);--i)
+#define rep(i, n) for_(i, 0, n)
+#define rrep(i, n) rfor_(i, 0, n)
+
+/* accelration */
+// 高速バイナリ生成
+#pragma GCC target("avx")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+// cin cout の結びつけ解除, stdioと同期しない(入出力非同期化)
+// cとstdの入出力を混在させるとバグるので注意
+struct Fast {Fast() {std::cin.tie(0); ios::sync_with_stdio(false);}} fast;
+
+/* define short */
+#define all(obj) (obj).begin(), (obj).end()
+
+/* alias */
+using ull = unsigned long long;
+using ll = long long;
+const int inf = 100000000;
+const ll infl = 1LL << 60;
+
+ll mul(ll a, ll b) { if (infl / a < b) return infl; return min(infl, a * b); }
+ll gcd(ll a, ll b) { return a ? gcd(b % a, a) : b; }
+ll lcm(ll a, ll b) { if (a == infl || b == infl) return infl; return mul(a / gcd(a, b), b); }
+
+template<class T>bool chmax(T& a, const T& b) { if (a < b) { a = b; return 1; } return 0; }
+template<class T>bool chmin(T& a, const T& b) { if (b < a) { a = b; return 1; } return 0; }
+
+
+// 最長増加部分列（Longest Increasing Subsequence）というのが
+// そもそも何のことかわからなかったので答え見た
+// ※ここの解き方はあくまで最長部分列の長さを求めるものであり、
+// 最長部分列を列挙することはできない
+// 下のサイトを参考にした
+// https://o-treetree.hatenablog.com/entry/DPL1D
+int N;
+
+
+int main() {
+    cin >> N;
+    vector<int> As(N);
+    rep(i, N) cin >> As[i];
+
+    vector<int> lis;    // 最長増加部分列
+                        // ただし、あくまで最長部分列の長さだけがわかるもの
+                        // であり、中に格納されるのが求める最長部分列
+                        // とは限らない
+
+    // 最長部分列を求める処理を記述していく
+    // As = {1, 5, 10, 2, 11}としたとき、手順としては
+    // 1. lisに1を入れる　{1}
+    // 2. 5は1より大きいので、lisの中に5を入れる {1, 5}
+    // 3. 同様に10を入れる {1, 5, 10}
+    // 4. 2の次に大きいのは5なので5の場所に2を入れる {1, 2, 10}
+    // ※4の状態は {1, 2, 10} となっているが、最長部分列は{1, 5, 10}
+    // である。しかし、最長部分列の長さが3ということは同じであり、
+    // 最長部分列の長さを求めることができている
+    // 5. 11は10より大きいので、lisの中に11を加える {1, 2, 10, 11}
+    // ※最長部分列は{1, 5, 10, 11}であるが、長さは4であり、求めることができている
+    rep(i, N) {
+        // As[i]以上の値の最初の位置を探索する
+        auto itr = lower_bound(all(lis), As[i]);
+
+        if (itr == lis.end()) { // As[i]がlisの中で一番大きいとき
+            lis.push_back(As[i]);
+        }
+        else {
+            // ※この書き方注意
+            // 入れ替える場所の値を直接書き換えている
+            *itr = As[i];
+        }
+    }
+
+    int ans = lis.size();
+    cout << ans << endl;
+}
+
+

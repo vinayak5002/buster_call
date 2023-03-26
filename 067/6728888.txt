@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+
+using std::cout, std::cin, std::endl;
+using lint = long long;
+
+lint h, w;
+std::vector<std::string> grid;
+
+lint is_valid(lint i, lint j){
+	return 0 <= i && i < h && 0 <= j && j < w;
+}
+
+lint solve(){
+	lint i = 0, j = 0;
+	while(grid[i][j] == '#'){
+		if(j < w - 1){
+			++j;
+		}else if(i < h - 1){
+			j = 0;
+			++i;
+		}else{
+			return 1;
+		}
+	}
+	lint ret = 0;
+	if(is_valid(i, j + 1) && is_valid(i + 1, j) && grid[i][j + 1] == '.' && grid[i + 1][j] == '.'){
+		grid[i][j] = '#';
+		grid[i][j + 1] = '#';
+		grid[i + 1][j] = '#';
+		ret += solve();
+		grid[i][j] = '.';
+		grid[i][j + 1] = '.';
+		grid[i + 1][j] = '.';
+	}
+	if(is_valid(i, j + 1) && is_valid(i + 1, j + 1) && grid[i][j + 1] == '.' && grid[i + 1][j + 1] == '.'){
+		grid[i][j] = '#';
+		grid[i][j + 1] = '#';
+		grid[i + 1][j + 1] = '#';
+		ret += solve();
+		grid[i][j] = '.';
+		grid[i][j + 1] = '.';
+		grid[i + 1][j + 1] = '.';
+	}
+	if(is_valid(i + 1, j) && is_valid(i + 1, j - 1) && grid[i + 1][j] == '.' && grid[i + 1][j - 1] == '.'){
+		grid[i][j] = '#';
+		grid[i + 1][j] = '#';
+		grid[i + 1][j - 1] = '#';
+		ret += solve();
+		grid[i][j] = '.';
+		grid[i + 1][j] = '.';
+		grid[i + 1][j - 1] = '.';
+	}
+	if(is_valid(i + 1, j) && is_valid(i + 1, j + 1) && grid[i + 1][j] == '.' && grid[i + 1][j + 1] == '.'){
+		grid[i][j] = '#';
+		grid[i + 1][j] = '#';
+		grid[i + 1][j + 1] = '#';
+		ret += solve();
+		grid[i][j] = '.';
+		grid[i + 1][j] = '.';
+		grid[i + 1][j + 1] = '.';
+	}
+	return ret;
+}
+
+int main(){
+	for(;;){
+		cin >> h >> w;
+		if(h == 0 && w == 0) break;
+		grid.resize(h);
+		for(auto &s : grid) cin >> s;
+		cout << solve() << endl;
+	}
+}
+

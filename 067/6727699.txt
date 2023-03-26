@@ -1,0 +1,49 @@
+#define BUF_SIZE 1024
+
+#include <stdio.h>
+
+int main(void) {
+	char buf[BUF_SIZE];
+	int min, mid, max;
+	int lim, purpose;
+	int count = 0;
+	
+	while (1) {
+		fgets(buf, sizeof(buf) - 1, stdin);
+		sscanf(buf, "%d %d", &lim, &purpose);
+		if ((lim == 0) && (purpose == 0)) {
+			break;
+		}
+		//中間値を変えながら探す
+		for (mid = 2; mid < lim; mid++) {
+			//特定の中間値でできる数値の中で最大のものが目標に行かない場合次の値を探す
+			if ((mid + mid - 1 + lim) < purpose) {
+				continue;
+			}
+			//特定の中間値でできる数値の中で最小のものが目標より大きい場合終わり
+			if ((mid + 1 + mid + 1) > purpose) {
+				break;
+			}
+			int tmp = purpose - mid;
+			//満たす組み合わせの端をきめる
+			if (tmp > lim) {
+				max = lim;
+				min = tmp - lim;
+
+			}
+			else {
+				max = tmp - 1;
+				min = 1;
+			}
+			//中間値に近いほうとの間が個数
+			if ((mid - min) > (max - mid)) {
+				count += (max - mid);
+			}
+			else {
+				count += (mid - min);
+			}
+
+		}
+		printf("%d\n", count);
+	}
+}

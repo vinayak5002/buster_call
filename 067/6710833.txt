@@ -1,0 +1,171 @@
+#include <iostream>
+#include <map>
+using namespace std;
+#define len 3
+#define MaxQsize 362880  // 9!
+
+// 结构体部分
+struct puzzle
+{
+    int pos[3][3];
+    int aimPos_i , aimPos_j;
+
+    string step;
+    bool operator == (const puzzle &next) const
+    {
+        for(int i = 0 ; i < len ; i++)
+            for(int j = 0 ; j < len ; j++)
+            {
+                if(this->pos[i][j] != next.pos[i][j])
+                    return false;
+            }
+            return true;
+    }
+    bool operator < (const puzzle &next) const
+    {
+        for(int i = 0 ; i < len ; i++)
+            for(int j = 0 ; j < len ; j++)
+            {
+                if(this->pos[i][j] == next.pos[i][j])
+                    continue;
+                
+				return this->pos[i][j] < next.pos[i][j];	
+            }
+        return false; 
+    }
+};
+// 结构体部分结束
+
+/* 队列部分*/
+struct QNode
+{
+    puzzle data;
+    QNode *next;
+};
+struct LinkQueue
+{
+    QNode *front;
+    QNode *rear;
+};
+int InitQueue(LinkQueue &init)
+{
+    init.front = init.rear = new QNode;
+    init.front->next = NULL;
+    return 0;
+}
+int EnQueue(LinkQueue &now , puzzle aim)
+{
+    QNode *temper = new QNode;
+    temper->next = NULL;
+    temper->data = aim;
+    now.rear->next = temper;
+    now.rear = temper;
+    
+    return 0;
+}
+int DeQueue(LinkQueue &now , puzzle &aim)
+{	
+    if(now.rear == now.front)
+        return -1;
+	
+    QNode *temper;
+	temper =  now.front->next;
+   	aim = temper->data;
+    now.front->next = now.front->next->next;
+    
+    if(temper == now.rear)
+        now.rear = now.front;
+   
+    return 0;
+}
+bool IsEmpty(LinkQueue now)
+{
+    if(now.rear == now.front)
+        return true;
+    return false;
+}
+
+/* 队列部分结束*/
+
+const int di[4] = {1 , -1 , 0 , 0};
+const int dj[4] = {0 , 0 , 1 , -1};
+const char direction[4] = {'D' , 'U' , 'R' , 'L'};
+void bfs(puzzle init , puzzle ans)
+{
+    map<puzzle , int> repetition;
+    
+	LinkQueue S;
+    InitQueue(S);
+    EnQueue(S , init);
+    repetition[init] = true;
+ 
+    while(!IsEmpty(S))
+    {    
+        puzzle now; 
+        DeQueue(S , now);
+
+        if(now == ans)
+        {
+            cout << now.step.size() << endl; 
+            return ;
+        }
+          
+        for(int k = 0 ; k < 4 ; k++)
+        {
+            puzzle next = now;
+        	next.aimPos_i = next.aimPos_i + di[k];
+    	    next.aimPos_j = next.aimPos_j + dj[k];
+    
+            if(next.aimPos_i < 0 || next.aimPos_i >= len || next.aimPos_j < 0 || next.aimPos_j >= len)
+                continue;
+            
+            swap(next.pos[now.aimPos_i][now.aimPos_j] , next.pos[next.aimPos_i][next.aimPos_j]);
+            if(repetition[next] == true)
+                continue;
+            else
+            {
+            	next.step = next.step + direction[k];
+                repetition[next] = true;
+                EnQueue(S , next);
+                
+            }
+        }
+    }
+    cout << "Unsolvable" << endl;
+}
+void CreateAns(puzzle &ans)
+{
+    for(int i = 0 ; i < len ; i++)
+        for(int j = 0 ; j < len ; j++)
+        {
+            if(i == len - 1 && j == len - 1)
+                ans.pos[i][j] = 0;
+            else
+                ans.pos[i][j] = i * len + (j + 1);
+        }
+    return;
+
+}
+int main()
+{
+    puzzle init , ans;
+
+    for(int i = 0 ; i < len ; i++)
+        for(int j = 0; j < len ; j++)
+        {
+            int n;
+            cin >> n;
+            init.pos[i][j] = n;
+            if(n == 0)
+            {
+                init.aimPos_i = i;
+                init.aimPos_j = j;
+            }
+        }
+
+    CreateAns(ans);
+    bfs(init , ans);
+    return 0;    
+}
+
+

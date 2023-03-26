@@ -1,0 +1,96 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+using pii = pair<int, int>;
+const ll mod = 998244353;
+const int INF = (1 << 30);
+
+/* Please care to over-flow. */
+struct Edge {
+   int to;
+   int w;
+   Edge(int to2, int w2) {
+      to = to2;
+      w = w2;
+   }
+};
+
+int main() {
+   int V, E;
+   cin >> V >> E;
+   int r;
+   cin >> r;
+   vector<vector<Edge>> Graph(V);
+   for(int e = 0; e < E; e++) {
+      /* Please care to over-flow. */
+      int s, t, d;
+      cin >> s >> t >> d;
+      /* Do you need? */
+      /* s--, t--; */
+      Graph[s].push_back(Edge(t, d));
+   }
+   /* Please care to over-flow. */
+   vector<int> dist(V, INF);
+   priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+   dist[r] = 0;
+   pq.push({0, r});
+   while(!pq.empty()) {
+      /* Please care to over-flow. */
+      pii p = pq.top();
+      pq.pop();
+      ll v = p.second;
+      if(dist[v] < p.first) continue;
+      for(Edge &E : Graph[v]) {
+         if(dist[E.to] > dist[v] + E.w) {
+            dist[E.to] = dist[v] + E.w;
+            pq.push({dist[E.to], E.to});
+         }
+      }
+   }
+   for(int v = 0; v < V; v++) {
+      if(dist[v] == INF) cout << "INF" << endl;
+      else cout << dist[v] << endl;
+   }
+   return 0;
+}
+
+/*
+                  .     ..+K`                                            QJ..    .,
+                .MN`  .HHH#!                                             .HHHm,  J#b
+               .MH#  +HHH"                                                 ?WMM_ (MHb
+               dHH%.(!`                                                        _-.MHH[
+           db  MH@(aJgga-,                                                 ?MHH#MNJMHF  k,
+          .HM. (SsWHHHM#"`                                                   ?T"""!?W! (HN.
+          WHM: J^  `                                                          .JJJ-..  JHM)
+         .MHM-dugMHH#'                            `  `                         (HHHHHm.JH#]
+      .N, WMbKHHHMB=                .MMMMr  dMMM#JMH#H#M)dMMN (MMM}               ?"""^(MM\ -L
+      dHN,.4H!  ..                  (H#WHN  (MHM!/B9(MHD (HHM (HHP`               (a..  y= (HN.
+      dHHb d~.gMM'                  MH@(MM;  MHN   .HMt   WHM (HH[                 vHHHm,_.HHN~
+      JHH@(mMHHB`                  .HHNHHHb  MHN  (HM^.., WHM (HH[                  ?MHHMsJHHN~
+      .MHNHMH"!                   (MH#`.MHM](MHMedHHMHHH] WHHNMHH\                    _TY6JMH#
+    N& .TK!  .g{                  .??!  7??'?777=_```````  ~????`                    JN,  ~dD` .J
+    MHh. Z .HH#`           ..... ....   ........    .........  ............          .MHN,.b  (H#
+    dHHb.bdHHM%          .MHHHHH[JMHHR..MHM<MHHM~   MHHH]dHHM, JHH#JHHHHHHN`          ?MHHrW (HHF
+    .MHMJHHH#^           JHH].MHF dHHHN,MMr ,MM}    .HHF .MHHMeJHN~ dHM_.""            ,MHNd(MH#`
+     .WMXX"! .)          JHH].MHF dHMHHMHMr ,MM}    .HHF .MHMHHHHN~ dHHMM\            Q,  7JdH#!
+  .,    ?{ .uM]          J#H].MHF.dH#.WHHMr ,MM},HM~.HHb .MH]?MHHN~ dHM_.gg.          dHx  J=!
+  (HMa. .{.HHM\          .MHHHHMtJHH#  WHMr.MHH#M#M~#HHM]MMM] (MHN~JMHH###N`          JHHb g   .dM!
+   VHHNx.LWHHF                                                                         WH#[d .MHM%
+    ?HHMpWMHD -                 (JJJ,.JJJ .JJJ.(JJJJJ-, .(JJJJ,.JJJJJJJ,             .p TMR#(HHMt
+     .TMNkf` (#|                TMHM"7MHM JHHB<TMM#YHHN(MH#"W#@,WHM#YHM)             +Mp  (NHMB'
+         (r .MHb                 HH#  HHM JHH) .MM[ HHN(HH].JJJ (HMh./`              dHM, d^!
+    ...   j.JHHF             ... HH#  HHM JHH) .MM[ HHN(HH](HH# (HM@"=               dHHb,!
+    ,MHHNJ.SdHM\.,           dHN.HH#  HHMJjHH\ .MMn.HHN(MHm.JH#.(HMh.MM)          .H (MH@}..gMM#
+     .WHHHHeWM% J#[          .T"""9^  ?WMMMH" .T"""""9^ T"""""5,MMMMMMM\         .HM- (B$JHHHH@`
+       (YMMMNS  dHN.                                                             (HH[ .SHHHMB^
+              O.dHM) (.                                                       .x dHM:.f`??`
+               TJHM: d#m.                                                   .HM\ dM5(%
+        (MHHHHMHJhZ  -MHN,                                                 .MH#` .gB+.&gmmgJ.
+          7WMHHHHMY>  WHHb                                                 HHM%.JMQHHHHHM#"
+              `!`      TH#                                                .MMQd9!  ?""7!
+                ..+HHHMNgJe..                                           ..jMMmJ(..
+               ,HMHHHHHM@`   ?77                                    ."7!   ?MHHHHHMN,
+                    ``                                                        _?THY"!
+*/

@@ -1,0 +1,93 @@
+#include<bits/stdc++.h>
+using namespace std;
+//#include<atcoder/all>
+//using namespace atcoder;
+using ll = long long;
+int spiral[1020][1020];
+int isprime[1010101];
+
+void init(){
+	int vi = 0;
+	int dx[] = {0,-1,0,1},dy[] = {1,0,-1,0};
+	int x = 1010/2,y = 1010/2;
+	int cur = 1;
+	while(1){
+		if(x<0||x>=1010||y<0||y>=1010){
+			break;
+		}
+		spiral[x][y] = cur++;
+		int zerocnt =0 ;
+		for(int i = 0;i<4;i++){
+			if(spiral[x+dx[i]][y+dy[i]]==0)zerocnt++;
+		}
+		if(zerocnt==3){
+			(vi+=1)%=4;
+		}
+		x += dx[vi];
+		y += dy[vi];
+	}
+	for(int i = 2;i<1010101;i++){
+		if(isprime[i]==0){
+			for(int j = i*2;j<1010101;j+=i){
+				isprime[j] = 1;
+			}
+		}
+	}
+	isprime[0] = isprime[1] = 1;
+	for(int i = 0;i<1010101;i++)isprime[i] = !isprime[i];
+}
+
+int n,m;
+pair<int,int> memo[1010][1010];
+
+pair<int,int> dfs(int x,int y){
+	if(memo[x][y].first!=-1)return memo[x][y];
+	pair<int,int> res = {};
+	if(spiral[x+1][y-1]<=n){
+		res = max(dfs(x+1,y-1),res);
+	}
+	if(spiral[x+1][y  ]<=n){
+		res = max(dfs(x+1,y  ),res);
+	}
+	if(spiral[x+1][y+1]<=n){
+		res = max(dfs(x+1,y+1),res);
+	}
+	if(isprime[spiral[x][y]]){
+		if(res.second==0){
+			res.second = spiral[x][y];
+		}
+		res.first++;
+	}
+	return memo[x][y] = res;
+}
+
+void solve(){
+	int sx,sy;
+	for(int i = 0;i<1020;i++){
+		for(int j = 0;j<1020;j++){
+			if(spiral[i][j]==m){
+				sx = i,sy = j;
+				break;
+			}
+		}
+	}
+	for(int i = 0;i<1010;i++){
+		for(int j = 0;j<1010;j++){
+			memo[i][j] =pair<int,int>(-1,-1);
+		}
+	}
+	auto ans = dfs(sx,sy);
+	cout<<ans.first<<' '<<ans.second<<endl;
+}
+
+signed main(){
+	init();
+	cin.tie(nullptr);
+	ios::sync_with_stdio(false);
+	while(1){
+		cin >> n >> m;
+		if(n==0)break;
+		solve();
+	}
+}
+

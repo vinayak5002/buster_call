@@ -1,0 +1,111 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    while(true){
+        int64_t res = INT64_MAX;
+        int64_t N, K, S; cin >> N >> K >> S;
+        if(N == 0 and K == 0 and S == 0){
+            return 0;
+        }
+        vector<tuple<int64_t,int64_t,int64_t>> pos(N);
+        for(int64_t i = 0; i < N; i++){
+            int64_t x, y, z; cin >> x >> y >> z;
+            pos[i] = {x, y, z};
+        }
+        if(K == 1){
+            cout << S * S * 6 << '\n';
+            continue;
+        }
+        if(N == 1){
+            cout << -1 << '\n';
+            continue;
+        }
+        vector<vector<int64_t>> edge(N);
+        for(int64_t i = 0; i < N; i++){
+            for(int64_t j = i+1; j < N; j++){
+                auto [xi, yi, zi] = pos[i];
+                auto [xj, yj, zj] = pos[j];
+                if(S >= abs(xi - xj) and S >= abs(yi - yj) and S >= abs(zi - zj)){
+                    edge[i].push_back(j);
+                    edge[j].push_back(i);
+                }
+            }
+        }
+        vector<bool> was(N, false);
+        vector<vector<int64_t>> path;
+        vector<vector<int64_t>> cycle;
+        for(int64_t i = 0; i < N; i++){
+            if(edge[i].size() != 1) continue;
+            if(was[i]) continue;
+            was[i] = true;
+            vector<int64_t> p;
+            p.push_back(i);
+            int64_t vis = edge[i][0];
+            while(edge[vis].size() > 1){
+                was[vis] = true;
+                p.push_back(vis);
+                if(was[edge[vis][0]]) vis = edge[vis][1];
+                else vis = edge[vis][0];
+            }
+            was[vis] = true;
+            p.push_back(vis);
+            path.push_back(p);
+        }
+        for(int64_t i = 0; i < N; i++){
+            if(edge[i].size() == 0) continue;
+            if(was[i]) continue;
+            vector<int64_t> c;
+            int64_t vis = i;
+            while(not was[vis]){
+                was[vis] = true;
+                c.push_back(vis);
+                if(was[edge[vis][0]]) vis = edge[vis][1];
+                else vis = edge[vis][0];
+            }
+            cycle.push_back(c);
+        }
+        auto D = [&](int64_t i, int64_t j){
+            auto [xi, yi, zi] = pos[i];
+            auto [xj, yj, zj] = pos[j];
+            int64_t res = (abs(xj - xi) - S) * (abs(yj - yi) - S) * 2 + (abs(yj - yi) - S) * (abs(zj - zi) - S) * 2 + (abs(zj - zi) - S) * (abs(xj - xi) - S) * 2;
+            return res;
+        };
+        for(auto p : path){
+            if(p.size() < K) continue;
+            int64_t tmp = S * S * 6 * K;
+            for(int64_t i = 0; i < K-1; i++) tmp -= D(p[i], p[i+1]);
+            res = min(res, tmp);
+            for(int64_t i = K-1; i < (int64_t)p.size()-1; i++){
+                tmp += D(p[i-K+1], p[i-K+2]);
+                tmp -= D(p[i], p[i+1]);
+                res = min(res, tmp);
+            }
+        }
+        for(auto c : cycle){
+            if(c.size() < K) continue;
+            if(c.size() == K){
+                int64_t tk = S * S * 6 * K;
+                for(int64_t i = 0; i < K-1; i++) tk -= D(c[i], c[i+1]);
+                tk -= D(c[K-1], c[0]);
+                res = min(res, tk);
+                continue;
+            }
+            auto d = c;
+            for(auto e : c) d.push_back(e);
+            int64_t tmp = S * S * 6 * K;
+            for(int64_t i = 0; i < K-1; i++) tmp -= D(d[i], d[i+1]);
+            res = min(res, tmp);
+            for(int64_t i = K-1; i < (int64_t)d.size()-1; i++){
+                tmp += D(d[i-K+1], d[i-K+2]);
+                tmp -= D(d[i], d[i+1]);
+                res = min(res, tmp);
+            }
+        }
+        if(res == INT64_MAX){
+            cout << -1 << '\n';
+        }else{
+            cout << res << '\n';
+        }
+    }
+}

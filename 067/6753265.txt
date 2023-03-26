@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for(int i = 0; i < n; i++)
+#define rrep(i,a,b) for(int i = a; i < b; i++)
+#define all(A) (A).begin(),(A).end()
+#define MOD 1000000007
+#define grt greater<int>()
+#define mapf(M) for(auto& [k,v] : M)
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+typedef vector<vector<ll> > Graph;
+
+ll INF = 1<<29;
+int n;
+
+void warshall_floyd(Graph &D,int m){
+	rep(i,m+1){
+		rep(j,m+1){
+			rep(k,m+1){
+				D[j][k] = min(D[j][k],D[j][i]+D[i][k]);
+			}
+		}
+	}
+}
+
+int main() {
+	while(1){
+		cin >> n;
+		if(n == 0) return 0;
+		Graph D(n,vector<ll>(n,INF));
+		rep(i,n) D[i][i] = 0;
+
+		int m = 0;
+		rep(_,n){
+			int a,b,c; cin >> a >> b >> c;
+			D[a][b] = c; D[b][a] = c;
+			m = max({m,a,b});
+		}
+		warshall_floyd(D,m);
+
+		ll ans = 0,T = 1<<29;
+		rep(i,m+1){
+			int t = 0;
+			rep(j,m+1){
+				t += D[i][j];
+			}
+			if(T > t) T = t,ans = i;
+		}
+		cout << ans << " " << T << endl;
+	}
+}
+

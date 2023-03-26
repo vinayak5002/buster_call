@@ -1,0 +1,72 @@
+#include <iostream>
+using namespace std;
+
+#define INFTY  1000000001
+
+// from から to にコピーして、最後に無限大という番兵を付加
+void cp_infty(int *to, int *from, int n)
+{
+  for (int i = 0; i < n; i++)
+    to[i] = from[i];
+  to[n] = INFTY;
+}
+
+// 配列に改行を付加して印字
+void print_ln(int A[], int n)
+{
+  for (int i = 0; i < n - 1; i++) 
+    cout << A[i] << " ";
+  cout << A[n-1] << endl;
+}
+
+// A[0]<...<A[n1-1], A[n1]<...<A[n1+n2-1] を合併して昇順に並べる
+// 反転数を返す
+long merge(int A[], int n1, int n2)
+{
+  int A1[n1 + 1];    // 番兵用に +1
+  int A2[n2 + 1];
+  cp_infty(A1, A, n1);
+  cp_infty(A2, A + n1, n2);
+  long cnt = 0;
+  for (int i1 = 0, i2 = 0; i1 < n1 || i2 < n2; ) {
+    if (A1[i1] <= A2[i2]) {     // i2 == n2 のとき A2[i2] = INFTY
+      A[i1 + i2] = A1[i1];
+      i1++;
+    } else {
+      cnt += n1 - i1; 
+      A[i1 + i2] = A2[i2];
+      i2++;
+    }
+  }
+
+  return cnt;
+}
+
+// マージ・ソート。 反転数を返す。
+long mergeSort(int A[], int n)
+{
+  if (n == 1)
+    return 0;
+
+  int n1 = n/2;
+  int n2 = n - n1;
+  long cnt1 = mergeSort(A, n1);
+  long cnt2 = mergeSort(A + n1, n2);
+  long cnt3 = merge(A, n1, n2);
+
+  return cnt1 + cnt2 + cnt3;
+}
+
+int main()
+{
+  int n; 
+  cin >> n;
+  int A[n];
+  for (int i = 0; i < n; i++)
+    cin >> A[i];
+
+  long cnt = mergeSort(A, n);
+  cout << cnt << endl;
+  return 0;
+}
+

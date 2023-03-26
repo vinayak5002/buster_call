@@ -1,0 +1,86 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define ll long long
+unsigned long long mod_mul(unsigned long long a, unsigned long long b, unsigned long long M) {
+	long long ret = a * b - M * (unsigned long long)((long double)(a) * (long double)(b) / (long double)(M));
+	return ret + M * (ret < 0) - M * (ret >= (ll)M);
+}
+
+// const vector<unsigned int> numset = {2,7,61}; // < 4,759,123,141 ≒ 4×10^9
+// const vector<unsigned int> numset = {2,3,5,7,11,13,17}; // < 341,550,071,728,321 ≒　3*10^14
+const unsigned long long numset[] = {2, 325, 9375, 28178, 450775, 9780504, 1795265022ULL}; // 2^64までいける
+// long long mod_pow(long long x, long long k, long long mod){
+//     long long res = 1;
+//     while(k){
+//         if(k & 1) res = res * x % mod;
+//         x = x * x % mod;
+//         k >>= 1;
+//     }
+//     return res;
+// }
+// long long型の素数判定の場合
+unsigned long long mod_pow(unsigned long long x, unsigned long long k, unsigned long long mod){
+    unsigned long long res = 1;
+    while(k){
+        if(k & 1) res = mod_mul(res, x, mod);
+        x = mod_mul(x, x, mod);
+        k >>= 1;
+    }
+    return res;
+}
+// check if n is prime
+bool check(unsigned long long n){
+    if(n < 2 || ((n % 6 != 1) && (n % 6 != 5))) return (n == 2) || (n == 3);
+    unsigned long long d = n - 1, s = 0;
+    while(d % 2 == 0){
+        d /= 2;
+        s++;
+    }
+    for(unsigned long long a : numset){
+        if(a % n == 0) return true;
+        unsigned long long res = mod_pow(a, d, n);
+        if(res == 1) continue;
+        bool ok = true;
+        for(unsigned int r = 0; r < s; r++){
+            if(res == n-1){
+                ok = false;
+                break;
+            }
+            res = mod_mul(res, res, n);
+        }
+        if(ok) return false;
+    }
+    return true;
+}
+int main(){
+  while(true){
+    long long p;
+    cin >> p;
+    if(p == 0) break;
+    long long ans = p + 2;
+    for(long long p1 = 1; p1 * p1 <= p; p1++){
+      if(p%p1 != 0) continue;
+      ans = min(ans, p1 + p/p1 + 1);
+    }
+    vector<long long> v;
+    for(long long w = 1; w*w*w <= p; w++){
+      if(p%w != 0) continue;
+      v.emplace_back(w);
+    }
+    reverse(v.begin(), v.end());
+    int k = min((int)v.size(), 10);
+    for(int i = 0; i < k; i++){
+      long long w = v[i];
+      long long dh = p/w;
+      if(check(dh)) continue;
+      long long lim = (round)(sqrt(dh)) + 1;
+      for(long long d = lim; d >= 2; d--){
+        if(dh%d != 0) continue;
+        ans = min(ans, w + d + dh/d);
+        break;
+      }
+    }
+    cout << ans << endl;
+  }
+  return 0;
+}

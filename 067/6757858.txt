@@ -1,0 +1,91 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+typedef struct node{
+ int num;
+ struct node *left;
+ struct node *right;
+}node;
+
+
+node * makenode(int x){
+
+ node *new=malloc(sizeof(node));
+ new->right=NULL;
+ new->left=NULL;
+ new->num=x;
+
+return new;
+}
+
+
+int main(){
+ int n,i,x;
+ char com[13];
+ node *front=NULL;
+ node *rear=NULL;
+ node *new;
+ node **p;
+ node *q;
+
+ scanf("%d",&n);
+
+ for(i=0;i<n;i++){
+  scanf("%s",com);
+
+  if(com[0]=='i'){
+    scanf("%d",&x);
+    new=makenode(x);
+    new->right=front;
+    if(front!=NULL)front->left=new;
+    else rear=new;
+    front=new;
+  }
+
+  else if(strcmp(com,"deleteFirst")==0){
+    front=front->right;
+    if(front!=NULL){
+       free(front->left);
+       front->left=NULL;
+    }
+    else rear=NULL;
+  }
+
+  else if(strcmp(com,"deleteLast")==0){
+    rear=rear->left;
+    if(rear==NULL)front=NULL;
+    else {
+     free(rear->right);
+     rear->right=NULL;
+    }
+  }
+
+  else if(strcmp(com,"delete")==0){
+    scanf("%d",&x);
+    p=&front;
+    while((*p)!=NULL && (*p)->num != x)p=&((*p)->right);
+    if((*p)!=NULL){
+     if((*p)->right == NULL){
+        rear=rear->left;
+        free((*p));
+        (*p)=NULL;
+     }
+     else {
+        (*p)->right->left=(*p)->left;
+        (*p)=(*p)->right;
+     }
+    }
+  }
+
+ }
+
+ q=front;
+ while(q!=NULL){
+  if(q==rear)printf("%d\n",q->num);
+  else printf("%d ",q->num);
+  q=q->right;
+ }
+
+return 0;
+}

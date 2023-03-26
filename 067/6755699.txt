@@ -1,0 +1,55 @@
+// 20D8102006D 松波俊介
+// 幅優先探索
+
+#include <iostream>
+#include <vector>
+
+void input_vertices(std::vector< std::vector<int> > &v){
+    int n;
+    std::cin >> n;
+
+    v.push_back(std::vector<int>());
+    v[0].push_back(n);
+
+    for(int i=1; i<=n; i++){
+        int u, k;
+        std::cin >> u >> k;
+        v.push_back(std::vector<int>());
+        v[i].push_back(k);
+        for(int j=0; j<k; j++){
+            int v_i;
+            std::cin >> v_i;
+            v[i].push_back(v_i);
+        }
+    }
+}
+
+void bfs(std::vector< std::vector<int> > v, std::vector<int> &d, int start){
+    std::vector<int> queue(1, start);
+    d[start] = 0;
+    while(!queue.empty()){
+        int top = queue.front();
+        bool flag = true;
+        for(int i=1; i<=v[top][0]; i++){
+            if(d[v[top][i]]>=0){
+                continue;
+            }else{
+                queue.push_back(v[top][i]);
+                d[v[top][i]] = d[top]+1;
+                flag = false;
+            }
+        }
+        queue.erase(queue.begin());
+    }
+}
+
+int main(){
+    std::vector< std::vector<int> > v;
+    input_vertices(v);
+    std::vector<int> d(v.size(), -1);
+    int start = 1;
+    bfs(v,d,start);
+    for(int i=1; i<v.size(); i++){
+        std::cout << i << " " << d[i] << "\n";
+    }
+}

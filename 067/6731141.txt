@@ -1,0 +1,315 @@
+#include<bits/stdc++.h>
+#define rep(i,a,...) for(int i = (a)*(strlen(#__VA_ARGS__)!=0);i<(int)(strlen(#__VA_ARGS__)?__VA_ARGS__:(a));++i)
+#define per(i,a,...) for(int i = (strlen(#__VA_ARGS__)?__VA_ARGS__:(a))-1;i>=(int)(strlen(#__VA_ARGS__)?(a):0);--i)
+#define foreach(i, n) for(auto &i:(n))
+#define all(x) (x).begin(), (x).end()
+#define bit(x) (1ll << (x))
+#define lambda(RES_TYPE, ...) (function<RES_TYPE(__VA_ARGS__)>)[&](__VA_ARGS__) -> RES_TYPE
+#define method(FUNC_NAME, RES_TYPE, ...) function<RES_TYPE(__VA_ARGS__)> FUNC_NAME = lambda(RES_TYPE, __VA_ARGS__)
+using namespace std;
+using ll = long long;
+using pii = pair<int,int>;
+using pll = pair<ll,ll>;
+//const ll MOD = (ll)1e9+7;
+const ll MOD = 998244353;
+const int INF = (ll)1e9+7;
+const ll INFLL = (ll)1e18;
+template<class t>
+using vvector = vector<vector<t>>;
+template<class t>
+using vvvector = vector<vector<vector<t>>>;
+template<class t>
+using priority_queuer = priority_queue<t, vector<t>, greater<t>>;
+template<class t, class u> bool chmax(t &a, u b){if(a<b){a=b;return true;}return false;}
+template<class t, class u> bool chmin(t &a, u b){if(a>b){a=b;return true;}return false;}
+#ifdef DEBUG
+#define debug(x) cout<<"LINE "<<__LINE__<<": "<<#x<<" = "<<x<<endl;
+#else
+#define debug(x) (void)0
+#endif
+
+namespace templates{
+    ll modpow(ll x, ll b,ll mod=MOD){
+        ll res = 1;
+        while(b){
+            if(b&1)res = res * x % mod;
+            x = x * x % mod;
+            b>>=1;
+        }
+        return res;
+    }
+
+    ll modinv(ll x){
+        return modpow(x, MOD-2);
+    }
+
+    bool was_output = false;
+
+    void print();
+    template <class t> void print(const vector<t> &);
+    template <class t, class u> void print(const pair<t, u> &);
+    template <class t> void print(const t&);
+    template <class Head, class... Tail> void print(const Head&, const Tail&...);
+
+    template <class t> void println(const vector<vector<t>>&);
+    template <class t> void println(const vector<t>&);
+    template <class t> void println(const t&);
+    template <class Head, class... Tail> void println(const Head&, const Tail&...);
+    void println();
+    void newline();
+
+    void print(){
+        return;
+    }
+
+    template <class t>
+    void print(const vector<t>&x){
+        for(const t&i:x)print(i);
+    }
+    template <class t, class u>
+    void print(const pair<t,u>&p){
+        print(p.first);
+        print(p.second);
+    }
+    template <class t>
+    void print(const t&x){
+        if(was_output)cout<<" ";
+        cout<<x;
+        was_output = true;
+    }
+    template <class Head, class... Tail>
+    void print(const Head&head,const Tail&...tail){
+        print(head);
+        print(tail...);
+    }
+
+    template<class t>
+    void println(const vector<vector<t>>&x){
+        for(vector<t> i:x)println(i);
+    }
+    template<class t>
+    void println(const vector<t>&x){
+        for(const t&i:x)print(i);
+        println();
+    }
+    template <class t>
+    void println(const t&x){
+        print(x);
+        println();
+    }
+    void println(){
+        if(was_output){
+            cout << endl;
+            was_output = false;
+        }
+    }
+    template <class Head, class... Tail>
+    void println(const Head&head,const Tail&...tail){
+        print(head);
+        println(tail...);
+    }
+
+    void newline(){
+        was_output = true;
+        println();
+    }
+
+    template<class t>
+    istream& operator>>(istream&is, vector<t>&x){
+        for(auto &i:x)is >> i;
+        return is;
+    }
+
+    template<class t, class u>
+    istream& operator>>(istream&is, pair<t, u>&x){
+        is >> x.first >> x.second;
+        return is;
+    }
+
+    template<class t>
+    ostream& operator<<(ostream&os, vector<t> &v){
+        os << "{";
+        for(t &i:v){
+            os << i << ", ";
+        }
+        os << "}";
+        return os;
+    }
+
+    template<class t = long long>
+    t in(){
+        t res; cin >> res; return res;
+    }
+
+    template<class t>
+    vector<t> sorted(vector<t> line,function<bool(t,t)> comp=[](t a,t b){return a<b;}){
+        sort(line.begin(),line.end(),comp);
+        return line;
+    }
+
+    template<class t>
+    vector<t> reversed(vector<t> line){
+        reverse(line.begin(),line.end());
+        return line;
+    }
+    string reversed(string str){
+        reverse(str.begin(),str.end());
+        return str;
+    }
+
+    long long gcd(long long a,long long b){
+        while(b){
+            a %= b;
+            swap(a,b);
+        }
+        return a;
+    }
+
+    long long lcm(long long a,long long b){
+        return a / gcd(a,b) * b;
+    }
+
+    class output_initializer{
+    public:
+        output_initializer(){
+            ios::sync_with_stdio(false);
+            cin.tie(nullptr);
+            cout << setprecision(20);
+        }
+    };output_initializer OUTPUT_INITIALIZER_INSTANCE = output_initializer();
+}
+
+using namespace templates;
+
+
+template<class flow=long long>
+class dinic{
+public:
+    struct edge{
+        int to;
+        flow cap;
+        int rev;
+        edge(){}
+        edge(int to, long long cap, int rev):to(to), cap(cap), rev(rev){}
+    };
+    int n;
+    vector<vector<edge>> E;
+    vector<int> level;
+    vector<size_t> itr;
+    flow FLOW_INF;
+    const int LEVEL_INF = 1e9;
+
+    dinic(int N, flow inf = numeric_limits<flow>::max() / 2):n(N), E(N), level(N), itr(N), FLOW_INF(inf){}
+
+    void add_edge(int from, int to, flow cap, flow cap2=0){
+        E[from].emplace_back(to, cap, E[to].size());
+        E[to].emplace_back(from, cap2, E[from].size()-1);
+    }
+
+    void bfs(int s){
+        queue<int> que;
+        level[s] = 0;
+        que.push(s);
+        while(que.size()){
+            int d = que.front();
+            que.pop();
+            for(size_t i=0;i<E[d].size();++i){
+                if(E[d][i].cap > 0 and level[d] + 1 < level[E[d][i].to]){
+                    level[E[d][i].to] = level[d] + 1;
+                    que.push(E[d][i].to);
+                }
+            }
+        }
+    }
+
+    flow dfs(int p, int to, flow f){
+        if(p==to)return f;
+        for(size_t i=itr[p];i<E[p].size();++i){
+            itr[p] = i;
+            edge &e = E[p][i];
+            if(e.cap > 0 && level[p] < level[e.to]){
+                flow d = dfs(e.to, to, min(f, e.cap));
+                if(d){
+                    e.cap -= d;
+                    E[e.to][e.rev].cap += d;
+                    return d;
+                }
+            }
+        }
+        return 0;
+    }
+
+    flow max_flow(int s, int t){
+        flow res = 0;
+        while(true){
+            fill(level.begin(), level.end(), LEVEL_INF);
+            bfs(s);
+            if(level[t]==LEVEL_INF)return res;
+            fill(itr.begin(), itr.end(), 0);
+            flow f = dfs(s, t, FLOW_INF);
+            while(f){
+                res += f;
+                f = dfs(s, t, FLOW_INF);
+            }
+        }
+    }
+};
+
+pii func(int n,int m){
+    vector<pii> edges(m);
+    vector<int> cnts(n,0);
+    foreach(i,edges)i=in<pii>();
+    foreach(i,edges)--i.first;
+    foreach(i,edges)--i.second;
+    foreach(i,edges)++cnts[i.first];
+    foreach(i,edges)++cnts[i.second];
+    per(bottom,n+1){
+        bool flag = false;
+        rep(i,n)if(cnts[i] < bottom)flag = true;
+        if(flag)continue;
+        int start = 0;
+        int end = 1;
+        method(starts,int,int v){
+            return 2 + v;
+        };
+        method(edge,int,int v){
+            return starts(n) + v;
+        };
+        method(ends,int,int v){
+            return edge(m) + v;
+        };
+        dinic<int> di(ends(n)+10);
+        rep(i,n){
+            di.add_edge(start, starts(i), cnts[i] - bottom);
+            di.add_edge(ends(i),end,bottom);
+        }
+        rep(i,m){
+            di.add_edge(starts(edges[i].first),edge(i),1);
+            di.add_edge(starts(edges[i].second),edge(i),1);
+            di.add_edge(edge(i),ends(edges[i].first),1);
+            di.add_edge(edge(i),ends(edges[i].second),1);
+        }
+        int used = 0;
+        rep(top,bottom,n+1){
+            used += di.max_flow(start,end);
+            if(used >= m)return pii(bottom,top);
+            rep(i,n){
+                ++di.E[ends(i)][0].cap;
+            }
+        }
+    }
+    return pii(-1,-1);
+}
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    while(true){
+        int n = in();
+        int m=in();
+        if(n==0)break;
+        println(func(n,m));
+    }
+    return 0;
+}
+

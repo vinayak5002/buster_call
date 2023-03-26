@@ -1,0 +1,21 @@
+require 'tsort'
+class Hash
+  include TSort
+  def tsort_each_child(n)
+    self[n].each {|i| yield i} if self[n]
+  end
+  alias tsort_each_node each_key
+end
+v,e=gets.split.map(&:to_i)
+g=Hash.new
+e.times do
+  s,t=gets.split.map(&:to_i)
+  g[s]=[] if !g[s]
+  g[s] << t
+end
+s=g.strongly_connected_components
+gets.to_i.times do
+  u,v=gets.split.map(&:to_i)
+  puts s.find {|i| i.include?(u) && i.include?(v)} ? 1 : 0
+end
+

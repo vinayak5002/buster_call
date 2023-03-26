@@ -1,0 +1,57 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for (int i=0;i<(int)(n);i++)
+#define all(v) v.begin(),v.end()
+using ll=long long;
+using pll=pair<ll,ll>;
+template<class T> void chmin(T &a,T b){
+  if(a>b){
+    a=b;
+  }
+}
+template<class T> void chmax(T &a,T b){
+  if(a<b){
+    a=b;
+  }
+}
+int main(){
+  vector<ll> w,w2;
+  ll c=1,x=0;
+  while(x<=1e6){
+    x=c*(c+1)*(c+2)/6;
+    w.push_back(x);
+    if(x%2==1) w2.push_back(x);
+    c++;
+  }
+  while(true){
+    ll n;
+    cin >> n;
+    if(n==0) return 0;
+    vector<vector<ll>> dp(w.size()+1,vector<ll>(n+1,(1ll<<60)));
+    dp[0][0]=0;
+    for(int i=1;i<=w.size();i++){
+      rep(j,n+1){
+        chmin(dp[i][j],dp[i-1][j]);
+        if(0<=j-w[i-1]) chmin(dp[i][j],dp[i][j-w[i-1]]+1);
+      }
+    }
+    ll ans=(1ll<<60);
+    rep(i,w.size()+1){
+      chmin(ans,dp[i][n]);
+    }
+    cout << ans << " ";
+    vector<vector<ll>> dp2(w2.size()+1,vector<ll>(n+1,(1ll<<60)));
+    dp2[0][0]=0;
+    for(int i=1;i<=w2.size();i++){
+      rep(j,n+1){
+        chmin(dp2[i][j],dp2[i-1][j]);
+        if(0<=j-w2[i-1]) chmin(dp2[i][j],dp2[i][j-w2[i-1]]+1);
+      }
+    }
+    ll ans2=(1ll<<60);
+    rep(i,w2.size()+1){
+      chmin(ans2,dp2[i][n]);
+    }
+    cout << ans2 << endl;
+  }
+}

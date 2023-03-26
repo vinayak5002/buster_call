@@ -1,0 +1,66 @@
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <numeric>
+#include <iomanip>
+#include <string>
+#include <regex>
+#include <array>
+#include <vector>
+#include <map>
+#include <set>
+#include <bitset>
+#include <queue>
+using namespace std;
+#define rep(x,to) for(int x=0;x<to;++x)
+#define rep2(x,from,to) for(int x=from;x<=to;++x)
+typedef long long ll;
+typedef unsigned long long ull;
+
+int D[4][2] = {{-1,0},{0,1},{1,0},{0,-1}};
+int main(void) {
+    int W, H, k;
+    while(true) {
+        cin >> W >> H;
+        if(W==0 && H==0) break;
+        vector<vector<int>> Wall(2*H-1);
+        rep(i,2*H-1) {
+            rep(j,W-1) {
+                cin >> k;
+                Wall[i].push_back(k);
+            }
+            if(i%2==1) {
+                cin >> k;
+                Wall[i].push_back(k);
+            }
+        }
+        
+        queue<array<int,3>> que;
+        que.push({0,0,1});
+        vector<vector<bool>> seen(H, vector<bool>(W, false));
+        seen[0][0] = true;
+        bool goal = false;
+        while(!que.empty()) {
+            auto& [x,y,c] = que.front();
+            que.pop();
+            if(x == W-1 && y == H-1) {
+                cout << c << endl;
+                goal = true;
+                break;
+            }
+            for(auto& [dx, dy]: D) {
+                int xx = x + dx;
+                int yy = y + dy;
+                
+                if(xx >= 0 && xx < W && yy >= 0 && yy < H) {
+                    if((dy==0 && Wall[y*2][min(x,xx)] == 0) || (dx==0 && Wall[min(yy,y)*2+1][x]==0)) {
+                        if(seen[yy][xx]) continue;
+                        seen[yy][xx] = true;
+                        que.push({xx, yy, c+1});
+                    }
+                }
+            }
+        }
+        if(!goal) cout << 0 << endl;
+    }
+}

@@ -1,0 +1,110 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return true; } return false; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return true; } return false; }
+#define all(x) (x).begin(),(x).end()
+#define fi first
+#define se second
+#define mp make_pair
+#define si(x) int(x.size())
+const int mod=998244353,MAX=300005;
+const ll INF=1LL<<62;
+
+bool dp[16][64][4][16][64][4][2];
+
+vector<int> dh={0,1,0,-1},dw={1,0,-1,0};
+
+int main(){
+    
+    std::ifstream in("text.txt");
+    std::cin.rdbuf(in.rdbuf());
+    cin.tie(0);
+    ios::sync_with_stdio(false);
+    
+    while(1){
+        int H,W;cin>>W>>H;
+        if(H==0) break;
+        vector<string> S(H);
+        int sh=-1,sw=-1,sd=-1,gh=-1,gw=-1,gd=-1;
+        for(int i=0;i<H;i++){
+            cin>>S[i];
+            for(int j=0;j<W;j++){
+                if(S[i][j]=='K'){
+                    sh=i;
+                    sw=j;
+                    for(int k=0;k<4;k++){
+                        if(S[i+dh[k]][j+dw[k]]!='#') sd=k;
+                    }
+                }
+                if(S[i][j]=='M'){
+                    gh=i;
+                    gw=j;
+                    for(int k=0;k<4;k++){
+                        if(S[i+dh[k]][j+dw[k]]!='#') gd=k;
+                    }
+                }
+            }
+        }
+        memset(dp,0,sizeof(dp));
+        
+        //cout<<sh<<" "<<sw<<" "<<sd<<" "<<gh<<" "<<gw<<" "<<gd<<endl;
+        
+        queue<tuple<int,int,int,int,int,int,int>> Q;
+        for(int k=0;k<4;k++){
+            if(k!=sd){
+                dp[sh][sw][sd][sh][sw][k][0]=true;
+                Q.push({sh,sw,sd,sh,sw,k,0});
+            }
+        }
+        while(!Q.empty()){
+            auto [h1,w1,d1,h2,w2,d2,f]=Q.front();Q.pop();
+            if(f==0){
+                int toh1=h1,tow1=w1;
+                while(S[toh1+dh[d1]][tow1+dw[d1]]!='#'){
+                    toh1+=dh[d1];
+                    tow1+=dw[d1];
+                }
+                int toh2=h2,tow2=w2;
+                while(1){
+                    if(!dp[toh1][tow1][d1][toh2][tow2][d2][1]){
+                        dp[toh1][tow1][d1][toh2][tow2][d2][1]=true;
+                        Q.push({toh1,tow1,d1,toh2,tow2,d2,1});
+                    }
+                    toh2-=dh[d2];
+                    tow2-=dw[d2];
+                    
+                    if(S[toh2][tow2]=='#') break;
+                }
+            }else{
+                for(int k=1;k<4;k+=2){
+                    int tod1=(d1+k)%4,tod2=(d2+k)%4;
+                    if(S[h2+dh[tod2]][w2+dw[tod2]]!='#') continue;
+                    if(!dp[h1][w1][tod1][h2][w2][tod2][0]){
+                        dp[h1][w1][tod1][h2][w2][tod2][0]=true;
+                        Q.push({h1,w1,tod1,h2,w2,tod2,0});
+                    }
+                }
+            }
+        }
+        
+        bool f=false,g=false;
+        
+        for(int k=0;k<4;k++){
+            if(gd==k) continue;
+            f|=dp[gh][gw][k][gh][gw][gd][1];
+            for(int h=0;h<H;h++){
+                for(int w=0;w<W;w++){
+                    for(int d=0;d<4;d++){
+                        g|=dp[gh][gw][k][h][w][d][1];
+                    }
+                }
+            }
+        }
+        
+        if(f) cout<<"He can accomplish his mission.\n";
+        else if(g) cout<<"He cannot return to the kitchen.\n";
+        else cout<<"He cannot bring tea to his master.\n";
+    }
+}
+

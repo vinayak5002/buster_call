@@ -1,0 +1,92 @@
+#include<bits/stdc++.h>
+// #include<atcoder/modint>
+using namespace std;
+// using namespace atcoder;
+double eps = 1e-8;
+bool ok;
+int h, w;
+char P[66][11];
+bool used[66][11];
+int di[4] = {0, 0, 1, -1};
+int dj[4] = {1, -1, 0, 0};
+
+pair<double, double> dfs(int i, int j){
+	pair<double, double> ret = {0, 0};
+	stack<pair<int, int>> st;
+	vector<pair<int, int>> block;
+	block.push_back({i, j});
+	st.push({i, j});
+	used[i][j] = true;
+	while(!st.empty()){
+		int ii = st.top().first;
+		int jj = st.top().second;
+		st.pop();
+		for(int k = 0; k < 4; k++){
+			int ni = ii + di[k];
+			int nj = jj + dj[k];
+			if(P[ni][nj] != P[i][j]) continue;
+			if(used[ni][nj]) continue;
+			used[ni][nj] = true;
+			st.push({ni, nj});
+			block.push_back({ni, nj});
+		}
+	}
+	int ll = 100;
+	int rr = -1;
+	for(auto &[ii, jj]: block){
+		ret.first++;
+		ret.second += double(jj) + 0.5;
+		if(P[ii - 1][jj] != '.' && !used[ii - 1][jj]){
+			auto tmp = dfs(ii - 1, jj);
+			ret.first += tmp.first;
+			ret.second += tmp.second;
+		}
+		if(P[ii + 1][jj] != '.' && P[ii + 1][jj] != P[ii][jj]){
+			ll = min(ll, jj);
+			rr = max(rr, jj + 1);
+		}
+	}
+	double g = ret.second / ret.first;
+	
+	if(g <= ll + eps || rr - eps <= g) ok = false;
+	return ret;
+}
+
+void solve(){
+	while(1){
+		cin >> w >> h;
+		if(w == 0) return;
+		ok = true;
+		for(int j = 1; j <= w; j++){
+			P[0][j] = '.';
+		}
+		for(int i = 1; i <= h; i++){
+			for(int j = 1; j <= w; j++){
+				cin >> P[i][j];
+				used[i][j] = false;
+			}
+		}
+		for(int j = 1; j <= w; j++){
+			P[h + 1][j] = '0';
+		}
+		for(int j = 1; j <= w; j++){
+			if(P[h][j] != '.'){
+				dfs(h, j);
+				break;
+			}
+		}
+
+		if(ok) cout << "STABLE\n";
+		else cout << "UNSTABLE\n";
+	}
+}
+
+int main(){
+    cin.tie(0)->sync_with_stdio(0);
+    int t;
+    t = 1;
+    // cin >> t;
+    while(t--) solve();
+}
+    
+    

@@ -1,0 +1,181 @@
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <iomanip>
+#include <iostream>
+#include <utility>
+#include <vector>
+
+namespace luz {
+
+  using isize = std::ptrdiff_t;
+  using usize = std::size_t;
+
+  using i32 = std::int32_t;
+  using i64 = std::int64_t;
+  using u32 = std::uint32_t;
+  using u64 = std::uint64_t;
+  
+} // namespace luz
+
+namespace luz {
+
+  struct rep {
+    struct itr {
+      usize i;
+      constexpr itr(const usize i) noexcept : i(i) {}
+      void operator++() noexcept { ++i; }
+      constexpr usize operator*() const noexcept { return i; }
+      constexpr bool operator!=(const itr x) const noexcept { return i != x.i; }
+    };
+    const itr f, l;
+    constexpr rep(const usize f, const usize l) noexcept
+      : f(std::min(f, l)), l(l) {}
+    constexpr auto begin() const noexcept { return f; }
+    constexpr auto end() const noexcept { return l; }
+  };
+
+  struct rrep {
+    struct itr {
+      usize i;
+      constexpr itr(const usize i) noexcept : i(i) {}
+      void operator++() noexcept { --i; }
+      constexpr usize operator*() const noexcept { return i; }
+      constexpr bool operator!=(const itr x) const noexcept { return i != x.i; }
+    };
+    const itr f, l;
+    constexpr rrep(const usize f, const usize l) noexcept
+      : f(l - 1), l(std::min(f, l) - 1) {}
+    constexpr auto begin() const noexcept { return f; }
+    constexpr auto end() const noexcept { return l; }
+  };
+
+} // namespace luz
+
+namespace luz {
+
+  void set_fast_ios() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+  }
+
+} // namespace luz
+
+namespace luz {
+
+  void io_set(usize precision) {
+    std::cout << std::fixed << std::setprecision(precision);
+    std::cerr << std::fixed << std::setprecision(precision);
+  }
+
+} // namespace luz
+
+namespace luz {
+
+  template< typename T = i64 > T input() {
+    T tmp;
+    std::cin >> tmp;
+    return tmp;
+  }
+
+} // namespace luz
+
+namespace luz {
+
+  template< typename T >
+  std::ostream &operator<<(std::ostream &os, std::vector< T > &vs) {
+    for (usize i: rep(0, vs.size())) {
+      os << vs[i] << (i + 1 != vs.size() ? " " : "");
+    }
+    return os;
+  }
+
+  template< typename T >
+  std::istream &operator>>(std::istream &is, std::vector< T > &vs) {
+    for (T &v: vs) {
+      is >> v;
+    }
+    return is;
+  }
+
+} // namespace luz
+
+namespace luz {
+
+  template< typename T1, typename T2 >
+  std::ostream &operator<<(std::ostream &os, std::pair < T1, T2 > &p) {
+    os << "(" << p.first << ", " << p.second << ")";
+    return os;
+  }
+
+  template< typename T1, typename T2 >
+  std::istream &operator>>(std::istream &is, std::pair< T1, T2 > &p) {
+    is >> p.first >> p.second;
+    return is;
+  }
+
+} // namespace luz
+
+namespace luz {
+
+  template <typename T>
+  std::vector<T> make_vector(usize a, T b) {
+    return std::vector<T>(a, b);
+  }
+
+  template <typename... Ts>
+  auto make_vector(usize a, Ts... ts) {
+    return std::vector<decltype(make_vector(ts...))>(a, make_vector(ts...));
+  }
+
+} // namespace luz
+
+namespace luz {
+
+  template <typename T1, typename T2>
+  inline bool chmax(T1 &a, T2 b) {
+    return a < b and (a = b, true);
+  }
+
+  template <typename T1, typename T2>
+  inline bool chmin(T1 &a, T2 b) {
+    return a > b and (a = b, true);
+  }
+
+} // namespace luz
+
+#include <numeric>
+
+namespace luz {
+  using namespace std;
+
+  void main_() {
+    int n = input(), m = input(), a = input();
+    vector< pair<int, pair<int, int> > > ls(m);
+    for (auto &[h, p]: ls) {
+      cin >> h >> p;
+    }
+
+    sort(ls.begin(), ls.end());
+
+    vector< int > uku(n);
+    iota(uku.begin(), uku.end(), 1);
+
+    for (auto &[_, p]: ls) {
+      auto [u, v] = p;
+      swap(uku[u - 1], uku[v - 1]);
+    }
+
+    cout << uku[a - 1] << endl;
+  }
+
+} // namespace luz
+
+int main() {
+  luz::set_fast_ios();
+  luz::io_set(15);
+
+  luz::main_();
+}
+

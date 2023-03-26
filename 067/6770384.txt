@@ -1,0 +1,38 @@
+from collections import deque
+N = int(input())
+graph = [deque([]) for _ in range(N+1)]
+for _ in range(N):
+    u, k, *v = list(map(int, input().split()))
+    v.sort() #頂点番号小さい順
+    for i in v:
+        graph[u].append(i)
+
+stack = []
+time = 0
+d = [-1]*(N+1) #発見時刻
+f = [-1]*(N+1) #完了時刻
+
+def dfs(v):
+    global time, d, f
+    time += 1
+    stack.append(v) #vをスタックに挿入
+    d[v] = time
+    while stack: #スタックが非空
+        u = stack[-1] #スタックの最後尾の頂点をuとする
+        if graph[u]:
+            u_ = graph[u].popleft() #u'
+            if d[u_] == -1: #u'が未探索なら
+                time += 1
+                d[u_] = time
+                stack.append(u_) #スタックに挿入
+        else:
+            time += 1
+            f[u] = time
+            stack.pop() #uをスタックから取り出し削除
+
+for j in range(N):
+    if d[j+1] == -1:
+        dfs(j+1)
+
+for j in range(N):
+    print(j+1, d[j+1], f[j+1])

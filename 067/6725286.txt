@@ -1,0 +1,176 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef pair<ll, ll> pint;
+#define rep(i, n) for(ll i = 0; i < (ll)n; i++)
+#define ALL(v) (v).begin(), (v).end()
+
+ll dx[4] = {-1, 1, 0, 0};
+ll dy[4] = {0, 0, -1, 1};
+
+map<char, ll> mp;
+
+struct four {
+  ll x, y, dir, right;
+};
+
+int main() {
+  ll N, M; cin >> N >> M;
+  // LRUD
+  mp['<'] = 0;
+  mp['>'] = 1;
+  mp['^'] = 2;
+  mp['v'] = 3;
+  vector<string> board(N);
+  rep(i, N) cin >> board[i];
+  set<pint> dp[60][60][4][4];
+  ll sx, sy, gx, gy;
+  rep(i, N) rep(j, M) {
+    if(board[i][j] == '<' || board[i][j] == '>' || board[i][j] == '^' || board[i][j] == 'v') sx = j, sy = i;
+    if(board[i][j] == 'G') gx = j, gy = i;
+  }
+  
+  dp[sy][sx][mp[board[sy][sx]]][2].insert(pint(sx, sy));
+  queue<four> que;
+  que.push(four{sx, sy, mp[board[sy][sx], 2});
+  while(!que.empty()) {
+    auto v = que.front(); que.pop();
+    if(v.dir == 0) {
+      if(v.right == 0) {
+        
+      }else if(v.right == 1) {
+      }else if(v.right == 2) {
+      }else if(v.right == 3) {
+      }
+    }else if(v.dir == 1) {
+      if(v.right == 0) {
+      }else if(v.right == 1) {
+      }else if(v.right == 2) {
+      }else if(v.right == 3) {
+      }
+    }else if(v.dir == 2) {
+      if(v.right == 0) {
+        //手の移動
+        if(board[v.y-1][v.x] == '#' && board[v.y-1][v.x+1] == '#') {
+          if(dp[v.y][v.x][v.dir][1].size() == 0) {
+            que.push(four{v.x, v.y, v.dir, 1});
+            dp[v.y][v.x][v.dir][1] = dp[v.y][v.x][v.dir][v.right];
+          }
+          
+        }
+        
+        //移動
+        //できません
+        
+        //左に90
+        if(dp[v.y][v.x][0][2].size() == 0) {
+          que.push(four{v.x, v.y, 0, 2});
+          dp[v.y][v.x][0][2] = dp[v.y][v.x][v.dir][v.right];
+        }
+        
+        
+        
+        
+      }else if(v.right == 1) {
+        //手の移動
+        if(board[v.y-1][v.x+1] == '#' && board[v.y-1][v.x] == '#') {
+          if(dp[v.y][v.x][v.dir][0].size() == 0) {
+            que.push(four{v.x, v.y, v.dir, 0});
+            dp[v.y][v.x][v.dir][0] = dp[v.sy][v.sx][v.dir][v.right];
+          }
+        }
+        if(board[v.y-1][v.x+1] == '#' && board[v.y][v.x+1] == '#') {
+          if(dp[v.y][v.x][v.dir][2].size() == 0) {
+            que.push(four{v.x, v.y, v.dir, 2});
+            dp[v.y][v.x][v.dir][2] = dp[v.sy][v.sx][v.dir][v.right];
+          }
+        }
+        
+        //移動
+        if(board[v.y-1][v.x] != '#') {
+          if(dp[v.y-1][v.x][v.dir][2].size() == 0) {
+            que.push(v.x, v.y-1, v.dir, 2);
+            dp[v.y-1][v.x][v.dir][2] = dp[v.y][v.x][v.dir][v.right]; 
+          }
+        }
+        
+        //左に90
+        if(dp[v.y][v.x][0][3].size() == 0) {
+          que.push(v.x, v.y, 0, 3);
+          dp[v.y][v.x][0][3] = dp[v.y][v.x][v.dir][v.right];
+        }
+        //右に90
+        //できません
+        
+      }else if(v.right == 2) { //一般的
+        //手の移動
+        if(board[v.y][v.x+1] == '#' && board[v.y+1][v.x+1] == '#') {
+          if(dp[v.y][v.x][v.dir][3].size() == 0) {
+            que.push(v.x, v.y, v.dir, 3);
+            dp[v.y][v.x][v.dir][3] = dp[v.sy][v.sx][v.dir][v.right];
+          }
+        }
+        if(board[v.y][v.x+1] == '#' && board[v.y-1][v.x+1] == '#') {
+          if(dp[v.y][v.x][v.dir][1].size() == 0) {
+            que.push(v.x, v.y, v.dir, 1);
+            dp[v.y][v.x][v.dir][1] = dp[v.sy][v.sx][v.dir][v.right];
+          }
+        }
+        
+        //移動
+        if(board[v.y-1][v.x] != '#') {
+          if(dp[v.y-1][v.x][v.dir][3].size() == 0) {
+            que.push(v.x, v.y-1, v.dir, 3);
+            dp[v.y-1][v.x][v.dir][3] = dp[v.y][v.x][v.dir][v.right]; 
+          }
+        }
+        //左に90
+        //できません
+        
+        //右に90
+        if(dp[v.y][v.x][1][0].size() == 0) {
+          que.push(v.x, v.y, 1, 0);
+          dp[v.y][v.x][1][0] = dp[v.y][v.x][v.dir][v.right];
+        }
+        
+        
+        
+        
+      }else if(v.right == 3) {
+        //手の移動
+        if(board[v.y+1][v.x+1] == '#' && board[v.y][v.x+1] == '#') {
+          if(dp[v.y][v.x][v.dir][2].size() == 0) {
+            que.push(v.x, v.y, v.dir, 2);
+            dp[v.y][v.x][v.dir][2] = dp[v.sy][v.sx][v.dir][v.right];
+          }
+        }
+        
+        //移動
+        if(board[v.y-1][v.x] != '#') {
+          if(dp[v.y-1][v.x][v.dir][3].size() == 0) {
+            que.push(v.x, v.y-1, v.dir, 3);
+            dp[v.y-1][v.x][v.dir][3] = dp[v.y][v.x][v.dir][v.right]; 
+          }
+        }
+        
+        //左に90
+        //できません
+        
+        //右に90
+        if(dp[v.y][v.x][1][1].size() == 0) {
+          que.push(v.x, v.y, 1, 1);
+          dp[v.y][v.x][1][1] = dp[v.y][v.x][v.dir][v.right];
+        }
+        
+        
+      }
+    }else if(v.dir == 3) {
+      if(v.right == 0) {
+      }else if(v.right == 1) {
+      }else if(v.right == 2) {
+      }else if(v.right == 3) {
+      }
+    }
+  }
+  
+}

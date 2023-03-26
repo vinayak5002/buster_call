@@ -1,0 +1,120 @@
+using S = System;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace _220619
+{
+public class ProblemC
+{
+  public class Tree
+  {
+    public int root = -1;
+    public Dictionary<int, (int, int)> childs;
+    public Tree(IEnumerable<int> vs, Dictionary<int, (int, int)> tree)
+    {
+      this.childs = tree;
+      foreach (var v in vs) { tree[v] = (-1, -1); }
+    }
+    public Tree(IEnumerable<int> vs) : this(vs, new Dictionary<int, (int, int)>()) {}
+  }
+
+  public static void ConstructRight(Tree tree, Stack<int> stack, IEnumerator<int> preE, IEnumerator<int> inE, int current)
+  {
+    if (!inE.MoveNext()) return;
+    if (stack.Any() && inE.Current == stack.Peek())
+    {
+      var c = stack.Pop();
+      ConstructRight(tree, stack, preE, inE, c);
+    }
+    else
+    {
+      var childs = tree.childs[current];
+      tree.childs[current] = (childs.Item1, preE.Current);
+      ConstructNext(tree, stack, preE, inE);
+    }
+  }
+
+  public static void ConstructNext(Tree tree, Stack<int> stack, IEnumerator<int> preE, IEnumerator<int> inE)
+  {
+    var preV = preE.Current;
+    var inV = inE.Current;
+    if (!preE.MoveNext()) return;
+    if (preV != inV)
+    {
+      // Left
+      var child = tree.childs[preV];
+      tree.childs[preV] = (preE.Current, child.Item2);
+      stack.Push(preV);
+      ConstructNext(tree, stack, preE, inE);
+    }
+    else
+    {
+      ConstructRight(tree, stack, preE, inE, preV);
+    }
+  }
+
+  public static Tree ConstructTree(IEnumerable<int> preOrder, IEnumerable<int> inOrder)
+  {
+    var tree = new Tree(preOrder);
+    var preE = preOrder.GetEnumerator();
+    var inE = inOrder.GetEnumerator();
+    var stack = new Stack<int>();
+
+    if (preE.MoveNext() && inE.MoveNext())
+    {
+      tree.root = preE.Current;
+      ConstructNext(tree, stack, preE, inE);
+    }
+
+    return tree;
+  }
+
+  public static void WriteTree(Tree tree)
+  {
+    void Write(int v)
+    {
+      var child = tree.childs[v];
+      S.Console.WriteLine($"root:{v}, child:{child}");
+      if (child.Item1 >= 0) Write(child.Item1);
+      if (child.Item2 >= 0) Write(child.Item2);
+    }
+    Write(tree.root);
+  }
+
+  public static void WritePostorderTreeWalk(Tree tree)
+  {
+    IEnumerable<int> Write(int r)
+    {
+      var child = tree.childs[r];
+      if (child.Item1 != -1)
+        foreach (var v in Write(child.Item1)) yield return v;
+      if (child.Item2 != -1)
+        foreach (var v in Write(child.Item2)) yield return v;
+      yield return r;
+    }
+    var str = Write(tree.root)
+      .Aggregate("", (s, v) => $"{s} {v}")
+      .Remove(0, 1);
+    S.Console.WriteLine(str);
+  }
+
+  public static void ReadInput(out int n, out IEnumerable<int> preOrder, out IEnumerable<int> inOrder)
+  {
+    n = int.Parse(S.Console.ReadLine());
+    preOrder = S.Console.ReadLine().Split(' ').Select(s => int.Parse(s));
+    inOrder = S.Console.ReadLine().Split(' ').Select(s => int.Parse(s));
+  }
+
+  public static void Main(string[] args)
+  {
+    int n;
+    IEnumerable<int> preOrder, inOrder;
+    ReadInput(out n, out preOrder, out inOrder);
+    var tree = ConstructTree(preOrder, inOrder);
+    WritePostorderTreeWalk(tree);
+  }
+}
+}
+
+

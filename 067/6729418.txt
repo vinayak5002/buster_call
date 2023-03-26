@@ -1,0 +1,136 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define sz(x) (int)x.size()
+#define fi first
+#define se second
+
+typedef long long lli;
+typedef pair<int, int> pii;
+
+const double eps = 1e-9;
+
+struct point {
+    double x, y;
+
+    point() {}
+    point(double _x, double _y) : x(_x), y(_y) {}
+
+    point operator +(const point&other) const { return point(x + other.x, y + other.y); }
+    point operator -(const point&other) const { return point(other.x - x, other.y - y); }
+    point operator *(const double&k) const { return point(x * k, y * k); }
+    double operator /(const point&other) const { return x * other.y - y * other.x; }
+
+};
+
+double abs(point u) {
+    return sqrt(u.x * u.x + u.y * u.y);
+}
+
+struct line { // ax + by = c
+    double a, b, c;
+
+    line() {}
+    line(double _a, double _b, double _c) : a(_a), b(_b), c(_c) {}
+    line(point u, point v) {
+        a = v.y - u.y;
+        b = u.x - v.x;
+        c = a * u.x + b * u.y;
+    }
+
+    line perp(point u) {
+        line d;
+        d.a = -b; d.b = a;
+        d.c = d.a * u.x + d.b * u.y;
+        return d;
+    }
+
+    point intersect(line d) {
+        double det = a * d.b - d.a * b;
+        assert(det != 0);
+        double x = (d.b * c - b * d.c) / det;
+        double y = (a * d.c - d.a * c) / det;
+        return point(x, y);
+    }
+
+    point reflect(point u) {
+        line d = perp(u);
+        point v = intersect(d);
+        return (v - u) - v;
+    }
+};
+
+const int maxn = 10;
+
+int n, x, y;
+point s, corner[maxn];
+int order[maxn];
+
+point p[maxn];
+line d[maxn];
+
+void read_input() {
+    //cin >> n;
+    cin >> x >> y;
+    s = point(x, y);
+    for(int i = 0; i < n; ++i) {
+        cin >> x >> y;
+        corner[i] = point(x, y);
+        order[i] = i;
+    }
+}
+
+bool check() {
+    point l = s - p[1], r = s - p[0];
+    for(int i = 1; i < n; ++i) {
+        point u = p[i], v = p[i + 1];
+        point uv = u - v, vu = v - u;
+        u = u + uv * (eps / abs(uv));
+        v = v + vu * (eps / abs(vu));
+        for(int j = i - 1; j >= 0; --j) {
+            u = d[j].reflect(u);
+            v = d[j].reflect(v);
+        }
+        u = s - u; v = s - v;
+        if(v / u < 0) swap(u, v);
+        if(u / l > 0) l = u;
+        if(r / v > 0) r = v;
+        if(r / l < 0) return false;
+    }
+    return true;
+}
+
+void solve() {
+    int ans = 0;
+    do {
+        for(int i = 0; i < n; ++i) {
+            p[i] = corner[order[i]];
+        }
+        p[n] = p[0];
+        for(int i = 0; i < n; ++i) {
+            d[i] = line(p[i], p[i + 1]);
+        }
+        if(check()) ++ans;
+
+    } while(next_permutation(order, order + n));
+
+    cout << ans << '\n';
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    #ifdef LOCAL
+        freopen("test.inp", "r", stdin);
+        freopen("test.out", "w", stdout);
+    #endif // LOCAL
+
+    while(cin >> n) {
+        if(n == 0) break;
+        read_input();
+        solve();
+    }
+}
+

@@ -1,0 +1,54 @@
+import heapq
+from collections import deque, defaultdict
+import math
+import copy
+from itertools import cycle, permutations
+
+INF = float("inf")
+mod = 10**9+7
+
+#N = int(input())
+#S = input()
+#m,n = map(int,input().split())
+#A = list(map(int,input().split()))
+# c = []
+# for _ in range(n):
+#     c.append(list(map(int,input().split())))
+#N,M = map(int,input().split())
+#Q = int(input())
+while True:
+    ##グリッド構造
+    W,H = map(int,input().split())
+    if W == H == 0:
+        break
+    #A = list(map(int,input().split()))
+    c = []
+    for _ in range(2*H-1):
+        c.append(list(map(int,input().split())))
+
+    dir = [(0,1),(1,0),(0,-1),(-1,0)]
+    def bfs(sy,sx):
+        d = [[INF]*(W) for _ in range(H)]
+        d[sy][sx] = 1
+        q = []
+        heapq.heappush(q,(1,(sy,sx)))
+        while q:
+            cost,(y,x) = heapq.heappop(q)  
+            if cost > d[y][x]:
+                continue
+            z = [(2*y,x),(2*y+1,x),(2*y,x-1),(2*y-1,x)]
+            for i in range(4):
+                ny,nx = z[i]
+                dy,dx = dir[i]
+                if 0<=y+dy<H and 0<=x+dx<W:
+                    #print(ny+y,nx+x,c[ny+y][nx+x])
+                    if c[ny][nx] == 0:
+                        if d[y+dy][x+dx] > d[y][x] + 1:
+                            d[y+dy][x+dx] = d[y][x] + 1
+                            heapq.heappush(q,(d[y+dy][x+dx],(y+dy,x+dx)))
+        return d
+    d = bfs(0,0)
+    if d[H-1][W-1] == INF:
+        print(0)
+    else:
+        print(d[H-1][W-1])

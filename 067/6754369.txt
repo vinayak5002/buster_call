@@ -1,0 +1,77 @@
+import java.util.Scanner
+import scala.annotation.tailrec
+
+object Main extends App {
+  class Node(val id:Int = -1, var parent:Int = -1, var left:Int = -1, var right:Int = -1)
+  object IdOrdering extends Ordering[Node] {
+    def compare(x: Node, y: Node): Int = x.id compare y.id
+  }
+  val sc = new Scanner(System.in)
+  val N = sc.nextInt()
+  var nodes = (for ( _ <- 0 until N)
+    yield new Node(id = sc.nextInt(),-1,left=sc.nextInt(), right=sc.nextInt())).toArray.sorted(IdOrdering)
+
+  def findById(id:Int):Option[Int] = {
+    @tailrec
+    def iterate(l:Int, r:Int): Option[Int] = {
+      if (l <= r) {
+        val m = (l + r) >> 1
+        nodes(m).id match {
+          case x if x < id => iterate(m+1, r)
+          case x if x > id => iterate(l, m-1)
+          case _ => Some(m)
+        }
+      } else None
+    }
+    if (id < 0) None
+    else iterate(0, N)
+  }
+
+  def getDepth(idx:Int):Int = {
+    @tailrec
+    def iterate(i:Int, ac:Int): Int = {
+      findById(nodes(i).parent) match {
+        case None => ac
+        case Some(i) => iterate(i, ac +1)
+      }
+    }
+    iterate(idx, 0)
+  }
+
+  def getHeight(idx:Int, ac:Int): Int = {
+    (nodes(idx).left, nodes(idx).right) match {
+      case (-1, -1) => ac
+      case (-1, r) => getHeight(r, ac+1)
+      case (l, -1) => getHeight(l, ac+1)
+      case (l, r) => Math.max(getHeight(l, ac+1), getHeight(r, ac+1))
+    }
+  }
+
+  for (n <- nodes) {
+    findById(n.left).foreach(nodes(_).parent = n.id)
+    findById(n.right).foreach(nodes(_).parent = n.id)
+  }
+
+  for ((n, idx) <- nodes.zipWithIndex) {
+    val sibling = findById(n.parent) match {
+      case None => -1
+      case Some(i) if nodes(i).left == n.id => nodes(i).right
+      case Some(i) if nodes(i).left != n.id => nodes(i).left
+    }
+    val degree = (n.left, n.right) match {
+      case (-1, -1) => 0
+      case (-1, y)  => 1
+      case (x, -1)  => 1
+      case _ => 2
+    }
+    val depth = getDepth(idx)
+    val height = getHeight(idx, 0)
+    val nodeType = (n.parent, degree) match {
+      case (-1, _) => "root"
+      case (_, 0)  => "leaf"
+      case _  => "internal node"
+    }
+    println(s"node ${n.id}: parent = ${n.parent}, sibling = $sibling, degree = $degree, depth = $depth, height = $height, $nodeType")
+  }
+
+}

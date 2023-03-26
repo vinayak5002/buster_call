@@ -1,0 +1,57 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int v, e;
+
+
+vector<vector<int>> g(100, vector<int>());
+vector<vector<bool>> st(100, vector<bool>(100));
+vector<int> memo(100, 1);
+
+int cal(int s) {
+
+    if (memo.at(s) == 0) return 0;
+
+    for (int i = 0; i < g.at(s).size(); i++) {
+        if (st.at(s).at(g.at(s).at(i)) == true) return 1;
+        else {
+            st.at(s).at(g.at(s).at(i)) = true;
+            if (cal(g.at(s).at(i)) == true) return 1;
+            st.at(s).at(g.at(s).at(i)) = false;
+        }
+    }
+
+    memo.at(s) = 0;
+
+    return 0;
+}
+
+int main() {
+
+    cin >> v >> e;
+    for (int i = 0; i < e; i++) {
+        int s, t;
+        cin >> s >> t;
+        g.at(s).push_back(t);
+    }
+
+    int ans = 0;
+
+    for (int i = 0; i < 100; i++) {
+        for (int j = 0; j < 100; j++) {
+            st.at(i).at(j) = false;
+        }
+    }
+
+    for (int i = 0; i < v; i++) {
+
+        if (cal(i) == 1) ans = 1;
+    }
+
+    cout << ans << endl;
+
+    return 0;
+
+
+
+}

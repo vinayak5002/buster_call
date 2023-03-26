@@ -1,0 +1,77 @@
+import sys
+readline = sys.stdin.readline
+write = sys.stdout.write
+def solve():
+    X, Y, N = map(int, readline().split())
+    if X == Y == N == 0:
+        return False
+    P = [[] for i in range(N)]
+    for i in range(N):
+        b, k = map(int, readline().split())
+        for x in range(1, k+1):
+            if k % x == 0:
+                P[i].append((x, k // x))
+    S = [list(map(int, readline().split())) for i in range(Y)]
+    ps = [None]*N
+    for i in range(Y):
+        for j in range(X):
+            s = S[i][j]
+            if s:
+                ps[s-1] = (j, i)
+    if any(e is None for e in ps):
+        write("NA\n")
+        return True
+    ans = None
+    def dfs(k, used, state, r):
+        nonlocal ans
+        if k == X*Y:
+            ans = state[:]
+            return r+1
+
+        if state[k] >= 0:
+            return dfs(k+1, used, state, r)
+
+        y, x = divmod(k, X)
+        for i in range(N):
+            if used[i]:
+                continue
+            p, q = ps[i]
+            if p < x or q < y:
+                continue
+            for a, b in P[i]:
+                if not (x <= p < x+a <= X and y <= q < y+b <= Y):
+                    continue
+                for j in range(N):
+                    if i == j:
+                        continue
+                    pj, qj = ps[j]
+                    if x <= pj < x+a and y <= qj < y+b:
+                        break
+                else:
+                    ok = 1
+                    for ny in range(y, y+b):
+                        for nn in range(ny*X + x, ny*X + x+a):
+                            if state[nn] != -1:
+                                ok = 0
+                            state[nn] = i+1
+                    if ok:
+                        used[i] = 1
+                        r = dfs(k+1, used, state, r)
+                        if r > 1:
+                            return r
+                        used[i] = 0
+                    for ny in range(y, y+b):
+                        for nn in range(ny*X + x, ny*X + x+a):
+                            state[nn] = -1
+        return r
+    r = dfs(0, [0]*N, [-1]*(X*Y), 0)
+    if ans is None or r != 1:
+        write("NA\n")
+    else:
+        for y in range(Y):
+            write(" ".join(map(str, ans[y*X:y*X+X])))
+            write("\n")
+    return True
+while solve():
+    ...
+

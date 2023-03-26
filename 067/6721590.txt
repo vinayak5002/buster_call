@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+set<int> p;
+
+inline bool judge(int x) {
+    return (x % 7 == 1 or x % 7 == 6);
+}
+
+void init() {
+    for (int i = 1 ; i < 305000 ; i++) if (judge(i)) {
+        p.emplace(i);
+    }
+
+    p.erase(1);
+
+    for (auto x : p) for (int i = x + x ; i < 305000 ; i += x) p.erase(i);
+
+    // for (auto x : p) cout << x << ' ';
+    // cout << endl;
+}
+
+inline bool getudo(int x) {
+    return p.count(x);
+}
+
+vector<int> solve(int n) {
+    vector<int> res;
+    for (int i = 1 ; i*i <= n ; i++) if (!(n % i)) {
+        if (getudo(i)) res.emplace_back(i);
+        if (getudo(n / i)) res.emplace_back(n / i);
+    }
+
+    sort(res.begin(), res.end());
+    res.erase(unique(res.begin(), res.end()), res.end());
+    return res;
+}
+
+int main() {
+    init();
+    while(1) {
+        int n; cin >> n;
+        if (n == 1) break;
+        cout << n << ':';
+        for (auto x : solve(n)) cout << ' ' << x;
+        cout << endl;
+    }
+}
+

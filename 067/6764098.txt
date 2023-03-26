@@ -1,0 +1,79 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+int dist[310][310][310] = {-1};
+
+int main(){
+    int h, w, n;
+    cin >> h >> w >> n;
+    vector<string> s(h);
+    for(int i = 0;i < h;++i) cin >> s[i];
+    vector<pair<int,int>> rc(n);
+    for(int i = 0;i < n;++i){
+        int r, c;
+        cin >> r >> c;
+        --r;--c;
+        rc[i] = make_pair(r, c);
+    }
+
+    for(int i = 0;i < 310;++i){
+        for(int j = 0;j < 310;++j){
+            for(int k = 0;k < 310;++k){
+                dist[i][j][k] = -1;
+            }
+        }
+    }
+
+    deque<pair<int,int>> que;
+    int dx[] = {1, 0, -1, 0};
+    int dy[] = {0, 1, 0, -1};
+    for(int i = 0;i < n;++i){
+        que.push_back(rc[i]);
+        dist[i][rc[i].first][rc[i].second] = 0;
+        while(!que.empty()){
+            int x = que.front().first, y = que.front().second;
+            que.pop_front();
+            for(int j = 0;j < 4;++j){
+                int nx = x+ dx[j], ny = y + dy[j];
+                if(nx < 0 || nx >= h || ny < 0 || ny >= w) continue;
+                if(dist[i][nx][ny] != -1) continue;
+                if(s[nx][ny] == '#') continue;
+                if(s[nx][ny] == '.'){
+                    dist[i][nx][ny] = dist[i][x][y];
+                    que.push_front(make_pair(nx, ny));
+                }
+                if(s[nx][ny] == '@'){
+                    dist[i][nx][ny] = dist[i][x][y] + 1;
+                    que.push_back(make_pair(nx, ny));
+                }
+            }
+        }
+    }
+
+    int minum = 1e9, ansx = -1, ansy = -1;
+
+    for(int i = 0;i < h;++i){
+        for(int j = 0;j < w;++j){
+            if(s[i][j] != '.') continue;
+            int tmp = 0;
+            bool ok = true;
+            for(int k = 0;k < n;++k){
+                if(dist[k][i][j] == -1){
+                    ok = false;
+                    break;
+                }
+                tmp = max(tmp, dist[k][i][j]);
+            }
+
+            if(ok == false) continue;
+            if(minum > tmp){
+                minum = tmp;
+                ansx = i, ansy = j;
+            }
+        }
+    }
+
+    if(ansx != -1 && ansy != -1)cout << ansx+1 << ' ' << ansy+1 << endl;
+    else cout << -1 << ' ' << -1 << endl;
+}

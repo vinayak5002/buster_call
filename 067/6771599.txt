@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    map<char, int> mp;
+    for (char c = '2'; c <= '9'; c++) mp[c] = c - '2';
+    mp['T'] = 8;
+    mp['J'] = 9;
+    mp['Q'] = 10;
+    mp['K'] = 11;
+    mp['A'] = 12;
+    char trump;
+    while (cin >> trump, trump != '#') {
+        V<V<string>> C(4, V<string>(13));
+        rep(i, 4) rep(j, 13) cin >> C[i][j];
+        V<int> cnt(4, 0);
+        int st = 0;
+        rep(i, 13) {
+            char suit = C[st][i][1];
+            int wi = st, trex = 0;
+            rep(k, 4) {
+                if (C[(st + k) % 4][i][1] != suit and C[(st + k) % 4][i][1] != trump) continue;
+                if (C[(st + k) % 4][i][1] == trump) {
+                    // trump
+                    if (trex) {
+                        if (mp[C[(st + k) % 4][i][0]] > mp[C[wi][i][0]]) {
+                            wi = (st + k) % 4;
+                        }
+                    } else {
+                        trex = 1;
+                        wi = (st + k) % 4;
+                    }
+                } else if (C[(st + k) % 4][i][1] == suit) {
+                    if (!trex) {
+                        if (mp[C[(st + k) % 4][i][0]] > mp[C[wi][i][0]]) {
+                            wi = (st + k) % 4;
+                        }
+                    }
+                }
+            }
+            cnt[wi]++;
+            st = wi;
+        }
+        if (cnt[0] + cnt[2] > cnt[1] + cnt[3]) {
+            cout << "NS " << cnt[0] + cnt[2] - 6 << '\n';
+        } else {
+            cout << "EW " << cnt[1] + cnt[3] - 6 << '\n';
+        }
+    }
+    return 0;
+}

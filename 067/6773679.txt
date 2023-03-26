@@ -1,0 +1,21 @@
+int dp[1110][111000];
+ int N,W;
+ int V[1110],weight[1110];
+ // i番目以降の品物から重さの和がj以下なるように選んだときの、
+ // 取りうる価値の総和の最大値を返す関数
+ int dfs(int i,int w){
+   int res;
+   if(dp[i][w]!=0)return dp[i][w];
+   if(i==N)res = 0;
+   else if(w<weight[i])res=dfs(i+1,w);
+   else {
+     res = max(dfs(i+1,w),dfs(i+1,w-weight[i])+V[i]);
+   }
+   dp[i][w]=res;
+   return res;
+ }
+ void solve(){
+   cin>>N>>W;
+   rep(i,N)cin>>V[i]>>weight[i];
+   cout<<dfs(0,W)<<endl;
+ }

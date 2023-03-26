@@ -1,0 +1,110 @@
+// I SELL YOU...! 
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<functional>
+#include<queue>
+#include<chrono>
+#include<iomanip>
+#include<map>
+#include<set>
+#include<bitset>
+using namespace std;
+using ll = long long;
+using P = pair<ll,ll>;
+using TP = tuple<ll,ll,ll>;
+void init_io(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  cout << fixed << setprecision(18);
+}
+const ll INF = 1e15;
+ll calc_dp(ll s, ll i, const vector<vector<ll>> &pat, vector<vector<ll>> &dp) {
+  ll n = pat.size();
+  ll k = 0;
+  if (dp[s][i] != -1) return dp[s][i];
+  for (int i=0;i<n;i++) {
+    if ((1ll << i) & s) k++;
+  }
+  if (k==1) {
+    return dp[s][i] = pat[i][i];
+  }
+  ll prev_s = s ^ (1ll << i);
+  ll res = INF;
+  for (int j=0;j<n;j++) {
+    if (i==j || ((prev_s & (1ll << j)) == 0)) continue;
+    res = min(res, calc_dp(prev_s, j, pat, dp) + pat[i][i] - pat[j][i]);
+  }
+  // cout << bitset<14>(s) <<" "<<i <<" "<<res << endl;
+  return dp[s][i] = res;
+};
+
+ll max_match(const string &s, const string &t) {
+  ll n = s.size(), m = t.size();
+  ll res = 0;
+  for (int i=1;i<=min(n, m);i++) {
+    bool can = true;
+    for (int j=0;j<i;j++) {
+      if (s[(n-i)+j] != t[j]) {
+        can = false;
+        break;
+      }
+    }
+    if (can) {
+      res = i;
+    }
+  }
+  return res;
+};
+void solve() {
+  ll n;
+  cin >> n;
+  if (n==0) return;
+  vector<string> s(n);
+  for(int i=0;i<n;i++) {
+    cin >> s[i];
+  }
+  for (auto itr=s.begin();itr!=s.end();) {
+    ll c = 0;
+    for (auto t: s) {
+      if (t == *itr) {
+        if (c==0) {
+          c++;
+          continue;
+        }
+      }
+      if (t.find(*itr) != string::npos) {
+        c = -1;
+        break;
+      }
+    }
+    if (c==-1) {
+      itr = s.erase(itr);
+    } else {
+      itr++;
+    }
+  }
+  n = s.size();
+  vector<vector<ll>> dp((1ll<<n), vector<ll>(n, -1));
+  vector<vector<ll>> pat(n, vector<ll>(n, 0));
+  for (int i=0;i<n;i++) {
+    for (int j=0;j<n;j++) {
+      if (i==j) {
+        pat[i][i] = s[i].size();
+      } else {
+        pat[i][j] = max_match(s[i], s[j]);
+      }
+    }
+  }
+  ll ans = 1e15;
+  for (int i=0;i<n;i++) {
+    ans = min(ans, calc_dp((1ll<<n) -1, i,pat, dp));
+  }
+  cout << ans << endl;
+  solve();
+}
+signed main(){
+  init_io();
+  solve();
+}
+

@@ -1,0 +1,68 @@
+#include<stdio.h>
+#include<string.h>
+
+int main(){
+	char buf[256];//バッファ容量
+
+	int turn,taro_score = 0,hanako_score = 0;//ターン数,タローの点数,花子の点数
+	char* t;//タローポインタ
+	char* h;//花子ポインタ
+	int taro_len = 0, hanako_len = 0;//タローのカード名長さ,花子のカード名長さ
+
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d", &turn);//ターン数を入力
+
+	for (int i = 0; i < turn; i++){
+		char taro[120] = {}, hanako[120] = {};//タローのカード,花子のカード
+
+		fgets(buf, sizeof(buf) - 1, stdin);
+		sscanf(buf, "%s %s", &taro, &hanako);
+
+		t = taro;
+		h = hanako;
+		taro_len = strlen(taro);
+		hanako_len = strlen(hanako);
+
+		if (*t < *h){
+			hanako_score+=3;
+		}
+		else if (*t == *h){
+			t++;
+			h++;
+			if (taro_len != hanako_len){
+				if (taro_len < hanako_len){
+					hanako_score+=3;
+				}
+				else{
+					taro_score+=3;
+				}
+			}
+			else{
+				while (*t != NULL){
+					if (*t < *h){
+						hanako_score+=3;
+						break;
+					}
+					else if (*t == *h){
+						t++;
+						h++;
+					}
+					else{
+						taro_score+=3;
+						break;
+					}
+				}
+				if (*t == NULL){
+					hanako_score++;
+					taro_score++;
+				}
+			}
+		}
+		else{
+			taro_score+=3;
+		}
+	}
+	printf("%d %d\n", taro_score, hanako_score);
+
+	return 0;
+}

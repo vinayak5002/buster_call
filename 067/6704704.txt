@@ -1,0 +1,104 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 50
+int n;
+int c;
+int t = NIL;
+int A[101][101] ; // 0以外では初期化できないんだってーーー。
+
+struct Node {
+    int d; //d,fは幅優先探索では使わないけど。。。 
+    int f; //conにどこから検索したときにひっかったかを入れる。
+    int con; // 
+    vector<int> go ;
+};
+vector<Node> X;
+stack<int> df ;
+queue<int> Q ; 
+
+void insert_q(int u) {
+    // uの経路のうち未訪問のところだけをQに入れる。
+    // 地点 u に書かれているgoをQに書き出す。
+
+    for (int i=0; i < X.at(u).go.size() ; i++ ) {
+        int  y = X.at(u).go.at(i);
+        if ( X.at(y).con == NIL ) {
+            Q.push(y) ; // yをQにいれる
+        } 
+    }
+}
+
+int doBFS () {
+    // 距離をtとする。
+    // Qにpushのタイミングでtを記録していく。
+    while ( Q.size() > 0) {
+        int u = Q.front();
+        Q.pop();
+        insert_q(u);
+
+        //初回訪問
+        if ( X.at(u).con == NIL ) {
+            X.at(u).con = t;
+        }
+    }
+    return 0;
+}
+
+bool ansconnect ( int a, int b ) {
+    // aからスタートしてbに行けるかを返す。
+    if (X.at(a).con == X.at(b).con) {return true; }
+    else { return false ;}
+}
+
+
+void clearvalueA() {
+    for (int i=0 ; i<101; i++) {
+        for  (int j=0; j<101; j++) {
+            A[i][j] = 0 ;
+        }
+    }
+}
+
+int main() {
+    cin >> n >> c ;
+    // nは登場人物の人数、cは関係の個数
+    Node indata;
+    indata.d = INF; indata.f = INF; indata.con = NIL;
+
+    for (int i = 0 ; i < n ; i++ ) {
+        X.push_back(indata); //とりあえずn人をつくる。
+    }
+
+    for (int i = 0 ; i < c ; i++ ) {
+        int a, b ;
+        cin >> a  >> b ;
+        X.at(a).go.push_back(b) ;
+        X.at(b).go.push_back(a) ;
+    }
+
+    // この段階ですべて訪問しきっちゃうなり!
+    for (int i=0; i<n ; i++) {
+        if (X.at(i).con == NIL) {
+            // iを起点としてBFS
+            // cout << "Start From " << i << endl ;
+            Q.push(i);     t = i;
+            X.at(i).con = t ;  
+            doBFS();
+        }
+    }
+
+    cin >> c;
+
+    for (int i = 0 ; i < c ; i++ ) {
+        int a , b ;
+        cin >> a >> b ;
+        if ( ansconnect (a,b) ) { cout << "yes" << endl; }
+        else { cout <<  "no" << endl ; }
+    }
+
+	return 0 ;
+}
+

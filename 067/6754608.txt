@@ -1,0 +1,50 @@
+#include<bits/stdc++.h>
+using namespace std;
+#pragma GCC target("avx2")
+#pragma GCC optimize("O3")
+using ll = long long;
+using pii = pair<ll, ll>;
+const int up = 1000010, inf = 1<<29;
+
+int main(){
+ios::sync_with_stdio(false);
+std::cin.tie(nullptr);
+	vector<int> q(180), o;
+
+	for (int i = 0; i < 180; i++){
+		q[i] = i + 1;
+	}
+
+	for (int i = 0; i < 2; i++){
+		for (int i = 1; i < 180; i++){
+			q[i] += q[i - 1];
+		}
+	}
+
+	for (auto x : q){
+		if (x & 1) o.push_back(x);
+	}
+
+	vector<int> odd(up, inf), all(up, inf);
+	odd[0] = 0; all[0] = 0;
+
+	for (int i = 0; i < up; i++){
+		for (auto x : q){
+			if (i < x) break;
+			all[i] = min(all[i], all[i - x] + 1);
+		}
+
+		for (auto x : o){
+			if (i < x) break;
+			odd[i] = min(odd[i], odd[i - x] + 1);
+		}
+	}
+
+	while (1){
+		int t;
+		cin >> t;
+		if (t == 0) return 0;
+
+		cout << all[t] << ' ' << odd[t] << endl;
+	}
+}

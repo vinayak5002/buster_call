@@ -1,0 +1,101 @@
+#include <atcoder/all>
+#include <bits/stdc++.h>
+
+#ifdef _DEBUG
+#include "debug.cpp"
+#else
+#define DE(x)
+#define DE2(x, y)
+#define DEV(v)
+#define DESq(v, h, w)
+#endif
+
+using namespace std;
+using namespace atcoder;
+#define REP(i, n) for(int i = 0; i < (n); i++)
+#define rep(i, l, r) for(int i = l; i < (r); i++)
+#define rrep(i, r, l) for(int i = r; i >= (l); i--)
+#define ALL(v) (v).begin(), (v).end()
+using ll = long long;
+using P = pair<ll, ll>;
+constexpr ll INF = 1e18;
+constexpr int mod = 1e9 + 7;
+/* https://onlinejudge.u-aizu.ac.jp/services/room.html#ynucpc_20220713/info
+ * 2問*/
+template <class T> bool chmax(T &a, const T &b) {
+    if(a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+bool isOk(vector<vector<ll>> g, vector<ll> w, vector<ll> h) {
+    REP(i, h.size()) REP(j, w.size()) {
+        if(g[i][j] != h[i] + w[j])
+            return false;
+    }
+    return true;
+}
+int main() {
+    while(true) {
+        ll w, h;
+        cin >> w >> h;
+        if(w == 0 && h == 0)
+            break;
+        vector<vector<ll>> g(h, vector<ll>(w, 102));
+        vector<ll> W(w), H(h);
+        map<ll, ll> mp;
+        REP(i, w + h - 1) {
+            ll x, y, value;
+            cin >> x >> y >> value;
+            x--, y--;
+            g[y][x] = value;
+        }
+        queue<ll> wc,hc;
+        wc.push(0);
+        vector<vector<ll>> ans(h, vector<ll>(w, 0));
+        ll wh = 0;
+        REP(i, w + h - 1) {
+            if(wh % 2 == 0) {
+                while(!wc.empty()) {
+                    ll x = wc.front();
+                    wc.pop();
+                    REP(i, h) {
+                        if(g[i][x] != 102) {
+                            hc.push(i);
+                        }
+                        ans[i][x]++;
+                    }
+                }
+                wh++;
+            } else {
+                while(!hc.empty()) {
+                    ll x = hc.front();
+                    hc.pop();
+                    REP(i, w) {
+                        if(g[x][i] != 102) {
+                            wc.push(i);
+                        }
+                        ans[x][i]++;
+                    }
+                }
+                wh++;
+            }
+        }
+        
+        bool ok=true;
+        REP(i,h)REP(j,w){
+            if(ans[i][j]==0){
+                ok=false;
+            }
+        }
+        if(ok){
+            cout << "YES" << endl;
+        }else
+            cout << "NO" << endl;
+
+
+    }
+    return 0;
+}

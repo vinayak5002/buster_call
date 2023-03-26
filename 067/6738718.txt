@@ -1,0 +1,81 @@
+package main
+
+import (
+  "fmt"
+  "bufio"
+  "os"
+  "strconv"
+)
+
+var Queue []Process
+
+type Process struct {
+  name string
+  time int
+}
+
+func EnQueue(p Process) {
+	Queue = append(Queue, p)
+}
+
+func DeQueue() Process {
+	data := Queue[0]
+	Queue = Queue[1:]
+	return data
+}
+
+func Head() Process {
+	return Queue[0]
+}
+
+func Tail() Process {
+	return Queue[len(Queue)-1]
+}
+
+func LenQueue() int {
+	return len(Queue)
+}
+
+func IsEmpty() bool {
+	return len(Queue) == 0
+}
+
+func min(a int, b int) int {
+  if a > b {
+    return a
+  }else {
+    return b
+  }
+}
+
+func main() {
+  var n, q int
+  var elaps int
+  sc := bufio.NewScanner(os.Stdin)
+  sc.Scan()
+  n, _ = strconv.Atoi(sc.Text())
+  q, _ = strconv.Atoi(sc.Text())
+  for i := 0; i < n; i++ {
+    sc.Scan()
+    process := *new(Process)
+    process.name = sc.Text()
+    process.time, _= strconv.Atoi(sc.Text())
+    Queue[i] = process
+  }
+
+  for {
+    if LenQueue() == 0 {
+      break
+    }
+    p := DeQueue()
+    t := min(q, p.time)
+    p.time -= t
+    elaps += t
+    if p.time > 0{
+      EnQueue(p)
+    }else {
+      fmt.Printf("%s %d\n", p.name, p.time)
+    }
+  }
+}
+

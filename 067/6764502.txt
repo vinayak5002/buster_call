@@ -1,0 +1,139 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef int ll;
+typedef pair<ll, ll> PP;
+//#define MOD 1000000007
+#define MOD 998244353
+#define INF 100000000
+//#define INF 810114514
+#define PI 3.141592653589
+#define setdouble setprecision
+#define REP(i, n) for (ll i = 0; i < (n); ++i)
+#define OREP(i, n) for (ll i = 1; i <= (n); ++i)
+#define RREP(i, n) for (ll i = (n)-1; i >= 0; --i)
+#define ALL(v) (v).begin(), (v).end()
+#define GOODBYE               \
+    do {                      \
+        cout << "-1" << endl; \
+        return 0;             \
+    } while (false)
+#define MM << " " <<
+#define Endl endl
+#define debug true
+#define debug2 false
+
+int main(void) {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    ll N, M;
+    cin >> N >> M;
+    vector<array<ll, 3>> STD(M);
+    vector<vector<pair<ll, ll>>> G(N);
+    REP(i, M) {
+        ll u, v, d;
+        cin >> u >> v >> d;
+        u--;
+        v--;
+        STD[i] = {u, v, d};
+        G[u].push_back({v, d});
+        G[v].push_back({u, d});
+    }
+
+    vector<vector<ll>> dp1(1l << N, vector<ll>(N, INF));
+    vector<vector<ll>> dpN(1l << N, vector<ll>(N, INF));
+    dp1[1ll << (0)][0] = 0;
+    dpN[1ll << (N - 1)][N - 1] = 0;
+
+    for (ll j = 0; j < (1ll << N); j++) {
+        REP(i, N) {
+            if (dp1[j][i] == INF) continue;
+            for (pair<ll, ll> E : G[i]) {
+                ll e = E.first, c = E.second;
+                if ((j >> e) % 2 == 1) continue;
+                dp1[j + (1ll << e)][e] =
+                    min(dp1[j + (1ll << e)][e], dp1[j][i] + c);
+            }
+        }
+    }
+
+    for (ll j = 0; j < (1ll << N); j++) {
+        REP(i, N) {
+            if (dpN[j][i] == INF) continue;
+            for (pair<ll, ll> E : G[i]) {
+                ll e = E.first, c = E.second;
+                if ((j >> e) % 2 == 1) continue;
+                dpN[j + (1ll << e)][e] =
+                    min(dpN[j + (1ll << e)][e], dpN[j][i] + c);
+            }
+        }
+    }
+
+    /*
+    REP(i,N){
+        REP(j,(1ll<<N)){
+            if(dp1[j][i]==INF)continue;
+            cout << i+1 << " ";
+            REP(k,N){
+                cout << ((j>>k)%2);
+            }
+            cout << " " << dp1[j][i] << endl;
+        }
+    }
+    cout << endl;
+
+    REP(i,N){
+        REP(j,(1ll<<N)){
+            if(dpN[j][i]==INF)continue;
+            cout << i+1 << " ";
+            REP(k,N){
+                cout << ((j>>k)%2);
+            }
+            cout << " " << dpN[j][i] << endl;
+        }
+    }*/
+
+    vector<vector<ll>> dpR = dpN;
+
+    for (ll j = 0; j < (1ll << N); j++) {
+        REP(i, N) {
+            if (dpR[j][i] == INF) continue;
+            REP(k, N) {
+                if ((j >> k) % 2 == 1) continue;
+                dpR[j + (1 << k)][i] = min(dpR[j + (1 << k)][i], dpR[j][i]);
+            }
+        }
+    }
+    std::vector<std::vector<int>> table(N);
+
+    REP(i,N) {
+        REP(j,1<<N) {
+            if(((j >> 0) & 1) && ((j >> i) & 1) && ((j >> (N-1) & 1) == 0)) {
+                table[i].emplace_back(j);
+            }
+        }
+    }
+
+    REP(i, M) {
+        ll u = STD[i][0], v = STD[i][1], d = STD[i][2];
+
+        ll a1 = INF;
+        for(auto j: table[u]) {
+            ll num = dp1[j][u] + d + dpR[(1ll << N) - 1 - j][v];
+            a1 = min(a1, num);
+        }
+
+        ll a2 = INF;
+        for(auto j: table[v]) {
+            ll num = dp1[j][v] + d + dpR[(1ll << N) - 1 - j][u];
+            a2 = min(a2, num);
+        }
+
+        ll Ans = min(a1, a2);
+        if (Ans == INF) Ans = -1;
+        cout << Ans << endl;
+    }
+
+    return 0;
+}
+

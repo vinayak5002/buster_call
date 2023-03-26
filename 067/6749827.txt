@@ -1,0 +1,71 @@
+#include<bits/stdc++.h>
+using namespace std;
+//#include<atcoder/all>
+//using namespace atcoder;
+using ll = long long;
+int n,m,p,a,b;
+vector<int> t;
+using P = pair<int,int>;
+vector<vector<P>> G;
+const double INF = 1e9;
+double dist[30][1<<8];
+
+void solve(){
+	for(int i = 0;i<30;i++){
+		for(int j = 0;j < (1<<8);j++){
+			dist[i][j] = INF;
+		}
+	}
+
+	using TUP = tuple<double,int,int>;
+
+	priority_queue<TUP,vector<TUP>,greater<>> PQ;
+	dist[a][(1<<n)-1]  = 0;
+	PQ.emplace(0,a,(1<<n)-1);
+	while(PQ.size()){
+		auto [cdist,x,cbit] = PQ.top();
+		PQ.pop();
+		if(cdist!=dist[x][cbit])continue;
+		for(auto [nx,cost]:G[x]){
+			for(int i = 0;i<n;i++){
+				if(cbit>>i&1){
+					int nbit = cbit - (1<<i);
+					double ndist = cdist + (double)cost/t[i];
+					if(dist[nx][nbit] > ndist){
+						dist[nx][nbit] = ndist;
+						PQ.emplace(ndist,nx,nbit);
+					}
+				}
+			}
+		}
+	}
+	double ans = INF;
+	for(int i = 0;i<(1<<n);i++){
+		ans = min(dist[b][i],ans);
+	}
+	if(ans!=INF)printf("%.4lf\n",ans);
+	else cout<<"Impossible"<<endl;
+}
+
+signed main(){
+	cin.tie(nullptr);
+	ios::sync_with_stdio(false);
+	while(1){
+		cin >> n >> m >> p >> a >> b;
+		if(n==0)break;
+		a--;
+		b--;
+		t = vector<int>(n);
+		for(auto &i:t)cin >> i;
+		G = vector<vector<P>>(m);
+		for(int i = 0;i<p;i++){
+			int x,y,z;
+			cin >> x >> y >> z;
+			x--;y--;
+			G[x].push_back(P(y,z));
+			G[y].push_back(P(x,z));
+		}
+		solve();
+	}
+}
+

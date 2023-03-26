@@ -1,0 +1,72 @@
+#include <stdio.h>
+#define MAX 100
+
+int queue[MAX + 1], y[MAX + 1][MAX + 1], d[MAX + 1], n;
+int tail = 0, head = 0;
+
+void dequeue(){
+	head = (head + 1) % MAX;
+}
+
+void enqueue(int n){
+	queue[tail] = n;
+	tail = (tail + 1) % MAX;
+}
+
+void wide(){
+	int i, k = 1;
+	enqueue(k);
+	d[k] = 0;
+	
+	while(tail != head){
+		for(i = 1; i <= n; i++){
+			if(y[k][i] == 1){			//繋がっている頂点を探索
+				if(d[i] == MAX * 100){
+					enqueue(i);
+					d[i] = d[k] + 1;
+				}
+			}
+		}
+		
+		dequeue(k);
+		k = queue[head];
+	}
+	
+	for(i = 1; i <= n; i++){
+		if(d[i] == MAX * 100){
+			d[i] = -1;
+		}
+		
+		printf("%d %d\n", i, d[i]);
+	}
+}
+
+int main (void){
+	int i, j, number, count, v;
+	scanf("%d", &n);
+	
+	for(i = 1; i <= n; i++){
+		for(j = 1; j <= n; j++){
+			y[i][j] = 0;
+		}
+	}
+	
+	for(i = 1; i <= n; i++){
+		scanf("%d",&number);
+		scanf("%d", &count);
+		for(j = 1; j <= count; j++){
+			scanf("%d", &v);
+			y[number][v] = 1;
+		}
+	}
+	
+	
+	for(i = 1; i <= n; i++){
+		d[i] = MAX * 100;
+	}
+	
+	wide();
+	
+	return 0;
+}
+

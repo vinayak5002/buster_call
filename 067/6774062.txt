@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+template<class T> class BIT {
+  private:
+    int n;
+    vector<T> data;
+
+  public:
+    BIT(int n_) {
+        n = 1;
+        while(n_ < n) n <<= 1;
+        data.resize(n + 1, 0);
+    }
+    void add (int i, T x) {
+        i++;
+        while(i <= n) {
+            data[i] += x;
+            i += i & -i;
+        }
+    }
+    T sum_sub (int i) {
+        i++;
+        T ans = 0;
+        while(0 < i) {
+            ans += data[i];
+            i -= i & -i;
+        }
+        return ans;
+    }
+    T sum(int i, int j) {return sum_sub(j) - sum_sub(i - 1);}
+};
+
+int main() {
+    int n, q; cin >> n >> q;
+    int com, x, y;
+    BIT<int> bt(n);
+    while(q--) {
+        cin >> com >> x >> y;
+        if(com == 1) {
+            x--; y--;
+            cout << bt.sum(x, y) << endl;
+        }
+        else {
+            x--;
+            bt.add(x, y);
+        }
+    }
+}

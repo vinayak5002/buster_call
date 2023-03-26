@@ -1,0 +1,88 @@
+#include<stdio.h>
+
+#define N 100
+#define W 0 /*訪問前*/
+#define G 1 /*訪問中*/
+#define B 2 /*訪問後*/
+#define INFTY 1000000000
+
+int A[N][N], Q[N];
+int color[N], d[N], time;
+int head, tail;
+
+void enqueue(int u)
+{
+  	Q[tail] = u;
+	tail = tail + 1;
+}
+
+int dequeue()
+{
+    int t = Q[head];
+	head = head + 1;
+	
+	return t;
+}
+
+void bfs(int x, int n)
+{
+	int u, v;
+	
+	for(u=0; u<n; u++) {color[u] = W;}
+	for(u=0; u<n; u++) {d[u] = INFTY;}
+	
+	color[x] = G;
+	d[x] = 0;
+	enqueue(x);
+	
+	while(head != tail)
+	{
+		u = dequeue();
+		for(v=0; v<n; v++)
+		{
+			if(A[u][v] && color[v] == W)
+			{
+				color[v] = G;
+				d[v] = d[u] + 1;
+				enqueue(v);
+			}
+		}
+		color[u] = B;
+	}
+	
+	for(u=0; u<n; u++)
+	{
+		printf("%d %d\n", u+1, d[u]);
+	}
+}
+	
+int main(void)
+{
+	int n, u, k, v, i, j;
+	
+	scanf("%d", &n);
+	
+	for(i=0; i<n; i++)
+	{
+		for(j=0; j<n; j++)
+		{
+			A[i][j] = 0;
+		}
+	}
+	
+	for(i=0; i<n; i++)
+	{
+		scanf("%d %d", &u, &k);
+		u = u - 1;
+		for(j=0; j<k; j++)
+		{
+			scanf("%d", &v);
+			v = v - 1;
+			A[u][v] = 1;
+		}
+	}
+	
+	bfs(0, n);
+	
+	return 0;
+}

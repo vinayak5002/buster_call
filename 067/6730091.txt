@@ -1,0 +1,87 @@
+import sys,random,bisect
+from collections import deque,defaultdict
+from heapq import heapify,heappop,heappush
+from itertools import permutations
+from math import log,gcd
+
+
+input = lambda :sys.stdin.readline()
+mi = lambda :map(int,input().split())
+li = lambda :list(mi())
+
+def ope(x,y,o):
+    if o=="+":
+        return x + y
+    elif o == "-":
+        return x-y
+    else:
+        return x * y
+
+
+def calc(S,op):
+    S += "#"
+    n = len(op)
+    #print(op)
+
+    i = 0
+
+    def number(i):
+        res = 0
+        while S[i] in "0123456789":
+            res = 10 * res + int(S[i])
+            i += 1
+        return res,i
+    
+    
+    def f(i,p):
+        if p == 0:
+            res,i = factor(i)
+            while S[i] in op[p]:
+                g = S[i]
+                i += 1
+                val,i = factor(i)
+                res = ope(res,val,g)
+            return res,i
+        else:
+            res,i = f(i,p-1)
+            while S[i] in op[p]:
+                g = S[i]
+                i += 1
+                val,i = f(i,p-1)
+                res = ope(res,val,g)
+            return res,i
+
+    
+    def expression(i):
+        return f(i,n-1)
+
+    def factor(i):
+        #print(i)
+        if S[i]=="(":
+            i += 1
+            res,i = expression(i)
+            i += 1
+            return res,i
+        else:
+            res,i = number(i)
+            return res,i
+    
+    return expression(0)[0]
+
+S = input()
+res = -10**100
+for i in range(3):
+    for j in range(3):
+        for k in range(3):
+            op = [[] for _ in range(3)]
+            A = [i,j,k]
+            for l in range(3):
+                op[A[l]].append("+-*"[l])
+            op = [o for o in op if len(o)!=0]
+            tmp = calc(S,op)
+            #print(op,tmp)
+            res = max(res,tmp)
+
+    
+    
+print(res)

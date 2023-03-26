@@ -1,0 +1,102 @@
+#include <iostream>
+#include <random>
+#include <regex>
+#include <queue>
+using namespace std;
+
+using P = pair<int, int>;
+using PP = pair<int, P>;
+
+vector<vector<int>> make_tree(int h_, int w_) {
+    const int h = h_ + 2, w = w_ + 2;
+    vector<string> s(h);
+    s[0] = s[h - 1] = string(w, '.');
+    for (int i = 1; i < h - 1; ++i) {
+        string tmp; cin >> tmp;
+        s[i] = '.' + tmp + '.';
+    }
+    // for (auto &e : s) fprintf(stderr, "[debug] %s\n", e.c_str());
+
+    auto adj = [&](int i, int j, char col)->vector<P>{
+        vector<P> res;
+        if (i > 0) res.emplace_back(i - 1, j);
+        if (j > 0) res.emplace_back(i, j - 1);
+        if (i + 1 < h) res.emplace_back(i + 1, j);
+        if (j + 1 < w) res.emplace_back(i, j + 1);
+        if (col == '#') {
+            if (i > 0 && j > 0) res.emplace_back(i - 1, j - 1);
+            if (i + 1 < h && j > 0) res.emplace_back(i + 1, j - 1);
+            if (i + 1 < h && j + 1 < w) res.emplace_back(i + 1, j + 1);
+            if (i > 0 && j + 1 < w) res.emplace_back(i - 1, j + 1);
+        }
+        return res;
+    };
+    auto inv_color = [](char c)->char{
+        return c ^ ('.' ^ '#');
+    };
+
+    vector<vector<int>> g;
+    queue<PP> que, que_next;
+    que.emplace(-1, P{0, 0});
+    // BFSをやる
+    while (!que.empty() || !que_next.empty()) {
+        if (que.empty()) swap(que, que_next);
+
+        auto [u, p] = que.front();
+        auto [i, j] = p;
+        que.pop();
+        if (s[i][j] == '*') continue;
+        // fprintf(stderr, "[debug] u=%d (i j)=(%d %d)\n", u, i, j);
+
+        int v = g.size();
+        if (u >= 0) g[u].push_back(v);
+        g.push_back({});
+
+        char col = s[i][j], inv_col = inv_color(col);
+        queue<P> que_paint;
+        que_paint.emplace(i, j);
+        while (!que_paint.empty()) {
+            auto [y, x] = que_paint.front();
+            que_paint.pop();
+            if (s[y][x] == '*') continue;
+            // fprintf(stderr, "[debug] \t(y x)=(%d %d)\n", y, x);
+
+            s[y][x] = '*';
+            for (auto [y_, x_] : adj(y, x, col)) {
+                if (s[y_][x_] == col) que_paint.emplace(y_, x_);
+                else if (s[y_][x_] == inv_col) {
+                    que_next.emplace(v, P{y_, x_});
+                }
+            }
+        }
+        // for (auto &e : s) fprintf(stderr, "[debug] %s\n", e.c_str());
+    }
+    return g;
+}
+
+string tree_to_str(int u, const vector<vector<int>> &g) {
+    vector<string> children;
+    for (auto v : g[u]) children.push_back(tree_to_str(v, g));
+    sort(children.begin(), children.end());
+    string res = ""s;
+    for (auto &s : children) res += s;
+    return '(' + res + ')';
+}
+string tree_to_str(const vector<vector<int>> &g) {
+    auto res = tree_to_str(0, g);
+    // fprintf(stderr, "[debug] %s\n", res.c_str());
+    return res;
+}
+
+int main(void) {
+    int h0, w0, h1, w1;
+    while (true) {
+        cin >> h0 >> w0;
+        if (h0 == 0) break;
+        auto g0 = make_tree(h0, w0);
+        cin >> h1 >> w1;
+        auto g1 = make_tree(h1, w1);
+        cout << (tree_to_str(g0) == tree_to_str(g1) ? "yes" : "no") << endl;
+    }
+    return 0;
+}

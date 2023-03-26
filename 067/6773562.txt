@@ -1,0 +1,162 @@
+#line 1 "solve/main.cpp"
+#include <algorithm>
+#include <array>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <chrono>
+#include <cmath>
+#include <complex>
+#include <cstdint>
+#include <cstdlib>
+#include <deque>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <random>
+#include <set>
+#include <stack>
+#include <string>
+#include <type_traits>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+/* template start */
+
+#line 2 "lib/utility/type_alias.hpp"
+
+#line 4 "lib/utility/type_alias.hpp"
+
+using u64 = std::uint64_t;
+using u32 = std::uint32_t;
+using u16 = std::uint16_t;
+using u8 = std::uint8_t;
+
+using i64 = std::int64_t;
+using i32 = std::int32_t;
+using i16 = std::int16_t;
+using i8 = std::int8_t;
+
+using usize = std::size_t;
+using isize = std::ptrdiff_t;
+
+constexpr i64 operator"" _i64(unsigned long long num) { return i64(num); }
+
+constexpr u64 operator"" _u64(unsigned long long num) { return u64(num); }
+#line 33 "solve/main.cpp"
+
+#define rep(i, a, b) for (i64 i = (a); (i) < (b); (i)++)
+#define all(i) i.begin(), i.end()
+
+#ifdef LOCAL
+#define debug(...)                                                    \
+  std::cerr << "LINE: " << __LINE__ << "  [" << #__VA_ARGS__ << "]:", \
+      debug_out(__VA_ARGS__)
+#else
+#define debug(...)
+#endif
+
+void debug_out() { std::cerr << std::endl; }
+
+template <typename Head, typename... Tail>
+void debug_out(Head h, Tail... t) {
+  std::cerr << " " << h;
+  if (sizeof...(t) > 0) std::cerr << " :";
+  debug_out(t...);
+}
+
+template <typename T1, typename T2>
+std::ostream& operator<<(std::ostream& os, std::pair<T1, T2> pa) {
+  return os << pa.first << " " << pa.second;
+}
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, std::vector<T> vec) {
+  for (std::size_t i = 0; i < vec.size(); i++)
+    os << vec[i] << (i + 1 == vec.size() ? "" : " ");
+  return os;
+}
+
+template <typename T1, typename T2>
+inline bool chmax(T1& a, T2 b) {
+  return a < b && (a = b, true);
+}
+
+template <typename T1, typename T2>
+inline bool chmin(T1& a, T2 b) {
+  return a > b && (a = b, true);
+}
+
+template <typename Num, typename Func = std::multiplies<Num>>
+constexpr Num mypow(Num a, u64 b, Num id = 1, Func mul = Func()) {
+  if (b == 0) return id;
+  Num x = id;
+  while (b > 0) {
+    if (b & 1) x = mul(x, a);
+    a = mul(a, a);
+    b >>= 1;
+  }
+  return x;
+}
+
+/* template end */
+
+using P = std::pair<i64,i64>;
+
+int main() {
+  std::cin.tie(nullptr);
+  std::ios::sync_with_stdio(false);
+
+  i64 n,m;
+  std::cin>>n>>m;
+
+  std::vector<i64> a(n);
+  
+  for(auto&& e:a)std::cin>>e;
+
+  std::vector<P> seg(m);
+
+  for(auto&& [l,r]:seg)std::cin>>l>>r;
+  std::sort(all(seg));
+
+  debug(seg);
+
+  std::vector<i64> dp(n+1);
+  std::priority_queue<P,std::vector<P>,std::greater<P>> pq;
+
+  dp[0] = 0;
+
+  i64 seg_count = 0;
+
+  rep(i,1,n+1){
+    pq.emplace(i,i);
+    while(seg_count < m && seg[seg_count].first == i){
+      debug(i,seg[seg_count]);
+      pq.emplace(seg[seg_count]);
+      seg_count++;
+    }
+
+    P left_seg = pq.top();
+    while(left_seg.second < i){
+      pq.pop();
+      left_seg = pq.top();
+    }
+
+    dp[i] = a[i-1] + dp[left_seg.first-1];
+    chmax(dp[i],dp[i-1]);
+  }
+
+  debug(dp);
+
+  std::cout<<dp[n]<<"\n";
+
+  return 0;
+}
+

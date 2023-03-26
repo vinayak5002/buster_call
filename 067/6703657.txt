@@ -1,0 +1,313 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int cnt = 0;//arrayに入力するループのため
+
+
+typedef struct tree_node_s {//node構造体の定義
+  struct tree_node_s *left;
+  struct tree_node_s *right;
+  int data;
+} tree_node_t;
+
+tree_node_t *array[10000000];//more than nodes
+
+tree_node_t* create_node(int val)
+/* 値 val を保持する新しい節点を作成し, その節点へのポインタを返す */
+{
+  tree_node_t *new_node;
+  new_node = (tree_node_t*) malloc(sizeof(tree_node_t));//メモリの配り
+  new_node->data = val;
+  new_node->left = NULL;
+  new_node->right = NULL;//新たなノードを初期化
+  return new_node;//ポインタを返す
+}
+
+
+tree_node_t* insert(tree_node_t *n, int val)
+/* n を根とする二分木に val (の節点) を挿入する */
+{
+    if ( n == NULL) {
+    n = create_node(val);/*もし 1.nが根なら（最初の節点）あるいは  2.再帰的にinsert目的地（葉）が見つかったら、valの値を持つノードを作成する*/
+    }
+    if (val < n->data) {//もし目標値が今の節点より小さいなら、左に行く
+        n->left = insert(n->left, val);//再帰的に目的地を探し、create_node(val)が終わったら、返す値として親のleftに代入する(親との連結)
+    }
+    if (val > n->data){//もし目標値が今の節点より大きいなら、右に行く
+        n->right = insert(n->right, val);//再帰的に目的地を探し、create_node(val)が終わったら、返す値として親のrightに代入する(親との連結)
+    }
+    return n;
+}
+
+void pre(tree_node_t *n)//preorder巡回
+{
+    if( n == NULL ) return;//もし葉であれば返す
+
+    printf(" %d", n->data);//先に節点出力して、左部分木巡回、右部分木巡回に進む
+    pre(n->left);
+    pre(n->right);
+}
+
+void in(tree_node_t *n)//inorder巡回
+{
+    if( n == NULL ) return;//もし葉であれば返す
+
+    in(n->left);//先に左部分木を巡回して、節点を出力して、右部分木巡回に進む
+    printf(" %d", n->data);
+    in(n->right);
+}
+
+void in_for_array(tree_node_t *n)//inorder巡回でノードをarrayに書き込む
+{
+    if( n == NULL ) return;//もし葉であれば返す
+
+    in_for_array(n->left);//先に左部分木を巡回して、節点を出力して、右部分木巡回に進む
+    array[cnt] = n;//書き込む
+    cnt++;
+    in_for_array(n->right);
+}
+
+tree_node_t* find_next(tree_node_t *goal)//ノードポインタ goal　の　中間順巡回の次のノードのポインタを返す関数
+{   
+    tree_node_t *res;
+    int i;
+
+    for( i = 0; i < cnt; i++ )
+    {
+        if( array[i] == goal )   return array[i+1];//arrayでgoalを探し、次のポインタを返す
+    }
+
+    return NULL;//もしなければNULLを返す
+}
+
+
+void tprint(tree_node_t *n)
+/* 二分木の内容を表示する (1. inorder 2. preorder)*/
+{
+    in(n);
+    printf("\n");
+    pre(n);
+    printf("\n");
+}
+
+
+tree_node_t* find(tree_node_t *n, int val)
+/* *n を根とする二分木中に値が val の節点を探す
+   見つかればその節点のポインタを, なければ NULL を返す */
+{
+    while( n != NULL )//nがnullになるまで
+    {
+        if( n->data == val ) return n;//見つかったら節点のポインタを返す
+        else{
+            if( n->data < val) n = n->right;//もし目標値が今の節点より大きいなら、右に行く
+            else n = n->left;//もし目標値が今の節点より小さいなら、左に行く
+        }
+    }
+    return NULL;
+}
+
+tree_node_t* delete_0_1_child(tree_node_t *n, int val)//削除したいノードが0か1個の子をもつ時の削除関数
+{
+    tree_node_t* parent;//親節点を初期化
+    tree_node_t* x = n;//n(根節点)の値を変えたくないから、xを用意し、valの目標節点として扱う
+
+    while( x != NULL )//xとparentを探す(結果：x--->目標節点、parent--->xの親節点)
+    {
+        if( x->data == val ){
+            break;
+        }
+        else{
+            if( x->data < val){
+                parent = x;//親節点を記録
+                x = x->right;//もし目標値が今の節点より大きいなら、右に行く
+            }
+            else{
+                parent = x;//親節点を記録
+                x = x->left;//もし目標値が今の節点より小さいなら、左に行く
+            } 
+        }
+    }
+
+    if( x->left == NULL && x->right == NULL )//もしxが子を持たないなら(xの子をparentの子として連結し(xを飛ばして)、xを削除)
+    {
+        if(parent->left == x)   parent->left = NULL;//もしxはparentの左節点なら、parent->left = NULL
+        else    parent->right = NULL;//もしxはparentの右節点なら、parent->right = NULL
+        free(x);
+        x = NULL;//xを削除
+    }
+    else if( (x->left != NULL && x->right == NULL) || (x->left == NULL && x->right != NULL) )//もしxが一個の子を持つなら
+    {
+    /*  2.1.1  parent --左--> x --左--> child
+        2.1.2  parent --左--> x --右--> child
+        2.2.1  parent --右--> x --左--> child
+        2.2.2  parent --右--> x --右--> child
+     */
+        if(parent->left == x && x->left != NULL)//2.1.1
+        {
+            parent->left = x->left;
+            x->left = NULL;
+            free(x);
+            x = NULL;
+        }
+        else if(parent->left == x && x->right != NULL)//2.1.2
+        {
+            parent->left = x->right;
+            x->right = NULL;
+            free(x);
+            x = NULL;
+        }
+        else if(parent->right == x && x->left != NULL)//2.2.1
+        {
+            parent->right = x->left;
+            x->left = NULL;
+            free(x);
+            x = NULL; 
+        }
+        else//2.2.2
+        {
+            parent->right = x->right;
+            x->right = NULL;
+            free(x);
+            x = NULL; 
+        }
+    }
+    return n;
+}
+
+void new_delete_0_1_child(tree_node_t *x, tree_node_t *parent)
+/*delete_2_child専用関数(old versionなら値valでノードを探す手順があり、delete_2_childで値をコピーすることがあって、
+valを探すなら過ちが生じる、ここでxとparentを引数で読み取り、探すのを避けたが、他の内容は一緒）
+*/
+{
+    if( x->left == NULL && x->right == NULL )
+    {
+        if(parent->left == x)   parent->left = NULL;
+        else    parent->right = NULL;
+        free(x);
+        x = NULL;
+    }
+    else if( (x->left != NULL && x->right == NULL) || (x->left == NULL && x->right != NULL) )
+    {
+    /*  2.1.1  parent --左--> x --左--> child
+        2.1.2  parent --左--> x --右--> child
+        2.2.1  parent --右--> x --左--> child
+        2.2.2  parent --右--> x --右--> child
+     */
+        if(parent->left == x && x->left != NULL)//2.1.1
+        {
+            parent->left = x->left;
+            x->left = NULL;
+            free(x);
+            x = NULL;
+        }
+        else if(parent->left == x && x->right != NULL)//2.1.2
+        {
+            parent->left = x->right;
+            x->right = NULL;
+            free(x);
+            x = NULL;
+        }
+        else if(parent->right == x && x->left != NULL)//2.2.1
+        {
+            parent->right = x->left;
+            x->left = NULL;
+            free(x);
+            x = NULL; 
+        }
+        else//2.2.2
+        {
+            parent->right = x->right;
+            x->right = NULL;
+            free(x);
+            x = NULL; 
+        }
+    }
+}
+
+tree_node_t* delete_2_child(tree_node_t *n, tree_node_t *x)//もしxが二個の子を持つ時の関数(yの値をxにコピーし、yを削除)
+{
+    tree_node_t* y;//yは目標ノードxの中間順巡回の次のノード
+    tree_node_t* tmp = n;//n(根節点)の値を変えたくないから、tmpを用意し、y_parentを探す時臨時変数として使う
+
+    in_for_array(n);//中間順でノードポインタをarrayに書き込む
+    y = find_next(x);//xの次のノード(中間順)をyに代入
+
+    tree_node_t* y_parent;//yの親節点
+
+    while( tmp != NULL )//y_parentを探す
+    {
+        if( tmp->data == y->data ){//tmpがyになるまで
+            break;
+        }
+        else{
+            if( tmp->data < y->data ){
+                y_parent = tmp;
+                tmp = tmp->right;//もし目標値が今の節点より大きいなら、右に行く
+            }
+            else{
+                y_parent = tmp;
+                tmp = tmp->left;//もし目標値が今の節点より小さいなら、左に行く
+            } 
+        }
+    }
+    x->data = y->data;//yの値をxに代入し
+    new_delete_0_1_child(y,y_parent);//yを削除する
+
+    return n;
+}
+
+void all_delete(tree_node_t *n)
+/* 二分木の全てのデータとメモリを解放する */
+{
+  if (n != NULL) {
+    all_delete(n->left);
+    all_delete(n->right);
+    free(n);//postorderでメモリ解放するのは、nが先にfree()したら、再帰的関数の引数として何か問題があるかもしれないと考えたから
+  }
+}
+
+int main(void)
+{
+    tree_node_t *root = NULL;//根の初期化
+    tree_node_t *tmp = NULL;
+    int i,n,key;//i は loop変数、 n は　命令の数、keyは命令の後の値
+    char str[10];//命令の文字列を保存する変数
+    scanf("%d", &n);//nを読み込み
+
+    for( i = 0; i < n; i++ )//命令を読み込む
+    {
+        scanf("%s",str);//文字列部分
+        if(str[0] == 'i')//if insert
+        {
+            scanf("%d",&key);//数字を読み込む
+            root = insert(root, key);// (要注意)第一回目のinsertならrootの値はnullでinsert()でrootのメモリが配られて、rootに代入する。第二回からrootの値が変わらない
+        }
+        else if(str[0] == 'f')//if find
+        {
+            scanf("%d",&key);//数字を読み込む
+            tmp = find(root,key);//findの結果を臨時変数に代入し、もしNULLなら見つからなくて noを、NULLじゃなかったら yesを出力
+            if(tmp == NULL)    printf("no\n");
+            else    printf("yes\n");
+        }
+        else if(str[0] == 'd')//if delete
+        {
+            scanf("%d",&key);//数字を読み込む
+            tree_node_t *x = find(root,key);//keyをもつ節点を探してxに代入
+            if(x->left != NULL && x->right != NULL)//もしxが二つの子を持つなら
+            {
+                delete_2_child(root,x);
+            }
+            else//0あるいは1個の子を持つなら
+            {
+                delete_0_1_child(root,key);
+            }
+        }
+        else//if print
+        {
+            tprint(root);
+        }
+    }
+
+    all_delete(root);//全てのメモリ解放する
+    return 0;
+}

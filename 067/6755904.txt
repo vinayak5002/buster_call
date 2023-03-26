@@ -1,0 +1,464 @@
+#include "bits/stdc++.h"
+#include <numeric>
+//#include <atcoder/all>
+using namespace std;
+//using namespace atcoder;
+
+// clang-format off
+/* accelration */
+// 高速バイナリ生成
+#pragma GCC target("avx")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+// cin cout の結びつけ解除, stdioと同期しない(入出力非同期化)
+// cとstdの入出力を混在させるとバグるので注意
+struct Fast { Fast() { std::cin.tie(0); ios::sync_with_stdio(false); } } fast;
+
+/* alias */
+using ull = unsigned long long;
+using ll = long long;
+using vi = vector<int>;
+using vl = vector<long>;
+using vll = vector<long long>;
+using vvi = vector<vi>;
+using vvl = vector<vl>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+
+/* define short */
+#define pb push_back
+// #define mp make_pair
+#define all(obj) (obj).begin(), (obj).end()
+#define YESNO(bool) if(bool){cout<<"YES"<<endl;}else{cout<<"NO"<<endl;}
+#define yesno(bool) if(bool){cout<<"yes"<<endl;}else{cout<<"no"<<endl;}
+#define YesNo(bool) if(bool){cout<<"Yes"<<endl;}else{cout<<"No"<<endl;}
+
+/* REP macro */
+#define reps(i, a, n) for (ll i = (a); i < (ll)(n); ++i)
+#define rep(i, n) reps(i, 0, n)
+#define rrep(i, n) reps(i, 1, n + 1)
+#define repd(i,n) for(ll i=n-1;i>=0;i--)
+#define rrepd(i,n) for(ll i=n;i>=1;i--)
+#define repsd(i, n, a) for(ll i=n;i>=a;i--)
+#define fore(i,a) for(auto &i:a)
+
+/* debug */
+// 標準エラー出力を含む提出はrejectされる場合もあるので注意
+#define debug(x) cerr << "\033[33m(line:" << __LINE__ << ") " << #x << ": " << x << "\033[m" << endl;
+
+/* func */
+inline int in_int() { int x; cin >> x; return x; }
+inline ll in_ll() { ll x; cin >> x; return x; }
+inline string in_str() { string x; cin >> x; return x; }
+// search_length: 走査するベクトル長の上限(先頭から何要素目までを検索対象とするか、1始まりで)
+template <typename T> inline bool vector_finder(std::vector<T> vec, T element, unsigned int search_length) {
+    auto itr = std::find(vec.begin(), vec.end(), element);
+    size_t index = std::distance(vec.begin(), itr);
+    if (index == vec.size() || index >= search_length) { return false; }
+    else { return true; }
+}
+template <typename T> inline void print(const vector<T>& v, string s = " ")
+{
+    rep(i, v.size()) cout << v[i] << (i != (ll)v.size() - 1 ? s : "\n");
+}
+template <typename T, typename S> inline void print(const pair<T, S>& p)
+{
+    cout << p.first << " " << p.second << endl;
+}
+template <typename T> inline void print(const T& x) { cout << x << "\n"; }
+inline void printd(double x) { cout << fixed << setprecision(8) << x << endl; }
+template <typename T, typename S> inline void print(const vector<pair<T, S>>& v)
+{
+    for (auto&& p : v) print(p);
+}
+// 第一引数と第二引数を比較し、第一引数(a)をより大きい/小さい値に上書き
+template <typename T> inline bool chmin(T& a, const T& b) { bool compare = a > b; if (a > b) a = b; return compare; }
+template <typename T> inline bool chmax(T& a, const T& b) { bool compare = a < b; if (a < b) a = b; return compare; }
+// gcd lcm
+// C++17からは標準実装
+// template <typename T> T gcd(T a, T b) {if (b == 0)return a; else return gcd(b, a % b);}
+// template <typename T> inline T lcm(T a, T b) {return (a * b) / gcd(a, b);}
+// clang-format on
+
+int __builtin_clz(unsigned int n)
+{
+    unsigned long index;
+    /* n が0のときの __builtin_clz の戻り値は未定義なので、
+     * _BitScanReverse の戻り値チェックは割愛する。
+     */
+    _BitScanReverse(&index, n);
+    return 31 - index;
+}
+
+/**
+ * @brief Graph Template(グラフテンプレート)
+ */
+template< typename T = int >
+struct Edge {
+    int from, to;
+    T cost;
+    int idx;
+
+    Edge() = default;
+
+    Edge(int from, int to, T cost = 1, int idx = -1) : from(from), to(to), cost(cost), idx(idx) {}
+
+    operator int() const { return to; }
+};
+
+template< typename T = int >
+struct Graph {
+    vector< vector< Edge< T > > > g;
+    int es;
+
+    Graph() = default;
+
+    explicit Graph(int n) : g(n), es(0) {}
+
+    size_t size() const {
+        return g.size();
+    }
+
+    void add_directed_edge(int from, int to, T cost = 1) {
+        g[from].emplace_back(from, to, cost, es++);
+    }
+
+    void add_edge(int from, int to, T cost = 1) {
+        g[from].emplace_back(from, to, cost, es);
+        g[to].emplace_back(to, from, cost, es++);
+    }
+
+    void read(int M, int padding = -1, bool weighted = false, bool directed = false) {
+        for (int i = 0; i < M; i++) {
+            int a, b;
+            cin >> a >> b;
+            a += padding;
+            b += padding;
+            T c = T(1);
+            if (weighted) cin >> c;
+            if (directed) add_directed_edge(a, b, c);
+            else add_edge(a, b, c);
+        }
+    }
+
+    inline vector< Edge< T > >& operator[](const int& k) {
+        return g[k];
+    }
+
+    inline const vector< Edge< T > >& operator[](const int& k) const {
+        return g[k];
+    }
+};
+
+template< typename T = int >
+using Edges = vector< Edge< T > >;
+
+struct UnionFind {
+    vector< int > data;
+
+    UnionFind() = default;
+
+    explicit UnionFind(size_t sz) : data(sz, -1) {}
+
+    bool unite(int x, int y) {
+        x = find(x), y = find(y);
+        if (x == y) return false;
+        if (data[x] > data[y]) swap(x, y);
+        data[x] += data[y];
+        data[y] = x;
+        return true;
+    }
+
+    int find(int k) {
+        if (data[k] < 0) return (k);
+        return data[k] = find(data[k]);
+    }
+
+    int size(int k) {
+        return -data[find(k)];
+    }
+
+    bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+
+    vector< vector< int > > groups() {
+        int n = (int)data.size();
+        vector< vector< int > > ret(n);
+        for (int i = 0; i < n; i++) {
+            ret[find(i)].emplace_back(i);
+        }
+        ret.erase(remove_if(begin(ret), end(ret), [&](const vector< int >& v) {
+            return v.empty();
+            }), end(ret));
+        return ret;
+    }
+};
+
+template< class T >
+struct Matrix {
+    vector< vector< T > > A;
+
+    Matrix() {}
+
+    Matrix(size_t n, size_t m) : A(n, vector< T >(m, 0)) {}
+
+    Matrix(size_t n) : A(n, vector< T >(n, 0)) {};
+
+    size_t height() const {
+        return (A.size());
+    }
+
+    size_t width() const {
+        return (A[0].size());
+    }
+
+    inline const vector< T >& operator[](int k) const {
+        return (A.at(k));
+    }
+
+    inline vector< T >& operator[](int k) {
+        return (A.at(k));
+    }
+
+    static Matrix I(size_t n) {
+        Matrix mat(n);
+        for (int i = 0; i < n; i++) mat[i][i] = ~0U;
+        return (mat);
+    }
+
+    Matrix& operator+=(const Matrix& B) {
+        size_t n = height(), m = width();
+        assert(n == B.height() && m == B.width());
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+                (*this)[i][j] ^= B[i][j];
+        return (*this);
+    }
+
+    Matrix& operator-=(const Matrix& B) {
+        size_t n = height(), m = width();
+        assert(n == B.height() && m == B.width());
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+                (*this)[i][j] -= B[i][j];
+        return (*this);
+    }
+
+    Matrix& operator*=(const Matrix& B) {
+        size_t n = height(), m = B.width(), p = width();
+        assert(p == B.height());
+        vector< vector< T > > C(n, vector< T >(m, 0));
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+                for (int k = 0; k < p; k++)
+                    C[i][j] = (C[i][j] ^ ((*this)[i][k] & B[k][j]));
+        A.swap(C);
+        return (*this);
+    }
+
+    Matrix& operator^=(long long k) {
+        Matrix B = Matrix::I(height());
+        while (k > 0) {
+            if (k & 1) B *= *this;
+            *this *= *this;
+            k >>= 1LL;
+        }
+        A.swap(B.A);
+        return (*this);
+    }
+
+    Matrix operator+(const Matrix& B) const {
+        return (Matrix(*this) += B);
+    }
+
+    Matrix operator-(const Matrix& B) const {
+        return (Matrix(*this) -= B);
+    }
+
+    Matrix operator*(const Matrix& B) const {
+        return (Matrix(*this) *= B);
+    }
+
+    Matrix operator^(const long long k) const {
+        return (Matrix(*this) ^= k);
+    }
+
+    friend ostream& operator<<(ostream& os, Matrix& p) {
+        size_t n = p.height(), m = p.width();
+        for (int i = 0; i < n; i++) {
+            os << "[";
+            for (int j = 0; j < m; j++) {
+                os << p[i][j] << (j + 1 == m ? "]\n" : ",");
+            }
+        }
+        return (os);
+    }
+
+
+    T determinant() {
+        Matrix B(*this);
+        assert(width() == height());
+        T ret = 1;
+        for (int i = 0; i < width(); i++) {
+            int idx = -1;
+            for (int j = i; j < width(); j++) {
+                if (B[j][i] != 0) idx = j;
+            }
+            if (idx == -1) return (0);
+            if (i != idx) {
+                ret *= -1;
+                swap(B[i], B[idx]);
+            }
+            ret *= B[i][i];
+            T vv = B[i][i];
+            for (int j = 0; j < width(); j++) {
+                B[i][j] /= vv;
+            }
+            for (int j = i + 1; j < width(); j++) {
+                T a = B[j][i];
+                for (int k = 0; k < width(); k++) {
+                    B[j][k] -= B[i][k] * a;
+                }
+            }
+        }
+        return (ret);
+    }
+};
+
+template< typename T, typename F >
+struct SparseTable {
+    F f;
+    vector< vector< T > > st;
+    vector< int > lookup;
+
+    SparseTable() = default;
+
+    explicit SparseTable(const vector< T >& v, const F& f) : f(f) {
+        const int n = (int)v.size();
+        const int b = 32 - __builtin_clz(n);
+        st.assign(b, vector< T >(n));
+        for (int i = 0; i < v.size(); i++) {
+            st[0][i] = v[i];
+        }
+        for (int i = 1; i < b; i++) {
+            for (int j = 0; j + (1 << i) <= n; j++) {
+                st[i][j] = f(st[i - 1][j], st[i - 1][j + (1 << (i - 1))]);
+            }
+        }
+        lookup.resize(v.size() + 1);
+        for (int i = 2; i < lookup.size(); i++) {
+            lookup[i] = lookup[i >> 1] + 1;
+        }
+    }
+
+    inline T fold(int l, int r) const {
+        int b = lookup[r - l];
+        return f(st[b][l], st[b][r - (1 << b)]);
+    }
+};
+
+template< typename T, typename F >
+SparseTable< T, F > get_sparse_table(const vector< T >& v, const F& f) {
+    return SparseTable< T, F >(v, f);
+}
+
+
+// 定数
+const ll INF = 1ll << 60, invINF = -(1ll << 60);
+const vi dd({ -1,0,1,0,-1 });
+const ll MOD = 1000000007;
+const double PI = acos(-1);
+
+// 最大公約数
+ll gcd(ll a, ll b) {
+    if (!b) return a;
+    if (a % b == 0) return b;
+    else return gcd(b, a % b);
+}
+
+// 最小公倍数
+ll lcm(ll a, ll b) {
+    return a * b / gcd(a, b);
+}
+
+
+//using mint = modint1000000007;
+
+
+
+
+
+#pragma once
+
+
+template< typename T = int >
+struct RMQLowestCommonAncestor : Graph< T > {
+public:
+    using Graph< T >::Graph;
+    using Graph< T >::g;
+    using F = function< int(int, int) >;
+
+    void build(int root = 0) {
+        ord.reserve(g.size() * 2 - 1);
+        dep.reserve(g.size() * 2 - 1);
+        in.resize(g.size());
+        dfs(root, -1, 0);
+        vector< int > vs(g.size() * 2 - 1);
+        iota(begin(vs), end(vs), 0);
+        F f = [&](int a, int b) { return dep[a] < dep[b] ? a : b; };
+        st = get_sparse_table(vs, f);
+    }
+
+    int lca(int x, int y) const {
+        if (in[x] > in[y]) swap(x, y);
+        return x == y ? x : ord[st.fold(in[x], in[y])];
+    }
+
+private:
+    vector< int > ord, dep, in;
+    SparseTable< int, F > st;
+
+    void dfs(int idx, int par, int d) {
+        in[idx] = (int)ord.size();
+        ord.emplace_back(idx);
+        dep.emplace_back(d);
+        for (auto& to : g[idx]) {
+            if (to != par) {
+                dfs(to, idx, d + 1);
+                ord.emplace_back(idx);
+                dep.emplace_back(d);
+            }
+        }
+    }
+};
+
+int main() {
+    ll n;
+    cin >> n;
+    Graph<int> G;
+    RMQLowestCommonAncestor<int> dlca(n);
+    rep(i, n) {
+        ll k;
+        cin >> k;
+        while (k--) {
+            ll c;
+            cin >> c;
+            dlca.add_edge(i, c);
+        }
+    }
+    dlca.build();
+    int q;
+    cin >> q;
+    while (q--) {
+        int u, v;
+        cin >> u >> v;
+        print(dlca.lca(u, v));
+    }
+}
+
+

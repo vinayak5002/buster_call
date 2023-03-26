@@ -1,0 +1,255 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1163&lang=jp
+class Program
+{
+    static string InputPattern = "InputX";
+
+    static List<string> GetInputList()
+    {
+        var WillReturn = new List<string>();
+
+        if (InputPattern == "Input1") {
+            WillReturn.Add("4 3");
+            WillReturn.Add("2 6 6 15");
+            WillReturn.Add("2 3 5");
+            WillReturn.Add("2 3");
+            WillReturn.Add("4 9");
+            WillReturn.Add("8 16 32");
+            WillReturn.Add("4 2");
+            WillReturn.Add("4 9 11 13");
+            WillReturn.Add("5 7");
+            WillReturn.Add("5 5");
+            WillReturn.Add("2 3 5 1001 1001");
+            WillReturn.Add("7 11 13 30 30");
+            WillReturn.Add("10 10");
+            WillReturn.Add("2 3 5 7 9 11 13 15 17 29");
+            WillReturn.Add("4 6 10 14 18 22 26 30 34 38");
+            WillReturn.Add("0 0");
+        }
+        else if (InputPattern == "Input2") {
+            return System.IO.File.ReadAllLines(@"D:\CSharp\TestConsole\in.txt").ToList();
+        }
+        else {
+            string wkStr;
+            while ((wkStr = Console.ReadLine()) != null) WillReturn.Add(wkStr);
+        }
+        return WillReturn;
+    }
+
+    static long mX; // Xの頂点数
+    static long mY; // Yの頂点数
+    static long mSourceNode;
+    static long mSinkNode;
+    static long UB;
+
+    // 隣接行列で枝を表現
+    static long[,] mCapacityArr;
+    static long[,] mFlowArr;
+
+    static void Main()
+    {
+        List<string> InputList = GetInputList();
+
+        long[] wkArr = { };
+        Action<string> SplitAct = pStr =>
+            wkArr = pStr.Split(' ').Select(pX => long.Parse(pX)).ToArray();
+
+        long RestB = 0;
+        long RestR = 0;
+
+        var BList = new List<long>();
+        var RList = new List<long>();
+
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        foreach (string EachStr in InputList) {
+            SplitAct(EachStr);
+
+            if (RestB == 0 && RestR == 0) {
+                RestB = wkArr[0];
+                RestR = wkArr[1];
+                if (RestB == 0) break;
+                continue;
+            }
+
+            if (RestB > 0) {
+                long[] ReadArr = EachStr.Split(' ').Select(pX => long.Parse(pX)).ToArray();
+                BList.AddRange(ReadArr);
+
+                RestB -= ReadArr.Length;
+                continue;
+            }
+            if (RestR > 0) {
+                long[] ReadArr = EachStr.Split(' ').Select(pX => long.Parse(pX)).ToArray();
+                RList.AddRange(ReadArr);
+
+                RestR -= ReadArr.Length;
+
+                if (RestR == 0) {
+                    Solve(BList.ToArray(), RList.ToArray());
+                    BList.Clear();
+                    RList.Clear();
+                }
+            }
+        }
+        //Console.WriteLine(sw.Elapsed);
+    }
+
+    static Dictionary<long, HashSet<long>> mYakusuuSetDict = new Dictionary<long, HashSet<long>>();
+
+    static void Solve(long[] pBArr, long[] pRArr)
+    {
+        mX = pBArr.Length;
+        mY = pRArr.Length;
+        mSourceNode = mX + mY;
+        mSinkNode = mSourceNode + 1;
+        UB = mSinkNode;
+
+        mCapacityArr = new long[UB + 1, UB + 1];
+        mFlowArr = new long[UB + 1, UB + 1];
+
+        //mYakusuuSetDict = new Dictionary<long, HashSet<long>>();
+        //foreach (long EachVal in pBArr.Concat(pRArr)) {
+        //    if (mYakusuuSetDict.ContainsKey(EachVal)) continue;
+        //    mYakusuuSetDict[EachVal] = DeriveYakusuuSet(EachVal);
+        //    mYakusuuSetDict[EachVal].Remove(1);
+        //}
+
+        for (int I = 0; I <= pBArr.GetUpperBound(0); I++) {
+            for (int J = 0; J <= pRArr.GetUpperBound(0); J++) {
+                //var YakusuuSet1 = mYakusuuSetDict[pBArr[I]];
+                //var YakusuuSet2 = mYakusuuSetDict[pRArr[J]];
+
+                //if (YakusuuSet1.Overlaps(YakusuuSet2)) {
+                //    mCapacityArr[I, mX + J] = 1;
+                //}
+
+                if (DeriveGCD(pBArr[I], pRArr[J]) > 1) {
+                    mCapacityArr[I, mX + J] = 1;
+                }
+            }
+        }
+
+        for (long I = 0; I <= mX - 1; I++) {
+            mCapacityArr[mSourceNode, I] = 1;
+        }
+        for (long I = mX; I <= mX + mY - 1; I++) {
+            mCapacityArr[I, mSinkNode] = 1;
+        }
+
+        // エドモンズ・カープで解く
+        EdmondsKarp();
+    }
+
+    // 約数を列挙する
+    static HashSet<long> DeriveYakusuuSet(long pTarget)
+    {
+        var YakusuuSet = new HashSet<long>();
+        for (long I = 1; I * I <= pTarget; I++) {
+            if (pTarget % I == 0) {
+                YakusuuSet.Add(I);
+                YakusuuSet.Add(pTarget / I);
+            }
+        }
+        return YakusuuSet;
+    }
+
+    // ユークリッドの互除法で2数の最大公約数を求める
+    static long DeriveGCD(long pVal1, long pVal2)
+    {
+        long WarareruKazu = pVal2;
+        long WaruKazu = pVal1;
+
+        while (true) {
+            long Amari = WarareruKazu % WaruKazu;
+            if (Amari == 0) return WaruKazu;
+            WarareruKazu = WaruKazu;
+            WaruKazu = Amari;
+        }
+    }
+
+    static void EdmondsKarp()
+    {
+        while (true) {
+            List<long> NodeList = ExecBFS();
+            if (NodeList == null) break;
+
+            //Console.WriteLine("経路を発見しました");
+            //NodeList.ForEach(pX => Console.Write("{0},", pX));
+            //Console.WriteLine();
+
+            // 経路に流す量
+            long CurrFlow = long.MaxValue;
+
+            for (int I = 0; I <= NodeList.Count - 2; I++) {
+                long FromNode = NodeList[I];
+                long ToNode = NodeList[I + 1];
+
+                CurrFlow = Math.Min(CurrFlow, mCapacityArr[FromNode, ToNode]);
+            }
+            //Console.WriteLine("この経路に{0}の水を流します", CurrFlow);
+
+            for (int I = 0; I <= NodeList.Count - 2; I++) {
+                long FromNode = NodeList[I];
+                long ToNode = NodeList[I + 1];
+
+                mCapacityArr[FromNode, ToNode] -= CurrFlow;
+                mFlowArr[FromNode, ToNode] += CurrFlow;
+
+                // 逆辺を追加する
+                mCapacityArr[ToNode, FromNode] += CurrFlow;
+            }
+        }
+
+        long Answer = 0;
+        for (long I = 0; I <= UB; I++) {
+            Answer += mFlowArr[I, UB];
+        }
+        Console.WriteLine(Answer);
+    }
+
+    struct JyoutaiDef
+    {
+        internal long CurrNode;
+        internal List<long> NodeList;
+    }
+
+    // 幅優先探索を行い、始点から終点へのノードのListを返す
+    // なければnullを返す
+    static List<long> ExecBFS()
+    {
+        var Que = new Queue<JyoutaiDef>();
+        JyoutaiDef WillEnqueue;
+        WillEnqueue.CurrNode = mSourceNode; // 始点のノードはmSourceNode
+        WillEnqueue.NodeList = new List<long>();
+        WillEnqueue.NodeList.Add(WillEnqueue.CurrNode);
+        Que.Enqueue(WillEnqueue);
+
+        // BFSを繰り返すので、レベルの低い訪問を優先しても問題ない
+        var VisitedSet = new HashSet<long>();
+
+        while (Que.Count > 0) {
+            JyoutaiDef Dequeued = Que.Dequeue();
+
+            // 終点のノードはmSinkNode
+            if (Dequeued.CurrNode == mSinkNode) {
+                return Dequeued.NodeList;
+            }
+
+            for (long I = 0; I <= UB; I++) {
+                long CurrCapacity = mCapacityArr[Dequeued.CurrNode, I];
+                if (CurrCapacity == 0) continue;
+
+                if (VisitedSet.Add(I) == false) continue;
+
+                WillEnqueue.CurrNode = I;
+                WillEnqueue.NodeList = new List<long>(Dequeued.NodeList) { I };
+                Que.Enqueue(WillEnqueue);
+            }
+        }
+        return null;
+    }
+}
+

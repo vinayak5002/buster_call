@@ -1,0 +1,69 @@
+#include<iostream>
+#include<vector>
+
+int main(){
+    int Vnum,Enum;
+    std::cin >> Vnum;
+    int E[100][100];
+    int size[100] = {};
+    for(int i = 0; i < Vnum; i++){
+        int num;
+        std::cin >> num >> Enum;
+        if(Enum != 0){
+            int s=0;
+            for(int j = 0; j<Enum; j++){
+                std::cin >> E[i][j];
+                s++;
+            }
+            size[i] = s;
+        }
+    }
+
+    std::cout << "入力完了\n";
+
+    std::cout << "\n";
+
+    //開始頂点を探索済み( =1 )とする
+    int V[101] = {0};
+
+    //G[発見時刻][終了時刻]
+    int G[100][2];
+
+    //g:時刻
+    int g = 1;
+    G[0][0] = g;
+    g++;
+
+    //空のスタックを用意して、開始頂点を挿入する
+    std::vector<int> stack;
+    stack.push_back(1);
+
+    //スタックが空の場合
+    for(int k = 0; k < 11; k++){
+        int u = stack.back();
+        if(E[u-1][0] != 0){
+            for(int i = 0; i < size[u-1]; i++){
+                int U = E[u-1][i];
+                if(E[u-1][i] != 0){
+                    if(V[U] == 0){
+                        stack.push_back(U);
+                        G[U-1][0] = g;
+                        g++;
+                    }
+                    E[u-1][i] = 0;
+                }
+            }
+        }else{
+            stack.pop_back();
+            V[u] = 1;
+            G[u-1][1] = g;
+            g++;
+        }
+    }
+
+    std::cout << "実行結果\n";
+    std::cout << "\n";
+    for(int i = 0; i < Vnum; i++){
+        std::cout << i+1 << ":" << G[i][0] << "/" << G[i][1] << "\n";
+    }
+}

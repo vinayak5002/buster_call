@@ -1,0 +1,69 @@
+// I SELL YOU...! 
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<functional>
+#include<queue>
+#include<chrono>
+#include<iomanip>
+#include<map>
+#include<set>
+using namespace std;
+using ll = long long;
+using P = pair<ll,ll>;
+using TP = tuple<ll,ll,ll>;
+void init_io(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  cout << fixed << setprecision(18);
+}
+const ll MINF = -1e15;
+const ll MAX_N = 101;
+const ll MAX = 500 * MAX_N;
+vector<vector<P>> dp(MAX_N, vector<P> (MAX, P(0, MINF)));
+void solve() {
+  ll n;
+  cin >> n;
+  if (n==0) return;
+  vector<ll> p(n);
+  for (int i=0;i<n;i++) {
+    cin >> p[i];
+  }
+  for (int i=0;i<MAX_N;i++) {
+    for (int j=0;j<MAX;j++) {
+      dp[i][j] = P(0, MINF);
+    }
+  }
+  dp[0][0] = P(0, 0);
+  for (int i=0;i<n;i++) {
+    for (int j=0;j<MAX;j++) {
+      dp[i+1][j] = max(dp[i][j], dp[i+1][j]);
+      if (dp[i][j].second == MINF) continue;
+      ll turi_1000 = (1000-(p[i]%1000))%1000;
+      ll nc = dp[i][j].second - p[i];
+      ll k;
+      if (turi_1000 >= 500) {
+        k = turi_1000 - 500;
+        dp[i+1][j+k] = max(dp[i+1][j+k], P(dp[i][j].first+1, nc));
+      } else {
+        k = turi_1000;
+        dp[i+1][j+k] = max(dp[i+1][j+k], P(dp[i][j].first, nc));
+        if (j >= (500-turi_1000)) {
+          k = -(500-turi_1000);
+          dp[i+1][j+k] = max(dp[i+1][j+k], P(dp[i][j].first+1, nc));
+        }
+      }
+    }
+  }
+  P ans = P(0, 0);
+  for (int i=0;i<500;i++) {
+    ans = max(ans, dp[n][i]);
+  }
+  cout << ans.first <<" "<< -ans.second << endl;
+  solve();
+}
+signed main(){
+  init_io();
+  solve();
+}
+

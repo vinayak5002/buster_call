@@ -1,0 +1,84 @@
+#define PROBLEM "http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1040"
+
+// #include "../../graph/edge.cpp"
+// #include "../../graph/minimum_steiner_tree.hpp"
+
+#include <bits/stdc++.h>
+using namespace std;
+
+template <typename T>
+struct Edge {
+    int from, to;
+    T weight;
+    Edge() = default;
+    Edge(int to, T weight) : from(-1), to(to), weight(weight) {}
+    Edge(int from, int to, T weight) : from(from), to(to), weight(weight) {}
+};
+
+template <typename T>
+T minimum_steiner_tree(std::vector<std::vector<Edge<T>>>& G, std::vector<int>& terminals) {
+    const int n = G.size();
+    const int t = terminals.size();
+    constexpr T INF = std::numeric_limits<T>::max() / 2;
+    using P = std::pair<T, int>;
+
+    std::vector<std::vector<T>> dp(1 << t, std::vector<T>(n, INF));
+    for (int i = 0; i < t; ++i) dp[1 << i][terminals[i]] = 0;
+
+    for (int S = 1; S < (1 << t); ++S) {
+        for (int i = 0; i < n; ++i) {
+            for (int U = S; U > 0; U = (U - 1) & S) {
+                dp[S][i] = std::min(dp[S][i], dp[S ^ U][i] + dp[U][i]);
+            }
+        }
+        if (S == (1 << t) - 1) continue;
+        std::priority_queue<P, std::vector<P>, std::greater<>> pq;
+        for (int i = 0; i < n; ++i) {
+            pq.emplace(dp[S][i], i);
+        }
+        while (!pq.empty()) {
+            auto [d, v] = pq.top();
+            pq.pop();
+            if (dp[S][v] < d) continue;
+            for (auto& e : G[v]) {
+                if (dp[S][e.to] > d + e.weight) {
+                    dp[S][e.to] = d + e.weight;
+                    pq.emplace(dp[S][e.to], e.to);
+                }
+            }
+        }
+    }
+
+    return dp.back()[terminals[0]];
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int H, W;
+        cin >> H >> W;
+        if (H == 0) break;
+        vector<vector<Edge<int>>> G(H*W);
+        vector<int> terminals;
+        for (int i = 0; i < H; ++i) {
+            for (int j = 0; j < W; ++j) {
+                int s;
+                cin >> s;
+                if (s) terminals.push_back(i*W+j);
+                if (i < H-1) {
+                    G[i*W+j].push_back({(i+1)*W+j, 1});
+                    G[(i+1)*W+j].push_back({i*W+j, 1});
+                }
+                if (j < W-1) {
+                    G[i*W+j].push_back({i*W+j+1, 1});
+                    G[i*W+j+1].push_back({i*W+j, 1});
+                }
+            }
+        }
+        cout << H*W - minimum_steiner_tree(G, terminals) - 1 << endl;
+    }
+}
+

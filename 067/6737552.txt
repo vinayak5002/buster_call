@@ -1,0 +1,90 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+struct Node{
+    int key;
+    Node *prev, *next;
+};
+
+// struct Node *nil;
+
+Node *nil;
+
+void init(){
+    nil = (Node *)malloc(sizeof(Node));
+    nil -> next = nil;
+    nil -> prev = nil;
+}
+
+void insert(int key){
+    Node *x = (Node *)malloc(sizeof(Node));
+    x -> key = key;
+    x -> prev = nil;
+    x -> next = nil -> next;
+    nil -> next -> prev = x;
+    nil -> next = x;
+}
+
+Node * listSearch(int key){
+    Node *cur = nil -> next;
+    while(cur != nil && cur -> key != key){
+        cur = cur -> next;
+    }
+    return cur;
+}
+void deleteNode(Node *t){
+    if(t == nil){
+        return;
+    }
+    t -> prev -> next = t -> next;
+    t -> next -> prev = t -> prev;
+    free(t);
+}
+
+void deleteFirst(){
+    deleteNode(nil -> next);
+}
+
+void deleteLast(){
+    deleteNode(nil -> prev);
+}
+
+void deleteKey(int key){
+    deleteNode(listSearch(key));
+}
+
+void printKey(){
+    Node *cur = nil -> next;
+    while(cur != nil){
+        cout << cur -> key;
+        if(cur -> next != nil){
+            cout << " ";
+        }
+        cur = cur -> next;
+    }
+        cout << endl;
+}
+
+int main(){
+    int n, key;
+    string cmd;
+    init();
+
+    cin >> n;
+    for(int i=0; i < n; i++){
+        cin >> cmd;
+        if(cmd == "insert"){
+            cin >> key;
+            insert(key);
+        } else if(cmd == "delete"){
+            cin >> key;
+            deleteKey(key);
+        } else if(cmd == "deleteFirst"){
+            deleteFirst();
+        } else if(cmd == "deleteLast"){
+            deleteLast();
+        }
+    }
+    printKey();
+}
+

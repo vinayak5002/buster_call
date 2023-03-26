@@ -1,0 +1,95 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long int ull;
+#define chmin(x,y) x = min(x,y)
+#define chmax(x,y) x = max(x,y)
+#define BIG_NUM 2000000000
+#define HUGE_NUM 4000000000000000000 //オーバーフローに注意
+#define MOD 1000000007
+#define EPS 0.000000001
+
+
+
+#define SIZE 100005
+
+
+struct Edge{
+	Edge(int arg_to,int arg_ch){
+		to = arg_to;
+		ch = arg_ch;
+	}
+	int to,ch;
+};
+
+int N;
+int POW[30];
+map<int,ll> MAP;
+vector<Edge> G[SIZE];
+ll table[SIZE];
+
+void dfs(int node,int pre,int value){
+
+	if(node != 0){
+
+		MAP[value] += 1;
+		table[node] = value;
+	}
+
+	for(int i = 0; i < G[node].size(); i++){
+
+		int child = G[node][i].to;
+		if(child == pre)continue;
+
+		dfs(child,node,value^POW[G[node][i].ch]);
+	}
+}
+
+
+int main(){
+
+	POW[0] = 1;
+	for(int i = 1; i < 30; i++){
+
+		POW[i] = POW[i-1]*2;
+	}
+
+	scanf("%d",&N);
+
+	int a,b,ch;
+	char buf[2];
+
+	for(int i = 0; i < N-1; i++){
+
+		scanf("%d %d %s",&a,&b,buf);
+
+		a--;
+		b--;
+		ch = buf[0]-'a';
+
+		G[a].push_back(Edge(b,ch));
+		G[b].push_back(Edge(a,ch));
+	}
+
+	dfs(0,-1,0);
+
+	ll ans = 0;
+	ll num = MAP[0];
+
+	ans += MAP[0]; //根→自分まで
+	ans += (num*(num-1))/2; //0同士
+
+	for(int i = 0; i < 26; i++){ //奇数個が1個だけのものを探す
+		auto at = MAP.find(POW[i]);
+		if(at == MAP.end())continue;
+
+		ans += (at->second*(MAP[0]+1));
+
+		ans += (at->second*(at->second-1))/2; //自分と同じもので消す
+	}
+
+	printf("%lld\n",ans);
+
+	return 0;
+}
+

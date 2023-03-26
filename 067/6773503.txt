@@ -1,0 +1,30 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+void rec(vector<vector<int>> G,int v,vector<bool> &seen,vector<int> &ord){
+  seen[v] = true;
+  for(auto nv:G[v]) if(!seen[nv]) rec(G,nv,seen,ord);
+  ord.push_back(v);
+}
+
+void topso(int N,vector<vector<int>> G,vector<bool> &seen,vector<int> &ord){
+  seen.assign(N,false);
+  ord.clear();
+  for(int i=0;i<N;i++) if(!seen[i]) rec(G,i,seen,ord);
+  reverse(ord.begin(),ord.end());
+}
+
+int main(){
+  int N,M;
+  cin >> N >> M;
+  vector<vector<int>> G(N);
+  for(int i=0;i<M;i++){
+    int x,y;
+    cin >> x >> y;
+    G[x-1].push_back(y-1);
+  }
+  vector<bool> seen;
+  vector<int> ord;
+  topso(N,G,seen,ord);
+  for(int i=0;i<N;i++) cout << ord[i]+1 << endl;
+}

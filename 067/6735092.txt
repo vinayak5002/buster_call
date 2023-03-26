@@ -1,0 +1,40 @@
+use std::io;
+
+fn grade_evaluate(middle: i32, fin: i32, retry: i32) -> &'static str {
+    let sum = middle + fin;
+    if middle == -1 || fin == -1 {
+        return "F";
+    } else if sum >= 80 {
+        return "A";
+    } else if sum >= 65 {
+        return "B";
+    } else if sum >= 50 || (sum >= 30 && sum < 50 && retry >= 50)   {
+        return "C";
+    } else if sum >= 30 {
+        return "D";
+    } else {
+        return "F"
+    }
+}
+
+fn main() {
+    let mut grade_list: Vec<&str> = vec![];
+    loop {
+        let mut s = String::new();
+        io::stdin().read_line(&mut s).expect("Error");
+        let input_str_vec: Vec<&str> = s.split_whitespace().collect();
+        let middle = input_str_vec[0].parse().unwrap_or(0);
+        let fin = input_str_vec[1].parse().unwrap_or(0);
+        let retry = input_str_vec[2].parse().unwrap_or(0);
+        if middle == -1 && fin == -1 && retry == -1 {
+            break;
+        } else {
+            let grade = grade_evaluate(middle, fin, retry);
+            grade_list.push(grade);
+        }
+    }
+    for i in grade_list {
+        println!("{}", i);
+    }
+}
+

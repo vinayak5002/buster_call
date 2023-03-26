@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    int n;
+    cin >> n;
+    vector<string> w(n);
+    for (auto& x : w) cin >> x;
+
+    using P = pair<int, string>;
+    priority_queue<P, vector<P>, greater<>> pq;
+    map<string, int> dist;
+    rep(i,0,n) rep(j,0,n) {
+        if (w[i].size() < w[j].size() && w[i] == w[j].substr(0, w[i].size())) {
+            auto s = w[j].substr(w[i].size());
+            pq.push({w[i].size(), s});
+            dist[s] = w[i].size();
+        }
+    }
+    while (!pq.empty()) {
+        auto [d, s] = pq.top();
+        pq.pop();
+        if (dist[s] < d) continue;
+        if (s == "") {
+            cout << d << endl;
+            return 0;
+        }
+        rep(i,0,n) {
+            if (w[i].size() <= s.size() && w[i] == s.substr(0, w[i].size())) {
+                int nd = d + w[i].size();
+                auto t = s.substr(w[i].size());
+                if (!dist.count(t) || dist[t] > nd) {
+                    dist[t] = nd;
+                    pq.push({nd, t});
+                }
+            }
+            if (w[i].size() >= s.size() && w[i].substr(0, s.size()) == s) {
+                int nd = d + s.size();
+                auto t = w[i].substr(s.size());
+                if (!dist.count(t) || dist[t] > nd) {
+                    dist[t] = nd;
+                    pq.push({nd, t});
+                }
+            }
+        }
+    }
+    cout << 0 << endl;
+}

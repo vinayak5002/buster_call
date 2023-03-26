@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long  ll;
+
+double PI = 3.1415926535;
+const int INF = 2147483647;
+const ll LINF = 9223372036854775807;
+#define repe(i,s,n)for(ll i=s;i<=n;i++)
+#define rep(i,s,n)for(ll i=s;i<n;i++)
+#define rep_r(i,s,n)for(ll i=n-1;i>=s;i--)
+#define rep_re(i,s,n)for(ll i=n;i>=s;i--)
+const ll MOD = 1e9 + 7;
+
+//printf("%.10f\n",x)
+//vector<ll> a(N + 1, -1);
+
+ll const MAX_V = 100001;
+struct edge { int to, cost; };
+typedef pair<int, int> P;
+int V;
+vector<edge> G[MAX_V];
+int d[MAX_V];
+
+void dijkstra(int s) {
+	priority_queue<P, vector<P>, greater<P>> que;
+	fill(d, d + V, INF);
+	d[s] = 0;
+	que.push(P(0, s));
+	while (!que.empty()) {
+		P p = que.top(); que.pop();
+		int v = p.second;
+		if (d[v] < p.first)continue;
+		for (int i = 0; i < G[v].size(); i++) {
+			edge e = G[v][i];
+			if (d[e.to] > d[v] + e.cost) {
+				d[e.to] = d[v] + e.cost;
+				que.push(P(d[e.to], e.to));
+			}
+		}
+	}
+}
+int main() {
+	ll E;
+	ll r;
+	cin >> V >> E >> r;
+	rep(i, 0, E) {
+		ll a, b, x; cin >> a >> b >> x;
+		edge e;
+		e.to = b;
+		e.cost = x;
+		G[a].push_back(e);
+	}
+
+	dijkstra(r);
+
+	rep(i, 0, V) {
+		cout << d[i] << endl;
+	}
+	return 0;
+}

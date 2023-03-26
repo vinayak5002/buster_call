@@ -1,0 +1,44 @@
+use std::collections::VecDeque;
+use std::io;
+use std::io::Read;
+
+fn main() {
+    let mut buf = String::new();
+    io::stdin().read_to_string(&mut buf).unwrap();
+    let mut iter = buf.split_whitespace();
+
+    let n: usize = iter.next().unwrap().parse().unwrap();
+
+    let mut g: Vec<Vec<usize>> = vec![Vec::new(); n + 1];
+
+    for _ in 0..n {
+        let i: usize = iter.next().unwrap().parse().unwrap();
+        let k: usize = iter.next().unwrap().parse().unwrap();
+        for _ in 0..k {
+            g[i].push(iter.next().unwrap().parse().unwrap());
+        }
+    }
+
+    let mut q: VecDeque<usize> = VecDeque::new();
+    let mut ans = vec![-1; n + 1];
+    for _ in 1..n + 1 {
+        q.clear();
+        q.push_back(1);
+        ans[1] = 0;
+        while q.len() != 0 {
+            let value = q.pop_front().unwrap();
+            for _ in 0..g[value].len() {
+                let node = g[value].pop().unwrap();
+                if ans[node] == -1 {
+                    ans[node] = ans[value] + 1;
+                    q.push_back(node);
+                }
+            }
+        }
+    }
+
+    for i in 1..n + 1 {
+        println!("{} {}", i, ans[i]);
+    }
+}
+

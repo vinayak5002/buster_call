@@ -1,0 +1,46 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for (int i=0;i<(int)(n);i++)
+#define all(v) v.begin(),v.end()
+using ll=long long;
+using pll=pair<ll,ll>;
+template<class T> void chmin(T &a,T b){
+  if(a>b){
+    a=b;
+  }
+}
+template<class T> void chmax(T &a,T b){
+  if(a<b){
+    a=b;
+  }
+}
+int main(){
+  while(true){
+    ll n,m;
+    cin >> n >> m;
+    if(n==0&&m==0) return 0;
+    vector<ll> c(m),x(n+1);
+    rep(i,m){
+      cin >> c[i];
+    }
+    rep(i,n){
+      cin >> x[i+1];
+    }
+    vector<vector<ll>> dp(n+1,vector<ll>(256,(1ll<<60)));
+    dp[0][128]=0;
+    for(int i=0;i<n;i++){
+      rep(j,256){
+        for(auto &k:c){
+          if(j+k<0) chmin(dp[i+1][0],dp[i][j]+(x[i+1]-0)*(x[i+1]-0));
+          else if(255<j+k) chmin(dp[i+1][255],dp[i][j]+(x[i+1]-255)*(x[i+1]-255));
+          else chmin(dp[i+1][j+k],dp[i][j]+(x[i+1]-(j+k))*(x[i+1]-(j+k)));
+        }
+      }
+    }
+    ll ans=(1ll<<60);
+    rep(j,256){
+      chmin(ans,dp[n][j]);
+    }
+    cout << ans << endl;
+  }
+}

@@ -1,0 +1,148 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define DUMMY 0
+int cnt = 0,sizeOfList = 0;
+
+struct node
+{
+    int value;
+    node* next;
+    node()
+    {
+        value = 0;
+        next = NULL;
+    }
+
+    node(int _value)
+    {
+        value = _value;
+        next = NULL;
+    }
+};
+
+node* head = new node(DUMMY);
+int currSize = 0;
+
+void insert_at(int position, int value)
+{
+    if (currSize < position)
+    {
+        return;
+    }
+    node* curr = head;
+    while(position--)
+    {
+        curr = curr -> next;
+    }
+    node* newNode = new node(value);
+    newNode->next = curr->next;
+    curr->next = newNode;
+    currSize++;
+}
+
+void insert_at_head(int value)
+{
+    insert_at(0, value);
+}
+
+void insert_at_tail(int value)
+{
+    insert_at(currSize, value);
+}
+
+void delete_at(int position)
+{
+    if (currSize < 0 || currSize <= position)
+    {
+        return;
+    }
+    node* curr = head;
+    while(position--)
+    {
+        curr = curr -> next;
+    }
+    node* nextNode = curr->next->next;
+    curr->next = nextNode;
+    currSize--;
+}
+
+void delete_from_head()
+{
+    delete_at(0);
+}
+
+void delete_from_tail()
+{
+    delete_at(currSize - 1);
+}
+void print_linked_list()
+{
+    node* copy_head = head -> next;
+    while(copy_head != NULL)
+    {
+        printf("%d \n", copy_head -> value);
+        copy_head = copy_head -> next;
+    }
+}
+
+int main()
+{
+    int T;
+    cin>>T;
+    while(T--)
+    {
+        int p,x,d;
+        cin>>p;
+        if(p == 0)
+        {
+            scanf("%d",&x);
+            if(cnt == 0)
+            {
+                insert_at_head(x);
+                sizeOfList++;
+            }
+            else if( cnt == sizeOfList)
+            {
+                insert_at_tail(x);
+                sizeOfList++;
+            }
+
+            else if(cnt > 0)
+            {
+                insert_at(cnt, x);
+                sizeOfList++;
+            }
+
+        }
+        if(p == 1)
+        {
+            scanf("%d",&d);
+            if(d > 0)
+                cnt += d;
+            else
+                cnt -=d;
+        }
+        if(p == 2)
+        {
+            if(cnt == 0)
+            {
+                delete_from_head();
+                sizeOfList--;
+            }
+            else if( cnt == sizeOfList)
+            {
+                delete_from_tail();
+                sizeOfList--;
+            }
+
+            else if(cnt > 0)
+            {
+                delete_at(cnt);
+                sizeOfList--;
+            }
+        }
+    }
+    print_linked_list();
+    return 0;
+}
+

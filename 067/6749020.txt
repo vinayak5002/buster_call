@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+
+/* snippet: useful macros and functions */
+#define ARC(i, a, b) for(lint i = (a); i < (b); ++i)
+#define RC(i, n) ARC(i, 0, n)
+#define ARCH(i, a, b) for(lint i = (a) - 1; i >= (b); --i)
+#define RCH(i, n) ARCH(i, n, 0)
+#define ALL(v) v.begin(), v.end()
+#define RALL(v) v.rbegin(), v.rend()
+template<class T> T rng(const T &a, const T &b){ return a < b ? b - a : a - b; }
+template<class T> void chmaxmin(T &a, const T &b, const T &(*f)(const T &, const T &)){ a = f(a, b); }
+#define chmax(a, b) chmaxmin(a, b, std::max)
+#define chmin(a, b) chmaxmin(a, b, std::min)
+
+/* snippet: inf struct */
+#if __cplusplus >= 201703
+struct{ template<class T> constexpr operator T(){ return std::numeric_limits<T>::max(); } constexpr auto operator-(); } inf;
+struct{ template<class T> constexpr operator T(){ return std::numeric_limits<T>::lowest(); } constexpr auto operator-(); } negative_inf;
+constexpr auto decltype(inf)::operator-(){ return negative_inf; }
+constexpr auto decltype(negative_inf)::operator-(){ return inf; }
+#endif
+
+/* snippet:  */
+int fourd[] = {0, 1, 0, -1, 0};
+int eightd[] = {0, 1, 1, -1, 0, -1, -1, 1, 0};
+
+/* snippet: using declarations */
+using lint = long long;
+using std::cout;
+using std::cin;
+using std::endl;
+using std::cerr;
+
+int main(){
+	std::string s;
+	while(cin >> s, s != "#"){
+		lint ocount = 0, oneed = 0, oneed2 = 0, doneed = 0;
+		lint cneed = 0, cneed2 = 0;
+		for(char c : s){
+			if(c == '('){
+				if(oneed2){
+					oneed += (oneed2 + 1) / 2;
+					oneed2 = 0;
+				}
+				if(oneed > ocount){
+					doneed += oneed - ocount;
+					oneed = 0;
+					ocount = 0;
+				}else{
+					ocount -= oneed;
+					oneed = 0;
+				}
+				ocount += 1;
+				cneed2 += 1;
+			}else{
+				oneed2 += 1;
+				if(cneed2){
+					cneed += (cneed2 + 1) / 2;
+					cneed2 = 0;
+				}
+				if(cneed) cneed -= 1;
+			}
+			// cout << c << ": " << doneed << " (" << oneed << ", " << oneed2 << "), " << cneed << " (" << cneed2 << ")" << endl;
+		}
+		if(cneed2) cneed += (cneed2 + 1) / 2;
+		if(oneed2) oneed += (oneed2 + 1) / 2;
+		if(oneed > ocount) doneed += oneed - ocount;
+		cout << doneed + cneed << endl;
+	}
+}
+

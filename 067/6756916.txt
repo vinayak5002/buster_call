@@ -1,0 +1,181 @@
+#include <bits/stdc++.h>
+#include <chrono>
+#include <thread>
+////#include <atcoder/all>
+
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using vvvb = vector<vvb>;
+using vd = vector<double>;
+using vvd = vector<vd>;
+using vvvd = vector<vvd>;
+#define all(A) A.begin(),A.end()
+#define ALL(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q) {
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+template<class T>
+bool chmin(T& p, T q) {
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+ll gcd(ll(a), ll(b)) {
+    if (b == 0)return a;
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+vector<ll> fact, factinv, inv;
+ll mod = 998244353;
+void prenCkModp(ll n) {
+    fact.resize(n + 5);
+    factinv.resize(n + 5);
+    inv.resize(n + 5);
+    fact.at(0) = fact.at(1) = 1;
+    factinv.at(0) = factinv.at(1) = 1;
+    inv.at(1) = 1;
+    for (ll i = 2; i < n + 5; i++) {
+        fact.at(i) = (fact.at(i - 1) * i) % mod;
+        inv.at(i) = mod - (inv.at(mod % i) * (mod / i)) % mod;
+        factinv.at(i) = (factinv.at(i - 1) * inv.at(i)) % mod;
+    }
+
+}
+ll nCk(ll n, ll k) {
+    if (k < 0)return 0;
+    if (n < k) return 0;
+    return fact.at(n) * (factinv.at(k) * factinv.at(n - k) % mod) % mod;
+}
+
+ll gr(ll A) {
+    return 1
+        ;
+}
+vector<ll> AN;
+vector<vector<pair<ll, ll>>> G;
+vector<bool> seen;
+
+void dfs(ll n) {
+    seen[n] = 1;
+    for (auto v : G[n]) {
+        if (seen[v.first]) {
+            AN[v.second] = 1;
+        }
+        else {
+            AN[v.second] = 0;
+            dfs(v.first);
+        }
+    }
+}
+
+template<class T> struct UnionFind {
+    vector<int> par;
+    vector<int> rank;
+    vector<T> dw;
+
+    UnionFind(int n = 1) {
+        init(n);
+    }
+
+    void init(int n = 1) {
+        par.resize(n); rank.resize(n); dw.resize(n);
+        for (int i = 0; i < n; ++i) par[i] = i, rank[i] = 0, dw[i] = 0;
+    }
+
+    int root(int x) {
+        if (par[x] == x) {
+            return x;
+        }
+        else {
+            int r = root(par[x]);
+            dw[x] += dw[par[x]];
+            return par[x] = r;
+        }
+    }
+
+    T weight(int x) {
+        root(x);
+        return dw[x];
+    }
+
+    bool same(int x, int y) {
+        return root(x) == root(y);
+    }
+
+    bool merge(int x, int y, T w) {
+        w += weight(x); w -= weight(y);
+        x = root(x); y = root(y);
+        if (x == y) return false;
+        if (rank[x] < rank[y]) swap(x, y), w = -w;
+        if (rank[x] == rank[y]) ++rank[x];
+        par[y] = x;
+        dw[y] = w;
+        return true;
+    }
+
+    T diff(int x, int y) {
+        return weight(y) - weight(x);
+    }
+};
+
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    while (1) {
+        ll N, M;
+        cin >> N >> M;
+        if (N == 0)return 0;
+        UnionFind<ll> dsu(N);
+        rep(m, M) {
+            char C;
+            cin >> C;
+            if (C == '!') {
+                ll X, Y, W;
+                cin >> X >> Y >> W;
+                X--; Y--;
+                if (dsu.same(X, Y))continue;
+                dsu.merge(X, Y, W);
+            }
+            else {
+                ll X, Y;
+                cin >> X >> Y;
+                X--; Y--;
+                if (dsu.same(X, Y)) {
+                    cout << dsu.diff(X, Y) << endl;
+                }
+                else cout << "UNKNOWN" << endl;
+            }
+        }
+    }
+
+}

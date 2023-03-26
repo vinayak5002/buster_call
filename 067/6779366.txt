@@ -1,0 +1,75 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
+
+func explorer(G [][]int, n int, start int, costs []int, cost int) {
+	for i := 0; i < n; i++ {
+		costToNextFromThisNode := G[start][i]
+		totalCost := cost + costToNextFromThisNode
+		// 隣に行けて、かつ、隣までのコストは、今探索中のパスが一番小さいとき
+		if costToNextFromThisNode != 1000000 && totalCost < costs[i] {
+			costs[i] = totalCost
+			explorer(G, n, i, costs, totalCost)
+		}
+	}
+}
+
+func dik(G [][]int, start int) []int {
+	n := len(G)
+
+	// startから各ノードまでの最小コストを記録
+	// 初期値は1000000
+	// ただしstartからstartへのコストは0と定義
+	costs := make([]int, n)
+	for i := 0; i < n; i++ {
+		costs[i] = 1000000
+	}
+	costs[start] = 0
+
+	explorer(G, len(G), 0, costs, 0)
+
+	return costs
+}
+
+func makeSquareMatrix(n int) [][]int {
+	s := make([][]int, n)
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			s[i] = append(s[i], 1000000)
+		}
+	}
+	return s
+}
+
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+
+	G := makeSquareMatrix(n)
+
+	for i := 0; i < n; i++ {
+		var _trashme, k int
+		fmt.Fscan(in, &_trashme)
+		fmt.Fscan(in, &k)
+		for j := 0; j < k; j++ {
+			var v, c int
+			fmt.Fscan(in, &v)
+			fmt.Fscan(in, &c)
+			G[i][v] = c
+		}
+	}
+
+	result := dik(G, 0)
+	for i := 0; i < n; i++ {
+		fmt.Fprintf(out, "%d %d\n", i, result[i])
+	}
+}
+

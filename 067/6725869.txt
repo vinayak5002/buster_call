@@ -1,0 +1,179 @@
+#include <iostream>
+#include <cstdio>
+#include <vector>
+#include <cmath>
+#include <cstring>
+#include <numeric>
+#include <algorithm>
+#include <functional>
+#include <fstream>
+#include <array>
+#include <map>
+#include <queue>
+#include <time.h>
+
+#include <limits.h>
+#include <set>
+#include <stack>
+#include <random>
+#include <complex>
+#include <unordered_map>
+#include <assert.h>
+#include <bitset>
+#include <unordered_set>
+#define rep(i, s, n) for (int i = (s); (n) > i; i++)
+#define REP(i, n) rep(i, 0, n)
+#define RANGE(x, a, b) (min(a, b) <= (x) && (x) <= max(a, b)) // hei
+#define DUPLE(a, b, c, d) (RANGE(a, c, d) || RANGE(b, c, d) || RANGE(c, a, b) || RANGE(d, a, b))
+#define INCLU(a, b, c, d) (RANGE(a, c, d) && (b, c, d))
+#define PW(x) ((x) * (x))
+#define ALL(x) (x).begin(), (x).end()
+#define RALL(x) (x).rbegin(), (x).rend()
+#define MODU 998244353LL
+#define bitcheck(a, b) ((a >> b) & 1)
+#define bitset(a, b) (a |= (1 << b))
+#define bitunset(a, b) (a &= ~(1 << b))
+#define MP(a, b) make_pair((a), (b))
+#define Manh(a, b) (abs((a).first-(b).first) + abs((a).second - ((b).second))
+#define pritnf printf
+#define scnaf scanf
+#define itn int
+#define PI 3.141592653589
+
+#define izryt bool
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+template <typename A, size_t N, typename T>
+void Fill(A (&array)[N], const T &val)
+{
+    std::fill((T *)array, (T *)(array + N), val);
+}
+
+//[a, b)
+#define Getsum(ar, a, b) (ar[b] - ar[a])
+#define INF 10000000000000000LL
+
+struct Edge
+{
+    int from, to;
+    ll w;
+    bool operator<(const Edge &rhs) const
+    {
+        return MP(w, MP(from, to)) < MP(rhs.w, MP(rhs.from, rhs.to));
+    }
+};
+typedef vector<vector<Edge>> Graph;
+typedef unsigned long long ull;
+
+#define isValid(y, x) (y >= 0 && y < n && x >= 0 && x < m)
+
+ll mod_pow(ll x, ll n, ll mod)
+{
+    ll res = 1;
+    while (n > 0)
+    {
+        if (n & 1)
+            res = (res * x) % mod;
+        x = (x * x) % mod;
+        n >>= 1;
+    }
+    return res;
+}
+
+#include <vector>
+#include <iostream>
+ 
+using namespace std;
+ 
+#define MAX_V 100400
+#define splitV 100000
+#define S 100302
+#define T 100303
+#define INF (1<<20)
+ 
+//to:行き先,cap:容量,rev:逆(G[e.to][e.rev]で逆辺の構造体にアクセスできる。)
+struct edge {
+  int to,cap,rev;
+};
+ 
+vector<edge> G[MAX_V];
+bool used[MAX_V];
+ 
+//辺を追加。revは,相互参照できるようにしている。sizeで実現しているが、別のルールを用いても良い(i.e ハッシュ)。逆辺の逆辺は通常の辺である。
+void
+add_edge(int from,int to,int cap)
+{
+  G[from].push_back( (edge){ to,cap,(int)G[to].size() } );
+	G[to].push_back( (edge){ from,0,(int)G[from].size()-1});
+}
+ 
+//sからtへ移動可能ならそのルートの最大流量を返し、不可能なら0を返す。
+int
+dfs(int v,int t,int f)
+{
+	if (v==t)
+		return f;
+	used[v] = true;
+	for (int i=0; i<G[v].size(); ++i) {
+		edge &e = G[v][i];
+		if (!used[e.to] && e.cap>0) {
+			int d = dfs(e.to, t, min(f,e.cap));
+			if (d > 0) {
+				e.cap -= d;
+				G[e.to][e.rev].cap += d;
+				return d;
+			}
+		}
+	}
+	return 0;
+}
+ 
+//sからtへの最大流量を返す。
+int
+max_flow(int s,int t)
+{
+	int flow = 0;
+	for (;;) {
+		memset(used, 0, sizeof(used));
+		int f = dfs(s, t, INF);
+		if (f==0) {
+			return flow;
+		}
+		flow += f;
+	}
+}
+
+int main () {
+    int n,m;
+    cin >> n >> m;
+
+    REP(i,m) {
+        int k;
+        cin >> k;
+        REP(j, k) {
+            int v;
+            cin >> v;
+            v--;
+
+            add_edge(v, splitV + i, 1);
+        }
+    }
+
+    int nottouch = 0;
+    REP(i,n) {
+        if(G[i].size() == 0) {
+            nottouch ++;
+        }
+
+
+        add_edge(S, i, 1);
+    }
+    REP(j, m) {
+        add_edge(splitV + j, T, 1);
+    }
+
+    cout << max_flow(S, T) + nottouch<< endl;
+}
+

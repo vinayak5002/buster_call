@@ -1,0 +1,56 @@
+from sys import stdin
+input = stdin.readline
+
+def show():
+  s = []
+  c = banpei["next"]
+  while(c != banpei):
+    s.append(c["key"])
+    c = c["next"]
+  print(*s, end='\n')
+
+
+banpei={}
+banpei["next"]=banpei
+banpei["prev"]=banpei
+  
+
+n=int(input())
+for i in range(n+1):
+  a=input().rstrip()
+
+  if "insert"==a[:6]:
+    x={}
+    x["key"] = int(a[7:])
+    x["next"]=banpei["next"]
+    banpei["next"]["prev"]=x
+    banpei["next"]=x
+    x["prev"]=banpei
+  #連結リストの先頭にキーkを持つ要素xを継ぎ足す
+  elif "delete"==a[:7] and"deleteFirst"!=a[:12] and "deleteLast"!=a[:12]:
+    c=banpei["next"]
+    if int(c["key"] )==int(a[6:]):
+        c["prev"]["next"]=c["next"]
+        c["next"]["prev"]=c["prev"]
+    while(c != banpei and int(c["key"]) !=int(a[6:])):
+      c=c["next"]
+      if c !=banpei:
+        if int(c["key"]) ==int(a[6:]):
+          c["prev"]["next"]=c["next"]
+          c["next"]["prev"]=c["prev"]
+    
+#キーkを持つ最初の要素xを連結リストから削除する
+  elif "deleteFirst"==a[:12]:
+    b=banpei["next"]
+    b["prev"]["next"]=b["next"]
+    b["next"]["prev"]=b["prev"]
+#連結リストの先頭の要素を削除する
+  elif "deleteLast"==a[:12]:
+    b=banpei["prev"]
+    b["prev"]["next"]=b["next"]
+    b["next"]["prev"]=b["prev"]
+#連結リストの末尾の要素を削除する
+
+
+
+show()

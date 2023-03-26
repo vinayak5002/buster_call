@@ -1,0 +1,113 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+const int N = 4;
+const int N2 = 16; 
+const int LIMIT = 100;
+
+static const int dx[4] = {-1, 0, 1, 0};
+static const int dy[4] = {0, -1, 0, 1};
+static const char dir[4] = {'u', 'l', 'd', 'r'};
+int MDT[N2][N2];  //曼哈顿距离表 
+
+struct Puzzle{
+	//f:当前状态；space:空格位置； MD：到目标状态的曼哈顿距离；  
+	int f[N2], space, MD;
+};
+
+Puzzle state;
+int limit;          /*深度限制*/
+int path[LIMIT];
+ 
+void iniMDT();
+string IDAstar(Puzzle in);
+int getAllMD(Puzzle pz);
+bool dfs(int depth, int prev);
+bool isSolved();
+
+int main(){
+	
+	iniMDT();
+	
+	Puzzle in;
+	
+	for(int i = 0; i < N2; i++){
+		cin >> in.f[i];
+		if(in.f[i] == 0){
+				in.f[i] = N2;	
+				in.space = i;
+		}
+	}
+	
+	in.MD = getAllMD(in);
+    string ans = IDAstar(in);
+	cout << ans.size() << endl;
+  
+	return 0;
+} 
+
+void iniMDT(){
+	//i到j的曼哈顿距离， 第i个元素在N*N数组的位置：i / N, i / N 
+	for(int i = 0; i < N2; i++)
+		for(int j = 0; j < N2; j++)
+			MDT[i][j] = abs(i / N - j / N) + abs(i % N - j % N);
+} 
+
+int getAllMD(Puzzle pz){
+	int sum = 0;
+	for(int i = 0; i < N2; i++){
+		if(pz.f[i] != N2){
+			sum += MDT[i][pz.f[i]-1]; //当前位置i到目标位置pz.f[i]-1的距离 
+		} 
+	}
+	return sum;
+}
+
+bool isSolved(){
+	for(int i = 0; i < N2; i++)
+		if(state.f[i] != (i + 1)) 
+			return false;
+	return true;
+}
+
+string IDAstar(Puzzle in){
+	for(limit = in.MD; limit < LIMIT; limit++){
+		state = in;
+		if(dfs(0, -100)){
+			string ans = "";
+			for(int i = 0; i < limit; i++)
+				ans += dir[path[i]];
+			return ans;
+		}
+	}
+	
+	return "unsolvable";
+
+}
+bool dfs(int depth, int prev){
+	if(state.MD == 0) return true;
+	if(depth + state.MD > limit) return false;
+	
+	int sx = state.space / N;
+	int sy = state.space % N;
+	
+	Puzzle temp;
+	for(int r = 0; r < 4; r++){
+		int tx = sx + dx[r];
+		int ty = sy + dy[r];
+		if(tx < 0 || ty < 0 || tx >= N || ty >= N) continue;
+		//if(max(prev, r) - min(prev, r) == 2) continue;
+		temp = state;
+		state.MD -= MDT[tx * N + ty][state.f[tx * N + ty] - 1];
+		state.MD += MDT[sx * N + sy][state.f[tx * N + ty] - 1];
+		swap(state.f[tx * N + ty], state.f[sx * N + sy]);
+		state.space = tx * N + ty; 
+		if(dfs(depth + 1, r)){
+			path[depth] = r;
+			return true;
+		}
+		state = temp;
+	}
+	
+	return false;
+}

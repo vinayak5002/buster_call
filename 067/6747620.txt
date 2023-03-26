@@ -1,0 +1,66 @@
+#include <stdio.h>
+#define N 100
+
+int n;
+int A[N][N];
+int judge[N];
+int count;
+int s[N],f[N];
+
+void visit(int number){
+	judge[number]=1;
+	s[number]=++count;
+	
+	int c;
+	for(c=0;c<n;c++){
+		if(A[number][c]==1 && judge[c]==0){
+			visit(c);
+		}
+	}
+	judge[number]=2;
+	f[number]=++count;
+}
+
+void dfs(){
+	int number;
+	for(number=0;number<n;number++){
+		judge[number]=0;
+	}
+	count=0;
+	
+	for(number=0;number<n;number++){
+		if(judge[number]==0){
+			visit(number);
+		}
+	}
+	for(number=0;number<n;number++){
+		printf("%d %d %d\n",number+1,s[number],f[number]);
+	}
+}
+	
+	
+int main(void){
+	scanf("%d",&n);
+	
+	int i,j;
+	for(i=0;i<n;i++){
+		for(j=0;j<n;j++){
+			A[i][j]=0;
+		}
+	}
+	
+	int a,b,h;
+	for(i=0;i<n;i++){
+		scanf("%d",&a);
+		a--;
+		scanf("%d",&b);
+		for(j=0;j<b;j++){
+			scanf("%d",&h);
+			h--;
+			A[a][h]=1;
+		}
+	}
+	
+	dfs();
+	return 0;
+}

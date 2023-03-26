@@ -1,0 +1,65 @@
+use std::io::{stdin, BufRead, BufReader};
+
+fn main() -> std::io::Result<()> {
+    let input: Vec<String> = BufReader::new(stdin().lock())
+        .lines()
+        .map(Result::unwrap)
+        .collect();
+
+    let mut dp = vec![0u32; 10E6 as usize];
+    let mut dp_odd = vec![0u32; 10E6 as usize];
+    let mut last = 1usize;
+    let mut last_2 = 1usize;
+    let mut last_odd: usize = 0usize;
+
+    for i in 1u64..392 {
+        let cnt = (i * (i + 1) * (i + 2) / 6) as usize;
+
+        if cnt < dp.len() {
+            dp[cnt] = 1;
+        }
+
+        for j in (last + 1)..cnt {
+            if j >= dp.len() {
+                break;
+            }
+
+            dp[j] = ((j / last + (dp[j % last] as usize))
+                .min(j / last_2 + (dp[j % last_2] as usize))) as u32;
+        }
+
+        last_2 = last;
+        last = cnt;
+
+        if cnt & 0b01 == 0 {
+            continue;
+        }
+
+        if cnt < dp.len() {
+            dp_odd[cnt] = 1;
+        }
+
+        for j in (last_odd + 1)..cnt {
+            if j >= dp.len() {
+                break;
+            }
+
+            let m = j % last_odd;
+            dp_odd[j] = (j / last_odd + (dp_odd[m as usize] as usize)) as u32;
+        }
+
+        last_odd = cnt;
+    }
+
+    for line in input {
+        if line == "0" {
+            break;
+        }
+
+        let cnt = line.parse::<usize>().unwrap();
+        println!("{} {}", dp[cnt], dp_odd[cnt]);
+    }
+
+    Ok(())
+}
+

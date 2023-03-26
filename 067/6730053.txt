@@ -1,0 +1,78 @@
+import sys,random,bisect
+from collections import deque,defaultdict
+from heapq import heapify,heappop,heappush
+from itertools import permutations
+from math import log,gcd
+
+
+input = lambda :sys.stdin.readline()
+mi = lambda :map(int,input().split())
+li = lambda :list(mi())
+
+mod = 10**9 + 7
+
+sys.setrecursionlimit(10**6+100)
+
+class boolean:
+
+    def __init__(self,s):
+        self.next = 0
+        self.string = s + "#"
+    
+    def variable(self):
+        #print(self.string[self.next])
+        res = [1,1]
+        self.next += 1
+        while self.string[self.next] in "0123456789":
+            self.next += 1
+        return res
+    
+    def factor(self):
+        #print(self.string[self.next],self.next)
+        if self.string[self.next]=="(":
+            self.next += 1
+            res = self.expression()
+            self.next += 1
+            return res
+        elif self.string[self.next]=="~":
+            self.next += 1
+            res = self.factor()
+            return [res[1],res[0]]
+        else:
+            return self.variable()
+    
+    
+    def term(self):
+        res = self.factor()
+        while True:
+            if self.string[self.next]=="&":
+                self.next += 1
+                p = self.factor()
+                s = (res[0] + res[1]) % mod
+                t = (p[0] + p[1]) % mod
+                res = [(s*t%mod-res[1]*p[1]%mod)%mod,res[1]*p[1]%mod]
+            else:
+                break
+        
+        return res
+    
+    def expression(self):
+        res = self.term()
+        while True:
+            if self.string[self.next] == "|":
+                self.next += 1
+                p = self.term()
+                s = (res[0] + res[1]) % mod
+                t = (p[0] + p[1]) % mod
+                res = [p[0]*res[0]%mod,(s*t%mod-p[0]*res[0]%mod)%mod]
+            else:
+                break
+        
+        return res
+
+
+S = input()
+ans = boolean(S)
+print(ans.expression()[1])
+
+

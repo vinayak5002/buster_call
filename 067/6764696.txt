@@ -1,0 +1,136 @@
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <deque>
+using namespace std;
+
+using lint = long long;
+using ulint = unsigned long long;
+template<class T> using vec = vector<T>;
+
+#define rep(i,n) for(int i = 0; i < n; i++)
+#define repr(i,n) for(int i = n - 1; i >= 0; i--)
+#define repi(i,ini,n) for(int i = ini; i < n; i++)
+#define repir(i,ini,n) for(int i = n - 1; i >= ini; i--)
+#define repb(i,mn,mx) for(int i = mn; i <= mx; i++)
+#define repbr(i,mn,mx) for(int i = mx; i >= mn; i--)
+#define all(a) begin(a),end(a)
+#define rall(a) rbegin(a),rend(a)
+
+template<class T> auto chmax(T& a, const T b) { return a = max(a, b); }
+template<class T> auto chmin(T& a, const T b) { return a = min(a, b); }
+
+template<class It>
+auto acc(It begin, It end) -> decltype(*begin) { return accumulate(begin, end, 0); }
+
+constexpr lint inf = 1100100100100100100ll;
+constexpr int infi = 1100100100;
+
+constexpr int mod = 1'000'000'007;
+
+template<class T>
+auto div2(T a, T b) {
+	return (a + b - 1) / b;
+}
+
+struct xy {
+	int x, y;
+};
+
+int d[310][310][310];
+
+void solve() {
+	int h, w, n;
+	cin >> h >> w >> n;
+
+	vec<string> s(h);
+
+	rep(i, h)
+		cin >> s[i];
+
+	vec<xy> p(n);
+	rep(i, n)
+		cin >> p[i].y >> p[i].x;
+	rep(i, n) {
+		p[i].x--; p[i].y--;
+	}
+
+	xy dd[4] = {
+		{-1,0},
+		{+1,0},
+		{0,-1},
+		{0,+1}
+	};
+
+	rep(i, n) {
+		rep(y, h)
+			rep(x, w)
+			d[i][y][x] = infi;
+
+		deque<xy> q;
+		q.push_back({ p[i].x,p[i].y });
+		d[i][p[i].y][p[i].x] = 0;
+
+		while (!q.empty()) {
+			auto pos = q.front();
+			q.pop_front();
+
+			rep(j, 4) {
+				xy to{ pos.x + dd[j].x,pos.y + dd[j].y };
+
+				if (to.x < 0 || to.x >= w || to.y < 0 || to.y >= h)
+					continue;
+
+				switch (s[to.y][to.x])
+				{
+				case '.':
+					if (d[i][to.y][to.x] > d[i][pos.y][pos.x]) {
+						d[i][to.y][to.x] = d[i][pos.y][pos.x];
+						q.push_front(to);
+					}
+					break;
+				case '@':
+					if (d[i][to.y][to.x] > d[i][pos.y][pos.x] + 1) {
+						d[i][to.y][to.x] = d[i][pos.y][pos.x] + 1;
+						q.push_back(to);
+					}
+					break;
+				default:
+					break;
+				}
+			}
+		}
+	}
+
+	int mnmxc = infi;
+	xy mnmxp{ -2,-2 };
+
+	rep(y,h)
+		rep(x, w) {
+		if (s[y][x] != '.')
+			continue;
+
+		int mxc = 0;
+		rep(i, n)
+			chmax(mxc, d[i][y][x]);
+
+		if (mxc < mnmxc) {
+			mnmxc = mxc;
+			mnmxp = xy{ x, y };
+		}
+	}
+
+	cout << mnmxp.y + 1 << ' ' << mnmxp.x + 1 << endl;
+
+}
+
+int main() {
+	{
+		solve();
+	}
+}
+

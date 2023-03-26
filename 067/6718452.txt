@@ -1,0 +1,144 @@
+import java.io.BufferedReader
+import java.io.PrintWriter
+import java.util.*
+import kotlin.math.*
+
+val infL = 1000000002L
+
+fun main() {
+    val re = System.`in`.bufferedReader()
+    val pw = PrintWriter(System.out)
+
+    val (v, e, r) = re.readInts() //v: 頂点の数, e: 辺の数, r: 始点となる頂点の番号
+    val graph = List(v) { mutableListOf<Pair<Int, Long>>() }
+
+    for (i in 0..e - 1) {
+        val (s, t, c) = re.readInts() // 頂点sから頂点tへ重さcの辺が存在する
+        graph[s].add(t to c.toLong())
+    }
+    val t = dijkstra(v, r, graph)
+    for (i in 0..v - 1) {
+        if (t[i] != infL) {
+            pw.println(t[i])
+        } else {
+            pw.println("INF")
+        }
+    }
+
+    pw.flush()
+    re.close()
+}
+
+// 始点を0
+// 未確定の頂点nの中から最も小さい長さの地点を一つ選び、その値を確定させる (= distに書き込む ?)
+// 確定した地点から直接繋がっていて、かつ未確定な地点に対し、長さを計算し、書き込まれている値より小さければ更新する
+// そのうち一番小さいやつのdistを決定する
+// 決定した頂点の隣接する頂点のdistを書き込んでいく、、 loop
+fun dijkstra(vertexCount: Int, start: Int, graph: List<MutableList<Pair<Int, Long>>>): MutableList<Long> {
+    val queue = PriorityQueue<Pair<Int, Long>>(compareBy(Pair<Int, Long>::second)) // 辺を詰めた、経路の長さで優先度付けされたキュー. distが求まってない(= 使用済みでない)頂点を詰める。
+    val dist = MutableList(vertexCount) { infL } // 経路の長さ(= 頂点を繋ぐ辺の重みの総和の最小値)
+    //println(graph)
+    dist[start] = 0L
+    queue.add(start to 0L)
+    while (queue.isNotEmpty()) {
+        val (current, cost) = queue.poll() // 未確定の頂点nの中から最も小さい長さの地点を一つ選び、その値を確定させる
+        if (dist[current] < cost) continue
+        for (to in graph[current]) { // currentに繋がっている辺(Pair<頂点, 重み>)
+            if (dist[to.first] > to.second + dist[current]) { // 行き先の長さが、現在地までの長さ + 辺の重み で緩和する
+                dist[to.first] = to.second + dist[current] // 確定した地点から直接繋がっていて、かつ未確定な地点に対し、長さを計算し、書き込まれている値より小さければ更新する
+                queue.add(to.first to dist[to.first])
+            }
+
+        }
+    }
+    return dist
+}
+
+inline fun <T, R : Comparable<R>> Iterable<T>.maxOf(selector: (T) -> R): R {
+    val iterator = iterator()
+    if (!iterator.hasNext()) throw NoSuchElementException()
+    var maxValue = selector(iterator.next())
+    while (iterator.hasNext()) {
+        val v = selector(iterator.next())
+        if (maxValue < v) {
+            maxValue = v
+        }
+    }
+    return maxValue
+}
+
+fun Int.isEven(): Boolean = this % 2 == 0
+
+fun Int.isOdd(): Boolean = !isEven()
+
+fun Int.factorial() = (1..this).reduce { a, b -> a * b }
+
+fun Int.permutation(k: Int = 1) = (k..this).reduce { a, b -> a * b }
+
+fun <T> List<T>.permutations(): Set<List<T>> {
+    val source = this
+    val permutations = mutableSetOf<List<T>>()
+    fun permutation(source: List<T>, perm: List<T>) {
+        if (source.size <= 1) {
+            permutations += perm + source
+        } else {
+            repeat(source.size) {
+                permutation(source.take(it) + source.drop(it + 1), perm + source[it])
+            }
+        }
+    }
+    permutation(source, emptyList())
+    return permutations
+}
+
+fun Int.combination(k: Int = 1) = permutation(k) / k.factorial()
+
+// digitToIntが1.5からなので自前で定義
+fun Char.digitToInt(): Int {
+    @Suppress("DEPRECATION") return Character.digit(this.toInt(), 10).also {
+        if (it < 0) throw IllegalArgumentException("Char $this is not a decimal digit")
+    }
+}
+
+
+operator fun Regex.contains(text: CharSequence): Boolean = this.matches(text)
+
+fun divisor(value: Long): List<Long> {
+    return (1..(sqrt(value.toDouble()).toLong() + 1)).filter { value % it == 0L }.flatMap {
+        if (value / it == it) listOf(it) else listOf(
+            it, value / it
+        )
+    }//.also { println("value: $value, divisors $it") }
+}
+
+fun primeFactor(value: Long): List<Long> {
+    if (value == 1L) return listOf(1)
+    val max = Math.sqrt(value.toDouble()).toLong()
+    return prime(2, max).filter { value % it == 0L }.also { println("value: $value, primeFactor $it") }
+}
+
+// 範囲内の素数を取得
+// fromだけ指定すると戻り値の個数で素数判定ができる
+fun prime(from: Long, to: Long = from): List<Long> {
+    return (from..to).filter { i ->
+        val max = Math.sqrt(i.toDouble()).toLong()
+        (2..max).all { j -> i % j != 0L }
+    }
+}
+
+
+fun BufferedReader.readInt(): Int = this.readLine()!!.toInt()
+
+fun BufferedReader.readLong(): Long = this.readLine()!!.toLong()
+
+fun BufferedReader.readDouble(): Double = this.readLine()!!.toDouble()
+
+fun BufferedReader.readInts(): List<Int> = readLine()!!.split(" ").map { it.toInt() }
+
+
+fun readLongs(reader: BufferedReader): List<Long> = reader.readLine()!!.split(" ").map { it.toLong() }
+
+fun readDoubles(reader: BufferedReader): List<Double> = reader.readLine()!!.split(" ").map { it.toDouble() }
+
+
+fun Double.decimalFormat(decimalCount: Int): String = String.format("%.${decimalCount}f", this)

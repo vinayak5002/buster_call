@@ -1,0 +1,779 @@
+#include <iostream>
+#include <vector>
+#include <cassert>
+#include <cmath>
+#include <type_traits>
+#include <initializer_list>
+#include <numeric>
+#include <algorithm>
+#include <utility>
+#include <queue>
+#include <iomanip>
+
+namespace Geometry{
+
+
+constexpr double EPS = 1e-9; // 判定用のイプシロン、適宜変える必要あり
+
+/**
+ * @brief 浮動小数点数の同値判定
+*/
+bool FEQ(double const x, double const y){
+    return std::abs(x - y) < EPS;
+}
+
+/**
+ * @brief 浮動小数点数の比較
+ * @note 同値なら0, x>yなら1, それ以外は-1
+*/
+int FCOMP(double const x, double const y){
+    return FEQ(x, y) ? 0 : (x > y ? 1 : -1);
+}
+
+
+/**
+ * @brief 左回り判定用列挙型
+*/
+enum class CCWResultType{
+    CCW,
+    CW,
+    ONLINE_BACK,    // 直線上、p0より後ろ
+    ONLINE_FRONT,   // 直線上、p1より奥
+    ON_SEGMENT      // 線分上、あるいはp0上かp1上
+};
+
+/**
+ * @brief 直線や線分の交差判定
+*/
+enum class LineIsecResultType{
+    FALSE,          // 交差無し
+    INTERSECTION,   // 交差
+    POINT_ONLS,     // 線分のある頂点が線分(直線)上に存在
+    LS_ONLS         // 線分(直線)上に線分が存在
+};
+
+// 前方宣言・プロトタイプ宣言
+template <typename data_type>
+struct Point;
+using Point2i = Geometry::Point<int>;
+using Point2d = Geometry::Point<double>;
+using Point2ld = Geometry::Point<long double>;
+using VPoint = std::vector<Point2d>;
+
+struct Line;
+CCWResultType ccw(Point2d const & p1, Point2d const & p2, Point2d const & p3);
+CCWResultType ccw(Point2d const & p, Line const & l_v);
+
+/**
+ * @brief 点・ベクトルクラス 多次元は判定系未実装
+*/
+template <typename data_type>
+struct Point{
+    std::vector<data_type> point;
+    static constexpr int dim = 2;
+
+    Point() : point(dim){}
+    Point(std::initializer_list<data_type> const vec) : point(vec){}
+    Point(data_type const init_num) : point(dim, init_num){}
+
+    /**
+     * @brief 第1要素の参照を返す
+    */
+    inline data_type & x(){
+        return point.at(0);
+    }
+
+    inline data_type const & x() const {
+        return point.at(0);
+    }
+
+    /**
+     * @brief 第2要素を返す
+    */
+    inline data_type & y(){
+        return point.at(1);
+    }
+
+    inline data_type const & y() const {
+        return point.at(1);
+    }
+
+    /**
+     * @brief 第n要素を返す
+     * @note dimを超えるidは無効
+    */
+    inline data_type & elem(int const idx){
+        assert(dim >= idx);
+        return point.at(idx);
+    }
+
+    inline data_type const & elem(int const idx) const {
+        assert(dim >= idx);
+        return point.at(idx);
+    }
+
+    /**
+     * @brief 点(ベクトル)が等しいかどうかの判定
+     * @return 等しい場合true
+     * @note EPSを用いた比較
+    */
+    bool equal(Point const & p) const {
+        // return (*this - p).norm() < EPS;
+        if(std::abs(x() - p.x()) > EPS) return false;
+        if(std::abs(y() - p.y()) > EPS) return false;
+        return true;
+    }
+
+    /**
+     * @brief [ベクトル]ノルム(長さ)を返す
+     * @note 平方根を求めるため若干重い
+    */
+    data_type norm() const {
+        return std::sqrt(norm_sq());
+    }
+
+    /**
+     * @brief [ベクトル]ノルム(長さ)の二乗を返す
+     * @note 平方根を使わない
+    */
+    data_type norm_sq() const {
+        return x() * x() + y() * y();
+    }
+
+    /**
+     * @brief [ベクトル]内積を返す
+     * @param[in] v ベクトル
+    */
+    data_type dot(Point const & v) const {
+        return x() * v.x() + y() * v.y();
+    }
+
+    /**
+     * @brief [ベクトル]2次元のベクトルの外積の大きさ(符号付面積と等価)を得る
+     * @param[in] v ベクトル
+    */
+    data_type cross(Point const & v) const {
+        return x() * v.y() - y() * v.x();
+    }
+
+    /**
+     * @brief 点との距離を返す
+     * @param[in] p 点
+    */
+    data_type dist_p(Point const & p) const {
+        return (p - *this).norm();
+    }
+
+    data_type dist_p_sq(Point const & p) const {
+        return (p - *this).norm_sq();
+    }
+
+    /**
+     * @brief [ベクトル]2つのベクトルがなす角[0, π]
+     * @param[in] v ベクトル
+     * @note 内積の定義より 真反対のときは-π
+    */
+    data_type angle(Point const & v) const {
+        return std::acos(dot(v) / (norm() * v.norm()));
+    }
+
+    /**
+     * @brief [ベクトル]2つのベクトルのなす符号付角度, 反時計回りが正
+     * @param[in] v ベクトル
+    */
+    data_type angle_signed(Point const & v) const {
+        return angle(v) * (ccw(Zero(), *this, v) == CCWResultType::CCW ? 1 : -1);
+    }
+
+    /**
+     * @brief [ベクトル]2次元において時計回り方向の法線を生成
+     * @param[in] v ベクトル
+    */
+    Point make_cw_normal() const {
+        Point res;
+        res.x() = y();
+        res.y() = -x();
+        return res;
+    }
+
+    /**
+     * @brief 動かす
+     * @param[in] right どれだけ動かすか
+    */
+    Point & move_by(Point const & right){
+        return *this += right;
+    }
+
+    Point & move_by(data_type const x, data_type const y){
+        return move_by({x, y});
+    }
+
+    /**
+     * @brief 動かしたものを新しいオブジェクトとして返す
+     * @param[in] right どれだけ動かすか
+     * @return 動かした点
+    */
+    Point moved_by(Point const & right) const {
+        return *this + right;
+    }
+
+    Point moved_by(data_type const x, data_type const y) const {
+        return moved_by({x, y});
+    }
+
+    /**
+     * @brief 線形補間する
+     * @param[in] p 終点
+     * @param[in] t パラメータ
+     * @return 線形補間で得られた点
+    */
+    Point lerp(Point const & p, double const t) const {
+        Point res;
+        res = ((1.0 - t) * *this) + (t * p);
+        return res;
+    }
+
+    /**
+     * @brief [ベクトル]正規化する
+     * @note 浮動小数点型以外には適用不可
+    */
+    Point & normalize(){
+        static_assert(std::is_floating_point<data_type>::value == true, "Point::normalize() function can't use if Point's data_type != floating point");
+        data_type tmp = 1.0 / norm();
+        for(int i=0; i<dim; ++i) point[i] *= tmp;
+        return *this;
+    }
+
+    /**
+     * @brief [ベクトル]正規化したものを返す
+     * @note 浮動小数点型以外には適用不可
+     * @return 正規化したベクトル
+    */
+    Point normalized() const {
+        static_assert(std::is_floating_point<data_type>::value == true, "Point::normalize() function can't use if Point's data_type != floating point");
+        Point res = *this;
+        res.normalize();
+        return res;
+    }
+
+    /**
+     * @brief [ベクトル]直交の判定をする
+     * @param[in] v ベクトル
+     * @note EPSを用いて判定しているため計算誤差に注意 参照[http://www.deqnotes.net/acmicpc/2d_geometry/products]
+    */
+    bool is_orthogonal(Point const & v) const {
+        return std::abs(dot(v)) < EPS;
+    }
+
+    /**
+     * @brief [ベクトル]平行の判定をする
+     * @param[in] v ベクトル
+     * @note EPSを用いて判定しているため計算誤差に注意 参照[http://www.deqnotes.net/acmicpc/2d_geometry/products]
+    */
+    bool is_parallel(Point const & v) const {
+        static_assert(dim == 2, "Point::cross_2d() function can't use if Point.dim != 2");
+        return std::abs(cross(v)) < EPS;
+    }
+
+    data_type & operator [](int const idx){
+        return elem(idx);
+    }
+
+    Point operator - () const {
+        Point p = *this;
+        for(int i=0; i<dim; ++i) p.elem(i) *= -1;
+        return p;
+    }
+
+    /**
+     * @brief 点(ベクトル)が等しいかどうかの判定
+     * @note 判定にEPSを用いる
+    */
+    bool operator == (Point const & right) const {
+        return this->equal(right);
+    }
+
+    /**
+     * @brief 等しくないかどうか
+     * @note 判定にEPSを用いる
+    */
+    bool operator != (Point const & right) const {
+        return !(this->equal(right));
+    }
+
+    Point & operator += (Point const & right){
+        for(int i=0; i<dim; ++i) point[i] += right.elem(i);
+        return *this;
+    }
+
+    Point & operator -= (Point const & right){
+        for(int i=0; i<dim; ++i) point[i] -= right.elem(i);
+        return *this;
+    }
+
+    Point & operator *= (data_type const right){
+        for(int i=0; i<dim; ++i) point[i] *= right;
+        return *this;
+    }
+
+    Point & operator /= (data_type const right){
+        for(int i=0; i<dim; ++i) point[i] /= right;
+        return *this;
+    }
+
+    /**
+     * @brief [ベクトル]ベクトルのアダマール積(要素ごとの積)
+    */
+    Point & operator *= (Point const & right){
+        for(int i=0; i<dim; ++i) point[i] *= right.elem(i);
+        return *this;
+    }
+
+    Point operator + (Point const & right) const {
+        Point p = *this;
+        p += right;
+        return p;
+    }
+
+    Point operator - (Point const & right) const {
+        Point p = *this;
+        p -= right;
+        return p;
+    }
+
+    Point operator * (data_type const right) const {
+        Point p = *this;
+        p *= right;
+        return p;
+    }
+
+    Point operator / (data_type const right) const {
+        Point p = *this;
+        p /= right;
+        return p;
+    }
+
+    /**
+     * @brief [ベクトル]ベクトルのアダマール積(要素ごとの積)
+    */
+    Point operator * (Point const & right) const {
+        Point p = *this;
+        p *= right;
+        return p;
+    }
+
+    /**
+     * @brief 比較
+     * @note x座標の大小、x座標が同じ場合y座標の大小
+    */
+    bool operator < (Point const & right) const {
+        return (FEQ(x(), right.x())) ? y() < right.y() : x() < right.x();
+    }
+
+    /**
+     * @brief 比較
+     * @note x座標の大小、x座標が同じ場合y座標の大小
+    */
+    bool operator > (Point const & right) const {
+        return right < *this;
+    }
+
+    friend Point operator * (data_type const left, Point const & right){
+        Point p = right;
+        p *= left;
+        return p;
+    }
+
+    /**
+     * @brief 入力
+    */
+    friend std::istream & operator >> (std::istream & left, Point & right){
+        left >> right.x() >> right.y();
+        return left;
+    }
+
+    /**
+     * @brief 出力
+    */
+    friend std::ostream & operator << (std::ostream & left, Point const & right){
+        // left << '(';
+        left << right.x() << ' ' << right.y();
+        // left << ')';
+        return left;
+    }
+
+    // ----- static
+    /**
+     * @brief ゼロベクトルを返す
+    */
+    static Point Zero(){
+        return Point(0);
+    }
+
+    /**
+     * @brief 定数ベクトルを返す
+    */
+    static Point Constant(data_type const init){
+        return Point(init);
+    }
+};
+
+// --------------------------------------------------------------------------------
+// 静的関数
+// --------------------------------------------------------------------------------
+
+/**
+ * @brief 内積を計算
+ * @param[in] v1 ベクトル
+ * @param[in] v2 ベクトル
+*/
+double dot(Point2d const & v1, Point2d const & v2) {
+    return v1.dot(v2);
+}
+
+/**
+ * @brief 外積を計算
+ * @param[in] v1 ベクトル
+ * @param[in] v2 ベクトル
+ * @note 計算順により結果の符号が変わるため注意
+*/
+double cross(Point2d const & v1, Point2d const & v2) {
+    return v1.cross(v2);
+}
+
+/**
+ * @brief 2点間を線形補間する
+ * @param[in] p1 始点
+ * @param[in] p2 終点
+ * @param[in] t パラメータ
+ * @return 線形補間で得られた点
+*/
+Point2d lerp(Point2d const & p1, Point2d const & p2, double const t) {
+    return p1.lerp(p2, t);
+}
+
+/**
+ * @brief 3点を結んだ折れ線が左回りになるかの判定
+ * @param[in] p1 点1
+ * @param[in] p2 点2
+ * @param[in] p3 点3
+ * @return p1-p2-p3を結んだ折れ線が左回りならCCW, 右回りならCW, 3点が直線上かつp3がp1より後ろならONLINE_BACK, 直線上かつp3がp2より奥ならONLINE_FRONT, 線分上ならON_SEGMENT
+*/
+CCWResultType ccw(Point2d const & p1, Point2d const & p2, Point2d const & p3) {
+    Point2d v1 = p2 - p1, v2 = p3 - p1;
+    double c = v1.cross(v2);
+    if(c > EPS) return CCWResultType::CCW;
+    else if(c < -EPS) return CCWResultType::CW;
+    else if(v1.dot(v2) < 0) return CCWResultType::ONLINE_BACK;
+    else if(v1.norm() < v2.norm()) return CCWResultType::ONLINE_FRONT;
+    return CCWResultType::ON_SEGMENT;
+}
+
+/**
+ * @brief 2点間の距離を返す(=差のノルムと同義)
+ * @param[in] p1 点
+ * @param[in] p2 点
+ * @note 距離はdouble型、dimは同じでないと無効
+*/
+double dist_p_p(Point2d const & p1, Point2d const & p2){
+    return p1.dist_p(p2);
+}
+
+using Pointopt = std::pair<int, double>;
+
+/**
+ * @brief KD木のノード
+*/
+struct KDTreeNode {
+    Point2d point;      // 点中央値
+    int axis;           // 軸
+    int id;             // id
+    KDTreeNode * left;  // 左の子 (axis=0 : left, axis=1 : up)
+    KDTreeNode * right; // 右の子
+
+    KDTreeNode() : left(nullptr), right(nullptr){}
+};
+
+/**
+ * @brief KD木本体
+*/
+struct KDTree {
+    VPoint const & points;      // 対象となる点群
+    std::vector<int> indices;   // argsort用のid配列
+    KDTreeNode * root;          // 根
+
+    KDTree(VPoint const & _points) : points(_points) {
+        indices.resize(points.size());
+        std::iota(indices.begin(), indices.end(), 0);
+        root = make_kdtree(0, points.size(), 0);
+    }
+
+private:
+    // construt KDTree data structure recursively
+    /**
+     * @brief KDTree構造を再帰的に構築
+     * @param[in] left 左下限
+     * @param[in] right 右上限
+     * @param[in] depth 再帰の深さ
+     * @return ノードのポインタ
+    */
+    KDTreeNode * make_kdtree(int const left, int const right, int const depth) {
+        if (right <= left) {
+            return nullptr; // 葉の子はnull
+        }
+
+        // axisの座標値が中央値となる点をnth_elementによって得る
+        int axis = depth % 2;
+        int mid = (left + right) / 2;
+        std::nth_element(indices.begin() + left, indices.begin() + mid, indices.begin() + right, [&](int const lhs, int const rhs){
+            return points[lhs].elem(axis) < points[rhs].elem(axis);
+        });
+        // std::sort(indices.begin() + left, indices.begin() + right, [&](int const l, int const r){
+        //     return points[l].elem(axis) < points[r].elem(axis);
+        // });
+
+        // make the node at point whose coordinate value is median
+        // 中央値の点はノードとして構築される
+        KDTreeNode * node = new KDTreeNode();
+        node->point = points[indices[mid]];
+        node->axis = axis;
+        node->id = indices[mid];
+
+        // branch by median value
+        // 中央値の点から枝分かれ
+        node->left = make_kdtree(left, mid, depth + 1);
+        node->right = make_kdtree(mid + 1, right, depth + 1);
+
+        return node;
+    }
+
+    /**
+     * @brief NNS(最近傍探索) kdtree内の点から最近傍点を探す
+     * @param[in] p 点
+     * @param[out] min_id 最近傍点のid
+     * @param[in] node 探索点
+     * @param[in] ignore 探索の対象外となる点id
+    */
+    void NNS_recursive(Point2d const & p, Pointopt & min_id, KDTreeNode * node, int const ignore) {
+        if (node == nullptr) {
+            return;
+        }
+
+        // 葉へ向かう
+        int axis = node->axis;
+        bool less = p.elem(axis) < node->point.elem(axis);
+        NNS_recursive(p, min_id, less ? node->left : node->right, ignore);
+
+        // 枝分かれの点で近傍点とその距離を更新
+        if(node->id != ignore){
+            double dist = node->point.dist_p_sq(p);
+            if (dist < min_id.second) {
+                min_id.first = node->id;
+                min_id.second = dist;
+            }
+        }
+
+        // 別のサイドを見に行く
+        double rect_to_dist = (p.elem(axis) - node->point.elem(axis)) * (p.elem(axis) - node->point.elem(axis)); // using squared distance
+        if (rect_to_dist < min_id.second) {
+            NNS_recursive(p, min_id, less ? node->right : node->left, ignore);
+        }
+    }
+
+    /**
+     * @brief RS(円近傍) 円に含まれる点群の配列を返す
+     * @param[in] circle_p 円の中心
+     * @param[in] circle_r 円の半径
+     * @param[out] ids 円に含まれる点のid
+     * @param[in] node 探索点
+     * @param[in] ignore 探索の対象外となる点id
+    */
+    void RS_recursive(Point2d const & circle_p, double const circle_r, std::vector<int> & ids, KDTreeNode * node, int const ignore){
+        if(node == nullptr){
+            return;
+        }
+        
+        // 葉へ向かう
+        int axis = node->axis;
+        bool less = circle_p.elem(axis) < node->point.elem(axis);
+        RS_recursive(circle_p, circle_r, ids, less ? node->left : node->right, ignore);
+
+        // 現在の枝分かれ点と比較することで近傍点を追加
+        if(node->id != ignore){
+            double dist = node->point.dist_p_sq(circle_p);
+            if (dist < circle_r) {
+                ids.emplace_back(node->id);
+            }
+        }
+
+        // 枝分かれの別の方へ探索しに行く
+        double rect_to_dist = (circle_p.elem(axis) - node->point.elem(axis)) * (circle_p.elem(axis) - node->point.elem(axis)); // using squared distance
+        if (rect_to_dist < circle_r) {
+            RS_recursive(circle_p, circle_r, ids, less ? node->right : node->left, ignore);
+        }
+    }
+
+    // KNNS(K-Nearest Neighbor Search): searching k-nearest neighbor of the point that doesn't exist in kdtree
+    /**
+     * @brief KNNS(K近傍) あるkdtreeに無い点に対して最も近い点をk個得る
+     * @param[in] p 点
+     * @param[out] heap K近傍点
+     * @param[in] k k近傍
+     * @param[in] node 探索点
+     * @param[in] ignore 探索の対象外となる点id
+    */
+    template <typename Ty, typename VTy, typename Pred>
+    void KNNS_recursive(Point2d const & p, std::priority_queue<Ty, VTy, Pred> & heap, int const k, KDTreeNode * node, int const ignore) {
+        if (node == nullptr) {
+            return;
+        }
+        
+        // 葉へ向かう
+        int axis = node->axis;
+        bool less = p.elem(axis) < node->point.elem(axis);
+        KNNS_recursive(p, heap, k, less ? node->left : node->right, ignore);
+        
+        // 枝分かれ点との比較でKNNを更新
+        if(node->id != ignore){
+            double dist = node->point.dist_p_sq(p);
+            // heap.insert(new Pointopt(node->id, dist)); // if dist > max value in heaptree, then be canceled inserting automatically
+            heap.push({node->id, dist});
+        }
+
+        // 枝分かれの別の方へ探索しに行く
+        double rect_to_dist = (p.elem(axis) - node->point.elem(axis)) * (p.elem(axis) - node->point.elem(axis));
+        // if (heap.size() < k || rect_to_dist < heap.front().dist) {
+        if (rect_to_dist <= heap.top().second) {
+            KNNS_recursive(p, heap, k, less ? node->right : node->left, ignore);
+        }
+    }
+
+public:
+    /**
+     * @brief NNS(最近傍探索) kdtreeに無い点から最近傍点を調べる
+     * @param[in] p 点
+     * @return 最近傍点のid
+    */
+    int NNS(Point2d const & p){
+        Pointopt ans = {0, std::numeric_limits<double>::max()};
+        NNS_recursive(p, ans, root, -1);
+        return ans.first;
+    }
+
+    /**
+     * @brief NNS(最近傍探索) kdtreeにある点から最近傍点を調べる
+     * @param[in] id 点id
+     * @return 最近傍点のid
+    */
+    int NNSin(int const id){
+        Pointopt ans = {0, std::numeric_limits<double>::max()};
+        NNS_recursive(points[id], ans, root, id);
+        return ans.first;
+    }
+
+    /**
+     * @brief RS(円近傍) kdtreeに無い点の円近傍を得る
+     * @param[in] cir_p 円の中心
+     * @param[in] cir_r 円の半径
+     * @return 円近傍点のid配列
+    */
+    std::vector<int> RS(Point2d const & cir_p, double const cir_r){
+        std::vector<int> ans;
+        RS_recursive(cir_p, cir_r, ans, root, -1);
+        return ans;
+    }
+
+    /**
+     * @brief RS(円近傍) kdtreeにある点の円近傍を得る
+     * @param[in] id 円の中心点id
+     * @param[in] cir_r 円の半径
+     * @return 円近傍点のid配列
+    */
+    std::vector<int> RSin(int const id, double const cir_r){
+        std::vector<int> ans;
+        RS_recursive(points[id], cir_r, ans, root, id);
+        return ans;
+    }
+
+    /**
+     * @brief KNNS(K近傍) kdtreeに無い点のK近傍を得る
+     * @param[in] p 点
+     * @param[in] k k近傍
+     * @return k近傍点のid配列
+    */
+    std::vector<int> KNNS(Point2d const & p, int const k){
+        auto comp = [&](Pointopt const l, Pointopt const r) -> bool {
+            return l.second > r.second;
+        };
+        std::priority_queue<Pointopt, std::vector<Pointopt>, decltype(comp)> q(comp);
+        KNNS_recursive(p, q, k, root, -1);
+        std::vector<int> ans;
+        for(int i=0; i<k; ++i){
+            ans.emplace_back(q.top().first);
+            q.pop();
+        }
+        return ans;
+    }
+
+    /**
+     * @brief KNNS(K近傍) kdtreeにある点のK近傍を得る
+     * @param[in] id 点id
+     * @param[in] k k近傍
+     * @return K近傍のid配列
+    */
+    std::vector<int> KNNSin(int const id, int const k){
+        auto comp = [&](Pointopt const l, Pointopt const r) -> bool {
+            return l.second > r.second;
+        };
+        std::priority_queue<Pointopt, std::vector<Pointopt>, decltype(comp)> q(comp);
+        KNNS_recursive(points[id], q, k, root, id);
+        std::vector<int> ans;
+        for(int i=0; i<k; ++i){
+            ans.emplace_back(q.top().first);
+            q.pop();
+        }
+        return ans;
+    }
+
+public:
+    void debug_print(KDTreeNode * node, int const depth = 0){
+        if(node == nullptr){
+            return;
+        }
+        std::cout << "[深" << depth << "][" << node->id << "](" << node->point << ") axis:" << node->axis << std::endl;
+        debug_print(node->left, depth + 1);
+        debug_print(node->right, depth + 1);
+    }
+};
+
+
+}
+
+
+using namespace Geometry;
+
+int main(){
+    int n;
+    std::cin >> n;
+    std::vector<Point2d> points(n);
+
+    for(int i=0; i<n; ++i){
+        std::cin >> points[i];
+    }
+
+    double dist_min = std::numeric_limits<double>::max();
+    KDTree kdtree(points);
+
+    for(int i=0; i<n; ++i){
+        int id = kdtree.NNSin(i);
+        double dist = points[i].dist_p(points[id]);
+        if(dist < dist_min){
+            dist_min = dist;
+        }
+    }
+
+    std::cout << std::fixed << std::setprecision(11) << dist_min << std::endl;
+
+    return 0;
+}
+

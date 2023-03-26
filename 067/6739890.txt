@@ -1,0 +1,284 @@
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <string>
+#include <math.h>
+#include <iomanip>
+#include <fstream>
+#include <map>
+#include <set>
+#include <queue>
+#include <list>
+#include <iomanip>
+#include <numeric>
+#include <bitset>
+using namespace std;
+
+template<typename T1, typename T2>
+class myPair : public std::pair<T1, T2>{
+    using std::pair<T1, T2>::pair;
+    public:
+    inline const myPair<T1, T2> operator+(const myPair<T1, T2> &p) { return {this->first + p.first, this->second + p.second}; }
+    inline const myPair<T1, T2> operator-(const myPair<T1, T2> &p) { return {this->first - p.first, this->second - p.second}; }
+    template<typename U> inline const  myPair<T1, T2> operator*(const U &p) { return {this->first * p, this->second * p}; }
+    template<typename U> inline const  myPair<T1, T2> operator/(const U &p) { return {this->first / p, this->second / p}; }
+    inline myPair& operator+=(const myPair<T1, T2> &p) {
+        *this = *this + p;
+        return *this;
+    }
+    inline myPair& operator-=(const myPair<T1, T2> &p) {
+        *this = *this - p;
+        return *this;
+    }
+    template<typename U> inline myPair& operator*=(const U &x) {
+        *this = *this * x;
+        return *this;
+    }
+    template<typename U> inline myPair& operator/=(const U &x) {
+        *this = *this / x;
+        return *this;
+    }
+};
+#define pair myPair
+
+
+using ll = long long;
+using P = pair<int,int>;
+using PL = pair<ll,ll>;
+using V = vector<int>;
+using VL = vector<ll>;
+using VD = vector<double>;
+using VC = vector<char>;
+using VP = vector<P>;
+using VS = vector<string>;
+using VV = vector<V>;
+using VVL = vector<VL>;
+using VVD = vector<VD>;
+using VVC = vector<VC>;
+using VVP = vector<VP>;
+using VVS = vector<VS>;
+const int INF  = 1001001001;
+const ll INFL = 1001001001001001001;
+const ll MOD = 1000000007;
+const ll MOD_ = 998244353;
+const V DH = {-1,-1,0,1,1,1,0,-1};
+const V DW = {0,1,1,1,0,-1,-1,-1};
+struct grid{
+    int h, w;
+    inline const grid operator+(const grid &p) { return {this->h + p.h, this->w + p.w}; }
+    inline const grid operator*(const int &p) { return {this->h * p, this->w * p}; }
+    
+};
+ostream &operator<<(ostream &os, const grid& p) {
+    os << p.h << " " << p.w;
+    return os;
+}
+#define rep(i, j, n) for(ll i = (ll)(j); i < (ll)(n); i++)
+#define repb(i, j, n) for(ll i = (ll)(n-1); i >= (ll)(j); i--)
+#define reps(i, j, n) for(ll i = (ll)(j); i <= (ll)(n); i++)
+#define repsb(i, j, n) for(ll i = (ll)(n); i >= (ll)(j); i--)
+#define all(a) (a).begin(),(a).end()
+
+template<typename T>
+ostream &operator<<(ostream &os, const vector< T > &v) {
+    for(int i=0; i<(int)v.size(); i++){
+        os << v[i] << (i+1 != (int)v.size() ? " " : "");
+    }
+    return os;
+}
+
+template<typename T>
+istream &operator>>(istream &is, vector<T> &v){
+    for(T &in : v) is >> in;
+    return is;
+}
+
+template<typename T1, typename T2>
+ostream &operator<<(ostream &os, const pair<T1, T2>& p) {
+  os << p.first << " " << p.second;
+  return os;
+}
+
+template<typename T1, typename T2>
+istream &operator>>(istream &is, pair<T1, T2> &p) {
+  is >> p.first >> p.second;
+  return is;
+}
+
+template<class T>
+vector<int> compress(vector<T> &v, int a = 0){
+    vector<T> w = v;
+    vector<int> ret(v.size());
+    sort(w.begin(), w.end());
+    w.erase(unique(w.begin(), w.end()), w.end());
+    for(int i=0; i<v.size(); i++){
+        ret[i] = lower_bound(w.begin(), w.end(), v[i]) - w.begin() + a;
+    }
+    return ret;
+}
+
+void Yes(bool a){
+    if(a) cout << "Yes\n";
+    else cout << "No\n";
+}
+
+template<class T> bool chmin(T& a, T b){
+    if(a > b){
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template<class T> bool chmax(T& a, T b){
+    if(a < b){
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template<class T> T power(T x, ll n) {
+    T ret = 1;
+    while (n > 0) {
+        if (n & 1) ret = ret * x/* % MOD*/;
+        x = x * x/* % MOD*/;
+        n >>= 1;
+    }
+    return ret;
+}
+
+ll round_up(ll a, ll b){
+    return (a + b - 1) / b;
+}
+
+ll gcd(ll a, ll b){
+    if(a % b == 0){
+        return(b);
+    }else{
+        return(gcd(b, a % b));
+    }
+}
+
+ll lcm(ll a, ll b){
+    return a / gcd(a, b) * b ;
+}
+
+int rev(VV &table, bool turn, grid pos){
+    int res = 0;
+    if(table[pos.h][pos.w] != -1) return 0;
+    rep(i,0,8){
+        grid vec = {DH[i], DW[i]};
+        int cnt = 0;
+        reps(j,1,8){
+            grid ne = pos + (vec * (int)j);
+            if(ne.h < 0 || ne.h >= 8 || ne.w < 0 || ne.w >= 8){
+                cnt = 0;
+                break;
+            }
+            if(table[ne.h][ne.w] == -1){
+                cnt = 0;
+                break;
+            }
+            if(!turn ^ table[ne.h][ne.w]){
+                break;
+            }
+            else cnt++;
+            
+        }
+        res += cnt;
+    }
+    return res;
+}
+
+void rev_execute(VV &table, bool turn, grid pos){
+    vector<grid> res;
+    rep(i,0,8){
+        grid vec = {DH[i], DW[i]};
+        vector<grid> rev_pos;
+        reps(j,1,8){
+            grid ne = pos + (vec * (int)j);
+            if(ne.h < 0 || ne.h >= 8 || ne.w < 0 || ne.w >= 8){
+                rev_pos.clear();
+                break;
+            }
+            if(table[ne.h][ne.w] == -1){
+                rev_pos.clear();
+                break;
+            }
+            if(!turn ^ table[ne.h][ne.w]){
+                break;
+            }
+            else rev_pos.push_back(ne);
+        }
+        res.insert(res.end(), rev_pos.begin(), rev_pos.end());
+    }
+    table[pos.h][pos.w] = turn;
+    for(auto gr : res) table[gr.h][gr.w] = !table[gr.h][gr.w];
+}
+
+
+void print(VV &table){
+    rep(i,0,8){
+        rep(j,0,8){
+            if(table[i][j] == -1) cout << ".";
+            if(table[i][j] == 1) cout << "o";
+            if(table[i][j] == 0) cout << "x";
+        }
+        cout << endl;
+    }
+}
+
+int main(void){
+	
+    //input
+
+    VS T(8);
+    cin >> T;
+    VV table(8, V(8));
+    rep(i,0,8){
+        rep(j,0,8){
+            if(T[i][j] == 'o'){
+                table[i][j] = 1;
+            }
+            else if(T[i][j] == 'x'){
+                table[i][j] = 0;
+            }
+            else table[i][j] = -1;
+        }
+    }
+
+    //calculate
+
+    bool turn = true;
+    int pass_cnt = 0;
+    while(pass_cnt < 2){
+        vector<grid> can_rev;
+        int max = 1; 
+        rep(i,0,8){
+            rep(j,0,8){
+                grid pos = {(int)i, (int)j};
+                int pre_rev = rev(table, turn, pos);
+                if(max == pre_rev){
+                    can_rev.push_back(pos);
+                }
+                if(max < pre_rev){
+                    can_rev = {pos};
+                    max =  pre_rev;
+                }
+            }
+        }
+        if(!can_rev.empty()){
+            pass_cnt = 0;
+            if(turn) rev_execute(table, turn, can_rev.front());
+            else rev_execute(table, turn, can_rev.back());
+        }
+        else pass_cnt++;
+        turn = !turn; 
+    }
+    print(table);
+
+    
+
+
+}

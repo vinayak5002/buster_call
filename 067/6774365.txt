@@ -1,0 +1,62 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        while (true) {
+            int n = sc.nextInt();
+            if (n==0) break;
+            int[][] route;
+            int max = 9999999;
+            int town_num = 0;
+            ArrayList<int[]> input = new ArrayList<>();
+            for (int i = 0; i < n; i++) {
+                int a = sc.nextInt();
+                int b = sc.nextInt();
+                int d = sc.nextInt();
+                input.add(new int[]{a, b, d});
+                town_num = Math.max(a, town_num);
+                town_num = Math.max(b, town_num);
+            }
+            town_num++;
+
+            route = new int[town_num][town_num];
+            for (int i = 0; i < town_num; i++) {
+                for (int j = 0; j < town_num; j++) {
+                    route[i][j] = max;
+                }
+                route[i][i] = 0;
+            }
+
+            for (int[] inp :
+                    input) {
+                route[inp[0]][inp[1]] = route[inp[1]][inp[0]] = inp[2];
+            }
+
+            for (int i = 0; i < town_num; i++) {
+                for (int j = 0; j < town_num; j++) {
+                    for (int k = 0; k < town_num; k++) {
+                        route[i][j] = route[j][i] = Math.min(route[i][j], route[i][k] + route[k][j]);
+                    }
+                }
+            }
+
+            int min_cost = max;
+            int min_town = -1;
+            for (int i = 0; i < town_num; i++) {
+                int temp_cost = 0;
+                for (int j = 0; j <town_num; j++) {
+                    temp_cost += route[i][j];
+                }
+                if (min_cost > temp_cost) {
+                    min_cost = temp_cost;
+                    min_town = i;
+                }
+            }
+            System.out.println(min_town + " " + min_cost);
+        }
+        sc.close();
+    }
+}
+

@@ -1,0 +1,226 @@
+#include <algorithm>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+#include <random>
+#include <complex>
+#include <bitset>
+#include <iomanip>
+#include <memory>
+#include <functional>
+#include <stack>
+#include <limits>
+
+#define rep(i, n, s) for (int i = (s); i < int(n); i++)
+#define per(i, n, s) for (int i = (n) - 1; i >= int(s); i--)
+#define MM << " " <<
+#define all(x) begin(x), end(x)
+#define rall(x) rbegin(x), rend(x)
+
+template <class T>
+using MinHeap = std::priority_queue<T, std::vector<T>, std::greater<T>>;
+template <class T>
+using MaxHeap = std::priority_queue<T>;
+
+using ll = long long;
+using Pii = std::pair<int, int>;
+using Pll = std::pair<ll, ll>;
+using Pdd = std::pair<double, double>;
+
+template <class T>
+bool chmin(T &a, const T b) {
+    if (b < a) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <class T>
+bool chmax(T &a, const T b) {
+    if (a < b) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <class T>
+void vdeb(const std::vector<T> &da) {
+    auto n = da.size();
+    for (size_t i = 0; i < n; i++) {
+        if (i == n - 1)
+            std::cout << da[i];
+        else
+            std::cout << da[i] << " ";
+    }
+    std::cout << std::endl;
+}
+template<class T>
+void vdeb(const std::vector<std::vector<T>> &da) {
+    auto n = da.size();
+    for (size_t i = 0; i < n; i++) {
+        // std::cout << i << " : ";
+        vdeb(da[i]);
+    }
+    std::cout << std::endl;
+}
+
+
+class UnionFind {
+    int _n;
+    int _size;
+    std::vector<int> par_size;
+
+    public:
+    UnionFind() :_n(0), _size(0){}
+    UnionFind(int n) : _n(n), _size(n), par_size(n, -1) {}
+
+    int unite(int a, int b) {
+        assert(0 <= a && a < _n);
+        assert(0 <= b && b < _n);
+        a = root(a), b = root(b);
+        if(a == b) return a;
+        _size--;
+        if(-par_size[a] < -par_size[b]) {
+            par_size[b] += par_size[a];
+            return par_size[a] = b;
+        }
+        else {
+            par_size[a] += par_size[b];
+            return par_size[b] = a;
+        }
+    }
+
+    int root(int a) {
+        assert(0 <= a && a < _n);
+        if(par_size[a] < 0) return a;
+        return par_size[a] = root(par_size[a]); 
+    }
+
+    bool same(int a, int b) {
+        assert(0 <= a && a < _n);
+        assert(0 <= b && b < _n);
+        return root(a) == root(b);
+    }
+
+    int size(int a) {
+        assert(0 <= a && a< _n);
+        return -par_size[root(a)];
+    }
+
+    int size() {return _size;}
+
+    std::vector<std::vector<int>> groups() {
+        std::vector<int> leader_buf(_n), group_size(_n);
+        for (int i = 0; i < _n; i++) {
+            leader_buf[i] = root(i);
+            group_size[leader_buf[i]]++;
+        }
+        std::vector<std::vector<int>> result(_n);
+        for (int i = 0; i < _n; i++) {
+            result[i].reserve(group_size[i]);
+        }
+        for (int i = 0; i < _n; i++) {
+            result[leader_buf[i]].push_back(i);
+        }
+        result.erase(
+            std::remove_if(result.begin(), result.end(),
+                           [&](const std::vector<int>& v) { return v.empty(); }),
+            result.end());
+        return result;
+    }
+};
+
+using namespace std;
+
+int main() {
+    int n, m; cin >> n >> m;
+    vector<pair<ll, Pii>> ed(m);
+    for(auto &i : ed) cin >> i.second.first >> i.second.second >> i.first;
+    int l; cin >> l;
+    vector<pair<ll, Pii>> cd(l);
+    vector<ll> base(l);
+    rep(i,l,0) {
+        cin >> cd[i].first;
+        cin >> base[i];
+        cd[i].second = {i, (i+1)%l};
+    }
+    int r; cin >> r;
+    vector<int> s(n);
+    rep(i,r,0) {
+        int x; cin >> x;
+        s[x] = 1;
+    }
+    sort(all(ed));
+    UnionFind ufg(n);
+    ll ans = 0, base_sum = accumulate(all(base),0LL);
+    vector<ll> weight, num = {r}, cost = {0};
+    // vdeb(s);
+    for(auto &i :ed) {
+        int a = i.second.first, b = i.second.second;
+        a = ufg.root(a);
+        b = ufg.root(b);
+        if(ufg.same(a, b)) continue;
+        ufg.unite(a, b);
+        int c = ufg.root(a);
+        if(s[a] & s[b]) {
+            weight.emplace_back(i.first);
+            num.emplace_back(num.back() - 1);
+            cost.emplace_back(cost.back() + i.first);
+        }
+        else {
+            ans += i.first * l + base_sum;
+        }
+        s[c] = s[a] | s[b];
+    }
+    // vdeb(weight);
+    // cerr << ans << endl;
+    UnionFind ufc(l);
+    vector<int> snap(l);
+    sort(all(cd));
+    for(auto &i : cd) {
+        int a = ufc.root(i.second.first);
+        int b = ufc.root(i.second.second);
+        if(a == b) continue;
+        {
+            int g = a;
+            auto itr = lower_bound(all(weight), i.first - base[g]);
+            int id = itr - begin(weight);
+            ans += cost[id] - cost[snap[g]];
+            ans += base[g] * (id - snap[g]);
+            snap[g] = id;
+        }
+        {
+            int g = b;
+            auto itr = lower_bound(all(weight), i.first - base[g]);
+            int id = itr - begin(weight);
+            ans += cost[id] - cost[snap[g]];
+            ans += base[g] * (id - snap[g]);
+            snap[g] = id;
+        }
+        ufc.unite(a, b);
+        ans += num[min(snap[a], snap[b])] * i.first;
+        int c = ufc.root(a);
+        snap[c] = max(snap[a], snap[b]);
+        base[c] = min(base[a], base[b]);
+        // cout << ans MM i.first MM i.second.first MM i.second.second << endl;
+        // vdeb(snap);
+    }
+    int las = ufc.root(0);
+    // vdeb(cost);
+    // cerr << las << endl;
+    ans += cost.back() - cost[snap[las]] + base[las] * (cost.size() - snap[las] - 1);
+    cout << ans << endl;
+}

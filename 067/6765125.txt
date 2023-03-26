@@ -1,0 +1,36 @@
+# n q
+# com0 x0 y0
+# com1 x1 y1
+# ...
+# comq−1 xq−1 yq−1
+import math
+
+n, q = map(int, input().split(" "))
+queries = [None] * q
+for i in range(q):
+    queries[i] = list(map(int, input().split(" ")))
+
+bucket_size = math.floor(math.sqrt(n))
+buckets = [math.pow(2, 31) - 1] * (math.ceil(n / bucket_size))
+raw = [math.pow(2, 31) - 1] * n
+for que in queries:
+    if que[0] == 0: # update
+        raw[que[1]] = que[2]
+        buckets[que[1] // bucket_size] = min(buckets[que[1] // bucket_size], que[2])
+    elif que[0] == 1: # find
+        min_in_buckets = math.pow(2, 31) - 1
+        
+        start_bucket = que[1] // bucket_size
+        if que[1] % bucket_size != 0:
+            start_bucket += 1
+            for i in range(que[1], start_bucket * bucket_size):
+                min_in_buckets = min(min_in_buckets, raw[i])
+        end_bucket = que[2] // bucket_size
+        
+        for b in range(start_bucket, end_bucket + 1):
+            min_in_buckets = min(min_in_buckets, buckets[b])
+        
+        print(min_in_buckets)
+        
+        
+

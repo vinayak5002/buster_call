@@ -1,0 +1,94 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+typedef long long ll;
+typedef pair<ll, ll> P;
+typedef vector<bool> vb;
+typedef vector<ll> vl;
+typedef vector<vl> vvl;
+typedef vector<P> vp;
+typedef vector<vp> graph;
+typedef vector<char> vc;
+typedef vector<vc> vvc;
+#define fi first
+#define se second
+#define all(x) (x).begin(), (x).end()
+// const ll mod = 1000000007;
+const ll MOD = 998244353;
+const ll INF = 1000000000000000000;
+void yn(bool ok) { cout << (ok ? "yes\n" : "no\n"); }
+void Yn(bool ok) { cout << (ok ? "Yes\n" : "No\n"); }
+void YN(bool ok) { cout << (ok ? "YES\n" : "NO\n"); }
+template <class T>
+inline bool chmin(T& a, T b) {
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+template <class T>
+inline bool chmax(T& a, T b) {
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+ll dx[8] = {1, 0, -1, 0, 1, 1, -1, -1}, dy[8] = {0, 1, 0, -1, 1, -1, 1, -1};
+// ll dx[4] = {1, 0, -1, 0}, dy[4] = {0, -1, 0, 1};
+struct UF {
+    vector<ll> par, siz;
+    UF(ll n) {
+        par.resize(n + 10, 0);
+        siz.resize(n + 10);
+        for (int i = 0; i <= n; i++) {
+            par[i] = i;
+            siz[i] = 1;
+        }
+    }
+    ll root(ll x) { return par[x] == x ? x : par[x] = root(par[x]); }
+    bool same(ll x, ll y) { return root(x) == root(y); };
+
+    void unite(ll x, ll y) {
+        x = root(x);
+        y = root(y);
+        if (x == y) return;
+        if (siz[x] > siz[y]) swap(x, y);
+        par[x] = y;
+        siz[y] += siz[x];
+    }
+    ll size(ll x) { return siz[root(x)]; }
+};
+void solve() {
+    ll h, w;
+    cin >> w >> h;
+    if (!h) exit(0);
+    UF uf(h * w);
+    vvl c(h, vl(w));
+    for (int i = 0; i < h; i++)
+        for (int j = 0; j < w; j++) cin >> c[i][j];
+    for (int i = 0; i < h; i++)
+        for (int j = 0; j < w; j++) {
+            if (c[i][j] == 0) continue;
+            for (int k = 0; k < 8; k++) {
+                ll ny = i + dy[k], nx = j + dx[k];
+                if (!(0 <= ny && ny < h && 0 <= nx && nx < w)) continue;
+                if (c[ny][nx] == 1) uf.unite(i * w + j, ny * w + nx);
+            }
+        }
+    set<ll> st;
+    for (int i = 0; i < h; i++)
+        for (int j = 0; j < w; j++)
+            if (c[i][j]) st.insert(uf.root(i * w + j));
+    cout << st.size() << endl;
+}
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    ll t = 1;
+    // cin >> t;
+    for (int i = 1;; i++) solve();
+    return 0;
+}

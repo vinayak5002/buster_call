@@ -1,0 +1,65 @@
+#include <iostream>
+#include <algorithm>
+#define INF 2147483647
+using namespace std;
+
+int N;
+int n,q;
+int com,x,y;
+int D[100000];
+
+void initRMQ(int);
+void update(int,int);
+int findMin(int,int);
+int query(int,int,int,int,int);
+
+int main(){
+  cin >> n >> q;
+
+  initRMQ(n);
+
+  for(int i=0; i<q; i++){
+    cin >> com >> x >> y;
+
+    if(com == 0){
+      update(x,y);
+    } else {
+      cout << findMin(x,y) << endl;
+    }
+  }
+
+  return 0;
+}
+
+void initRMQ(int n_){
+  N = 1;
+
+  while(N < n_) N *= 2;
+
+  for(int i=0; i<(2*N-1-1); i++) D[i] = INF;
+}
+
+void update(int k, int x){
+  k += N-1;
+  D[k] = x;
+
+  while(k > 0){
+    k = (k-1)/2;
+    D[k] = min(D[k*2+1],D[k*2+2]);
+  }
+}
+
+int findMin(int a, int b){
+  return query(a,b+1,0,0,N);
+}
+
+int query(int a, int b, int k, int l, int r){
+  if(r <= a || b <= l) return INF;
+  if(a <= l && r <= b) return D[k];
+
+  int vl = query(a,b,k*2+1,l,(l+r)/2);
+  int vr = query(a,b,k*2+2,(l+r)/2,r);
+
+  return min(vl,vr);
+}
+

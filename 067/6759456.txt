@@ -1,0 +1,51 @@
+banpei = {}
+banpei["next"] = banpei
+banpei["prev"] = banpei
+
+def insert(k):
+  x = {}
+  x["key"] = k
+  x["next"] = banpei["next"]
+  banpei["next"]["prev"] = x
+  banpei["next"] = x
+  x["prev"] = banpei
+
+def delete(k):
+  t = banpei["next"]
+  while (t != banpei and t["key"] != k):
+    t = t["next"]
+  if t != banpei:
+    t["prev"]["next"] = t["next"]
+    t["next"]["prev"] = t["prev"]
+
+def deleteFirst():
+  t = banpei["next"]
+  banpei["next"] = t["next"]
+  t["next"]["prev"] = banpei
+
+def deleteLast():
+  t = banpei["prev"]
+  banpei["prev"] = t["prev"]
+  t["prev"]["next"] = banpei
+
+def show():
+  s = []
+  c = banpei["next"]
+  while c != banpei:
+    s.append(c["key"])
+    c = c["next"]
+  print(*s, end="\n")
+
+n = int(input().rstrip())
+for _ in range(n):
+  command = input().rstrip().split()
+  if command[0] == "insert":
+    insert(command[1])
+  elif command[0] == "delete":
+    delete(command[1])
+  elif command[0] == "deleteFirst":
+    deleteFirst()
+  elif command[0] == "deleteLast":
+    deleteLast()
+
+show()

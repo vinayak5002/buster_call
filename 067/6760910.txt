@@ -1,0 +1,42 @@
+ans_list = []
+
+###################
+#Union Find
+###################
+#when par[i]<0, i is par. abs is equal to the number of children
+
+#親のindexを返す
+def root(x):
+    if(par[x]<0):
+        return x
+    else:
+        par[x]=root(par[x])
+        return par[x]
+
+def unite(x,y):
+    x,y=root(x),root(y)
+    if(x==y):
+        return False
+    else:
+        if(x>y):
+            x,y=y,x
+        par[x]+=par[y]
+        par[y]=x
+
+while True:
+    m, n, p = map(int, input().split())
+    if m == 0 and n == 0 and p == 0:
+        break
+    p -= 1
+    par = [-1 for _ in range(m)]
+    flg = False
+    for _ in range(n):
+        a, b = map(lambda x : int(x) - 1, input().split())
+        if (a == p) or (b == p):
+            flg = True
+        if flg:
+            unite(a, b)
+    ans = -par[root(p)]
+    ans_list.append(ans)
+
+print(*ans_list, sep = "\n")

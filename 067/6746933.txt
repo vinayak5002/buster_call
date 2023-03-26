@@ -1,0 +1,117 @@
+using System;
+
+public class Test
+{
+	static String wynik;
+	static int kursor = 0;
+	
+	static void forwardChar()
+	{
+		if (kursor<=wynik.Length) kursor++;
+	}
+	static void forwardWord()
+	{
+		if (kursor == wynik.Length) return;
+		while (kursor < wynik.Length && wynik[kursor]==' ') kursor++;
+		while (kursor < wynik.Length && wynik[kursor]!=' ') kursor++;
+	}
+	static void backwardChar()
+	{
+		if (kursor>0) kursor--;
+	}
+	static void backwardWord()
+	{
+		if (kursor == 0) return;
+		if (kursor == wynik.Length) kursor--;
+			while (kursor>0 && wynik[kursor]==' ') kursor--;
+			while (kursor>0 && wynik[kursor]!=' ') kursor--;
+	}
+	static void insert(string s)
+	{
+		string neww="";
+		for (int i=0; i<wynik.Length; i++)
+		{
+			if (kursor == i) neww += s;
+			neww += wynik[i];
+		}
+		if (kursor == wynik.Length) neww += s;
+		wynik = neww;
+		kursor += s.Length;
+
+	}
+	static void deleteChar()
+	{
+		if (kursor == wynik.Length) return;
+		string neww="";
+		for (int i=0; i<wynik.Length; i++)
+		{
+			if (kursor == i) continue;
+			neww += wynik[i];
+		}
+		wynik = neww;
+	}
+	static void deleteWord()
+	{
+		if (kursor == wynik.Length) return;
+		string neww="";
+		for (int i=0; i<wynik.Length; i++)
+		{
+			if (kursor == i) 
+			{
+				while (i < wynik.Length && wynik[i]!=' ') i++;
+			}
+			if (i < wynik.Length) neww += wynik[i];
+		}
+		wynik = neww;
+	}
+	
+	public static void Main()
+	{
+		String co;
+		int n,qq;
+		n = int.Parse(Console.ReadLine());
+		
+		while (n-->0)
+		{
+			wynik = Console.ReadLine();
+			kursor=0;
+			qq = int.Parse(Console.ReadLine());
+			while (qq-->0)
+			{
+				co = Console.ReadLine();
+
+//Console.Write(co+":");	
+
+				if (co == "forward char") forwardChar();
+				if (co == "forward word") forwardWord();
+				if (co == "backward char") backwardChar();
+				if (co == "backward word") backwardWord();
+				if (co == "delete char") deleteChar();
+				if (co == "delete word") deleteWord();
+				if (co[0]=='i')
+				{
+					String slowo = "";
+					int jest = 0;
+					foreach (char c in co)
+					{
+						
+						if (jest>0 && c!='"') slowo += c;
+						if (c == '"') jest = 1-jest;
+					}
+					insert(slowo);
+				}
+			}
+				for (int i=0; i<wynik.Length; i++)
+				{
+					if (kursor == i) 
+					{
+						Console.Write('^');	
+					}
+					Console.Write(wynik[i]);
+				}
+				if (kursor == wynik.Length) Console.Write('^');	
+				Console.WriteLine("");
+
+		}
+	}
+}

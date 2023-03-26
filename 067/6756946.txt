@@ -1,0 +1,96 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+class UnionFind {
+public:
+    UnionFind() = default;
+    explicit UnionFind(int n) : data(n, -1) {}
+
+    int find(int x) {
+        if (data[x] < 0) return x;
+        return data[x] = find(data[x]);
+    }
+
+    void unite(int x, int y) {
+        x = find(x);
+        y = find(y);
+        if (x == y) return;
+        if (data[x] > data[y]) std::swap(x, y);
+        data[x] += data[y];
+        data[y] = x;
+    }
+
+    bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+
+    int size(int x) {
+        return -data[find(x)];
+    }
+
+private:
+    std::vector<int> data;
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    int V;
+    cin >> V;
+    vector<string> a(V);
+    for (auto& x : a) cin >> x;
+    int rem = V*(V-1)/2;
+    UnionFind uf(V);
+    rep(i,0,V) rep(j,i+1,V) {
+        if (a[i][j] == 'Y') {
+            --rem;
+            uf.unite(i, j);
+        }
+    }
+    vector<int> cnt(2);
+    rep(i,0,V) if (uf.find(i) == i) {
+        ++cnt[uf.size(i) % 2];
+    }
+    if (rem % 2) {
+        if (V % 2 == 0 && cnt[0] == 0) {
+            cout << "Hanako" << endl;
+        } else {
+            cout << "Taro" << endl;
+        }
+    } else {
+        if (V % 2 == 1) {
+            cout << "Hanako" << endl;
+        } else {
+            while (cnt[0] + cnt[1] > 2) {
+                // taro
+                if (cnt[0] == 0) {
+                    cnt[1] -= 2;
+                    ++cnt[0];
+                } else {
+                    --cnt[0];
+                }
+
+                // hanako
+                if (cnt[1] == 0) {
+                    --cnt[0];
+                } else {
+                    cnt[1] -= 2;
+                    ++cnt[0];
+                }
+            }
+            if (cnt[0] == 0) {
+                cout << "Taro" << endl;
+            } else {
+                cout << "Hanako" << endl;
+            }
+        }
+    }
+}

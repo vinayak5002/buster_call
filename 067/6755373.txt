@@ -1,0 +1,76 @@
+from operator import sub
+
+
+
+class number():
+    def __init__(self, val):
+        self.val = val
+
+    def __add__(self, other):
+        if isinstance(other, int):
+            return number(max(self.val, other))
+        return number(max(self.val, other.val))
+
+    def __radd__(self, other):
+        if isinstance(other, int):
+            return number(max(self.val, other))
+        return number(max(self.val, other.val))
+
+    def __mul__(self, other):
+        if isinstance(other, int):
+            return number(min(self.val, other))
+        return number(min(self.val, other.val))
+
+    def __rmul__(self, other):
+        if isinstance(other, int):
+            return number(min(self.val, other))
+        return number(min(self.val, other.val))
+
+    def __neg__(self):
+        if isinstance(self, int):
+            return number(2 - self)
+        return number(2 - self.val)
+
+
+def main():
+    result = []
+    while True:
+        formula = input()
+        if formula == ".":
+            break
+
+        ans = 0
+        for p in range(3):
+            P = number(p)
+            for q in range(3):
+                Q = number(q)
+                for r in range(3):
+                    R = number(r)
+                    res = eval(formula)
+                    if not isinstance(res, int):
+                        res = res.val
+                    if res == 2:
+                        ans += 1
+        result.append(ans)
+
+    print(*result, sep="\n")
+
+
+def test():
+    P = number(2)
+    print(eval("---P")._x)
+    """
+    (P*Q)
+    (--R+(P*Q))
+    (P*-P)
+    2
+    1
+    (-1+(((---P+Q)*(--Q+---R))*(-R+-P)))
+    .
+    """
+
+
+
+if __name__ == '__main__':
+    main()
+

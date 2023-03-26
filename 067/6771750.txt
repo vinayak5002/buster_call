@@ -1,0 +1,54 @@
+#include <stdio.h>
+
+int n,cur=1,head=0,tail=0;
+int v[101];
+int G[101][101];
+int queue[101];
+int cnt[101];
+
+void BFS(int id){
+    for(int i=1;i<=n;i++){
+        if(G[id][i]==1 && v[i]==0){
+            v[i]=1;
+            queue[tail++]=i;
+            cnt[i]=cnt[id]+1;
+        }
+    }
+}
+
+int dequeue(){
+    int a;
+    a = queue[head];
+    head++;
+    return a;
+}
+
+int main(void){
+    int tmp_n,tmp;
+    int k;
+    scanf("%d",&n);
+    for(int i=1;i<=n;i++){
+        for(int j=1;j<=n;j++){
+            G[i][j]=0;
+        }
+        cnt[i]=-1;
+    }
+    for(int i=1;i<=n;i++){
+        scanf("%d %d",&tmp_n,&k);
+        for(int j=0;j<k;j++){
+            scanf("%d",&tmp);
+            G[i][tmp]=1;
+        }
+    }
+    
+    cnt[1]=0;
+    v[1]=1;
+    BFS(1);
+    while(head<=tail){
+        BFS(dequeue());
+    }
+
+    for(int i=1;i<=n;i++){
+        printf("%d %d\n",i,cnt[i]);
+    }
+}

@@ -1,0 +1,149 @@
+#include <bits/stdc++.h>
+////#include <atcoder/all>
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using vvvb = vector<vvb>;
+using vd = vector<double>;
+using vvd = vector<vd>;
+using vvvd = vector<vvd>;
+#define all(A) A.begin(),A.end()
+#define ALL(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q) {
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+template<class T>
+bool chmin(T& p, T q) {
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+ll gcd(ll(a), ll(b)) {
+    if (b == 0)return a;
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+ll Eulers_phi(ll n) {
+    ll res = 0;
+    ll N = n;
+    vll P;
+    for (ll p = 2; p * p <= N; p++) {
+        if (N % p == 0) {
+            P.push_back(p);
+            while (N % p == 0)N /= p;
+        }
+    }
+    if (N != 1)P.push_back(N);
+
+    N = P.size();
+    rep(bit, (1 << N)) {
+        ll k = 1;
+        ll t = 0;
+        rep(i, N) {
+            if (bit & (1 << i)) {
+                k *= P[i];
+                t++;
+            }
+        }
+        res += (t % 2 == 0 ? 1 : -1) * n / k;
+    }
+    return res;
+
+}
+
+string OR;
+bool C(string &S){
+    string res=S;
+    rep(j,25){
+        rep(i,S.size()){
+            if(res[i]=='a'+j+1){
+                res[i]='a'+j;
+                break;
+            }
+        }
+    }
+    return (OR==res);
+}
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    
+    while(1){
+        string S;
+        cin>>S;
+        if(S=="#")return 0;
+        vector<string> AN;
+        ll N=S.size();
+        OR=S;
+        set<string> mi,MA;
+        ll an=0;
+        rep(bit,(1<<N)){
+            string T=S;
+            rep(i,N){
+                if(bit&(1<<i)){
+                    T[i]++;
+                }
+            }
+            
+            if(C(T)){
+                an++;
+                mi.insert(T);
+                MA.insert(T);
+                if(mi.size()>5){
+                    auto it=mi.end();
+                    it--;
+                    mi.erase(it);
+                }
+                if(MA.size()>5){
+                    MA.erase(MA.begin());
+                }
+            }
+        }
+        for(auto p:mi)AN.push_back(p);
+        for(auto p:MA)if(!mi.count(p))AN.push_back(p);
+        sort(all(AN));
+        cout<<an<<endl;
+        if(AN.size()<10){
+            rep(i,AN.size())cout<<AN[i]<<endl;
+        }
+        else{
+            rep(i,5)cout<<AN[i]<<endl;
+            rep(i,5)cout<<AN[AN.size()-5+i]<<endl;
+        }
+    }
+
+
+
+
+
+
+}

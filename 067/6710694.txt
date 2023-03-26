@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for(int i = 0; i < (n); i++)
+using namespace std;
+typedef long long ll;
+
+using ARG = pair<int,int>;
+const int O = 34;
+ARG dp[O][O][O][O];
+ARG e = {-1, -1};
+
+int main(){
+    cin.tie(0);
+    ios::sync_with_stdio(0);
+    
+    while(true) {
+        int h,w,s; cin >> h >> w >> s; if(h == 0 && w == 0 && s == 0) break;
+        vector<vector<int>> u(h, vector<int>(w));
+        rep(x,h)rep(y,w) cin >> u[x][y];
+
+        vector<vector<int>> u_sum(h + 1, vector<int>(w + 1, 0));
+        rep(x,h)rep(y,w) u_sum[x + 1][y + 1] = u_sum[x + 1][y] + u_sum[x][y + 1] - u_sum[x][y] + u[x][y];
+        auto sum = [&](int x1, int x2, int y1, int y2) {
+            return u_sum[x2][y2] - u_sum[x1][y2] - u_sum[x2][y1] + u_sum[x1][y1];
+        };
+
+        rep(x1,O)rep(x2,O)rep(y1,O)rep(y2,O) dp[x1][x2][y1][y2] = e;
+
+        function<ARG(int,int,int,int)> calc = [&](int x1, int x2, int y1, int y2) -> ARG {
+            if(dp[x1][x2][y1][y2] != e) return dp[x1][x2][y1][y2];
+            ARG res = {1, s - sum(0, h, 0, w) + sum(x1, x2, y1, y2)};
+            if(res.second < 0) return e;
+
+            for(int m = x1 + 1; m < x2; m++) {
+                ARG nt1 = calc(x1, m, y1, y2);
+                ARG nt2 = calc(m, x2, y1, y2);
+                if(nt1 != e && nt2 != e) {
+                    ARG nt = {nt1.first + nt2.first, min(nt1.second, nt2.second)};
+                    res = max(res, nt);
+                }
+            }
+
+            for(int m = y1 + 1; m < y2; m++) {
+                ARG nt1 = calc(x1, x2, y1, m);
+                ARG nt2 = calc(x1, x2, m, y2);
+                if(nt1 != e && nt2 != e) {
+                    ARG nt = {nt1.first + nt2.first, min(nt1.second, nt2.second)};
+                    res = max(res, nt);
+                }
+            }
+
+            return dp[x1][x2][y1][y2] = res;
+        };
+
+        auto ans = calc(0, h, 0, w);
+        cout << ans.first << " " << ans.second << endl;
+    }
+}

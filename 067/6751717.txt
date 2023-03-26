@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+import sys
+# from icecream import ic
+from collections import defaultdict, deque
+INF = float('inf')
+readline = sys.stdin.buffer.readline
+sys.setrecursionlimit(10**7)
+
+'''
+dp[bit][i] := visited nodes represented by bit with i-th visited last
+dp[0][0] = 1として0以外でbitdp→dp[2**V-2][i]が各i>0に対して求まるので、それらについてiから0へのコストを足す？
+いや、答えはdp[2**V-1][0]で求まるから途中で0訪れてしまうのは気にしなくていい
+
+'''
+
+def div_ceil(x, y):
+    return -(-x//y)
+
+V, E = map(int, input().split())
+# cost[(a, b)] := weight of the edge from a to b
+cost = defaultdict(lambda: INF)
+for _ in range(E):
+    s, t, d = map(int, input().split())
+    cost[(s, t)] = d
+
+pattern_count = pow(2, V)
+dp = [[INF] * V for _ in range(pattern_count)]
+for bit in range(1, pattern_count):
+    for last in range(V):
+        # last is visited in bit
+        if not (bit & (1<<last)):
+            continue
+        is_first = True
+        for second_last in range(V):
+            if last == second_last or not (bit & (1<<second_last)):
+                continue
+            dp[bit][last] = min(dp[bit][last], dp[bit&(~(1<<last))][second_last] + cost[(second_last, last)])
+            is_first = False
+        if is_first:
+            dp[bit][last] = cost[(0, last)]
+
+print(dp[-1][0] if dp[-1][0] != INF else -1)
+

@@ -1,0 +1,32 @@
+import java.util.*;
+import java.awt.*;
+
+public class Main{
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int v = sc.nextInt(), e = sc.nextInt(), r = sc.nextInt();
+        ArrayList<Map<Integer, Integer>> graph = new ArrayList<Map<Integer, Integer>>();
+        for(int i=0;i<v;i++)graph.add(new HashMap<Integer, Integer>());
+        for(int i=0;i<e;i++){
+            graph.get(sc.nextInt()).put(sc.nextInt(), sc.nextInt());
+        }
+        sc.close();
+        Deque<Point> pq = new ArrayDeque<Point>();
+        pq.add(new Point(r, 0));
+        long[] ans = new long[v];
+        Arrays.fill(ans, Long.MAX_VALUE);
+        while(pq.size()>0){
+            Point p = pq.poll();
+            if(ans[p.x]<=p.y)continue;
+            ans[p.x] = p.y;
+            for(Map.Entry<Integer, Integer> en : graph.get(p.x).entrySet()){
+                pq.add(new Point(en.getKey(), p.y+en.getValue()));
+            }
+        }
+        for(long x : ans){
+            if(x==Long.MAX_VALUE)System.out.println("INF");
+            else System.out.println(x);
+        }
+    }
+}
+

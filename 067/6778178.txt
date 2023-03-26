@@ -1,0 +1,88 @@
+#include <iostream>
+#include <math.h>
+
+using namespace std;
+
+int values[184];
+
+char r1[1000000] = {0,};
+
+
+int exe(int in);
+
+int exe2(int in);
+
+int recursive(int v, int i, int n, char step);
+
+
+int main() {
+    values[0] = 1;
+    int tmp = 1;
+    for (int i = 1; i <= 184; ++i) {
+        tmp += i + 1;
+        values[i] = values[i - 1] + tmp;
+    }
+    recursive(0, 0, 1, 1);
+    recursive(0, 0, 2, 2);
+    recursive(0, 0, 3, 3);
+    recursive(0, 0, 4, 4);
+    recursive(0, 0, 5, 5);
+    recursive(0, 0, 6, 6);
+    int target;
+    cin >> target;
+    while (target != 0) {
+        cout << exe2(target) << ' ' << exe(target) << endl;
+        cin >> target;
+    }
+}
+
+int recursive(int v, int i, int n, char step) {
+    if (n == 1) {
+        for (int j = i; j < 183; ++j) {
+            int target = v + values[j];
+            if (target > 100000) break;
+            if (r1[target] == 0 || r1[target] > step) {
+                r1[target] = step;
+//                printf("%d, %d\n", target, step);
+            }
+        }
+    } else {
+        for (int j = i; j < 183; ++j) {
+            int target = v + values[j];
+            if (target > 100000) break;
+            recursive(target, j, n - 1, step);
+        }
+    }
+}
+
+
+int exe2(int in) {
+    return (int) r1[in];
+}
+
+
+int exe1(int target, int max) {
+//    printf("%d %d \n", target, values[max]);
+    if (target == values[max])return 1;
+    if (target < values[max]) {
+        max -= 1;
+        while (values[max] % 2 != 1) {
+            max--;
+        }
+        return exe1(target, max);
+    }
+    return exe1(target - values[max], max) + 1;
+}
+
+int exe(int in) {
+    int max = 0;
+    while (values[max] < in) {
+        max++;
+    }
+    if (values[max] == in && values[max] % 2 == 1) return 1;
+    max -= 1;
+    while (values[max] % 2 != 1) {
+        max--;
+    }
+    return exe1(in, max);
+}

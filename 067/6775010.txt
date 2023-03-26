@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+#ifdef MY_DEBUG
+  #include "dprint.cpp"
+  # define dprint(a, ...);\
+      do {\
+          printf("line : %d, func : %s\n",\
+                __LINE__, __func__);\
+          dprint(#a,a,##__VA_ARGS__ );\
+      } while (0)
+#else
+  #define dprint(a,...) 
+#endif
+using namespace std;
+
+pair<int,int>search(int h,int w,vector<vector<char>> vec,char c){
+  for (int i = 0; i < h; i++){
+    for(int j=0;j<w;j++){
+      if(vec[i][j]==c)return make_pair(i,j);
+    }
+  }
+  return make_pair(-1,-1);
+}
+
+long long solve(int h,int w,vector<vector<char>> vec,string s2){
+  long long ans=0;
+
+  int now_x=0;
+  int now_y=0;
+
+for (int i = 0; i < (int)s2.size(); i++){
+  auto v=search(h,w,vec,s2[i]);
+
+  ans+=abs(now_x-v.first)+abs(now_y-v.second);
+  now_x=v.first;
+  now_y=v.second;
+  ans++;
+}
+  
+
+  return ans;
+
+}
+
+int main() {
+  while (true){
+    int h,w;
+    cin >>h>>w;
+    if(h==0&&w==0)break;
+
+    vector<vector<char>> vec(h, vector<char>(w));
+    for (int i = 0; i < h; i++){
+      string s;
+      cin >>s;
+      for(int j=0;j<w;j++){
+        vec[i][j]=s[j];
+      }
+    }
+
+    string s2;
+    cin >>s2;
+
+    cout << solve(h,w,vec,s2) << endl;
+  }
+  
+
+
+return 0;
+}

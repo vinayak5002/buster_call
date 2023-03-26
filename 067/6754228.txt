@@ -1,0 +1,41 @@
+import sys, math
+sys.setrecursionlimit(1000000)
+INF = 1 << 100
+#mod = 1000000007
+mod = 998244353
+input = lambda: sys.stdin.readline().rstrip()
+li = lambda: list(map(int, input().split()))
+
+H, W = li()
+grid = [li() for _ in range(H)]
+
+tate = [[0] * W for _ in range(H)]
+
+for h in range(H):
+    for w in range(W):
+        if grid[h][w] == 0:
+            tate[h][w] = 1
+            if h:
+                tate[h][w] += tate[h-1][w]
+
+ans = 0
+for h in range(H):
+    stack = []
+    for w in range(W):
+        y = w
+        flg = 0
+        while stack and stack[-1][0] > tate[h][w]:
+            t, y = stack.pop()
+            ans = max(ans, t * (w-y))
+            flg = 1
+        if tate[h][w]:
+            if not flg:
+               stack.append((tate[h][w], w))
+            else:
+                stack.append((tate[h][w], y))
+    while stack:
+        t, y = stack.pop()
+        ans = max(ans, (W-y) * t)
+        
+print(ans)
+        

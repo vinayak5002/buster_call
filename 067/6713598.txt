@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+using namespace std;
+
+#define all(x) (x).begin(),(x).end()
+#define print(x) cout << (x) << '\n'
+typedef long long ll;
+typedef long double ld;
+using P = pair<int,int>;
+using pll = pair<ll,ll>;
+using Graph = vector<vector<int>>;
+
+//using mint = atcoder :: modint998244353;
+//const ll MOD = 1000000007;
+//const ll MOD = 998244353;
+
+template <typename T> inline bool chmax(T &a, T b) {return a < b ? a = b, true : false;}
+template <typename T> inline bool chmin(T &a, T b) {return a > b ? a = b, true : false;}
+
+template <typename T>
+void vin(vector<T> &v) {
+    int l = v.size();
+    for(int i = 0; i < l; i++) cin >> v[i];
+}
+
+template <typename T>
+void vout(vector<T> &v) {
+    int l = v.size();
+    for(int i = 0; i < l; i++) cout << v[i] << " \n"[i == l - 1];
+}
+
+int main() {
+    cin.tie(0); cout.tie(0);
+    ios::sync_with_stdio(false);
+    cout << fixed << setprecision(18);
+
+    int n;  cin >> n;
+    vector<int> c(3, 0);
+    for(int i = 0; i < n; i++) {
+        int a;  cin >> a;
+        c[a % 3]++;
+    }
+    if(c[1] + c[2] == 0) {
+        print(1);
+    } else {
+        int ans = 0;
+        for(int t = 1; t <= 2; t++) {
+            int cnt = c[0];
+            vector<int> d = {c[1], c[2]};
+            int now = -1;
+            if(d[t - 1] > 0) {
+                d[t - 1]--;
+                now = t;
+                cnt++;
+            }
+            for(int i = 0; i < n - c[0]; i++) {
+                if(now == 1) {
+                    if(d[0] == 0) break;
+                    else {
+                        d[0]--;
+                        now = 2;
+                        cnt++;
+                    }
+                } else if(now == 2) {
+                    if(d[1] == 0) break;
+                    else {
+                        d[1]--;
+                        now = 1;
+                        cnt++;
+                    }
+                }
+            }
+            if(d[0] + d[1] > 0) cnt++;
+            chmax(ans, cnt);
+        }
+        print(ans);
+    }
+    return 0;
+}

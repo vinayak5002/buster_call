@@ -1,0 +1,30 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+int main(){
+    ll a, b, d;
+    while(cin >> a >> b >> d){
+        if(a == 0 && b == 0 && d == 0)return 0;
+        array<ll,2> minv = {1ll << 60, 1ll << 60}, ans;
+        auto f = [&](ll x, ll v){
+            if(v % b != 0)return;
+            ll y = v / b;
+            if(y < 0)return;
+            if(x + y < minv[0]){
+                minv[0] = x + y;
+                minv[1] = a * x + b * y;
+                ans[0] = x, ans[1] = y;
+            }else if(x + y == minv[0] && a * x + b * y < minv[1]){
+                minv[1] = a * x + b * y;
+                ans[0] = x, ans[1] = y;
+            }
+        };
+        for(ll x = 0; x <= 100 * d; x++){
+            f(x, d - a * x);
+            f(x, a * x - d);
+            f(x, a * x + d);
+        }
+        cout << ans[0] << " " << ans[1] << '\n';
+    }
+}

@@ -1,0 +1,51 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
+
+func makeSlice(n int) [][]int {
+	s := make([][]int, n)
+	for i := 0; i < n; i++ {
+		for j := 0; j < n; j++ {
+			s[i] = append(s[i], 0)
+		}
+	}
+	return s
+}
+
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+
+	// adjacency_matrix := make([][]int, n*n)
+	adjacency_matrix := makeSlice(n)
+
+	for i := 0; i < n; i++ {
+		var u, k int
+		fmt.Fscan(in, &u)
+		fmt.Fscan(in, &k)
+
+		for j := 0; j < k; j++ {
+			var target_index int
+			fmt.Fscan(in, &target_index)
+			adjacency_matrix[u-1][target_index-1] = 1
+		}
+	}
+
+	// Output
+	for i := 0; i < n; i++ {
+		fmt.Fprintf(out, "%d", adjacency_matrix[i][0])
+		for j := 1; j < n; j++ {
+			fmt.Fprintf(out, " %d", adjacency_matrix[i][j])
+		}
+		fmt.Fprint(out, "\n")
+	}
+}
+

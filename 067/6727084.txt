@@ -1,0 +1,33 @@
+import sys
+from collections import defaultdict
+
+sys.setrecursionlimit(10 ** 6)
+stdin = sys.stdin
+
+INF = float('inf')
+
+ni = lambda: int(ns())
+na = lambda: list(map(int, stdin.readline().split()))
+ns = lambda: stdin.readline().strip()
+
+V, E = na()
+G = defaultdict(list)
+for _ in range(E):
+    s, t, d = na()
+    G[s].append((t, d))
+
+dp = [[INF] * V for _ in range(1 << V)]
+dp[0][0] = 0
+
+for bit in range(1 << V):
+    for u in range(V):
+        for v, vv in G[u]:
+            if bit & (1 << v):
+                continue
+            dp[bit | (1 << v)][v] = min(dp[bit | (1 << v)][v], dp[bit][u] + vv)
+
+
+if dp[(1 << V) - 1][0] != INF:
+    print(dp[(1 << V) - 1][0])
+else:
+    print(-1)

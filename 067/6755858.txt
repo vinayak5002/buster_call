@@ -1,0 +1,102 @@
+import java.util.Arrays;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
+
+class PriorityQueue {
+
+    private static final int d = 2;
+    private int[] heap;
+    public int heapSize;
+
+    PriorityQueue(int capacity) {
+        heapSize = 0;
+        heap = new int[ capacity + 1];
+        Arrays.fill(heap, -1);
+    }
+
+    public boolean isEmpty(){
+        return heapSize == 0;
+    }
+
+    public boolean isFull(){
+        return heapSize == heap.length;
+    }
+
+    private int parent(int i){
+        return (i-1)/d;
+    }
+
+    private int kthChild(int i,int k){
+        return d*i  +k;
+    }
+
+    public void insert(int k) {
+        if(isFull())
+            throw new NoSuchElementException("Heap is full, No space to insert new element");
+        heap[heapSize++] = k;
+        heapifyUp(heapSize - 1);
+    }
+
+    private void heapifyUp(int i) {
+        int temp = heap[i];
+        while(i > 0 && temp > heap[parent(i)]){
+            heap[i] = heap[parent(i)];
+            i = parent(i);
+        }
+        heap[i] = temp;
+    }
+
+    private void heapifyDown(int i) {
+        int child;
+        int temp = heap[i];
+        while(kthChild(i, 1) < heapSize){
+            child = maxChild(i);
+            if(temp < heap[child]){ heap[i] = heap[child]; }
+            else break; i = child;
+        }
+        heap[i] = temp;
+    }
+
+    private int maxChild(int i) {
+        int leftChild = kthChild(i, 1);
+        int rightChild = kthChild(i, 2);
+        return heap[leftChild] > heap[rightChild] ? leftChild:rightChild;
+    }
+
+    public int delete(int k){
+        if(isEmpty())
+            throw new NoSuchElementException("Heap is empty, No element to delete");
+        int key = heap[k];
+        heap[k] = heap[heapSize -1];
+        heapSize--;
+        heapifyDown(k);
+        return key;
+    }
+
+    public int extractMax() {
+        return delete(0);
+    }
+}
+
+public class Main
+{
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+
+        PriorityQueue queue = new PriorityQueue(2000000);
+        String operation = sc.next();
+
+        while (!operation.equals("end")) {
+            if (operation.equals("insert")) {
+                int k = sc.nextInt();
+                queue.insert(k);
+            } else {
+                int maxChild = queue.extractMax();
+                if (maxChild != -1) System.out.println(maxChild);
+                else System.out.println();
+            }
+            operation = sc.next();
+        }
+    }
+}

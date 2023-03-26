@@ -1,0 +1,72 @@
+#include<iostream>
+#include<algorithm>
+#include<map>
+#include<queue>
+#include<stack>
+#include<set>
+#include<bitset>
+#include<vector>
+#include<string>
+
+#define rep(i,n) for(int i=0;i<(n);i++)
+using namespace std;
+using ll=long long;
+using P=pair<int,int>;
+using P_S=pair<int,string>;
+
+struct Card{
+    int num;
+    char mark;
+    int id;
+};
+
+vector<Card> C;
+
+int n;
+
+int partition(int p,int r){
+    int x=C[r].num;
+    int i=p-1;
+    for(int j=p;j<r;j++){
+        if(C[j].num<=x){
+            i=i+1;
+            swap(C[i],C[j]);
+        }
+    }
+    swap(C[i+1],C[r]);
+
+    return i+1;
+}
+
+void quicksort(int p,int r){
+    if(p<r){
+        int q=partition(p,r);
+        quicksort(p,q-1);
+        quicksort(q+1,r);
+    }
+}
+
+bool is_stable(){
+    rep(i,n-1){
+        if(C[i].num==C[i+1].num&&C[i].id>C[i+1].id) {
+            return false;
+        }
+    }
+    return true;
+}
+int main()
+{
+    cin>>n;
+    rep(i,n){
+        Card c;
+        cin>>c.mark>>c.num;
+        c.id=i;
+        C.push_back(c);
+    }
+    quicksort(0,n-1);
+    if(is_stable()) cout<<"Stable"<<endl;
+    else cout<<"Not stable"<<endl;
+    rep(i,n){
+        cout<<C[i].mark<<" "<<C[i].num<<" "<<C[i].id<<endl;
+    }
+}

@@ -1,0 +1,266 @@
+#include <iostream>
+#include <string>
+
+class Node {
+ public:
+    Node* parent = nullptr;
+    Node* left = nullptr;
+    Node* right = nullptr;
+    int key;
+
+    Node(int k)
+    {
+        key = k;
+    }
+};
+
+void insert(Node* tree, Node* z)
+{
+    if (tree == nullptr)
+    {
+        tree = z;
+        return;
+    }
+
+    Node* x = tree;
+    while (x != nullptr)
+    {
+        if (z->key < x->key)
+        {
+            if (x->left == nullptr)
+            {
+                x->left = z;
+                z->parent = x;
+                break;
+            }
+            else
+            {
+                x = x->left;
+            }
+        }
+        else
+        {
+            if (x->right == nullptr)
+            {
+                x->right = z;
+                z->parent = x;
+                break;
+            }
+            else
+            {
+                x = x->right;
+            }
+        }
+    }
+
+    return;
+}
+
+bool find(Node* T, int key)
+{
+    Node* x = T;
+
+    while(x != nullptr)
+    {
+        if (x->key == key)
+        {
+            return true;
+        }
+        else if (x->key > key)
+        {
+            x = x->left;
+        }
+        else
+        {
+            x = x->right;
+        }
+    }
+
+    return false;
+}
+
+Node* next_node(Node* node)
+{
+    Node* p = node;
+    Node* x;
+    while (p != nullptr)
+    {
+        if (p->right != nullptr)
+        {
+            x = p->right;
+            break;
+        }
+    }
+
+    while (x != nullptr)
+    {
+        if (x->left != nullptr)
+        {
+            x = x->left;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    return x;
+}
+
+void delete_node(Node* tree, int key)
+{
+    Node* x = tree;
+    while (x != nullptr)
+    {
+        if (x->key > key)
+        {
+            x = x->left;
+        }
+        else if (x->key < key)
+        {
+            x = x->right;
+        }
+        else
+        {
+            if ((x->left == nullptr) && (x->right == nullptr))
+            {
+                if (x->parent->left->key == x->key)
+                {
+                    x->parent->left = nullptr;
+                }
+                else
+                {
+                    x->parent->right = nullptr;
+                }
+
+                break;
+            }
+            else if (x->left == nullptr)
+            {
+                if (x->parent->left->key == x->key)
+                {
+                    x->parent->left = x->right;
+                }
+                else
+                {
+                    x->parent->right = x->right;
+                }
+
+                x->right->parent = x->parent;
+
+                break;
+            }
+            else if (x->right == nullptr)
+            {
+                if (x->parent->left->key == x->key)
+                {
+                    x->parent->left = x->left;
+                }
+                else
+                {
+                    x->parent->right = x->left;
+                }
+
+                x->left->parent = x->parent;
+
+                break;
+            }
+            else
+            {
+                Node* n = next_node(x);
+                x->key = n->key;
+                x = n;
+                key = n->key;
+            }
+        }
+    }
+
+    delete x;
+    x = nullptr;
+
+    return;
+}
+
+void print_tree_inorder(Node* tree)
+{
+    if (tree->left != nullptr)
+    {
+        print_tree_inorder(tree->left);
+    }
+
+    std::cout << " " << tree->key;
+
+    if (tree->right != nullptr)
+    {
+        print_tree_inorder(tree->right);
+    }
+
+    return;
+}
+
+void print_tree_preorder(Node* tree)
+{
+    std::cout << " " << tree->key;
+
+    if (tree->left != nullptr)
+    {
+        print_tree_preorder(tree->left);
+    }
+
+    if (tree->right != nullptr)
+    {
+        print_tree_preorder(tree->right);
+    }
+
+    return;
+}
+
+void print_tree(Node* tree)
+{
+    print_tree_inorder(tree);
+    std::cout << std::endl;
+    print_tree_preorder(tree);
+    std::cout << std::endl;
+
+    return;
+}
+
+int main()
+{
+    int n;
+
+    std::cin >> n;
+
+    Node* tree = nullptr;
+    std::string cmd;
+    int key;
+    for (int i = 0 ; i < n ; ++i)
+    {
+        std::cin >> cmd;
+        if (cmd == "insert")
+        {
+            std::cin >> key;
+            Node* node = new Node(key);
+            insert(tree, node);
+        }
+        else if (cmd == "find")
+        {
+            std::cin >> key;
+            bool is_found = find(tree, key);
+            std::cout << (is_found == true ? "yes" : "no") << std::endl;
+        }
+        else if (cmd == "delete")
+        {
+            std::cin >> key;
+            delete_node(tree, key);
+        }
+        else if (cmd == "print")
+        {
+            print_tree(tree);
+        }
+    }
+
+    return 0;
+}
+
+

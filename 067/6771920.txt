@@ -1,0 +1,98 @@
+#include <stdio.h>
+
+#define N 100
+#define INFTY 22
+
+int n;
+int A[N][N];
+int d[N];
+int tail;
+
+int empty(int B[]){
+	int i;
+	for(i = 0; i < N; i++){
+		if(B[i] != -1){
+			return i;
+		}
+	}
+	
+	return -1;
+}
+
+int dequeue(int B[]){
+	int i;
+	for(i = 0; i < N; i++){
+		if(B[i] != -1){
+			return i;
+		}
+	}
+	
+	return 0;
+}
+
+void bfs(int s){
+	int i, v, p;
+	tail = 1;
+	int B[100];
+	
+	for(i = 0; i < N; i++){
+		B[i] = -1;
+		d[i] = INFTY;
+	}
+	B[0] = s;
+	d[s] = 0;
+	
+	while(empty(B) != -1){
+		p = B[dequeue(B)];
+		B[dequeue(B)] = -1;
+		for(v = 0; v < n; v++){
+			if(A[p][v] == 0){
+				continue;
+			}
+			if(d[v] != INFTY){
+				continue;
+			}
+			d[v] = d[p] + 1;
+			B[tail] = v;
+			tail++;
+		}
+	}
+	for(i = 0; i < n; i++){
+		if(d[i] == INFTY){
+			printf("%d -1\n", i+1);
+		}
+		else{
+			printf("%d %d\n", i+1, d[i]);
+		}
+	}
+}
+
+int main(void)
+{
+	int i, j, u, k, v;
+	
+	scanf("%d", &n);
+	
+	//初期化
+	for(i = 0; i < n; i++){
+		for(j = 0; j < n; j++){
+			A[i][j] = 0;
+		}
+	}
+	
+	//挿入
+	for(i = 0; i < n; i++){
+		scanf("%d", &u);
+		scanf("%d", &k);
+		for(j = 0; j < k; j++){
+			scanf("%d", &v);
+			v--;
+			A[i][v] = 1;
+		}
+	}
+	
+	bfs(0);
+	
+	return 0;
+}
+

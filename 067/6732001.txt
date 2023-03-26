@@ -1,0 +1,65 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <climits>
+using namespace std;
+int main(){
+	//素数列挙
+	long long max_s = 4e7;
+	vector<bool>is_prime(max_s,true);
+	vector<long long>p;
+	for (long long i=2;i<max_s; i++){
+		if (is_prime.at(i)){
+			long long cop = i;
+			p.push_back(i);
+			cop += i;
+			while (cop<max_s){
+				is_prime.at(cop)=false;
+				cop+=i;
+			}
+		}
+	}
+	// cout<<"OK"<<endl;
+	while(true){
+		long long n;cin>>n;
+		long long cop = n;
+		long long ans = LLONG_MAX;
+		if (n==0)break;
+		vector<long long>div;
+		div.push_back(1);
+		for (long long i=0; i<(long long)p.size()&&p[i]<=n; i++){
+			long long count=0;
+			// if (p[i]==0)cout<<"err1"<<endl;
+			while (n%p[i]==0){
+				count++;
+				n/=p[i];
+			}
+			long long sz = (long long)div.size();
+			for (long long j=0; j<sz; j++){
+				long long add = p[i];
+				for (long long k=0; k<count; k++){
+					div.push_back(add*div[j]);
+					add *= p[i];
+				}
+			}
+		}
+		if (n!=1)div.push_back(n);
+		n = cop;
+		sort(div.begin(),div.end());
+		long long sz = div.size();
+		long long num1=(long long)pow(n,1.0/3)+10;
+		for (long long i=0; i<sz&&div[i]<num1; i++){
+			// if (div[i]==0)cout<<"err2"<<endl;
+			long long left = n/div.at(i);
+			long long num2 = (long long)sqrt(left)+10;
+			for (long long j=i; j<sz&&div[j]<num2; j++){
+				if (left%div.at(j)==0){
+					ans = min(ans,div[i]+div[j]+left/div[j]);
+				}
+			}
+
+		}
+		cout<<ans<<endl;
+	}
+}

@@ -1,0 +1,127 @@
+import java.util.*;
+
+public class Main {
+    static HashMap<String, Integer> solvePattern = new HashMap<>();
+    static Queue<Puzzle> puzzleQueue = new ArrayDeque<>();
+    public static void main(String[] args) {
+        Puzzle initPuzzle = new Puzzle();
+        puzzleQueue.add(initPuzzle);
+        while(puzzleQueue.size() > 0) {
+            Puzzle p = puzzleQueue.poll();
+            String puzzleString = p.getString();
+            if(solvePattern.get(puzzleString) != null) {
+                solvePattern.put(puzzleString,
+                        Math.min(p.getDistance(), solvePattern.get(puzzleString)));
+                continue;
+            }
+            solvePattern.put(p.getString(), p.getDistance());
+            Puzzle up = p.up();
+            if (up != null) puzzleQueue.add(up);
+            Puzzle down = p.down();
+            if (down != null) puzzleQueue.add(down);
+            Puzzle right = p.right();
+            if (right != null) puzzleQueue.add(right);
+            Puzzle left = p.left();
+            if (left != null) puzzleQueue.add(left);
+        }
+
+        Scanner sc = new Scanner(System.in);
+        while(sc.hasNext()) {
+            String inputString = sc.nextLine();
+            int distance = solvePattern.get(inputString.replaceAll(" ", ""));
+            System.out.println(distance);
+        }
+        sc.close();
+    }
+}
+class Puzzle {
+    private int distance = 0;
+    private int[][] body = {{0,1,2,3},{4,5,6,7}};
+
+    void setDistance (int d) {
+        distance = d;
+    }
+
+    Puzzle () {
+        int[][] b = {{0,1,2,3},{4,5,6,7}};
+        distance = 0;
+        body = b;
+    }
+
+    Puzzle (String str) {
+        String[] c = str.replaceAll(" ", "").split("");
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 4; j++) {
+                body[i][j] = Integer.parseInt(c[i*4 + j]);
+            }
+        }
+    }
+
+    String getString() {
+        String str = "";
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 4; j++) {
+                str += body[i][j];
+            }
+        }
+        return str;
+    }
+
+    int getDistance() {
+        return distance;
+    }
+
+    int[] getZeroPosition() {
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 4; j++) {
+                if(body[i][j] == 0) {
+                    return new int[]{i, j};
+                }
+            }
+        }
+        return new int[2];
+    }
+
+    Puzzle up() {
+        Puzzle p = new Puzzle(getString());
+        int y = getZeroPosition()[0];
+        int x = getZeroPosition()[1];
+        if (y == 0) return null;
+        p.swap(new int[]{0, x}, new int[]{1, x});
+        p.setDistance(distance + 1);
+        return p;
+    }
+    Puzzle down() {
+        Puzzle p = new Puzzle(getString());
+        int y = getZeroPosition()[0];
+        int x = getZeroPosition()[1];
+        if (y == 1) return null;
+        p.swap(new int[]{0, x}, new int[]{1, x});
+        p.setDistance(distance + 1);
+        return p;
+    }
+    Puzzle right() {
+        Puzzle p = new Puzzle(getString());
+        int y = getZeroPosition()[0];
+        int x = getZeroPosition()[1];
+        if (x == 3) return null;
+        p.swap(new int[]{y, x}, new int[]{y, x+1});
+        p.setDistance(distance + 1);
+        return p;
+    }
+    Puzzle left() {
+        Puzzle p = new Puzzle(getString());
+        int y = getZeroPosition()[0];
+        int x = getZeroPosition()[1];
+        if (x == 0) return null;
+        p.swap(new int[]{y, x}, new int[]{y, x-1});
+        p.setDistance(distance + 1);
+        return p;
+    }
+
+    void swap(int[] a, int[] b) {
+        int tmp = body[a[0]][a[1]];
+        body[a[0]][a[1]] = body[b[0]][b[1]];
+        body[b[0]][b[1]] = tmp;
+    }
+}

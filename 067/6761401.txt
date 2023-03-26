@@ -1,0 +1,38 @@
+import sys
+sys.setrecursionlimit(10**7)
+
+
+n = int(input())
+
+pre_tree = list(map(int, input().split()))
+ino_tree = list(map(int, input().split()))
+
+data_i = {x: i for i, x in enumerate(ino_tree)}
+
+ans = []
+def dfs(p_left, p_right, i_left, i_right):
+    if p_left >= n:
+        return
+    x = pre_tree[p_left]
+    
+    left_size = data_i[x] - i_left
+    left_pl = p_left + 1
+    left_pr = left_pl + left_size
+    left_il = i_left
+    left_ir = data_i[x]
+    if left_size > 0:
+        dfs(left_pl, left_pr, left_il, left_ir)
+    
+    right_pl = left_pr
+    right_pr = p_right
+    right_il = data_i[x] + 1
+    right_ir = i_right
+    if right_pr - right_pl > 0:
+        dfs(right_pl, right_pr, right_il, right_ir)
+    
+    ans.append(x)
+
+
+dfs(0, n , 0, n)
+print(*ans)
+

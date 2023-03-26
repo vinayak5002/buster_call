@@ -1,0 +1,47 @@
+banpei = {'prev':None,'next':None}
+banpei['next'] = banpei
+banpei['prev'] = banpei
+n=int(input())
+for _ in range(n):
+  command = input()
+  try:
+    c,k = command.split()
+  except ValueError:
+    c = command
+  if c == "insert":
+    if banpei['next'] == banpei:
+      x = {'prev':banpei,'key':k,'next':banpei}
+      banpei['next'] = x
+      banpei['prev'] = x
+    else:
+      x = {'prev':None,'key':k,'next':None}
+      x['next'] = banpei['next']
+      banpei['next']['prev'] = x
+      banpei['next'] = x
+      x['prev'] = banpei
+  if c == "delete":
+    t = banpei['next']
+    while t != banpei:
+      if t['key'] == k:
+         t['prev']['next'] = t['next']
+         t['next']['prev'] = t['prev']
+         break
+      else:
+        t = t['next']
+  if c == "deleteFirst":
+    t = banpei['next']
+    banpei['next'] = t['next']
+    t['next']['prev'] = banpei
+  if c == "deleteLast":
+    t = banpei['prev']
+    t['prev']['next'] = banpei
+    banpei['prev'] = t['prev']
+
+def show():
+  s = []
+  c = banpei['next']
+  while(c != banpei):
+    s.append(c['key'])
+    c = c['next']
+  print(*s)
+show()

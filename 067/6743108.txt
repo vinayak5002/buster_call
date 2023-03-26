@@ -1,0 +1,57 @@
+// I SELL YOU...! 
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<functional>
+#include<queue>
+#include<chrono>
+#include<iomanip>
+#include<map>
+#include<set>
+using namespace std;
+using ll = long long;
+using P = pair<ll,ll>;
+using TP = tuple<ll,ll,ll>;
+void init_io(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  cout << fixed << setprecision(18);
+}
+void set_t_ok(const ll w, const vector<ll> &a, vector<ll> &ok) {
+  const ll INF = 1e15;
+  ll t_ok = -1;
+  for (int i=0;i<w;i++) {
+    if (a[i] == 0) {
+      t_ok = INF;
+    } else if (a[i] > 0) {
+      ok[i] = max(ok[i], min(t_ok, a[i]));
+    } else if (a[i] < 0) {
+      ll ta = a[i] * -1;
+      t_ok = min(ta, t_ok);
+    }
+    if (t_ok != INF) {
+      t_ok--;
+    }
+  }
+}
+
+signed main(){
+  init_io();
+  ll w;
+  cin >> w;
+  vector<ll> a(w);
+  vector<ll> ok(w, 0);
+  for(int i=0;i<w;i++) {
+    cin >> a[i];
+  }
+  set_t_ok(w, a, ok);
+  reverse(a.begin(), a.end());
+  reverse(ok.begin(), ok.end());
+  set_t_ok(w, a, ok);
+  ll ans = 0;
+  for (int i=0;i<w;i++) {
+    ans += ok[i];
+  }
+  cout << ans << endl;
+}
+

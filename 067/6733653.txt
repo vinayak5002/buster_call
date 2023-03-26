@@ -1,0 +1,49 @@
+import java.util.Scanner
+import scala.annotation.tailrec
+
+class Element(val num:Int, val pos:Int, var done:Boolean = false)
+object NumberOrdering extends Ordering[Element] {
+  def compare(a:Element, b:Element):Int = a.num compare b.num
+}
+
+object Main extends App {
+  val sc = new Scanner(System.in)
+  val N = sc.nextInt()
+  val arr = (for (p <- 0 until N) yield new Element(sc.nextInt(), p)).toArray
+  val elements = arr.sorted(NumberOrdering)
+
+  def getCycleNotation(elements:Array[Element], idx:Int):List[Int] = {
+    @tailrec
+    def iterate(i:Int, ac:List[Int]):List[Int] = {
+      val j = elements(i).pos
+      elements(i).done = true
+      if (i == j || ac.nonEmpty && i == idx) ac else iterate(j, i::ac)
+    }
+    iterate(idx, Nil)
+  }
+
+  def cost(elements:Array[Element], list:List[Int]):Int = {
+    if (list.isEmpty) 0
+    else {
+      val Min = elements(0).num
+      val l = list.map(elements(_).num)
+      val s = l.sum
+      val m = l.min
+      if (Min <  m) Math.min(s + m*(l.length -2), m + s + Min*(l.length+1))
+      else s + m*(l.length -2)
+    }
+  }
+
+  @tailrec
+  def solver(idx:Int, ac:Int):Int = {
+    if (idx < N) {
+      if (elements(idx).done) solver(idx+1, ac)
+      else {
+        val cn = getCycleNotation(elements, idx)
+        solver(idx+1, ac+cost(elements, cn))
+      }
+    } else ac
+  }
+
+  println(s"${solver(0, 0)}")
+}

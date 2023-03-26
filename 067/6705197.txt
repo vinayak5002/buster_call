@@ -1,0 +1,85 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+#define all(x) (x).begin(), (x).end()
+
+    int N;
+struct card
+{
+    int value;
+    char type;
+};
+void stable_check(vector<card> &A,map<int,vector<char> > &duplicate){
+    bool is_stable = true;
+    int tmp = 0;
+    for(int i = 0;i<N-1;i++){
+        if(duplicate[A[i].value][tmp]==A[i].type){tmp++;}
+            else{
+                is_stable=false;
+                break;
+            }
+        while(i+1<N)
+        {
+            if(A[i].value!=A[i+1].value){
+                tmp = 0;
+                break;
+            }
+            i++;
+            if(duplicate[A[i].value][tmp]==A[i].type){
+                tmp++;
+            }
+            else{
+                is_stable=false;
+                break;
+            }
+        }
+    }
+    if(is_stable){cout << "Stable" << endl;}
+    else{cout << "Not stable"<<endl;}
+
+}
+int main()
+{
+    cin >> N;
+    vector<card> A(N);
+    string s;
+    map<int,vector<char> > duplicate;
+    for (int i = 0; i < N; i++)
+    {
+        cin >> s;
+        A[i].type = s[0];
+        A[i].value = s[1] - '0';
+        duplicate[A[i].value].push_back(A[i].type);
+    }
+
+    vector<card> B=A;
+    //bubble sort
+    for(int i = 0;i<N;i++){
+        for(int j = N-1;j>i;j--){
+            if(A[j-1].value > A[j].value) swap(A[j-1],A[j]);
+        }
+    }
+
+    for(int i = 0;i<N-1;i++){
+        cout << A[i].type << A[i].value << " ";
+
+    }
+    cout << A[N-1].type << A[N-1].value << endl;
+    stable_check(A,duplicate);
+
+    //selection sort
+    for(int i = 0;i<N;i++){
+        int minj =i;
+        for(int j = i;j<N;j++){
+            if(B[j].value<B[minj].value){
+                minj = j;
+            }
+        }
+        swap(B[minj],B[i]);
+    }
+    for(int i = 0;i<N-1;i++){cout << B[i].type << B[i].value  << " ";}
+    cout << B[N-1].type << B[N-1].value << endl;
+
+    stable_check(B,duplicate);
+}

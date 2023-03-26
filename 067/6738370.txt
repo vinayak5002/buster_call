@@ -1,0 +1,77 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <algorithm>
+#include <iomanip>
+#define MAXN 10005
+#define MAXM 40005
+using namespace std;
+typedef pair<int, int> Coord;
+int N, M;
+Coord coords[MAXN];
+int par[MAXN], ranks[MAXN];
+bool destroy[MAXM];
+
+int find(int x) {
+    if (par[x] == x) return x;
+    return par[x] = find(par[x]);
+}
+
+void unite(int x, int y) {
+    x = find(x), y = find(y);
+    if (x == y) return;
+    if (ranks[x] < ranks[y]) par[x] = y;
+    else {
+        par[y] = x;
+        if (ranks[x] == ranks[y]) ranks[x]++;
+    }
+}
+
+bool same(int x, int y) {
+    return find(x) == find(y);
+}
+
+struct Edge {
+    int from, to, cost;
+};
+
+bool operator<(const Edge & e1, const Edge & e2) {
+    return e1.cost < e2.cost;
+}
+
+int distance(int i, int j) {
+    return (coords[i].first - coords[j].first) * (coords[i].first - coords[j].first)
+        + (coords[i].second - coords[j].second) * (coords[i].second - coords[j].second);
+}
+Edge edges[MAXM];
+void solve();
+int main() {
+    cin >> N >> M;
+    for (int i = 1; i <= N; i++) {
+        cin >> coords[i].first >> coords[i].second;
+    }
+    for (int i = 0; i < M; i++) {
+        cin >> edges[i].from >> edges[i].to;
+        edges[i].cost = -distance(edges[i].from, edges[i].to);
+    }
+    solve();
+}
+
+void solve() {
+    for (int i = 0; i <= N; i++) par[i] = i;
+    sort(edges, edges + M);
+    for (int i = 0; i < M; i++) {
+        Edge e = edges[i];
+        if (!same(e.from, e.to)) {
+            unite(e.from, e.to);
+            destroy[i] = true;
+        }
+    }
+    double res = 0;
+    for (int i = 0; i < M; i++) {
+        if (!destroy[i]) {
+            res += (sqrt(-edges[i].cost));
+        }
+    }
+    cout << fixed << setprecision(3) << res << endl;
+}

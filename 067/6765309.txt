@@ -1,0 +1,35 @@
+import sys
+from heapq import heapify, heappush, heappop
+input = lambda: sys.stdin.readline().rstrip()
+
+def topological_sort(n: int, E: list) -> list:
+  # E: [(a, b), (a, b), ...]; a -> b
+  G = [[] for _ in range(n)]
+  incnt = [0] * n # 次数
+  for a,b in E:
+    G[a].append(b)
+    incnt[b] += 1
+  hq = []
+  for i,a in enumerate(incnt):
+    if not a:
+      heappush(hq, i)
+  ret = []
+  while hq:
+    v = heappop(hq)
+    ret.append(v)
+    for x in G[v]:
+      incnt[x] -= 1
+      if incnt[x] == 0:
+        heappush(hq, x)
+  return ret
+#  -----------------------  #
+
+v, e = map(int, input().split())
+E = []
+for _ in range(e):
+  s, t = map(int, input().split())
+  E.append((s, t))
+
+ans = topological_sort(v, E)
+print('\n'.join(map(str, ans)))
+

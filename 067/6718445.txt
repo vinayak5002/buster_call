@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < (int)(n); ++i)
+
+int d[101];
+int f[101];
+
+void dfs(int v, vector<vector<int>> list, int* time) {
+    d[v-1] = *time;
+    *time = *time + 1;
+
+    rep(i, list[v-1].size()) {
+        if(d[list[v-1][i]-1] == 0) {
+            dfs(list[v-1][i], list, time);
+        }
+    }
+    f[v-1] = *time;
+    *time = *time + 1;
+
+}
+
+int main() {
+    int n;
+    vector<vector<int>> list;
+
+    cin >> n;
+    rep(i, n) {
+        d[i] = 0;
+        f[i] = 0;
+    }
+    rep(i, n) {
+        vector<int> adjs;
+        int temp;
+        int num;
+        cin >> temp >> num;
+        rep(j, num) {
+            int adj;
+            cin >> adj;
+            adjs.push_back(adj);
+        }
+        list.push_back(adjs);
+    }
+
+    int time = 1;
+    int *ptr = &time;
+
+    rep(i, n) {
+        if(d[i] == 0) {
+           dfs(i+1, list, ptr);
+        }
+    }
+
+    rep(i, list.size()) {
+        cout << i + 1 << " " << d[i] << " " << f[i] << endl;
+    }
+    
+    return 0;
+}

@@ -1,0 +1,65 @@
+
+#[derive(PartialEq, PartialOrd, Clone, Debug)]
+struct Sortable<T>(T);
+ 
+impl<T: PartialEq> Eq for Sortable<T> {}
+impl<T: PartialOrd> Ord for Sortable<T> {
+    fn cmp(&self, other: &Sortable<T>) -> std::cmp::Ordering {
+        self.0.partial_cmp(&other.0).unwrap()
+    }
+}
+
+/*
+  Andrewのアルゴリズム
+  return: 使うpointのindices
+*/
+fn andrew_scan(points: &Vec<(f64, f64)>) -> Vec<usize> {
+    let n = points.len();
+    let mut indices: Vec<usize> = (0..n).collect();
+    indices.sort_by_key(|&i| (Sortable(points[i].0), Sortable(points[i].1)));
+    let mut ret = vec![];
+    ret.push(indices[0]);
+    ret.push(indices[1]);
+    fn cross_production(a: (f64, f64), b: (f64, f64)) -> f64 {
+        a.0 * b.1 - b.0 * a.1
+    }
+    for _ in 0..2 {
+        for i in 2..n {
+            let (x, y) = points[indices[i]];
+            while ret.len() >= 2 {
+                let (px, py) = points[ret[ret.len()-1]];
+                let (ppx, ppy) = points[ret[ret.len()-2]];
+                let ba = (x - ppx, y - ppy);
+                let bc = (px - ppx, py - ppy);
+                if cross_production(ba, bc) < 0.0 {
+                    ret.pop();
+                } else {
+                    break;
+                }
+            }
+            ret.push(indices[i]);
+        }
+        indices.reverse();
+    }
+    ret.pop();
+    ret
+}
+
+fn main() {
+    loop {
+        let mut n = String::new();
+        std::io::stdin().read_line(&mut n).ok();
+        let n: usize = n.trim().parse().unwrap();
+        if n == 0 { return; }
+        let points = (0..n).map(|_| {
+                let mut temp = String::new();
+                std::io::stdin().read_line(&mut temp).ok();
+                let temp: Vec<f64> = temp.trim().split(',').map(|s| s.parse().unwrap()).collect();
+                (temp[0], temp[1])
+            })
+            .collect::<Vec<(f64, f64)>>();
+
+        let indices = andrew_scan(&points);
+        println!("{}", n-indices.len());
+    }
+}

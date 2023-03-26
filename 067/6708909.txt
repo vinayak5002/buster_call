@@ -1,0 +1,101 @@
+//ALDS_13_A - 8 クイーン問題
+//実装おもおも問題だったけどACできそう…！
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define ALL(a)  (a).begin(),(a).end()
+int main(){
+    string s="........";
+    vector<string> ans(0);
+    for(ll a=0;a<8;a++){
+        ans.push_back(s);
+    }
+    ll k;cin>>k;
+    vector<pair<ll,ll>> fixed(0);
+    ll i,j;
+    vector<bool> i_used(8,false),j_used(8,false);
+    for(ll a=0;a<k;a++){
+        cin>>i>>j;
+        i_used.at(i)=true;
+        j_used.at(j)=true;
+        fixed.push_back({i,j});
+    }
+    vector<ll> i_move(0);
+    vector<ll> j_move(0);
+    for(ll a=0;a<8;a++){
+        if(!i_used.at(a)){
+            i_move.push_back(a);
+        }
+        if(!j_used.at(a)){
+            j_move.push_back(a);
+        }
+    }
+    /*for(ll x:i_move){
+        cout<<x<<" ";
+    }
+    cout<<endl;
+    for(ll x:j_move){
+        cout<<x<<" ";
+    }
+    cout<<endl;*/
+    //ここまで異常なし
+    
+    vector<pair<ll,ll>> disc(0);
+    set<pair<ll,ll>> disc_s;
+    bool ng=false;
+    //sort(ALL(j_move));
+    do{
+        ng=false;
+        disc={};
+        disc_s.erase(ALL(disc_s));
+        for(ll a=0;a<k;a++){
+            disc.push_back(fixed.at(a));
+            disc_s.insert(fixed.at(a));
+        }
+        for(ll a=0;a<8-k;a++){
+            disc.push_back({i_move.at(a),j_move.at(a)});
+            disc_s.insert({i_move.at(a),j_move.at(a)});
+        }
+        for(ll a=0;a<8;a++){
+            i=disc.at(a).first;
+            j=disc.at(a).second;
+            for(ll b=1;b<=10;b++){
+                if(0<=i-b and 0<=j-b){
+                    if(disc_s.count({i-b,j-b})){
+                        ng=true;
+                        break;
+                    }
+                }
+                if(i+b<8 and 0<=j-b){
+                    if(disc_s.count({i+b,j-b})){
+                        ng=true;
+                        break;
+                    }
+                }
+                if(i+b<8 and j+b<8){
+                    if(disc_s.count({i+b,j+b})){
+                        ng=true;
+                        break;
+                    }
+                }
+                if(0<=i-b and j+b<8){
+                    if(disc_s.count({i-b,j+b})){
+                        ng=true;
+                        break;
+                    }
+                }
+            }
+            if(ng){
+                break;
+            }
+        }
+        if(!ng){
+            sort(ALL(disc));
+            for(ll a=0;a<8;a++){
+                ans.at(disc.at(a).first).at(disc.at(a).second)='Q';
+                cout<<ans.at(a)<<endl;
+            }
+            return 0;
+        }
+    }while(next_permutation(ALL(j_move)));
+}

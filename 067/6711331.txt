@@ -1,0 +1,286 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+struct Edge{
+    int id, source, target;
+
+    Edge(int id, int source, int target): id(id), source(source), target(target){}
+
+    // 出力
+    friend ostream &operator<<(ostream &os, const Edge &e) {
+        return os << "id: " << e.id << ", source: " << e.source << ", target: " << e.target;
+    }
+};
+
+struct Graph{
+    using E=Edge;
+    vector<vector<E>> inc;
+    vector<E> edge;
+
+    Graph(int N=0){
+        inc.resize(N);
+    }
+
+    // 頂点数
+    int order(){return inc.size();}
+
+    // 辺の数
+    int size(){return edge.size();}
+
+    // 頂点を1個追加する.
+    int add_vertex(){
+        inc.emplace_back(vector<E>());
+        return inc.size()-1;
+    }
+
+    // 頂点をk個追加する.
+    vector<int> add_vertices(int k){
+        vector<int> I;
+        for (; k--; k>=0){
+            I.emplace_back(add_vertex());
+        }
+        return I;
+    }
+
+    // 無向辺 uv を加える.
+    int add_edge(int u, int v){
+        int i=size();
+        inc[u].emplace_back(E(i,u,v));
+        inc[v].emplace_back(E(i,v,u));
+        edge.emplace_back(E(i,u,v));
+        return i;
+    }
+
+    // walk を加える.
+    vector<int> add_walk(const vector<int> &walk){
+        vector<int> J;
+        for (int i=0; i<(int)walk.size()-1; i++){
+            J.emplace_back(add_edge(walk[i], walk[i+1]));
+        }
+        return J;
+    }
+
+    // cycle を加える.
+    vector<int> add_cycle(const vector<int> &cycle){
+        vector<int> J=add_walk(cycle);
+        J.emplace_back(add_edge(cycle.back(),cycle.front()));
+        return J;
+    }
+
+    // 頂点 v を含む連結成分を出力する.
+    vector<int> connected_component(int v){
+        vector<int> C;
+        vector<bool> T(order(),false); T[v]=true;
+        deque<int> Q{v};
+
+        while (!Q.empty()){
+            int x=Q.front(); Q.pop_front();
+            C.emplace_back(x);
+
+            for (E e: inc[x]){
+                int t=e.target;
+                if (!T[t]){
+                    T[t]=true;
+                    Q.push_back(t);
+                }
+            }
+        }
+
+        return C;
+    }
+
+    // 2 頂点 u,v 間の距離を求める.
+    int distance(int u, int v){
+        if (u==v) return 0;
+
+        vector<int> T(order(),-1); T[u]=0;
+        deque<int> Q{u};
+
+        while (!Q.empty()){
+            int x=Q.front(); Q.pop_front();
+
+            for (E e: inc[x]){
+                int t=e.target;
+                if (T[t]==-1){
+                    T[t]=T[x]+1;
+                    Q.push_back(t);
+
+                    if (t==v) return T[t];
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    // 頂点 u 間からの距離を求める.
+    vector<int> distance_all(int u){
+        vector<int> T(order(),-1); T[u]=0;
+        deque<int> Q{u};
+
+        while (!Q.empty()){
+            int x=Q.front(); Q.pop_front();
+
+            for (E e: inc[x]){
+                int t=e.target;
+                if (T[t]==-1){
+                    T[t]=T[x]+1;
+                    Q.push_back(t);
+                }
+            }
+        }
+
+        return T;
+    }
+
+    // u-v 間の最短路を求める (存在しない場合, [-1]).
+    vector<int> shortest_path(int u, int v){
+        if (u==v) return vector<int>{u};
+
+        vector<int> T(order(),-1);
+        deque<int> Q{u};
+
+        while (!Q.empty()){
+            int x=Q.front(); Q.pop_front();
+
+            for (auto e:inc[x]){
+                int y=e.target;
+                if (T[y]==-1){
+                    T[y]=x;
+                    Q.push_back(y);
+
+                    if (y==v){
+                        vector<int> P{v};
+                        int a=v;
+                        while (a!=u){
+                            a=T[a];
+                            P.emplace_back(a);
+                        }
+                        reverse(P.begin(), P.end());
+                        return P;
+                    }
+                }
+            }
+        }
+        return vector<int>{};
+    }
+};
+
+struct Connected_Component_Decomposition{
+    vector<vector<int>> component;
+    vector<int> id;
+
+    public:
+    Connected_Component_Decomposition(Graph &G){
+        calculate(G);
+    }
+
+    private:
+    void calculate(Graph &G){
+        int N=G.order();
+
+        component=vector<vector<int>>();
+        id=vector<int>(N,-1);
+
+        for (int u=0; u<N; u++){
+            if (id[u]!=-1) continue;
+
+            int k=component.size();
+            deque<int> Q{u}; id[u]=k;
+            vector<int> c;
+
+            while (!Q.empty()){
+                int x=Q.front(); Q.pop_front();
+                c.emplace_back(x);
+
+                for (auto e:G.inc[x]){
+                    int y=e.target;
+                    if (id[y]==-1){
+                        id[y]=k;
+                        Q.push_back(y);
+                    }
+                }
+            }
+
+            component.emplace_back(c);
+        }
+    }
+
+    public:
+    inline int component_number() const {return component.size();}
+    inline bool is_connected(const int &u, const int &v) const {return id[u]==id[v];}
+};
+
+struct Lowlink{
+    vector<bool> used, bridge, articulation;
+    vector<int> ord, low;
+
+    Lowlink(Graph &G){
+        int N=G.order(), M=G.size();
+        used.assign(N,false);
+        ord.assign(N,0);
+        low.assign(N,0);
+
+        bridge.assign(M,false);
+        articulation.assign(N,false);
+
+        int k=0;
+        for (int i=0; i<N; i++){
+            if (!used[i]) k=dfs(G,i,k,-1);
+        }
+    }
+
+    private:
+    int dfs(Graph &G, int v, int k, int par){
+        used[v]=true;
+        ord[v]=k++;
+        low[v]=ord[v];
+
+        bool is_arti=false;
+        int child=0;
+
+        for (auto &e:G.inc[v]){
+            if (!used[e.target]){
+                child++;
+                k=dfs(G,e.target,k,v);
+                low[v]=min(low[v], low[e.target]);
+                if (par!=-1 && ord[v]<=low[e.target]) is_arti=true;
+                if (ord[v]<low[e.target]) bridge[e.id]=true;
+            }else if (e.target!=par){
+                low[v]=min(low[v], ord[e.target]);
+            }
+        }
+        if (par==-1 && child>=2) is_arti=true;
+        if (is_arti) articulation[v]=true;
+        return k;
+    }
+};
+
+int main(){
+    int N,M;
+    cin >> N >> M;
+
+    Graph G(N);
+    int s,t;
+    for (int j=0; j<M; j++){
+        scanf("%d%d",&s,&t);
+        if (s>t) swap(s,t);
+        G.add_edge(s,t);
+    }
+
+    Lowlink L(G);
+    vector<pair<int,int>> B;
+
+    for (int j=0; j<M; j++){
+        if (L.bridge[j]){
+            Edge e=G.edge[j];
+            B.emplace_back(make_pair(e.source, e.target));
+        }
+    }
+
+    sort(B.begin(), B.end());
+    for (auto e: B){
+        cout << e.first << " " << e.second << "\n";
+    }
+}
+

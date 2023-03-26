@@ -1,0 +1,106 @@
+#include<stdio.h>
+#define MAX 100
+#define white 0 //訪問状態
+#define gray 1
+#define black 2
+
+int n; //頂点数
+int color[MAX]; // 頂点の訪問状態
+int id[MAX]; //頂点の番号
+int d[MAX]; //頂点1からその頂点までの距離
+int A[MAX][MAX]; //隣接行列表現
+int head, tail;
+int Q[MAX]; //キュー
+
+void enqueue(int x) // キューに要素を追加
+{ 
+	Q[tail] = x;
+	if(tail+1 == MAX){
+		tail = 0;
+	}
+	else{
+		tail++;
+	}
+}
+
+int dequeue() // キューから要素を取り出す
+{
+	if(head ==tail){
+		printf("エラー\n");
+	}
+	int x = Q[head];
+	head = (head+1) % MAX;
+	return x;
+}
+
+void dfs_visit(int u) //幅優先探索
+{
+	int i, s;
+	for(i = 0; i < n; i++)
+	{
+		color[i] = white;
+		id[i] = i+1;
+		d[i] = -1;
+	}
+	color[u] = gray;
+	d[u] = 0;
+	enqueue(u);
+	
+	while(head != tail)
+	{
+		s = dequeue();
+		for(i = 0; i < n; i++)
+		{
+			if(A[s][i] && color[i] == white)
+			{
+				color[i] = gray;
+				d[i] = d[s] + 1;
+				enqueue(i);
+			}
+		}
+		color[s] = black;
+	}
+	
+	for(i = 0; i < n; i++)
+	{
+		printf("%d %d\n", id[i], d[i]);
+	}
+	
+}
+
+int main(void)
+{
+	int u, k, i, j;
+	int v[MAX];
+	
+	scanf("%d", &n);
+	
+	for(i = 0; i < n; i++)
+	{
+		for(j = 0; j < n; j++)
+		{
+			A[i][j] = 0;
+		}
+	}
+	
+	for(i = 0; i < n; i++)
+	{
+		scanf("%d %d", &u, &k);
+		// uは頂点の番号
+		// kはuの出次数
+		u--;
+		
+		for(j = 0; j < k; j++)
+		{
+			scanf("%d", &v[j]); // 配列vはuに隣接する頂点の番号
+			A[u][v[j]-1] = 1;
+		}
+	}
+	
+	head = 1;
+	tail = n+1;
+	
+	dfs_visit(0);
+	
+	return 0;
+}

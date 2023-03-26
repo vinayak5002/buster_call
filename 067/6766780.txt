@@ -1,0 +1,81 @@
+#include <stdio.h>
+#define N 100
+#define white 0
+#define gray 1
+#define black 2
+#define LEN 100000
+#define NIL -1
+
+int n,u,v;
+int A[N][N];
+int d[N];
+int color[N];
+
+
+int Q[LEN];
+int head=0;
+int tail=0;
+
+void enqueue(int x){
+	Q[tail]=x;
+	tail=(tail+1)%LEN;
+}
+
+int dequeue(){
+	int x=Q[head];
+	head=(head+1)%LEN;
+	return x;
+}
+
+
+void bfs(int s){
+	for(u=0;u<n;u++){
+		color[u]=white;
+	}
+	for(u=0;u<n;u++){
+		d[u]=NIL;
+	}
+	color[s]=gray;
+	d[s]=0;
+	enqueue(s);
+	while(head!=tail){
+		u=dequeue();
+		for(v=0;v<n;v++){
+			if(A[u][v]==1&&color[v]==white){
+				color[v]=gray;
+				d[v]=d[u]+1;
+				enqueue(v);
+			}
+		}
+		color[u]=black;
+	}
+	for(u=0;u<n;u++){
+		printf("%d %d\n",u+1,d[u]);
+	}
+}
+
+int main(void){
+	scanf("%d",&n);
+	
+	int i,j;
+	for(i=0;i<n;i++){
+		for(j=0;j<n;j++){
+			A[i][j]=0;
+		}
+	}
+	
+	int a,b,h;
+	for(i=0;i<n;i++){
+		scanf("%d",&a);
+		a--;
+		scanf("%d",&b);
+		for(j=0;j<b;j++){
+			scanf("%d",&h);
+			h--;
+			A[a][h]=1;
+		}
+	}
+	
+	bfs(0);
+	return 0;
+}

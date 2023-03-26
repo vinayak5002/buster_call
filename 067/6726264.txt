@@ -1,0 +1,51 @@
+#include <stdio.h>
+
+int H;
+
+int left(int i){ return 2 * i; }
+int right(int i){ return 2 * i + 1; }
+
+void maxHeapify(int A[], int i)
+{
+	int l, r;
+	l = left(i);
+	r = right(i);
+	
+	// 左の子、自分、右の子で値が最大のノードを選ぶ
+	int largest;
+	if(l <= H && A[l] > A[i]){ largest = l; }
+	else{ largest = i; }
+	if(r <= H && A[r] > A[largest]){ largest = r; }
+	
+	int tmp;
+	if(largest != i) // i の子の方が値が大きい場合
+	{
+		tmp = A[i];
+		A[i] = A[largest];
+		A[largest] = tmp;
+		maxHeapify(A, largest);
+	}
+}
+
+int main (void)
+{
+	scanf("%d", &H);
+	
+	int A[H + 1], i;
+	for(i = 1; i <= H; i++)
+	{
+		scanf("%d", &A[i]);
+	}
+	
+	for(i = H / 2; i >= 1; i--){ maxHeapify(A, i); }
+	
+	
+	for(i = 1; i <= H; i++)
+	{
+		printf(" %d", A[i]);
+	}
+	printf("\n");
+	
+	return 0;
+}
+

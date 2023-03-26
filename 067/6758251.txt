@@ -1,0 +1,78 @@
+#include<bits/stdc++.h>
+using namespace std;
+//#include<atcoder/all>
+//using namespace atcoder;
+using ll = long long;
+int n;
+vector<string> s;
+
+void solve(){
+	int cnt = 0;
+	{
+		set<char> st;
+		map<char,int> mp;
+		for(auto &i:s){
+			for(auto &c:i){
+				st.insert(c);
+			}
+		}
+		for(auto &c:st){
+			mp[c] = cnt++;
+		}
+		for(int i =0;i<n;i++){
+			for(int j =0;j<s[i].size();j++){
+				s[i][j] = mp[s[i][j]];
+			}
+		}
+	}
+	vector<int> c10(10);
+	for(int i = 0;i<cnt;i++)c10[i] = 1;
+	sort(c10.begin(),c10.end());
+
+	int ans = 0;
+
+	do{
+		vector<int> v;
+		for(int i = 0;i<10;i++)if(c10[i])v.push_back(i);
+		do{
+			vector<vector<int>> x;
+			vector<int> t;
+			bool is = true;
+			for(auto &i:s){
+				vector<int> adv;
+				int add = 0;
+				for(auto &j:i){
+					adv.push_back(v[(int)j]);
+					add *= 10;
+					add += v[(int)j];
+				}
+				if(adv.front()==0&&adv.size()>1)is = false;
+				t.push_back(add);
+				x.push_back(adv);
+			}
+			if(is==false)continue;
+			int sum = 0;
+			for(int i = 0;i<n-1;i++){
+				sum += t[i];
+			}
+			ans += (sum == t.back());
+		}while(next_permutation(v.begin(),v.end()));
+	}while(next_permutation(c10.begin(),c10.end()));
+	cout<<ans<<endl;
+
+}
+
+signed main(){
+	cin.tie(nullptr);
+	ios::sync_with_stdio(false);
+	while(1){
+		cin >> n;
+		if(n==0)break;
+		s = vector<string>(n);
+		for(int i = 0;i<n;i++){
+			cin >> s[i];
+		}
+		solve();
+	}
+}
+

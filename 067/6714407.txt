@@ -1,0 +1,174 @@
+// #include "atcoder/all"
+#include <iostream> // cout, endl, cin
+#include <string> // string, to_string, stoi
+#include <vector> // vector
+#include <algorithm> // min, max, swap, sort, reverse, lower_bound, upper_bound
+#include <utility> // pair, make_pair
+#include <tuple> // tuple, make_tuple
+#include <cstdint> // int64_t, int*_t
+#include <cstdio> // printf
+#include <map> // map
+#include <queue> // queue, priority_queue
+#include <set> // set
+#include <stack> // stack
+#include <deque> // deque
+#include <unordered_map> // unordered_map
+#include <unordered_set> // unordered_set
+#include <bitset> // bitset
+#include <cctype> // isupper, islower, isdigit, toupper, tolower
+#include <iomanip> // setprecision
+#include <complex> // complex
+#include <math.h>
+#include <functional>
+#include <cassert>
+using namespace std;
+// using namespace atcoder;
+using ll = long long;
+using P = pair<ll,ll>;
+constexpr ll INF = 1e18;
+constexpr ll LLMAX = 9223372036854775807;
+constexpr int inf = 1e9;
+// constexpr ll mod = 1000000007;
+constexpr ll mod = 998244353;
+// 右下左上
+const int dx[8] = {1, 0, -1, 0,1,1,-1,-1};
+const int dy[8] = {0, 1, 0, -1,1,-1,1,-1};
+template<class T> inline bool chmax(T& a, T b) { if (a < b) { a = b; return 1; } return 0; }
+template<class T> inline bool chmin(T& a, T b) { if (a > b) { a = b; return 1; } return 0; }
+ll gcd(ll a,ll b){if(b==0){return a;}else{return gcd(b,a%b);}};
+#define eb emplace_back
+#define pb pop_back
+#define eol endl
+// ---------------------------------------------------------------------------
+
+bool solve(){
+    ll N,K,S;
+    cin >> N >> K >> S;
+    if(N == 0) return false;
+    vector<ll> X(N),Y(N),Z(N);
+    for(int i=0; i<N; i++){
+        cin >> X[i] >> Y[i] >> Z[i];
+    }
+    if(K == 1){
+        cout << S*S*6 << endl;
+        return true;
+    }
+    vector<vector<P>> G(N);
+    auto calc = [&](ll i,ll j){
+        ll x = S - abs(X[i]-X[j]);
+        ll y = S - abs(Y[i]-Y[j]);
+        ll z = S - abs(Z[i]-Z[j]);
+        // cout << x << " " << y << " " << z << endl;
+        ll cost = 2*(x*y + y*z + z*x);
+        return cost;
+    };
+    for(int i=0; i<N; i++){
+        for(int j=i+1; j<N; j++){
+            if(abs(X[i]-X[j])<S && abs(Y[i]-Y[j])<S && abs(Z[i]-Z[j])<S){
+                ll cost = calc(i,j);
+                G[i].emplace_back(j,cost);
+                G[j].emplace_back(i,cost);
+            }
+        }
+    }
+    // for(int i=0; i<N; i++){
+    //     cout << i <<":";
+    //     for(int j=0; j<G[i].size(); j++){
+    //         cout << G[i][j].first << " ";
+    //     }
+    //     cout << endl;
+    // }
+    vector<ll> used(N,-1);
+    ll ans = INF;
+    {
+        for(int i=0; i<N; i++){
+            if(used[i] != -1) continue;
+            if(G[i].size() == 1){
+                vector<ll> vec;
+                queue<ll> que;
+                que.emplace(i);
+                used[i] = 0;
+                while(que.size()){
+                    ll v = que.front();
+                    vec.emplace_back(v);
+                    que.pop();
+                    for(auto hoge: G[v]){
+                        ll nv = hoge.first;
+                        if(used[nv] != -1) continue;
+                        used[nv] = 0;
+                        que.emplace(nv);
+                    }
+                }
+                for(int j=0; j<vec.size(); j++){
+                    if(vec.size() < K+j) break;
+                    ll res = 0;
+                    for(int k=j+1; k<j+K; k++){
+                        ll v1 = vec[k];
+                        ll v2 = vec[k-1];
+                        res += calc(v1,v2);
+                    }
+                    chmin(ans,6*S*S*K - res);
+                }
+            }
+        }
+    }
+    {// サイクル
+        vector<ll> vec;
+        function<void(int,int)> dfsc = [&](int v,int p){
+            used[v] = 0;
+            vec.emplace_back(v);
+            for(auto hoge: G[v]){
+                ll nv = hoge.first;
+                if(nv == p) continue;
+                if(used[nv] != -1){
+                    // cout << vec.size() << endl;
+                    // サイクルk?
+                    // for(int i=0; i<vec.size(); i++){
+                    //     cout << vec[i] << " \n"[i+1 == vec.size()];
+                    // }
+                    if(vec.size() == K){
+                        ll res = 0;
+                        for(int k=0; k<K; k++){
+                            ll a = vec[k%vec.size()];
+                            ll b = vec[(k+1)%vec.size()];
+                            res += calc(a,b);
+                        }
+                        chmin(ans,6LL*S*S*K - res);
+
+                    }
+                    if(vec.size() >= K){
+                        for(int j=0; j<vec.size(); j++){
+                            ll res = 0;
+                            for(int k=j; k<j+K-1; k++){
+                                ll a = vec[k%vec.size()];
+                                ll b = vec[(k+1)%vec.size()];
+                                res += calc(a,b);
+                            }
+                            chmin(ans,6LL*S*S*K - res);
+                        }
+                    }
+                }else{
+                    dfsc(nv,v);
+                }
+            }
+        };
+        for(int i=0; i<N; i++){
+            if(used[i] != -1) continue;
+            vec = vector<ll>(0);
+            // cout << endl;
+            dfsc(i,-1);
+        }
+    }
+    if(ans == INF){
+        cout << -1 << endl;
+    }else{
+        cout << ans << endl;
+    }
+    return true;
+}
+
+
+int main(){
+    while(solve());
+    return 0;
+}

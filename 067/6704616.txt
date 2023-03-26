@@ -1,0 +1,117 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define reps(i,start,end) for(int i = start; i < (int)(end); i++)
+#define ll long long
+#define print(t) cout << t << endl
+#define all(a)  (a).begin(),(a).end()
+// << std::fixed << std::setprecision(0)
+const ll INF = 1LL << 60;
+
+template<class T> void chmin(T& a, T b){
+ if(a > b){
+  a = b;
+ }
+}
+
+template<class T> void chmax(T& a, T b){
+ if(a < b){
+  a = b;
+ }
+}
+
+// template<class T> void change(T& a, T& b){
+//   pair c = a;
+//    a = b;
+//    b = c;
+// }
+
+void change(pair<int,string>& a, pair<int,string>& b){
+  pair<int,string> c = a;
+   a = b;
+   b = c;
+}
+
+
+int main(){
+  int n; cin >> n;
+  vector<pair<int,string> > c;
+  // map<int,vector<string>> map;
+  vector<vector<string> > str(14);
+  rep(i,n){
+    string s; cin >> s;
+    int t = s[1] -'0';
+    c.push_back(make_pair(t,s));
+    str[t].push_back(s);
+  }
+  // rep(i,2){
+  //   cout << str[1][i] << endl;
+  // }
+
+  // bubble sort
+  vector<pair<int,string> >d = c, e = c;
+  rep(i,n){
+    for(int j = n-1;j>=i+1;j--){
+      if(d[j].first < d[j-1].first){
+        change(d[j],d[j-1]);
+      }
+    }
+  }
+  rep(i,n){
+    if(i == n-1){
+      cout << d[i].second << endl;
+    }else{
+      cout << d[i].second << " ";
+    }
+  }
+  // stable check
+  bool isStable = true;
+  for(int i = 0;i<n;){
+    int j = d[i].first;
+    int point = 0;
+    while(point < (int)str[j].size()){
+      // cout << isStable << endl;
+      if(d[i].second != str[j][point]){
+        isStable = false;
+      }
+      i++;
+      point++;
+    }
+  }
+  if(isStable) print("Stable");
+  else print("Not stable");
+
+  // selection sort
+  rep(i,n){
+    int minj = i;
+    reps(j,i,n){
+      if(e[j].first < e[minj].first){
+        minj = j;
+      }
+    }
+    change(e[i],e[minj]);
+  }
+  rep(i,n){
+    if(i == n-1){
+      cout << e[i].second << endl;
+    }else{
+      cout << e[i].second << " ";
+    }
+  }
+
+  // stable check
+  bool isStables = true;
+  for(int i = 0;i<n;){
+    int j = e[i].first;
+    int point = 0;
+    while(point < (int)str[j].size()){
+      if(e[i].second != str[j][point]) isStables = false;
+      i++;
+      point++;
+    }
+  }
+  if(isStables) print("Stable");
+  else print("Not stable");
+}
+
+

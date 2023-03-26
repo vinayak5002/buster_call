@@ -1,0 +1,85 @@
+#include<stdio.h>
+
+#define MAX 1000
+
+int parent(int i){
+    return i/2;
+}
+int left(int i){
+    return 2*i;
+}
+int right(int i){
+    return 2*i+1;
+}
+
+void T_print(int A[MAX+1], int size){
+    int i;
+    for(i=1;i<=size;i++){
+        printf("node ");
+        printf("%d: ",i);
+        printf("key = %d, ",A[i]);
+
+        if(parent(i)!=0){
+            printf("parent key = %d, ",A[parent(i)]);
+        }
+        if(left(i)<=size){
+            printf("left key = %d, ", A[left(i)]);
+        }
+        if(right(i)<=size){
+            printf("right key = %d, ", A[right(i)]);
+        }
+        printf("\n");
+
+    }
+}
+
+void maxHeapify(int A[MAX+1], int i, int size){
+    int l = left(i);
+    int r = right(i);
+    int max = i;//自身が最大と仮定
+    int val;
+
+//左の子＞自身なら更新
+    if(l <= size && A[l] > A[i]){
+        max = l;
+    }
+//右の子>現在の最大のノードなら更新
+    if(r <= size && A[r] > A[max]){
+        max = r;
+    }
+//最大値が更新されれば入れ替え
+    if(max != i){
+        val = A[i];
+        A[i] = A[max];
+        A[max] = val;
+
+        maxHeapify(A, max, size);
+    }
+}
+
+
+int main(void){
+    int i;
+    int size;
+    int T[MAX+1];   
+
+
+    scanf("%d",&size);
+
+    for(i=1;i<=size;i++){
+        scanf("%d",&T[i]);
+    }
+
+     for(i = size/2; i >= 1; i--){
+        maxHeapify(T,i,size);
+    }
+
+    for(i=1;i<=size;i++){
+        printf(" %d",T[i]);
+    }
+    printf("\n");
+
+   
+    
+    return 0;
+}

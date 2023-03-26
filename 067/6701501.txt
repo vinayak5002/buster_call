@@ -1,0 +1,48 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int f(const vector<vector<int>>& A, vector<vector<int>>& B, int i, int j, int k, int a)
+{
+	int H = (int) A.size(), W = (int) A[0].size();
+	if (i < 0 || j < 0 || i >= H || j >= W || A[i][j] < a) return 0;
+	if (B[i][j] > 0) {
+		if (B[i][j] >= k) return 0;
+		B[i][j] = H * W + 1;
+		return 1;
+	}
+	B[i][j] = k;
+	int s = 0;
+	s += f(A, B, i - 1, j, k, A[i][j]);
+	s += f(A, B, i + 1, j, k, A[i][j]);
+	s += f(A, B, i, j - 1, k, A[i][j]);
+	s += f(A, B, i, j + 1, k, A[i][j]);
+	return s;
+}
+
+int f(const vector<vector<int>>& A, vector<vector<int>>& B, int i, int j, int k)
+{
+	int H = (int) A.size(), W = (int) A[0].size();
+	if (i - 1 >= 0 && A[i - 1][j] < A[i][j]) return 0;
+	if (i + 1 <  H && A[i + 1][j] < A[i][j]) return 0;
+	if (j - 1 >= 0 && A[i][j - 1] < A[i][j]) return 0;
+	if (j + 1 <  W && A[i][j + 1] < A[i][j]) return 0;
+	return f(A, B, i, j, k, A[i][j]);
+}
+
+int main()
+{
+	int H, W; cin >> H >> W;
+	vector<vector<int>> A(H, vector<int>(W));
+	for (auto& Ai : A) for (auto& a : Ai) cin >> a;
+	vector<vector<int>> B(H, vector<int>(W, 0));
+	int s = 0;
+	for (int i = 0, k = 0; i < H; ++i) for (int j = 0; j < W; ++j) {
+		if (B[i][j] <= 0) s += f(A, B, i, j, ++k);
+	}
+	cout << s << endl;
+
+	return 0;
+}
+

@@ -1,0 +1,68 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+
+const int INF = 100000000;
+
+int bfs(vector<vector<vector<int>>>&field,int h,int w){
+   int dx[4] = {1,0,-1,0};
+   int dy[4] = {0,-1,0,1};
+   vector<vector<int>>d(h,vector<int>(w));
+   queue<pair<int,int>>que;
+   for(int i = 0;i < d.size();i++){
+      for(int j = 0;j < d.at(0).size();j++){
+         d.at(i).at(j) = INF;
+      }
+   }
+   int sx = 0;int sy = 0;int gx = w-1;int gy = h-1;
+   que.push(make_pair(sx,sy));
+   d.at(sy).at(sx) = 0;
+
+   while(que.size()){
+      pair<int,int>p = que.front();
+      que.pop();
+      if(p.first == gx && p.second == gy)break;
+      for(int i = 0;i < 4;i++){
+         int nx = p.first + dx[i]; int ny = p.second + dy[i];
+         if(0 <= ny && ny < h && 0 <= nx && nx < w  && field[p.second][p.first][i] == 0 && d.at(ny).at(nx) == INF){
+            que.push(make_pair(nx,ny));
+            d.at(ny).at(nx) = d.at(p.second).at(p.first) + 1;
+         }
+      }
+   }
+   return d.at(gy).at(gx);
+} 
+
+int main(){
+   int w,h;
+   cin >> w >> h;
+   
+   while(!(w ==0 && h==0)){
+      vector<vector<vector<int>>>field(h, vector<vector<int>>(w, vector<int>(4,0)));
+      for(int i = 0;i < h*2-1;i++){
+         if(i%2==0){
+            for(int j = 0;j < w-1;j++){
+               int tmp;
+               cin >> tmp;
+               field[i/2][j][0] = tmp;
+               field[i/2][j+1][2] = tmp;               
+            }
+         }else{
+            for(int j = 0;j < w;j++){
+               int tmp;
+               cin >> tmp;
+               field[i/2][j][3] = tmp;
+               field[i/2+1][j][1] = tmp;   
+            }
+         }
+      }
+      int answer = bfs(field,h,w);
+      if(answer >= INF)cout << 0 << endl;
+      else cout << answer+1 << endl;
+      int nw,nh;
+      cin >> nw >> nh;
+      w = nw;
+      h = nh;
+   }
+}
+

@@ -1,0 +1,239 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+template <int mod>
+class Modint {
+    using mint = Modint;
+    static_assert(mod > 0, "Modulus must be positive");
+
+public:
+    static constexpr int get_mod() noexcept { return mod; }
+
+    constexpr Modint(long long y = 0) noexcept : x(y >= 0 ? y % mod : (y % mod + mod) % mod) {}
+
+    constexpr int value() const noexcept { return x; }
+
+    constexpr mint& operator+=(const mint& r) noexcept { if ((x += r.x) >= mod) x -= mod; return *this; }
+    constexpr mint& operator-=(const mint& r) noexcept { if ((x += mod - r.x) >= mod) x -= mod; return *this; }
+    constexpr mint& operator*=(const mint& r) noexcept { x = static_cast<int>(1LL * x * r.x % mod); return *this; }
+    constexpr mint& operator/=(const mint& r) noexcept { *this *= r.inv(); return *this; }
+
+    constexpr mint operator-() const noexcept { return mint(-x); }
+
+    constexpr mint operator+(const mint& r) const noexcept { return mint(*this) += r; }
+    constexpr mint operator-(const mint& r) const noexcept { return mint(*this) -= r; }
+    constexpr mint operator*(const mint& r) const noexcept { return mint(*this) *= r; }
+    constexpr mint operator/(const mint& r) const noexcept { return mint(*this) /= r; }
+
+    constexpr bool operator==(const mint& r) const noexcept { return x == r.x; }
+    constexpr bool operator!=(const mint& r) const noexcept { return x != r.x; }
+
+    constexpr mint inv() const noexcept {
+        int a = x, b = mod, u = 1, v = 0;
+        while (b > 0) {
+            int t = a / b;
+            std::swap(a -= t * b, b);
+            std::swap(u -= t * v, v);
+        }
+        return mint(u);
+    }
+
+    constexpr mint pow(long long n) const noexcept {
+        mint ret(1), mul(x);
+        while (n > 0) {
+            if (n & 1) ret *= mul;
+            mul *= mul;
+            n >>= 1;
+        }
+        return ret;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const mint& r) {
+        return os << r.x;
+    }
+
+    friend std::istream& operator>>(std::istream& is, mint& r) {
+        long long t;
+        is >> t;
+        r = mint(t);
+        return is;
+    }
+
+private:
+    int x;
+};
+
+using mint = Modint<32768>;
+using Matrix = vector<vector<mint>>;
+
+int k;
+string prog;
+map<char, Matrix> vars;
+
+template <typename T>
+ostream& operator<<(ostream& os, const vector<T>& v) {
+    for (int i = 0; i < (int) v.size(); ++i) os << v[i] << " ";
+    return os;
+}
+
+Matrix expr();
+Matrix term();
+Matrix factor();
+Matrix primary();
+Matrix matrix();
+Matrix row();
+
+Matrix expr() {
+    // cout << "expr: " << prog.substr(k) << endl;
+    auto res = term();
+    while (prog[k] != '.' && prog[k] != ')' && prog[k] != ';' && prog[k] != ']' && prog[k] != ' ' && prog[k] != ',') {
+        char op = prog[k++];
+        auto b = term();
+        if (op == '+') {
+            rep(i,0,res.size()) rep(j,0,res[0].size()) res[i][j] += b[i][j];
+        } else {
+            rep(i,0,res.size()) rep(j,0,res[0].size()) res[i][j] -= b[i][j];
+        }
+    }
+    return res;
+}
+
+Matrix term() {
+    // cout << "term: " << prog.substr(k) << endl;
+    auto res = factor();
+    while (prog[k] == '*') {
+        ++k;
+        auto b = factor();
+        if (res.size() == 1 && res[0].size() == 1) {
+            rep(i,0,b.size()) rep(j,0,b[0].size()) b[i][j] *= res[0][0];
+            res = b;
+        } else if (b.size() == 1 && b[0].size() == 1) {
+            rep(i,0,res.size()) rep(j,0,res[0].size()) res[i][j] *= b[0][0];
+        } else {
+            Matrix nres(res.size(), vector<mint>(b[0].size()));
+            rep(i,0,res.size()) rep(j,0,b[0].size()) {
+                rep(k,0,res[0].size()) nres[i][j] += res[i][k] * b[k][j];
+            }
+            res.swap(nres);
+        }
+    }
+    return res;
+}
+
+Matrix factor() {
+    // cout << "factor: " << prog.substr(k) << endl;
+    if (prog[k] == '-') {
+        ++k;
+        auto res = factor();
+        rep(i,0,res.size()) rep(j,0,res[0].size()) res[i][j] = -res[i][j];
+        return res;
+    } else {
+        return primary();
+    }
+}
+
+Matrix primary() {
+    // cout << "primary: " << prog.substr(k) << endl;
+    // inum
+    if ('0' <= prog[k] && prog[k] <= '9') {
+        string n = "";
+        while ('0' <= prog[k] && prog[k] <= '9') n += prog[k++];
+        return {{stoi(n)}};
+    }
+    Matrix res;
+    bool f = false;
+    while (true) {
+        if ('A' <= prog[k] && prog[k] <= 'Z') {
+            // var
+            res = vars[prog[k++]];
+            f = true;
+        } else if (prog[k] == '[') {
+            // matrix
+            res = matrix();
+            f = true;
+        } else if (prog[k] == '(') {
+            if (!f) {
+                // expr
+                ++k;
+                res = expr();
+                ++k;
+                f = true;
+            } else {
+                // index
+                ++k;
+                auto a = expr();
+                ++k;
+                auto b = expr();
+                ++k;
+                Matrix nres(a[0].size(), vector<mint>(b[0].size()));
+                rep(i,0,a[0].size()) rep(j,0,b[0].size()) nres[i][j] = res[a[0][i].value()-1][b[0][j].value()-1];
+                res.swap(nres);
+            }
+        } else if (prog[k] == '\'') {
+            // transpose
+            ++k;
+            Matrix nres(res[0].size(), vector<mint>(res.size()));
+            rep(i,0,res.size()) rep(j,0,res[0].size()) nres[j][i] = res[i][j];
+            res.swap(nres);
+        } else {
+            break;
+        }
+    }
+    return res;
+}
+
+Matrix matrix() {
+    // cout << "matrix: " << prog.substr(k) << endl;
+    ++k;
+    Matrix res = row();
+    while (prog[k] == ';') {
+        ++k;
+        auto r = row();
+        for (auto x : r) res.push_back(x);
+    }
+    ++k;
+    return res;
+}
+
+Matrix row() {
+    // cout << "row: " << prog.substr(k) << endl;
+    Matrix res = expr();
+    while (prog[k] == ' ') {
+        ++k;
+        auto e = expr();
+        rep(i,0,e.size()) for (auto x : e[i]) res[i].push_back(x);
+    }
+    return res;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int n;
+        cin >> n;
+        if (n == 0) break;
+        string s_;
+        getline(cin, s_);
+        rep(_,0,n) {
+            getline(cin, prog);
+            char v = prog[0];
+            k = 2;
+            vars[v] = expr();
+            for (auto& r : vars[v]) {
+                rep(i,0,r.size()) cout << r[i] << (i<r.size()-1 ? " " : "\n");
+            }
+            // cout << flush;
+        }
+        cout << "-----\n";
+        cout << flush;
+    }
+}

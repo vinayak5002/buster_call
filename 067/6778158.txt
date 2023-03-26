@@ -1,0 +1,125 @@
+
+N = []
+class Node:
+	def __init__(self, name, parent=None, leftchild=None, rightbrother=None):
+		global N
+
+		self.name = name
+		self.parent = parent
+		self.leftchild = leftchild
+		self.rightbrother = rightbrother
+		self.state = None
+		self.depth = None
+
+		#self.state = self.get_state()
+		#if parent!=None:
+		#	self.depth = self.get_depth()
+			
+
+	def set_depth(self):
+		depth_num = 0
+		parent_nodenum = self.parent
+
+		#print("aaa" + str(parent_nodenum))
+		
+		while True:
+			if parent_nodenum == -1:
+				#return depth_num
+				self.depth = depth_num
+				return
+			else:
+				parent_nodenum = N[parent_nodenum].parent
+				depth_num += 1
+		
+
+	def set_state(self):
+		if self.parent == -1:
+			self.state = "root"
+		elif self.leftchild == None:
+			self.state = "leaf"
+		else:
+			self.state = "internal node"
+
+
+	def show_node(self):
+		childlist = []
+		#if self.leftchild is None:
+		#	childdata = "[]"
+		if self.leftchild is not None:
+			childlist.append(self.leftchild)
+
+			#childdata = "[" + str(self.leftchild)
+			child = N[self.leftchild]
+
+			while child.rightbrother != None:
+				childlist.append(child.rightbrother)
+				child = N[child.rightbrother]
+			#childdata += "]"
+		#print(f"node {self.name}: parent = {self.parent}, depth = {self.depth}, leftch = {self.leftchild}, ribro = {self.rightbrother}, {self.state}, {childlist}")
+		print(f"node {self.name}: parent = {self.parent}, depth = {self.depth}, {self.state}, {childlist}")
+
+
+def decodenodes(nodenum, childnum, childlist=None):
+	global N
+
+	#print("a")
+	if N[nodenum].parent == None:
+		#if childnum != 0:
+		#	new_node = Node(nodenum, -1, childlist[0], None)
+		#else:
+		#	new_node = Node(nodenum, -1)
+		#	N[nodenum] = new_node
+		new_node = Node(nodenum, -1, childlist[0], None)
+		N[nodenum] = new_node
+		N[nodenum].set_depth()
+		N[nodenum].set_state()
+	else:
+		if childnum != 0:
+			N[nodenum].leftchild = childlist[0]
+		N[nodenum].set_depth()
+		N[nodenum].set_state()
+
+	# 子ノードの生成
+	for i in range(childnum):
+		if i != childnum-1:
+			new_node = Node(childlist[i], nodenum, None, childlist[i+1])
+		else:
+			new_node = Node(childlist[i], nodenum, None, None)
+		N[childlist[i]] = new_node
+			
+
+
+n = int(input())
+#decodelist = []
+
+N = [Node(i) for i in range(n+1)]
+for i in range(n):
+	inputdata = list(map(int, input().split()))
+
+
+	#print("_____________________")
+	#for s in range(n):
+	#	print(N[s].show_node())
+
+
+	if len(inputdata) == 2:
+		decodenodes(inputdata[0], inputdata[1])
+		#decodelist.append([inputdata[0], inputdata[1]])
+	else:
+		decodenodes(inputdata[0], inputdata[1], inputdata[2:])
+
+for i in range(n):
+	N[i].show_node()
+
+		
+
+
+
+
+# nodeをtureに加えること
+#ノードを参照できること
+
+
+
+
+

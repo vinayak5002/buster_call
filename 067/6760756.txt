@@ -1,0 +1,78 @@
+#include <iostream>
+#include <vector>
+
+static const int INF = 2147483647;
+int n;
+
+class RmqRuq{
+    private:
+        std::vector<int> D, lazy;
+    public:
+        RmqRuq(int n_){
+            n = 1;
+            while(n < n_) n *= 2;
+            for(int i=0; i< 2*n-1; ++i){
+                this->D.push_back(INF);
+                this->lazy.push_back(INF);
+            }
+        }
+
+        void update(int s, int t, int x, int k, int l, int r){
+            lazy_evaluate(k);
+            if(r<=s || t<=l) return;
+            if(s<=l && t>=r){
+                this->lazy[k] = x;
+                lazy_evaluate(k);
+            }
+            else{
+                update(s, t, x, k*2+1, l, (l+r)/2);
+                update(s, t, x, k*2+2, (l+r)/2, r);
+                this->D[k] = std::min(this->D[2*k+1],this->D[2*k+2]);
+            }
+        }
+
+        // int get_n(){return n;};
+
+        int query(int s, int t, int k, int l, int r){
+            lazy_evaluate(k);
+            if (r<=s || t<=l) //case1
+                return INF;
+            if (s<=l && r<=t) //case2
+                return this->D[k];
+
+            int vl = query(s, t, k*2 + 1, l, (l + r)/2);
+            int vr = query(s, t, k*2 + 2, (l + r)/2, r);
+            return std::min(vl, vr);
+        }
+
+        int findMin(int s, int t){
+            return query(s, t+1, 0, 0, n);
+        }
+
+        void lazy_evaluate(int k){
+            if(this->lazy[k] == INF) return;
+            if(k < n-1){
+                this->lazy[2*k+1] = this->lazy[2*k+2] = this->lazy[k];
+            }
+            this->D[k] = this->lazy[k];
+            this->lazy[k] = INF;
+        }
+};
+
+int main(){
+    int n_, q, com, s, t, x;
+    std::cin >> n_ >> q;
+    RmqRuq rr = RmqRuq(n_);
+
+    for(int i=0; i<q; ++i){
+        std::cin >> com >> s >> t;
+        if(com == 0){
+            std::cin >> x;
+            rr.update(s, t+1, x, 0, 0, n);
+        }
+        else{
+            std::cout << rr.findMin(s, t) << std::endl;
+        }
+    }
+    return 0;
+}

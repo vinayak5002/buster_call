@@ -1,0 +1,82 @@
+use std::io::{stdin, BufRead, BufReader};
+
+fn main() {
+    let mut input = BufReader::new(stdin());
+    let mut buf = String::new();
+
+    loop {
+        if let Ok(len) = input.read_line(&mut buf) {
+            if len == 0 {
+                break;
+            }
+        }
+        let mut params = buf
+            .trim()
+            .split(' ')
+            .map(str::parse::<usize>)
+            .map(Result::unwrap);
+        let n = params.next().unwrap();
+        let m = params.next().unwrap();
+
+        if n == 0 && m == 0 {
+            break;
+        }
+
+        let mut code_books = vec![0i32; m];
+        let mut rms_table = vec![vec![0u64; m]; n + 1];
+
+        let mut prev_status = vec![128u8; m];
+
+        for i in 0..m {
+            buf.clear();
+            input.read_line(&mut buf).unwrap();
+            code_books[i] = buf.trim().parse::<i32>().unwrap();
+        }
+
+        for t in 0..n {
+            buf.clear();
+            input.read_line(&mut buf).unwrap();
+            let signal = buf.trim().parse::<i32>().unwrap();
+            let mut cur_status = vec![128u8; m];
+
+            for i in 0..m {
+                let code = code_books[i];
+
+                let mut min_val = 0u8;
+                let mut min_rms = std::u64::MAX;
+
+                for k in 0..m {
+                    let val = prev_status[k] as i32 + code;
+                    let val = val.min(255).max(0);
+                    let rms =
+                        rms_table[if t == 0 { 0 } else { t - 1 }][k] + (val - signal).pow(2) as u64;
+
+                    if rms < min_rms {
+                        min_val = val as u8;
+                        min_rms = rms;
+                    }
+                }
+
+                cur_status[i] = min_val;
+                rms_table[t][i] = min_rms;
+            }
+
+            prev_status = cur_status;
+        }
+
+        let mut min_rms = std::u64::MAX;
+
+        for k in 0..m {
+            let rms = rms_table[n - 1][k];
+
+            if rms < min_rms {
+                min_rms = rms;
+            }
+        }
+
+        println!("{}", min_rms);
+
+        buf.clear();
+    }
+}
+

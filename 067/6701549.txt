@@ -1,0 +1,210 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+struct node {
+	struct node *right;
+	struct node *left;
+	struct node *parent;
+	int key;
+};
+typedef struct node Node;
+
+#define NIL NULL
+
+Node *root;
+
+Node *treeSearch( Node *u, int k )
+{
+	while( u != NIL && u->key != k )
+	{
+		if( k < u->key )
+		{
+			u = u->left;
+		}
+		else
+		{
+			u = u->right;
+		}
+	}
+	return u;
+}
+
+void treeDelete( Node *z )
+{
+	Node *x;  //zの子供//
+	Node *y;
+	
+	//zが子を持たない場合//
+	if( z->right == NIL && z->left == NIL )
+	{
+		if( z->parent->left == z )
+		{
+			z->parent->left = NIL;
+		}
+		else if( z->parent->right == z )
+		{
+			z->parent->right = NIL;
+		}
+	}
+	
+	//zが子供を1つもつ場合//
+	if( z->left != NIL && z->right == NIL )
+	{
+		if( z->parent->right == z )
+		{
+			x = z->left;
+			z->parent->right = x;
+		}
+		else if( z->parent->left == z )
+		{
+			x = z->left;
+			z->parent->left = x;
+		}
+	}
+	else if( z->left == NIL && z->right != NIL)
+	{
+		if( z->parent->right == z )
+		{
+			x = z->right;
+			z->parent->right = x;
+		}
+		else if( z->parent->left == z )
+		{
+			x = z->right;
+			z->parent->left = x;
+		}
+	}
+	
+	//zが子を2つもつ場合//
+	if( z->left != NIL && z->right !=NIL )
+	{
+		y = z;
+	
+		while( y->left != NIL )
+		{
+			y = y->left;
+		}
+	
+		z->key = y->key;
+		
+		if( y->parent->left == y )
+		{
+			y->parent->left = NIL;
+		}
+		else if( y->parent->right == y )
+		{
+			y->parent->right = NIL;
+		}
+	}
+}
+	
+void insert( int k )
+{
+	Node *y = NIL;
+	Node *x = root;
+	Node *z;
+	
+	z = malloc( sizeof( Node ));
+	z->key = k;
+	z->left = NIL;
+	z->right = NIL;
+	
+	while( x != NIL )
+	{
+		y = x;
+		
+		if( z->key < x->key )
+		{
+			x = x->left;
+		}
+		else
+		{
+			x = x->right;
+		}
+	}	
+	z->parent = y;
+		
+	if( y == NIL )
+	{
+		root = z;
+	}
+	else if( z->key < y->key )
+	{
+		y->left = z;
+	}
+	else 
+	{
+		y->right = z;
+	}
+}
+
+void Inorder( Node *u )
+{
+	if( u == NIL )
+	{
+		return ;
+	}
+	
+	printf( " %d", u->key );
+	Inorder( u->left );
+	Inorder( u->right );
+}
+
+void Preorder( Node *u )
+{
+	if( u == NIL )
+	{
+		return ;
+	}
+	
+	Preorder( u->left );
+	printf( " %d", u->key );
+	Preorder( u->right );
+	
+}
+
+int main( void )
+{
+	int n, i, k;
+	char com[10000];
+	scanf( "%d", &n );
+	
+	for( i = 0; i < n; i++ )
+	{
+		scanf( "%s", com );
+		if( com[0] == 'f' )
+		{
+			scanf( "%d", &k );
+			Node *t = treeSearch( root, k );
+			
+			if( t != NIL )
+			{
+				printf( "yes\n" );
+			}
+			else
+			{
+				printf( "no\n" );
+			}
+		}
+		else if( com[0] == 'i')
+		{
+			scanf( "%d", &k );
+			insert( k );
+		}
+		else if( com[0] == 'p' )
+		{				
+			Preorder( root );
+			printf( "\n" );
+			Inorder( root );
+			printf( "\n" );
+		}
+		else if( com[0] == 'd' )
+		{
+			scanf( "%d", &k );
+			treeDelete( treeSearch( root, k ));
+		}
+	}
+	
+	return 0;
+}
+

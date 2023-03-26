@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define INF 1020304050
+
+int main() {
+  
+  ios::sync_with_stdio(false);
+  cin.tie(0);
+
+  int n;
+  cin >> n;
+  while (n != 0) {
+    vector<int> p(n);
+    for (int i=0;i<n;i++) {
+      cin >> p[i];
+    }
+    vector<vector<vector<int>>> dp(n+1,vector<vector<int>>(5*n+1,vector<int>(n+1,INF)));
+    dp[0][5*n][0] = 0;
+    for (int i=0;i<n;i++) {
+      for (int j=0;j<=5*n;j++) {
+        for (int k=0;k<n;k++) {
+          // from dp[i][j][k]
+          if (dp[i][j][k] == INF) continue;
+          //cerr << i << ' ' << j << ' ' << k << endl;
+          // buy
+          int turi = (5*n-j)*1000-dp[i][j][k]-k*500;
+          int need = max(p[i]%1000-500,0);
+          if (p[i]%1000 == 0) need = 500;
+          int bils = (p[i]+999)/1000;
+          if (j-bils >= 0) {
+            if (turi >= need) {
+              dp[i+1][j-bils][k+1] = min(dp[i+1][j-bils][k+1],dp[i][j][k]+p[i]);
+            }
+            else {
+              dp[i+1][j-bils][k] = min(dp[i+1][j-bils][k],dp[i][j][k]+p[i]);
+            }
+          }
+          // not buy
+          dp[i+1][j][k] = min(dp[i+1][j][k],dp[i][j][k]);
+        }
+      }
+    }
+    int c500 = 0;
+    int spent = 0;
+    for (int j=0;j<=5*n;j++) {
+      for (int k=0;k<=n;k++) {
+        if (dp[n][j][k] == INF) continue;
+        if (k > c500) {
+          c500 = k;
+          spent = dp[n][j][k];
+        }
+        else if (k == c500 && dp[n][j][k] < spent) {
+          spent = dp[n][j][k];
+        }
+      }
+    }
+    cout << c500 << ' ' << spent << endl;
+    cin >> n;
+  }
+}
+

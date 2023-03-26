@@ -1,0 +1,231 @@
+#define _USE_MATH_DEFINES
+#include<bits/stdc++.h>
+#include<unordered_map>
+
+using namespace std;
+#define LP(I,S,G) for (long long int I = (S); I < (G); I++)
+#define IN(X) 	for (int in = 0; in < X.size(); in++)cin >> X[in]
+#define OUT(X) 	for (int in = 0; in < X.size(); in++)cout << X[in]<<" "
+#define SORT(X) sort((X).begin(), (X).end())
+#define CSORT(X,Y) sort(X.begin(), X.end(),Y)
+#define COPY(X,Y) copy(X.begin(), X.end(), Y.begin())
+#define ALL(X,Y) for (auto X = (Y).begin(); X != (Y).end(); X++)
+#define FULL(a)  (a).begin(),(a).end()
+#define BFS(Q,S) for(Q.push(S);Q.size()!=0;Q.pop())
+typedef long long int ll;
+typedef unsigned long long int ull;
+long long int M = pow(10, 9) + 7;
+
+
+int dx[] = { 0,-1,0,1 }, dy[] = { -1,0,1,0 };
+
+ll MAX(ll A, ll B) { return ((A) > (B) ? (A) : (B)); }
+ll MIN(ll A, ll B) { return ((A) < (B) ? (A) : (B)); }
+long long int xor128() {
+	static long long int x = 123456789, y = 362436069, z = 521288629, w = 88675123;
+	long long int t = (x ^ (x << 11));
+	x = y; y = z; z = w;
+	return (w = (w ^ (w >> 19)) ^ (t ^ (t >> 8)));
+}
+
+struct HashPair {
+	//注意 constがいる
+	template<class T1, class T2>
+	size_t operator()(const pair<T1, T2> &p) const {
+		//first分をハッシュ化する
+		auto hash1 = hash<T1>{}(p.first);
+		//second分をハッシュ化する
+		auto hash2 = hash<T2>{}(p.second);
+		//重複しないようにハッシュ処理
+		size_t seed = 0;
+		seed ^= hash1 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		seed ^= hash2 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		return seed;
+	}
+};
+template<class I1, class I2>
+istream& operator>>(istream& s, pair<I1, I2>& in) {
+	s >> in.first >> in.second;
+	return s;
+}
+
+class union_find {
+public:
+	vector<int> tree;
+	vector<ll> size;
+	union_find(int n) {
+		for (int i = 0; i < n; i++) {
+			tree.push_back(i);
+			size.push_back(1);
+		}
+	}
+	int root(int n) {
+		if (n == tree[n])return n;
+		else {
+			int x = root(tree[n]);
+			size[n] = size[x];
+			tree[n] = x;
+			return x;
+		}
+	}
+	void join(int x, int y) {
+		int rx = root(x), ry = root(y);
+		if (rx != ry) {
+			if (size[rx] > size[ry])swap(rx, ry);
+			size[rx] += size[ry];
+			size[ry] = size[rx];
+			tree[rx] = ry;
+		}
+	}
+	int get_size(int x) {
+		return size[root(x)];
+	}
+	bool compare(int x, int y) {
+		return root(x) == root(y);
+	}
+	void print() {
+		for (int i = 0; i < tree.size(); i++) {
+			cout << i << ":" << root(i) << "," << get_size(i) << "\n";
+		}
+	}
+};
+
+ll solve(vector<vector<ll>>& g,vector<ll>& p,ll in=-1) {
+	ll n = g.size();
+	if (n == 0)return 0;
+	map<ll,ll> t1, t2;
+	LP(x, 1, ((ll)1 << (n/2))) {
+		if ((x&in) == 0)continue;
+		vector<ll> t((n/2), 0);
+		LP(i,0,n/2)if ((x&((ll)1<<i)) != 0)t[i] = 1;
+		bool ok = 1;
+		ll score = 0;
+		LP(i, 0, n / 2) {
+			if (t[i] == 1) {
+				score += p[i];
+				ALL(k, g[i]) {
+					if (*k >= n / 2)continue;
+					if (t[*k] == 1)ok = 0;
+					if (!ok)break;
+				}
+			}
+			if (!ok)break;
+		}
+		if (ok)t1[x] = score;
+	}
+	LP(x, 1, ((ll)1 << ((ll)ceil(n / 2.0)))) {
+		vector<ll> t(ceil(n / 2.0), 0);
+		LP(i, 0, (n+1) / 2)if ((x&((ll)1 << i)) != 0)t[i] = 1;
+		bool ok = 1;
+		ll score = 0;
+		LP(i, 0, (n+1) / 2) {
+			if (t[i] == 1) {
+				score += p[i+n/2];
+				ALL(k, g[i+n/2]) {
+					if (*k < n / 2)continue;
+					if (t[*k-n/2] == 1)ok = 0;
+					if (!ok)break;
+				}
+			}
+			if (!ok)break;
+		}
+		if (ok)t2[x] = score;
+	}
+	ll ret = 0;
+	if(in==-1)t1[0] = 0;
+	t2[0] = 0;
+	ALL(x, t1) {
+		ALL(y, t2) {
+			vector<ll> t(n, 0);
+			LP(i, 0, n / 2) {
+				if ((x->first&((ll)1 << i)) != 0)t[i] = 1;
+			}
+			LP(i, 0, (n+1) / 2) {
+				if ((y->first&((ll)1 << i)) != 0)t[i + n / 2] = 1;
+			}
+			bool ok = 1;
+			LP(i, 0, n) {
+				if(t[i]==1){ 
+					ALL(k, g[i]) {
+						if (t[*k] == 1)ok = 0;
+						if (!ok)break;
+					}
+				}
+				if (!ok)break;
+			}
+			if (ok)ret = MAX(ret, x->second + y->second);
+		}
+	}
+	return ret;
+}
+
+int main() {
+	while (1) {
+		ll n;
+		cin >> n;
+		if (n == 0)break;
+		ll cnt = 0;
+		map<string,ll> name_list;
+		vector<ll> p(n, 0);
+		union_find tree(n);
+		vector<vector<ll>> g(n);
+		vector<vector<ll>> group(n);
+		LP(i, 0, n) {
+			string name;
+			cin >> name;
+			if (name_list.find(name) == name_list.end()) {
+				name_list[name] = cnt;
+				cnt++;
+			}
+			ll power;
+			cin >> power;
+			p[name_list[name]] = power;
+			ll size;
+			cin >> size;
+			LP(k, 0, size) {
+				string s;
+				cin >> s;
+				if (name_list.find(s) == name_list.end()) {
+					name_list[s] = cnt;
+					cnt++;
+				}
+				ll u = name_list[name], v = name_list[s];
+				g[u].push_back(v);
+				tree.join(u, v);
+			}
+		}
+		ll size = 0;
+		vector<ll> inv(n);
+		LP(i, 0, n) {
+			inv[i] = group[tree.root(i)].size();
+			group[tree.root(i)].push_back(i);
+			size = MAX(size, tree.root(i));
+		}
+		size++;
+		vector<vector<vector<ll>>> connect_g;
+		vector<vector<ll>> connect_p;
+		LP(i, 0, size) {
+			connect_g.push_back(vector<vector<ll>>(group[i].size()));
+			connect_p.push_back(vector<ll>(group[i].size()));
+		}
+		LP(i, 0, n) {
+			connect_p[tree.root(i)][inv[i]] = p[i];
+			ALL(k, g[i]) {
+				connect_g[tree.root(i)][inv[i]].push_back(inv[*k]);
+			}
+		}
+		connect_g, connect_p;
+		ll ans = 0;
+		LP(i, 0, size) {
+			if (i == tree.root(0)) {
+				ans += solve(connect_g[i], connect_p[i], ((ll)1 << inv[0]));
+			}
+			else {
+				ans += solve(connect_g[i], connect_p[i]);
+			}
+		}
+		cout << ans << "\n";
+	}
+	return 0;
+}
+

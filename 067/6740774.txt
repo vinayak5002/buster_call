@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+using namespace std;
+void chmax(int& a, int b){ if(a < b) a = b; }
+
+
+int main(){
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    int N, K;
+    cin >> N >> K;
+    vector<pair<int, int>> taxi(N);
+    for(auto& [C, R] : taxi) cin >> C >> R;
+    vector g(N, vector<int>{});
+    while(K--){
+        int a, b;
+        cin >> a >> b;
+        a--; b--;
+        g[a].push_back(b);
+        g[b].push_back(a);
+    }
+    vector<pair<int, int>> q;
+    priority_queue pq(greater<>{}, vector<pair<int, int>>{});
+    vector dp(N, vector(N + 1, INT_MAX));
+    auto push = [&](int i, int r, int c){
+        if(dp[i][r] <= c) return;
+        dp[i][r] = c;
+        if(r) q.emplace_back(i, r);
+        else pq.emplace(c, i);
+    };
+    push(0, 0, 0);
+    while(pq.size()){
+        auto [c, i] = pq.top();
+        pq.pop();
+        auto [C, R] = taxi[i];
+        push(i, R, c + C);
+        while(q.size()){
+            auto [i, r] = q.back();
+            const int c = dp[i][r];
+            q.pop_back();
+            push(i, r - 1, c);
+            for(int j : g[i]) push(j, r - 1, c);
+        }
+    }
+    cout << dp.back()[0] << endl;
+}
+

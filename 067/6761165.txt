@@ -1,0 +1,49 @@
+import itertools
+import sys
+import math
+import heapq
+from collections import deque, Counter, defaultdict
+from sys import stdin
+import copy
+import bisect
+from decimal import Decimal, ROUND_HALF_UP
+# from atcoder.dsu import DSU
+
+MOD = 10 ** 9 + 7
+int1 = lambda x: int(x) - 1
+stinput = lambda: stdin.readline()[:-1]
+ii = lambda: int(stinput())  # int input
+mi = lambda: map(int, stdin.readline().split())  # map input (int)
+li = lambda: list(mi())  # list input (int)
+mi1 = lambda: map(int1, stdin.readline().split())  # map input (int)-1
+li1 = lambda: list(mi1())  # list input (int)-1
+mis = lambda: map(str, stdin.readline().split())  # map input (string)
+lis = lambda: list(mis())  # list input (string)
+
+while True:
+    Team, P, R = mi()
+    if Team == 0:
+        break
+    ans = 0
+    cnt = 0
+    pena_li = [[0 for _ in range(P+1)] for _ in range(Team)]
+    core_li = [[0 for _ in range(4)]for _ in range(Team)]
+    for i in range(Team):
+        core_li[i][2] = i+1
+    for i in range(R):
+        T = list(map(str,input().split()))
+        for j in range(3):
+            T[j] = int(T[j])
+        T[0] -= 1
+        if T[-1] == 'WRONG':
+            pena_li[T[0]][T[1]] += 1
+        else:
+            core_li[T[0]][0] -= 1
+            if pena_li[T[0]][T[1]] == 0:
+                core_li[T[0]][3] += T[2]
+            else:
+                core_li[T[0]][3] += T[2] + 1200*pena_li[T[0]][T[1]]
+    core_li.sort()
+    for i in range(Team):
+            print(f'{core_li[i][2]} {-core_li[i][0]} {core_li[i][3]}')
+

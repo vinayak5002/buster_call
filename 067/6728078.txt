@@ -1,0 +1,25 @@
+arr = []
+print(end="Enter the Size: ")
+arrSize = int(input())
+print("Enter " +str(arrSize)+ " Elements: ")
+for i in range(arrSize):
+  arr.append(int(input()))
+
+for i in range(1, arrSize):
+  elem = arr[i]
+  if elem<arr[i-1]:
+    for j in range(i+1):
+      if elem<arr[j]:
+        index = j
+        for k in range(i, j, -1):
+          arr[k] = arr[k-1]
+        break
+  else:
+    continue
+  arr[index] = elem
+
+print("\nThe New (Sorted) List is: ")
+for i in range(arrSize):
+  print(end=str(arr[i]) + " ")
+
+print()

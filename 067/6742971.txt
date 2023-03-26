@@ -1,0 +1,86 @@
+//AOJ GRL_1_A Single Source Shortest Path (https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_1_A&lang=ja)
+
+//「Dijkstra's algorithm」を用いて解いた。「Dijkstra's algorithm」は、
+//ヒープを用いた時の計算量はO(ElogV),線形探索をした場合はO(V^2)
+//基本的にはヒープを用いたほうが高速だが、密グラフ（E≒V^2)の場合のみ注意
+//「単一始点最短路問題」に適用出来、計算量も抑えめだが、負辺があるとダメ
+//このアルゴリズムが上手くいくのは「負辺を含まない」（から現時点でヒープ内で最小の距離の頂点がこれ以上更新される可能性がなく最短距離として確定させてよい）ことがポイント
+//幅優先探索の「距離が小さいもの優先」版ともいえる（「最良優先探索」）
+
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <queue>
+
+using namespace std;
+
+using ll = long long;
+using vi = vector<int>;
+using vvi = vector<vi>;
+
+#define rep(i, n) for (int i = 0; i < n; i++)
+
+const long long INFL = pow(10,17);
+
+
+//辺を表す型
+struct edge{
+    int to;
+    long long w;
+    //メンバ初期化リスト
+    edge(int to, long long w): to(to), w(w) {}
+};
+
+//重み付きグラフを表す型
+using graph = vector<vector<edge> >;
+
+int main(){
+    //入力の受け取り
+    int V,E,r; cin >> V >> E >> r;
+    graph g(V);
+    rep(i,E){
+        int s,t,d; cin >> s >> t >> d;
+        g[s].push_back(edge(t,d));
+    }
+
+    //ダイクストラ法
+    vll dist(V,INFL);
+    dist[r] = 0;
+
+    //(始点からの（現時点での）距離、頂点番号)のペアを要素としたヒープをつくる
+    priority_queue<pair<ll, int>, //要素の型
+                   vector<pair<ll, int> >, //内部コンテナ
+                   greater<pair<ll, int> > //昇順に変更（小さいものから取り出したい）
+                   > q; 
+    q.push(make_pair(dist[r], r));
+
+    //ダイクストラ法の反復を開始
+    while(!q.empty()){
+        //v:使用済みでない頂点のうち、dist[v]が最小の頂点
+        //d:vに対するキー(距離)値
+        int v = q.top().second;
+        ll d = q.top().first;
+        q.pop();
+
+        //d>dist[v]の時は、ヒープに入っている経路が最短でないのでスルー(このように、この実装法だと一つの頂点に対して複数の距離がヒープ内にpushされてしまってることがあるのに注意)
+        if(d>dist[v]) continue;
+
+        //頂点Vを始点とした各辺の緩和
+        for(auto e:g[v]){
+            if(dist[v]+e.w < dist[e.to]){
+                //更新があるならヒープに新たに挿入＆更新
+                dist[e.to] = dist[v]+e.w;
+                q.push(make_pair(dist[e.to], e.to));
+            }
+        }
+    }
+
+    //結果の出力
+    rep(v,V){
+        if(dist[v]<INFL) cout << dist[v] << endl;
+        else cout << "INF" << endl;
+    }
+
+}
+

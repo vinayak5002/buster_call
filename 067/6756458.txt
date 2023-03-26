@@ -1,0 +1,48 @@
+#include<stdio.h>
+
+int main(){
+	char buf[256];
+	int num;//命令数
+	char str[1100] = {};//文字列
+	char* p;//ポインタ
+
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%s", &str);//文字列入力
+
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d", &num);//命令数入力
+
+	for (int i = 0; i < num; i++){
+		char command[10] = {}, replace_str[1000] = {},re_moji;//コマンド文字列,入れ替え文字列,1文字記憶
+		int c_num1 = 0, c_num2 = 0;//コマンド実行指定場所
+		p = replace_str;
+
+		fgets(buf, sizeof(buf) - 1, stdin);
+		sscanf(buf, "%s %d %d %s", &command, &c_num1, &c_num2 ,&replace_str);//コマンド、指定場所入力
+
+		if (command[2] == 'v'){
+			while (c_num1 <= c_num2){
+				re_moji = str[c_num1];
+				str[c_num1] = str[c_num2];
+				str[c_num2] = re_moji;
+				c_num1++;
+				c_num2--;
+			}
+		}
+		else if (command[2] == 'p'){
+			while (c_num1 <= c_num2){
+				str[c_num1] = *p;
+				p++;
+				c_num1++;
+			}
+		}
+		else if (command[2] == 'i'){
+			while (c_num1 <= c_num2){
+				printf("%c",str[c_num1]);
+				c_num1++;
+			}
+			printf("\n");
+		}
+	}
+	return 0;
+}

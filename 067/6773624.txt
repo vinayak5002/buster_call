@@ -1,0 +1,50 @@
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+
+int n, q;
+
+int inf = pow(2, 31) - 1;
+
+vector<int> D(300005, inf);
+
+void update (int k, int x) {
+    D.at(k) = x;
+    while (k > 0) {
+        k = (k - 1) / 2;
+        D.at(k) = min(D.at(k * 2 + 1), D.at(k * 2 + 2));
+    }
+}
+
+int query(int a, int b, int k, int l, int r) {
+    if (r <= a || b <= l) return inf;
+    if (a <= l && r <= b) return D.at(k);
+    else {
+        int vl = query(a, b, k * 2 + 1, l, (l + r) / 2);
+        int vr = query(a, b, k * 2 + 2, (l + r) / 2, r);
+        return min (vl, vr);
+    }
+
+}
+
+int find (int a, int b) {
+    return query(a, b + 1, 0, 0, n);
+}
+
+int main() {
+    cin >> n >> q;
+
+    int nn = 1;
+    while (n > nn) {
+        nn *= 2;
+    }
+
+    n = nn;
+
+    for (int i = 0; i < q; i++) {
+        int com, x, y;
+        cin >> com >> x >> y;
+        if (com == 0) update(x + n - 1, y);
+        else if (com == 1) cout << find(x, y) << endl;
+    }
+}

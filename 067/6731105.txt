@@ -1,0 +1,81 @@
+def solve():
+    from sys import stdin
+    from collections import deque
+    
+    f_i = stdin
+    H, W, N = map(int, f_i.readline().split())
+    
+    W += 2
+    
+    field = '#' * W
+    for i in range(H):
+        line = f_i.readline().rstrip()
+        field += '#' + line + '#'
+    field += '#' * W
+    
+    rec = dict()
+    move = [1, -1, W, -W]
+    
+    # first search
+    # Also create an adjacency list.
+    r, c = map(int, f_i.readline().split())
+    start = W * r + c
+    rec[start] = 0
+    q = deque()
+    q.append((0, start))
+    adj = dict() # adj[key]: (position, damage to move)
+    while q:
+        dmg, pos = q.popleft()
+        adj_pos = []
+        for m in move:
+            next_pos = pos + m
+            next_cell = field[next_pos]            
+            if next_cell == '.':
+                adj_pos.append((next_pos, False))
+                if next_pos not in rec:
+                    q.appendleft((dmg, next_pos))
+                    rec[next_pos] = dmg
+            elif next_cell == '@':
+                adj_pos.append((next_pos, True))
+                if next_pos not in rec:
+                    q.append((dmg + 1, next_pos))
+                    rec[next_pos] = dmg + 1
+        adj[pos] = adj_pos
+        
+    #
+    # for k, v in adj.items():
+    #     print(k, v)
+    #
+        
+    # serach after the second
+    for i in range(N - 1):
+        r, c = map(int, f_i.readline().split())
+        start = W * r + c
+        if start not in rec:
+            return "-1 -1"
+        
+        visited = dict()
+        visited[start] = True
+        q = deque()
+        q.append((0, start))
+        while q:
+            dmg, pos = q.popleft()
+            if dmg > rec[pos]:
+                rec[pos] = dmg
+            
+            for next_pos, dmg_to_move in adj[pos]:
+                if next_pos in visited:
+                    continue
+                visited[next_pos] = True
+                if dmg_to_move:
+                    q.append((dmg + 1, next_pos))
+                else:
+                    q.appendleft((dmg, next_pos))
+    
+    candidate = ((dmg, pos) for pos, dmg in rec.items() if field[pos] == '.')
+    ans_dmg, ans_pos = min(candidate)
+    ans_r = ans_pos // W
+    ans_c = ans_pos % W
+    return f'{ans_r} {ans_c}'
+
+print(solve())

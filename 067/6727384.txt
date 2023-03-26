@@ -1,0 +1,104 @@
+#include <stdio.h>
+
+#define M -1
+#define N 100
+#define S 100000
+#define W 0
+#define G 1
+#define B 2
+
+int n;
+int a[N][N];
+
+void dijkstra()
+{
+    int color[N], d[N];
+    int i, u, v, min;
+
+    for (i = 0; i < n; i++)
+    {
+        d[i] = S;
+        color[i] = W;
+    }
+
+    d[0] = 0;
+    color[0] = G;
+
+    while (1)
+    {
+        min = S;
+        u = -1;
+
+        for (i = 0; i < n; i++)
+        {
+            if (min > d[i] && color[i] != B)
+            {
+                u = i;
+                min = d[i];
+            }
+        }
+
+        if (u == -1)
+        {
+            break;
+        }
+
+        color[u] = B;
+
+        for (v = 0; v < n; v++)
+        {
+            if (color[v] != B && a[u][v] != M)
+            {
+                if (d[v] > d[u] + a[u][v])
+                {
+                    d[v] = d[u] + a[u][v];
+                    color[v] = G;
+                }
+            }
+        }
+    }
+
+    for (i = 0; i < n; i++)
+    {
+        if (d[i] == S)
+        {
+            printf("%d %d\n", i, M);
+        }
+
+        else
+        {
+            printf("%d %d\n", i, d[i]);
+        }
+    }
+}
+
+int main()
+{
+    int i, j, v, u, k, c;
+
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < n; j++)
+        {
+            a[i][j] = N;
+        }
+    }
+
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d %d", &u, &k);
+
+        for (j = 0; j < k; j++)
+        {
+            scanf("%d %d", &v, &c);
+
+            a[u][v] = c;
+        }
+    }
+
+    dijkstra();
+
+    return 0;
+}

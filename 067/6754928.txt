@@ -1,0 +1,87 @@
+#include<stdio.h>
+#define MAX 500000
+#define INFTY 1000000000
+
+int count=0;
+int L[MAX/2+2];
+int R[MAX/2+2];
+
+void merge(int A[], int left, int mid, int right)
+{
+	int k;
+	int i=0;
+	int j=0;
+	int n1 = mid - left;
+	int n2 = right - mid;
+	
+	for(k = 0; k < n1; k++)
+	{
+		L[k] = A[left + k];
+	}
+	for(k = 0; k < n2; k++)
+	{
+		R[k] = A[mid + k];
+	}
+	
+	L[n1] = INFTY;
+	R[n2] = INFTY;
+	
+	for(k = left; k < right; k++)
+	{
+		count++;
+		
+		if(L[i] <= R[j])
+		{
+			A[k] = L[i];
+			i++;
+		}
+		else
+		{
+			A[k] = R[j];
+			j++;
+		}
+	}
+}
+
+void mergeSort(int A[], int left, int right)
+{
+	int mid;
+	
+	if(left + 1 < right)
+	{
+		mid = (left + right) / 2;
+		mergeSort(A, left, mid);
+		mergeSort(A, mid, right);
+		merge(A, left, mid, right);
+	}
+}
+
+int main(void)
+{
+	int A[MAX], n, i;
+	
+	scanf("%d", &n);
+	
+	for(i = 0; i < n; i++)
+	{
+		scanf("%d", &A[i]);
+	}
+	
+	mergeSort(A, 0, n);
+	
+	for(i = 0; i < n; i++)
+	{
+		if(i == 0)
+		{
+			printf("%d", A[i]);
+		}
+		else
+		{
+			printf(" %d", A[i]);
+		}
+	}
+	printf("\n");
+	printf("%d\n", count);
+	
+	return 0;
+}

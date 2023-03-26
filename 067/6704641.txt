@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using VI = vector<int>;
+using VVI = vector<VI>;
+
+VI dx = {-1, 0, 1, 0};
+VI dy = {0, -1, 0, 1};  // 左、上、右、下
+
+// 深さ優先探索
+void one_stroke(VVI& s, VI& v, int len, int y, int x) {
+    if (s[y][x] == 0) {
+        return;
+    } else {
+        ++len;
+        s[y][x] = 0;
+        for (int i = 0; i < 4; ++i) {
+            if (s[y + dy[i]][x + dx[i]] == 1) {
+                one_stroke(s, v, len, y + dy[i], x + dx[i]);
+            }
+        }
+        v.push_back(len);
+        s[y][x] = 1;
+    }
+}
+
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+    while (true) {
+        int m, n;
+        cin >> m;
+        cin >> n;
+        if (n == 0 && m == 0) break;
+
+        VVI square(n + 2, VI(m + 2, 0));
+        for (int i = 1; i <= n; ++i) {
+            for (int j = 1; j <= m; ++j) {
+                cin >> square[i][j];
+            }
+        }
+
+        int max_len = 0;
+        for (int i = 1; i <= n; ++i) {
+            for (int j = 1; j <= m; ++j) {
+                VI vec;
+                one_stroke(square, vec, 0, i, j);
+                if (vec.size() > 0) {
+                    max_len =
+                        max(max_len, *max_element(vec.begin(), vec.end()));
+                }
+            }
+        }
+        cout << max_len << endl;
+    }
+
+    return 0;
+}
+

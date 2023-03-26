@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+
+using namespace std; 
+
+#define FIO cin.tie(0),ios::sync_with_stdio(0),cout.tie(0)
+#define oo __LONG_LONG_MAX__
+#define ooi INT32_MAX
+#define endl '\n'
+#define ll long long 
+#define Debug(_var1) if(DB) cout << "=> " << _var1 << endl;
+#define Debug2(_var1, _var2) if(DB) cout << "=> " << _var1 << "   " << _var2 << endl;
+#define Debug3(_var1, _var2, _var3) if(DB) cout << "=> " << _var1 << "   " << _var2 << "   " << _var3 << endl;
+#define DB_TC() if(DB)cout << "=> _____________ <=\n"; 
+
+bool DB = 0;
+const int N = 1e4 + 4, M = 10*N;
+int head[N], nxt[M], to[M], to_edg[N];
+int n, ne;
+int vis[N], vid;
+void init(){
+    memset(head, -1, (n + 1) * sizeof(head[0]));
+    ne = 0;
+    ++vid;
+}
+void addEdge(int f, int t){
+    to[ne] = t;
+    nxt[ne] = head[f];
+    head[f] = ne++;
+}
+void addBiEdge(int u, int v){
+    addEdge(u, v);
+    addEdge(v, u);
+}
+vector <int> outs;
+int dfs(int u){
+    if(vis[u] == vid){
+        outs.push_back((u));
+        return 1;
+    }
+    vis[u] = vid;
+    int ret = 0;
+    for(int e = head[u] ; ~e ; e = nxt[e]){
+        int v = to[e];
+        ret = max(ret, dfs(v));
+        if(ret){
+            outs.push_back((u));
+            return ret;
+        }
+    }
+    vis[u] = 0;
+    return ret;
+}
+
+int main(){ 
+    #ifdef VS_FreeOpen 
+        freopen("input.in", "r", stdin); 
+        freopen("output.in", "w", stdout); 
+        DB = 0;
+    #endif 
+    FIO; 
+
+    int tc = 1;
+    // cin >> tc;
+    while(tc--){
+        cin >> n;
+        int m;
+        cin >> m;
+        init();
+        for(int i = 0 ; i < m ; ++i){
+            int f, t;
+            cin >> f >> t;
+            addEdge(f, t);
+            ++to_edg[t];
+        }
+
+        while(outs.size() < n)
+            for(int i = 0 ; i < n ; ++i){
+                if(!to_edg[i] && vis[i] != vid){
+                    vis[i] = vid;
+                    outs.push_back(i);
+                    for(int e = head[i] ; ~e ; e = nxt[e]){
+                        int v = to[e];
+                        --to_edg[v];
+                    }
+                }
+            }
+
+        for(auto &it : outs){
+            cout << it << "\n";
+        }
+        
+        DB_TC();
+    }
+
+    return 0;
+}
+/*
+
+*/

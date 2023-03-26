@@ -1,0 +1,71 @@
+#include<bits/stdc++.h>
+#define rep(i,n) for(int i=0; i< (n); i++)
+using namespace std;
+typedef long long ll;
+typedef pair<int , int> P;
+const ll inf = (1ll<<60);
+//const int mod = 998244353;
+const int mod = 1000000007;
+int n,m;
+int mvwx[4] = {-1,0,1,0};
+int mvwy[4] = { 0, 1, 0, -1};
+int mvx[4] = {0,1,0,-1};
+int mvy[4] = {1,0,-1,0};
+
+bool check2(int x,int y,int i){
+    return i == 3 || (x != 0 || y != 0);
+}
+bool check(int x,int y,int i){
+    return x > -1 && y > -1 && y < n && x < m && check2(x,y,i);
+}
+
+int main(){
+    while(true){
+        cin>>n>>m;
+        if(n == 0 && m == 0) break;
+        bool table[n][m]={};
+        rep(i,n){
+            rep(j,m){
+                char c; cin>>c;
+                if(c == '.') table[i][j]=true;
+                else table[i][j]=false;
+            }
+        }
+        int nowx=0,nowy=0;
+        int goolx[4]={0,m-1,m-1,0};
+        int gooly[4]={n-1,n-1,0,0};
+        bool ans=true;
+        rep(i,4){
+            while((nowx != goolx[i] || nowy != gooly[i])){
+                //cout<<nowy<<" "<<nowx<<" "<<i<<endl;
+                if(check(nowx+mvwx[i],nowy+mvwy[i],i) && table[nowy+mvwy[i]][nowx+mvwx[i]]){
+                    nowx+=mvwx[i];nowy+=mvwy[i];
+                    //cout<<"mw"<<endl;
+                }else if(check(nowx+mvx[i],nowy+mvy[i],i) && table[nowy+mvy[i]][nowx+mvx[i]]){
+                    nowx+=mvx[i];nowy+=mvy[i];
+                    //cout<<"mg"<<endl;
+                }else if(check(nowx-mvwx[i],nowy-mvwy[i],i) && table[nowy-mvwy[i]][nowx-mvwx[i]]){
+                    nowx-=mvwx[i];nowy-=mvwy[i];
+                    //cout<<"lw"<<endl;
+                }else{
+                    ans=false;
+                    break;
+                }
+                table[nowy][nowx] = false;
+                /*rep(k,n){
+                    rep(j,m){
+                        cout<<table[k][j];
+                    }
+                    cout<<endl;
+                }
+                cout<<endl;*/
+            }
+               
+        }
+
+        if(ans) cout<<"YES"<<endl;
+        else cout<<"NO"<<endl;
+
+    }
+}
+

@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#pragma GCC target("avx")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+
+struct Fast {
+  Fast() {
+    std::cin.tie(0);
+    ios::sync_with_stdio(false);
+  }
+} fast;
+
+int get_truck_num(const vector<int> &v, const int container) {
+  int num = 1;
+  int bucket = 0;
+  for (const int &x : v) {
+    if ((bucket + x) > container) {
+      num++;
+      bucket = 0;
+    }
+    bucket += x;
+  }
+  return num;
+}
+
+int main() {
+  int n, k;
+  cin >> n >> k;
+
+  vector<int> v(n);
+  for (int i = 0; i < n; i++) {
+    cin >> v[i];
+  }
+
+  int body_high = 100000;
+  int body_low = 1;
+  int body = 0;
+  while (body_low < body_high) {
+    body = int(body_low + body_high) / 2;
+    const int res = get_truck_num(v, body);
+    if (res > k) {
+      body_low = body + 1;
+    } else if (res <= k) {
+      body_high = body;
+    }
+  }
+
+  cout << body_low << endl;
+
+  return 0;
+}
+

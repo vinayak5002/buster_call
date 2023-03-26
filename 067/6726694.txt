@@ -1,0 +1,96 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define N 4
+#define N2 16
+
+static const int dx[4]={-1,0,1,0};
+static const int dy[4]={0,-1,0,1};
+//static const char dir[4]={'u','l','d','r'};
+int MDT[N2][N2];
+
+struct Puzzle{
+  int f[N2],MD;
+  int space,cost;
+  bool operator < (const Puzzle &p) const {
+    for (int i = 0; i < N2; i++) {
+      if (f[i] == p.f[i]) continue;
+      return f[i] < p.f[i];
+    }
+    return false;
+  }
+};
+
+struct state{
+  Puzzle puzzle;
+  int estimated;
+  bool operator < (const state &s) const{
+    return estimated > s.estimated;
+  }
+};
+
+int getAllMD(Puzzle pz){
+  int sum=0;
+  for(int i=0;i<N2;i++){
+    if(pz.f[i]==N2) continue;
+    sum+=MDT[i][pz.f[i]-1];
+  }
+  return sum;
+}
+priority_queue<state> PQ;
+map<Puzzle,bool> V;
+int astar(Puzzle &s){
+ 
+  s.MD=getAllMD(s);
+  s.cost=0;
+ 
+  Puzzle v;
+  state initial;
+  initial.puzzle=s;
+  initial.estimated=getAllMD(s);
+  PQ.push(initial);
+
+  while(!PQ.empty()){
+    state st=PQ.top();PQ.pop();
+    if(st.puzzle.MD==0) return st.puzzle.cost;
+    int sx=st.puzzle.space/N;
+    int sy=st.puzzle.space%N;
+    for(int r=0;r<4;r++){
+      int tx=sx+dx[r];
+      int ty=sy+dy[r];
+      if(tx<0 || ty<0 || tx>=N || ty>=N) continue;
+      v=st.puzzle;
+      v.MD-=MDT[tx*N+ty][v.f[tx*N+ty]-1];
+      v.MD+=MDT[sx*N+sy][v.f[tx*N+ty]-1];
+      swap(v.f[sx*N+sy],v.f[tx*N+ty]);
+      v.space=tx*N+ty;
+      if(!V[v]){
+	V[st.puzzle]=true;
+	v.cost++;
+	state news;
+	news.puzzle=v;
+	news.estimated=v.cost+v.MD;
+	PQ.push(news);
+      }
+    }
+  }
+  return -1;
+}
+
+int main(){
+  for(int i=0;i<N2;i++){
+    for(int j=0;j<N2;j++){
+      MDT[i][j]=abs(i/N - j/N)+abs(i%N - j%N);
+    }
+  }
+  Puzzle in;
+  for(int i=0;i<N2;i++){
+    cin>>in.f[i];
+    if(in.f[i]==0){
+      in.f[i]=N2;
+      in.space=i;
+    }
+  }
+  cout<<astar(in)<<endl;
+  return 0;
+}
+

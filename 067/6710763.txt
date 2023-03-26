@@ -1,0 +1,159 @@
+#include "iostream"
+#include "climits"
+#include "list"
+#include "queue"
+#include "stack"
+#include "set"
+#include "functional"
+#include "algorithm"
+#include "string"
+#include "map"
+#include "unordered_map"
+#include "unordered_set"
+#include "iomanip"
+#include "cmath"
+#include "random"
+#include "bitset"
+#include "cstdio"
+#include "numeric"
+#include "cassert"
+#include "ctime"
+using namespace std;
+// #include <atcoder/lazysegtree>
+// using namespace atcoder;
+
+typedef long long int ll;
+typedef unsigned long long ull;
+typedef long double ld;
+typedef pair<ll, ll> pll;
+typedef vector<ll> vll;
+typedef vector<vll> vvll;
+typedef vector<vvll> vvvll;
+typedef vector<pll> vpll;
+typedef vector<vpll> vvpll;
+typedef vector<bool> vb;
+typedef vector<vb> vvb;
+typedef vector<double> vd;
+typedef vector<vd> vvd;
+typedef priority_queue<pll, vpll, function<bool(pll, pll)> > pqpll;
+typedef priority_queue<ll, vll, function<bool(pll, pll)> > pqll;
+
+//struct edge{ ll from,to,cost; edge(ll e_from,ll e_to,ll e_cost): from(e_from), to(e_to), cost(e_cost){} };
+//typedef vector<vector<edge>> Graph;
+
+#define rep(i,a,n) for(ll i = a;i < n;i++)
+#define rrep(i,a,n) for(ll i = n-1; i >= a;i--)
+#define LINF (1LL << 60)
+#define INF (1 << 30)
+#define fs first
+#define sc second
+#define EPS 1e-10
+#define ALL(a) a.begin(), a.end()
+#define tcheck(a) if((clock() - start)/(ld)CLOCKS_PER_SEC >= a) break
+#define debug(s) cout << #s << endl
+#define debugval(x) cout << #x" = " << x << endl
+
+template<typename T> ll sz(vector<T>& pos) { return (ll)pos.size(); }
+template<typename T> ll sz(priority_queue<T, vector<T> >& pq) { return (ll)pq.size(); }
+template<typename T> ll sz(priority_queue<T, vector<T>, greater<T> >& pq) { return (ll)pq.size(); }
+ll sz(string& s) { return (ll)s.size(); }
+
+template<typename T> void chmin(T& a, T b) { if (a > b) a = b; }
+template<typename T> void chmax(T& a, T b) { if (a < b) a = b; }
+
+ll gcd(ll a, ll b) { return ((!b) ? a : gcd(b, a % b)); }
+ll lcm(ll a, ll b) { return a / gcd(a, b) * b; }
+ll dx[4] = { 0,-1,0,1 }, dy[4] = { -1,0,1,0 };
+inline bool isinside(ll i, ll n) { return (i < n&& i >= 0); }
+
+typedef string::const_iterator State;
+class ParseError {};
+
+const ll A = 0xFF00, B = 0xF0F0, C = 0xCCCC, D = 0xAAAA;
+
+ll expr(State& begin) {
+    if (*begin == '1') {
+        begin++;
+        return 0xFFFF;
+    }
+    else if (*begin == '0') {
+        begin++;
+        return 0;
+    }
+    else if ('a' <= *begin && *begin <= 'd') {
+        ll res = 0;
+        if (*begin == 'a') res = A;
+        else if (*begin == 'b') res = B;
+        else if (*begin == 'c') res = C;
+        else if (*begin == 'd') res = D;
+        begin++;
+        return res;
+    }
+    else if (*begin == '-') {
+        begin++;
+        ll res = expr(begin);
+        res ^= 0xFFFF;
+        return res;
+    }
+    else if (*begin == '(') {
+        begin++;
+        ll res = expr(begin);
+        char op = *begin; begin++;
+        ll res2 = expr(begin);
+        if (op == '^') res ^= res2;
+        else if (op == '*') res &= res2;
+        else {
+            cout << "parseerror0 : " << *begin << endl;
+            throw ParseError();
+        }
+        begin++;
+        return res;
+    }
+    else {
+        cout << "parseerror1 : " << *begin << endl;
+        throw ParseError();
+    }
+    return 0;
+}
+
+
+string t = "01abcd";
+vector<string> tvec = vector<string>({ "-E","(E^E)","(E*E)" });
+int main() {
+    string s;
+    while (1) {
+        cin >> s;
+        if (s == ".") break;
+
+        State begin = s.begin();
+        ll res = expr(begin);
+
+        ll ans = 16;
+        queue<string> que;
+        que.emplace("E");
+        while (que.size()) {
+            string str = que.front();
+            que.pop();
+            if (ans <= str.size())continue;
+            ll ecnt = 0;
+            rep(i, 0, sz(str)) if (str[i] == 'E') ecnt++;
+            rep(i, 0, sz(str)) {
+                if (str[i] == 'E') {
+                    rep(j, 0, sz(t)) {
+                        str[i] = t[j];
+                        begin = str.begin();
+                        if (ecnt == 1 && expr(begin) == res) chmin(ans, sz(str));
+                        else if (ecnt >= 2) que.push(str);
+                    }
+
+                    rep(j, 0, sz(tvec)) {
+                        string newstr = str.substr(0, i) + tvec[j] + str.substr(i + 1, sz(str) - i - 1);
+                        if (sz(newstr) <= 15) que.push(newstr);
+                    }
+                }
+            }
+        }
+        cout << ans << endl;
+    }
+}
+

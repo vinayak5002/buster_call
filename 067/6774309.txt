@@ -1,0 +1,132 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return true; } return false; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return true; } return false; }
+#define all(x) (x).begin(),(x).end()
+#define fi first
+#define se second
+#define mp make_pair
+#define si(x) int(x.size())
+const int mod=1000000007,MAX=300005,INF=1<<30;
+
+int main(){
+    
+    std::ifstream in("text.txt");
+    std::cin.rdbuf(in.rdbuf());
+    cin.tie(0);
+    ios::sync_with_stdio(false);
+    
+    int N,Q;cin>>N>>Q;
+    ll A,B,C,D,E,F,G;cin>>A>>B>>C>>D>>E>>F>>G;D--;E--;F--;G--;
+    vector<int> H(N),W(N),invH(N),invW(N);
+    iota(all(H),0);
+    iota(all(W),0);
+    iota(all(invH),0);
+    iota(all(invW),0);
+    bool f=false,g=false,z=false;
+    map<pair<int,int>,int> MA;
+    
+    auto inv=[&](int h,int w){
+        //cout<<h<<" "<<w<<" ";
+        if(f) h=N-1-h;
+        h=invH[h];
+        if(g) w=N-1-w;
+        w=invW[w];
+        //cout<<h<<" "<<w<<endl;
+        if(z) swap(h,w);
+        return mp(h,w);
+    };
+    
+    while(Q--){
+        string S;cin>>S;
+        if(S=="WR"){
+            int h,w,v;cin>>h>>w>>v;h--;w--;
+            tie(h,w)=inv(h,w);
+            MA[mp(h,w)]=v;
+        }
+        if(S=="CP"){
+            int h1,w1,h2,w2;cin>>h1>>w1>>h2>>w2;
+            h1--;w1--;h2--;w2--;
+            tie(h1,w1)=inv(h1,w1);
+            tie(h2,w2)=inv(h2,w2);
+            int v;
+            if(MA.count(mp(h1,w1))) v=MA[mp(h1,w1)];
+            else v=(A*(h1+1)+B*(w1+1))%C;
+            MA[mp(h2,w2)]=v;
+        }
+        if(S=="SR"){
+            int h1,h2;cin>>h1>>h2;h1--;h2--;
+            if(f){
+                h1=N-1-h1;
+                h2=N-1-h2;
+            }
+            if(z){
+                swap(invW[h1],invW[h2]);
+                swap(W[invW[h1]],W[invW[h2]]);
+            }else{
+                swap(invH[h1],invH[h2]);
+                swap(H[invH[h1]],H[invH[h2]]);
+            }
+        }
+        if(S=="SC"){
+            int w1,w2;cin>>w1>>w2;w1--;w2--;
+            if(g){
+                w1=N-1-w1;
+                w2=N-1-w2;
+            }
+            if(z){
+                swap(invH[w1],invH[w2]);
+                swap(H[invH[w1]],H[invH[w2]]);
+            }else{
+                swap(invW[w1],invW[w2]);
+                swap(W[invW[w1]],W[invW[w2]]);
+            }
+        }
+        if(S=="RL"){
+            swap(f,g);
+            if(z) g=!g;
+            else f=!f;
+            swap(H,W);
+            swap(invH,invW);
+            z=!z;
+        }
+        if(S=="RR"){
+            swap(f,g);
+            if(z) f=!f;
+            else g=!g;
+            swap(H,W);
+            swap(invH,invW);
+            z=!z;
+        }
+        if(S=="RH"){
+            if(z) g=!g;
+            else f=!f;
+        }
+        if(S=="RV"){
+            if(z) f=!f;
+            else g=!g;
+        }
+        
+        //cout<<f<<" "<<g<<" "<<z<<endl;
+    }
+    
+    //cout<<f<<" "<<g<<" "<<z<<endl;
+    
+    ll ans=314159265;
+    
+    for(int r=D;r<=E;r++){
+        for(int c=F;c<=G;c++){
+            int h=r,w=c;
+            tie(h,w)=inv(h,w);
+            //cout<<h<<" "<<w<<endl;
+            int v;
+            if(MA.count(mp(h,w))) v=MA[mp(h,w)];
+            else v=(A*(h+1)+B*(w+1))%C;
+            ans=(ans*31+v)%mod;
+        }
+    }
+    
+    cout<<ans<<"\n";
+}
+

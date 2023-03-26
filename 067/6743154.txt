@@ -1,0 +1,83 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <numeric>
+#include <map>
+#include <functional>
+#include <unordered_set>
+#define rep(i, a, b) for (int i = a; i < b; ++i)
+using namespace std;
+
+const int MOD = 1000000007;
+
+// const long long INF = 1LL << 60;
+
+template<class T> bool chmin(T& a, T b) { if (a > b) { a = b; return true; } else return false; }
+template<class T> bool chmax(T& a, T b) { if (a < b) { a = b; return true; } else return false; }
+
+int V, E;
+int dist[21][21];
+int dp[(1 << 20) + 1][21];
+
+const int INF = 1 << 29;
+
+int s = 0;
+
+int rec(int bit, int v) {
+
+    // すでに探索済みならそれをリターン
+    if (dp[bit][v] != -1) return dp[bit][v];
+
+    // 初期値
+    if (bit == 0) {
+        if (v == 0) {
+            return 0;
+        } else {
+            return INF;
+        }
+    }
+
+    // bit に{v}がない時は無理
+    if (!(bit & (1 << v))) return INF;
+
+        // 答えの格納
+    int res = INF;
+
+    // v の手前のノードとしてuを全探索する
+    rep(u, 0, V) {
+        chmin(res, rec(bit ^ (1 << v), u) + dist[u][v]);
+    } 
+
+    return dp[bit][v] = res;
+}
+
+int main() {
+    cin >> V >> E;
+
+    rep(i, 0, 21) {
+        rep(j, 0, 21) {
+            dist[i][j] = INF;
+        }
+    }
+
+    rep(i, 0, E) {
+        int s, t, d; cin >> s >> t >> d;
+        dist[s][t] = d;
+    }
+
+    for (int bit = 0; bit < (1 << V); ++bit) {
+        rep(v, 0, V) dp[bit][v] = -1;
+    }
+
+    // int res = INF;
+    // rep(v, 0, V) {
+    //     chmin(res, rec((1 << V) - 1, v));
+    // }
+
+    int res = rec((1 << V) - 1, s);
+    if (res == INF) cout << -1 << endl;
+    else cout << res << endl;
+    return 0;
+}

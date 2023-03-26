@@ -1,0 +1,61 @@
+from collections import *
+import itertools
+
+ans_list = []
+
+while True:
+    n, m = map(int, input().split())
+    if n == 0 and m == 0:
+        break
+    A = list(map(int, input().split()))
+    W = list(map(int, input().split()))
+
+    diff_can_make = set()
+
+    query = list(itertools.product([0,1,2], repeat=m))
+
+    for q in query:
+        left, right = 0, 0
+        for i in range(m):
+            if q[i] == 0:
+                continue
+            elif q[i] == 1:
+                left += W[i]
+            else:
+                right += W[i]
+
+        diff_can_make.add(abs(left - right))
+
+    cnt_can_make = 0
+    B = set()
+    for a in A:
+        if a not in diff_can_make:
+            B.add(a)
+        else:
+            cnt_can_make += 1
+
+    if cnt_can_make == len(A):
+        ans_list.append(0)
+        continue
+
+    #以後はBのみ考えたらいい
+    now = B.pop()
+    possible = set()
+    for diff in diff_can_make:
+        possible.add(abs(now - diff))
+        possible.add(now + diff)
+
+    for b in B:
+        new_possible = set()
+        for possible_sub in possible:
+            if (b + possible_sub) in diff_can_make or abs(b - possible_sub) in diff_can_make:
+                new_possible.add(possible_sub)
+        possible = new_possible
+
+    if len(possible) == 0:
+        ans_list.append(-1)
+    else:
+        ans_list.append(min(possible))
+
+print(*ans_list, sep = "\n")
+

@@ -1,0 +1,80 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+struct DisjointSet {
+    vector<int> rank, root, weight;
+
+    DisjointSet(int n) {
+        rank.resize(n, 0);
+        root.resize(n, 0);
+        weight.resize(n, 0);
+        for (int i = 0; i < n; i++) makeSet(i);
+    }
+
+    void makeSet(int x) {
+        rank[x] = 0;
+        root[x] = x;
+        weight[x] = 0;
+    }
+
+
+    pair<int, int> findSet(int x) {
+        pair <int, int> p;
+        if (x != root[x]) {
+            p = findSet(root[x]);
+            root[x] = p.first;
+            weight[x] += p.second;
+        }
+        p = pair<int, int>(root[x], weight[x]);
+        return p;
+    }
+
+    void merge(int x, int y, int z) {
+        int a = findSet(x).first;
+        int b = findSet(y).first;
+        link(a, b, z - weight[x] + weight[y]);
+    }
+
+    void link(int x, int y, int z) {
+        if (rank[x] > rank[y]) {
+            root[y] = x;
+            weight[y] = -z;
+        } else {
+            root[x] = y;
+            weight[x] = z;
+            if (rank[x] == rank[y]) rank[y]++;
+        }
+    }
+
+    bool same(int x, int y) {
+        return findSet(x).first == findSet(y).first;
+    }
+
+    void diff(int x, int y) {
+        if (!same(x, y)) cout << "?" << endl;
+        else cout << weight[x] - weight[y] << endl;
+    }
+};
+
+int main() {
+    int n, q, com, x, y, z;
+
+    cin >> n >> q;
+    DisjointSet ds(n);
+
+    for (int i = 0; i < q; i++) {
+        cin >> com;
+        if (com == 0)
+        {
+            cin >> x >> y >> z;
+            ds.merge(x, y, z);
+        } else if (com == 1)
+        {
+            cin >> x >> y;
+            ds.diff(x, y);
+        }
+    }
+
+    return 0;
+}

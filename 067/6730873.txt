@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for (int i = 0; i < (n); ++i)
+using namespace std;
+using ll = long long;
+using P = pair<int,int>;
+
+struct LazySegmentTree{
+    int n;
+    vector<int> tree;
+
+    LazySegmentTree(vector<int> v){
+        int sz = v.size();
+        n=1; while(n<sz)n*=2;
+        tree.resize(2*n-1,0); 
+        rep(i,tree.size())tree[i]=0;
+    }
+
+    void update(int x, int val){
+        //最下段にアクセス
+        x+=(n-1);
+        tree[x]=val;
+        while(x>0){
+            x=(x-1)/2;
+            tree[x]=tree[2*x+1]+tree[2*x+2];
+        }
+    }
+
+    int getmax(int a, int b, int k, int l=0, int r=-1){
+        //区間[a,b)の最大値を求める
+        //k:=自分のインデックス
+        //対象区間[l,r)]
+        if(r<0)r=n; //最初に呼び出すとき右端にする
+        if(r<=a||b<=l)return 0;
+        if(a<=l&&r<=b)return tree[k];
+        int vl=getmax(a,b,2*k+1,l,(l+r)/2);
+        int vr=getmax(a,b,2*k+2,(l+r)/2,r);
+        return vl+vr;
+    }
+    
+};
+
+
+int main(){
+    int n,q;
+    cin>>n>>q;
+    vector<int> v(n,0);
+    LazySegmentTree sg(v);
+    rep(i,q){
+        int c,x,y;
+        cin>>c>>x>>y;
+        x--;y;
+        if(c==0)sg.update(x,y);
+        else{
+            cout<<sg.getmax(x,y,0)<<endl;
+        }
+    }
+}

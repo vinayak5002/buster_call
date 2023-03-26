@@ -1,0 +1,110 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000001
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 100001
+#define MAXM 1
+typedef long long int ll;
+ll n ;
+int weight, v, w;
+ll t = 0;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+
+long long int res;
+const long long int infty = (1LL<<31) - 1;
+const long long int M = 998244353777789;
+const long long int N = 499122177;
+
+vector<int> S;
+vector<int> A; // i番目に入る数列の要素を格納する
+int VAL[MAXM] ; //コインの額面
+int length;
+///////////計算量を減らす工夫///////////////
+// i番目までの荷物で重さjまででの最大価値をA[i][j]に保管
+// A[i][j] = max (A[i-1][j], A[i-1][j-W[i]] + VAL[i] )
+/////////////////////////////
+void init(){
+    A.resize(MAXN);
+    A[0] = -1;
+    A[1] = S[0] ;
+    length = 1;
+
+    // printf("END init  \n");
+}
+void shori(int k){
+    if (S[k]>A[length]){
+        A[length+1]=S[k]; 
+        length++;
+    } else {
+        int* it ;
+        *lower_bound(A.begin(),A.begin()+length,S[k]) = S[k];
+    }
+    /*        int* pos; // int型へのポインタ
+        pos = lower_bound(A.begin(),A.begin()+length,S[k]) ;
+        int low = distance(A.begin(), pos);
+        A[low] = S[k];
+    **/
+    //for (int i=1; i<=n ; i++) {
+    //    printf ( "%d " , A[i] );
+    //}
+    //printf ("\n");
+    return ;
+}
+
+
+int main(){
+    cin >> n  ;
+    for (int i=1; i<=n ; i++) {
+        cin >> v ;
+        S.push_back(v);
+    }
+    init();
+    for (int i=1; i<n ; i++) {
+        // S[i]に対応させている。
+        shori(i);
+    }
+    printf ("%d\n", length);
+    //for (int i=1; i<=n ; i++) {
+    //    printf ( "%d " , A[i] );
+    //}
+
+    return 0;
+}
+
+/*
+最長増加部分列
+数列 A=a0,a1,…,an−1 の最長増加部分列 (LIS: Longest Increasing Subsequence) の長さを求めてください。 数列 A の増加部分列は 0≤i0<i1<…<ik<n かつ　ai0<ai1<…<aik を満たす部分列 ai0,ai1,…,aik です。最長増加部分列はその中で最も k　が大きいものです。
+
+入力
+１行目に数列 A の長さを示す整数 n が与えられます。続く n 行で数列の各要素 ai が与えられます。
+
+出力
+最長増加部分列の長さを１行に出力してください。
+
+制約
+1 ≤ n ≤ 100,000
+0 ≤ ai ≤ 109
+入出力例
+
+入力例 1
+5
+5
+1
+3
+2
+4
+出力例 1
+3
+
+入力例 2
+3
+1
+1
+1
+出力例 2
+1
+Note
+
+*/

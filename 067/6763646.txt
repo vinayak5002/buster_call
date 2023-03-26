@@ -1,0 +1,245 @@
+#include <bits/stdc++.h>
+#include <chrono>
+#include <thread>
+////#include <atcoder/all>
+
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using vvvb = vector<vvb>;
+using vd = vector<double>;
+using vvd = vector<vd>;
+using vvvd = vector<vvd>;
+#define all(A) A.begin(),A.end()
+#define ALL(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q, bool C = 1) {
+    if (C == 0 && p == q) {
+        return 1;
+    }
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+double EPS = 1e-9;
+template<class T>
+bool chmin(T& p, T q) {
+    if (p > q + EPS) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+ll gcd(ll(a), ll(b)) {
+    if (b == 0)return a;
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+vector<ll> fact, factinv, inv;
+ll mod = 998244353;
+void prenCkModp(ll n) {
+    fact.resize(n + 5);
+    factinv.resize(n + 5);
+    inv.resize(n + 5);
+    fact.at(0) = fact.at(1) = 1;
+    factinv.at(0) = factinv.at(1) = 1;
+    inv.at(1) = 1;
+    for (ll i = 2; i < n + 5; i++) {
+        fact.at(i) = (fact.at(i - 1) * i) % mod;
+        inv.at(i) = mod - (inv.at(mod % i) * (mod / i)) % mod;
+        factinv.at(i) = (factinv.at(i - 1) * inv.at(i)) % mod;
+    }
+
+}
+ll nCk(ll n, ll k) {
+    if (k < 0)return 0;
+    if (n < k) return 0;
+    return fact.at(n) * (factinv.at(k) * factinv.at(n - k) % mod) % mod;
+}
+
+
+
+
+
+
+
+namespace atcoder {
+namespace internal {
+
+template <class E> struct csr {
+    std::vector<int> start;
+    std::vector<E> elist;
+    csr(int n, const std::vector<std::pair<int, E>>& edges)
+        : start(n + 1), elist(edges.size()) {
+        for (auto e : edges) {
+            start[e.first + 1]++;
+        }
+        for (int i = 1; i <= n; i++) {
+            start[i] += start[i - 1];
+        }
+        auto counter = start;
+        for (auto e : edges) {
+            elist[counter[e.first]++] = e.second;
+        }
+    }
+};
+
+// Reference:
+// R. Tarjan,
+// Depth-First Search and Linear Graph Algorithms
+struct scc_graph {
+  public:
+    scc_graph(int n) : _n(n) {}
+
+    int num_vertices() { return _n; }
+
+    void add_edge(int from, int to) { edges.push_back({from, {to}}); }
+
+    // @return pair of (# of scc, scc id)
+    std::pair<int, std::vector<int>> scc_ids() {
+        auto g = csr<edge>(_n, edges);
+        int now_ord = 0, group_num = 0;
+        std::vector<int> visited, low(_n), ord(_n, -1), ids(_n);
+        visited.reserve(_n);
+        auto dfs = [&](auto self, int v) -> void {
+            low[v] = ord[v] = now_ord++;
+            visited.push_back(v);
+            for (int i = g.start[v]; i < g.start[v + 1]; i++) {
+                auto to = g.elist[i].to;
+                if (ord[to] == -1) {
+                    self(self, to);
+                    low[v] = std::min(low[v], low[to]);
+                } else {
+                    low[v] = std::min(low[v], ord[to]);
+                }
+            }
+            if (low[v] == ord[v]) {
+                while (true) {
+                    int u = visited.back();
+                    visited.pop_back();
+                    ord[u] = _n;
+                    ids[u] = group_num;
+                    if (u == v) break;
+                }
+                group_num++;
+            }
+        };
+        for (int i = 0; i < _n; i++) {
+            if (ord[i] == -1) dfs(dfs, i);
+        }
+        for (auto& x : ids) {
+            x = group_num - 1 - x;
+        }
+        return {group_num, ids};
+    }
+
+    std::vector<std::vector<int>> scc() {
+        auto ids = scc_ids();
+        int group_num = ids.first;
+        std::vector<int> counts(group_num);
+        for (auto x : ids.second) counts[x]++;
+        std::vector<std::vector<int>> groups(ids.first);
+        for (int i = 0; i < group_num; i++) {
+            groups[i].reserve(counts[i]);
+        }
+        for (int i = 0; i < _n; i++) {
+            groups[ids.second[i]].push_back(i);
+        }
+        return groups;
+    }
+
+  private:
+    int _n;
+    struct edge {
+        int to;
+    };
+    std::vector<std::pair<int, edge>> edges;
+};
+
+}  // namespace internal
+
+}  // namespace atcoder
+
+
+namespace atcoder {
+
+struct scc_graph {
+  public:
+    scc_graph() : internal(0) {}
+    scc_graph(int n) : internal(n) {}
+
+    void add_edge(int from, int to) {
+        int n = internal.num_vertices();
+        //assert(0 <= from && from < n);
+        //assert(0 <= to && to < n);
+        internal.add_edge(from, to);
+    }
+
+    std::vector<std::vector<int>> scc() { return internal.scc(); }
+
+  private:
+    internal::scc_graph internal;
+};
+
+}  // 
+using namespace atcoder;
+
+
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    ll N;
+    cin>>N;
+    rep(i,1e5){
+        if((i)*(i+1)/2>=N){
+
+            ll Z=i*(i+1)/2-N;
+            //cout<<Z<<endl;
+            vector<char> AN(i*2);
+            rep(j,i)AN[j]=')';
+            rep(j,i)AN[j+i]='(';
+            rep(p,i){
+                if(Z>=i){
+                    Z-=i;
+                    swap(AN[i+p],AN[p]);
+                }
+                else{
+                    //Z=0;
+                    swap(AN[i+p],AN[i+p-Z]);
+                    Z=0;
+                }
+            }
+            rep(j,2*i)cout<<AN[j];
+            cout<<endl;
+            return 0;
+        }
+    }
+}
+
+
+

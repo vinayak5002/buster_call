@@ -1,0 +1,54 @@
+#include <iostream>
+#include <queue>
+#include <algorithm>
+using namespace std;
+
+int Solve( int *a )
+{
+    queue<int> bowl;
+
+    for ( int i = 0; i < 4; i++ )
+    {
+        if ( a[i] > 0 ) bowl.push( a[i] );
+    }
+
+    while ( bowl.size() >= 2 )
+    {
+        int rest = bowl.size();
+        for ( int i = 0; i < rest; i++ )
+        {
+            a[i] = bowl.front(); bowl.pop();
+        }
+        sort( a, a + rest );
+
+        bowl.push( a[0] );
+        for ( int i = 1; i < rest; i++ )
+        {
+            if ( a[i] - a[0] > 0 ) bowl.push( a[i] - a[0] );
+        }
+    }
+
+    return bowl.front();
+}
+
+int main()
+{
+    int a[4];
+
+    while ( 1 )
+    {
+        bool quit = true;
+        for ( int i = 0; i < 4; i++ )
+        {
+            cin >> a[i];
+            if ( a[i] ) quit = false;
+        }
+        if ( quit ) break;
+
+        cout << Solve( a ) << endl;
+    }
+
+    return 0;
+}
+
+

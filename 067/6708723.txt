@@ -1,0 +1,119 @@
+#include <bits/stdc++.h>
+#ifdef MY_DEBUG
+  #include "dprint.cpp"
+  # define dprint(a, ...);\
+      do {\
+          printf("line : %d, func : %s\n",\
+                __LINE__, __func__);\
+          dprint(#a,a,##__VA_ARGS__ );\
+      } while (0)
+#else
+  #define dprint(a,...) 
+#endif
+using namespace std;
+
+int n;
+int m;
+long long res_count=0;
+int count2=0;
+vector<vector<int>> tornument;
+int expect_win=0;
+bool check(){
+  for (int j = 1; j < n; j++){
+    int a_n_win=0;
+
+    for (int i = 1; i <= n; i++){
+      if(tornument[j][i]==1)a_n_win++;
+    }
+  if(a_n_win!=expect_win)return false;
+  }
+  
+return true;
+}
+void _solve(vector<pair<int,int>>& VS,int num){
+  if(num==(int)VS.size()){
+    if(check()==true){
+      res_count++;
+    }
+    
+    return;
+  }
+
+  if(tornument[VS[num].first][VS[num].second]!=0){
+    _solve(VS,num+1);
+    return;
+  }
+
+  int a_n_win=0;
+  int a_n_lose=0;
+  int b_n_win=0;
+  int b_n_lose=0;
+  for (int i = 1; i <= n; i++){
+    if(tornument[VS[num].first][i]==1)a_n_win++;
+    if(tornument[VS[num].first][i]==-1)a_n_lose++;
+    if(tornument[VS[num].second][i]==1)b_n_win++;
+    if(tornument[VS[num].second][i]==-1)b_n_lose++;
+  }
+
+  if(a_n_win<expect_win && b_n_lose<n-1-expect_win){
+    tornument[VS[num].first][VS[num].second]=1;
+    tornument[VS[num].second][VS[num].first]=-1;
+
+    _solve(VS,num+1);
+    tornument[VS[num].first][VS[num].second]=0;
+    tornument[VS[num].second][VS[num].first]=0;
+  }
+  if(b_n_win<expect_win &&a_n_lose<n-1-expect_win){
+    tornument[VS[num].first][VS[num].second]=-1;
+    tornument[VS[num].second][VS[num].first]=1;
+    _solve(VS,num+1);
+
+  tornument[VS[num].first][VS[num].second]=0;
+  tornument[VS[num].second][VS[num].first]=0;
+  }
+
+  return;
+}
+
+long long solve(vector<vector<int>>& vec){
+res_count=0;
+tornument = vector<vector<int>>(n+1, vector<int>(n+1,0));
+for (int i = 1; i <= n; i++){
+  tornument[i][i]=-2;
+}
+for (int i = 0; i < m; i++){
+  tornument[vec[i][0]][vec[i][1]]=1;
+  tornument[vec[i][1]][vec[i][0]]=-1;
+}
+
+ expect_win=(n*n-n)/2/n;
+
+ vector<pair<int,int>> VS;
+ for (int i = 1; i <= n; i++){
+  for (int j = i+1; j <=n; j++){
+    VS.push_back(make_pair(i,j));
+  }
+ }
+ 
+  _solve(VS,0);
+  return res_count;
+}
+
+int main() {
+
+  while(true){
+    cin >>n>>m;
+    if(n==0)break;
+  vector<vector<int>> vec(m, vector<int>(2));
+  for (int i = 0; i < m; i++){
+    for(int j=0;j<2;j++){
+      cin >> vec[i][j];
+    }
+  }
+    long long ret=solve(vec);
+    cout << ret << endl;
+  }
+
+
+return 0;
+}

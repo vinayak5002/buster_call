@@ -1,0 +1,818 @@
+// https://qiita.com/tanakh/items/0ba42c7ca36cd29d0ac8
+macro_rules! input {
+    (source = $s:expr, $($r:tt)*) => {
+        let mut iter = $s.split_whitespace();
+        input_inner!{iter, $($r)*}
+    };
+    ($($r:tt)*) => {
+        let s = {
+            use std::io::Read;
+            let mut s = String::new();
+            std::io::stdin().read_to_string(&mut s).unwrap();
+            s
+        };
+        let mut iter = s.split_whitespace();
+        input_inner!{iter, $($r)*}
+    };
+}
+
+macro_rules! input_inner {
+    ($iter:expr) => {};
+    ($iter:expr, ) => {};
+
+    ($iter:expr, $var:ident : $t:tt $($r:tt)*) => {
+        let $var = read_value!($iter, $t);
+        input_inner!{$iter $($r)*}
+    };
+}
+
+macro_rules! read_value {
+    ($iter:expr, ( $($t:tt),* )) => {
+        ( $(read_value!($iter, $t)),* )
+    };
+
+    ($iter:expr, [ $t:tt ; $len:expr ]) => {
+        (0..$len).map(|_| read_value!($iter, $t)).collect::<Vec<_>>()
+    };
+
+    ($iter:expr, chars) => {
+        read_value!($iter, String).chars().collect::<Vec<char>>()
+    };
+
+    ($iter:expr, usize1) => {
+        read_value!($iter, usize) - 1
+    };
+
+    ($iter:expr, $t:ty) => {
+        $iter.next().unwrap().parse::<$t>().expect("Parse error")
+    };
+}
+
+use ntk_rand::Xorshift;
+
+const INF: i64 = 1 << 58;
+const TIMELIMIT: f64 = 0.33;
+
+fn main() {
+    input! {
+        n: usize,
+        m: usize,
+        data: [(usize, usize, i64); m],
+    }
+    let dist = {
+        let mut dist = vec![vec![INF; n]; n];
+        for (s, t, d) in data {
+            dist[s][t] = d;
+        }
+        dist
+    };
+    let mut rng = Xorshift::new();
+    let mut best_ans = INF;
+    let mut timer = Timer::new();
+    let mut out = init_solution(n, &dist, &mut rng);
+    let ans = annealing(n, &mut out, &dist, &mut timer, &mut rng);
+    best_ans = best_ans.min(ans);
+    let mut timer = Timer::new();
+    let mut out = nearest_neighbor(n, &dist);
+    let ans = annealing(n, &mut out, &dist, &mut timer, &mut rng);
+    best_ans = best_ans.min(ans);
+    let mut timer = Timer::new();
+    let mut out = init_solution(n, &dist, &mut rng);
+    let ans = annealing(n, &mut out, &dist, &mut timer, &mut rng);
+    best_ans = best_ans.min(ans);
+    // INFよりは更新することがあるので適当に引く
+    if best_ans < INF - 200000 {
+        println!("{}", best_ans);
+    } else {
+        println!("-1");
+    }
+    // eprintln!("{:?}", out);
+}
+
+fn init_solution(n: usize, dist: &[Vec<i64>], rng: &mut Xorshift<usize>) -> Vec<usize> {
+    let mut visited = vec![false; n];
+    visited[0] = true;
+    let mut prev = vec![n; n];
+    let mut ord = (0..n).into_iter().collect::<Vec<usize>>();
+    for i in 0..n {
+        let nv_i = rng.gen_range(i..n);
+        ord.swap(i, nv_i);
+    }
+
+    dfs(0, n, dist, &mut visited, &mut prev, &ord);
+    let mut out = vec![];
+    let mut i = 0;
+    visited = vec![false; n];
+    while prev[i] != n && prev[i] != 0 {
+        visited[i] = true;
+        out.push(i);
+        i = prev[i];
+    }
+    for (i, b) in visited.iter().enumerate() {
+        if !*b {
+            out.push(i);
+        }
+    }
+    out.push(0);
+    out.reverse();
+    out
+}
+
+fn dfs(
+    v: usize,
+    n: usize,
+    dist: &[Vec<i64>],
+    visited: &mut [bool],
+    prev: &mut [usize],
+    ord: &[usize],
+) {
+    for &nv in ord.iter() {
+        if dist[v][nv] == INF || visited[nv] {
+            continue;
+        }
+        visited[nv] = true;
+        prev[nv] = v;
+        dfs(nv, n, dist, visited, prev, ord);
+    }
+}
+
+fn nearest_neighbor(n: usize, dist: &[Vec<i64>]) -> Vec<usize> {
+    let mut visited = vec![false; n];
+    visited[0] = true;
+    let mut out = vec![0];
+    let mut i = 0;
+    while visited.iter().any(|b| !*b) {
+        let mut min = INF;
+        let mut min_j = 0;
+        for (j, v) in visited.iter().enumerate() {
+            if *v {
+                continue;
+            }
+            if min > dist[i][j] {
+                min = dist[i][j];
+                min_j = j;
+            }
+        }
+        if min_j == 0 {
+            break;
+        }
+        visited[min_j] = true;
+        out.push(min_j);
+        i = min_j;
+    }
+    for (i, b) in visited.iter().enumerate() {
+        if !*b {
+            out.push(i);
+        }
+    }
+    out.push(0);
+    out
+}
+
+fn annealing(
+    n: usize,
+    output: &mut Vec<usize>,
+    dist: &[Vec<i64>],
+    timer: &mut Timer,
+    rng: &mut Xorshift<usize>,
+) -> i64 {
+    const T0: f64 = 100.0;
+    const T1: f64 = 0.001;
+    let mut temp = T0;
+    let mut prob;
+    let mut now_score = compute_score(n, output, dist);
+
+    let mut best_score = now_score;
+    let mut best_output = output.clone();
+
+    let mut count = 0;
+    loop {
+        if count >= 100 {
+            let passed = timer.get_time() / TIMELIMIT;
+            if passed >= 1.0 {
+                break;
+            }
+            temp = T0.powf(1.0 - passed) * T1.powf(passed);
+            count = 0;
+        }
+        count += 1;
+        let mut new_output = output.clone();
+        // 近傍解作成
+        if rng.gen_bool(0.5) {
+            // 2-opt
+            let mut i = rng.gen_range(1..new_output.len() - 1);
+            let mut j = rng.gen_range(1..new_output.len() - 1);
+            if i == j {
+                continue;
+            }
+            if i > j {
+                std::mem::swap(&mut i, &mut j);
+            }
+            // let diff = dist[i - 1][j] + dist[i][j + 1] - dist[i - 1][i] - dist[j][j + 1];
+            // new_output[i..=j]をひっくり返す
+            new_output[i..=j].reverse();
+            // let mut best_new_score = now_score;
+            // let mut best_i = 0;
+            // let mut best_j = 0;
+            // for i in 1..new_output.len() - 1 {
+            //     for j in i + 1..new_output.len() - 1 {
+            //         // new_output[i..=j]をひっくり返す
+            //         new_output[i..=j].reverse();
+            //         let new_score = compute_score(n, &new_output, dist);
+            //         if best_new_score > new_score {
+            //             best_new_score = new_score;
+            //             best_i = i;
+            //             best_j = j;
+            //         }
+            //         new_output[i..=j].reverse();
+            //     }
+            // }
+            // if best_i == best_j {
+            //     continue;
+            // }
+            // new_output[best_i..=best_j].reverse();
+        } else {
+            // swap
+            let mut best_new_score = now_score;
+            let mut best_i = 0;
+            let mut best_j = 0;
+            for i in 1..new_output.len() - 1 {
+                for j in i + 1..new_output.len() - 1 {
+                    new_output.swap(i, j);
+                    let new_score = compute_score(n, &new_output, dist);
+                    if best_new_score > new_score {
+                        best_new_score = new_score;
+                        best_i = i;
+                        best_j = j;
+                    }
+                    new_output.swap(j, i);
+                }
+            }
+            if best_i == best_j {
+                continue;
+            }
+            new_output.swap(best_i, best_j);
+        }
+        // 近傍解作成ここまで
+        let new_score = compute_score(n, &new_output, dist);
+        prob = f64::exp((now_score - new_score) as f64 / temp);
+        if now_score > new_score || rng.gen_bool(prob) {
+            now_score = new_score;
+            *output = new_output;
+        }
+
+        if best_score > now_score {
+            best_score = now_score;
+            best_output = output.clone();
+            // eprintln!("{:?} {}", output, best_score);
+        }
+    }
+    *output = best_output;
+    best_score
+}
+
+fn compute_score(n: usize, out: &[usize], dist: &[Vec<i64>]) -> i64 {
+    let mut score = 0;
+    for i in 0..n {
+        score += dist[out[i]][out[i + 1]];
+    }
+    score
+}
+
+pub fn get_time() -> f64 {
+    let t = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap();
+    t.as_secs() as f64 + t.subsec_nanos() as f64 * 1e-9
+}
+
+struct Timer {
+    start_time: f64,
+}
+
+impl Timer {
+    fn new() -> Timer {
+        Timer {
+            start_time: get_time(),
+        }
+    }
+
+    fn get_time(&self) -> f64 {
+        get_time() - self.start_time
+    }
+}
+
+#[allow(dead_code)]
+mod ntk_rand {
+    pub trait Distribution<T, TX> {
+        /// Generate a random value of `T`, using `rng` as the source of randomness.
+        fn sample(&self, rng: &mut Xorshift<TX>) -> T;
+    }
+
+    pub struct Xorshift<T> {
+        seed: T,
+    }
+
+    impl Xorshift<usize> {
+        pub fn new() -> Self {
+            Xorshift {
+                seed: 0x139408dcbbf7a44,
+            }
+        }
+        pub fn seed_from_u64(seed: usize) -> Xorshift<usize> {
+            Xorshift { seed }
+        }
+
+        fn gen(&mut self) -> usize {
+            self.seed = self.seed ^ (self.seed << 13);
+            self.seed = self.seed ^ (self.seed >> 7);
+            self.seed = self.seed ^ (self.seed << 17);
+            self.seed
+        }
+
+        pub fn rand(&mut self) -> usize {
+            self.gen()
+        }
+
+        fn sample<T, D: Distribution<T, usize>>(&mut self, distr: D) -> T {
+            distr.sample(self)
+        }
+
+        pub fn gen_bool(&mut self, p: f64) -> bool {
+            let d = Bernoulli::new(p).unwrap();
+            self.sample(d)
+        }
+
+        pub fn gen_range<T, R>(&mut self, range: R) -> T
+        where
+            T: SampleUniform,
+            R: SampleRange<T>,
+        {
+            range.sample_single(self)
+        }
+    }
+    pub struct Uniform<X: SampleUniform>(X::Sampler);
+
+    impl<X: SampleUniform> Uniform<X> {
+        pub fn new<B1, B2>(low: B1, high: B2) -> Uniform<X>
+        where
+            B1: SampleBorrow<X> + Sized,
+            B2: SampleBorrow<X> + Sized,
+        {
+            Uniform(X::Sampler::new(low, high))
+        }
+
+        pub fn new_inclusive<B1, B2>(low: B1, high: B2) -> Uniform<X>
+        where
+            B1: SampleBorrow<X> + Sized,
+            B2: SampleBorrow<X> + Sized,
+        {
+            Uniform(X::Sampler::new_inclusive(low, high))
+        }
+    }
+
+    impl<X: SampleUniform> Distribution<X, usize> for Uniform<X> {
+        fn sample(&self, rng: &mut Xorshift<usize>) -> X {
+            self.0.sample(rng)
+        }
+    }
+
+    pub trait UniformSampler: Sized {
+        /// The type sampled by this implementation.
+        type X;
+
+        fn new<B1, B2>(low: B1, high: B2) -> Self
+        where
+            B1: SampleBorrow<Self::X> + Sized,
+            B2: SampleBorrow<Self::X> + Sized;
+
+        fn new_inclusive<B1, B2>(low: B1, high: B2) -> Self
+        where
+            B1: SampleBorrow<Self::X> + Sized,
+            B2: SampleBorrow<Self::X> + Sized;
+
+        /// Sample a value.
+        fn sample(&self, rng: &mut Xorshift<usize>) -> Self::X;
+
+        fn sample_single<B1, B2>(low: B1, high: B2, rng: &mut Xorshift<usize>) -> Self::X
+        where
+            B1: SampleBorrow<Self::X> + Sized,
+            B2: SampleBorrow<Self::X> + Sized,
+        {
+            let uniform: Self = UniformSampler::new(low, high);
+            uniform.sample(rng)
+        }
+
+        fn sample_single_inclusive<B1, B2>(low: B1, high: B2, rng: &mut Xorshift<usize>) -> Self::X
+        where
+            B1: SampleBorrow<Self::X> + Sized,
+            B2: SampleBorrow<Self::X> + Sized,
+        {
+            let uniform: Self = UniformSampler::new_inclusive(low, high);
+            uniform.sample(rng)
+        }
+    }
+
+    impl<X: SampleUniform> From<core::ops::Range<X>> for Uniform<X> {
+        fn from(r: core::ops::Range<X>) -> Uniform<X> {
+            Uniform::new(r.start, r.end)
+        }
+    }
+
+    impl<X: SampleUniform> From<core::ops::RangeInclusive<X>> for Uniform<X> {
+        fn from(r: core::ops::RangeInclusive<X>) -> Uniform<X> {
+            Uniform::new_inclusive(r.start(), r.end())
+        }
+    }
+
+    pub trait SampleUniform: Sized {
+        /// The `UniformSampler` implementation supporting type `X`.
+        type Sampler: UniformSampler<X = Self>;
+    }
+
+    pub trait SampleBorrow<Borrowed> {
+        /// Immutably borrows from an owned value. See [`Borrow::borrow`]
+        ///
+        /// [`Borrow::borrow`]: std::borrow::Borrow::borrow
+        fn borrow(&self) -> &Borrowed;
+    }
+    impl<Borrowed> SampleBorrow<Borrowed> for Borrowed
+    where
+        Borrowed: SampleUniform,
+    {
+        #[inline(always)]
+        fn borrow(&self) -> &Borrowed {
+            self
+        }
+    }
+    impl<'a, Borrowed> SampleBorrow<Borrowed> for &'a Borrowed
+    where
+        Borrowed: SampleUniform,
+    {
+        #[inline(always)]
+        fn borrow(&self) -> &Borrowed {
+            *self
+        }
+    }
+
+    /// Range that supports generating a single sample efficiently.
+    ///
+    /// Any type implementing this trait can be used to specify the sampled range
+    /// for `Rng::gen_range`.
+    pub trait SampleRange<T> {
+        /// Generate a sample from the given range.
+        fn sample_single(self, rng: &mut Xorshift<usize>) -> T;
+
+        /// Check whether the range is empty.
+        fn is_empty(&self) -> bool;
+    }
+
+    impl<T: SampleUniform + PartialOrd> SampleRange<T> for core::ops::Range<T> {
+        #[inline]
+        fn sample_single(self, rng: &mut Xorshift<usize>) -> T {
+            T::Sampler::sample_single(self.start, self.end, rng)
+        }
+
+        #[inline]
+        fn is_empty(&self) -> bool {
+            // !(self.start >= self.end)
+            self.start < self.end
+        }
+    }
+
+    impl<T: SampleUniform + PartialOrd> SampleRange<T> for core::ops::RangeInclusive<T> {
+        #[inline]
+        fn sample_single(self, rng: &mut Xorshift<usize>) -> T {
+            T::Sampler::sample_single_inclusive(self.start(), self.end(), rng)
+        }
+
+        #[inline]
+        fn is_empty(&self) -> bool {
+            // !(self.start() <= self.end())
+            self.start() > self.end()
+        }
+    }
+    pub trait WideningMultiply<RHS = Self> {
+        type Output;
+
+        fn wmul(self, x: RHS) -> Self::Output;
+    }
+
+    macro_rules! wmul_impl {
+        ($ty:ty, $wide:ty, $shift:expr) => {
+            impl WideningMultiply for $ty {
+                type Output = ($ty, $ty);
+
+                #[inline(always)]
+                fn wmul(self, x: $ty) -> Self::Output {
+                    let tmp = (self as $wide) * (x as $wide);
+                    ((tmp >> $shift) as $ty, tmp as $ty)
+                }
+            }
+        };
+
+        // simd bulk implementation
+        ($(($ty:ident, $wide:ident),)+, $shift:expr) => {
+            $(
+                impl WideningMultiply for $ty {
+                    type Output = ($ty, $ty);
+
+                    #[inline(always)]
+                    fn wmul(self, x: $ty) -> Self::Output {
+                        // For supported vectors, this should compile to a couple
+                        // supported multiply & swizzle instructions (no actual
+                        // casting).
+                        // TODO: optimize
+                        let y: $wide = self.cast();
+                        let x: $wide = x.cast();
+                        let tmp = y * x;
+                        let hi: $ty = (tmp >> $shift).cast();
+                        let lo: $ty = tmp.cast();
+                        (hi, lo)
+                    }
+                }
+            )+
+        };
+    }
+    wmul_impl! { u8, u16, 8 }
+    wmul_impl! { u16, u32, 16 }
+    wmul_impl! { u32, u64, 32 }
+    wmul_impl! { u64, u128, 64 }
+
+    // This code is a translation of the __mulddi3 function in LLVM's
+    // compiler-rt. It is an optimised variant of the common method
+    // `(a + b) * (c + d) = ac + ad + bc + bd`.
+    //
+    // For some reason LLVM can optimise the C version very well, but
+    // keeps shuffling registers in this Rust translation.
+    macro_rules! wmul_impl_large {
+        ($ty:ty, $half:expr) => {
+            impl WideningMultiply for $ty {
+                type Output = ($ty, $ty);
+
+                #[inline(always)]
+                fn wmul(self, b: $ty) -> Self::Output {
+                    const LOWER_MASK: $ty = !0 >> $half;
+                    let mut low = (self & LOWER_MASK).wrapping_mul(b & LOWER_MASK);
+                    let mut t = low >> $half;
+                    low &= LOWER_MASK;
+                    t += (self >> $half).wrapping_mul(b & LOWER_MASK);
+                    low += (t & LOWER_MASK) << $half;
+                    let mut high = t >> $half;
+                    t = low >> $half;
+                    low &= LOWER_MASK;
+                    t += (b >> $half).wrapping_mul(self & LOWER_MASK);
+                    low += (t & LOWER_MASK) << $half;
+                    high += t >> $half;
+                    high += (self >> $half).wrapping_mul(b >> $half);
+
+                    (high, low)
+                }
+            }
+        };
+
+        // simd bulk implementation
+        (($($ty:ty,)+) $scalar:ty, $half:expr) => {
+            $(
+                impl WideningMultiply for $ty {
+                    type Output = ($ty, $ty);
+
+                    #[inline(always)]
+                    fn wmul(self, b: $ty) -> Self::Output {
+                        // needs wrapping multiplication
+                        const LOWER_MASK: $scalar = !0 >> $half;
+                        let mut low = (self & LOWER_MASK) * (b & LOWER_MASK);
+                        let mut t = low >> $half;
+                        low &= LOWER_MASK;
+                        t += (self >> $half) * (b & LOWER_MASK);
+                        low += (t & LOWER_MASK) << $half;
+                        let mut high = t >> $half;
+                        t = low >> $half;
+                        low &= LOWER_MASK;
+                        t += (b >> $half) * (self & LOWER_MASK);
+                        low += (t & LOWER_MASK) << $half;
+                        high += t >> $half;
+                        high += (self >> $half) * (b >> $half);
+
+                        (high, low)
+                    }
+                }
+            )+
+        };
+    }
+    wmul_impl_large! { u128, 64 }
+
+    macro_rules! wmul_impl_usize {
+        ($ty:ty) => {
+            impl WideningMultiply for usize {
+                type Output = (usize, usize);
+
+                #[inline(always)]
+                fn wmul(self, x: usize) -> Self::Output {
+                    let (high, low) = (self as $ty).wmul(x as $ty);
+                    (high as usize, low as usize)
+                }
+            }
+        };
+    }
+    #[cfg(target_pointer_width = "16")]
+    wmul_impl_usize! { u16 }
+    #[cfg(target_pointer_width = "32")]
+    wmul_impl_usize! { u32 }
+    #[cfg(target_pointer_width = "64")]
+    wmul_impl_usize! { u64 }
+
+    pub struct UniformInt<X> {
+        low: X,
+        range: X,
+        z: X, // either ints_to_reject or zone depending on implementation
+    }
+
+    macro_rules! uniform_int_impl {
+        ($ty:ty, $unsigned:ident, $u_large:ident) => {
+            impl SampleUniform for $ty {
+                type Sampler = UniformInt<$ty>;
+            }
+
+            impl UniformSampler for UniformInt<$ty> {
+                // We play free and fast with unsigned vs signed here
+                // (when $ty is signed), but that's fine, since the
+                // contract of this macro is for $ty and $unsigned to be
+                // "bit-equal", so casting between them is a no-op.
+
+                type X = $ty;
+
+                #[inline] // if the range is constant, this helps LLVM to do the
+                          // calculations at compile-time.
+                fn new<B1, B2>(low_b: B1, high_b: B2) -> Self
+                where
+                    B1: SampleBorrow<Self::X> + Sized,
+                    B2: SampleBorrow<Self::X> + Sized,
+                {
+                    let low = *low_b.borrow();
+                    let high = *high_b.borrow();
+                    assert!(low < high, "Uniform::new called with `low >= high`");
+                    UniformSampler::new_inclusive(low, high - 1)
+                }
+
+                #[inline] // if the range is constant, this helps LLVM to do the
+                          // calculations at compile-time.
+                fn new_inclusive<B1, B2>(low_b: B1, high_b: B2) -> Self
+                where
+                    B1: SampleBorrow<Self::X> + Sized,
+                    B2: SampleBorrow<Self::X> + Sized,
+                {
+                    let low = *low_b.borrow();
+                    let high = *high_b.borrow();
+                    assert!(
+                        low <= high,
+                        "Uniform::new_inclusive called with `low > high`"
+                    );
+                    let unsigned_max = core::$u_large::MAX;
+
+                    let range = high.wrapping_sub(low).wrapping_add(1) as $unsigned;
+                    let ints_to_reject = if range > 0 {
+                        let range = $u_large::from(range);
+                        (unsigned_max - range + 1) % range
+                    } else {
+                        0
+                    };
+
+                    UniformInt {
+                        low,
+                        // These are really $unsigned values, but store as $ty:
+                        range: range as $ty,
+                        z: ints_to_reject as $unsigned as $ty,
+                    }
+                }
+
+                #[inline]
+                fn sample(&self, rng: &mut Xorshift<$u_large>) -> Self::X {
+                    let range = self.range as $unsigned as $u_large;
+                    if range > 0 {
+                        let unsigned_max = core::$u_large::MAX;
+                        let zone = unsigned_max - (self.z as $unsigned as $u_large);
+                        loop {
+                            let v: $u_large = rng.gen();
+                            let (hi, lo) = v.wmul(range);
+                            if lo <= zone {
+                                return self.low.wrapping_add(hi as $ty);
+                            }
+                        }
+                    } else {
+                        // Sample from the entire integer range.
+                        rng.gen()
+                    }
+                }
+
+                #[inline]
+                fn sample_single<B1, B2>(
+                    low_b: B1,
+                    high_b: B2,
+                    rng: &mut Xorshift<$u_large>,
+                ) -> Self::X
+                where
+                    B1: SampleBorrow<Self::X> + Sized,
+                    B2: SampleBorrow<Self::X> + Sized,
+                {
+                    let low = *low_b.borrow();
+                    let high = *high_b.borrow();
+                    assert!(low < high, "UniformSampler::sample_single: low >= high");
+                    Self::sample_single_inclusive(low, high - 1, rng)
+                }
+
+                #[inline]
+                fn sample_single_inclusive<B1, B2>(
+                    low_b: B1,
+                    high_b: B2,
+                    rng: &mut Xorshift<$u_large>,
+                ) -> Self::X
+                where
+                    B1: SampleBorrow<Self::X> + Sized,
+                    B2: SampleBorrow<Self::X> + Sized,
+                {
+                    let low = *low_b.borrow();
+                    let high = *high_b.borrow();
+                    assert!(
+                        low <= high,
+                        "UniformSampler::sample_single_inclusive: low > high"
+                    );
+                    let range = high.wrapping_sub(low).wrapping_add(1) as $unsigned as $u_large;
+                    // If the above resulted in wrap-around to 0, the range is $ty::MIN..=$ty::MAX,
+                    // and any integer will do.
+                    if range == 0 {
+                        return rng.gen();
+                    }
+
+                    let zone = if core::$unsigned::MAX <= core::u16::MAX as $unsigned {
+                        // Using a modulus is faster than the approximation for
+                        // i8 and i16. I suppose we trade the cost of one
+                        // modulus for near-perfect branch prediction.
+                        let unsigned_max: $u_large = core::$u_large::MAX;
+                        let ints_to_reject = (unsigned_max - range + 1) % range;
+                        unsigned_max - ints_to_reject
+                    } else {
+                        // conservative but fast approximation. `- 1` is necessary to allow the
+                        // same comparison without bias.
+                        (range << range.leading_zeros()).wrapping_sub(1)
+                    };
+
+                    loop {
+                        let v: $u_large = rng.gen();
+                        let (hi, lo) = v.wmul(range);
+                        if lo <= zone {
+                            return low.wrapping_add(hi as $ty);
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    // uniform_int_impl! { u64, u64, u64 }
+    uniform_int_impl! { usize, usize, usize }
+
+    pub struct Bernoulli {
+        /// Probability of success, relative to the maximal integer.
+        p_int: u64,
+    }
+
+    const ALWAYS_TRUE: u64 = u64::max_value();
+
+    const SCALE: f64 = 2.0 * (1u64 << 63) as f64;
+
+    /// Error type returned from `Bernoulli::new`.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    pub enum BernoulliError {
+        /// `p < 0` or `p > 1`.
+        InvalidProbability,
+    }
+
+    impl Bernoulli {
+        #[inline]
+        pub fn new(p: f64) -> Result<Bernoulli, BernoulliError> {
+            if !(0.0..1.0).contains(&p) {
+                if p == 1.0 {
+                    return Ok(Bernoulli { p_int: ALWAYS_TRUE });
+                }
+                return Err(BernoulliError::InvalidProbability);
+            }
+            Ok(Bernoulli {
+                p_int: (p * SCALE) as u64,
+            })
+        }
+    }
+
+    impl Distribution<bool, usize> for Bernoulli {
+        #[inline]
+        fn sample(&self, rng: &mut Xorshift<usize>) -> bool {
+            // Make sure to always return true for p = 1.0.
+            if self.p_int == ALWAYS_TRUE {
+                return true;
+            }
+            let v: u64 = rng.gen() as u64;
+            v < self.p_int
+        }
+    }
+}
+

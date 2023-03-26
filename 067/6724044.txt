@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < n; ++i)
+typedef long long ll;
+using namespace std;
+const int PENA_TIME = 20;
+
+struct TeamData {
+    int ac_cnt = 0;
+    int sum_time = 0;
+    int team_id;
+    vector<bool> ac;
+    vector<int> pena, last_ac;
+
+    void init(int N) {
+        ac.resize(N);
+        pena.resize(N);
+        last_ac.resize(N);
+    }
+
+    void calc() {
+        rep(i, ac.size()) {
+            if (ac[i]) {
+                ac_cnt++;
+                sum_time += pena[i];
+                sum_time += last_ac[i];
+            }
+        }
+    }
+
+    bool operator<(const TeamData &right) const {
+        if (ac_cnt == right.ac_cnt)
+            if (sum_time == right.sum_time)
+                return team_id > right.team_id;
+            else
+                return sum_time < right.sum_time;
+        else
+            return ac_cnt > right.ac_cnt;
+    }
+};
+
+void solve(int M, int T, int P, int R) {
+    vector<TeamData> data(T);
+    rep(i, T) data[i].init(P);
+    rep(i, T) data[i].team_id = i + 1;
+
+    while (R--) {
+        int m, t, p, j;
+        cin >> m >> t >> p >> j;
+        t--, p--;
+
+        if (j == 0) {
+            if (!data[t].ac[p]) {
+                data[t].ac[p] = true;
+                data[t].last_ac[p] = m;
+            }
+        } else {
+            data[t].pena[p] += PENA_TIME;
+        }
+    }
+    rep(i, T) data[i].calc();
+    sort(data.begin(), data.end());
+
+    int pre_ac_cnt = -1, pre_sum_time = -1;
+    rep(i, T) {
+        if (i == 0)
+            ;
+        else if (pre_ac_cnt == data[i].ac_cnt && pre_sum_time == data[i].sum_time)
+            cout << "=";
+        else
+            cout << ",";
+        cout << data[i].team_id;
+
+        pre_ac_cnt = data[i].ac_cnt;
+        pre_sum_time = data[i].sum_time;
+    }
+    cout << "\n";
+}
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+
+    int M, T, P, R;
+    while (cin >> M >> T >> P >> R) {
+        if (M == 0 && T == 0 && P == 0 && R == 0) break;
+        solve(M, T, P, R);
+    }
+
+    return 0;
+}
+

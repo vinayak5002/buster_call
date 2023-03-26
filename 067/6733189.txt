@@ -1,0 +1,63 @@
+#include <iostream>
+#include <vector>
+#include <math.h>
+#include <algorithm>
+#include <string>
+#include <iomanip>
+using namespace std;
+template<class T> void chmax(T& a,T b){
+    if(a < b){
+        a = b;
+    }
+}
+template<class T> void chmin(T& a,T b){
+    if(a > b){
+        a = b;
+    }
+}
+
+int main() {
+    int N,M;
+    cin >> N >> M;
+
+    vector<long long> a(N);
+    for (int i = 0; i < N; i++){
+        cin >> a[i];
+    }
+    // c[j][i]：[j,i)の平均
+    vector<vector<double>> c(N+1,vector<double>(N+1));
+    for (int i = 1; i <= N; i++)
+    {
+        for (int j = 0; j < i; j++)
+        {
+            double sum = 0;
+            for (int k = j; k < i; k++)
+            {
+                sum += a[k];
+                c[j][i] = sum / (i-j);
+            }   
+        }
+    }
+    
+    // dp[i][k]：[0,i)の区間をkに分けた時の各区間の平均の最大
+    vector<vector<double>> dp(N+1,vector<double>(M+1,(-1) * (1LL << 60)));
+    dp[0][0] = 0;
+    for (int i = 1; i <= N; i++)
+    {
+        for (int j = 0; j < i; j++)
+        {
+            for (int k = 1; k <= M; k++)
+            {
+                chmax(dp[i][k],dp[j][k-1] + c[j][i]);
+            }   
+        }
+    }
+    
+    double res = (-1) * (1LL << 60);
+    for (int i = 0; i <= M; i++)
+    {
+        chmax(res,dp[N][i]);
+    }
+    cout << fixed << setprecision(10) << res;
+
+}

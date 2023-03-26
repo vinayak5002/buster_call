@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// clang-format off
+template <typename T> inline bool chmin(T &a, const T &b) {if (a > b) {a = b; return true;} return false;}
+// clang-format on
+
+const int INF = 1 << 29;
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    vector<vector<int>> dp(m + 1, vector<int>(n + 1, INF));
+    vector<int> coins(m);
+    for (auto &e : coins) {
+        cin >> e;
+    }
+
+    dp.at(0).at(0) = 0;
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j <= n; j++) {
+            chmin(dp.at(i + 1).at(j), dp.at(i).at(j));
+            if (j - coins.at(i) >= 0) {
+                chmin(dp.at(i + 1).at(j), dp.at(i + 1).at(j - coins.at(i)) + 1);
+            }
+        }
+    }
+
+    cout << dp.at(m).at(n) << endl;
+}

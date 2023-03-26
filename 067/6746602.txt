@@ -1,0 +1,121 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using ld = long double;
+
+//only for atcoder
+//#include<atcoder/all>
+//using namespace atcoder;
+
+#define rep(i,l,r) for(ll i=(l); i<(r); i++)
+#define rrep(i,l,r) for(ll i=(r)-1; i>=(l); i--)
+#define ALL(c) (c).begin(), (c).end()
+#define RALL(c) (c).rbegin(), (c).rend()
+#define SORT(c) sort(ALL(c))
+#define RSORT(c) sort(RALL(c))
+#define MINV(c) *min_element(ALL(c))
+#define MAXV(c) *max_element(ALL(c))
+
+using VI = vector<int>;
+using VVI = vector<VI>;
+using VL = vector<ll>;
+using VVL = vector<VL>;
+using VS = vector<string>;
+using VVS = vector<VS>;
+using VB = vector<bool>;
+using VVB = vector<VB>;
+using VC = vector<char>;
+using VVC = vector<VC>;
+using VD = vector<ld>;
+using VVD = vector<VD>;
+using P = pair<ll,ll>;
+using VP = vector<P>;
+const ll LINF = 2e18;
+const int INF = 2e9;
+using T = tuple<int,int,int,int>;
+
+//dijkstra
+
+struct edge{
+  int to;
+  long long cost;
+  long long C;
+};
+
+using P = pair<long long,long long>;
+
+const int MAX_N = 1e4+10;
+vector<vector<edge>> G(MAX_N,vector<edge>(0));
+vector<long long> dist(MAX_N,LINF);
+ll C_save[MAX_N];
+
+void dijkstra(int s){
+  priority_queue<P,vector<P>,greater<P>> PQ;
+  dist[s] = 0;
+  PQ.push(P(0,s));
+  
+  while(PQ.size()){
+    P p = PQ.top();
+    PQ.pop();
+    int v = p.second; //from
+    if(dist[v] < p.first){ //現在わかっている距離が更新できない
+      continue;
+    }
+    for(int i=0; i<G[v].size(); i++){
+      edge e = G[v][i];
+      if(dist[e.to] > dist[v] + e.cost){
+        dist[e.to] = dist[v] + e.cost;
+        PQ.push(P(dist[e.to], e.to));
+        C_save[e.to] = e.C;
+      }
+      if(dist[e.to] == dist[v] + e.cost){
+        C_save[e.to] = min(C_save[e.to],e.C);
+      }
+    }
+  }
+}
+
+void solve(int N, int M){
+  rep(i,0,MAX_N){
+    G[i].clear();
+    dist[i] = LINF;
+    C_save[i] = LINF;
+  }
+  C_save[0] = 0;
+  
+  rep(i,0,M){
+    int a, b, c, d;
+    cin >> a >> b >> c >> d;
+    a--; b--;
+    G[a].push_back({b,c,d});
+    G[b].push_back({a,c,d});
+  }
+  
+  dijkstra(0);
+  ll ans = 0;
+  rep(i,1,N){
+    ans += C_save[i];
+  }
+  cout << ans << endl;
+    
+}
+
+int main(){
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  //cin >> T;
+  /*T = 1;
+  for(int i=0; i<T; i++){
+    solve();
+  }*/
+  
+  while(true){
+    int N, M;
+    cin >> N >> M;
+    if(N == 0){
+      return 0;
+    }
+    solve(N,M);
+  }
+}

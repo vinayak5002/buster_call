@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
+#ifdef tabr
+#include "library/debug.cpp"
+#else
+#define debug(...)
+#endif
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int n, s;
+    cin >> n >> s;
+    vector<int> dp(s + 1);
+    while (n--) {
+        int value, weight, limit;
+        cin >> value >> weight >> limit;
+        vector<int> new_dp(s + 1);
+        for (int x = 0; x < weight; x++) {
+            deque<int> deq;
+            for (int it = 0; it * weight + x <= s; it++) {
+                auto Get = [&](int when) {
+                    return dp[when * weight + x] + (it - when) * value;
+                };
+                while (!deq.empty() && Get(deq.back()) <= Get(it)) {
+                    deq.pop_back();
+                }
+                deq.emplace_back(it);
+                new_dp[it * weight + x] = Get(deq.front());
+                if (deq.front() == it - limit) {
+                    deq.pop_front();
+                }
+            }
+        }
+        swap(dp, new_dp);
+        debug(dp);
+    }
+    cout << dp[s] << '\n';
+    return 0;
+}

@@ -1,0 +1,240 @@
+#include <iostream>
+#include <map>
+using namespace std;
+#define len 3
+#define MaxQsize 362880  // 9!
+
+// 结构体部分
+struct puzzle
+{
+    int pos[3][3]; // 用于存放拼图的二维数组
+    int aimPos_i , aimPos_j; // 此为0的位置坐标
+    string step; // 用于存储路径
+    
+    bool operator == (const puzzle &next) const // 重载等于号，仅比较二维数组
+    {
+        for(int i = 0 ; i < len ; i++)
+            for(int j = 0 ; j < len ; j++)
+            {
+                if(this->pos[i][j] != next.pos[i][j])
+                    return false;
+            }
+            return true;
+    }
+    bool operator < (const puzzle &next) const  // 重载小于号，仅根据二维数组的字的顺序大小来定义大小关系
+    {
+        for(int i = 0 ; i < len ; i++)
+            for(int j = 0 ; j < len ; j++)
+            {
+                if(this->pos[i][j] == next.pos[i][j])
+                    continue;
+                
+				return this->pos[i][j] < next.pos[i][j];	
+            }
+        return false; 
+    }
+};
+// 结构体部分结束
+
+/* 链队列部分*/
+
+// 队列的基本结点
+struct QNode
+{
+    puzzle data;
+    QNode *next;
+};
+
+// 队列的队头和队尾指针
+struct LinkQueue
+{
+    QNode *front;
+    QNode *rear;
+};
+
+// 初始化队列
+int InitQueue(LinkQueue &init)
+{
+    init.front = init.rear = new QNode; // 使队头和队尾同时指向一个结点
+    init.front->next = NULL;    // 将这个结点的next域置为空
+    return 0;
+}
+
+// 入队
+int EnQueue(LinkQueue &now , puzzle aim)
+{
+    QNode *temper = new QNode;
+    temper->next = NULL;
+    temper->data = aim; // 创立新的结点
+    
+    now.rear->next = temper;    // 将新结点嫁接到队尾后
+    now.rear = temper;  // 更新队尾
+    return 0;
+}
+
+// 判断队列是否为空
+bool IsEmpty(LinkQueue now)
+{
+    /* 注意创建队列的时候，是让队首和队尾指向同一个结点的
+    当有元素入队时，队尾会向后更新。此时，队首和队尾不相等
+    因此，为空的条件就是队首和队尾指向同一个结点*/
+
+    if(now.rear == now.front)   
+        return true;
+    
+    return false;
+}
+
+// 出队
+int DeQueue(LinkQueue &now , puzzle &aim)
+{	
+    if(IsEmpty(now))    //当队列为空   
+        return -1;
+	
+    QNode *temper;  // 创建新节点，便于后续删除操作
+	temper =  now.front->next;
+   	aim = temper->data;
+    now.front->next = now.front->next->next;
+    
+    if(temper == now.rear)  // 若此删去的结点恰好是队尾，将此队置空
+        now.rear = now.front;
+    
+    delete temper;  // 将出队的元素删去
+    
+    return 0;
+}
+
+
+/* 队列部分结束*/
+
+const int di[4] = {1 , -1 , 0 , 0};
+const int dj[4] = {0 , 0 , 1 , -1}; // 定义常量位移坐标
+const char direction[4] = {'D' , 'U' , 'R' , 'L'};
+// 定义常量位移符号，D->Down , U->Up , R->Right , L->Left
+
+// 利用广度优先搜索搜索答案
+void bfs(puzzle init , puzzle ans)
+{
+    map<puzzle , bool> repetition;  // 定义一个状态的映射。若查询过此状态->True,否则为False
+    
+	LinkQueue S;    // 创捷供BFS搜索的队列
+    InitQueue(S);
+    
+    EnQueue(S , init);
+    repetition[init] = true;    // 将初始结点放入队列，当时将此状态设为True，代表以访问过
+ 
+    while(!IsEmpty(S))
+    {    
+        puzzle now; // 当前的拼图状态
+        DeQueue(S , now);   // 出队
+
+        if(now == ans)  // 如果当前的拼图状态是正确答案
+        {
+            cout << now.step.size() << endl; // 输出位移总数
+            //cout << now.step << endl;   // 输出位移方式
+            return ;
+        }
+          
+        for(int k = 0 ; k < 4 ; k++)    // 以当前拼图为起始，使‘0’与上下左右的拼图块交换
+        {
+            puzzle next = now;
+        	next.aimPos_i = next.aimPos_i + di[k];
+    	    next.aimPos_j = next.aimPos_j + dj[k];
+    
+            // 如果下一个0的位置，超出了数组边界
+            if(next.aimPos_i < 0 || next.aimPos_i >= len || next.aimPos_j < 0 || next.aimPos_j >= len)
+                continue;
+            
+            // 交换0和相邻的拼图块
+            swap(next.pos[now.aimPos_i][now.aimPos_j] , next.pos[next.aimPos_i][next.aimPos_j]);
+            
+            if(repetition[next] == true)    // 如果交换后的状态已访问过
+                continue;
+            else
+            {
+            	next.step = next.step + direction[k];
+                repetition[next] = true;    // 将这个状态设为已经访问过
+                
+                EnQueue(S , next);  // 将此状态入队
+            }
+        }
+    }
+    cout << "Unsolvable" << endl;
+}
+void CreateAns(puzzle &ans)
+{
+    for(int i = 0 ; i < len ; i++)
+        for(int j = 0 ; j < len ; j++)
+        {
+            if(i == len - 1 && j == len - 1)
+                ans.pos[i][j] = 0;
+            else
+                ans.pos[i][j] = i * len + (j + 1);
+        }
+    return;
+
+}
+
+bool Is_Ans_Exist(puzzle init)
+{
+    int temper[8] = {0};
+    int k = 0 , i = 0 , j = 0;
+    while(k < 8)
+    {
+        if(j == 3)
+        {
+            j = 0;
+            i++;
+        }
+        if(i == init.aimPos_i && j == init.aimPos_j)
+        {
+            j++;
+            continue;
+        }
+        temper[k++] = init.pos[i][j++]; 
+  
+    }
+    int n = 0;
+    for(int i = 2 ; i < 8 ; i++)
+    {
+        for(int j = i - 1 ; j >= 0 ; j--)
+        {
+            if(temper[i] < temper[j])
+                n++;
+        }
+    }
+    if(n % 2 == 0)
+        return true;
+    else
+        return false;
+
+}
+int main()
+{
+    puzzle init , ans;
+
+    for(int i = 0 ; i < len ; i++)
+        for(int j = 0; j < len ; j++)
+        {
+            int n;
+            cin >> n;
+            init.pos[i][j] = n;
+            if(n == 0)
+            {
+                init.aimPos_i = i;
+                init.aimPos_j = j;
+            }
+        }
+    if(Is_Ans_Exist(init))
+    {
+        CreateAns(ans);
+        bfs(init , ans);
+    }
+    else
+    {
+        cout << "Unsolvable" << endl;
+    }
+    return 0;    
+}
+
+

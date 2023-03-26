@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < n; ++i)
+typedef long long ll;
+using namespace std;
+
+typedef string::const_iterator State;
+void consume(State &begin, char expected) {
+    if (*begin == expected) {
+        begin++;
+    } else {
+        cerr << "Expected '" << expected << "' but got '" << *begin << "'" << endl;
+        exit(1);
+    }
+}
+
+int parse_formula(State &s, int P, int Q, int R) {
+    int res = 0;
+    if (*s == '(') {
+        consume(s, '(');
+        int l = parse_formula(s, P, Q, R);
+        char op = *s;
+        s++;
+        int r = parse_formula(s, P, Q, R);
+
+        if (op == '*') res = min(l, r);
+        if (op == '+') res = max(l, r);
+
+        consume(s, ')');
+    } else if (*s == '-') {
+        consume(s, '-');
+        res = 2 - parse_formula(s, P, Q, R);
+    } else if (isdigit(*s)) {
+        int num = *s - '0';
+        s++;
+        res = num;
+    } else if (*s == 'P')
+        res = P, s++;
+    else if (*s == 'Q')
+        res = Q, s++;
+    else if (*s == 'R')
+        res = R, s++;
+
+    return res;
+}
+
+void solve(string S) {
+    int ans = 0;
+    rep(P, 3) rep(Q, 3) rep(R, 3) {
+        State begin = S.begin();
+        int res = parse_formula(begin, P, Q, R);
+        if (res == 2) ans++;
+    }
+    cout << ans << "\n";
+}
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+
+    string S;
+    while (cin >> S) {
+        if (S == ".") return 0;
+        solve(S);
+    }
+
+    return 0;
+}
+

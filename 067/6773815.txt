@@ -1,0 +1,1150 @@
+//#pragma once
+#define _CRT_SECURE_NO_WARNINGS
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <iostream>
+#include <queue>
+#include <algorithm>
+#include <sstream>
+#include <vector>
+#include <math.h>
+#include <set>
+#include <map>
+#include <unordered_map>
+#include <numeric>
+#include <bitset>
+#include <iomanip>
+#include <cctype>
+#include <cstdlib>      // srand,rand
+#include <random>
+#include <functional>
+#include <list>
+#include <stack>
+
+
+
+
+using namespace std;
+#define ll long long
+#define ll128 long long
+#define lp(i,n) for(ll i=0;i<n;i++)
+
+#define modd 1000000007
+#define mod2 998244353
+const long double EPS = 1e-12L;
+const double PI = acos(-1);
+
+//#define INF 8223372036854775807ll
+#define ALL(a)  (a).begin(),(a).end()
+
+
+typedef pair<long long, long long> pl;
+typedef pair<long long, pl> lpl;
+typedef pair<long double, long double> pd;
+typedef pair<ll, string> pls;
+typedef pair<string, ll> psl;
+
+
+
+typedef string::const_iterator State;
+class ParseError {};
+
+
+
+/*
+class SegmentTree {
+
+
+
+private:
+
+	ll cont_num = 2;
+	pd initial_v;
+	vector<pd> dat;
+
+
+public:
+
+
+	SegmentTree() {};
+
+
+	void init(ll size, double initial_value_first, double initial_value_second) {
+
+		cont_num = 2;
+		initial_v.first = initial_value_first;
+		initial_v.second = initial_value_second;
+
+		while (cont_num < size) {
+			cont_num *= 2;
+		}
+
+		dat.resize(2 * cont_num);//サイズ設定
+
+		for (int i = 0; i < 2 * cont_num; i++)dat[i] = initial_v;//初期化
+
+
+
+	}
+
+
+	void Update(ll position, double value_f, double value_s) {
+
+
+
+		ll k = cont_num + position;
+
+		dat[k].first = value_f;
+		dat[k].second = value_s;
+
+		while (k > 1) {
+			k /= 2;
+			dat[k].first = dat[k * 2 + 1].first * dat[k * 2].first;
+			dat[k].second = dat[k * 2 + 1].first * dat[k * 2].second + dat[k * 2 + 1].second;
+
+
+		}
+
+
+	}
+
+	/*
+	ll query_proces(ll a, ll b, ll k, ll l, ll r) {
+
+		if (r <= a || b <= l)return initial_v;
+
+		if (a <= l && r <= b)return dat[k];
+		else {
+			ll vl = query_proces(a, b, k * 2, l, (l + r) / 2);
+			ll vr = query_proces(a, b, k * 2 + 1, (l + r) / 2, r);
+			return min(vl, vr);
+		}
+
+	}
+
+
+	ll query(ll left, ll right) {
+		return query_proces(left, right, 1, 0, cont_num);
+	}
+	*/
+	/*
+		double query() {
+			return dat[1].first + dat[1].second;
+		}
+
+	};*/
+
+
+template <typename T>
+class Zip {
+	vector<T> d;
+	bool flag;
+public:
+	void init() {
+		sort(d.begin(), d.end());
+		d.erase(unique(d.begin(), d.end()), d.end());
+		flag = false;
+	}
+
+	Zip() {
+		flag = false;
+	}
+	void add(T x) {
+		d.push_back(x);
+		flag = true;
+	}
+	ll getNum(T x) {
+		if (flag) init();
+		return lower_bound(d.begin(), d.end(), x) - d.begin();
+	}
+
+	T getVal(ll num) {
+		return d[num];
+	}
+
+	ll size() {
+		if (flag) init();
+		return (ll)d.size();
+	}
+};
+
+
+
+
+typedef struct ST
+{
+	ll first;
+	ll second;
+	ll cost;
+
+	ST(ll _first, ll _second, ll _cost) : first(_first), second(_second), cost(_cost) {
+	}
+
+	bool operator<(const ST& another) const
+	{
+		return cost < another.cost;//比較
+	};
+
+	bool operator>(const ST& another) const
+	{
+		return cost > another.cost;//比較
+	};
+
+}ST;
+//queue<ST> qst;
+priority_queue<ST, vector<ST>, greater<ST> > qst;
+
+
+
+/*vector <ST> vst;
+ST st[200005];
+ST bufst;
+bitset<5000> bits;*/
+
+
+long long modinv(long long aa, long long mm) {
+	long long bb = mm, uu = 1, vv = 0;
+	while (bb) {
+		long long tt = aa / bb;
+		aa -= tt * bb; swap(aa, bb);
+		uu -= tt * vv; swap(uu, vv);
+	}
+	uu %= mm;
+	if (uu < 0) uu += mm;
+	return uu;
+}
+
+
+
+
+
+ll zettai(ll aa) {
+
+	if (aa < 0) {
+		aa *= -1;
+	}
+	return aa;
+
+}
+
+float zettai(float aa) {
+
+	if (aa < 0) {
+		aa *= -1;
+	}
+	return aa;
+
+}
+
+double zettai(double aa) {
+
+	if (aa < 0) {
+		aa *= -1;
+	}
+	return aa;
+
+}
+
+
+/*
+class UnionFind
+{
+
+public:
+
+
+	vector <ll>pairent;
+	vector <ll>depth;
+	vector <ll>size;
+
+
+	UnionFind(ll Amount) : pairent(Amount, 1), depth(Amount, 1), size(Amount, 1) {
+
+		for (ll i = 0; i < Amount; i++) {
+			pairent[i] = i;
+		}
+
+
+	}
+
+
+	ll FindPairent(ll x) {
+		if (pairent[x] == x)return x;
+		else return pairent[x] = FindPairent(pairent[x]);
+
+	}
+
+
+	ll Merge(ll x, ll y) {
+		x = FindPairent(x);
+		y = FindPairent(y);
+
+		if (x != y) {
+			if (depth[x] > depth[y]) {
+				pairent[y] = pairent[x];
+				return size[x] += size[y];
+			}
+			else {
+				pairent[x] = pairent[y];
+				if (depth[x] == depth[y]) {
+					depth[y] ++;
+				}
+
+				return size[y] += size[x];
+			}
+
+		}
+		else {
+			return -1;
+		}
+
+
+
+	}
+
+
+
+	bool IsSame(ll x, ll y) {
+		if (FindPairent(x) == FindPairent(y))return true;
+		else return false;
+	}
+
+
+	ll GetSize(ll x) {
+		x = FindPairent(x);
+		return size[x];
+	}
+
+
+};
+*/
+
+
+
+template <typename T>
+class RollingHash {
+
+private:
+	vector<T> all_array;
+	vector<T> sub_array;
+	vector<bool> match_flag;
+	vector<ll128> ruijou;
+	ll match_count = 0;
+	vector<ll>match_place;
+
+public:
+
+	void Clear() {
+		all_array.clear();
+		sub_array.clear();
+		match_flag.clear();
+		match_place.clear();
+	}
+
+	RollingHash() {
+		Clear();
+	}
+
+	void AddAllArray(T factor) {
+		all_array.push_back(factor);
+	}
+
+	void AddSubArray(T factor) {
+		sub_array.push_back(factor);
+	}
+
+	void Calculate_Ruijou(ll128 tei, ll max_num, ll128 mod) {
+		ruijou.clear();
+		ruijou.push_back(1);
+		if (max_num > 0) {
+			while (ruijou.size() < max_num + 1) {
+				ruijou.push_back(ruijou.back() * tei % mod);
+			}
+		}
+
+	}
+
+	ll128 GetSubHash(ll128 b, ll128 mod) {
+		ll128 ans = 0;
+		Calculate_Ruijou(b, sub_array.size(), mod);
+		for (ll i = 0; i < sub_array.size(); i++) {
+			ans += (sub_array[i] % mod) * ruijou[sub_array.size() - 1 - i] % mod;
+			ans %= mod;
+		}
+
+		return ans;
+	}
+
+	ll128 GetAllHashInit(ll128 b, ll128 mod) {
+		ll128 ans = 0;
+		for (ll i = 0; i < sub_array.size(); i++) {
+			ans += (all_array[i] % mod) * ruijou[sub_array.size() - 1 - i] % mod;
+			ans %= mod;
+		}
+
+		return ans;
+	}
+
+	void CheckMatchFlag() {
+		match_place.clear();
+		match_count = 0;
+		for (ll i = 0; i < match_flag.size(); i++) {
+			if (match_flag[i] == true) {
+				match_count++;
+				match_place.push_back(i);
+			}
+		}
+	}
+
+	void Rolling(ll128 b, ll128 mod) {
+		ll128 sub_hash = GetSubHash(b, mod);
+		ll128 all_hash = GetAllHashInit(b, mod);
+
+		if (sub_hash != all_hash) {
+			match_flag[0] = false;
+		}
+
+		for (ll i = 1; i < match_flag.size(); i++) {
+			all_hash = (all_hash * b % mod - all_array[i - 1] % mod * ruijou[sub_array.size()] % mod + all_array[i + sub_array.size() - 1] % mod) % mod;
+			while (all_hash < 0)all_hash += mod;
+			all_hash %= mod;
+			if (all_hash != sub_hash)match_flag[i] = false;
+		}
+	}
+
+	void Match() {
+		ll128 b = 3;
+		//ll128 mod = 999999999999999989;
+		ll128 mod = 1000000007;
+		ll128 sub_hash = GetSubHash(b, mod);
+
+		if (sub_array.size() <= all_array.size()) {
+
+			while (match_flag.size() < all_array.size()) {
+				match_flag.push_back(true);
+			}
+
+			while (match_flag.size() > all_array.size() - sub_array.size() + 1) {
+				match_flag.pop_back();
+			}
+
+
+			Rolling(b, mod);
+
+			b = 5;
+			mod = mod2;
+
+			Rolling(b, mod);
+
+			b = 7;
+			mod = modd;
+
+			Rolling(b, mod);
+
+			b = mod2;
+			mod = modd;
+
+			Rolling(b, mod);
+
+			CheckMatchFlag();
+
+		}
+
+
+
+	}
+
+	ll GetMatchCount() {
+		return match_count;
+	}
+
+	ll GetMatchPlace(ll num) {
+		if (num >= match_place.size())return -1;
+		else return match_place[num];
+	}
+
+};
+
+
+
+class UnionFind
+{
+
+public:
+
+	vector <ll>pairent;
+	vector <ll>depth;
+	vector <ll>size;
+	vector <ll>edge_num;
+
+	UnionFind(ll Amount) : pairent(Amount, 1), depth(Amount, 1), size(Amount, 1), edge_num(Amount, 0) {
+
+		for (ll i = 0; i < Amount; i++) {
+			pairent[i] = i;
+		}
+	}
+
+
+	ll FindPairent(ll x) {
+		if (pairent[x] == x)return x;
+		else return pairent[x] = FindPairent(pairent[x]);
+	}
+
+
+	ll Merge(ll x, ll y) {
+		x = FindPairent(x);
+		y = FindPairent(y);
+
+		if (x != y) {
+			if (depth[x] > depth[y]) {
+				edge_num[x] += edge_num[y] + 1;
+				pairent[y] = pairent[x];
+				return size[x] += size[y];
+			}
+			else {
+				edge_num[y] += edge_num[x] + 1;
+				pairent[x] = pairent[y];
+				if (depth[x] == depth[y]) {
+					depth[y] ++;
+				}
+				return size[y] += size[x];
+			}
+		}
+		else {
+			edge_num[x]++;
+			return -1;
+		}
+	}
+
+
+
+	bool IsSame(ll x, ll y) {
+		if (FindPairent(x) == FindPairent(y))return true;
+		else return false;
+	}
+
+
+	ll GetSize(ll x) {
+		x = FindPairent(x);
+		return size[x];
+	}
+
+	void add_edge_num(ll x) {
+		x = FindPairent(x);
+		edge_num[x]++;
+	}
+
+	ll GetEdgeNum(ll x) {
+		x = FindPairent(x);
+		return edge_num[x];
+	}
+
+
+};
+
+
+
+
+struct Edge
+{
+	ll a, b, cost;
+
+
+	bool operator<(const Edge& other) const {
+		return cost < other.cost;
+	}
+};
+
+struct Graph
+{
+	ll n;  // 頂点数
+	vector<Edge> es;  // 辺集合
+};
+
+class Kruskal {
+
+	Graph origin_G;
+	Graph MST;
+	ll total_cost = 0;
+
+public:
+
+	void Solve() {
+		UnionFind uf = UnionFind(MST.n);
+		for (ll i = 0; i < origin_G.es.size(); i++) {
+			ll a = origin_G.es[i].a;
+			ll b = origin_G.es[i].b;
+			ll cost = origin_G.es[i].cost;
+
+			if (!uf.IsSame(a, b)) {
+				uf.Merge(a, b);
+				MST.es.push_back(origin_G.es[i]);
+				total_cost += cost;
+			}
+		}
+	}
+
+	Kruskal(Graph graph) {
+		origin_G = graph;
+		MST = graph;
+		MST.es.clear();
+		sort(origin_G.es.begin(), origin_G.es.end());
+	}
+
+	ll GetMinCost() {
+		return total_cost;
+	}
+
+};
+
+
+ll RepeatSquaring(ll N, ll P, ll M) {
+	if (P == 0) return 1;
+	if (P % 2 == 0) {
+		ll t = RepeatSquaring(N, P / 2, M) % M;
+		return t * t % M;
+	}
+	return N * RepeatSquaring(N, P - 1, M) % M;
+}
+
+/*
+ll KurikaesiNijou(ll a, ll b, ll P) {
+
+	if (b == 0)return 1;
+	if (b % 2 == 0) {
+		ll c=KurikaesiNijou(a,b/2,P)%P;
+		return c * c %P;
+	}
+	else {
+		ll c = KurikaesiNijou(a, b/2, P) % P;
+		return a * c * c % P;
+	}
+
+}*/
+
+
+
+
+ll GCD(ll a, ll b) {
+	if (a % b == 0)return b;
+	else return GCD(b, a % b);
+}
+
+ll GCDV2(ll a, ll b) {
+	if (a == 0 || b == 0)return (a == 0 ? b : a);
+	else if (a % b == 0)return b;
+	else return GCD(b, a % b);
+}
+
+
+ll Min(ll a, ll b) {
+	if (a < b)return a;
+	else return b;
+}
+
+ll Max(ll a, ll b) {
+	if (a > b)return a;
+	else return b;
+}
+
+ll Sum(ll a, ll b) {
+	return a + b;
+}
+
+ll Add(ll a, ll b) {
+	return a + b;
+}
+
+template <typename T>
+class SegmentTree {
+	ll n;
+	vector<T> node;
+	function<T(T, T)> fun, fun2;
+	bool customChange;
+	T outValue, initValue;
+public:
+	void init(ll num, function<T(T, T)> resultFunction, T init, T out, function<T(T, T)> changeFunction = NULL) {
+		// changeFunction: (input, beforevalue) => newvalue
+		fun = resultFunction;
+		fun2 = changeFunction;
+		customChange = changeFunction != NULL;
+		n = 1;
+		while (n < num) n *= 2;
+		node.resize(2 * n - 1);
+		fill(node.begin(), node.end(), init);
+		outValue = out;
+		initValue = init;
+	}
+	void valueChange(ll num, T value) {
+		num += n - 1;
+		if (customChange) node[num] = fun2(value, node[num]);
+		else node[num] = value;
+		while (num > 0) num = (num - 1) / 2, node[num] = fun(node[num * 2 + 1], node[num * 2 + 2]);
+	}
+	T rangeQuery(ll a, ll b, ll l = 0, ll r = -1, ll k = 0) { // [a, b)
+		if (r == -1) r = n;
+		if (a <= l && r <= b) return node[k];
+		if (b <= l || r <= a) return outValue;
+		ll mid = (l + r) / 2;
+		return fun(rangeQuery(a, b, l, mid, 2 * k + 1), rangeQuery(a, b, mid, r, 2 * k + 2));
+	}
+};
+
+
+ll extgcd(ll a, ll b, ll& x, ll& y) {
+	if (b == 0) {
+		x = 1;
+		y = 0;
+		return a;
+	}
+	ll gcd = extgcd(b, a % b, x, y);
+	ll oldX = x;
+	x = y;
+	y = oldX - a / b * y;
+	return gcd;
+}
+
+
+class Combination {
+
+	vector<ll> factorial;
+	vector<ll> factorial_inv;
+	ll mod;
+	ll max_n;
+
+
+public:
+	void Init(ll init_max_n, ll init_mod) {
+		max_n = init_max_n;
+		mod = init_mod;
+		factorial.resize(max_n + 1);
+		factorial[0] = 1;
+		for (ll i = 1; i < factorial.size(); i++) {
+			factorial[i] = factorial[i - 1] * i;
+			factorial[i] %= mod;
+		}
+
+		factorial_inv.resize(max_n + 1);
+		factorial_inv[0] = 1;
+		for (ll i = 1; i < factorial_inv.size(); i++) {
+			factorial_inv[i] = factorial_inv[i - 1] * modinv(i, mod);
+			factorial_inv[i] %= mod;
+		}
+	}
+
+
+
+	ll GetComb(ll n, ll k) {
+		if (n < k)return 0;
+		if (k == 0)return 1;
+
+		ll comb = factorial[n];
+		comb *= factorial_inv[k];
+		comb %= mod;
+		comb *= factorial_inv[n - k];
+		comb %= mod;
+		return comb;
+	}
+
+	ll GetH(ll n, ll k) {//n+k-1<=max_N
+		ll comb = factorial[n + k - 1];
+		comb *= factorial_inv[n];
+		comb %= mod;
+		comb *= factorial_inv[k - 1];
+		comb %= mod;
+		return comb;
+	}
+
+};
+
+
+
+class Tree {
+
+	ll node_N;
+	vector<ll> node;
+	vector<vector<pl>> pass;
+	ll diameter = -1;
+	vector<ll> dist_Diamieter[2];
+
+	pl maxDist_Num;
+
+public:
+
+
+	void Init(ll node_Num) {
+		node_N = node_Num;
+		node.resize(node_N + 1);
+		pass.resize(node_N + 1);
+
+		dist_Diamieter[0].resize(node_N + 1);
+		lp(i, node_N + 1)dist_Diamieter[0][i] = -1;
+		dist_Diamieter[1].resize(node_N + 1);
+		lp(i, node_N + 1)dist_Diamieter[1][i] = -1;
+	}
+
+	void AddEdge(ll a, ll b, ll dist) {
+		pl bufpl;
+		bufpl.first = b;
+		bufpl.second = dist;
+		pass[a].push_back(bufpl);
+		bufpl.first = a;
+		pass[b].push_back(bufpl);
+	}
+
+
+	void DFS(ll step, ll now, ll dist) {
+
+		dist_Diamieter[step][now] = dist;
+		if (dist_Diamieter[step][now] > maxDist_Num.first) {
+			maxDist_Num.first = dist_Diamieter[step][now];
+			maxDist_Num.second = now;
+		}
+
+		for (ll i = 0; i < pass[now].size(); i++) {
+			ll next_node = pass[now][i].first;
+			if (dist_Diamieter[step][next_node] == -1) {
+				DFS(step, next_node, dist + pass[now][i].second);
+			}
+		}
+	}
+
+	ll GetDiameter(ll min_node_num) {
+		if (diameter >= 0)return diameter;
+		else {
+			maxDist_Num.first = -1;
+			maxDist_Num.second = -1;
+			DFS(0, min_node_num, 0ll);
+			ll step2_start = maxDist_Num.second;
+
+			maxDist_Num.first = -1;
+			maxDist_Num.second = -1;
+			DFS(1, step2_start, 0ll);
+
+			diameter = maxDist_Num.first;
+			return diameter;
+		}
+	}
+
+	ll GetDistFromMinNode(ll num) {
+		return dist_Diamieter[0][num];
+	}
+
+};
+
+
+
+
+struct LDE {
+	ll a, b, c, x, y;
+	ll m = 0;
+	bool check = true;//解が存在するか
+
+	//初期化
+	LDE(ll a_, ll b_, ll c_) : a(a_), b(b_), c(c_) {
+		ll g = GCD(a, b);
+		if (c % g != 0) {
+			check = false;
+		}
+		else {
+			//ax+by=gの特殊解を求める
+			extgcd(abs(a), abs(b), x, y);
+			if (a < 0)x = -x;
+			if (b < 0)y = -y;
+			//ax+by=cの特殊解を求める(オーバフローに注意！)
+			x *= c / g; y *= c / g;
+			//一般解を求めるために割る
+			a /= g; b /= g;
+		}
+	}
+
+	//拡張ユークリッドの互除法
+	//返り値:aとbの最大公約数
+	ll extgcd(ll a, ll b, ll& x0, ll& y0) {
+		if (b == 0) {
+			x0 = 1;
+			y0 = 0;
+			return a;
+		}
+		ll d = extgcd(b, a % b, y0, x0);
+		y0 -= a / b * x0;
+		return d;
+	}
+
+	//パラメータmの更新(書き換え)
+	void m_update(ll m_) {
+		x += (m_ - m) * b;
+		y -= (m_ - m) * a;
+		m = m_;
+	}
+};
+
+
+/*
+template< typename Monoid >
+struct SegmentTreee {
+	using F = function< Monoid(Monoid, Monoid) >;
+
+	int sz;
+	vector< Monoid > seg;
+
+	const F f;
+	const Monoid M1;
+
+	SegmentTreee(int n, const F f, const Monoid& M1) : f(f), M1(M1) {
+		sz = 1;
+		while (sz < n) sz <<= 1;
+		seg.assign(2 * sz, M1);
+	}
+
+	void set(int k, const Monoid& x) {
+		seg[k + sz] = x;
+	}
+
+	void build() {
+		for (int k = sz - 1; k > 0; k--) {
+			seg[k] = f(seg[2 * k + 0], seg[2 * k + 1]);
+		}
+	}
+
+	void update(int k, const Monoid& x) {
+		k += sz;
+		seg[k] = x;
+		while (k >>= 1) {
+			seg[k] = f(seg[2 * k + 0], seg[2 * k + 1]);
+		}
+	}
+
+	Monoid query(int a, int b) {
+		Monoid L = M1, R = M1;
+		for (a += sz, b += sz; a < b; a >>= 1, b >>= 1) {
+			if (a & 1) L = f(L, seg[a++]);
+			if (b & 1) R = f(seg[--b], R);
+		}
+		return f(L, R);
+	}
+
+	Monoid operator[](const int& k) const {
+		return seg[k + sz];
+	}
+
+	template< typename C >
+	int find_subtree(int a, const C& check, Monoid& M, bool type) {
+		while (a < sz) {
+			Monoid nxt = type ? f(seg[2 * a + type], M) : f(M, seg[2 * a + type]);
+			if (check(nxt)) a = 2 * a + type;
+			else M = nxt, a = 2 * a + 1 - type;
+		}
+		return a - sz;
+	}
+
+
+	template< typename C >
+	int find_first(int a, const C& check) {
+		Monoid L = M1;
+		if (a <= 0) {
+			if (check(f(L, seg[1]))) return find_subtree(1, check, L, false);
+			return -1;
+		}
+		int b = sz;
+		for (a += sz, b += sz; a < b; a >>= 1, b >>= 1) {
+			if (a & 1) {
+				Monoid nxt = f(L, seg[a]);
+				if (check(nxt)) return find_subtree(a, check, L, false);
+				L = nxt;
+				++a;
+			}
+		}
+		return -1;
+	}
+
+	template< typename C >
+	int find_last(int b, const C& check) {
+		Monoid R = M1;
+		if (b >= sz) {
+			if (check(f(seg[1], R))) return find_subtree(1, check, R, true);
+			return -1;
+		}
+		int a = sz;
+		for (b += sz; a < b; a >>= 1, b >>= 1) {
+			if (b & 1) {
+				Monoid nxt = f(seg[--b], R);
+				if (check(nxt)) return find_subtree(b, check, R, true);
+				R = nxt;
+			}
+		}
+		return -1;
+	}
+};
+
+*/
+
+
+vector<pair<long long, long long> > prime_factorize(long long N) {
+	vector<pair<long long, long long> > res;
+	for (long long a = 2; a * a <= N; ++a) {
+		if (N % a != 0) continue;
+		long long ex = 0;
+		while (N % a == 0) {
+			++ex;
+			N /= a;
+		}
+		res.push_back({ a, ex });
+	}
+	if (N != 1) res.push_back({ N, 1 });
+	return res;
+}
+
+
+Combination co;
+typedef pair<int, int> pi;
+priority_queue<pl, vector<pl>, greater<pl> > pqpl;
+
+
+priority_queue<ll, vector<ll>, greater<ll> > pqll;
+
+
+ll nck(ll n, ll k, ll m) {
+	ll ans = 1;
+	if (k == 0)return 1;
+	for (ll i = 1; i <= k; i++) {
+		ans *= n - i + 1;
+		ans %= m;
+		ans *= modinv(i, m);
+		ans %= m;
+	}
+	return ans;
+}
+
+typedef string::const_iterator State;
+
+
+
+struct LazySegmentTree {
+private:
+	int n;
+	vector<ll> node, lazy;
+
+public:
+	LazySegmentTree(vector<ll> v) {
+		int sz = (int)v.size();
+		n = 1; while (n < sz) n *= 2;
+		node.resize(2 * n - 1);
+		lazy.resize(2 * n - 1, 0);
+
+		for (int i = 0; i < sz; i++) node[i + n - 1] = v[i];
+		for (int i = n - 2; i >= 0; i--) node[i] = node[i * 2 + 1] + node[i * 2 + 2];
+	}
+
+	void eval(int k, int l, int r) {
+		if (lazy[k] != 0) {
+			node[k] += lazy[k];
+			if (r - l > 1) {
+				lazy[2 * k + 1] += lazy[k] / 2;
+				lazy[2 * k + 2] += lazy[k] / 2;
+			}
+			lazy[k] = 0;
+		}
+	}
+
+	void add(int a, int b, ll x, int k = 0, int l = 0, int r = -1) {
+		if (r < 0) r = n;
+		eval(k, l, r);
+		if (b <= l || r <= a) return;
+		if (a <= l && r <= b) {
+			lazy[k] += (r - l) * x;
+			eval(k, l, r);
+		}
+		else {
+			add(a, b, x, 2 * k + 1, l, (l + r) / 2);
+			add(a, b, x, 2 * k + 2, (l + r) / 2, r);
+			node[k] = node[2 * k + 1] + node[2 * k + 2];
+		}
+	}
+
+	ll getsum(int a, int b, int k = 0, int l = 0, int r = -1) {
+		if (r < 0) r = n;
+		eval(k, l, r);
+		if (b <= l || r <= a) return 0;
+		if (a <= l && r <= b) return node[k];
+		ll vl = getsum(a, b, 2 * k + 1, l, (l + r) / 2);
+		ll vr = getsum(a, b, 2 * k + 2, (l + r) / 2, r);
+		return vl + vr;
+	}
+};
+
+
+ll N, M, a, b, c, d, e, W, K, Q;
+
+
+
+typedef struct Disk {
+	ll x, y, r, c;
+}Disk;
+
+class Data {
+	ll N = 0;
+	Disk disk[24];
+	ll covered[24] = {};
+	bool removed[24] = {};
+	vector<ll> underDisk[24];
+	const ll INF = 100000000000000000;
+	ll ans = 0;
+
+	bool kasanari(Disk d1, Disk d2) {
+		ll dist = RepeatSquaring(d1.x - d2.x, 2, INF) + RepeatSquaring(d1.y - d2.y, 2, INF);
+		ll rr = RepeatSquaring(d1.r + d2.r, 2, INF);
+		return rr > dist;
+	}
+
+public:
+	Data(ll _N) {
+		N = _N;
+	}
+	void Input() {
+		lp(i, N) {
+			cin >> disk[i].x >> disk[i].y >> disk[i].r >> disk[i].c;
+			lp(j, i)if (kasanari(disk[i], disk[j])) {
+				covered[i]++;
+				underDisk[j].push_back(i);
+			}
+		}
+	}
+	void saiki(ll num) {
+		ans = max(ans, num);
+		lp(i, N)if (!removed[i] && covered[i]==0) {
+			lp(j, i)if (!removed[j] && covered[j]==0 && disk[i].c == disk[j].c) {
+				removed[i] = true; removed[j] = true;
+				for (auto itr : underDisk[i])covered[itr]--;
+				for (auto itr : underDisk[j])covered[itr]--;
+				saiki(num + 2);
+				for (auto itr : underDisk[i])covered[itr]++;
+				for (auto itr : underDisk[j])covered[itr]++;
+				removed[i] = false; removed[j] = false;
+			}
+		}
+	}
+	ll GetAns() { return ans; }
+	
+
+};
+
+
+int main() {
+
+	while (1) {
+		cin >> N;
+		if (N == 0)break;
+		Data data(N);
+		data.Input();
+		data.saiki(0);
+		cout << data.GetAns() << endl;
+	}
+
+	//cout << fixed << setprecision(12) << bb << endl;
+	return 0;
+}
+

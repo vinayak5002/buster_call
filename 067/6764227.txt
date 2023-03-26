@@ -1,0 +1,115 @@
+
+#if 1
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <queue>
+#include <stack>
+#include <array>
+#include <deque>
+#include <algorithm>
+#include <utility>
+#include <cstdint>
+#include <functional>
+#include <iomanip>
+#include <numeric>
+#include <assert.h>
+#include <bitset>
+#include <list>
+#include <cmath>
+//#include <atcoder/all>
+
+auto& in = std::cin;
+auto& out = std::cout;
+#define all_range(C) std::begin(C), std::end(C)
+const double PI = 3.141592653589793238462643383279502884197169399375105820974944;
+
+const auto  ALPHA = 'z' - 'a' + 1;
+int N;
+std::bitset<ALPHA * ALPHA + 1> lang[200];
+int count[200];
+int count2[200][200];
+int convert(std::string_view ln) {
+    return (ln[1] - 'a') * ALPHA + (ln[0] - 'a');
+}
+
+int main()
+{
+    using std::endl;
+    in.sync_with_stdio(false);
+    out.sync_with_stdio(false);
+    in.tie(nullptr);
+    out.tie(nullptr);
+
+    in >> N;
+    for (size_t i = 0; i < N; i++)
+    {
+        size_t k;
+        in >> k;
+        std::string ln;
+        for (size_t j = 0; j < k; j++) {
+            in >> ln;
+            lang[i].set(convert(ln));
+        }
+    }
+
+    for (size_t i = 0; i < N; i++)
+    {
+        int c = 0;
+        for (size_t k = 0; k < N; k++)
+        {
+            if ((lang[k] & lang[i]).any()) {
+                ++c;
+            }
+        }
+        count[i] = c;
+    }
+
+    for (size_t i = 0; i < N; i++)
+        for (size_t j = i+1; j < N; j++)
+    {
+        int c = 0;
+        for (size_t k = 0; k < N; k++)
+        {
+            if ((lang[k] & lang[i]).any() && (lang[k] & lang[j]).any()) {
+                ++c;
+            }
+        }
+        count2[j][i] = count2[i][j] = c;
+    }
+
+    int64_t result = 0;
+    for (size_t i = 0; i < N; i++)
+        if (count[i] > 2)
+        for (size_t j = 0; j < N; j++)
+        {
+            if (i == j) { continue; }
+            if ((lang[i] & lang[j]).none()) { continue; }
+            if (count[j] <= 2) { continue; }
+            for (size_t k = 0; k < N; k++)
+            {
+                if (k == i || k == j) { continue; }
+                if ((lang[j] & lang[k]).none()) { continue; }
+
+                auto both_count = count2[i][k] - 1;
+                auto i_count = count[i] - 2;
+                auto k_count = count[k] - 2;
+                if ((lang[i] & lang[k]).any()) {
+                    --i_count; --k_count;
+                    both_count -= 2;
+                }
+
+                result += (i_count * k_count) - both_count;
+            }
+        }
+    out << result << endl;
+
+    return 0;
+}
+#endif
+

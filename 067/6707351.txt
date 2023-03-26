@@ -1,0 +1,28 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_map>
+
+using namespace std;
+
+int main()
+{
+	int N, M; cin >> N >> M;
+	vector<string> S(N); for (auto& s : S) cin >> s;
+	vector<unordered_map<char, int>> C(N);
+	for (int i = 0; i < N; ++i) for (int j = 0; j < M; ++j) ++C[i][S[i][j]];
+	int minS = 1 << 30;
+	for (int w = 1, sw = 0; w + 2 <= N; ++w, sw = 0) {
+		for (int i = 0; i < w; ++i) sw += M - C[i]['W'];
+		for (int b = 1, s = sw; w + b + 1 <= N; ++b, s = sw) {
+			for (int i = 0; i < b; ++i) s += M - C[i + w]['B'];
+			int r = N - w - b;
+			for (int i = 0; i < r; ++i) s += M - C[i + w + b]['R'];
+			minS = min(minS, s);
+		}
+	}
+	cout << minS << endl;
+
+	return 0;
+}
+

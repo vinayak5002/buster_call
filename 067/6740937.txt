@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+using namespace std;
+void chmax(int& a, int b){ if(a < b) a = b; }
+
+
+/*
+ ...#
+ ..##
+ .###
+ ####
+ */
+int main(){
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    int H, W, K;
+    cin >> H >> W >> K;
+    vector S(H, string{});
+    for(auto& s : S) cin >> s;
+    static int dp[4][4][50][50][1 << 10];
+    memset(dp, 0xcc, sizeof dp);
+    dp[0][0][0][0][0] = 0;
+    auto down = [](int bit){
+        const int bit3 = bit & 0B0'01'000'0000;
+        const int bit2 = bit & 0B0'00'011'0000;
+        const int bit1 = bit & 0B0'00'000'0111;
+        return bit3 << 2 | bit2 << 3 | bit1 << 4;
+    };
+    auto right = [](int bit){
+        const int bit1 = bit & 0B0'01'011'0111;
+        return bit1 << 1;
+    };
+    auto get = [](int bit, int dx, int dy){
+        if(dx == 0) return bit >> dy & 1;
+        if(dx == 1) return bit >> (4 + dy) & 1;
+        if(dx == 2) return bit >> (7 + dy) & 1;
+        return bit >> 9 & 1;
+    };
+    auto add = [](int bit, int dx, int dy){
+        if(dx == 0) return bit | 1 << dy;
+        if(dx == 1) return bit | 1 << (4 + dy);
+        if(dx == 2) return bit | 1 << (7 + dy);
+        return bit | 1 << 9;
+    };
+    vector point(H, vector(W, 0));
+    for(int i = 0; i < H; i++) for(int j = 0; j < W; j++){
+        if(isdigit(S[i][j])) point[i][j] = S[i][j] - '0';
+        else if(S[i][j] == '#') point[i][j] = INT_MIN / 2;
+    }
+    for(int dx = 0; dx <= K; dx++) for(int dy = 0; dx + dy <= K; dy++) for(int x = 0; x < H; x++) for(int y = 0; y < W; y++) for(int bit = 0; bit < 1 << 10; bit++) if(dp[dx][dy][x][y][bit] >= 0){
+        const int c = dp[dx][dy][x][y][bit];
+        if(x + 1 < H){
+            chmax(dp[dx][dy][x + 1][y][add(down(bit), dx, dy)], c + (get(down(bit), dx, dy) ? 0 : point[x + 1][y]));
+        }
+        if(y + 1 < W){
+            chmax(dp[dx][dy][x][y + 1][add(right(bit), dx, dy)], c + (get(right(bit), dx, dy) ? 0 : point[x][y + 1]));
+        }
+        if(x && dx + dy < K){
+            chmax(dp[dx + 1][dy][x - 1][y][add(bit, dx + 1, dy)], c + (get(bit, dx + 1, dy) ? 0 : point[x - 1][y]));
+        }
+        if(y && dx + dy < K){
+            chmax(dp[dx][dy + 1][x][y - 1][add(bit, dx, dy + 1)], c + (get(bit, dx, dy + 1) ? 0 : point[x][y - 1]));
+        }
+    }
+    int ans = 0;
+    for(int dx = 0; dx <= K; dx++) for(int dy = 0; dx + dy <= K; dy++) for(int bit = 0; bit < 1 << 10; bit++) chmax(ans, dp[dx][dy][H - 1][W - 1][bit]);
+    cout << ans << endl;
+}
+

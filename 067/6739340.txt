@@ -1,0 +1,148 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+
+// each node of tree
+class Node{
+private:
+	int parent;
+	int root;
+	int diff;	// difference from parent
+
+public:
+	Node(){
+		parent = 0;
+		root = 0;
+	}
+
+	Node(int parent){
+		this->parent = parent;
+		root = parent;
+		diff = 0;
+	}
+
+	void setParent(int parent){
+		this->parent = parent;
+	}
+
+	int getParent(){
+		return parent;
+	}
+
+	void setRoot(int root){
+		this->root = root;
+	}
+
+	int getRoot(){
+		return root;
+	}
+
+	void setDiff(int diff){
+		this->diff = diff;
+	}
+
+	int getDiff(){
+		return diff;
+	}
+};
+
+// Weighted Union Find Tree
+class WUFT{
+private:
+	vector<Node> tree;
+
+public:
+	WUFT(){
+		int n, q;
+		cin >> n >> q;
+
+		// init union find tree
+		for(int i=0; i<n; i++){
+			tree.push_back(Node(i));
+		}
+
+		// execute command
+		for(int i=0; i<q; i++){
+			int query;
+			cin >> query;
+
+			// relate
+			if(query==0){
+				int x, y, z;
+				cin >> x >> y >> z;
+				relate(x, y, z);
+			}
+
+			// diff
+			else if(query==1){
+				int x, y;
+				cin >> x >> y;
+				diff(x, y);
+			}
+		}
+	}
+
+	void relate(int x, int y, int z){
+		link(find(x), find(y), z + getWeightToRoot(y) - getWeightToRoot(x));
+	}
+
+	void diff(int x, int y){
+		// no relation between ax and ay
+		if(find(x) != find(y)){
+			cout << "?" << endl;
+		}
+
+		// found a relation
+		else{
+			cout << (getWeightToRoot(x) - getWeightToRoot(y)) << endl;
+		}
+	}
+
+	int getWeightToRoot(int from){
+		int weight = 0;
+		int root = find(from);
+		while(from != root){
+			weight += tree[from].getDiff();
+			from = tree[from].getParent();
+		}
+
+		return weight;
+	}
+
+	/*** the orepation for disjoint set ***/
+
+	void link(int x, int y, int z){
+		// connect x and y directly
+		if(z>0){
+			tree[x].setParent(y);
+			tree[x].setRoot(y);
+			tree[x].setDiff(z);
+		}
+
+		// insert y between x and parent(x)
+		else{
+			int parent = tree[x].getParent();
+			int weight = tree[x].getDiff();
+
+			tree[x].setParent(y);
+			tree[x].setRoot(y);
+			tree[x].setDiff(-z);
+
+			tree[y].setParent(parent);
+			tree[y].setRoot(parent);
+			tree[y].setDiff(weight + z);
+		}
+	}
+
+	int find(int x){
+		if(x != tree[x].getRoot()){
+			tree[x].setRoot(find(tree[x].getRoot()));
+		}
+		return tree[x].getRoot();
+	}
+};
+
+int main(){
+	WUFT wuft = WUFT();
+	return 0;
+}

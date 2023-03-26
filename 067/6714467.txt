@@ -1,0 +1,45 @@
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main()
+{
+    string expr;
+    cin >> expr;
+    int n;
+    cin >> n;
+
+    int L = expr.front() - '0';
+    for (int i = 1; i < static_cast<int>(expr.length()); i += 2)
+        if (expr[i] == '+')
+            L += expr[i+1] - '0';
+        else
+            L *= expr[i+1] - '0';
+
+    vector<int> v;
+    v.push_back(expr.front() - '0');
+    for (int i = 1; i < static_cast<int>(expr.length()); i += 2)
+        if (expr[i] == '+')
+            v.push_back(expr[i+1] - '0');
+        else
+        {
+            int left = v.back();
+            int right = expr[i+1] - '0';
+            v.pop_back();
+            v.push_back(left * right);
+        }
+    int M = 0;
+    for (const auto &x : v)
+        M += x;
+
+    if (n == L && n == M)
+        cout << 'U' << endl;
+    else if (n == M)
+        cout << 'M' << endl;
+    else if (n == L)
+        cout << 'L' << endl;
+    else
+        cout << 'I' << endl;
+}
+

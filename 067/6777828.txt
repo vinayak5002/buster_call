@@ -1,0 +1,104 @@
+#include<iostream>
+#include<string>
+#include<cstdio>
+#include<algorithm>
+#include<cstdlib>
+#include<cmath>
+#include<vector>
+#include<utility>
+#include<queue>
+#include<stack>
+#include<set>
+#include<map>
+#include<bitset>
+#include<iomanip>
+#include<list>
+#include<deque>
+#include<unordered_set>
+using namespace std;
+//#define MODE 1
+#ifdef MODE
+#define DEB(X) cout<< #X <<": "<<X<<" ";
+#define DEB2(X) cout<<X<<" ";
+#define END cout<<endl;
+#else
+#define DEB(X) {}
+#define DEB2(X) {}
+#define END {}
+#endif
+#define int long long
+typedef std::pair<int,int> P;
+struct edge{
+	int from,to,cost;
+};
+const int INF2=2000000000000000000;
+const int INF =200000000000000000;
+const int MOD=1000000007;
+//const int MOD=998244353;
+#define REP(i,n) for(int i=0;i<(int)(n);i++)
+#define min(X,Y) (((int)(X)<(int)(Y))?(X):(Y))
+#define max(X,Y) (((int)(X)>(int)(Y))?(X):(Y))
+#define NP(X,Y) next_permutation(X,Y)
+int ceil2(int a,int b){if(a%b==0){return a/b;}else{return a/b+1;}}
+int pow2(int a,int b){int r=1;for(int i=1;i<=b;i++){r*=a;}return r;}
+void add(int &a,int b){a=(a+b)%MOD;}
+void sub(int &a,int b){a=(a-b+MOD)%MOD;}
+void seki(int &a,int b){a=(a*b)%MOD;}
+
+int W,H,N,D,B;
+int X[110],Y[110];
+bool F[110];
+bool F2[110][110];
+
+signed main(){
+	cin.tie(nullptr);
+	ios_base::sync_with_stdio(false);
+	vector<int> ans;
+	vector<int> deb,deb2;
+	while(true){
+		cin>>W>>H>>N>>D>>B;
+		if(W==0&&H==0&&N==0&&D==0&&B==0)break;
+		B--;
+		map<P,int> Hash;
+		REP(i,H){
+			REP(j,W){
+				F2[i][j]=0;
+			}
+		}
+		REP(i,N){
+			cin>>Y[i]>>X[i];
+			X[i]--,Y[i]--;
+			F[i]=false;
+			F2[X[i]][Y[i]]=1;
+			Hash[P(X[i],Y[i])]=i;
+		}
+		int cnt=0;
+		queue<int> Q;
+		Q.push(B);
+		F2[X[B]][Y[B]]=0;
+		while(Q.size()){
+			int q=Q.front();
+			Q.pop();
+			int x=X[q],y=Y[q];
+			for(int j=y-D;j<=y+D;j++){
+				if(j<0||j>=W)continue;
+				if(!F2[x][j])continue;
+				Q.push(Hash[P(x,j)]);
+				F2[x][j]=0;
+			}
+			for(int j=x-D;j<=x+D;j++){
+				if(j<0||j>=H)continue;
+				if(!F2[j][y])continue;
+				Q.push(Hash[P(j,y)]);
+				F2[j][y]=0;
+			}
+			cnt++;
+		}
+		ans.push_back(cnt);
+	}
+	REP(i,ans.size()){
+		cout<<ans[i]<<"\n";
+	}
+	return 0;
+}
+

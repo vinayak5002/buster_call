@@ -1,0 +1,85 @@
+#include<iostream>
+#include<vector>
+
+#define INF 2147483647
+
+void initRMQ(int n);
+void update(int s, int t, int x);
+int find(int i);
+int query(int a, int b, int k, int l, int r);
+
+
+int n;
+std::vector<int> D;
+
+int main(){
+    int n_,q;
+    std::cin>>n_>>q;
+    initRMQ(n_);
+
+    for(int i = 0;i<q;i++){
+        int cmd;
+        std::cin>>cmd;
+        if(cmd==0){ //update
+            int s,t,x;
+            std::cin>>s>>t>>x;
+            update(s,t,x);
+        }
+        if(cmd==1){// findMin
+            int a;
+            std::cin>>a;
+            std::cout<<find(a)<<std::endl;
+        }
+
+    }
+    return 0;
+
+}
+
+void initRMQ(int n_){
+    n=1;
+    
+    while(n < n_){
+        n*=2;
+    }
+    std::vector<int> D_(n*2);
+    D = D_;
+
+    for(int i=0;i<2*n-1;i++){
+        D[i]=INF;
+    }
+}
+
+void update(int s, int t, int x){
+    s += n-1, t += n-1; // convert array index to tree index 
+
+    for(int i = s;i<=t;i++){
+        D[i] = x;
+
+        int k_ = i;
+        while(k_ > 0){
+            k_ = (k_ - 1)/2;
+            D[k_] = std::min(D[k_*2+1], D[k_*2+2]);
+        }
+
+    }
+ 
+}
+// int findMin(int a,int b){
+//     return query(a, b+1, 0, 0, n);
+// }
+
+
+int find(int i){
+    i += n-1;
+    return D[i];
+}
+
+// int query(int a, int b, int k, int l, int r){
+//     if(r<=a || b<=l) return INF; //case1 return INF
+//     if(a<=l && r<=b) return D[k]; //case2 return D[k]
+//     // case 3
+//     int vl = query(a, b, k*2 + 1, l, (l + r)/2);
+//     int vr = query(a, b, k*2 + 2, (l + r)/2, r);
+//     return std::min(vl, vr);
+// }

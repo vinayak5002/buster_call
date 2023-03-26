@@ -1,0 +1,43 @@
+n = int(input())
+stack = []
+visited = []
+time = 0
+d = [0]*(n+1)
+f = [0]*(n+1)
+deg = [None]
+next = [[None]]
+time = 0
+for _ in range(n):
+  _, k, *V = list(map(int, input().split()))
+  deg.append(k)
+  next.append(V)
+
+print(deg)
+print(next)
+
+for  u in range(1, n+1):
+  if u not in visited: #visitedになかったらスタックに入れる
+    stack.append(u)
+    visited.append(u)
+    time += 1
+    d[u] = time #発見
+
+  while stack:
+    print(stack)
+    v = stack[-1]
+    if deg[v] == 0: #次のところなくなったら
+      stack.pop()
+      time += 1
+      f[v] = time
+
+    else:
+      deg[v] -= 1 #つながっているやつ消すので次数減らす
+      vv = next[v].pop(0)
+      if vv not in visited:
+        stack.append(vv)
+        visited.append(vv)
+        time += 1
+        d[vv] = time
+
+for i in range(1, n+1):
+  print(i, d[i], f[i])

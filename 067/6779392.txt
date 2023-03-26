@@ -1,0 +1,89 @@
+#include<iostream>
+#include<vector>
+
+#define INF 2147483647
+#define NUL -1
+
+void initRUQ(int);
+void update(int, int, int, int, int, int);
+void lazy_evaluate(int);
+int find(int);
+int query(int a, int b, int k, int l, int r);
+
+
+int n;
+std::vector<int> D;
+std::vector<int>Lazy;
+
+int main(){
+    int n_,q;
+    std::cin>>n_>>q;
+    initRUQ(n_);
+
+    for(int i = 0;i<q;i++){
+        int cmd;
+        std::cin>>cmd;
+        if(cmd==0){ //update
+            int s,t,x;
+            std::cin>>s>>t>>x;
+            update(s,t+1,0,0,n,x);
+        }
+        if(cmd==1){// findMin
+            int s,t;
+            std::cin>>s>>t;
+            std::cout<<query(s,t+1,0,0,n)<<std::endl;
+        }
+
+    }
+    return 0;
+
+}
+
+void initRUQ(int n_){
+    n=1;
+    
+    while(n < n_){
+        n*=2;
+    }
+    std::vector<int> D_((n*2)-1,INF);
+    D = D_;
+    std::vector<int> Lazy_((n*2)-1,NUL);
+    Lazy = Lazy_;
+}
+
+void update(int a, int b, int k, int l, int r, int x){
+    lazy_evaluate(k);
+
+    if (r <= a || b <= l)return;
+    if (a <= l && r <= b){
+        Lazy[k] = x;
+    }
+    else{
+        update(a, b, k*2+1, l, (l+r)/2, x);
+        update(a, b, k*2+2, (l+r)/2, r, x);
+        D[k] = std::min(D[k*2+1], D[k*2+2]);
+    }
+}
+
+void lazy_evaluate(int k){
+    if (Lazy[k]==NUL)return;
+    D[k]=Lazy[k];
+    if(k<n-1){ //not leaf
+        Lazy[2*k + 1] = Lazy[k];
+        Lazy[2*k + 2] = Lazy[k];
+    }
+    Lazy[k] = NUL;
+}
+
+
+int query(int a, int b, int k, int l, int r){
+    if(r<=a || b<=l) return INF; //case1 return INF
+    lazy_evaluate(k);
+    if(a<=l && r<=b) return D[k]; //case2 return D[k]
+    // case 3
+    int vl = query(a, b, k*2 + 1, l, (l + r)/2);
+    int vr = query(a, b, k*2 + 2, (l + r)/2, r);
+    return std::min(vl, vr);
+}
+
+

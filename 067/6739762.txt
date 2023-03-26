@@ -1,0 +1,103 @@
+#pragma GCC optimize("Ofast")
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <queue>
+#include <cstdio>
+#include <ctime>
+#include <assert.h>
+#include <chrono>
+#include <random>
+#include <numeric>
+#include <set>
+#include <deque>
+#include <stack>
+#include <sstream>
+#include <utility>
+#include <cstring>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+#include <array>
+#include <bitset>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long ull;
+
+mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
+ll myRand(ll B) {
+    return (ull)rng() % B;
+}
+inline double time() {
+    return static_cast<long double>(chrono::duration_cast<chrono::nanoseconds>(chrono::steady_clock::now().time_since_epoch()).count()) * 1e-9;
+}
+
+vector<double> solve(const int n,const int m,const vector<double> &p,vector<int> v,int tmp){
+    vector<double> res(m+1);
+    for(int i=0;i<=m;i++){
+        int score = v[0]*i;
+        // 最下位の確率
+        double bb = 1;
+        array<double, 3> dp;
+        dp[0] = 1;
+        dp[1] = 0;
+        dp[2] = 0;
+        for(int j=1;j<n;j++){
+            array<double, 3> ndp;
+            ndp[0] = ndp[1] = ndp[2] = 0;
+            double b;
+            if(m*v[j] < score){
+                b = 0;
+            }
+            else{
+                int u = (score+v[j]-1)/v[j];
+                b = p[u];
+            }
+            bb *= b;
+            for(int k=0;k<3;k++){
+                if(k+1<3){
+                    ndp[k+1] += dp[k]*b;
+                }
+                ndp[k] += dp[k]*(1-b);
+            }
+            swap(dp,ndp);
+        }
+        res[i] = -bb+tmp*(dp[0]+dp[1]+dp[2]);
+    }
+    return res;
+}
+
+int main(){
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    int n,m; cin >> n >> m;
+    vector<int> v(n),vv(n),vvv(n);
+    for(int i=0;i<n;i++){
+        cin >> v[i] >> vv[i] >> vvv[i];
+    }
+    vector<double> p(m+1);
+    p[0] = 1.0;
+    for(int i=0;i<m;i++){
+        vector<double> np(m+1);
+        for(int j=0;j<=i;j++){
+            np[j+1] += p[j] / 3.0;
+            np[j] += p[j] * 2.0 / 3.0;
+        }
+        swap(p,np);
+    }
+    for(int i=m;i>0;i--){
+        p[i-1] += p[i];
+    }
+    auto r = solve(n,m,p,v,5);
+    auto rr = solve(n,m,p,vv,3);
+    auto rrr = solve(n,m,p,vvv,2);
+    double res = -1e9;
+    for(int i=0;i<=m;i++){
+        for(int j=0;i+j<=m;j++){
+            res = max(res,r[i]+rr[j]+rrr[m-i-j]);
+        }
+    }
+    printf("%.9f\n",res);
+}
+

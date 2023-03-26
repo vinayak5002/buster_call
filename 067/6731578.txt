@@ -1,0 +1,71 @@
+class Node:
+    def __init__(self, key):
+        self.key = key
+        self.next = None
+        self.prev = None
+        
+class LinkedList:
+    def __init__(self):
+        self.head = None
+        
+    def insert(self, key):
+        node = Node(key)
+        if self.head is None:
+            self.head = node
+            return
+        
+        node.next = self.head.next
+        node.prev = self.head
+        if self.head.next:
+            node.next.prev = node
+        self.head.next = node
+        return
+    
+    def delete(self, key):
+        if self.head.key == key:
+            self.head.next.prev = None
+            self.head = self.head.next
+            return
+        
+        current_node = self.head.next
+        while current_node and current_node.key != key:
+            current_node = current_node.next
+        
+        if current_node:
+            current_node.prev.next = current_node.next
+            current_node.next.prev = current_node.prev
+        return
+    
+    def deleteFirst(self):
+        self.head.next.prev = None
+        self.head = self.head.next
+        return
+            
+    def deleteLast(self):
+        current_node = self.head
+        while current_node.next:
+            current_node = current_node.next
+        
+        current_node.prev.next = None
+        current_node = None
+        return
+    
+if __name__ == '__main__':
+    linkedlist = LinkedList()
+    num = input()
+    for i in range(int(num)):
+        command = input().split()
+        if command[0] == "insert":
+            linkedlist.insert(int(command[1]))
+        elif command[0] == "delete":
+            linkedlist.delete(int(command[1]))
+        elif command[0] == "deleteFirst":
+            linkedlist.deleteFirst()
+        elif command[0] == "deleteLast":
+            linkedlist.deleteLast()
+                
+    current_node = linkedlist.head
+    while current_node:
+        print('%s ' % current_node.key, end='')
+        current_node = current_node.next
+    print('\n')

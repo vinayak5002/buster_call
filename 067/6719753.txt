@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+typedef long long ll;
+typedef pair<ll, ll> P;
+typedef vector<bool> vb;
+typedef vector<ll> vl;
+typedef vector<vl> vvl;
+typedef vector<P> vp;
+typedef vector<vp> graph;
+typedef vector<char> vc;
+typedef vector<vc> vvc;
+#define fi first
+#define se second
+#define all(x) (x).begin(), (x).end()
+// const ll mod = 1000000007;
+const ll MOD = 998244353;
+const ll INF = 1000000000000000000;
+void yn(bool ok) { cout << (ok ? "yes\n" : "no\n"); }
+void Yn(bool ok) { cout << (ok ? "Yes\n" : "No\n"); }
+void YN(bool ok) { cout << (ok ? "YES\n" : "NO\n"); }
+template <class T>
+inline bool chmin(T& a, T b) {
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+template <class T>
+inline bool chmax(T& a, T b) {
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+ll dx[8] = {1, 0, -1, 0, 1, 1, -1, -1}, dy[8] = {0, 1, 0, -1, 1, -1, 1, -1};
+
+void solve() {
+    ll h, w;
+    cin >> w >> h;
+    if (!h) exit(0);
+    vvc c(h, vc(w));
+    ll y, x;
+    for (int i = 0; i < h; i++)
+        for (int j = 0; j < w; j++) {
+            cin >> c[i][j];
+            if (c[i][j] == '@') {
+                y = i;
+                x = j;
+            }
+        }
+    queue<P> que;
+    vector<vb> used(h, vb(w));
+    que.push({y, x});
+    used[y][x] = 1;
+    ll res = 1;
+    while (!que.empty()) {
+        P p = que.front();
+        que.pop();
+        for (int i = 0; i < 4; i++) {
+            ll ny = p.fi + dy[i], nx = p.se + dx[i];
+            if (!(0 <= ny && ny < h && 0 <= nx && nx < w)) continue;
+            if (used[ny][nx]) continue;
+            if (c[ny][nx] == '#') continue;
+            used[ny][nx] = 1;
+            que.push({ny, nx});
+            res++;
+        }
+    }
+    cout << res << endl;
+}
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    ll t = 1;
+    // cin >> t;
+    for (int i = 1;; i++) solve();
+    return 0;
+}

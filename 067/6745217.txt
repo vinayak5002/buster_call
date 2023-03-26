@@ -1,0 +1,65 @@
+import sys
+import math
+import heapq
+from collections import deque, Counter, defaultdict
+from sys import stdin
+
+
+INF = 10 ** 7
+int1 = lambda x: int(x) - 1
+stinput = lambda: stdin.readline()[:-1]
+ii = lambda: int(stinput())  # int input
+mi = lambda: map(int, stdin.readline().split())  # map input (int)
+li = lambda: list(mi())  # list input (int)
+mi1 = lambda: map(int1, stdin.readline().split())  # map input (int)-1
+li1 = lambda: list(mi1())  # list input (int)-1
+mis = lambda: map(str, stdin.readline().split())  # map input (string)
+lis = lambda: list(mis())  # list input (string)
+
+def rot(movement, direction):
+    # direction * 90度回転
+    if direction == 1:
+        movement = [[mov[1], -mov[0]] for mov in movement]
+    elif direction == 2:
+        movement = [[-mov[0], -mov[1]] for mov in movement]
+    elif direction == 3:
+        movement = [[-mov[1], mov[0]] for mov in movement]
+
+    return movement
+
+
+while 1:
+    N = ii()
+    res = []
+    cnt = 0
+    if N == 0: 
+        break
+    M = ii()
+    px, py = mi()
+    mv = []
+    for i in range(1, M):
+        nx, ny = mi()
+        dx = nx - px
+        dy = ny - py
+        mv.append([dx, dy])
+        px, py = nx, ny
+
+
+    for i in range(N):
+        M = ii()
+        px, py = mi()
+        nmv = []
+        for j in range(1, M):
+            nx, ny = mi()
+            dx = nx - px
+            dy = ny - py
+            nmv.append([dx, dy])
+            px, py = nx, ny
+        for j in range(4): # 一致判定
+            tmpMV = rot(nmv, j)
+            invMV = tmpMV[::-1]
+            if tmpMV == mv or invMV == mv:
+                res.append(i+1)
+                print(i+1)
+                break
+    print("+++++")

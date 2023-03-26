@@ -1,0 +1,63 @@
+#include<bits/stdc++.h>
+using namespace std;
+//#include<atcoder/all>
+//using namespace atcoder;
+using ll = long long;
+int h,w;
+vector<vector<int>> G;
+int cost[4];
+int dist[30][30][4];
+int INF = 1e9;
+
+void solve(){
+	for(int i = 0;i<30;i++){
+		for(int j =0 ;j<30;j++){
+			for(int k = 0;k<4;k++){
+				dist[i][j][k] = INF;
+			}
+		}
+	}
+	dist[0][0][0] = 0;
+	int dx[4] = {0,1,0,-1},dy[4] = {1,0,-1,0};
+	using TUP = tuple<int,int,int,int>;
+	priority_queue<TUP,vector<TUP>,greater<>> PQ;
+	PQ.emplace(0,0,0,0);
+	while(PQ.size()){
+		auto [curCost,x,y,d] = PQ.top();
+		PQ.pop();
+		if(dist[x][y][d] != curCost )continue;
+		for(int i = 0;i<4;i++){
+			int nx = x + dx[(d+i)%4],ny = y + dy[(d+i)%4],nd = (d+i)%4;
+			if(nx<0||nx>=h||ny<0||ny>=w)continue;
+			int ncost = curCost + cost[i];
+			if(G[x][y] == i)ncost -= cost[i];
+			if(dist[nx][ny][nd] > ncost){
+				dist[nx][ny][nd] = ncost;
+				PQ.emplace(ncost,nx,ny,nd);
+			}
+		}
+	}
+	int ans = dist[h-1][w-1][0];
+	for(int i = 0;i<4;i++){
+		ans = min(ans,dist[h-1][w-1][i]);
+	}
+	cout<<ans<<endl;
+}
+
+signed main(){
+	cin.tie(nullptr);
+	ios::sync_with_stdio(false);
+	while(1){
+		cin >> w >> h;
+		if(h==0&&w==0)break;
+		G = vector<vector<int>>(h,vector<int>(w));
+		for(int i = 0;i<h;i++){
+			for(int j = 0;j<w;j++){
+				cin >> G[i][j];
+			}
+		}
+		for(int i =0;i<4;i++)cin >> cost[i];
+		solve();
+	}
+}
+

@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+std::vector<bool> prime_table(int n) {
+    std::vector<bool> prime(n + 1, true);
+    prime[0] = prime[1] = false;
+    for (int j = 4; j <= n; j += 2) prime[j] = false;
+    for (int i = 3; i * i <= n; i += 2) {
+        if (!prime[i]) continue;
+        for (int j = i * i; j <= n; j += 2 * i) prime[j] = false;
+    }
+    return prime;
+}
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    auto table = prime_table(1e5);
+    vector<ll> primes;
+    rep(i,2,1e5) if (table[i]) primes.push_back(i);
+    while (true) {
+        int m, a, b;
+        cin >> m >> a >> b;
+        if (m == 0) break;
+        tuple<ll, int, int> ans(0, 0, 0);
+        rep(i,0,primes.size()) {
+            int lb = i-1, ub = primes.size();
+            ll p = primes[i];
+            while (ub - lb > 1) {
+                int j = (lb + ub) / 2;
+                ll q = primes[j];
+                if (p*q > m || a*q > p*b) ub = j;
+                else lb = j;
+            }
+            if (lb >= i) chmax(ans, {primes[i]*primes[lb], primes[i], primes[lb]});
+        }
+        auto [_, p, q] = ans;
+        cout << p << " " << q << "\n";
+    }
+}

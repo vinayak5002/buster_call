@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for(int i = 0; i < (int)(n); i++)
+#define rrep(ri,n) for(int ri = (int)(n-1); ri >= 0; ri--)
+#define rep2(i,x,n) for(int i = (int)(x); i < (int)(n); i++)
+#define rrep2(ri,x,n) for(int ri = (int)(n-1); ri >= (int)(x); ri--)
+#define repit(itr,x) for(auto itr = x.begin(); itr != x.end(); itr++)
+#define rrepit(ritr,x) for(auto ritr = x.rbegin(); ritr != x.rend(); ritr++)
+#define ALL(x) x.begin(), x.end()
+using ll = long long;
+using namespace std;
+
+int main() {
+while(1) {
+  int n, m, c;
+  cin >> n >> m >> c;
+  int s, g;
+  cin >> s >> g; s--; g--;
+  if(n == 0) break;
+  const ll INF = 1e18;
+  vector gr(c, vector(n, vector<ll>(n, INF)));
+  rep(i, m) {
+    int x, y, d, c;
+    cin >> x >> y >> d >> c; x--; y--; c--;
+    gr.at(c).at(x).at(y) = min(gr.at(c).at(x).at(y), (ll)d);
+    gr.at(c).at(y).at(x) = gr.at(c).at(x).at(y);
+  }
+  vector<int> pv(c);
+  rep(i, c) cin >> pv.at(i);
+  rep(idx, c) {
+    int p = pv.at(idx);
+    vector<int> q(p-1);
+    rep(i, p-1) cin >> q.at(i);
+    vector<int> r(p);
+    rep(i, p) cin >> r.at(i);
+    vector<ll> d2cost(n*200+5, 0);
+    ll now = 0;
+    int qidx = 0, ridx = 0;
+    rep2(i, 1, d2cost.size()) {
+      now += r.at(ridx);
+      d2cost.at(i) = now;
+      if(qidx != p-1 && i == q.at(qidx)) {
+        qidx++;
+        ridx++;
+      }
+    }
+    auto &ng = gr.at(idx);
+    rep(i, n) ng.at(i).at(i) = 0;
+    rep(k, n)rep(i, n)rep(j, n) ng.at(i).at(j) = min(ng.at(i).at(j), ng.at(i).at(k)+ng.at(k).at(j));
+    rep(i, n)rep(j, n) {
+      if(ng.at(i).at(j) >= d2cost.size()) continue;
+      ng.at(i).at(j) = d2cost.at(ng.at(i).at(j));
+    }
+  }
+  vector ss(n, vector<ll>(n, INF));
+  rep(i, n)rep(j, n)rep(k, c) ss.at(i).at(j) = min(ss.at(i).at(j), gr.at(k).at(i).at(j));
+  rep(k, n)rep(i, n)rep(j, n) ss.at(i).at(j) = min(ss.at(i).at(j), ss.at(i).at(k)+ss.at(k).at(j));
+  ll ans = ss.at(s).at(g);
+  if(ans == INF) ans = -1;
+  cout << ans << endl;
+}
+  return 0;
+}

@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <iostream>
+
+using namespace std;
+
+const int WHITE=0;
+const int GRAY=1;
+const int BLACK=2;
+const int NIL=-1;
+
+typedef struct
+{
+    int d_time; /* 発見時刻 */
+    int f_time; /* 終了時刻 */
+    int color;
+    int pi; /* 先行点 */
+}graph;
+
+int time=0;
+
+void dfs(graph G[],int v[][],int u)
+{
+    G[u].color=GRAY;
+    G[u].d_time=time;
+    time++;
+    for(int i=0;i<n;i++)
+    {
+        if(v[u][i]!=NIL)dfs(G,v,v[u][i]);
+    }
+    G[u].color=BLACK;
+    G[u].f_time=time;
+}
+
+int main(void)
+{
+    int n;/* 頂点数 */
+    int u;
+    int k; /* 頂点番号，uの出次数 */
+    scanf("%d",&n); /* 頂点数を入力 */
+    graph G[n]; /* グラフの節点自体を記憶 */
+    int v[n][n]; /* 各頂点の隣接節点の番号を記憶 */
+    for(int i=0;i<n;i++)
+        for(int j=0;j<n;j++)
+            v[i][j]=NIL;
+    
+    for(int i=1;i<=n;i++)
+    {
+        scanf("%d %d",&u,&k);
+        for(int j=1;j<=k;j++)
+        {
+            scanf("%d",&v[i][j]);
+        }
+    }
+    
+    /* 初期化 */
+    for(int i=1;i=<n;i++)
+    {
+        G[i].color=WHITE;
+        G[i].pi=NIL;
+    }
+    G[1].color=GRAY;
+    
+    dfs(G,v,1);
+    
+    /* 出力 */
+    for(int i=1;i<=n;i++)
+        printf("%d %d %d\n",i,G[i].d_time,G[i].f_time)
+}

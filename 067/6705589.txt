@@ -1,0 +1,60 @@
+class RingBuffer
+  attr_accessor :base, :head, :tail, :capa
+
+  def initialize(n)
+    @capa = n
+    @base = Array.new(capa+1)
+    @head = @tail = 0
+  end
+
+  def enqueue(x)
+    if full?
+      raise 'size is full'
+    end
+
+    base[tail] = x
+    tail = (tail + 1) % capa
+  end
+
+  def dequeue
+    if empty?
+      raise 'buffer is empty. cannot dequeue any further'
+    end
+
+    x = base[head]
+    head = (head + 1) % capa
+
+    x
+  end
+
+  def full?
+    length == capa
+  end
+
+  def length
+    (tail - head) % capa
+  end
+end
+
+n, q = gets.chomp.split(' ').map(&:to_i)
+
+buf = RingBuffer.new(n)
+n.times do |i|
+  buf.enqueue gets.chomp.split(' ').map(&:to_i) # [name, time]
+end
+
+
+clock = 0
+while buf.length > 0
+  p = buf.dequeue
+
+  clock += q
+  p[1] -= q
+
+  if p[1] > 0
+    buf.enqueue(p)
+  else
+    puts "#{p[0]} #{clock}"
+  end
+end
+

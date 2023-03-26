@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+char ord[32], mess[32];
+
+void swap(char* a, char* b) {
+    char c = *a;
+    *a = *b;
+    *b = c;
+}
+
+int main(void) {
+    int t, l;
+    char stor;
+    scanf("%d", &t);
+    for (int tt = 0; tt < t; tt++) {
+        scanf("%s%s", ord, mess);
+        l = strlen(mess);
+        for (int i = strlen(ord) - 1; i >= 0; i--) {
+            if (ord[i] == 'J') {
+                stor = mess[l - 1];
+                for (int j = l - 1; j > 0; j--) mess[j] = mess[j - 1];
+                mess[0] = stor;
+            }
+            else if (ord[i] == 'C') {
+                stor = mess[0];
+                for (int j = 0; j < l - 1; j++) mess[j] = mess[j + 1];
+                mess[l - 1] = stor;
+            }
+            else if (ord[i] == 'E') {
+                for (int j = 0; j < (l >> 1); j++) {
+                    swap(&mess[j], &mess[j + ((l + 1) >> 1)]);
+                }
+            }
+            else if (ord[i] == 'A') {
+                for (int j = 0, k = l - 1; j < k; j++, k--) {
+                    swap(&mess[j], &mess[k]);
+                }
+            }
+            else if (ord[i] == 'P') {
+                for (int j = 0; j < l; j++) {
+                    if (isdigit(mess[j])) {
+                        mess[j] = (mess[j] - '0' + 9) % 10 + '0';
+                    }
+                }
+            }
+            else if (ord[i] == 'M') {
+                for (int j = 0; j < l; j++) {
+                    if (isdigit(mess[j])) {
+                        mess[j] = (mess[j] - '0' + 1) % 10 + '0';
+                    }
+                }
+            }
+            else return 1;
+        }
+        printf("%s\n", mess);
+    }
+    return 0;
+}

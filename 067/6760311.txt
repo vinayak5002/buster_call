@@ -1,0 +1,111 @@
+#include <bits/stdc++.h>
+#include <time.h>
+
+using namespace std;
+typedef long long ll;
+typedef vector<int> VI;
+typedef vector<long long> Vll;
+typedef vector<char> VC;
+typedef vector<double> VD;
+ll mm=1000000000;ll MM=mm+7;
+ll MM1=998244353;
+#define rep(i, n) for(int i=0;i<n;i++)
+#define PI 3.141592653589793
+#define inf 1e18
+ll zero=0;
+ll one=0;
+
+ll binarypow(ll a, ll n/*, ll mod*/){
+    ll res =1;
+    while(n>0){
+        if(n & 1){
+            res *=a;
+            // res %= mod;
+        }
+        a*=a;
+        // a %=mod;
+        n >>=1;
+    }
+  return res;
+}
+
+struct UnionFind{
+        vector<ll> par;         // par[自分]=親
+        UnionFind(ll N) :par(N){
+            rep(i,N) par[i]=i;
+        }
+    int root(ll x){ //データxの木の根を得る
+        if(par[x] ==x)return x;
+        return par[x]=root(par[x]);
+    }
+    void unite(ll x,ll y){ // xとyの木を併合
+        ll rx=root(x);
+        ll ry=root(y);
+        if(rx==ry)return;
+        par[rx]=ry;
+    }
+
+    bool same(ll x,ll y){ //x,yの木の根が同じならtrueを返す
+        ll rx=root(x);
+        ll ry=root(y);
+        return rx==ry;
+    }
+};
+
+ll modinv(ll a,ll m){
+  ll b=m,u=1,v=0;
+  while(b){
+    ll t=a/b;
+    a-=t*b; swap(a,b);
+    u-=t*v; swap(u,v);
+  }
+  u%=m;
+  if(u<0) u+=m;
+  return u;
+};
+
+
+
+int main(){
+    Vll ans;
+    rep(itr,200){
+        Vll a(4);
+        bool end=true;
+        ll cnt0=0;
+        rep(i,4){
+            cin >> a[i];
+            if(a[i]!=0)end=false;
+            else cnt0++;
+        }
+        if(end)break;
+        ll x=-1,num=inf;
+        rep(i,4){
+            if(a[i]==0)continue;
+            if(a[i]<num){
+                x=i;
+                num=a[i];
+            }
+        }
+        //cout << num << " " << x << endl;
+        while(cnt0<3){
+            //cout << cnt0 << " " << num << " " << x << endl;
+            ll newnum=num;
+            ll newx=x;
+            rep(i,4){
+                if(a[i]==0 || i==x)continue;
+                a[i]-=num;
+                if(a[i]==0)cnt0++;
+                else if((a[i]==newnum && i<newx)|| a[i]<newnum){
+                    newnum=a[i];
+                    newx=i;
+                }
+            }
+            num=newnum;
+            x=newx;
+        }
+        ans.emplace_back(num);
+    }
+    rep(i,ans.size())cout << ans[i] << endl;
+}
+
+

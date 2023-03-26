@@ -1,0 +1,47 @@
+#include <cstdio>
+#include <vector>
+#include <algorithm>
+
+#define rep(i, n) for(int i = 0; i < (n); i++) //for文の短縮
+
+using namespace std; 
+
+int n;//頂点数
+vector<int> G[100]; //各頂点を記憶する
+int t = 1; //時間をカウントする
+int d[100]; //各頂点の発見時間
+int f[100]; //各頂点の完了時間
+
+void dfs(int i){ //深さ優先探索
+	d[i] = t++;
+	rep(j, G[i].size()){
+		int v = G[i][j]; //各点に隣接する頂点の番号
+		if(!d[v]){
+			dfs(v); //再帰
+		}
+	}
+	f[i] = t++;
+}
+
+int main(){
+	scanf("%d", &n); //頂点数を入力する
+	rep(i, n){
+		int u, k; //uは頂点の番号,kはuの出次数
+		scanf("%d%d", &u, &k);
+		rep(j, k){
+			int v; //各点に隣接する頂点の番号
+			scanf("%d", &v);
+			G[u - 1].push_back(v - 1);
+		}
+	}
+	rep(i, n){
+		if(!d[i]){
+			dfs(i); //深さ優先探索を行う
+		}
+	}
+	rep(i, n){
+		printf("%d %d %d\n", i + 1, d[i], f[i]); //頂点の番号、その頂点の発見時刻、その頂点の完了時刻を出力
+	}
+	return 0;
+}
+

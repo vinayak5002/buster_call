@@ -1,0 +1,38 @@
+def find(x, arr, value):
+    if arr[x] == x:
+        return x
+    else:
+        fx = arr[x]
+        arr[x] = find(arr[x], arr, value)
+        value[x] += value[fx]
+        return arr[x]
+    if arr[x] == x:
+        return x
+    else:
+        arr[x] = find(arr[x], arr, value)
+        return arr[x]
+
+
+def relate(a, b, c, arr, value):
+    fa = find(a, arr, value)
+    fb = find(b, arr, value)
+    if fa != fb:
+        value[fa] = c + value[b] - value[a]
+        arr[fa] = fb
+
+
+value1 = [0] * 200000
+arr1 = [0] * 200000
+n, q = map(int, input().strip().split())
+for i in range(n):
+    arr1[i] = i
+
+for j in range(q):
+    oneLine = list(map(int, input().strip().split()))
+    if oneLine[0] == 1:
+        if find(oneLine[1], arr1, value1) == find(oneLine[2], arr1, value1):
+            print(value1[oneLine[1]] - value1[oneLine[2]])
+        else:
+            print("?")
+    if oneLine[0] == 0:
+        relate(oneLine[1], oneLine[2], oneLine[3], arr1, value1)

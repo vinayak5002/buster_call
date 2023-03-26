@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+namespace {
+    const int NIL = -1;
+    int n;
+    vector<int> color;
+    vector<vector<int>> g;
+}  // namespace
+
+void dfs(int r, int c);
+void assignColor();
+
+int main() {
+    int m, s, t, q;
+
+    cin >> n >> m;
+    color = vector<int>(n, NIL);
+    g = vector<vector<int>>(n);
+
+    for (int i = 0; i < m; i++) {
+        cin >> s >> t;
+        g.at(s).push_back(t);
+        g.at(t).push_back(s);
+    }
+
+    assignColor();
+
+    cin >> q;
+
+    while (q--) {
+        cin >> s >> t;
+        if (color.at(s) == color.at(t)) {
+            cout << "yes" << endl;
+        } else {
+            cout << "no" << endl;
+        }
+    }
+}
+
+void dfs(int r, int c) {
+    stack<int> s;
+    s.push(r);
+    color.at(r) = c;
+    while (!s.empty()) {
+        int u = s.top();
+        s.pop();
+        for (int i = 0; i < g.at(u).size(); i++) {
+            int v = g.at(u).at(i);
+            if (color.at(v) == NIL) {
+                color.at(v) = c;
+                s.push(v);
+            }
+        }
+    }
+    return;
+}
+
+void assignColor() {
+    int id = 1;
+    for (int u = 0; u < n; u++) {
+        if (color.at(u) == NIL) {
+            dfs(u, id);
+            id++;
+        }
+    }
+    return;
+}

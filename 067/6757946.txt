@@ -1,0 +1,48 @@
+S = [i for i in range(10000)]
+W = [i for i in range(10000)]
+edges = []
+
+def same(x, y):
+    return root(x) == root(y)
+    
+def root(i):
+    parent = S[i]
+    if i == parent:
+        return i
+    S[i] = root(parent)
+    return S[i]
+
+def relate(x, y, z):
+    rootx = root(x)
+    rooty = root(y)
+    if(rootx < rooty):
+        S[rooty] = rootx
+        W[rooty] += W[x] - W[y] + z 
+    else:
+        S[rootx] = rooty
+        W[rootx] += W[y]  - W[x] - z
+        
+def diff(x, y):
+    d = W[y] - W[x]
+    if same(x, y):
+        print(d)
+    else:
+        print("?")
+        
+def main():
+    Q = []
+    n,q = map(int, input().split())
+    for _ in range(q):
+        Q = list(map(int, input().split()))
+
+        if Q[0] == 0:
+            x,y,z = Q[1], Q[2], Q[3]
+            edges.append((x, y, z))
+            relate(x, y, z)
+        else:
+            x,y = Q[1], Q[2]
+            diff(x, y)
+
+
+if __name__ == '__main__':
+    main()

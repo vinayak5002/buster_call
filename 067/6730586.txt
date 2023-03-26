@@ -1,0 +1,74 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+struct Node{
+    int val;
+    vector<struct Node*> child;
+    int depth;
+} ;
+
+struct Node* append(struct Node *p, int id, vector<struct Node*> vec, int d) {
+    if (p == nullptr) {
+        p = new struct Node;
+        p->val = id;
+        p->child = vec;
+        p->depth = d;
+        return p;
+    }
+    else {
+        for (int i = 0; i < p->child.size(); i++) {
+            if (p->child[i]->val == id) {
+                struct Node *tmp = p->child[i];
+                tmp->child = vec;
+                tmp->depth = d + 1;
+                break;
+            }
+            else {
+                p->child[i] = append(p->child[i], id, vec, d + 1);
+            }
+        }
+    }
+    return p;
+}
+
+void print(struct Node *n, int parent) {
+    cout << "node " << n->val << ": ";
+    cout << "parent = " << parent << ", ";
+    cout << "depth = " << n->depth << ", ";
+    if (parent == -1)
+        cout << "root, ";
+    else if (n->child.size() > 0)
+        cout << "internal node, ";
+    else
+        cout << "leaf, ";
+    cout << "[";
+    for (int i = 0; i < n->child.size(); i++) {
+        cout << n->child[i]->val;
+        if (i < n->child.size() - 1)
+            cout << ", ";
+    }
+    cout << "]" << endl;
+    for (Node* tmp:n->child)
+        print(tmp, n->val);
+}
+
+int main() {
+    struct Node *root = nullptr;
+    int n;
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        int id, k, c;
+        vector<struct Node*> v;
+        cin >> id >> k;
+        for (int j = 0; j < k; j++) {
+            struct Node *tc = new struct Node;
+            int ch;
+            cin >> ch;
+            tc->val = ch;
+            v.push_back(tc);
+        }
+        root = append(root, id, v, 0);
+    }
+    print(root, -1);
+}

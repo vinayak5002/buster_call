@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < n; ++i)
+typedef long long ll;
+using namespace std;
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+
+    string S;
+    cin >> S;
+    int N = S.size();
+
+    ll a = 0;
+    rep(i, N) {
+        if (isdigit(S[i])) {
+            a = a * 10 + (S[i] - '0');
+        }
+    }
+
+    ll b = 0;
+    rep(i, N) {
+        if (S[i] == '(')
+            break;
+        if (isdigit(S[i])) {
+            b = b * 10 + (S[i] - '0');
+        }
+    }
+
+    ll c = 0;
+    for (int i = N - 1; i >= 0; --i) {
+        if (S[i] == ')') c += i;
+        if (S[i] == '(') c -= i + 1;
+    }
+
+    ll bunbo = 1;
+    rep(i, c) bunbo *= 10;
+    bunbo--;
+
+    rep(i, N) {
+        if (S[i] == '.') {
+            rep(j, i) bunbo *= 10;
+        }
+    }
+    rep(i, N) {
+        if (S[i] == '0')
+            bunbo /= 10;
+        else
+            break;
+    }
+
+    ll bunshi = a - b;
+    if (bunshi == 0) {
+        bunshi = a;
+
+        bunbo = 1;
+        rep(i, N) {
+            if (S[i] == '.') {
+                rep(j, N - i - 1) bunbo *= 10;
+            }
+        }
+    }
+    ll g = gcd(bunbo, bunshi);
+    bunbo /= g;
+    bunshi /= g;
+
+    cout << bunshi << "/" << bunbo << "\n";
+
+    return 0;
+}
+

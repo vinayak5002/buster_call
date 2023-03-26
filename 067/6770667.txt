@@ -1,0 +1,70 @@
+#include<stdio.h>
+long long int cntbit(long long int n)
+{
+	long long int res = 0;
+	while (n > 0)
+	{
+		res += n % 2;
+		n /= 2;
+	}
+	return res;
+}
+long long int n, m;
+long long int gcd(long long int a, long long int b)
+{
+	long long int r = a % b;
+	while (r > 0)
+	{
+		a = b;
+		b = r;
+		r = a % b;
+	}
+	return b;
+}
+long long int lcm(long long int a, long long int b)
+{
+	if (a < 0 || b < 0)
+		return -1;
+	long long int g = gcd(a, b);
+	a /= g;
+	if (a >= (m + b) / b)
+		return -1;
+	return a * b;
+}
+int main()
+{
+	scanf("%lld %lld", &n, &m);
+	long long int i, j;
+	long long int a[22];
+	for (i = 0; i < n; i++)
+		scanf("%lld", &a[i]);
+	double p[22];
+	for (i = 0; i < n; i++)
+	{
+		scanf("%lf", &p[i]);
+		p[i] /= 100;
+	}
+	long long int max = 1 << n;
+	double ans = 0, pp;
+	long long int l, c;
+	for (i = 1; i < max; i++)
+	{
+		pp = 1;
+		for (j = 0; j < n; j++)
+			if ((i & (1 << j)) == (1 << j))
+				pp *= p[j];
+		l = 1;
+		for (j = 0; j < n; j++)
+			if ((i & (1 << j)) == (1 << j))
+				l = lcm(l, a[j]);
+		if (l < 0)
+			continue;
+		l = m / l;
+		if (cntbit(i) % 2 > 0)
+			ans += l * pp;
+		else
+			ans -= l * pp;
+	}
+	printf("%.20lf\n", ans);
+	return 0;
+}

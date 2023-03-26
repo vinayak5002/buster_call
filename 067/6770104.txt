@@ -1,0 +1,43 @@
+import sys
+
+sys.setrecursionlimit(100000)
+n = int(input())
+targetList = list(map(int, input().split()))
+inversionCounter = 0
+
+
+def merge(leftList, rightList):
+    global inversionCounter
+    mergedList = []
+    i, j = 0, 0
+    while (i < len(leftList)) and (j < len(rightList)):
+        if leftList[i] <= rightList[j]:
+            mergedList.append(leftList[i])
+            i += 1
+        else:
+            inversionCounter += len(leftList) - i
+            mergedList.append(rightList[j])
+            j += 1
+
+    if i < len(leftList):
+        inversionCounter += len(mergedList) - i - j
+        mergedList.extend(leftList[i:])
+
+    if j < len(rightList):
+        mergedList.extend(rightList[j:])
+
+    return mergedList
+
+
+def mergeSort(targetList):
+    if len(targetList) <= 1:
+        return targetList
+
+    middleIndex = len(targetList) // 2
+    leftList = mergeSort(targetList[:middleIndex])
+    rightList = mergeSort(targetList[middleIndex:])
+    return merge(leftList, rightList)
+
+
+mergeSort(targetList)
+print(inversionCounter)

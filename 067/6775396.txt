@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+#ifdef MY_DEBUG
+  #include "dprint.cpp"
+  # define dprint(a, ...);\
+      do {\
+          printf("line : %d, func : %s\n",\
+                __LINE__, __func__);\
+          dprint(#a,a,##__VA_ARGS__ );\
+      } while (0)
+#else
+  #define dprint(a,...) 
+#endif
+using namespace std;
+int solve(int n,vector<int>vec){
+  vector<vector<int>>dp(n,vector<int>(n,0));
+  
+  for (int d = 2; d <= n; d++){
+    for (int i = 0; i <= n-d; i++){
+      int j= i+d-1;
+      //和
+      for (int t_d = 0; t_d <= d-2; t_d++){
+        dp[i][j]=max(dp[i][j] , dp[i][i+t_d]+dp[i+t_d+1][j]);
+      }
+      
+      if(d%2==0){
+        if(dp[i+1][j-1]==d/2-1&&abs(vec[i]-vec[j])<=1){
+          dp[i][j]=max(dp[i][j] ,d/2-1+1);
+        }
+      }
+
+    }
+  }
+    
+  
+
+
+  return dp[0][n-1]*2;
+
+}
+
+int main() {
+
+while (true)
+{
+  int n;
+  cin>>n;
+  if(n==0)break;
+  vector<int> vec(n);
+  for (int i = 0; i < n; i++) cin >> vec[i];
+  
+  cout <<solve(n,vec)<<endl;
+}
+
+
+
+return 0;
+}

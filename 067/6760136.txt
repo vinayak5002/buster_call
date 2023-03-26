@@ -1,0 +1,66 @@
+#include <stdio.h>
+#define MAX 100
+
+int color[MAX];
+int time=0;
+int array[MAX][MAX];
+int counter[MAX];
+int total=0;
+int current=1;
+int starter=1;
+
+void count (int num){
+    int i=1;
+    if(num==starter){
+        counter[current]=0;
+    }
+    else{
+        if(array[starter][num]==1){
+            counter[current]+=1;
+            return;
+        }
+        else{
+            for(i=1; i<total+1; i++){
+                if(array[num][i]==1){
+                    counter[current]+=1;
+                    count(i);
+                }
+            }
+            if (counter[current]==0){
+                counter[current]=-1;
+            }
+        }
+        
+    }
+}
+
+
+int main(void){
+    scanf("%d", &total);
+    int i, j;
+    for(i=1; i<total+1; i++){
+        for(j=1; j<total+1; j++){
+            array[i][j]=0;
+        }
+        counter[i]=0;
+    }
+    int id, num, temp;
+    for(i=1; i<total+1; i++){
+        scanf("%d %d", &id, &num);
+        for(j=1; j<num+1; j++){
+            scanf("%d", &temp);
+            array[i][temp]=1;
+            array[temp][i]=1;
+        }
+    }
+
+    for(i=1; i<total+1; i++){
+        current=i;
+        count(i);
+        printf("%d %d\n", i, counter[i]);
+    }
+
+
+    return 0;
+    
+}

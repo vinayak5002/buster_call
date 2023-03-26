@@ -1,0 +1,85 @@
+#include <stdio.h>
+#define MAX 100
+#define MAXIMUM 100000
+
+int time=0;
+int array[MAX][MAX];
+int d[MAX];
+int color[MAX];
+int total=0;
+int temp=0;
+int que[MAXIMUM];
+int tail=0;
+int head=0;
+
+void enque(int x){
+    que[tail]=x;
+	tail=tail+1;
+	if(tail==MAX){
+		tail = 0;
+	}
+}
+
+
+void deque(){
+    que[head]=0;
+	head=head+1;
+	if(head==MAX){
+		head = 0;
+    }
+}
+
+void count (){
+    for(int i=1;i<total+1; i++){
+		color[i]=0;
+		d[i]=-1;
+	}
+	
+	d[1]=0;
+	color[1]=1;
+	enque(1);
+	int u;
+	
+	while(que[head]!=0){
+		u = que[head];
+        deque();
+		for(int i=1; i<total+1; i++){
+			if(array[u][i]==1&&color[i]==0){
+				color[i] = 1;
+				d[i] = d[u] + 1;
+				enque(i);
+			}
+		}
+		color[u] = 2;
+	}
+    
+}
+
+
+int main(void){
+    scanf("%d", &total);
+    int i, j;
+    for(i=1; i<total+1; i++){
+        for(j=1; j<total+1; j++){
+            array[i][j]=0;
+        }
+    }
+    int id, num, temp;
+    for(i=1; i<total+1; i++){
+        scanf("%d %d", &id, &num);
+        for(j=1; j<num+1; j++){
+            scanf("%d", &temp);
+            if(temp!=id){
+                array[i][temp]=1;
+            }
+        }
+    }
+    count();
+
+    for(i=1; i<total+1; i++){
+        printf("%d %d\n", i, d[i]);
+    }
+
+    return 0;
+    
+}

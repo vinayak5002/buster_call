@@ -1,0 +1,129 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long int ull;
+#define chmin(x,y) x = min(x,y)
+#define chmax(x,y) x = max(x,y)
+#define BIG_NUM 2000000000
+#define HUGE_NUM 4000000000000000000 //オーバーフローに注意
+#define MOD 1000000007
+#define EPS 0.000000001
+
+
+
+#define SIZE 960
+
+struct Edge{
+	Edge(int arg_to,ll arg_value){
+		to = arg_to;
+		value = arg_value;
+	}
+	int to;
+	ll value;
+};
+
+int N,M;
+const ll BASE = 232792560;
+map<ll,ll> MAP,REV;
+bool visited[1005][SIZE];
+vector<Edge> G[1005];
+
+
+//最大公約数
+ll gcd(ll x,ll y){
+
+	x = abs(x);
+	y = abs(y);
+
+	if(x < y){
+		swap(x,y);
+	}
+	if(y == 0){
+		return x;
+	}else{
+		return gcd(y,x%y);
+	}
+}
+
+//最小公倍数
+ll lcm(ll x,ll y){
+
+	return (x*y)/gcd(x,y);
+}
+
+void dfs(int node,ll LCM){
+
+	if(visited[node][MAP[LCM]]){
+
+		return;
+	}
+	if(node != 0 || LCM != 1){
+
+		visited[node][MAP[LCM]] = true;
+	}
+
+	for(int i = 0; i < G[node].size(); i++){
+
+		int next = G[node][i].to;
+		ll next_LCM = lcm(LCM,G[node][i].value);
+
+		dfs(next,next_LCM);
+	}
+}
+
+
+int main(){
+
+	vector<ll> vec;
+	for(ll i=2; i*i <= BASE; i++){
+		if(BASE%i != 0)continue;
+
+		vec.push_back(i);
+
+		if(i != BASE/i){
+
+			vec.push_back(BASE/i);
+		}
+	}
+	sort(vec.begin(),vec.end());
+	for(int i = 0; i < vec.size(); i++){
+
+		MAP[vec[i]] = i;
+		REV[i] = vec[i];
+	}
+
+	scanf("%d %d",&N,&M);
+
+	int a,b,c;
+
+	for(int i = 0; i < M; i++){
+
+		scanf("%d %d %d",&a,&b,&c);
+		a--;
+		b--;
+		G[a].push_back(Edge(b,c));
+	}
+
+	dfs(0,1);
+
+	ll mini = HUGE_NUM,maxi = -HUGE_NUM;
+
+	for(int i = 0; i < vec.size(); i++){
+
+		if(visited[N-1][i]){
+
+			chmin(mini,REV[i]);
+			chmax(maxi,REV[i]);
+		}
+	}
+	if(mini == HUGE_NUM){
+
+		printf("IMPOSSIBLE\n");
+	}else{
+
+		printf("%lld %lld\n",mini,maxi);
+	}
+
+	return 0;
+}
+

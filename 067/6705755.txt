@@ -1,0 +1,198 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+struct node{
+  struct node *right;
+  struct node *left;
+  struct node *parent;
+  int key;
+};
+typedef struct node * Node;
+#define NIL NULL
+
+Node root;
+
+// ツリーの最小値を求める
+Node treeMinimum(Node x){
+
+    while(x->left != NIL){
+        x = x->left;
+    }
+    // 二分木では最も左の葉が最小値となるためwhileで求める
+    return x;
+}
+
+Node treeMaximum(Node x){
+
+
+}
+
+Node treeSearch(Node u, int k){
+
+    if(u->key == k){
+        return u;
+    }
+    //　検索したい値(k)がノードの値(key)よりも大きければ、自分よりも大きい値を持つ右のノードへ移る
+    else if(u->key < k){
+        if(u->right == NIL){ 
+            return NIL;
+        }
+        // 先に右に子があるかを調べ、なければNILを返す
+        return treeSearch(u->right, k);     
+    }
+    // 検索したい値がノードの値よりも小さい場合も同じ
+    else{
+        if(u->left == NIL){
+            return NIL;
+        }
+        return treeSearch(u->left, k);
+    }
+
+}
+
+/* 子が二つある場合は右のサブツリーの最小値をもってくる*/
+Node treeSuccessor(Node x){
+
+if(x->right != NIL){
+    return treeMinimum(x->right);
+}
+
+Node y = x->parent;
+
+while(y != NIL && x == y->right ){
+    x = y;
+    y = y->parent;
+}
+
+return y;
+
+}
+
+void treeDelete(Node z){
+  Node y; // 削除する対象をyとおく
+  Node x; // yの子
+
+  // zが子を持つかどうかを調べる
+  if(z->left == NIL || z->right == NIL){
+      y = z; // yが子を一つ持つ、もしくは持たない場合はzを削除対象にする
+  }
+  else{
+      y = treeSuccessor(z); // zが子を二つ持つ場合はzの次の節点を削除対象とする
+  }
+ 
+  // yの子を(x)を決める
+  if(y->left != NIL){
+      x = y->left; // yの左の子が存在すればxは左の子にする
+  }
+  else{
+      x = y->right; // そうでなければ右の子にする
+  }
+
+  // xの親をきめる
+  if(x != NIL){
+      x->parent = y->parent; // yは削除される節点なのでxの親はyの親となる
+  }
+  
+  if(y->parent == NIL){
+     root = x; // yが根であるときxを木の根とする
+  }
+  else if(y == y->parent->left){
+      y->parent->left = x; //yが左の子か、右の子かどうか判別する
+  }
+  else {
+      y->parent->right = x;
+  }
+
+  if(y != z){
+      z->key = y->key; //yがzと違う場合（次節点）は削除されるのはyなのでzにyの値をいれる
+  }
+
+  free(y); //メモリの解放
+
+}
+
+void insert(int k){
+  Node y = NIL;
+  Node x = root;
+  Node z;
+
+  z = malloc(sizeof(struct node));  /*malloc関数による動的割り当て*/
+  z->key = k;
+  z->left = NIL;
+  z->right = NIL;
+
+  while(x != NIL){
+      y = x;
+      if(z->key < x->key){
+          x = x->left;
+      }
+      else{
+          x = x->right;
+      }
+  }  /*最初はx=root=NULLであるためループ無し*/
+  
+  z->parent = y;
+  if(y==NIL){
+      root = z;
+  } /*ここで初めてrootの値が決まる*/
+
+  else{
+      if(z->key < y->key){
+          y->left = z;
+      }
+      else{
+          y->right = z;
+      }
+  }
+
+}
+
+/*先行順探索*/
+void preParse(Node u){
+    if(u == NIL) return;
+    printf(" %d", u->key);
+    preParse(u->left);
+    preParse(u->right);
+}
+
+/*中間順探索*/
+void inParse(Node u){
+    if(u == NIL) return;
+    inParse(u->left);
+    printf(" %d", u->key);
+    inParse(u->right);
+}
+
+
+int main(){
+  int n, i, x;
+  char com[20];
+  scanf("%d", &n);
+
+  for ( i = 0; i < n; i++ ){
+    scanf("%s", com);  /*どのような操作をするのか入力*/
+
+    if ( com[0] == 'f' ) /*findの場合*/{
+      scanf("%d", &x);
+      Node t = treeSearch(root, x);
+      if ( t != NIL ) printf("yes\n");
+      else printf("no\n");
+    } 
+    else if ( com[0] == 'i' ) /*insertの場合*/{
+      scanf("%d", &x);
+      insert(x);
+    } 
+    else if ( com[0] == 'p' ) /*printの場合*/{
+      inParse(root);
+      printf("\n");
+      preParse(root);
+      printf("\n");
+    } 
+    else if ( com[0] == 'd' ) /*deleteの場合*/{
+      scanf("%d", &x);
+      treeDelete(treeSearch(root, x));
+    }
+  }
+
+  return 0;
+}

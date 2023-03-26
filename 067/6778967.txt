@@ -1,0 +1,100 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define reps(i,start,end) for(int i = start; i < (int)(end); i++)
+#define ll long long
+#define print(t) cout << t << endl
+#define all(a)  (a).begin(),(a).end()
+// << std::fixed << std::setprecision(0)
+const ll INF = 1LL << 60;
+
+template<class T> void chmin(T& a, T b){
+ if(a > b){
+  a = b;
+ }
+}
+
+template<class T> void chmax(T& a, T b){
+ if(a < b){
+  a = b;
+ }
+}
+
+template<class Tp>
+bool zero (const Tp &x) {
+    return x == 0;
+}
+
+template<class Tp, class... Args>
+bool zero (const Tp &x, const Args& ...args) {
+    return zero(x) and zero(args...);
+}
+// ICPCjudge
+int main(){
+  while(true){
+    int M,T,P,R;cin >> M >> T >> P >> R;
+    if(zero(M,T,P,R))break;
+    // 0indent
+    vector<vector<tuple<int,int,bool>>> memo(T);
+    rep(i,R){
+      int m,t,p,j;
+      cin >> m >> t >> p >> j;
+      t -= 1;
+      bool J = false;
+      if(j==0) J = true;
+      memo[t].push_back({m,p,J});
+    }
+    // rep(i,T){
+    //   for(auto p: memo[i]){
+    //     auto[a,b,c] = p;
+    //     cout << a<< " "<< b <<" "<< c << endl;
+    //   }
+    //   cout << endl;
+    // }
+    // score  time
+    vector<tuple<int,int,int>> result(T);
+    rep(i,T){
+      result[i] = {0,0,i+1};
+    }
+    rep(i,T){
+      for(auto p:memo[i]){
+        auto [a,b,c] = p;
+        if(c == true){
+          result[i] = {get<0>(result[i])+1,get<1>(result[i])-a,i+1};
+          // result[i].first++;
+          // result[i].second += a;
+          for(auto q:memo[i]){
+            auto[d,e,f] = q;
+            if(b == e && d !=a){
+              result[i] = {get<0>(result[i]),get<1>(result[i])-20,i+1};
+              // result[i].second += d;
+            }
+          }
+        }
+      }
+    }
+    sort(all(result));
+    reverse(all(result));
+
+    // for(auto p:result){
+    //   auto [a,b,c] = p;
+    //   cout << a << " " << b << " "<< c <<endl;
+    // }
+    cout << get<2>(result[0]);
+    int Snow = get<0>(result[0]);
+    reps(i,1,T){
+      if(get<0>(result[i]) == Snow){
+        if(get<1>(result[i]) == get<1>(result[i-1])){
+          cout << "=" << get<2>(result[i]);
+        }else{
+          cout << ","<< get<2>(result[i]);
+        }
+      }else{
+          cout << ","<< get<2>(result[i]);
+          Snow = get<0>(result[i]);
+      }
+    }
+    cout << endl;
+  }
+}
+

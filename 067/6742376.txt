@@ -1,0 +1,39 @@
+#include <stdio.h>
+
+int main(){
+	char buf[1200];
+	char *p;
+	char tmp;
+	char w[11]; // 最後に改行文字付き
+	int w_len = 0;
+	int cnt = 0;
+
+	// w
+	fgets(buf, sizeof(buf) - 1, stdin);
+	p = buf;
+	while (*p){
+		sscanf(p, "%c", &w[w_len]);
+		w_len++;
+		p++;
+	}
+	// 処理
+	while (fgets(buf, sizeof(buf) - 1, stdin) != NULL){ // 標準入力
+		p = buf;
+		while (*p){
+			sscanf(p, "%c", &tmp);
+			for(int i=0; i < w_len-1; i++){
+				//printf("%c %c %c\n", tmp, w[i], w[i] - 'a' + 'A');
+				if (tmp == ' ') break;
+				if (!(tmp == w[i] || tmp == w[i] - 'a' + 'A')) break;
+				if (i == w_len - 2) cnt++;
+				p++;
+				sscanf(p, "%c", &tmp);
+			}
+			p++;
+		}
+	}
+	// 画面表示
+	printf("%d\n", cnt);
+
+	return 0;
+}

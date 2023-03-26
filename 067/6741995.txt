@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+struct Card
+{
+    string suit;
+    int num;
+    int order;
+};
+
+void swap(int &a, int &b) {
+    int tmp = a;
+    a = b;
+    b = tmp;
+}
+
+int partition(vector<Card> &A, int p, int r) {
+    int x = A[r].num;
+    int i = p-1;
+    for (int j = p; j < r; j++) {
+        if (A[j].num <= x) {
+            i = i + 1;
+            swap(A[i], A[j]);
+        }
+    }
+    swap(A[i+1], A[r]);
+    return i+1;
+}
+
+void quicksort(vector<Card> &A, int p, int r) {
+    if (p < r) {
+        int q = partition(A, p, r);
+        quicksort(A, p, q-1);
+        quicksort(A, q+1, r);
+    }
+}
+
+void print_vector(vector<Card> &vec) {
+    for (int i = 0; i < vec.size()-1; i++){
+        cout << vec.at(i).suit << " " << vec.at(i).num << endl;
+    }
+    cout << vec.back().suit << " " << vec.back().num << endl;
+}
+
+bool isStable(vector<Card> &vec) {
+    for (int i = 0; i < vec.size()-1; i++){
+        for (int j = i; j < vec.size(); j++) {
+            if (vec.at(i).num == vec.at(j).num && vec.at(i).order > vec.at(j).num) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+int main(){
+    int N;
+    cin >> N;
+    vector<Card> vec(N);
+    for (int i = 0; i < N; i++) {
+        cin >> vec.at(i).suit;
+        cin >> vec.at(i).num;
+        vec.at(i).order = i;
+    }
+    quicksort(vec, 0, N-1);
+    if (isStable(vec)) {
+        cout << "Stable" << endl;
+    } else {
+        cout << "Not stable" << endl;
+    }
+    print_vector(vec);
+}

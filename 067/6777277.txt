@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 2000000002
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 123456
+#define M 1000000007
+// const int M = 1e7 のようにかく。
+
+typedef long long int ll;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+#define REP(i,n) for(int i=0; i<(int)n; i++)
+
+int linear(int *A, int &n, int &key){
+    int ans = 0;
+    REP(i,n) {
+        if (A[i]==key) { ans++; break ; }
+    }
+    return ans;
+}
+
+int binary(int *A, int &key, int l, int r){
+    //binary(A,key,l,r+1);
+    // [l,r)が範囲のとき、midより大きいか小さいかを判断して
+    // r-l=1になったら要素が1だから終了
+    
+    //printf("START binary l=%d, r=%d \n",l,r);
+    int m = (l+r)/2;
+    int ans = 0;
+    if (r-l >1) {
+        if ( key < A[m] ) {
+            ans = binary(A,key,l,m);
+        }else{
+            ans = binary(A,key,m,r);
+        }
+    } else {
+        // printf ("A[m] is %d \n", A[m]);
+        if (A[m]==key) { ans = 1; }
+        else { ans = 0 ;}
+    }
+    return ans;
+}
+
+//ポインタ渡しと参照渡し
+// 参照渡しはC++で追加された
+// ポインタ渡しは　通常は&で渡して、*で受ける。（受けたのはポインタ）
+// 参照渡しはそのまま渡して、&で受ける。（受けたのは値を参照した値）
+// 結果は同じような感じ。
+
+//「配列渡し」は「ポインタ渡し」の一種でポインタ変数を引数として使うことは同じですが
+//、呼び出し元の実引数が変数ではなくて配列であるという違いがあります。
+// 要するに&をつけない？
+
+int main() {
+    int n , m , key;
+    int  res =0;
+    int A[10001];
+
+    scanf ("%d",&n);
+    REP(i,n){ 
+        scanf("%d",&A[i]);
+    }
+    scanf ("%d",&m);
+    REP(i,m){ 
+        // 配列に保存しないで1つずつサーチする。
+        scanf ("%d",&key);
+        res += binary(A,key,0,n);   //linear(A,n,key);
+    }
+
+    printf("%d\n", res  );
+
+    return 0;
+}
+
+

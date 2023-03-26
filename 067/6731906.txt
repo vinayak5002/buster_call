@@ -1,0 +1,82 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main() {
+  while(true){
+    string s, t;
+    cin >> s;
+    if(s == ".") break;
+    cin >> t;
+    if(s == t) cout << "IDENTICAL" << endl;
+    else{
+      if(s[0] != '"') s = '@' + s;
+      if(s.back() != '"') s += '@';
+      if(t[0] != '"') t = '@' + t;
+      if(t.back() != '"') t += '@';
+      int n = s.size();
+      int m = t.size();
+      vector<int> p1, p2;
+      for(int i = 0; i < n; i++){
+        if(s[i] == '"' || s[i] == '@') p1.emplace_back(i);
+      }
+      for(int i = 0; i < m; i++){
+        if(t[i] == '"' || t[i] == '@') p2.emplace_back(i);
+      }
+      vector<pair<string, int>> v1, v2;
+      int k1 = p1.size();
+      int k2 = p2.size();
+      int c1 = 0;
+      int c2 = 0;
+      for(int i = 0; i < k1-1; i++){
+        if(s[p1[i]] == '"' && s[p1[i+1]] == '"' && c1%2 == 0){
+          v1.emplace_back(s.substr(p1[i]+1, p1[i+1] - p1[i] - 1), 1);
+        }
+        else{
+          v1.emplace_back(s.substr(p1[i]+1, p1[i+1] - p1[i] - 1), 0);
+        }
+        if(s[p1[i]] == '"') c1++;
+      }
+      for(int i = 0; i < k2-1; i++){
+        if(t[p2[i]] == '"' && t[p2[i+1]] == '"' && c2%2 == 0){
+          v2.emplace_back(t.substr(p2[i]+1, p2[i+1] - p2[i] - 1), 1);
+        }
+        else{
+          v2.emplace_back(t.substr(p2[i]+1, p2[i+1] - p2[i] - 1), 0);
+        }
+        if(t[p2[i]] == '"') c2++;
+      }
+      if(v1.size() != v2.size()){
+        cout << "DIFFERENT" << endl;
+      }
+      else{
+        int l = v1.size();
+        bool diff = false;
+        int cnt = 0;
+        for(int i = 0; i < l; i++){
+          auto[s1, x1] = v1[i];
+          auto[s2, x2] = v2[i];
+          if(x1 != x2){
+            diff = true;
+            break;
+          }
+          if(x1 == 0){
+            if(s1 != s2){
+              diff = true;
+              break;
+            }
+          }
+          else{
+            if(s1 != s2) cnt++;
+          }
+        }
+        if(diff || (!diff && cnt != 1)){
+          cout << "DIFFERENT" << endl;
+        }
+        else{
+          cout << "CLOSE" << endl;
+        }
+      }
+    }
+  }
+  return 0;
+}

@@ -1,0 +1,60 @@
+#include<iostream>
+#include<vector>
+
+bool traverser_DFS(int,std::vector<int>);
+
+int V,E;
+std::vector<std::vector<int> > connection(100,std::vector<int>(100,0));
+
+int main(){
+    int s,t;
+    std::cin >> V >>E;
+
+    std::vector<int> visited(V,0);
+
+    // init
+    for(int i = 0;i<V;i++){
+        for(int j = 0;j<V;j++ ){
+            connection[i][j]=0;
+        }
+    }
+
+    for(int i = 0; i<E;i++){
+        std::cin>> s >> t;
+        connection[s][t]=1;
+    }
+
+    bool flag = false;
+    
+    for(int i = 0;i<V;i++){
+        if(traverser_DFS(i,visited)){
+            flag = true;
+            break;
+        }
+    }
+
+    if(flag){
+        std::cout<<"1"<<std::endl;
+    }else{
+        std::cout<<"0"<<std::endl;
+    }
+    return 0;
+}
+
+bool traverser_DFS(int now,std::vector<int> visited){
+
+    if(visited[now]){
+        return true;
+    }else{
+        visited[now]=1;
+    }
+
+    for(int i = 0;i<V;i++){
+        if(connection[now][i]==1){
+            if(traverser_DFS(i,visited)){
+            return true;
+            }   
+        }
+    }
+    return false;
+}

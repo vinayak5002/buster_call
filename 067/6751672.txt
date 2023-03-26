@@ -1,0 +1,53 @@
+use std::cmp::Reverse;
+use std::collections::BinaryHeap;
+use std::io;
+use std::io::Read;
+
+fn main() {
+    let mut buf = String::new();
+    io::stdin().read_to_string(&mut buf).unwrap();
+    let mut iter = buf.split_whitespace();
+
+    let v: usize = iter.next().unwrap().parse().unwrap();
+    let e: usize = iter.next().unwrap().parse().unwrap();
+    let r: usize = iter.next().unwrap().parse().unwrap();
+
+    let mut g: Vec<Vec<isize>> = vec![vec![-1; v]; v];
+    let mut ans: Vec<isize> = vec![-1; v];
+
+    for _ in 0..e {
+        let s: usize = iter.next().unwrap().parse().unwrap();
+        let t: usize = iter.next().unwrap().parse().unwrap();
+        let d: isize = iter.next().unwrap().parse().unwrap();
+        g[s][t] = d;
+    }
+
+    let mut q = BinaryHeap::new();
+
+    q.push((Reverse(0), r));
+
+    while q.len() != 0 {
+        let node = q.pop().unwrap();
+
+        if ans[node.1] == -1 {
+            ans[node.1] = node.0 .0;
+        } else {
+            continue;
+        }
+        for i in 0..v {
+            let d = g[node.1][i];
+            if d != -1 {
+                q.push((Reverse(d + node.0 .0), i))
+            }
+        }
+    }
+
+    for a in ans {
+        if a != -1 {
+            println!("{}", a);
+        } else {
+            println!("INF");
+        }
+    }
+}
+

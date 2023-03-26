@@ -1,0 +1,112 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <functional>
+#include <vector>
+#include <cstring>
+#include <iomanip>
+#include <numeric>
+#include <cmath>
+#include <cassert>
+#include <queue>
+#include <map>
+#include <set>
+using namespace std;
+using Int = int64_t;
+using P = pair<Int, Int>;
+const Int INF = 1 << 30;
+const Int MOD = (Int)1e9 + 7;
+const Int MAX_N = (Int)1e5 + 5;
+#define debug(x) cout << #x << ": " << x << endl
+#define debug2(x, y) cout << #x << ": " << x << ", " << #y << ": " << y << endl;
+template <typename T1, typename T2>
+ostream &operator<<(ostream &os, const pair<T1, T2> &p)
+{
+    os << p.first << " " << p.second;
+    return os;
+}
+template <typename T>
+ostream &operator<<(ostream &os, const vector<T> &v)
+{
+    for (int i = 0; i < (int)v.size(); i++)
+        os << v[i] << (i + 1 != v.size() ? " " : "");
+    return os;
+}
+
+class UnionFind
+{
+public:
+    vector<int> parent, rank;
+    UnionFind(int sz)
+    {
+        this->parent.assign(sz, -1);
+        // this->rank.assign(size, 0);
+    }
+
+    int root(int x)
+    {
+        if (this->parent[x] == -1)
+        {
+            return x;
+        }
+        else
+        {
+            return this->parent[x] = root(this->parent[x]);
+        }
+    }
+
+    bool unite(int x, int y)
+    {
+        int parent_x = root(x);
+        int parent_y = root(y);
+        // assert(parent_x != -1);
+        // assert(parent_y != -1);
+        if (x == y)  // same group
+            return false;
+
+        // if (rank[parent_x] < rank[parent_y])
+        //     swap(parent_x, parent_y);
+
+        parent[parent_y] = parent_x;
+        // if (rank[parent_x] == rank[parent_y])
+        //     rank[parent_y]++;
+        
+        return true;
+    }
+
+    bool is_same(int x, int y) { return root(x) == root(y); }
+};
+
+void solve()
+{
+    int N, Q;
+    cin >> N >> Q;
+    UnionFind uf(N);
+    vector<int> ans;
+    for (int i = 0; i < Q; i++)
+    {
+        int com, x, y;
+        cin >> com >> x >> y;
+        if (com)
+        {
+            bool is_same = uf.is_same(x, y);
+            ans.push_back(is_same ? 1 : 0);
+ 
+        }
+        else
+        {
+            uf.unite(x, y);
+        }
+    }
+    for(int i = 0; i < (int)ans.size(); i++)
+        cout << ans[i] << endl;
+}
+
+signed main()
+{
+    cin.tie(0);
+    ios::sync_with_stdio(false);
+    solve();
+    return 0;
+}
+

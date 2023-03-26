@@ -1,0 +1,166 @@
+import java.util.Scanner;
+
+public class Main {
+    static class Node {
+        int key;
+        int priority;
+        Node left;
+        Node right;
+        Node parent;
+
+        public Node(int key, int priority) {
+            this.key = key;
+            this.priority = priority;
+        }
+
+        public Node(int key, int priority, Node left, Node right, Node parent) {
+            this.key = key;
+            this.priority = priority;
+            this.left = left;
+            this.right = right;
+            this.parent = parent;
+        }
+    }
+
+    static Node leftRotate(Node cur) {
+        Node s = cur.right;
+        cur.right = s.left;
+        s.left = cur;
+        return s;
+    }
+
+    static Node rightRotate(Node cur) {
+        Node s = cur.left;
+        cur.left = s.right;
+        s.right = cur;
+        return s;
+    }
+
+    static Node insert(Node cur, Node newcomer) {
+        if (cur == null) {
+            return newcomer;
+        }
+
+        if (cur.key > newcomer.key) {
+            Node child = insert(cur.left, newcomer);
+            cur.left = child;
+            if (cur.priority < child.priority) {
+                return rightRotate(cur);
+            }
+        } else {
+            Node child = insert(cur.right, newcomer);
+            cur.right = child;
+            if (cur.priority < child.priority) {
+                return leftRotate(cur);
+            }
+        }
+
+        return cur;
+    }
+
+    static Node find(Node root, int key) {
+        Node cur = root;
+        while (cur != null) {
+            if (cur.key == key) {
+                break;
+            } else if (cur.key > key) {
+                cur = cur.left;
+            } else {
+                cur = cur.right;
+            }
+        }
+        return cur;
+    }
+
+    static Node delete(Node cur, int key) {
+        if (cur == null) {
+            return null;
+        }
+
+        if (cur.key > key) {
+            cur.left = delete(cur.left, key);
+        } else if (cur.key < key) {
+            cur.right = delete(cur.right, key);
+        } else {
+            return deleteWithRotate(cur, key);
+        }
+
+        return cur;
+    }
+
+    static Node deleteWithRotate(Node cur, int key) {
+        if (cur.left == null && cur.right == null) {
+            return null;
+        }
+
+        Node subRoot;
+        if (cur.left == null) {
+            subRoot = leftRotate(cur);
+        } else if (cur.right == null) {
+            subRoot = rightRotate(cur);
+        } else {
+            if (cur.left.priority > cur.right.priority) {
+                subRoot = rightRotate(cur);
+            } else {
+                subRoot = leftRotate(cur);
+            }
+        }
+        
+        return delete(subRoot, key);
+    }
+
+    static void inOrderPrint(Node cur) {
+        if (cur == null) {
+            return;
+        }
+
+        inOrderPrint(cur.left);
+        System.out.print(" " + cur.key);
+        inOrderPrint(cur.right);
+    }
+
+    static void preOrderPrint(Node cur) {
+        if (cur == null) {
+            return;
+        }
+
+        System.out.print(" " + cur.key);
+        preOrderPrint(cur.left);
+        preOrderPrint(cur.right);
+    }
+
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+        int n = s.nextInt();
+        Node root = null;
+        for (int i = 0; i < n; i++) {
+            String command = s.next();
+            if (command.equals("insert")) {
+                int key = s.nextInt();
+                int priority = s.nextInt();
+                if (root == null) {
+                    root = new Node(key, priority);
+                } else {
+                    root = insert(root, new Node(key, priority));
+                }
+            } else if (command.equals("find")) {
+                int key = s.nextInt();
+                if (find(root, key) == null) {
+                    System.out.println("no");
+                } else {
+                    System.out.println("yes");
+                }
+            } else if (command.equals("delete")) {
+                int key = s.nextInt();
+                root = delete(root, key);
+            } else if (command.equals("print")) {
+                inOrderPrint(root);
+                System.out.println();
+                preOrderPrint(root);
+                System.out.println();
+            }
+        }
+        s.close();
+    }    
+}
+

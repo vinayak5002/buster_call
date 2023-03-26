@@ -1,0 +1,84 @@
+#include <stdio.h>
+#define MAXWH 30
+int map[MAXWH][MAXWH];
+char wall[2 * MAXWH - 1][2 * MAXWH + 2];
+int dx[4] = {1, 0, -1, 0};
+int dy[4] = {0, -1, 0, 1};
+int w, h;
+
+bfs()
+{
+    int x, y, len, flag, d;
+    int nx, ny;
+    for (y = 0; y < h; y++)
+    {
+        for (x = 0; x < w; x++)
+        {
+            map[y][x] = 0;
+        }
+    }
+    map[0][0] = 1;
+    for (len = 1;; len++)
+    {
+        flag = 0;
+        for (y = 0; y < h; y++)
+        {
+            for (x = 0; x < w; x++)
+            {
+                if (map[y][x] != len)
+                {
+                    continue;
+                }
+                for (d = 0; d < 4; d++)
+                {
+                    nx = x + dx[d];
+                    ny = y + dy[d];
+                    if (nx < 0 || nx >= w || ny < 0 || ny >= h)
+                    {
+                        continue;
+                    }
+                    if (map[ny][nx] > 0)
+                    {
+                        continue;
+                    }
+                    if (wall[y + ny][x + nx] == '1')
+                    {
+                        continue;
+                    }
+                    map[ny][nx] = len + 1;
+                    if (ny == h - 1 && nx == w - 1)
+                    {
+                        printf("%d¥n", len + 1);
+                        return;
+                    }
+                    flag = 1;
+                }
+            }
+        }
+        if (flag == 0)
+        {
+            break;
+        }
+        printf("0\n");
+    }
+}
+
+int main()
+{
+    int i;
+    while (1)
+    {
+        scanf("%d %d", &w, &h);
+        if (w == 0 && h == 0)
+        {
+            break;
+        }
+        getchar();
+        for (i = 0; i < 2 * h - 1; i++)
+        {
+            fgets(wall[i], 2 * MAXWH + 1, stdin);
+        }
+        bfs();
+    }
+}
+

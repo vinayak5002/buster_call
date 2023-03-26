@@ -1,0 +1,29 @@
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class Main{
+	public static void main(String[]args) {
+		Scanner sc = new Scanner(System.in);
+		int n = sc.nextInt();
+		int lim = sc.nextInt();
+		
+		int[] v = new int[n];
+		int[] w = new int[n];
+		for (int i = 0; i < n; i++) {
+			v[i] = sc.nextInt();
+			w[i] = sc.nextInt();
+		}
+		
+		int[][] dpTable = new int[n+1][lim+1];
+		for (int i = 0; i < dpTable.length; i++) Arrays.fill(dpTable[i], 0);
+		
+		for (int i = 1; i < n+1; i++) {
+			for (int j = 0; j <= lim; j++) {
+				dpTable[i][j] = Math.max(dpTable[i][j], dpTable[i-1][j]);
+				if (j >= w[i-1]) dpTable[i][j] = Math.max(dpTable[i][j], dpTable[i][j - w[i-1]] + v[i-1]);
+			}
+		}
+		
+		System.out.println(dpTable[n][lim]);
+	}
+}

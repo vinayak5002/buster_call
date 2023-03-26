@@ -1,0 +1,101 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 500001
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 50001
+#define MAXM 22
+typedef long long int ll;
+
+int n, m, v;
+int t = 0;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+
+long long int res;
+const long long int infty = (1LL<<31) - 1;
+const long long int M = 998244353777789;
+const long long int N = 499122177;
+
+vector<int> S;
+int A[MAXM][MAXN] ; 
+int VAL[MAXM] ; //コインの額面
+
+///////////計算量を減らす工夫///////////////
+// i番目までのcoinでj 円を払う最小枚数をA[i][j]に保管
+// A[i][j] = min (A[i-1][j], A[i-1][j-VAL[i]] + 1)
+/////////////////////////////
+void init(){
+    for (int i=0 ; i<MAXM ; i++) {
+        A[i][0] = 0;
+    }
+    for (int i=0 ; i<MAXM ; i++ ) {
+        for (int j=1 ; j<MAXN ; j++) {
+            if (VAL[i]==j) {A[i][j]=1;}
+            else {A[i][j] = INF;}
+        }
+    }
+    // printf("END init  \n");
+}
+
+
+int ansback(int coin, int w){
+    int tmp = INF ;
+    int mincoin = INF; 
+    if (coin == 0 || w<0 ) {return INF;}
+    else if ( A[coin][w] < INF) { mincoin = A[coin][w];}
+    else {
+        A[coin][w] = min (ansback(coin-1,w), ansback(coin,w-VAL[coin]) + 1) ; 
+        mincoin = A[coin][w];
+    }
+    // printf("ansback(%d,%d) = %d \n", coin,w,mincoin);
+    return mincoin;
+}
+
+int main(){
+    cin >> n >> m ;
+    for (int i=1; i<=m ; i++) {
+        cin >> v ;
+        VAL[i]=v;
+    }
+    init();
+    int mincoins = ansback(m,n);
+    printf ("%d\n", mincoins);
+    return 0;
+}
+
+
+/*
+コイン問題
+額面がc1, c2,..., cm　円の　m　種類のコインを使って、 n 円を支払うときの、コインの最小の枚数を求めて下さい。各額面のコインは何度でも使用することができます。
+
+入力
+n m
+c1 c2 ... cm
+１行目に整数 n と整数 m が１つの空白区切りで１行に与えられます。２行目に各コインの額面が１つの空白区切りで１行に与えられます。
+
+出力
+コインの最小枚数を１行に出力してください。
+
+制約
+1 ≤ n ≤ 50,000
+1 ≤ m ≤ 20
+1 ≤ 額面 ≤ 10,000
+額面はすべて異なり、必ず1を含む。
+入出力例
+
+入力例 1
+15 6
+1 2 7 8 12 50
+出力例 1
+2
+
+入力例 2
+65 6
+1 2 7 8 12 50
+出力例 2
+3
+
+
+*/
+

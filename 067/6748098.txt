@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <math.h>
+
+int main(){
+	char buf[4000];
+	char *p;
+	int n; // 学生の人数
+	int s[100];
+
+	while (1){
+		fgets(buf, sizeof(buf) - 1, stdin);
+		sscanf(buf, "%d", &n);
+		if (n == 0) break;
+
+		fgets(buf, sizeof(buf) - 1, stdin);
+		p = buf;
+		for (int i = 0; i < n; i++){
+			sscanf(p, "%d", &s[i]);
+			while (isdigit(*p)) p++;
+			while (isspace(*p)) p++;
+		}
+		// 処理
+		// 平均
+		double tmp = 0;
+		double m = 0; // 平均
+		for (int i = 0; i < n; i++){
+			tmp += s[i];
+		}
+		m = tmp / n;
+		// 分散
+		tmp = 0;
+		double alpha_2 = 0; // 分散
+		for (int i = 0; i < n; i++){
+			tmp += pow(s[i] - m, 2.);
+		}
+		alpha_2 = tmp / n;
+		// 標準偏差
+		double alpha = sqrt(alpha_2);
+		// 標準出力
+		printf("%lf\n", alpha);
+	}
+	return 0;
+}

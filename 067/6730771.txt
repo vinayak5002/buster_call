@@ -1,0 +1,31 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+int main(){
+    string s;
+    cin >> s;
+    function<bool(string)> dfs=[&](string t){
+        if(t == "ABC")return true;
+        if(t.size() <= 3)return false;
+        string cn;
+        for(int i = 0; i < t.size(); i++){
+            cn += t[i];
+            if(cn.size() >= 3 && cn.substr(cn.size() - 3, 3) == "ABC"){
+                cn.pop_back(),cn.pop_back(),cn.pop_back();
+                cn += '{';
+            }
+        }
+        if(cn.size() == t.size())return false;
+        for(char c = 'A'; c <= 'C'; c++){
+            string res;
+            for(int i = 0; i < cn.size(); i++){
+                if(cn[i] == '{')res += c;
+                else res += cn[i];
+            }
+            if(dfs(res))return true;
+        }
+        return false;
+    };
+    cout << (dfs(s) ? "Yes" : "No") << '\n';
+}

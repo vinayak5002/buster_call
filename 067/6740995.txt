@@ -1,0 +1,151 @@
+
+#if 1
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <queue>
+#include <stack>
+#include <array>
+#include <deque>
+#include <algorithm>
+#include <utility>
+#include <cstdint>
+#include <functional>
+#include <iomanip>
+#include <numeric>
+#include <assert.h>
+#include <bitset>
+#include <list>
+#include <cmath>
+#include <array>
+//#include <atcoder/all>
+
+auto& in = std::cin;
+auto& out = std::cout;
+#define all_range(C) std::begin(C), std::end(C)
+const int MOD = 10007;
+
+int H, W, K;
+char map[52][52];
+
+std::map<uint32_t, int16_t> dp[52][52][4];
+
+uint32_t myencode(int h, int w, const std::array<std::pair<int8_t, int8_t>, 6>& visited) {
+
+	std::pair<int8_t, int8_t> now = { h,w };
+	uint32_t mask = 0;
+	for (size_t i = 0; i < visited.size(); i++)
+	{
+		if (visited[i].first == now.first) {
+			if (visited[i].second == now.second + 1) {
+				mask |= 0;
+			}
+			else {
+				mask |= 1;
+			}
+		}
+		else {
+			if (visited[i].first == now.first - 1) {
+				mask |= 2;
+			}
+			else {
+				mask |= 3;
+			}
+		}
+
+		mask <<= 2;
+		now = visited[i];
+	}
+	return mask;
+}
+
+int16_t func(int h, int w, int k, std::array<std::pair<int8_t, int8_t>, 6> visited) {
+
+	if (map[h][w] == '#') {
+		return -5509;
+	}
+	if (k == 0 && h == H && w == W) {
+		return 0;
+	}
+	auto& memo_map = dp[h][w][k];
+	auto enc_v = myencode(h,w,visited);
+	if (memo_map.count(enc_v) != 0) {
+		return memo_map[enc_v];
+	}
+	auto& memo = memo_map[enc_v];
+	memo = -5509;
+	if (h == H && w == W) {
+		memo = 0;
+	}
+
+	std::array<std::pair<int8_t, int8_t>, 6> next_visited = { visited[1], visited[2], visited[3], visited[4], visited[5], {(int8_t)h,(int8_t)w} };
+	if (map[h][w + 1] != '#') {
+		bool getable = (map[h][w + 1] != '.');
+		getable &= std::count(all_range(visited), std::pair<int8_t, int8_t>{h, w + 1}) == 0;
+		memo = std::max<int16_t>(memo, (getable ? (map[h][w + 1] - '0') : 0) + func(h, w + 1, k, next_visited));
+	}
+	if (map[h + 1][w] != '#') {
+		bool getable = (map[h + 1][w] != '.');
+		getable &= std::count(all_range(visited), std::pair<int8_t, int8_t>{h + 1, w}) == 0;
+		memo = std::max<int16_t>(memo, (getable ? (map[h + 1][w] - '0') : 0) + func(h + 1, w, k, next_visited));
+	}
+
+	if (k > 0) {
+		if (map[h][w - 1] != '#') {
+			bool getable = (map[h][w - 1] != '.');
+			getable &= std::count(all_range(visited), std::pair<int8_t, int8_t>{h, w - 1}) == 0;
+			memo = std::max<int16_t>(memo, (getable ? (map[h][w - 1] - '0') : 0) + func(h, w - 1, k - 1, next_visited));
+		}
+		if (map[h - 1][w] != '#') {
+			bool getable = (map[h - 1][w] != '.');
+			getable &= std::count(all_range(visited), std::pair<int8_t, int8_t>{h - 1, w}) == 0;
+			memo = std::max<int16_t>(memo, (getable ? (map[h - 1][w] - '0') : 0) + func(h - 1, w, k - 1, next_visited));
+		}
+	}
+
+	if (memo < 0) {
+		memo = -5509;
+	}
+	return memo;
+}
+
+
+template<typename T, typename U>
+std::enable_if_t<std::rank<T>::value == 0> fill_all(T& arr, const U& v) {
+	arr = v;
+}
+template<typename ARR, typename U>
+std::enable_if_t<std::rank<ARR>::value != 0> fill_all(ARR& arr, const U& v) {
+	for (auto& i : arr) {
+		fill_all(i, v);
+	}
+}
+
+int main()
+{
+	using std::endl;
+
+	//in >> H >> W >> K;
+	scanf("%d", &H);
+	scanf("%d", &W);
+	scanf("%d", &K);
+	fill_all(map, '#');
+	for (size_t i = 1; i <= H; i++)
+	{
+		scanf("%s", &map[i][1]);
+		map[i][W + 1] = '#';
+	}
+	out << func(1, 1, K, {}) << endl;
+
+
+	return 0;
+}
+#endif
+

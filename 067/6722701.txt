@@ -1,0 +1,74 @@
+# 123.
+# https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_4_A&lang=ja
+
+from collections import deque
+
+def find_path(V, res_next_nodes, s, t):
+    queue = deque()
+    dist = [-1] * V
+    prev = [-1] * V
+    dist[s] = 0
+    queue.append(s)
+    while len(queue) > 0:
+        u = queue.popleft()
+        d = dist[u]
+        for v, capacity in res_next_nodes[u].items():
+            if capacity == 0:
+                continue
+
+            if dist[v] == -1:
+                dist[v] = d + 1
+                prev[v] = u
+                queue.append(v)
+    
+    if dist[t] == -1:
+        return None
+    
+    v = t
+    path = []
+    while v != s:
+        path.append(v)
+        v = prev[v]
+    path.append(s)
+    path.reverse()
+    return path
+
+
+def main():
+    V, E = map(int, input().split())
+    next_nodes = [ {} for _ in range(V)]
+    for _ in range(E):
+        u, v, c = map(int, input().split())
+        next_nodes[u][v] = {"capacity":c, "flow": 0}
+    
+    # 残余ネットワーク作成
+    res_next_nodes = [{} for _ in range(V)]
+    for u in range(V):
+        for v, values in next_nodes[u].items():
+            res_next_nodes[u][v] = values["capacity"]
+            res_next_nodes[v][u] = 0
+
+    s = 0
+    t = V - 1
+    answer = 0
+    # Edmond-karpアルゴリズム
+    while True:
+        path = find_path(V, res_next_nodes, s, t)
+
+        if path is None:
+            break
+
+        min_capacity = float("inf")
+        for u, v in zip(path[:-1], path[1:]):
+            min_capacity = min(min_capacity, res_next_nodes[u][v])
+        
+        answer += min_capacity
+
+        # 最大流のedge情報は求めないので今回は残余ネットワークの更新だけ
+        for u, v in zip(path[:-1], path[1:]):
+            res_next_nodes[u][v] -= min_capacity
+            res_next_nodes[v][u] += min_capacity
+    print(answer)
+
+if __name__ == "__main__":
+    main()

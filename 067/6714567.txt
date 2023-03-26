@@ -1,0 +1,71 @@
+#include <stdio.h>
+#define MAX 500001
+#define NIL 0
+int total=0;
+int array[MAX];
+
+
+void maxHeap(int i){
+    int left, right, largest, temp;
+    left=2*i;
+    right=2*i+1;
+
+    if(left<=total&&array[left]>array[i]){
+        largest=left;
+    }
+    else{
+        largest=i;
+    }
+    if(right<=total&&array[right]>array[largest]){
+        largest=right;
+    }
+
+    if(largest!=i){
+        temp=array[i];
+        array[i]=array[largest];
+        array[largest]=temp;
+        maxHeap(largest);
+    }
+}
+
+void print(int array[]){
+    int i;
+    for(i=1; i<=total; i++){
+            printf("node %d: key = %d,", i, array[i]);
+            if(i!=1){
+                printf(" parent key = %d,", array[i/2]);
+            }
+            if(array[i*2]!=NIL){
+                printf(" left key = %d,", array[i*2]);
+            }
+            if(array[i*2+1]!=NIL){
+                printf(" right key = %d,", array[i*2+1]);
+            }
+        printf("\n");
+    }
+    
+  
+}
+
+int main(void){
+    int i;
+    scanf("%d", &total);
+    for(i=0; i<MAX; i++){
+        array[i]=NIL;
+    }
+    for(i=1; i<=total; i++){
+        scanf("%d", &array[i]);
+    }
+
+    for(i=total/2; i>=1; i--){
+        maxHeap(i);
+    }
+    
+    for(i=1; i<=total; i++){
+        printf("%d ", array[i]);
+    }
+    printf("\n");
+    
+
+    return 0;
+}

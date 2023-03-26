@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+void dfs(vector<vector<int>> t, vector<vector<bool>>& f, int H ,int W, int x, int y);
+
+int main(void){
+    int H, W;
+    int cnt=0;
+    vector<vector<int>> t(52, vector<int>(52)); // 周囲1マスを海としておく
+    // vector<vector<int>> tmp(51, vector<int>(51));
+    vector<vector<bool>> f(52, vector<bool>(52, false)); // dfs済みかどうか
+    while(true){
+        cin >> W >> H;
+        if(W==0 && H==0) break;
+        for(int i=0;i<H+2;i++){
+            for(int j=0;j<W+2;j++){
+                if(i!=0 && j!=0 && i!=H+1 && j!=W+1) cin >> t[i][j];
+                else t[i][j]=0;
+                // tmp[i][j] = i*W+j;
+                f[i][j]=false;
+            }
+        }
+
+        cnt=0;
+        for(int i=1;i<H+1;i++){
+            for(int j=1;j<W+1;j++){
+                if(t[i][j]==1){
+                    if(f[i][j]==false){
+                        cnt++;
+                        // cout << cnt;
+                        f[i][j]=true;
+                        dfs(t, f, H, W, j, i);
+                    }
+                }
+            }
+        }
+        
+    cout << cnt << endl;
+    
+
+    }
+
+
+    return 0;
+}
+
+void dfs(vector<vector<int>> t, vector<vector<bool>>& f, int H ,int W, int x, int y){
+    for(int i=-1;i<2;i++){
+        for(int j=-1;j<2;j++){
+            if(t[y+i][x+j]==1){
+                if(!f[y+i][x+j]){
+                    f[y+i][x+j]=true;
+                    // cout << f[y+i][x+j] << endl;
+                    dfs(t, f, H, W, x+j, y+i);
+                }
+            }
+        }
+    }
+    return;
+}

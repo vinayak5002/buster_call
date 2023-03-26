@@ -1,0 +1,18 @@
+Mod=10**9+7
+def pow(a,p)
+  r=1
+  while p>0
+    r=r*a%Mod if p&1==1
+    a=a**2%Mod
+    p >>= 1
+  end
+  return r
+end
+n=gets.to_i
+a=gets.split.map(&:to_i)
+f=Array.new(n,1)
+(n-1).times {|i| f[i+1]=f[i]*(i+1)%Mod}
+fi=Array.new(n) {|i| pow(f[i],Mod-2)}
+b=Array.new(n-1)
+(n-1).times {|i| b[i]=(a[i]-a[i+1]).abs}
+puts b.each_with_index.inject(0) {|r,(i,j)| (r+i*f[n-2]*fi[n-2-j]*fi[j])%Mod}

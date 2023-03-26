@@ -1,0 +1,120 @@
+/*the program demonstrates coding a doubly linked list (DLL) fron scratch
+a class Node is created, with each Node represent each element in a linked list
+in each Node, integer dt stores the data of the node, and the Node pointer nx points to the memory adress of the next Node, or if the next Node is nonexistent, nullptr
+the InsertFirst function inserts the function */
+#include <bits/stdc++.h>
+using namespace std;
+
+class Node {
+   public:
+    unsigned int dt;
+    Node* nx;
+    Node* pv;
+};
+
+// boolean function empty returns boolean value of whether the DLL is empty
+bool empty(Node*& head) {
+    return head == nullptr;
+}
+
+// the InsertFirst function inserts new integer data ndt into the front of the DLL
+void InsertFirst(Node*& head, Node*& tail, unsigned int ndt) {
+    Node* nNode = new Node;
+    nNode->nx = head;
+    nNode->pv = nullptr;
+    head = nNode;
+    if (tail == nullptr) tail = nNode;
+    if (head != tail) {
+        nNode->nx->pv = nNode;
+    }
+    nNode->dt = ndt;
+}
+
+// the DeleteFirst function deletes the first node and removes the unused memory location
+void DeleteFirst(Node*& head, Node*& tail) {
+    Node* tmp = head;
+    if (!empty(head)) {
+        if (head != tail) {
+            head->nx->pv = nullptr;
+            head = head->nx;
+
+        } else {
+            head = nullptr;
+            tail = nullptr;
+        }
+        delete tmp;
+    }
+}
+
+// the DeleteLast function deletes the last node and removes the unused memory location
+void DeleteLast(Node*& head, Node*& tail) {
+    Node* tmp = tail;
+    if (!empty(head)) {
+        if (head != tail) {
+            tail->pv->nx = nullptr;
+            tail = tail->pv;
+
+        } else {
+            head = nullptr;
+            tail = nullptr;
+        }
+        delete tmp;
+    }
+}
+
+// the smart delete SDel function finds the first occurance of the input integer and remove's it from the DLL
+// if the input integer is not found nothing will be done
+void SDel(Node*& head, Node*& tail, unsigned int x) {
+    Node* tmp = head;
+    if (empty(head)) return;
+    while (tmp != nullptr && tmp->dt != x ) {
+        tmp = tmp->nx;
+    }
+    if (tmp == head && tmp != nullptr) {
+        head = tmp->nx;
+        head->pv = nullptr;
+        delete tmp;
+    } else if (tmp != nullptr) {
+        tmp->pv->nx = tmp->nx;
+        (tmp != tail) ? tmp->nx->pv = tmp->pv : tail = tmp->pv;
+        delete tmp;
+    }
+}
+
+// prnt function prints the entire DLL from head
+void prnt(Node*& head) {
+    Node* tmp = head;
+    if (tmp != nullptr){
+        cout << tmp->dt;
+        tmp = tmp->nx;
+    }
+    while (tmp != nullptr) {
+        cout << ' ' << tmp->dt;
+        tmp = tmp->nx;
+    }
+    cout << endl;
+}
+
+int main() {
+    unsigned int q, d;
+    Node* head = nullptr;
+    Node* tail = nullptr;
+    string s;
+    cin >> q;
+    while (q--) {
+        cin >> s;
+        if (s == "insert") {
+            cin >> d;
+            InsertFirst(head, tail, d);
+        } else if (s == "delete") {
+            cin >> d;
+            SDel(head, tail, d);
+        } else if (s == "deleteFirst") {
+            DeleteFirst(head, tail);
+        } else if (s == "deleteLast") {
+            DeleteLast(head, tail);
+        }
+    }
+    prnt(head);
+    return 0;
+}

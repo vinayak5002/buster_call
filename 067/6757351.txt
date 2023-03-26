@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (long long  i = 0; i < (long long )(n); i++) 
+#define all(x) (x).begin(),(x).end() 
+using vl = vector<long long>;
+vector<vector<int>> board(8,vector<int>(8));
+int dx[] = {-1, 0, 1, 0, -1, -1, 1, 1};
+int dy[] = {0, -1, 0, 1, -1, 1, -1, 1};
+void solve(){
+  int k;cin>>k;
+  //すでに選んだ頂点を保存する配列
+  set<int> seenx;
+  set<int> seeny;
+  rep(i,k){
+    int a,b;cin>>a>>b;
+    board[a][b] = -1;
+    seenx.insert(a);
+    seeny.insert(b);
+    //8方向に行けるだけいく
+    rep(d,8){
+      int na = a+dx[d];
+      int nb = b+dy[d];
+      board[na][nb] = 1;
+      while(na<8&&nb<8&&0<=na&&0<=nb){
+        if(board[na][nb]!=-1)board[na][nb] = 1;
+        na+=dx[d];
+        nb+=dy[d];
+      }
+    }
+  }
+  int N = 8-k;
+  vector<int> X;
+  vector<int> Y;
+  rep(i,8){
+    if(seenx.count(i))continue;
+    X.pb(i);
+  }
+  rep(i,8){
+    if(seeny.count(i))continue;
+    Y.pb(i);
+  }
+  //１行に一つしかクイーンを置けないということから、k個は除外できる。
+  do{
+    do{
+      vector<vector<int>> nboard = board;
+      bool flag {};
+      rep(i,N){
+        int x = X[i];
+        int y = Y[i];
+        if(nboard[x][y]==1){
+          flag = true;
+          break;
+        }
+        nboard[x][y] = -1;
+        rep(d,8){
+          int nx = x+dx[d];
+          int ny = y+dy[d];
+          while(nx<8&&ny<8&&0<=nx&&0<=ny){
+            if(nboard[nx][ny]==-1){
+              flag = true;
+              break;
+            }
+            nboard[nx][ny] = 1;
+            nx+=dx[d];
+            ny+=dy[d];
+          }
+          if(flag)break;
+        }
+      }
+      if(flag)continue;
+      else{
+        rep(i,8){
+          rep(j,8){
+            if(nboard[i][j]==-1)cout<<"Q";
+            else cout<<'.';
+            if(j==7)cout<<endl;
+          }
+        }
+        return;
+      }
+    }while(next_permutation(all(Y)));
+  }while(next_permutation(all(X)));
+}
+int main(){cin.tie(nullptr);ios::sync_with_stdio(false);solve();}
+

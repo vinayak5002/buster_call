@@ -1,0 +1,107 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+class Node{
+	public:
+	int data;
+	Node* next; 
+	Node* prev; 
+};
+
+void printforward(Node* node) { 
+    Node* last=node;
+    cout<<last->data;
+    last = last->next; 
+    while (last != NULL) { 
+    	cout<<" "<<last->data; 
+    	last = last->next; 
+    }
+	cout<<endl; 
+} 
+
+void insertfront(Node** head_ref,Node** tail_ref ,int new_data){
+	Node* new_node = new Node();
+	new_node->data = new_data;
+	new_node->next = (*head_ref);
+	new_node->prev = NULL;
+	if ((*head_ref) != NULL){
+		(*head_ref)->prev = new_node;
+	}
+	else {
+		(*tail_ref)= new_node;
+	}
+		(*head_ref) = new_node;
+}
+
+void Deletefirst (Node**head_ref,Node**tail_ref) {
+	Node*temp=*head_ref;
+	*head_ref=temp->next;
+}
+
+void Deletelast(Node**head_ref,Node**tail_ref){
+	Node*temp=*tail_ref;
+	*tail_ref=temp->prev;
+	temp->prev->next=NULL;
+    free(temp);
+}
+
+void Delete(Node** head_ref,Node**tail_ref,int delvalue ){
+ 	Node*temp=*head_ref;
+    if (*head_ref == NULL ) {
+        return; 	
+	}
+	if (temp->data== delvalue){
+    	*head_ref = temp->next;
+    	*tail_ref=temp->prev;
+    	temp->next->prev = temp->prev;
+    	free(temp);
+    	return;
+	}
+	while(temp->next != NULL){
+		if (temp->data== delvalue){
+    		if (temp->next != NULL){
+    			temp->next->prev = temp->prev;
+			} 
+   	 		if (temp->prev != NULL) {
+        		temp->prev->next = temp->next;
+			}
+ 			free(temp);
+ 			return;
+		}
+		temp=temp->next;
+	}	
+	if (temp->data== delvalue){
+		*tail_ref=temp->prev;
+    	temp->prev->next=NULL;
+    	free(temp);
+    	return;
+	}
+    return;
+}
+int main(){
+	Node* head=NULL;
+	Node* tail=NULL;
+	int nu;
+	cin>>nu;
+	string s;
+	int x;
+	for(int i=0;i<nu;i++){
+		cin>>s;
+		if(s=="insert"){
+			cin>>x;
+			insertfront(&head,&tail,x);
+		}
+		else if(s=="delete"){
+			cin>>x;
+			Delete(&head,&tail,x);		
+		}
+		else if(s=="deleteFirst"){
+			Deletefirst(&head,&tail);
+		}
+		else if(s=="deleteLast"){
+			Deletelast(&head,&tail);
+		}
+	}
+	printforward(head);
+}
+

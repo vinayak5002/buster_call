@@ -1,0 +1,108 @@
+#include <stdio.h>
+
+struct Card
+{
+  char suit, value;
+};
+
+void BubbleSort(struct Card a[], int n)
+{
+  int i, j;
+  struct Card tmp;
+
+  for (i = 0; i < n; i++)
+  {
+    for (j = n - 1; j >= i + 1; j--)
+    {
+      if (a[j].value < a[j - 1].value)
+      {
+        tmp = a[j];
+        a[j] = a[j - 1];
+        a[j - 1] = tmp;
+      }
+    }
+  }
+}
+
+void SelectionSort(struct Card a[], int n)
+{
+  int i, j, minj;
+  struct Card tmp;
+
+  for (i = 0; i < n; i++)
+  {
+    minj = i;
+    for (j = i; j < n; j++)
+    {
+      if (a[j].value < a[minj].value)
+      {
+        minj = j;
+      }
+        }
+    tmp = a[i];
+    a[i] = a[minj];
+    a[minj] = tmp;
+  }
+}
+
+void print(struct Card a[], int n)
+{
+  int i;
+  for (i = 0; i < n; i++)
+  {
+    if (i > 0)
+    {
+      printf(" ");
+    }
+    printf("%c%c", a[i].suit, a[i].value);
+  }
+  printf("\n");
+}
+
+int isStable(struct Card c1[], struct Card c2[], int n)
+{
+  int i;
+  for (i = 0; i < n; i++)
+  {
+    if (c1[i].suit != c2[i].suit)
+    {
+      return 0;
+    }
+  }
+  return 1;
+}
+
+int main(void)
+{
+  int n, i;
+  char ch;
+  struct Card c1[100], c2[100];
+
+  scanf("%d", &n);
+  for (i = 0; i < n; i++)
+  {
+    scanf(" %c%c", &c1[i].suit, &c1[i].value); //" %c%c"と直前に空白を入れることで空白を無視する
+  }
+
+  for (i = 0; i < n; i++)
+  {
+    c2[i] = c1[i];
+  }
+  BubbleSort(c1, n);
+  SelectionSort(c2, n);
+
+  print(c1, n);
+  printf("Stable\n"); //バブルソートは必ずstable
+
+  print(c2, n);
+  if (isStable(c1, c2, n) == 1)
+  {
+    printf("Stable\n");
+  }
+  else
+  {
+    printf("Not stable\n");
+  }
+
+  return 0;
+}

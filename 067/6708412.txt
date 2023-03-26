@@ -1,0 +1,120 @@
+#include <bits/stdc++.h>
+#ifdef MY_DEBUG
+  #include "dprint.cpp"
+  # define dprint(a, ...);\
+      do {\
+          printf("line : %d, func : %s\n",\
+                __LINE__, __func__);\
+          dprint(#a,a,##__VA_ARGS__ );\
+      } while (0)
+#else
+  #define dprint(a,...) 
+#endif
+using namespace std;
+
+int n;
+int m;
+long long res_count=0;
+void _combination( int v,int last,vector<int> &vec,int r,vector<int>&temp,vector<vector<int>>& res){
+  
+  if(v==r){
+    vector<int>temp2;
+    for (int i = 0; i < (int)temp.size(); i++) {
+      temp2.push_back(temp[i]);
+    }
+    res.push_back(temp2);
+    return;
+  }
+  for (int i = last+1; i < (int)vec.size(); i++){
+    temp[vec[i]]=1;
+    _combination(v+1,i,vec,r,temp,res);
+    temp[vec[i]]=0;
+    
+  }
+  
+}
+
+vector<vector<int>> combination(vector<int> &vec,int r){
+  vector<vector<int>>res=vector<vector<int>>();
+  vector<int> temp=vector<int>(n+1,0);
+  _combination(0,-1,vec,r,temp,res);
+  return res;
+}
+int count2=0;
+vector<vector<int>> tornument;
+int expect_win=0;
+
+void rec(int a){
+  if(a==n){
+    res_count+=1;
+    return;
+  }
+  int win_count=0;
+  vector<int>unused=vector<int>();
+  for (int i = 1; i <= n; i++){
+    if(tornument[a][i]==1)win_count++;
+    else if(tornument[a][i]==0)unused.push_back(i);
+  }
+  if(expect_win<win_count)return;//勝ちすぎてる
+  int win_need=expect_win-win_count;
+  if(win_need >(int)unused.size())return;//必要数に満たない。（負けが多すぎ
+  
+
+  //unusedからwin_need個選ぶ。
+    vector<vector<int>> res=combination(unused,win_need);
+
+    for(auto v:res){
+      for (int n_win:unused){
+        if(v[n_win]==1){
+          //勝ち
+          tornument[a][n_win]=1;
+          tornument[n_win][a]=-1;
+        }else{
+          //負け
+          tornument[a][n_win]=-1;
+          tornument[n_win][a]=1;
+        }
+      }
+      rec(a+1);
+    }
+    //もとに戻す
+    for (int n_win:unused){
+      tornument[a][n_win]=0;
+      tornument[n_win][a]=0;
+    }
+  return;
+}
+long long solve(vector<vector<int>>& vec){
+res_count=0;
+tornument = vector<vector<int>>(n+1, vector<int>(n+1,0));
+for (int i = 1; i <= n; i++){
+  tornument[i][i]=-2;
+}
+for (int i = 0; i < m; i++){
+  tornument[vec[i][0]][vec[i][1]]=1;
+  tornument[vec[i][1]][vec[i][0]]=-1;
+}
+
+ expect_win=(n*n-n)/2/n;
+rec(1);
+return res_count;
+}
+
+int main() {
+
+  while(true){
+    cin >>n>>m;
+    if(n==0)break;
+  vector<vector<int>> vec(m, vector<int>(2));
+  for (int i = 0; i < m; i++){
+    for(int j=0;j<2;j++){
+      cin >> vec[i][j];
+    }
+  }
+    long long ret=solve(vec);
+    cout << ret << endl;
+  }
+
+
+return 0;
+}

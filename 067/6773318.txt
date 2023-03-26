@@ -1,0 +1,77 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Map<Integer, Map<Integer, Double>> distance;
+        Scanner sc = new Scanner(System.in);
+        while (true) {
+            int n = sc.nextInt();
+            if (n == 0) break;
+            distance = new HashMap<>();
+
+            for (int i = 0; i < n; i++) {
+                int a = sc.nextInt();
+                int b = sc.nextInt();
+                double d = sc.nextInt();
+                Map<Integer, Double> d1 = distance.get(b) != null ? distance.get(b) : new HashMap<>();
+                Map<Integer, Double> d2 = distance.get(a) != null ? distance.get(a) : new HashMap<>();
+                d1.put(a, d);
+                d2.put(b, d);
+                distance.put(b, d1);
+                distance.put(a, d2);
+            }
+            for (int i: distance.keySet()) {
+                Map<Integer, Double> d1 = distance.get(i);
+                d1.put(i, 0.0);
+                distance.put(i, d1);
+            }
+
+            for (int i :
+                    distance.keySet()) {
+                for (int j :
+                        distance.keySet()) {
+                    if(distance.get(i).get(j) == null) {
+                        distance.get(i).put(j, 1.0/0.0);
+                    }
+                }
+            }
+
+            for (int i: distance.keySet()) {
+                for (int j: distance.keySet()) {
+//                    if (i == j) continue;
+                    for (int k: distance.keySet()) {
+//                        if (i == k || j == k) continue;
+//                        if(distance.get(i).get(k) != null && distance.get(k).get(j) != null) {
+//                            distance.get(i).put(j, distance.get(i).get(j) != null
+//                                    ? Math.min(distance.get(i).get(j), distance.get(i).get(k) + distance.get(k).get(j))
+//                                    : distance.get(i).get(k) + distance.get(k).get(j));
+//                        }
+                        distance.get(i).put(j, Math.min(distance.get(i).get(j), distance.get(i).get(k) + distance.get(k).get(j)));
+                    }
+                }
+            }
+
+
+            int min_town = 0;
+            int min_dist = -1;
+            int dist;
+            for (int i: distance.keySet()) {
+                dist = 0;
+                for (int j: distance.get(i).keySet()) {
+                    dist += distance.get(i).get(j);
+                }
+                if (min_dist == -1 || min_dist > dist) {
+                    min_dist = dist;
+                    min_town = i;
+                } else if (min_dist == dist) {
+                    min_town = Math.min(i, min_town);
+                }
+            }
+            System.out.println(min_town + " " + min_dist);
+        }
+        sc.close();
+    }
+}
+

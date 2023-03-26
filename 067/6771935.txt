@@ -1,0 +1,115 @@
+#include<stdio.h>
+#include<string.h>
+
+#define N 100
+#define WHITE 0 //訪問してない
+#define GRAY 1 //一度訪問
+#define BLACK 2 //訪問済み
+#define INFTY 1000000
+
+
+int n, M[N][N];
+int color[N], d[N], f[N], tt;
+//d[N]：発見時刻，f[N]：完了時刻
+
+int head=0; 
+int tail=0;
+
+int Q[N];
+
+//Q[tail]にxを入れる関数
+void enqueue(int x){
+	Q[tail] = x;
+	if(tail + 1 >= n){
+		tail = 0;
+	}
+	else{
+		tail++;
+	}
+}
+
+//Q[head]のx返す関数
+int dequeue(){
+	int x;
+	x = Q[head];
+	
+	if(head + 1 == n){
+		head = 0;
+	}
+	else{
+		head++;
+	}
+
+	return x;
+
+}
+
+void dfs(int x){
+	
+	int u, y;
+	//初期化（訪問まだ）
+	for ( u = 0 ; u < n ; u++ ){
+		color[u] = WHITE;
+		d[u] = INFTY;
+	}
+	color[x] = GRAY;
+	d[x] = 0;
+	
+	enqueue(x);
+	
+	while(head != tail){
+		y = dequeue();
+
+		for ( u = 0 ; u < n ; u++ ) {
+			if( M[y][u] == 0 ){
+				continue;
+			}
+			if( d[u] != INFTY ){
+				continue;
+			}
+			d[u] = d[y] + 1;
+			enqueue(u);
+		}
+	}
+	for ( u = 0; u < n; u++ ){
+		printf("%d", u + 1);
+		if(d[u] == INFTY){
+			printf(" -1");
+		}
+		else{
+			printf(" %d",d[u]);
+		}
+		printf("\n");
+	}
+	color[x] = BLACK;
+}
+
+int main(){
+	
+	int u, v, k, i, j;
+	
+	scanf("%d", &n);
+	
+	for ( i = 0 ; i < n ; i++ ){
+		for ( j= 0 ; j < n ; j++ ){
+			M[i][j] = 0;
+		}
+	}
+	for( i = 0 ; i < n ; i++ ){
+		scanf("%d %d", &u, &k);
+		u--;
+		
+		for(j = 0 ; j < k ; j++ ){
+			
+			scanf("%d" , &v);
+			v--;
+			M[u][v] = 1;
+		}
+	}
+	
+	dfs(0);
+	
+	return 0;
+}
+
+

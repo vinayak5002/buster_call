@@ -1,0 +1,112 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+
+public class Main {
+
+	static int[][] graph;
+	static StringBuilder sb = new StringBuilder();
+	static final int NULL = -1;
+	static int[] searched;
+	static int endJudge = 0;
+
+	public static void main(String[] args) throws IOException{
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		PrintWriter out = new PrintWriter(System.out);
+
+		int n = Integer.parseInt(br.readLine());
+
+		graph = new int[n][n];
+		searched = new int[n];
+
+		String[] num;
+		String input;
+
+		for(int i=0; i<n; i++) {
+
+			searched[i] = NULL;
+		}
+
+
+		for(int i=0; i<n; i++) {
+
+			//入力&格納
+			input = br.readLine();
+			num = input.split(" ");
+
+			int u = 0;
+
+			while(u+1 != num.length) {
+
+				graph[i][u] = Integer.parseInt(num[u+1]);
+				u++;
+			}
+		}
+
+		//出力
+		out.println(minSum(n));
+
+		out.flush();
+	}
+
+	static int minSum(int n) {
+
+		int result = 0;
+
+		//重みの最大値が2000
+		LABEL0:{
+				for(int i=0; i<2000; i++) {
+
+					if(endJudge == n)
+						break;
+
+					for(int j=0; j<n; j++) {
+
+						for(int k=0; k<n; k++) {
+
+							if(graph[j][k] < i)
+								continue;
+
+							if(graph[j][k] == i) {
+
+								if(searched[j] == NULL && searched[k] == NULL)
+									result -=i;
+
+								System.out.println("i: " + i);
+
+								result += sumCheck(j, i);
+								System.out.println("a" + result + " " + j);
+											;
+									if(endJudge == n)
+										break LABEL0;
+
+								result += sumCheck(k, i);
+								System.out.println("b" + result + " " + k);
+									;
+								if(endJudge == n)
+									break LABEL0;
+							}
+						}
+					}
+				}
+			}
+
+		return result;
+	}
+
+	static int sumCheck(int d, int i) {
+
+		int r = 0;
+
+		if(searched[d] == NULL) {
+			searched[d] = i;
+			endJudge++;
+			r = i;
+		}
+
+		return r;
+	}
+}
+

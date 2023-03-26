@@ -1,0 +1,155 @@
+#include <bits/stdc++.h>
+#include <chrono>
+#include <thread>
+////#include <atcoder/all>
+
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using vvvb = vector<vvb>;
+using vd = vector<double>;
+using vvd = vector<vd>;
+using vvvd = vector<vvd>;
+#define all(A) A.begin(),A.end()
+#define ALL(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q) {
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+template<class T>
+bool chmin(T& p, T q) {
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+ll gcd(ll(a), ll(b)) {
+    if (b == 0)return a;
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+vector<ll> fact, factinv, inv;
+ll mod = 998244353;
+void prenCkModp(ll n) {
+    fact.resize(n + 5);
+    factinv.resize(n + 5);
+    inv.resize(n + 5);
+    fact.at(0) = fact.at(1) = 1;
+    factinv.at(0) = factinv.at(1) = 1;
+    inv.at(1) = 1;
+    for (ll i = 2; i < n + 5; i++) {
+        fact.at(i) = (fact.at(i - 1) * i) % mod;
+        inv.at(i) = mod - (inv.at(mod % i) * (mod / i)) % mod;
+        factinv.at(i) = (factinv.at(i - 1) * inv.at(i)) % mod;
+    }
+
+}
+ll nCk(ll n, ll k) {
+    if (k < 0)return 0;
+    if (n < k) return 0;
+    return fact.at(n) * (factinv.at(k) * factinv.at(n - k) % mod) % mod;
+}
+
+ll gr(ll A) {
+    return 1
+        ;
+}
+vector<ll> AN;
+vector<vector<pair<ll, ll>>> G;
+vector<bool> seen;
+
+void dfs(ll n) {
+    seen[n] = 1;
+    for (auto v : G[n]) {
+        if (seen[v.first]) {
+            AN[v.second] = 1;
+        }
+        else {
+            AN[v.second] = 0;
+            dfs(v.first);
+        }
+    }
+}
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    while (1) {
+        ll H, W;
+        cin >> H >> W;
+        if (H == 0)return 0;
+        vvll A(2 * W - 1, vll(2 * H - 1, 0));
+        rep(i, 2 * W - 1) {
+            if (i % 2 == 0) {
+                rep(j, H - 1) {
+                    ll B;
+                    cin >> B;
+                    A[i][2 * j + 1] = B;
+                }
+            }
+            else {
+                rep(j, H) {
+                    ll B;
+                    cin >> B;
+                    A[i][2 * j] = B;
+                }
+            }
+        }
+        rep(i, 2 * W - 1)rep(j, 2 *H- 1) {
+            if (i % 2 == 1 && j % 2 == 1)A[i][j] = 1;
+        }
+        vector<vector<bool>> seen(2 * W - 1, vector<bool>(2 * H - 1, 0));
+        vvll dist(2 * W - 1, vll(2 * H - 1, 1e18));
+        queue<pair<ll, ll>> Q;
+        dist[0][0] = 0;
+        Q.push({ 0,0 });
+        vll dy = { 1,0,-1,0 };
+        vll dx = { 0,1,0,-1 };
+        while (!Q.empty()) {
+            auto p = Q.front();
+            Q.pop();
+            if (seen[p.first][p.second])continue;
+            seen[p.first][p.second] = 1;
+            rep(d, 4) {
+                ll ny = p.first + dy[d];
+                ll nx = p.second + dx[d];
+                if (ny < 0 || nx < 0 || ny >= 2 * W - 1 || nx >= 2 * H - 1)continue;
+                if (seen[ny][nx])continue;
+                if (A[ny][nx] == 1)continue;
+                if (dist[ny][nx] <= dist[p.first][p.second] + 1)
+                    continue;
+
+                dist[ny][nx] = dist[p.first][p.second] + 1;
+                Q.push({ ny,nx });
+            }
+        }
+        cout << (dist[2 * W - 2][2 * H - 2] < 1e17 ? 1+dist[2 * W - 2][2 * H - 2] / 2 : 0) << endl;
+    }
+
+}

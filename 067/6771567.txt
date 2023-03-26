@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdlib.h>
+
+#define N 100
+#define INF 1<<21
+
+typedef struct queue{
+  int tail;
+  int head;
+  int data[N];
+} queue_t;
+
+void initialize( queue_t *q );
+bool isEmpty( queue_t *q );
+bool isFull( queue_t *q );
+void enqueue( int x, queue_t *q );
+int dequeue( queue_t *q );
+int front( queue_t *q );
+void bfs( int s, int *d, int n, int M[][N] );
+void get_adj( int n, int adj[][N] );
+
+void initialize( queue_t *q ) {
+  q->head = 0;
+  q->tail = 0;
+}
+
+bool isEmpty( queue_t *q ) {
+  if( q->head == q->tail ) return true;
+  else return false;
+}
+
+bool isFull( queue_t *q ) {
+  if( (q->tail+1) % N == q->head ) return true;
+  else return false;
+}
+
+void enqueue( int x, queue_t *q ) {
+  if( isFull(q) ) exit(1);
+  else
+  {
+    q->data[q->tail] = x;
+    q->tail = (q->tail + 1) % N;
+  }
+}
+
+int dequeue( queue_t *q ) {
+  int x;
+  if( isEmpty(q) ) exit(1);
+  else
+  {
+    x = q->data[q->head];
+    q->head = (q->head + 1) % N;
+  }
+  return x;
+}
+
+int front( queue_t *q ){
+  return q->data[q->head];
+}
+
+void bfs( int s, int *d, int n, int M[][N] ) {
+  queue_t q;
+  initialize(&q);
+  enqueue(s, &q);
+  for (int i = 0; i < n; i++) { d[i] = INF; }
+  d[s] = 0;
+  int u;
+  while( isEmpty(&q) == false ) {
+    u = dequeue(&q);
+    for (int v = 0; v < n; v++) {
+      if( M[u][v] == 0 ) continue;
+      if( d[v] != INF ) continue;
+      d[v] = d[u] + 1;
+      enqueue(v, &q);
+    }
+  }
+  for (int i = 0; i < n; i++) {
+    printf("%d ", i+1);
+    if( d[i] == INF ) { printf("-1\n"); }
+    else { printf("%d\n", d[i]); }
+  }
+}
+
+void get_adj( int n, int adj[][N]){
+  int u, k, temp;
+  for (int i = 0; i < n; i++) {
+    scanf("%d", &u);
+    scanf("%d", &k);
+    for (int j = 0; j < k; j++) {
+      scanf("%d", &temp);
+      adj[i][temp-1] = 1;
+    }
+  }
+}
+
+int main(void) {
+  int n, M[N][N], d[N];
+
+  scanf("%d", &n);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) { M[i][j] = 0; }
+  }
+
+  get_adj(n, M);
+
+  bfs(0, d, n, M);
+
+  return 0;
+}
+

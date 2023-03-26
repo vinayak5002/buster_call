@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+
+#define rep(i,a,b) for(int i=a;i<b;i++)
+#define rrep(i,a,b) for(int i=a;i>=b;i--)
+#define fore(i,a) for(auto &i:a)
+#define all(x) (x).begin(),(x).end()
+typedef long long ll; const int inf = INT_MAX / 2; const ll infl = 1LL << 60;
+
+using namespace std;
+vector<vector<ll> > dp;
+
+int main(void)
+{   
+    int n=0,m=0;
+    vector<ll> c;
+
+    cin >> n >> m;
+    c.resize(m);
+    //↓：コインの種類（m）、→値段（~n円）
+    //dpテーブルの値：その値段を払うのに必要な最小のコイン枚数
+    dp.assign(m+1,vector<ll>(n+1,inf));
+
+    rep(i,0,m) cin >> c[i];
+    sort(all(c));
+
+    rep(i,0,m){
+        dp[i][0]=0;
+        rep(j,1,n+1){
+            if(i==0){
+                dp[i][j]=j/c[i]+dp[i][j%c[i]];
+                if(dp[i][j]>inf) dp[i][j]=inf;
+            }
+            else{
+                dp[i][j]=dp[i-1][j];
+                dp[i][j]=min(dp[i][j],j/c[i]+dp[i][j%c[i]]);
+                if(dp[i][j]>inf) dp[i][j]=inf;
+            }
+        }
+    }
+    cout << dp[m-1][n] << endl;
+    return 0;
+}       

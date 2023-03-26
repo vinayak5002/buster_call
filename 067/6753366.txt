@@ -1,0 +1,106 @@
+
+"""
+
+"""
+
+import sys
+from sys import stdin
+import heapq
+
+ANS = []
+mod = 10**9+7
+MMM = 40
+
+while True:
+
+    n,p,q = map(int,stdin.readline().split())
+    if n == 0:
+        break
+    
+    N = n
+
+    lis = [ [] for i in range(2*N) ]
+
+    for i in range(p):
+
+        a,b,c = map(int,stdin.readline().split())
+        a -= 1
+        b -= 1
+
+        lis[a].append((b,c))
+        lis[b].append((a,c))
+
+    for i in range(q):
+
+        a,b,c = map(int,stdin.readline().split())
+        a -= 1
+        b -= 1
+
+        lis[N+a].append( (N+b,c) )
+        lis[N+b].append( (N+a,c) )
+
+    for i in range(N):
+        lis[i+N].append( (i,0) )
+
+
+    d = [ (float("inf"),float("inf")) for i in range(2*n) ]
+    d[0] = (0,0)
+    q = [( 0,0,0 )]
+
+    while q:
+
+        taxi,move,v = heapq.heappop(q)
+        if (taxi,move) != d[v]:
+            continue
+
+        for nex,ec in lis[v]:
+            if d[nex] > ( taxi , move+ec ):
+                d[nex] = ( taxi , move+ec )
+                heapq.heappush( q , (taxi,move+ec,nex) )
+
+        if v < N and d[v+N] > (taxi+1,move):
+            d[v+N] = (taxi+1 , move)
+            heapq.heappush( q , (taxi+1,move,v+N) )
+
+    if d[N-1][0] == float("inf"):
+        ANS.append(-1)
+        continue
+    elif d[N-1][0] > MMM-3:
+        ans = pow(2,d[N-1][0],mod)-1 + d[N-1][1]
+        ANS.append(str(ans % mod))# + " wow")
+        continue
+
+    #original
+
+    d = [float("inf")] * (2*N)
+
+    d[0] = 0
+    q = [(0,0)]
+
+    for lp in range(MMM):
+
+        while q:
+
+            cost,v = heapq.heappop(q)
+            if d[v] != cost:
+                continue
+
+            for nex,ec in lis[v]:
+                
+                if d[nex] > d[v] + ec:
+                    d[nex] = d[v] + ec
+                    heapq.heappush( q , (d[nex],nex) )
+
+        ride = 2**lp
+        for i in range(N):
+            if d[i+N] > d[i] + ride:
+                d[i+N] = d[i] + ride
+                heapq.heappush(q, (d[i+N] , i+N))
+
+        if not q:
+            break
+
+    ANS.append( d[N-1] )
+
+print ("\n".join(map(str,ANS)))
+

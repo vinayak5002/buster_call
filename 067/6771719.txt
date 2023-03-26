@@ -1,0 +1,89 @@
+#include <stdio.h>
+#define MAX 500000
+#define SENTINEL 2000000000 //番兵
+
+int L[MAX / 2 + 2], R[MAX / 2 + 2];
+int cnt; //比較回数の総数
+
+void merge(int a[], int n, int left, int mid, int right)
+{
+  int i, j, k;
+  int n1 = mid - left;  //左側の要素の数
+  int n2 = right - mid; //右側の要素の数
+
+  for (i = 0; i < n1; i++)
+  {
+    L[i] = a[left + i]; //配列Lにaの配列の左側を代入していく
+  }
+
+  for (i = 0; i < n2; i++)
+  {
+    R[i] = a[mid + i]; //配列Rにaの配列の右側を代入していく
+  }
+
+  L[n1] = R[n2] = SENTINEL; //番兵
+
+  i = 0;
+  j = 0;
+  for (k = left; k < right; k++)
+  {
+    cnt++;
+    //比較
+    if (L[i] <= R[j])
+    {
+      a[k] = L[i++];
+    }
+    else
+    {
+      a[k] = R[j++];
+    }
+  }
+}
+
+void mergeSort(int a[], int n, int left, int right)
+{
+  int mid;
+
+  if (left + 1 < right)
+  {
+    mid = (left + right) / 2;
+    //半分に分割する
+    mergeSort(a, n, left, mid);
+    mergeSort(a, n, mid, right);
+    //分割したものをソートする
+    merge(a, n, left, mid, right);
+  }
+}
+
+int main(void)
+{
+  int a[MAX];
+  int n, i;
+
+  scanf("%d", &n);
+
+  for (i = 0; i < n; i++)
+  {
+    scanf("%d", &a[i]);
+  }
+
+  mergeSort(a, n, 0, n); // rightは0, leftはnに初期値を設定
+
+  for (i = 0; i < n; i++)
+  {
+    if (i == n - 1)
+    {
+      printf("%d", a[i]);
+    }
+    else
+    {
+      printf("%d ", a[i]);
+    }
+  }
+
+  printf("\n");
+
+  printf("%d\n", cnt);
+
+  return 0;
+}

@@ -1,0 +1,66 @@
+#pragma region
+
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <set>
+#include <map>
+#include <algorithm>
+#include <functional>
+#include <utility>
+#include <bitset>
+#include <cmath>
+#include <numeric> // gcd, lcm
+#include <cstdlib>
+#include <ctime>
+#include <cstdio>
+#include <cassert>
+#include <iomanip>
+using namespace std;
+
+using ull = unsigned long long;
+using ll = long long;
+using vi = vector<int>;
+using vll = vector<ll>;
+using vvi = vector<vi>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using pii = pair<int,int>;
+
+#pragma endregion
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+
+    int n, m; cin >> n >> m;
+    vvi g(n);
+    while(n--){
+        int s, t; cin >> s >> t;
+        g[s].push_back(t);
+        g[t].push_back(s);
+    }
+    vi color(n, -1);
+    for(int s=0; s<n; ++s){
+        if(color[s] != -1) continue;
+        queue<int> Q; Q.push(s);
+        while(not Q.empty()){
+            int t = Q.front(); Q.pop();
+            if(color[t] != -1) continue;
+            color[t] = s;
+            for(auto u: g[t]) Q.push(u);
+        }
+    }
+    int q; cin >> q;
+    while(q--){
+        int s, t; cin >> s >> t;
+        cout << (color[s]==color[t] ? "yes" : "no") << endl;
+    }
+
+    return 0;
+}

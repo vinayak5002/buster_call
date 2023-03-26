@@ -1,0 +1,99 @@
+// 线段是否相交
+#include <cstdio>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+const double EPS = 1e-14;
+inline int sgn(double x) {
+    if(fabs(x) < EPS) return 0;
+    return x > 0 ? 1 : -1;
+}
+struct Point {
+    double x, y;
+    Point(double a = 0, double b = 0): x(a), y(b) {}
+    Point operator + (const Point &B) const {
+        return Point(x + B.x, y + B.y);
+    }
+    Point operator - (const Point &B) const {
+        return Point(x - B.x, y - B.y);
+    }
+    Point operator * (const double &v) const {
+        return Point(x * v, y * v);
+    }
+    bool operator == (const Point &B) const {
+        return x == B.x && y == B.y;
+    }
+    Point l90() const {
+        return Point(-y, x);
+    }
+    Point r90() const {
+        return Point(y, -x);
+    }
+    double dot(const Point &B) const {
+        return x * B.x + y * B.y;
+    }
+    double mult(const Point &B) const {
+        // 小于 0，在 B 的逆时针
+        return x * B.y - y * B.x;
+    }
+    double dis2() {
+        return x * x + y * y;
+    }
+    double dis() {
+        return sqrt(x * x + y * y);
+    }
+};
+struct Line {
+    Point A, B;
+    Line(Point a = Point(), Point b = Point()): A(a), B(b) {}
+    Point Projection(const Point &P) const {
+        Point l = B - A, x = P - A;
+        return A + (l * (l.dot(x) / l.dis2()));
+    }
+    Point Reflection(const Point &P) const {
+        Point l = B - A, x = P - A;
+        return P + (l.r90() * (l.mult(x) / l.dis2() * 2));
+    }
+    Point symbol() const {
+        return A - B;
+    }
+    bool online(const Point &P) const {
+        Point l1 = P - A, l2 = B - A;
+        return sgn(l1.mult(l2)) == 0;
+    }
+    bool onSegment(const Point &P) const {
+        Point l1 = A - P, l2 = B - P;
+        return sgn(l1.mult(l2)) == 0 && sgn(l1.dot(l2)) <= 0;
+    }
+    bool Intersection(const Line &l) const {
+        // 有无重合
+        if(l.onSegment(A) || l.onSegment(B) || onSegment(l.A) || onSegment(l.B)) return 1;
+        // 是否平行
+        if(sgn(symbol().mult(l.symbol())) == 0) return 0;
+        // 快速排斥实验
+        double l1, r1, l2, r2;
+        l1 = min(A.x, B.x), r1 = max(A.x, B.x);
+        l2 = min(l.A.x, l.B.x), r2 = max(l.A.x, l.B.x);
+        if(sgn(l1 - r2) > 0 || sgn(l2 - r1) > 0) return 0;
+        l1 = min(A.y, B.y), r1 = max(A.y, B.y);
+        l2 = min(l.A.y, l.B.y), r2 = max(l.A.y, l.B.y);
+        if(sgn(l1 - r2) > 0 || sgn(l2 - r1) > 0) return 0;
+        // 跨立实验
+        Point vec = B - A;
+        if(sgn(vec.mult(l.A - A)) * sgn(vec.mult(l.B - A)) >= 0) return 0;
+        vec = l.B - l.A;
+        return sgn(vec.mult(A - l.A)) * sgn(vec.mult(B - l.A)) == -1;
+    }
+};
+int main() {
+    int q; scanf("%d", &q);
+    while(q--) {
+        double x1, y1, x2, y2, x3, y3, x4, y4;
+        scanf("%lf%lf%lf%lf", &x1, &y1, &x2, &y2);
+        scanf("%lf%lf%lf%lf", &x3, &y3, &x4, &y4);
+        Point A(x1, y1), B(x2, y2), C(x3, y3), D(x4, y4);
+        Line l1(A, B), l2(C, D);
+        puts(l1.Intersection(l2) ? "1" : "0");
+    }
+    return 0;
+}

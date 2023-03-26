@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define MAX_N 300+1
+#define MAX_W 1000+1
+
+int N;
+int w[MAX_N];
+int dp[MAX_N][MAX_N];
+
+int main(void)
+{
+	while(1){
+		scanf("%d", &N);
+		if(N == 0) break;
+		for(int i = 0; i < N; i++){
+			scanf("%d", &w[i]);
+		}
+		for(int i = 0; i < MAX_N; i++){
+		     for(int j = 0; j < MAX_N; j++){
+		         dp[i][j] = 0;
+		     }
+		}
+		for(int l = 0; l < N; l++){
+			for(int s = 0, e = l; e < N; s++,e++){
+				for(int i = s; i < e; i++){
+					dp[s][e] = max(dp[s][e], dp[s][i]+dp[i+1][e]);
+				}
+				if((e-s-1)%2 == 0 && (e-s-1)/2 == dp[s+1][e-1] && abs(w[e]-w[s]) <= 1) dp[s][e] = max(dp[s][e], dp[s+1][e-1]+1);
+			}
+		}
+		printf("%d\n", dp[0][N-1]*2);
+	}
+	return 0;
+}

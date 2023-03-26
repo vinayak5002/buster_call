@@ -1,0 +1,107 @@
+from collections import defaultdict
+
+BIGN = 1e9
+
+def read_wgraph(inp=None, gitGraph=True):
+    if inp is not None:
+        V, E = inp.split()[:2]
+        G = defaultdict(list)
+        W = {}
+        for i in inp.split('\n')[1:]:
+            if i:
+                s, t, w = map(int, i.split())
+                if gitGraph:
+                    G[s].append((t, w))
+                else:
+                    G[s].append(t)
+                    W[(s, t)] = w
+                if t not in G:
+                    G[t] = []
+
+    else:
+        V, E = [int(v) for v in input().split()]
+        G = defaultdict(list)
+        W = {}
+        for i in range(V):
+            G[i]
+        for e in range(E):
+            s, t, w = [int(v) for v in input().split()]
+            G[s].append(t)
+            if t not in G:
+                G[t] = []
+            W[(s, t)] = w
+    return G, W
+
+def BelmanFord(G, W, s):
+  dist = defaultdict(lambda: BIGN)
+  dist[s] = 0
+  for v in G:
+    for e in W:
+      relax(W, e[0], e[1], dist)
+  for e in W:
+    if dist[e[1]] > dist[e[0]] + W[e]:
+      return False
+  return dist
+
+def relax(W, s, ch, dist):
+  if dist[ch] > dist[s] + W[(s, ch)]:
+    dist[ch] = dist[s] + W[(s, ch)]
+
+
+def w2matr(G, W):
+    n = len(G)
+    L = [[BIGN for i in range(n)] for j in range(n)]
+    for i in range(n):
+        for j in range(n):
+            if i == j: L[i][j] = 0
+            elif (i,j) in W: L[i][j] = W[(i, j)]
+    return L
+
+
+def all_vsp(G, A):
+    n = len(G)
+    L = [[BIGN for i in range(n)] for j in range(n)]
+    for i in range(n):
+        for j in range(n):
+            for k in range(n):
+                #print(W)
+                if A[i][k] == BIGN or A[k][j] == BIGN:
+                    continue
+                L[i][j] = min(L[i][j], A[i][k] + A[k][j])
+                #print(i,k,j, L)
+    return L
+
+
+def all_vspf(G, W):
+    m = 1
+    n = len(W)
+    L = w2matr(G, W)
+    while m < n:
+        m = 2 * m
+        L = all_vsp(G, L)
+    return L
+
+
+def print_matr(L):
+    ans = ''
+    for col, i in enumerate(L):
+        for ind, d in enumerate(i):
+            if d == BIGN:
+                if ind != 0:
+                    ans += ' INF'
+                else:
+                    ans += 'INF'
+            else:
+                if ind != 0:
+                    ans += ' ' + str(d)
+                else:
+                    ans += str(d)
+        ans += '\n'
+    print(ans[:-1])
+
+
+G, W = read_wgraph(gitGraph=False)
+if BelmanFord(G, W, 0) is False:
+    print('NEGATIVE CYCLE')
+else:
+    print_matr(all_vspf(G, W))

@@ -1,0 +1,152 @@
+using System;
+
+
+class Program
+{
+    static void Main()
+    {
+        
+        int n = int.Parse(Console.ReadLine()); //回転数を取得
+        int R_count = 0;                       //文字列　R　がいくつか
+        int G_count = 0;                       //文字列　G　がいくつか
+        int B_count = 0;                       //文字列　B　がいくつか
+        int count_sum = 0;                     //count1かcount2が2になったときカウントプラス３なら条件を満たす
+        int[] tmp_three = new int[2];
+        int[] tmp_three2 = new int[2];
+
+        for (int i = 0; i < n; i++) {
+            string[] num = Console.ReadLine().Split(' ');
+            string[] rgb = Console.ReadLine().Split(' ');
+
+            for(int j = 0; j < 9; j++) {      //色を識別
+                if(rgb[j] == "R") {
+                    R_count++;
+                }
+
+                if(rgb[j] == "G") {
+                    G_count++;
+                }
+
+                if(rgb[j] == "B") {
+                    B_count++;
+                }
+            }
+
+            string[,] R = new string[2,R_count];   //識別した色をもとに配列を初期化
+            string[,] G = new string[2, G_count];
+            string[,] B = new string[2, B_count];
+
+            R_count = 0;
+            G_count = 0;
+            B_count = 0;
+
+
+            //--------------配列に色と数字を入れる-----------------//
+
+            for (int j = 0; j < 9; j++) {           
+                if(rgb[j] == "R") {
+                    R[0, R_count] = num[j];
+                    R[1,R_count] = rgb[j];
+                    R_count++;
+                }
+
+                if(rgb[j] == "G") {
+                    G[0, G_count] = num[j];
+                    G[1, G_count] = rgb[j];
+                    G_count++;
+                }
+
+                if(rgb[j] == "B") {
+                    B[0, B_count] = num[j];
+                    B[1, B_count] = rgb[j];
+                    B_count++;
+                }
+            }
+
+            //--------------昇順に配列をソート-----------------------//
+
+            Bubble_Sort(R,R_count);
+
+            Bubble_Sort(G, G_count);
+
+            Bubble_Sort(B, B_count);
+
+            //--------------値が同じか、値が1違うか判別-----------------------//
+
+
+            count_sum = Equal_One(R, tmp_three, tmp_three2, R_count, count_sum);
+       
+            count_sum = Equal_One(G, tmp_three, tmp_three2, G_count, count_sum);
+                               
+            count_sum = Equal_One(B, tmp_three, tmp_three2, B_count, count_sum);
+                            
+            R_count = 0;
+            G_count = 0;
+            B_count = 0;
+
+            //--------------結果を出力-----------------------//
+
+            if (count_sum == 3) {
+                Console.WriteLine(1);
+            } else {
+                Console.WriteLine(0);
+            }
+
+            count_sum = 0;
+        }
+    }
+
+    static int Equal_One(string[,] ary, int[] three, int[] three2, int ccolor_count, int ccount_sum) {
+        for (int j = 0; j < ccolor_count; j++) {
+            int count1 = 0;
+            int count2 = 0;
+            int ttmp_num = int.Parse(ary[0, j]);
+            for (int k = j+1; k < ccolor_count; k++) { 
+            
+                if (ary[0, j] == ary[0, k] && j != k && ary[0, k] != "0" && ary[0, j] != "0") { 
+                
+                    three[count1] = k;
+                    count1++;
+                    if (count1 == 2){
+                        ary[0, three[0]] = "0";
+                        ary[0, three[1]] = "0";
+                        ary[0, j] = "0";
+                        ccount_sum++;
+                        break;
+                    }
+                }
+                else if (ttmp_num + 1 == int.Parse(ary[0, k]) && j != k && ary[0, k] != "0" && ary[0, j] != "0"){
+                    ttmp_num = int.Parse(ary[0, k]);
+                    three2[count2] = k;
+                    count2++;
+                    if (count2 == 2){
+                        ary[0, three2[0]] = "0";
+                        ary[0, three2[1]] = "0";
+                        ary[0, j] = "0";
+                        ccount_sum++;
+                        break;
+                    }
+                }
+            }
+        }
+        return ccount_sum;
+    }
+
+    static void Bubble_Sort(string[,] ary, int color_count){
+        for(int j = 0; j < color_count; j++) {
+            for(int k = j + 1; k < color_count; k++) {
+                if (int.Parse(ary[0,j]) > int.Parse(ary[0,k])) {
+                    string tmp = ary[0, j];
+                    ary[0,j] = ary[0,k];
+                    ary[0,k] = tmp;
+
+                    tmp = ary[1, j];
+                    ary[1, j] = ary[1, k];
+                    ary[1, k] = tmp;
+                }
+            }
+            }
+    }
+
+    
+}

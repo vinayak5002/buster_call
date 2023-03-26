@@ -1,0 +1,82 @@
+#include <cstddef>
+#include <cstdint>
+#include <iostream>
+
+std::uint16_t V;
+std::uint16_t E;
+std::uint16_t r;
+
+constexpr std::int16_t INF = INT16_MAX;
+constexpr std::int32_t MAX_COST = 2000 * 10000;
+
+struct Node {
+    std::int32_t distance = INF;
+    Node *predecessor = nullptr;
+};
+
+struct Edge {
+    Node *source = nullptr;
+    Node *distination = nullptr;
+    std::int16_t weight = 0;
+};
+
+Node *node_list = nullptr;
+Edge *edge_list = nullptr;
+
+void get_inputs()
+{
+    std::cin >> V >> E >> r;
+    node_list = new Node[V] {};
+    edge_list = new Edge[E] {};
+    for (std::size_t idx=0; idx<E; ++idx) {
+        std::uint16_t s, t;
+        std::int16_t d;
+        std::cin >> s >> t >> d;
+        edge_list[idx].source = &node_list[s];
+        edge_list[idx].distination = &node_list[t];
+        edge_list[idx].weight = d;
+    }
+
+    node_list[r].distance = 0;
+}
+
+void solve()
+{
+    for (std::size_t _=0; _<V; ++_) {
+        for (std::size_t idx=0; idx<E; ++idx) {
+            auto uv = &edge_list[idx];
+            auto u = uv->source;
+            auto v = uv->distination;
+            auto distination_distance = u->distance + uv->weight;
+            if (v->distance > distination_distance) {
+                v->distance = distination_distance;
+                v->predecessor = u;
+            }
+        }
+    }
+
+    for (std::size_t idx=0; idx<E; ++idx) {
+        auto uv = &edge_list[idx];
+        auto u = uv->source;
+        auto v = uv->distination;
+        if (u->distance + uv->weight < v->distance
+                && u->distance > MAX_COST) {
+            std::cout << "NEGATIVE CYCLE" << std::endl;
+            exit(0);
+        }
+    }
+}
+
+int main()
+{
+    get_inputs();
+    solve();
+    return 0;
+    for (std::size_t idx=0; idx<V; ++idx) {
+        if (node_list[idx].distance <= MAX_COST) {
+            std::cout << node_list[idx].distance << std::endl;
+        } else {
+            std::cout << "INF" << std::endl;
+        }
+    }
+}

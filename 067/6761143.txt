@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int H, W;
+    cin >> H >> W;
+    V<string> S(H);
+    rep(i, H) cin >> S[i];
+    V<string> G = S;
+    for (int j = 0; j < W; j++) G[0][j] = '#';
+    for (int j = 0; j < W; j += 2) {
+        for (int i = 2; i < H; i++) {
+            G[i][j] = '#';
+        }
+    }
+    for (int j = 1; j < W; j += 2) {
+        if (j % 4 == 1) {
+            G[H - 1][j] = '#';
+        } else {
+            G[2][j] = '#';
+        }
+    }
+    G[1][0] = G[1][W - 1] = '#';
+    const int dx[4] = {1, 0, -1, 0}, dy[4] = {0, 1, 0, -1};
+    rep(i, H) rep(j, W) {
+        if (S[i][j] == '@') {
+            V<V<int>> seen(H, V<int>(W, 0));
+            int cx = i, cy = j;
+            seen[cx][cy] = 1;
+            bool ok = false;
+            while (!ok) {
+                rep(k, 4) {
+                    int nx = cx + dx[k], ny = cy + dy[k];
+                    if (!(0 <= nx and nx < H and 0 <= ny and ny < W)) continue;
+                    if (seen[nx][ny]) continue;
+                    if (G[nx][ny] == '#') {
+                        cx = nx, cy = ny;
+                        seen[cx][cy] = 1;
+                        G[nx][ny] = '.';
+                        if (S[nx][ny] == '*') {
+                            ok = true;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    rep(i, H) {
+        rep(j, W) {
+            if (G[i][j] == '#' and S[i][j] == '.') {
+                S[i][j] = '#';
+            }
+        }
+        cout << S[i] << '\n';
+    }
+    return 0;
+}
+

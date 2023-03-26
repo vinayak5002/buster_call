@@ -1,0 +1,85 @@
+// NgJaBach: Forever Meadow <3
+
+#include<bits/stdc++.h>
+
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long ull;
+#define pb push_back
+#define pob pop_back
+#define mp make_pair
+#define upb upper_bound
+#define lwb lower_bound
+#define bend(a) a.begin(),a.end()
+#define rev(x) reverse(bend(x))
+#define mset(a) memset(a, 0, sizeof(a))
+#define fi first
+#define se second
+#define gcd __gcd
+#define getl(s) getline(cin, s);
+#define setpre(x) fixed << setprecision(x)
+#define endl '\n'
+const int N=100050,M=2147483647;
+const ll INF=1e18+7;
+int seg[4*N],lo,hi,val,pos;
+void Build(int x,int L,int R){
+	seg[x]=M;
+	if(L==R) return;
+	int mid=(L+R)/2;
+	Build(2*x,L,mid);
+	Build(2*x+1,mid+1,R);
+	return;
+}
+void Update(int x,int L,int R){
+	if(L==R){
+		seg[x]=val;
+		return;
+	}
+	int mid=(L+R)/2;
+	if(pos>mid) Update(2*x+1,mid+1,R);
+	else Update(2*x,L,mid);
+	seg[x]=min(seg[2*x],seg[2*x+1]);
+	return;
+}
+int Query(int x,int L,int R){
+	if(lo>R||hi<L) return M;
+	else if(lo<=L&&R<=hi) return seg[x];
+	int mid=(L+R)/2;
+	return min(Query(2*x,L,mid),Query(2*x+1,mid+1,R));
+}
+int main(){
+    ios_base::sync_with_stdio(NULL); cin.tie(nullptr); cout.tie(nullptr);
+//    freopen(".inp","r",stdin);
+//    freopen(".out","w",stdout);
+    int n,q,t;
+    cin>>n>>q;
+    Build(1,1,n);
+    while(q--){
+    	cin>>t;
+    	if(t==0){
+    		cin>>pos>>val;
+    		++pos;
+    		Update(1,1,n);
+		}
+		else{
+			cin>>lo>>hi;
+			++lo; ++hi;
+			cout<<Query(1,1,n)<<endl;
+		}
+	}
+    return 0;
+}
+/*
+==================================+
+INPUT:                            |
+------------------------------    |
+
+------------------------------    |
+==================================+
+OUTPUT:                           |
+------------------------------    |
+
+------------------------------    |
+==================================+
+*/
+

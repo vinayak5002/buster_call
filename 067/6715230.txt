@@ -1,0 +1,101 @@
+// #define _GLIBCXX_DEBUG
+#include <bits/stdc++.h>
+
+using namespace std;
+#define ll long long
+#define LLMAX numeric_limits<ll>::max()
+#define LLMIN numeric_limits<ll>::min()
+#define INTMAX numeric_limits<int>::max()
+#define INTMIN numeric_limits<int>::min()
+#define rep(i, n) for (decltype(n) i = 0; i < (n); i++)
+#define rep1(i, n) for (decltype(n) i = 1; i <= (n); i++)
+#define rep2(i, k, n) for (decltype(n) i = k; i <= (n); i++)
+#define repr(i, n) for (decltype(n) i = (n)-1; i >= 0; i--)
+#define repr1(i, n) for (decltype(n) i = (n); i > 0; i--)
+#define repr2(i, k, n) for (decltype(n) i = n; i >= k; i--)
+auto chmax = [](auto& a, auto b) {bool ret=a<b; if(ret)a=b; return ret; };
+auto chmin = [](auto& a, auto b) {bool ret=a>b; if(ret)a=b; return ret; };
+template <typename T>
+using pq_inv = priority_queue<T, vector<T>, greater<T>>;
+vector<int> dd4 = {1, 0, -1, 0, 1};                // 4方位 rep(i,4) nh=h+dd4[i]; nw=w+dd4[i+1];
+vector<int> dd8 = {1, 0, -1, 0, 1, 1, -1, -1, 1};  // 8方位 rep(i,8) nh=h+dd8[i]; nw=w+dd8[i+1];
+
+struct Solver {
+    void solve(int H) {
+        vector<vector<int>> A(H, vector<int>(5));
+        rep(i, H) rep(j, 5) cin >> A[i][j];
+        int ans = 0;
+        auto check_row = [&]() {
+            int ret = 0;
+            rep(i, H) {
+                int prev = -1;
+                int count = 0;
+                rep(j, 5) {
+                    if (prev == A[i][j]) {
+                        count++;
+                    } else {
+                        if (count >= 3) {
+                            ret += count * prev;
+                            for (int k = j+1 - count; k <= j; k++) A[i][k] = 0;
+                        }
+                        prev = A[i][j];
+                        count = 1;
+                    }
+                }
+                if (count >= 3) {
+                    ret += count * prev;
+                    for (int k = 4+1 - count; k <= 4; k++) A[i][k] = 0;
+                }
+            }
+            return ret;
+        };
+        auto arrange = [&]() {
+            for (int j = 0; j < 5; j++) {
+                queue<int> q;
+                for (int i = H - 1; i >= 0; i--) {
+                    if (A[i][j] == 0) {
+                        q.push(i);
+                    } else if (!q.empty()) {
+                        A[q.front()][j] = A[i][j];
+                        q.pop();
+                        A[i][j] = 0;
+                        q.push(i);
+                    }
+                }
+            }
+        };
+        
+        auto print = [&](){
+            for(auto&& x:A){
+                for(auto&& y:x){
+                    cout << y << ' ';
+                }
+                cout << endl;
+            }
+            cout << endl;
+        };
+        while (true) {
+            int tmp = check_row();
+            if (tmp == 0) break;
+            ans += tmp;
+            arrange();
+            // print();
+        }
+        cout << ans << endl;
+    };
+};
+
+int main() {
+    std::cin.tie(nullptr);
+    // cin >> T;
+    for (;;) {
+        int i;
+        cin >> i;
+        if (i == 0) break;
+        Solver solver;
+        solver.solve(i);
+    }
+    return 0;
+}
+
+

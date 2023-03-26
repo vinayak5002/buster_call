@@ -1,0 +1,75 @@
+#include <stdio.h>
+#define MAX 100
+#define LIM 200000
+
+int A[MAX][MAX], d[MAX];
+int n;
+
+void dijkstra(){
+	//d[n]は最小の辺の重みを格納
+	int i, judge[n + 1], u, min;
+	
+	for(i = 0; i < n; i++){
+		d[i] = LIM;
+		judge[i] = 0;
+	}
+	
+	d[0] = 0;
+	
+	while(1){
+		min = LIM;
+		u = -1;
+		for(i = 0; i < n; i++){
+			if(judge[i] != 2 && d[i] < min){
+				u = i;
+				min = d[i];
+			}
+		}
+		
+		if(u == -1){
+			return;
+		}
+		
+		judge[u] = 2;
+		
+		for(i = 0; i < n; i++){
+			if(judge[i] != 2 && A[u][i] != LIM){
+				if(A[u][i] + d[u] < d[i]){
+					d[i] = A[u][i] + d[u];
+					judge[i] = 1;
+				}
+			}
+		}
+	}
+}
+
+int main (void){
+	int i, j, u, k, v, c;
+	scanf("%d", &n);
+	
+	for(i = 0; i < n; i++){
+		for(j = 0; j < n; j++){
+			A[i][j] = LIM;
+		}
+	}
+	
+	for(i = 0; i < n; i++){
+		scanf("%d", &u);
+		scanf("%d", &k);
+		
+		for(j = 0; j < k; j++){
+			scanf("%d", &v);
+			scanf("%d", &c);
+			A[u][v] = c;
+		}
+	}
+	
+	dijkstra();
+	
+	for(i = 0; i < n; i++){
+		printf("%d %d\n", i, d[i]);
+	}
+	
+	return 0;
+}
+

@@ -1,0 +1,62 @@
+#include<bits/stdc++.h>
+using namespace std;
+//#include<atcoder/all>
+//using namespace atcoder;
+using ll = long long;
+int n,m;
+int s,g;
+using Edge = tuple<int,double,double>;
+vector<vector<Edge>> G;
+const double INF = 1e9;
+
+void solve(){
+	double dp[30][32];
+	for(int i = 0;i<30;i++){
+		for(int j = 0;j<32;j++){
+			dp[i][j] = INF;
+		}
+	}
+	using TUP = tuple<double,int,int>;
+	priority_queue<TUP,vector<TUP>,greater<>> PQ;
+	dp[s][1] = 0;
+	PQ.emplace(0,s,1);
+	while(PQ.size()){
+		auto [dist,cur,v] = PQ.top();
+		PQ.pop();
+		for(auto [to,cost,cap]:G[cur]){
+			for(int i = -1;i<=1;i++){
+				if(v==0)continue;
+				double ndist = dist + (double)cost/v;
+				int nv = v + i;
+				if(cap>=v&&dp[to][nv]>ndist){
+					dp[to][nv] = ndist;
+					PQ.emplace(ndist,to,nv);
+				}
+			}
+		}
+	}
+	double ans = dp[g][0];
+	if(ans==INF)printf("unreachable\n");
+	else printf("%.5lf\n",ans);
+}
+
+signed main(){
+	cin.tie(nullptr);
+	ios::sync_with_stdio(false);
+	while(1){
+		cin >> n >> m;
+		if(n==0)break;
+		cin >> s >> g;
+		s--,g--;
+		G = vector<vector<Edge>>(n);
+		for(int i = 0;i<m;i++){
+			int x,y,d,c;
+			cin >> x >> y >> d >> c;
+			x--;y--;
+			G[x].emplace_back(Edge(y,d,c));
+			G[y].emplace_back(Edge(x,d,c));
+		}
+		solve();
+	}
+}
+

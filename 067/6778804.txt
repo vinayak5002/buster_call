@@ -1,0 +1,500 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#include <iostream>
+#include <optional>
+#include <string>
+
+namespace suisen::parsing {
+    using State = std::string::const_iterator;
+
+    struct ParseError {
+        ParseError(const std::string& message = "") {
+            std::cerr << message << std::endl;
+        }
+    };
+
+    namespace internal {
+        void print_rest_of_string(State it) {
+            cerr << "Rest string is '";
+            while (*it) cerr << *it++;
+            cerr << "'" << endl;
+        }
+    }
+
+    void consume(State& it, char expected) {
+        if (*it == expected) {
+            *it++;
+        } else {
+            cerr << "Expected '" << expected << "' but got '" << *it << "'" << endl;
+            internal::print_rest_of_string(it);
+            throw ParseError{};
+        }
+    }
+
+    bool in(const State& it, char l, char r) {
+        return l <= *it and *it <= r;
+    }
+    bool is(const State& it, char c) {
+        return *it == c;
+    }
+
+    void assert_range(const State& it, char lo, char hi) {
+        if (in(it, lo, hi)) {
+            cerr << "Expected [" << lo << "-" << hi << "] but got '" << *it << "'" << endl;
+            internal::print_rest_of_string(it);
+            throw ParseError{};
+        }
+    }
+    void assert_exact(const State& it, char c) {
+        if (not is(it, c)) {
+            cerr << "Expected '" << c << "' but got '" << *it << "'" << endl;
+            internal::print_rest_of_string(it);
+            throw ParseError{};
+        }
+    }
+
+    long long nonnegative_number(State& it) {
+        long long res = 0;
+        while (in(it, '0', '9')) res = res * 10 + (*it++ - '0');
+        return res;
+    }
+    long long number(State& it) {
+        long long res = 0;
+        bool neg = false;
+        while (is(it, '-')) neg = not neg, consume(it, '-');
+        while (in(it, '0', '9')) res = res * 10 + (*it++ - '0');
+        if (neg) res = -res;
+        return res;
+    }
+
+    namespace normal_expression {
+        namespace internal {
+            long long expr(State& it);
+            long long term(State& it);
+            long long factor(State& it);
+
+            long long expr(State& it) {
+                long long res = term(it);
+                while (true) {
+                    if (*it == '+') {
+                        consume(it, '+');
+                        res = res + term(it);
+                    } else if (*it == '-') {
+                        consume(it, '-');
+                        res = res - term(it);
+                    } else break;
+                }
+                return res;
+            }
+            long long term(State& it) {
+                long long res = factor(it);
+                while (true) {
+                    if (*it == '*') {
+                        consume(it, '*');
+                        res = res * factor(it);
+                    } else if (*it == '/') {
+                        consume(it, '/');
+                        res = res / factor(it);
+                    } else break;
+                }
+                return res;
+            }
+            long long factor(State& it) {
+                bool neg = false;
+                while (is(it, '-')) neg = not neg, consume(it, '-');
+                long long res;
+                if (is(it, '(')) {
+                    consume(it, '(');
+                    res = expr(it);
+                    consume(it, ')');
+                } else {
+                    res = nonnegative_number(it);
+                }
+                if (neg) res = -res;
+                return res;
+            }
+        }
+
+        long long parse(State& it) {
+            return internal::expr(it);
+        }
+    }
+}
+
+#include <algorithm>
+#include <cassert>
+#include <complex>
+#include <tuple>
+#include <variant>
+#include <vector>
+
+namespace suisen {
+namespace geometry {
+
+    using coordinate_t = long double;
+    using Point = std::complex<coordinate_t>;
+
+    // operator
+
+    Point operator+(const Point &p, coordinate_t real) { return Point(p) + Point(real, 0); }
+    Point operator-(const Point &p, coordinate_t real) { return Point(p) - Point(real, 0); }
+    Point operator*(const Point &p, coordinate_t real) { return Point(p) * Point(real, 0); }
+    Point operator/(const Point &p, coordinate_t real) { return Point(p) / Point(real, 0); }
+    Point operator+(coordinate_t real, const Point &p) { return Point(real, 0) + Point(p); }
+    Point operator-(coordinate_t real, const Point &p) { return Point(real, 0) - Point(p); }
+    Point operator*(coordinate_t real, const Point &p) { return Point(real, 0) * Point(p); }
+    Point operator/(coordinate_t real, const Point &p) { return Point(real, 0) / Point(p); }
+
+    std::istream& operator>>(std::istream &in, Point &p) {
+        coordinate_t x, y;
+        in >> x >> y;
+        p = Point(x, y);
+        return in;
+    }
+    std::ostream& operator<<(std::ostream &out, const Point &p) {
+        return out << p.real() << ' ' << p.imag();
+    }
+
+    // relations between three points X, Y, Z.
+
+    struct ISP {
+        static constexpr int L_CURVE = +1; // +---------------+ Z is in 'a' => ISP = +1
+        static constexpr int R_CURVE = -1; // |aaaaaaaaaaaaaaa| Z is in 'b' => ISP = -1
+        static constexpr int FRONT   = +2; // |ddd X eee Y ccc| Z is in 'c' => ISP = +2
+        static constexpr int BACK    = -2; // |bbbbbbbbbbbbbbb| Z is in 'd' => ISP = -2
+        static constexpr int MIDDLE  =  0; // +---------------+ Z is in 'e' => ISP =  0
+    };
+
+    struct Sign {
+        static constexpr int NEGATIVE = -1;
+        static constexpr int ZERO = 0;
+        static constexpr int POSITIVE = +1;
+    };
+
+    enum class Containment {
+        OUT, ON, IN
+    };
+
+    constexpr Point ZERO = Point(0, 0);
+    constexpr Point ONE  = Point(1, 0);
+    constexpr Point I    = Point(0, 1);
+    constexpr coordinate_t EPS = 1e-9;
+    constexpr coordinate_t PI  = 3.14159265358979323846264338327950288419716939937510L;
+    constexpr coordinate_t E   = 2.71828182845904523536028747135266249775724709369995L;
+
+    constexpr auto XY_COMPARATOR = [](const Point &p, const Point &q) {
+        return p.real() == q.real() ? p.imag() < q.imag() : p.real() < q.real();
+    };
+    constexpr auto XY_COMPARATOR_GREATER = [](const Point &p, const Point &q) {
+        return p.real() == q.real() ? p.imag() > q.imag() : p.real() > q.real();
+    };
+    constexpr auto YX_COMPARATOR = [](const Point &p, const Point &q) {
+        return p.imag() == q.imag() ? p.real() < q.real() : p.imag() < q.imag();
+    };
+    constexpr auto YX_COMPARATOR_GREATER = [](const Point &p, const Point &q) {
+        return p.imag() == q.imag() ? p.real() > q.real() : p.imag() > q.imag();
+    };
+
+    int sgn(coordinate_t x) {
+        return x > EPS ? Sign::POSITIVE : x < -EPS ? Sign::NEGATIVE : Sign::ZERO;
+    }
+    int compare(coordinate_t x, coordinate_t y) {
+        return sgn(x - y);
+    }
+
+    auto cartesian(const coordinate_t real, const coordinate_t imag) {
+        return Point(real, imag);
+    }
+    auto polar(const coordinate_t rho, const coordinate_t theta) {
+        return Point(rho * std::cos(theta), rho * std::sin(theta));
+    }
+    auto cis(const coordinate_t theta) {
+        return Point(std::cos(theta), std::sin(theta));
+    }
+    auto conj(const Point &z) {
+        return Point(z.real(), -z.imag());
+    }
+    auto arg(const Point &z) {
+        return std::atan2(z.imag(), z.real());
+    }
+    auto square_abs(const Point &z) {
+        return z.real() * z.real() + z.imag() * z.imag();
+    }
+    auto abs(const Point &z) {
+        return std::sqrt(square_abs(z));
+    }
+    auto rot(const Point &z, const coordinate_t theta) {
+        return cis(theta) * z;
+    }
+    auto dot(const Point &a, const Point &b) {
+        return a.real() * b.real() + a.imag() * b.imag();
+    }
+    auto det(const Point &a, const Point &b) {
+        return a.real() * b.imag() - a.imag() * b.real();
+    }
+    bool equals(const Point &a, const Point &b) {
+        return sgn(a.real() - b.real()) == Sign::ZERO and sgn(a.imag() - b.imag()) == Sign::ZERO;
+    }
+    bool equals(coordinate_t a, coordinate_t b) {
+        return compare(a, b) == 0;
+    }
+    
+    // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_1_C
+    int isp(const Point &a, const Point &b, const Point &c) {
+        Point ab = b - a, ac = c - a;
+        int s = sgn(det(ab, ac));
+        if (s == Sign::POSITIVE) return ISP::L_CURVE;
+        if (s == Sign::NEGATIVE) return ISP::R_CURVE;
+        if (sgn(dot(ab, ac)) == Sign::NEGATIVE) return ISP::BACK;
+        Point ba = a - b, bc = c - b;
+        if (sgn(dot(ba, bc)) == Sign::NEGATIVE) return ISP::FRONT;
+        return ISP::MIDDLE;
+    }
+
+    struct Line {
+        Point a, b;
+        Line() : Line(ZERO, ZERO) {}
+        Line(const Point &from, const Point &to) : a(from), b(to) {}
+    };
+    struct Ray {
+        Point a, b;
+        Ray() : Ray(ZERO, ZERO) {}
+        Ray(const Point &from, const Point &to) : a(from), b(to) {}
+    };
+    struct Segment {
+        Point a, b;
+        Segment() : Segment(ZERO, ZERO) {}
+        Segment(const Point &from, const Point &to) : a(from), b(to) {}
+    };
+    struct Circle {
+        Point center;
+        coordinate_t radius;
+        Circle() : Circle(ZERO, 0) {}
+        Circle(const Point &c, const coordinate_t &r) : center(c), radius(r) {}
+    };
+
+    // Triangle
+    
+    coordinate_t signed_area(const Point &a, const Point &b, const Point &c) {
+        return det(b - a, c - a) / 2;
+    }
+    coordinate_t area(const Point &a, const Point &b, const Point &c) {
+        return std::abs(signed_area(a, b, c));
+    }
+    Point pG(const Point &a, const Point &b, const Point &c) {
+        return (a + b + c) / 3;
+    }
+    // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_7_B
+    Circle pI(const Point &a, const Point &b, const Point &c) {
+        auto la = std::abs(b - c), lb = std::abs(c - a), lc = std::abs(a - b);
+        auto l = la + lb + lc;
+        la /= l, lb /= l, lc /= l;
+        Point center = la * a + lb * b + lc * c;
+        auto radius = 2. * area(a, b, c) / l;
+        return Circle(center, radius);
+    }
+    // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_7_C
+    Circle pO(const Point &a, const Point &b, const Point &c) {
+        Point ab = b - a, bc = c - b, ca = a - c;
+        auto la = square_abs(bc), lb = square_abs(ca), lc = square_abs(ab);
+        auto s = la * (lb + lc - la), t = lb * (lc + la - lb), u = lc * (la + lb - lc);
+        auto l = s + t + u;
+        s /= l, t /= l, u /= l;
+        Point center = a * s + b * t + c * u;
+        return Circle(center, std::abs(center - a));
+    }
+    Point pH(const Point &a, const Point &b, const Point &c) {
+        return a + b + c - 2 * pO(a, b, c).center;
+    }
+    auto pIabc(const Point &a, const Point &b, const Point &c) {
+        return std::make_tuple(pI(-a, b, c), pI(a, -b, c), pI(a, b, -c));
+    }
+
+    // Line
+
+    // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_2_A
+    template <typename line_t_1, typename line_t_2>
+    auto is_parallel(const line_t_1 &l1, const line_t_2 &l2) -> decltype(l1.a, l1.b, l2.a, l2.b, bool()) {
+        return sgn(det(l1.b - l1.a, l2.b - l2.a)) == Sign::ZERO;
+    }
+    // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_2_A
+    template <typename line_t_1, typename line_t_2>
+    auto is_orthogonal(const line_t_1 &l1, const line_t_2 &l2) -> decltype(l1.a, l1.b, l2.a, l2.b, bool())  {
+        return sgn(dot(l1.b - l1.a, l2.b - l2.a)) == Sign::ZERO;
+    }
+    template <typename line_t_1, typename line_t_2>
+    auto on_the_same_line(const line_t_1 &l1, const line_t_2 &l2) -> decltype(l1.a, l1.b, l2.a, l2.b, bool())  {
+        return is_parallel(l1, l2) and sgn(det(l1.b - l1.a, l2.a - l1.a)) == Sign::ZERO;
+    }
+
+    // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_1_A
+    template <typename line_t>
+    Point projection(const Point &p, const line_t &line) {
+        Point a = p - line.a;
+        Point b = line.b - line.a;
+        return line.a + dot(a, b) / square_abs(b) * b;
+    }
+
+    // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_1_B
+    template <typename line_t>
+    Point reflection(const Point &p, const line_t &line) {
+        Point h = projection(p, line);
+        return p + (h - p) * 2;
+    }
+
+    // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_2_D
+    coordinate_t square_distance(const Point &p, const Segment &l) {
+        Point h = projection(p, l);
+        if (isp(l.a, l.b, h) == ISP::MIDDLE) {
+            return square_abs(h - p);
+        } else {
+            return std::min(square_abs(p - l.a), square_abs(p - l.b));
+        }
+    }
+    coordinate_t square_distance(const Segment &l, const Point &p) {
+        return square_distance(p, l);
+    }
+    coordinate_t square_distance(const Point &p, const Ray &l) {
+        Point h = projection(p, l);
+        int dir = isp(l.a, l.b, h);
+        return dir == ISP::MIDDLE or dir == ISP::FRONT ? square_abs(h - p) : std::min(square_abs(p - l.a), square_abs(p - l.b));
+    }
+    coordinate_t square_distance(const Ray &l, const Point &p) {
+        return square_distance(p, l);
+    }
+    coordinate_t square_distance(const Point &p, const Line &l) {
+        return square_abs(projection(p, l) - p);
+    }
+    coordinate_t square_distance(const Line &l, const Point &p) {
+        return square_distance(p, l);
+    }
+    // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_2_D
+    coordinate_t distance(const Point &p, const Segment &l) {
+        return std::sqrt(square_distance(p, l));
+    }
+    // https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_2_D
+    coordinate_t distance(const Segment &l, const Point &p) {
+        return distance(p, l);
+    }
+    coordinate_t distance(const Point &p, const Ray &l) {
+        return std::sqrt(square_distance(p, l));
+    }
+    coordinate_t distance(const Ray &l, const Point &p) {
+        return distance(p, l);
+    }
+    coordinate_t distance(const Point &p, const Line &l) {
+        return std::sqrt(square_distance(p, l));
+    }
+    coordinate_t distance(const Line &l, const Point &p) {
+        return distance(p, l);
+    }
+
+    Containment contains(const Segment &l, const Point &p) {
+        return sgn(distance(l, p)) == 0 ? Containment::ON : Containment::OUT;
+    }
+    Containment contains(const Ray &l, const Point &p) {
+        return sgn(distance(l, p)) == 0 ? Containment::ON : Containment::OUT;
+    }
+    Containment contains(const Line &l, const Point &p) {
+        return sgn(distance(l, p)) == 0 ? Containment::ON : Containment::OUT;
+    }
+
+    bool equals(const Line &l, const Line &m) {
+        return on_the_same_line(l, m);
+    }
+    bool equals(const Ray &l, const Ray &m) {
+        return on_the_same_line(l, m) and equals(l.a, m.a);
+    }
+    bool equals(const Segment &l, const Segment &m) {
+        return (equals(l.a, m.a) and equals(l.b, m.b)) or (equals(l.a, m.b) and equals(l.b, m.a));
+    }
+
+    // "https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=CGL_2_B"
+    bool has_common_point(const Segment &l1, const Segment &l2) {
+        int isp_1a = isp(l1.a, l1.b, l2.a), isp_1b = isp(l1.a, l1.b, l2.b);
+        if (isp_1a * isp_1b > 0) return false;
+        int isp_2a = isp(l2.a, l2.b, l1.a), isp_2b = isp(l2.a, l2.b, l1.b);
+        if (isp_2a * isp_2b > 0) return false;
+        return true;
+    }
+
+    namespace internal {
+        template <typename line_t_1, typename line_t_2>
+        Point cross_point(const line_t_1 &l1, const line_t_2 &l2) {
+            assert(not is_parallel(l1, l2));
+            Point u = l1.b - l1.a, v = l2.a - l2.b, c = l2.a - l1.a;
+            return l2.a - det(u, c) / det(u, v) * v;
+        }
+    }
+}
+} // namespace suisen
+
+struct S {
+    suisen::geometry::Line l;
+    bool is_point;
+
+    S(suisen::geometry::Point a, suisen::geometry::Point b, bool is_point) : l(a, b), is_point(is_point) {}
+
+    static S point(suisen::geometry::Point a) {
+        return S(a, suisen::geometry::ZERO, true);
+    }
+    static S line(suisen::geometry::Point a, suisen::geometry::Point b) {
+        return S(a, b, false);
+    }
+
+    S op(S x) {
+        if (is_point and x.is_point) {
+            return line(l.a, x.l.a);
+        } else if (is_point) {
+            return x.op(*this);
+        } else if (x.is_point) {
+            return point(suisen::geometry::reflection(x.l.a, l));
+        } else {
+            return point(suisen::geometry::internal::cross_point(l, x.l));
+        }
+    }
+};
+
+using namespace suisen::parsing;
+
+S expr(State &it);
+S atom(State &it);
+
+S expr(State &it) {
+    S res = atom(it);
+    while (*it and *it != ')') {
+        consume(it, '@');
+        res = res.op(atom(it));
+    }
+    return res;
+}
+S atom(State &it) {
+    consume(it, '(');
+    if (in(it, '0', '9')) {
+        suisen::geometry::coordinate_t x = number(it);
+        consume(it, ',');
+        suisen::geometry::coordinate_t y = number(it);
+        consume(it, ')');
+        return S::point(suisen::geometry::Point { x, y });
+    } else {
+        S res = expr(it);
+        consume(it, ')');
+        return res;
+    }
+}
+
+int main() {
+    cout << fixed << setprecision(20);
+    while (true) {
+        string s;
+        cin >> s;
+        if (s == "#") break;
+        auto it = s.cbegin();
+        auto ans = expr(it).l.a;
+        cout << ans.real() << ' ' << ans.imag() << endl;
+    }
+}
+
+

@@ -1,0 +1,81 @@
+#include<bits/stdc++.h>
+using namespace std;
+int H,W,N;
+string s[300];
+int r[300], c[300];
+pair<int,int> dir[] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+const int inf = 1e9;
+
+int bfs(int x, int y){
+    int dist[H][W];
+    for(int i = 0; i < H; i++){
+        for(int j = 0; j < W; j++){
+            dist[i][j] = inf;
+        }
+    }
+    deque<pair<int,int>> que;
+    dist[x][y] = 0;
+    que.push_back({x, y});
+    while(!que.empty()){
+        auto [a, b] = que.front();
+        que.pop_front();
+        for(int i = 0; i < 4; i++){
+            int c = a + dir[i].first;
+            int d = b + dir[i].second;
+            if(c < 0 || H <= c || d < 0 || W <= d) continue;
+            if(s[c][d] == '#') continue;
+            if(s[c][d] == '.'){
+                if(dist[a][b] < dist[c][d]){
+                    dist[c][d] = dist[a][b];
+                    que.push_front({c, d});
+                }
+            }
+            if(s[c][d] == '@'){
+                if(dist[a][b] + 1 < dist[c][d]){
+                    dist[c][d] = dist[a][b] + 1;
+                    que.push_back({c, d});
+                }
+            }
+        }
+    }
+    // for(int i = 0; i < H; i++){
+    //     for(int j = 0; j < W; j++){
+    //         cout<<dist[i][j]<<" ";
+    //     }
+    //     cout<<endl;
+    // }cout<<endl;
+
+    int damage = 0;
+    for(int i = 0; i < N; i++){
+        int h = r[i];
+        int w = c[i];
+        damage = max(damage, dist[h][w]);
+    }
+    return damage;
+}
+int main(){
+    cin>>H>>W>>N;
+    for(int i = 0; i < H; i++){
+        cin>>s[i];
+    }
+    for(int i = 0; i < N; i++){
+        cin>>r[i]>>c[i];
+        r[i]--; c[i]--;
+    }
+    int min_damage = inf;
+    int ans_h, ans_w;
+    for(int i = 0; i< H; i++){
+        for(int j = 0; j < W; j++){
+            if(s[i][j] == '.'){
+                int damage = bfs(i, j);
+                if(min_damage > damage){
+                    min_damage = damage;
+                    ans_h = i;
+                    ans_w = j;//cout<<i<<" "<<j<<" "<<damage<<endl;
+                }
+            }
+        }
+    }
+    if(min_damage == inf) cout<<-1<<" "<<-1<<endl;
+    else cout<<ans_h + 1<<" "<<ans_w + 1<<endl;
+}

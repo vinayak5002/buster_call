@@ -1,0 +1,58 @@
+#include<iostream>
+#include<algorithm>
+#include<vector>
+#include<unordered_set>
+#include<map>
+
+
+using namespace std;
+
+int main(){
+
+    int result = 0;
+
+    //頂点Vと辺の数Eの読み取り
+    int V, E;
+    cin >> V >> E;
+
+    //重み付き隣接リストの作成
+    vector< vector<int> > L(V, vector<int>());
+    map<pair<int,int>,int> w;
+    for (int i=0; i<E; i++){
+        int s, t, d;
+        cin >> s >> t >> d;
+        L[s].push_back(t);
+        L[t].push_back(s);
+
+        w[make_pair(s,t)]=d;
+        w[make_pair(t,s)]=d;
+    }
+
+    unordered_set <int> U;
+
+    U.insert(0);
+
+    while (U.size() < V){
+        int mini = 1000000;
+        int J;
+        for (int i:U){
+            for (int j : L[i]){
+                if (mini > w.at(make_pair(i,j))){
+                    mini = w.at(make_pair(i,j));
+                    J = j;
+                    w[make_pair(i,j)] = 1000000;
+                    w[make_pair(j,i)] = 1000000;
+                }
+            }
+        }
+
+        U.insert(J);
+
+        result += mini;
+
+    }
+    
+    printf("%d\n",result);
+
+    return 0;
+}

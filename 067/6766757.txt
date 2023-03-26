@@ -1,0 +1,80 @@
+#define _CRT_SECURE_NO_WARNINGS
+#define _USE_MATH_DEFINES
+#include<stdio.h>
+#include<string.h>
+#include<math.h>
+
+int main(void){
+
+	char buf[10000];
+
+	struct Dice
+	{
+		int d[6];
+	};
+
+	struct Dice dice_a, dice_b;
+
+	int i, j, k;
+
+	//サイコロAの数字入力
+	fgets(buf, sizeof(buf) - 1, stdin);
+	for (i = 0; i < 6; i++)	sscanf(buf, "%d %[^\n]", &dice_a.d[i], &buf);
+
+	//サイコロBの数字入力
+	fgets(buf, sizeof(buf) - 1, stdin);
+	for (i = 0; i < 6; i++)	sscanf(buf, "%d %[^\n]", &dice_b.d[i], &buf);
+
+
+	int yesFlg = 0;
+
+	int a_side[8]; //サイコロAの側面2周分
+	int b_side[4]; //サイコロBの側面
+
+	for (i = 1; i < 5; i++){
+		a_side[i-1] = dice_a.d[i];
+		a_side[i+3] = dice_a.d[i];
+	}
+
+	for (i = 0; i < 6; i++){
+		//サイコロAの天面と同じ面を探す
+		if (dice_a.d[0] == dice_b.d[i]){
+
+			//底面判定
+			if (dice_b.d[5 - i] != dice_a.d[5]) break;
+
+			//サイコロBの側面を取得
+			j = k = 0;
+			while (k < 6){
+				if (k != i && k != 5 - i){
+					b_side[j] = dice_b.d[k];
+					j++;
+				}
+				k++;
+			}
+
+			//側面判定
+			for (j = 0; j < 4; j++){
+				if (a_side[j] == b_side[0]){
+					for (k = 1; k < 4; k++){
+						if (a_side[j + k] != b_side[k]) break;
+						if (k == 3) yesFlg = 1;
+					}
+					if (a_side[j + 1] == b_side[2] && a_side[j + 2] == b_side[1] && a_side[j + 3] == b_side[3])	yesFlg = 1;
+					
+					break;
+				}
+			}
+		}
+	}
+
+	if (yesFlg == 1){
+		printf("Yes\n");
+	}
+	else{
+		printf("No\n");
+	}
+	
+
+	return 0;
+}

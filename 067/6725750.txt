@@ -1,0 +1,64 @@
+#include<bits/stdc++.h>
+//#include<atcoder/all>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+//using namespace atcoder;
+typedef long long ll;
+const ll INF = 1e18;
+//typedef modint998244353 mint;
+//cout << fixed << setprecision(12);
+
+int main(){
+	int n;
+	cin >> n;
+	vector<bool> a(1<<n, false);
+	int v;
+	for (int i=0; i<(1<<n); i++){
+		cin >> v;
+		if (v == 1){
+			a[i] = true;
+		}
+	}
+	
+	vector<tuple<int,int,int>> mada;
+	vector<vector<int>> popl(n+1, vector<int>(0));
+	mada.push_back(make_tuple(0,0,0));
+	while (!mada.empty()){
+		int i = get<0>(mada.back());
+		int pops = get<1>(mada.back());
+		int ind = get<2>(mada.back());
+		mada.pop_back();
+		if (ind < n){
+			popl[pops+1].push_back(i+(1<<ind));
+			mada.push_back(make_tuple(i+(1<<ind), pops+1, ind+1));
+			mada.push_back(make_tuple(i, pops, ind+1));
+		}
+	}
+	
+	int ans = 0;
+	for (int num=1; num<=n; num++){
+		for (int i: popl[num]){
+			if (!a[i]){
+				for (int j=0; j<n; j++){
+					if ((i>>j)&1){
+						if (a[i^(1<<j)]){
+							cout << -1 << endl;
+							return 0;
+						}
+					}
+				}
+			}else{
+				bool mode = true;
+				for (int j=0; j<n; j++){
+					if ((i>>j)&1){
+						if (a[i^(1<<j)]){
+							mode = false;
+						}
+					}
+				}
+				if (mode) ans++;
+			}
+		}
+	}
+	cout << ans << endl;
+}

@@ -1,0 +1,130 @@
+#include <iostream>
+
+using namespace std;
+
+int binarySearch( int arr[], int size, int key );
+int nMatchingInts( int arr1[], int size1, int arr2[], int size2 );
+int insertionSort( int arr[], int size, int g );
+int shellSort( int arr[], int size, int gArr[], int gSize );
+
+int main()
+{
+
+	int sSize;
+	cin >> sSize;
+	int* sArr = new int[sSize];
+	for( int i = 0; i < sSize; i++ )
+	{
+		std::cin >> sArr[i];
+	}
+
+	int tSize;
+	cin >> tSize;
+	int* tArr = new int[tSize];
+	for( int i = 0; i < tSize; i++ )
+	{
+		std::cin >> tArr[i];
+	}
+
+	cout << nMatchingInts( sArr, sSize, tArr, tSize ) << endl;
+
+	delete[] sArr;
+	delete[] tArr;
+
+	return 0;
+}
+
+int binarySearch( int arr[], int size, int key )
+{
+	int left = 0;
+	int right = size;
+
+	while( left != right )
+	{
+		int mid = (left + right) / 2;
+
+		if( arr[mid] == key )
+		{
+			return mid;
+		}
+		else if( arr[mid] < key )
+		{
+			left = mid + 1;
+		}
+		else
+		{
+			right = mid;
+		}
+	}
+
+	return -1;
+}
+
+int nMatchingInts( int arr1[], int size1, int arr2[], int size2 )
+{
+	int sum = 0;
+
+	int gSize = 12;
+	int gArr[] = {
+		19930, 8858,
+		3937, 1750,
+		701, 301,
+		132, 57,
+		23, 10,
+		4, 1
+	}; // Ciura gap sequence
+
+	shellSort( arr1, size1, gArr, gSize );
+
+	for( int i = 0; i < size2; i++ )
+	{
+		if( binarySearch( arr1, size1, arr2[i] ) != -1 )
+		{
+			sum++;
+		}
+	}
+
+	return sum;
+}
+
+int insertionSort( int arr[], int size, int g )
+{
+	/*
+	Takes in an array to sort, size of the array,
+	and the gap between each element to compare
+	*/
+	int count = 0;
+
+	for( int i = g; i < size; i++ )
+	{
+		int key = arr[i];
+		int j = i - g;
+		while( j >= 0 && arr[j] > key )
+		{
+			arr[j + g] = arr[j];
+			j -= g;
+			count++;
+		}
+
+		arr[j + g] = key;
+	}
+
+	return count;
+}
+
+int shellSort( int arr[], int size, int gArr[], int gSize )
+{
+	if( size == 1 )
+	{
+		return 0;
+	}
+
+	int count = 0;
+
+	for( int i = 0; i < gSize; i++ )
+	{
+		count += insertionSort( arr, size, gArr[i] );
+	}
+
+	return count;
+}

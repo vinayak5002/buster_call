@@ -1,0 +1,189 @@
+#define COM_MAX 2000000
+#define VALUE_MAX 1000000000
+
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+
+struct node
+{
+    unsigned int key;
+    struct node *next;
+    struct node *prev;
+};
+
+typedef struct node * node_p;
+
+node_p node_pointer={0};
+
+node_p listSearch(int value);
+void initialize();
+void printList();
+void deleteNode(node_p x);
+void deleteFirst();
+void deleteLast();
+void delete(int value);
+void insert(int value);
+
+int main()
+{
+    int command_num=0;
+    char command[20];
+    int value=0;
+    int i=0;
+    int np=0;
+    int nd=0;
+    int size=0;
+
+    scanf("%d",&command_num);
+    initialize();
+    for (i=0;i<command_num;i++)
+    {
+        scanf("%s %d", command, &value);
+        
+        if (!strcmp(command,"insert"))
+        {
+            insert(value);
+            np++;
+            size++;
+        }
+        else if (!strcmp(command,"delete"))
+        {
+            delete(value);
+            nd++;
+            size--;
+        }
+        else if (!strcmp(command,"deleteFirst"))
+        {
+            deleteFirst();
+            size--;
+        }
+        else if (!strcmp(command,"deleteLast"))
+        {
+            deleteLast();
+            size--;
+        }
+        else
+        {
+            printf("ERROR: Invalid Command!\n");
+            exit(0);
+        }
+        printList();
+    }
+
+    //printList();
+
+    return 0;
+}
+
+node_p listSearch(int value)
+{
+    node_p result={0};
+    node_p i_node=node_pointer;
+
+    for (i_node=node_pointer;i_node->next!=node_pointer;i_node=i_node->next)
+    {
+        if (i_node->next->key==value)
+        {
+            result = i_node->next;
+            break;
+        }
+        else
+        {
+            result = NULL;
+        }
+    }
+
+    return result;
+}    
+
+void initialize()
+{
+    node_pointer = malloc(sizeof(struct node));
+    node_pointer->key = 0;
+    node_pointer->next = node_pointer;
+    node_pointer->prev = node_pointer;
+
+    return;
+}
+
+void printList()
+{
+    node_p next_node = node_pointer->next;
+    int i = 1;
+
+    while (1)
+    {
+        if (next_node==node_pointer)
+        {
+            break;
+        }
+        if (i == 0)
+        {
+            printf(" ");
+        }
+        printf("%d", next_node->key);
+        next_node = next_node->next;
+        i = 0;
+    }
+    printf("\n");
+
+    return;
+}
+
+void deleteNode(node_p x)
+{
+    node_p next_node = x->next;
+    node_p prev_node = x->prev;
+
+    next_node->prev = prev_node;
+    prev_node->next = next_node;
+    free(x);
+
+    return;
+}
+
+void deleteFirst()
+{
+    node_p first_node = node_pointer->next;
+
+    deleteNode(first_node);
+
+    return;
+}
+
+void deleteLast()
+{
+    node_p last_node = node_pointer->prev;
+    
+    deleteNode(last_node);
+
+    return;
+}
+
+void delete(int value)
+{
+    node_p node_to_delete = listSearch(value);
+
+    if (node_to_delete != NULL)
+    {
+        deleteNode(node_to_delete);
+    }
+
+    return;
+}
+
+void insert(int value)
+{
+    node_p new_node = malloc(sizeof(struct node));
+    node_p next_node = node_pointer->next;
+
+    new_node->key = value;
+    new_node->prev = node_pointer;
+    new_node->next = next_node;
+
+    next_node->prev = new_node;
+    node_pointer->next = new_node;
+
+    return;
+}

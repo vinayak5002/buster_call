@@ -1,0 +1,87 @@
+//AOJ GRL_1_B Single Source Shortest Path (Negative Edges) (https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_1_B&lang=ja)
+
+//Bellman–Ford algorithm
+//最短路の頂点数が高々V-1個であることより、高々V-1回の更新で最短距離がすべて求まることがポイント
+//「単一始点最短路問題」に対して適用可能、負の辺を含んでいてもOK、負の閉路を検出できる
+//計算量はO(EV)
+
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <queue>
+
+using namespace std;
+
+using ll = long long;
+using vi = vector<int>;
+using vll = vector<long long>;
+using vvi = vector<vi>;
+
+#define rep(i, n) for (int i = 0; i < n; i++)
+
+const long long INFL = pow(10,17);
+
+//辺を表す型
+struct edge{
+    int to; //隣接頂点番号
+    long long w; //重み
+
+    //メンバ初期化リスト
+    edge(int to, long long w) : to(to), w(w) {}
+};
+
+//重み付きグラフを表す型
+using graph = vector<vector<edge> >;
+
+int main(){
+    //入力の受け取り
+    int V,E,r; cin >> V >> E >> r;
+    graph g(V);
+    rep(i,E){
+        int s,t,d;
+        cin >> s >> t >> d;
+        g[s].push_back(edge(t,d));
+    }
+
+    //ベルマン・フォード法
+
+    //負の閉路を持つかどうか
+    bool exist_negative_cycle = false;
+
+    vll dist(V,INFL);
+    dist[r] = 0;
+    rep(iter,V){
+        //更新が発生したかどうかを表すフラグ
+        bool update = false;
+
+        rep(v,V){
+            //dist[v] = INF の時は頂点vからの緩和処理を行わない(始点から到達不可能な負の閉路は不問)
+            if(dist[v] == INFL) continue;
+
+            for(auto e:g[v]){
+                //緩和処理を行い、更新されたらupdateをtrueにする
+                if(dist[v] + e.w < dist[e.to]){
+                    dist[e.to] = dist[v] + e.w;
+                    update = true;
+                }
+            }
+        }
+    //更新が行われていなかったら、既に最短路が求められている
+    if(!update) break;
+
+    //V回目の反復で更新が行われていた場合は、負の閉路を持つとわかる 
+    if(iter == V-1 && update) exist_negative_cycle = true;
+    }
+
+    //結果の出力
+    if(exist_negative_cycle) cout << "NEGATIVE CYCLE" << endl;
+    else{
+        rep(v,V){
+            if(dist[v] < INFL/2) cout << dist[v] << endl;
+            else cout << "INF" << endl;
+        }
+    }
+
+
+}

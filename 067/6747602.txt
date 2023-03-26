@@ -1,0 +1,41 @@
+Max = 500000
+sentinel = 20000000
+
+def merge(a, n, left, mid, right):
+    n_left = mid -left
+    n_right = right - mid
+    for i in range(n_left):
+        L[i] = a[left+1]
+    for i in range(n_right):
+        R[i] = a[mid+1]
+    
+    L[n_left]=sentinel
+    R[n_right]=sentinel
+    j = 0
+    i = 0
+
+    for k in range(left, right):
+        if L[i] <= R[j]:
+            a[k] = L[i]
+            i = i + 1
+        else:
+            a[k] = R[j]
+            j = j + 1
+
+def mergesort(a, n, left, right):#半分に分けていく
+    if left+1 < right:
+        mid = (left+right)/2
+        mergesort(a, n, left, mid)
+        mergesort(a, n, mid, right)
+        merge(a, n, left, mid, right)
+
+L = [0]*Max
+R = [0]*Max
+n = int(input())
+for i in range(n):
+    a = list(map(int, input().split()))
+
+mergesort(a, n, 0, n)
+
+for i in range(n):
+    print(a[i])

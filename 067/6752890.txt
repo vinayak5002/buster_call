@@ -1,0 +1,190 @@
+#include <iostream>
+#include <deque>
+using namespace std;
+#define zyb cout<<111111<<endl
+
+typedef struct ye {
+	long long num;
+	struct ye *left, *right, *parent;
+	long long priority;
+} ye;
+typedef ye *ptr;
+
+
+ptr find(int a, ptr root) {
+	while (root != NULL && a != root->num) {
+		if (a < root->num)
+			root = root->left;
+		else
+			root = root->right;
+	}
+	return root ;
+}
+
+void print(ptr root) {
+	if (root == NULL)
+		return ;
+	print(root->left);
+
+	printf("%lld ", root->num);
+	print(root->right);
+}
+
+ptr findmin(ptr root) {
+	while (root->left) {
+		root = root->left;
+	}
+	return root;
+}
+
+ptr rightRotate(ptr t) {
+	ptr s = t->left;
+	t->left = s->right;
+	s->right = t;
+	return s;
+}
+
+ptr leftRotate(ptr t) {
+	ptr s = t->right;
+	t->right = s->left;
+	s->left = t;
+	return s;
+}
+
+ptr treeSuccessor(ptr x) {
+	if (x->right != NULL)
+		return findmin(x->right);
+
+	ptr y = x->parent;
+	while (y != NULL && x == y->right) {
+		x = y;
+		x = y->parent;
+	}
+	return y;
+}
+ptr delete1(ptr root, long long number);
+
+ptr delete_lover(ptr root, long long number) {
+	//zyb << 22222 << endl;
+	if (root == NULL)
+		return NULL;
+	if (number < root->num)
+		root->left = delete_lover(root->left, number);
+	else if (number > root->num)
+		root->right = delete_lover(root->right, number);
+	else
+		return delete1(root, number);
+	return root;
+}
+
+ptr delete1(ptr root, long long number) {
+	//ptr y, x;
+//	zyb;
+	if (root->left == NULL && root->right == NULL)
+		return NULL;
+	else if (root->left == NULL) {
+		root = leftRotate(root);
+	} else if (root->right == NULL) {
+		root = rightRotate(root);
+	} else {
+		if (root->left->priority > root->right->priority) {
+			root = rightRotate(root);
+		} else {
+			root = leftRotate(root);
+		}
+
+	}
+	return delete_lover(root, number);
+
+}
+
+
+ptr create_ptr(long long number, long long priority) {
+//	zyb;
+	ptr s = (ptr)malloc(sizeof(ye));
+	s->num = number;
+	s->priority = priority;
+	s->left = NULL;
+	s->right = NULL;
+	//zyb;
+	return s;
+}
+
+ptr insert(ptr root, long long number, long long priorty) {
+//	zyb << 222222 << endl;
+	if (root == NULL) {
+//		cout << 6666 << /dl;
+		return create_ptr(number, priorty);
+	}
+	if (number == root->num) {
+		return root;
+	}
+	if (number < root->num) {
+		root->left = insert(root->left, number, priorty);
+		//	cout << 77777 << endl;
+		if (root->priority < root->left->priority) {
+
+			root = rightRotate(root);
+
+			//		cout << 333333 << endl;
+		}
+	} else {
+		//	cout << 8888 << endl;
+		root->right = insert(root->right, number, priorty);
+		if (root->priority < root->right->priority) {
+
+			root = leftRotate(root);
+
+		}
+		//	cout << 333333 << endl;
+	}
+	return root;
+
+}
+
+void print1(ptr root) {
+	if (root == NULL)
+		return ;
+
+
+	printf("%lld ", root->num);
+	print1(root->left);
+	print1(root->right);
+}
+
+int main() {
+	int a;
+	while (cin >> a) {
+		ptr root = NULL;
+		string lll;
+		long long num, prior;
+		for (int i = 0; i < a; i++) {
+			cin >> lll;
+			if (lll[0] == 'i') {
+				ptr a1;
+
+				cin >> num >> prior;
+				root = insert( root, num, prior);
+			} else if (lll[0] == 'f') {
+				int lover;
+				cin >> lover;
+				if (find(lover, root)) {
+					cout << "yes" << endl;
+				} else {
+					cout << "no" << endl;
+				}
+			} else if (lll[0] == 'd') {
+				int lover;
+				cin >> lover;
+				root = delete1( root, lover);
+			} else {
+
+				print(root);
+				cout << endl;
+				print1(root);
+				cout << endl;
+
+			}
+		}
+	}
+}

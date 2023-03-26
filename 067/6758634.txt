@@ -1,0 +1,60 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
+
+import static java.lang.Integer.parseInt;
+
+class MaxHeap {
+
+    static int leftChild(int i) {
+        return i * 2;
+    }
+
+    static int rightChild(int i) {
+        return i * 2 + 1;
+    }
+
+    static void maxHeapify(int[] heap, int i) {
+        int leftChild = leftChild(i);
+        int rightChild = rightChild(i);
+        int largest = i;
+        if (leftChild < heap.length && heap[leftChild] > heap[i]) {
+            largest = leftChild;
+        }
+        if (rightChild < heap.length && heap[rightChild] > heap[largest]) {
+            largest = rightChild;
+        }
+        if (largest != i) {
+            int tmp = heap[i];
+            heap[i] = heap[largest];
+            heap[largest] = tmp;
+            maxHeapify(heap, largest);
+        }
+    }
+
+    static void buildMaxHeap(int[] heap) {
+        for (int i = (heap.length - 1) / 2; i >= 1; i--) {
+            maxHeapify(heap, i);
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) throws IOException {
+        BufferedReader bRead = new BufferedReader(new InputStreamReader(System.in));
+
+        int h = parseInt(bRead.readLine());
+        int[] heap = new int[h + 1];
+        StringTokenizer st = new StringTokenizer(bRead.readLine());
+        for (int i = 1; i < h + 1; i++) {
+            heap[i] = parseInt(st.nextToken());
+        }
+        MaxHeap.buildMaxHeap(heap);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 1; i < h + 1; i++) {
+            sb.append(" ").append(heap[i]);
+        }
+        System.out.println(sb.toString());
+    }
+}

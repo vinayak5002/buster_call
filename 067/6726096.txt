@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define rep(i,n) for(i = 0;i < n;++i)
+#define all(v) v.begin(), v.end()
+using ll = long long;
+
+int main()
+{
+    ll i,j;
+    ll n;
+    cin >> n;
+    vector<vector<pair<ll,ll>>> graph(n);
+    for(i = 0;i < n;++i){
+        ll u,k;
+        cin >> u >> k;
+        for(j = 0;j < k;++j){
+            ll v,c;
+            cin >> v >> c;
+            graph.at(u).emplace_back(v, c);
+        }
+    }
+    
+    priority_queue<pair<ll, ll>> pq;
+    vector<ll> vdist(n, 1e9);
+    ll top = 0;
+    vdist.at(top) = 0;
+    pq.emplace(0, top);
+    while(!pq.empty()){
+        auto x = pq.top();
+        pq.pop();
+
+        ll now = x.second;
+        ll dist = -x.first;
+        if(vdist.at(now) < dist) continue;
+        for(i = 0;i < graph.at(now).size();++i){
+            ll next = graph.at(now).at(i).first;
+            ll next_dist = graph.at(now).at(i).second + dist;
+            if(vdist.at(next) > next_dist){
+                vdist.at(next) = next_dist;
+                pq.emplace(-next_dist, next);
+            }
+        }
+    }
+
+    for(i = 0;i < n;++i){
+        cout << i << " " << vdist.at(i) << endl;
+    }
+
+    return 0;
+}
+

@@ -1,0 +1,118 @@
+#include <iostream> 
+#include <map>
+#include <array>
+#include <vector>
+using namespace std;
+int main(){
+    int n;
+    int maxN=1<<30;
+    cin >> n;
+    //cerr << n << "\n";
+    map<array<int, 2>, double> A;
+    vector<int> vN;
+    vector<int> vtS;
+    vector<int> vtE;
+    for(int i=0;i<n;++i){
+        int u, k;
+        cin >> u;
+        cin >> k;
+      //  cerr << u << " " << k ;
+        vN.push_back(u);
+        for(int j=0;j<k;++j){
+            array<int, 2> e;
+            int vj;
+            cin >> vj;
+       //     cerr << " " << vj ;
+            e[0] = u;
+            e[1] = vj;
+            A[e] = 1;
+        }
+      //  cerr << "\n";
+    }
+    //cerr << "\nSample output\n";
+    //cerr << n << "\n";
+    for(auto u : vN){
+        array<int, 2> e1;
+        array<int, 2> eE;
+        e1[0] = u;
+        e1[1] = 0;
+        eE[0] = u;
+        eE[1] = maxN;
+
+        auto itlow = A.lower_bound(e1);  // itlow points to b
+        auto itup = A.upper_bound (eE);   // itup points to e (not d!)
+        int count = std::distance(itlow, itup);
+      //  cerr << u << " " << count;
+        while(itlow != itup){
+       //     cerr << " " << (*itlow).first[1];
+            ++itlow;
+        }
+      //  cerr << "\n";
+    }
+    vector<int> stack;
+    vtS.resize(n+1);
+    vtE.resize(n+1);
+    for(int i=0;i<=n;++i){
+        vtS[i] = maxN;
+        vtE[i] = maxN;
+    }
+    int t = 1;
+    for(int k=1;k<n+1;++k){
+        int u = k;
+        if(vtS[u] != maxN){
+            continue;
+        }
+        [&](){
+            while(true){
+                array<int, 2> e1;
+                array<int, 2> eE;
+                e1[0] = u;
+                e1[1] = 0;
+                eE[0] = u;
+                eE[1] = maxN;
+
+               // cout << t << ", " << u << "\n";
+                if(vtS[u] == maxN){
+                    vtS[u] = t;
+                    t = t + 1;
+                }
+                auto itlow = A.lower_bound(e1);  // itlow points to b
+                auto itup = A.upper_bound(eE);  // itup points to e (not d!)
+                if(itlow != itup){
+                    int ut = u;
+                    while(itlow != itup){
+                        int ut2 = (*itlow).first[1];
+                        if(vtS[ut2] == maxN){
+                            ut = ut2;
+                            break;
+                        }
+                        ++itlow;
+                    }
+                    if(ut == u){
+                        // cannot find any new node.
+                        // go to backward process
+                    }
+                    else{
+                        stack.push_back(u);
+                        u = ut;
+                        // continue forward process
+                        continue;
+                    }   
+                }
+                vtE[u] = t;
+                t = t + 1;
+                // backward.
+                if(stack.size() == 0){
+                    return;
+                }
+                int uL = stack[stack.size()-1];
+                stack.pop_back();
+                u = uL;
+            }
+        }();
+    }    
+    for(int u=1;u<n+1;++u){
+        cout << u << " " << vtS[u] << " " << vtE[u] << "\n";
+    }
+    return 0;
+}

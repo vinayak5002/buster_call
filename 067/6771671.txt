@@ -1,0 +1,125 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define N 100
+#define INFTY (1<<22)
+
+int n;
+int M[N][N];
+int d[N];
+
+int Q[INFTY+1];
+int head, tail;
+
+void initialize()
+{
+	head = tail =0;
+}
+
+int isEmpty()
+{
+	return head == tail;
+}
+
+int isFull()
+{
+	return head == (tail+1) % INFTY;
+}
+void enqueue(int x)
+{
+	if(isFull()==1)
+	{
+		exit(1);
+	}
+	Q[tail] = x;
+	if(tail+1== INFTY)
+	{
+		tail =0;
+	}
+	else
+	{
+		tail++;
+	}
+
+}
+
+int dequeue()
+{
+	int x;
+	if(isEmpty()==1)
+	{
+		exit(1);
+	}
+	x=Q[head];
+	if(head+1 == INFTY)
+	{
+		head=0;
+	}
+	else
+	{
+		head++;
+	}
+	return x;
+	
+}
+
+
+void bfs(int s)
+{
+	head=0;
+	tail=0;
+	for(int i=0;i<n;i++)
+	{
+		d[i]=INFTY;
+	}
+	enqueue(s);
+	d[s]=0;
+	int u;
+	while(isEmpty() !=1)
+	{
+		u=dequeue();
+		for(int v=0;v<n;v++)
+		{
+			if(M[u][v]==0)
+			{
+				continue;
+			}
+			if(d[v]!=INFTY)
+			{
+				continue;
+			}
+			d[v]=d[u]+1;
+			enqueue(v);
+		}
+	}
+	
+}
+int main()
+{
+	int u,k,v;
+	scanf("%d", &n);
+	for(int i=0;i<n;i++)
+	{
+		for(int j=0;j<n;j++)
+		{
+			M[i][j]=0;
+		}
+	}
+	for(int i=0;i<n;i++)
+	{
+		scanf("%d %d", &u, &k);
+		u--;
+		for(int j=0;j<k;j++)
+		{
+			scanf("%d", &v);
+			v--;
+			M[u][v]=1;
+		}
+	}
+	bfs(0);
+	for(int i=0;i<n;i++)
+	{
+		printf("%d %d\n", i+1,(d[i]==INFTY) ? (-1):d[i]);
+	}
+	return 0;
+}

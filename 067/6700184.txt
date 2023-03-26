@@ -1,0 +1,105 @@
+#include<bits/stdc++.h>
+using namespace std;
+#include <unordered_set>
+#include <random>
+//#define int long long
+#define REP(i,m,n) for(int i=(m);i<(n);i++)
+#define rep(i,n) REP(i,0,n)
+#define pb push_back
+#define all(a) a.begin(),a.end()
+#define rall(c) (c).rbegin(),(c).rend()
+#define mp make_pair
+#define endl '\n'
+//#define vec vector<ll>
+//#define mat vector<vector<ll> >
+#define fi first
+#define se second
+#define double long double
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<ll,ll> pll;
+//typedef long double ld;
+typedef complex<double> Complex;
+const ll INF=1e9+7;
+const ll MOD=998244353;
+const ll inf=INF*INF;
+const ll mod=MOD;
+const ll MAX=200010;
+const double PI=acos(-1.0);
+typedef vector<vector<ll> > mat;
+typedef vector<ll> vec;
+
+ll dx[]={0,1,0,-1};
+ll dy[]={1,0,-1,0};
+
+
+
+void solve(){
+    while(1){
+        ll d,w;cin>>d>>w;
+        if(d==0&&w==0)break;
+        vector<vector<int> >g(d,vector<int>(w));
+        rep(i,d){
+            rep(j,w)cin>>g[i][j];
+        }
+        vector<vector<int> >sum(d,vector<int>(w));
+        rep(i,d){
+            rep(j,w)sum[i][j]=g[i][j];
+        }
+        REP(i,1,d){
+            rep(j,w)sum[i][j]+=sum[i-1][j];
+        }
+        rep(i,d){
+            REP(j,1,w){
+                sum[i][j]+=sum[i][j-1];
+            }
+        }
+        int ans=0;
+        rep(l,10){
+            vector<vector<int> >cnt(d,vector<int>(w));
+            rep(i,d){
+                rep(j,w){
+                    if(g[i][j]<=l){
+                        cnt[i][j]++;
+                    }
+                }
+            }
+            REP(i,1,d){
+                rep(j,w)cnt[i][j]+=cnt[i-1][j];
+            }
+            rep(i,d){
+                REP(j,1,w)cnt[i][j]+=cnt[i][j-1];
+            }
+            rep(x1,d){
+                rep(y1,w){
+                    REP(x2,x1+2,d){
+                        REP(y2,y1+2,w){
+                            int out=cnt[x2][y2];
+                            if(x1>0){
+                                out-=cnt[x1-1][y2];
+                            }
+                            if(y1>0){
+                                out-=cnt[x2][y1-1];
+                            }
+                            if(x1>0&&y1>0){
+                                out+=cnt[x1-1][y1-1];
+                            }
+                            int in=cnt[x2-1][y2-1]-cnt[x2-1][y1]-cnt[x1][y2-1]+cnt[x1][y1];
+                            if(in==(x2-x1-1)*(y2-y1-1)&&in==out){
+                                int s=sum[x2-1][y2-1]-sum[x2-1][y1]-sum[x1][y2-1]+sum[x1][y1];
+                                ans=max(ans,(l+1)*in-s);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        cout<<ans<<endl;
+    }
+}
+
+signed main(){
+    cin.tie(0);
+    ios::sync_with_stdio(false);
+    solve();
+}

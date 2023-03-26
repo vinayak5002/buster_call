@@ -1,0 +1,19 @@
+N = int(input())
+G = [[0 for _ in range(N)] for _ in range(N)] # NxN の 2 次元配列
+for _ in range(N):
+    u,k,*varray = map(int,input().split()) # u,k は数, varray は配列
+    for v in varray:
+        G[u-1][v-1] = 1# G において u-1 と v-1 をつなげる
+import collections
+D = [-1 for _ in range(N)]
+D[0] = 0 # 始点への距離は 0, 他の距離は-1
+Q = collections.deque()
+Q.append(0) # 始点
+while len(Q) > 0:
+    cur = Q.popleft()
+    for dst in range(N):
+        if ((G[cur][dst] == 1) and (D[dst] == -1)):# cur から dst に移動可能かつ、dst が未訪問だったら
+            D[dst] = D[cur]+1
+            Q.append(dst) # Q に dst を詰める
+for v in range(N):
+    print(v+1, D[v]) # [0,N-1] から [1,N] に変換

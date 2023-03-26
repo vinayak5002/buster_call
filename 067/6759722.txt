@@ -1,0 +1,46 @@
+from sys import stdin
+input = stdin.readline
+
+banpei = {}
+banpei['next'] = banpei
+banpei['prev'] = banpei
+n=int(input().rstrip())
+for _ in range(n):
+  command = input().rstrip().split()
+  if command[0] == "insert":
+    if banpei['next'] == banpei:
+      x = {'prev':banpei,'key':command[1],'next':banpei}
+      banpei['next'] = x
+      banpei['prev'] = x
+    else:
+      x = {'prev':None,'key':command[1],'next':None}
+      x['next'] = banpei['next']
+      banpei['next']['prev'] = x
+      banpei['next'] = x
+      x['prev'] = banpei
+  if command[0] == "delete":
+    t = banpei['next']
+    while t != banpei:
+      if t['key'] == command[1]:
+         t['prev']['next'] = t['next']
+         t['next']['prev'] = t['prev']
+         break
+      else:
+        t = t['next']
+  if command[0] == "deleteFirst":
+    t = banpei['next']
+    banpei['next'] = t['next']
+    t['next']['prev'] = banpei
+  if command[0] == "deleteLast":
+    t = banpei['prev']
+    t['prev']['next'] = banpei
+    banpei['prev'] = t['prev']
+
+def show():
+  s = []
+  c = banpei['next']
+  while(c != banpei):
+    s.append(c['key'])
+    c = c['next']
+  print(*s)
+show()

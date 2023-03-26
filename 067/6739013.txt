@@ -1,0 +1,181 @@
+#define BUF_SIZE 1024
+
+#include <stdio.h>
+#include <string.h>
+
+struct dice {
+	int up;
+	int south;
+	int east;
+	int west;
+	int north;
+	int down;
+};
+
+void roll_south(struct dice *d) {
+	int tmp;
+	tmp = d->south;
+	d->south = d->up;
+	d->up = d->north;
+	d->north = d->down;
+	d->down = tmp;
+}
+
+void roll_east(struct dice *d) {
+	int tmp;
+	tmp = d->east;
+	d->east = d->up;
+	d->up = d->west;
+	d->west = d->down;
+	d->down = tmp;
+}
+
+void roll_west(struct dice *d) {
+	int tmp;
+	tmp = d->west;
+	d->west = d->up;
+	d->up = d->east;
+	d->east = d->down;
+	d->down = tmp;
+}
+
+void roll_north(struct dice *d) {
+	int tmp;
+	tmp = d->north;
+	d->north = d->up;
+	d->up = d->south;
+	d->south = d->down;
+	d->down = tmp;
+}
+//水平方向に時計回りに回転
+void roll_horizontal(struct dice *d){
+	int tmp;
+	tmp = d->south;
+	d->south = d->east;
+	d->east = d->north;
+	d->north = d->west;
+	d->west = tmp;
+}
+//ダイスに同じ数値の面が何個あるか
+int samenum(struct dice *d, int num, int a[])
+{
+	int count = 0;
+	if (d->up == num) {
+		a[count] = 1;
+		count++;
+	}
+	if (d->south == num) {
+		a[count] = 2;
+		count++;
+	}
+	if (d->east == num) {
+		a[count] = 3;
+		count++;
+	}
+	if (d->west == num) {
+		a[count] = 4;
+		count++;
+	}
+	if (d->north == num) {
+		a[count] = 5;
+		count++;
+	}
+	if (d->down == num) {
+		a[count] = 6;
+		count++;
+	}
+	return count;
+}
+
+
+
+int main(void)
+{
+	char buf[BUF_SIZE];
+	int up, south, east, west, north, down;
+	int i, j;
+	int nums[6];
+	int nums2[6];
+
+	memset(nums, 0, sizeof(nums));
+	memset(nums, 0, sizeof(nums));
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d %d %d %d %d %d", &up, &south, &east, &west, &north, &down);
+	struct dice d1 = { up, south, east, west, north, down };
+	struct dice d1_orig = { up, south, east, west, north, down };
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d %d %d %d %d %d", &up, &south, &east, &west, &north, &down);
+	struct dice d2 = { up, south, east, west, north, down };
+
+	//d2の上面と同じ数値の面を探す
+	int n = samenum(&d1, d2.up, nums);
+
+	for (i = 0; i < n; i++) {
+		//d2とd1の上面を合わせる
+		switch (nums[i]) 
+		{
+		case 1:
+			break;
+		case 2:
+			roll_north(&d1);
+			break;
+		case 3:
+			roll_west(&d1);
+			break;
+		case 4:
+			roll_east(&d1);
+			break;
+		case 5:
+			roll_south(&d1);
+			break;
+		case 6:
+			roll_north(&d1);
+			roll_north(&d1);
+			break;
+		default:
+			break;
+		}
+		//d2の前面と同じ数値の面を探す
+		int m = samenum(&d1, d2.south, nums2);
+		for (j = 0; j < n; j++) {
+			//d2とd1の上面を合わせる
+			switch (nums2[j])
+			{
+			case 1:
+				break;
+			case 2:
+				break;
+			case 3:
+				roll_horizontal(&d1);
+				break;
+			case 4:
+				roll_horizontal(&d1);
+				roll_horizontal(&d1);
+				roll_horizontal(&d1);
+				break;
+			case 5:
+				roll_horizontal(&d1);
+				roll_horizontal(&d1);
+				break;
+			case 6:
+				break;
+			default:
+				break;
+			}
+			//printf("%d %d %d %d %d %d", d1.up, d1.south, d1.east, d1.west, d1.north, d1.down);
+			if ((d1.up == d2.up) && (d1.south == d2.south) && (d1.east == d2.east) && (d1.west == d2.west) && (d1.north == d2.north) && (d1.down == d2.down)) {
+				printf("Yes\n");
+				return 0;
+			}
+		}
+		d1.up = d1_orig.up;
+		d1.south = d1_orig.south;
+		d1.east = d1_orig.east;
+		d1.west = d1_orig.west;
+		d1.north = d1_orig.north;
+		d1.down = d1_orig.down;
+
+	}
+	printf("No\n");
+	return 0;
+}

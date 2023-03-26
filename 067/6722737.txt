@@ -1,0 +1,65 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int inf = -100000000;
+
+vector<int> input(int n) {
+    vector<int> res(n);
+    for (auto& x : res) cin >> x;
+    return res;
+}
+
+// 全探索で求める
+int sv1(int n) {
+    auto a = input(n);
+    vector<int> accum = {0};
+    partial_sum(a.begin(), a.end(), back_inserter(accum));
+    
+    int res = inf;
+    for (int i = 0 ; i < n ; i++) {
+        for (int j = i + 1 ; j <= n ; j++) res = max(res, accum[j] - accum[i]);
+    }
+
+    return res;
+}
+
+int sv2(int n) {
+    auto a = input(n);
+    function<int(int, int)> dc = [&](int l, int r) -> int {
+        if (r - l == 0) return inf;
+        if (r - l == 1) return max(inf, a[l]);
+
+        int m = (l + r) / 2;
+        int lmx = inf, sum = 0;
+        for (int i = m - 1 ; i >= l ; i--) {
+            sum += a[i];
+            lmx = max(lmx, sum);
+        }
+
+        int rmx = inf;
+        sum = 0;
+        for (int i = m ; i < r ; i++) {
+            sum += a[i];
+            rmx = max(rmx, sum);
+        }
+
+        return max(max(dc(l, m), dc(m, r)), lmx + rmx);
+         
+    };
+
+    return dc(0, n);
+}
+
+int solve(int n) {
+    // return sv1(n);
+    return sv2(n);
+}
+
+int main() {
+    while(1) {
+        int n; cin >> n;
+        if (!n) break;
+        cout << solve(n) << endl;
+    }
+}
+

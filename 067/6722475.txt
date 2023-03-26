@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+using namespace std;
+using vi = vector<int64_t>;
+using vii = vector<vi>;
+using pii = pair<int64_t, int64_t>;
+
+#define rep(i, n) for (int64_t i = 0; i < (int64_t)(n); i++)
+#define all(v) v.begin(), v.end()
+
+const int64_t inf = numeric_limits<int64_t>::max();
+
+// 以下可変
+
+template <typename T>
+struct RSQ
+{
+    const T INF = numeric_limits<T>::max();
+    int64_t leaf;  // num of leaf
+    vector<T> dat; // complete binary tree
+
+    RSQ(int64_t seqLNG) : leaf(), dat(seqLNG * 4, 0)
+    { // leaf & dat initialization
+        int64_t xxx = 1;
+        while (seqLNG > xxx)
+        {
+            xxx *= 2;
+        }
+        leaf = xxx;
+    }
+
+    void leaf_set(int64_t leafN, T value) { (dat[leafN + leaf - 1] = value); }
+    void RSQ_build()
+    {
+        for (int64_t now = leaf - 2; now >= 0; now--)
+        {
+            dat[now] = dat[now * 2 + 1] + dat[now * 2 + 2];
+        }
+    }
+
+    void update(int64_t index, T xxx)
+    {
+        index += leaf - 1;
+        // 長さ leaf の数列上で index 番目の要素は完全二分木上では index * leaf -1 番目の要素になる
+        dat[index] += xxx; // 要素の書き換え
+        while (index > 0)
+        {
+            index = (index - 1) / 2;
+            dat[index] = dat[index * 2 + 1] + dat[index * 2 + 2];
+        }
+    }
+
+    // [R, L) 間の最小値を出力する
+    T getSUM(int64_t ai, int64_t bi) { return getSUM_sub(ai, bi, 0, 0, leaf); }
+    T getSUM_sub(int64_t ai, int64_t bi, int64_t now, int64_t left, int64_t right)
+    {
+        if (bi <= left || right <= ai)
+        {
+            return 0;
+        }
+        else if (ai <= left && right <= bi)
+        {
+            return dat[now];
+        }
+        else
+        {
+            int64_t lmin = getSUM_sub(ai, bi, now * 2 + 1, left, (left + right) / 2);
+            int64_t rmin = getSUM_sub(ai, bi, now * 2 + 2, (left + right) / 2, right);
+            return lmin + rmin;
+        }
+    }
+};
+
+/////////////////////////////////////////////////////////////
+int main()
+{
+    int64_t N, Q;
+    cin >> N >> Q;
+
+    RSQ<int64_t> ans(N);
+
+
+    rep(i, Q){
+        int64_t comi, xi, yi;
+        cin >> comi >> xi >> yi;
+        if(comi == 0){
+            ans.update(xi - 1, yi);
+        }
+        else{
+            cout << ans.getSUM(xi - 1, yi) << endl;
+        }
+    }
+
+    return 0;
+}
+

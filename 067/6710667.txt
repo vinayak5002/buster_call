@@ -1,0 +1,60 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"math"
+	"os"
+)
+
+type point struct {
+	x, y float64
+}
+
+func (p point) print(out *bufio.Writer) {
+	fmt.Fprintf(out, "%.8f %.8f\n", p.x, p.y)
+}
+
+func koch(left point, right point, depth int, out *bufio.Writer) {
+	if depth == 0 {
+		return
+	}
+
+	left_foot := point{}
+	right_foot := point{}
+	center := point{}
+
+	left_foot.x = (2*left.x + right.x) / 3
+	left_foot.y = (2*left.y + right.y) / 3
+	right_foot.x = (left.x + 2*right.x) / 3
+	right_foot.y = (left.y + 2*right.y) / 3
+
+	th := math.Pi * 60.0 / 180.0
+	center.x = (right_foot.x-left_foot.x)*math.Cos(th) - (right_foot.y-left_foot.y)*math.Sin(th) + left_foot.x
+	center.y = (right_foot.x-left_foot.x)*math.Sin(th) + (right_foot.y-left_foot.y)*math.Cos(th) + left_foot.y
+
+	koch(left, left_foot, depth-1, out)
+	left_foot.print(out)
+	koch(left_foot, center, depth-1, out)
+	center.print(out)
+	koch(center, right_foot, depth-1, out)
+	right_foot.print(out)
+	koch(right_foot, right, depth-1, out)
+}
+
+func main() {
+	in := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
+	var n int
+	fmt.Fscan(in, &n)
+
+	left := point{x: 0, y: 0}
+	right := point{x: 100, y: 0}
+
+	left.print(out)
+	koch(left, right, n, out)
+	right.print(out)
+}
+

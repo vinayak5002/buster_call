@@ -1,0 +1,46 @@
+#include <iostream>
+#include <random>
+#include <regex>
+using namespace std;
+
+int main(void) {
+    int n;
+    while (true) {
+        cin >> n;
+        if (n == 0) break;
+        vector<int> p(n);
+        for (auto &e : p) cin >> e;
+        constexpr int INF = 1e9;
+        vector dp(n + 1, vector(n + 1, vector<int>(1000, INF)));
+        dp[0][0][0] = 0;
+        for (int i = 0; i < n; ++i) {
+            int rem = p[i] % 1000;
+            for (int j = n; j >= 0; --j) {
+                for (int k = 0; k < 1000; ++k) {
+                    if (dp[i][j][k] == INF) continue;
+                    dp[i + 1][j][k] = min(dp[i + 1][j][k], dp[i][j][k]);
+                    int k_next = ((1000 - rem) % 1000 + k);
+                    if (k_next >= 500) {
+                        k_next = (k_next - 500) % 1000;
+                        // cerr
+                        // << '(' << i << ' ' << j << ' ' << k << ')' << " -> "
+                        // << '(' << i + 1 << ' ' << j + 1 << ' ' << k_next << ')'
+                        // << '=' << dp[i][j][k] + p[i] << endl;
+                        dp[i + 1][j + 1][k_next] = min(dp[i + 1][j + 1][k_next], dp[i][j][k] + p[i]);
+                    } else {
+                        dp[i + 1][j][k_next] = min(dp[i + 1][j][k_next], dp[i][j][k] + p[i]);
+                    }
+                }
+            }
+        }
+        for (int j = n; j >= 0; --j) {
+            int res = INF;
+            for (int k = 0; k < 1000; ++k) res = min(res, dp[n][j][k]);
+            if (res < INF) {
+                cout << j << ' ' << res << endl;
+                break;
+            }
+        }
+    }
+    return 0;
+}

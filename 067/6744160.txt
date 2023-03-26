@@ -1,0 +1,32 @@
+def TSP():
+    INF = 10000000
+    dp = [INF] * (1 << n)
+    for i in range(n):  # 任意始点
+        dp[1 << i] = t[i][0]
+
+    for S in range(1, 1 << n):
+        for u in range(n):
+            if S >> u & 1:
+                continue
+            k = 100000
+
+            for i in range(n):
+                if S >> i & 1:
+                    k = min(k, t[u][i + 1])
+            dp[S + (1 << u)] = min(dp[S + (1 << u)], dp[S] + k)
+    return dp[-1]
+
+
+import sys
+input = sys.stdin.readline
+res = []
+
+while True:
+    n = int(input())
+    if n == 0:
+        break
+    t = [list(map(int, input().split())) for _ in range(n)]
+    res.append(TSP())
+
+print(*res, sep="\n")
+

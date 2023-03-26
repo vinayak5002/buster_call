@@ -1,0 +1,39 @@
+n = int(input())
+banpei = {}
+banpei["next"] = banpei
+banpei["prev"] = banpei
+
+for _ in range(n):
+  command = input().split()
+  if command[0] == "insert":
+    x = {}
+    x["key"] = command[1]
+    x["next"] = banpei["next"]
+    banpei["next"]["prev"] = x
+    banpei["next"] = x
+    x["prev"] = banpei
+  elif command[0] == "delete":
+    t = banpei["next"]
+    while True:
+      if t["key"] != command[1]:
+        t = t["next"]
+      else:
+        t["prev"]["next"] = t["next"]
+        t["next"]["prev"] = t["prev"]
+        break
+  elif command[0] == "deleteFirst":
+    t = banpei["next"]
+    banpei["next"] = t["next"]
+    t["next"]["prev"] = banpei
+  elif command[0] == "deleteLast":
+    t = banpei["prev"]
+    banpei["prev"] = t["prev"]
+    t["prev"]["next"] = banpei
+
+
+s = []
+c = banpei["next"]
+while c != banpei:
+  s.append(c["key"])
+  c = c["next"]
+print(*s, end="\n")

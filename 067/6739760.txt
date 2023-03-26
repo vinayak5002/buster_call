@@ -1,0 +1,71 @@
+#include <stdio.h>
+ 
+#if 1
+#define gc() getchar_unlocked()
+#define pc(c) putchar_unlocked(c)
+#else
+#define gc() getchar()
+#define pc(c) putchar(c)
+#endif
+ 
+int in()
+{
+	int n = 0, c = gc();
+	do n = 10*n + (c & 0xf), c = gc(); while (c >= '0');
+	return n;
+}
+ 
+void skip(int k) { while (k--) gc(); }
+ 
+void out(int n)
+{
+	int i;
+	char ob[20];
+ 
+	if (!n) { pc('0'); return; }
+	i = 0; while (n) ob[i++] = n%10 + '0', n/=10;
+	while (i--) pc(ob[i]); 
+}
+ 
+int que[1500005]; int top, end;
+ 
+int main()
+{
+	int n, i, t;
+	char op;
+ 
+	n = in(); top = 0, end = 1;
+	while (n--) {
+		if (gc() == 'i') {
+			skip(6);
+			que[end++] = in();
+		} else {
+			skip(5);
+			op = gc();
+			if (op == 'L') {
+				skip(4);
+				top++;
+			} else if (op == 'F') {
+				skip(5);
+				end--;
+			} else {
+				que[top] = t = in();
+				i = end; while (que[--i] != t);
+				if (i > top) {
+					if (end - i < i - top) {
+						while (++i < end) que[i-1] = que[i];
+						end--;
+					} else {
+						while (--i > top) que[i+1] = que[i];
+						top++;
+					}
+				}
+			}
+		}
+	}
+	i = end-1; out(que[i--]);
+	while (i > top) pc(' '), out(que[i--]);
+	pc('\n');
+	return 0;
+}
+

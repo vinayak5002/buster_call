@@ -1,0 +1,41 @@
+def oi(): return int(input())
+def os(): return input()
+def mi(): return list(map(int, input().split()))
+
+# import sys
+# input = sys.stdin.readline
+
+# 最初の行に G の頂点数 n が与えられます。
+# 続く n 行で各頂点 u の隣接リストが以下の形式で与えられます：
+
+# u k v1 v2 ... vk
+# u は頂点の番号、k は u の出次数、
+# v1v2...vk 　は u に隣接する頂点の番号を示します。
+
+import sys
+sys.setrecursionlimit(10**8)
+
+input_count=0
+N = oi()
+maps = [[] for i in range(N)]
+for i in range(N):
+    temp = mi()
+    maps[i] = temp[2:]
+
+dicts = {i:[] for i in range(1,N+1)}
+count = 1
+def dfs(node, old_node):
+    global count
+    dicts[node].append(count)
+    count += 1
+    for next_node in maps[node-1]:
+        if old_node != next_node:
+            dfs(next_node, node)
+            
+    count += 1
+    dicts[node].append(count)
+
+dfs(1,-1)
+
+for k,v in dicts.items():
+    print(*[v[0], v[1]-1])

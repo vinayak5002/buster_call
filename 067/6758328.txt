@@ -1,0 +1,64 @@
+#include<bits/stdc++.h>
+using namespace std;
+//#include<atcoder/all>
+//using namespace atcoder;
+using ll = long long;
+int n;
+vector<double> x,y;
+
+double dist(double sx,double sy,double tx,double ty){
+	double dx = sx-tx;
+	double dy = sy-ty;
+	return sqrt(dx*dx+dy*dy);
+}
+
+pair<pair<double,double>,pair<double,double>> niten(double a,double b,double c,double d){
+	double A = (2*a-2*c);
+	double B = (2*b-2*d);
+	double C = (c*c + d*d - a*a - b*b);
+	double D = -abs(a*A+b*B+C);
+	double AABB = A*A+B*B;
+	double root = sqrt(AABB-D*D);
+	auto l = pair<double,double>((A*D-B*root)/(AABB)+a,(B*D+A*root)/(AABB)+b);
+	auto r = pair<double,double>((A*D+B*root)/(AABB)+a,(B*D-A*root)/(AABB)+b);
+	return pair<pair<double,double>,pair<double,double>>(l,r);
+}
+
+void solve(){
+	int ans = 1;
+	for(int i = 0;i<n;i++){
+		for(int j = i+1;j<n;j++){
+			if(dist(x[i],y[i],x[j],y[j])<2.0){
+				auto [lp,rp] = niten(x[i],y[i],x[j],y[j]);
+				int cnt = 0;
+				//cerr<<lp.first<<' '<<lp.second<<endl;
+				//cerr<<rp.first<<' '<<rp.second<<endl;
+				for(int k = 0;k<n;k++){
+					if(dist(lp.first,lp.second,x[k],y[k])<1.0+1e-12)cnt++;
+				}
+				ans = max(cnt,ans);
+				cnt = 0;
+				for(int k = 0;k<n;k++){
+					if(dist(rp.first,rp.second,x[k],y[k])<1.0+1e-12)cnt++;
+				}
+				ans = max(cnt,ans);
+			}
+		}
+	}
+	cout<<ans<<endl;
+}
+
+signed main(){
+	cin.tie(nullptr);
+	ios::sync_with_stdio(false);
+	while(1){
+		cin >> n;
+		if(n==0)break;
+		x = y = vector<double>(n);
+		for(int i = 0;i < n;i++){
+			cin >> x[i] >> y[i];
+		}
+		solve();
+	}
+}
+

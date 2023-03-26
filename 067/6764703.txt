@@ -1,0 +1,31 @@
+import sys
+input = sys.stdin.readline
+from collections import Counter
+
+while True:
+    n, m = map(int, input().split())
+    if n == m == 0:
+        break
+    MIN = [0] * n
+    MAX = [0] * n
+    for _ in range(m):
+        ls = map(int, input().split())
+        s = ls.__next__()
+        k = ls.__next__()
+        if k == 1:
+            c = ls.__next__()
+            MIN[c - 1] += s
+            MAX[c - 1] += s
+        else:
+            for c in ls:
+                MAX[c - 1] += s
+    x = sorted(Counter(MIN).items())
+    ans = 0
+    for i, e in enumerate(MAX):
+        if MIN[i] == x[0][0] and x[0][1] == 1:
+            ans = max(ans, e - x[1][0])
+        else:
+            ans = max(ans, e - x[0][0])
+
+    print(ans + 1)
+

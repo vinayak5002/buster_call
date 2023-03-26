@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define ALL(v) v.begin(),v.end()
+#define sz(v) (int)v.size()
+
+int main(){
+  while(true) {
+    int n, m;
+    cin >> n >> m;
+    if(n==0 && m==0) break;
+
+    vector<ll> a(n), w(m);
+    for(int i = 0; i < n; i++) { cin >> a[i]; }
+    for(int i = 0; i < m; i++) { cin >> w[i]; }
+
+    set<ll> st;
+    for(int tmp = 0; tmp < (1<<m); tmp++) {
+      bitset<10> bs(tmp);
+      // cout << "tmp : " << bs << endl;
+      ll ri = 0;
+      vector<int> idx;
+      for(int i = 0; i < m; i++) {
+        if(bs.test(i)) ri += w[i];
+        else idx.push_back(i);
+      }
+      st.insert(ri);
+      for(int tmp2 = 0; tmp2 < (1<< sz(idx)); tmp2++) {
+        bitset<10> bs2(tmp2);
+        // cout << "tmp2: " << bs2 << endl;
+        ll le = 0;
+        for(int i = 0; i < sz(idx); i++) {
+          if(bs2.test(i)) le += w[idx[i]];
+        }
+        int we = ri - le;
+        if(we > 0) st.insert(we);
+      }
+    }
+    
+    // for(auto it : st) cout << it << " ";
+    // cout << endl;
+
+    set<ll> pred, now;
+    bool no_add_ok = true;
+    for(int i = 0; i < n; i++) {
+      if(st.count(a[i])) continue;
+      no_add_ok = false;
+      if(sz(pred) == 0) {
+        for(auto it : st) {
+          int p1 = a[i]-it, p2 = a[i]+it, p3 = it-a[i];
+          if(p1 > 0) pred.insert(p1);
+          if(p2 > 0) pred.insert(p2);
+          if(p3 > 0) pred.insert(p3);
+        }
+      } else {
+        now.clear();
+        for(auto it : st) {
+          int p1 = a[i]-it, p2 = a[i]+it, p3 = it-a[i];
+          if(p1 > 0 && pred.count(p1)) now.insert(p1);
+          if(p2 > 0 && pred.count(p2)) now.insert(p2);
+          if(p3 > 0 && pred.count(p3)) now.insert(p3);
+        }
+        pred = now;
+      }
+    }
+    
+    if(no_add_ok) cout << 0 << endl;
+    else if(sz(now)) cout << *now.begin() << endl;
+    else cout << -1 << endl;
+  }
+}

@@ -1,0 +1,108 @@
+#include <stdio.h>
+
+#define MAX 100
+#define Amax 2097152
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+
+int data[MAX][MAX];
+int n;
+int d[MAX];
+
+//標準入力からデータを受け取る関数
+void getdata()
+{
+    int i, j, v;
+    int k, u, z;
+    //データ数の取得
+    scanf("%d", &n);
+
+    // 2次元配列の初期化
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < n; j++)
+        {
+            data[i][j] = -1;
+        }
+    }
+
+    //データの格納
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d %d", &u, &k);
+        //頂点リストを作製
+        for (j = 0; j < k; j++)
+        {
+            scanf("%d %d", &v, &z);
+            data[u][v] = z;
+        }
+    }
+}
+
+void dijkstra(int t)
+{
+    int i;
+    int min;
+    int u;
+    int color[MAX];
+
+    //配列の初期化
+    for (i = 0; i < n; i++)
+    {
+        color[i] = WHITE;
+        d[i] = Amax;
+    }
+
+    //初期点の設定
+    d[t] = 0;
+
+    while (1)
+    {
+        min = Amax;
+        for (i = 0; i < n; i++)
+        {
+            if (color[i] != BLACK && d[i] < min)
+            {
+                min = d[i];
+                u = i;
+            }
+        }
+        if (min == Amax)
+        {
+            break;
+        }
+        color[u] = BLACK;
+        for (i = 0; i < n; i++)
+        {
+            if (color[i] != BLACK && data[u][i] != -1)
+            {
+                if ((d[u] + data[u][i]) < d[i])
+                {
+                    d[i] = d[u] + data[u][i];
+                    color[i] = GRAY;
+                }
+            }
+        }
+    }
+}
+
+void output()
+{
+    int i;
+    for (i = 0; i < n; i++)
+    {
+        printf("%d %d\n", i, d[i]);
+    }
+}
+
+int main(void)
+{
+    getdata();
+
+    dijkstra(0);
+
+    output();
+
+    return 0;
+}

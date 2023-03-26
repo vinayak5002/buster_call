@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+constexpr ll inf = (1LL << 62);
+
+int main()
+{
+    ll V, E;
+    cin >> V >> E;
+    vector<vector<ll>> d(V, vector<ll>(V, inf));
+    vector<ll> s(E), t(E), w(E);
+    for (ll i = 0; i < E; ++i) {
+        cin >> s[i] >> t[i] >> w[i];
+        d[s[i]][t[i]] = w[i];
+    }
+    for (ll i = 0; i < V; ++i) {
+        d[i][i] = 0;
+    }
+    // dp[k+1][i][j] = min(dp[k][i][j], dp[k][i][k] + dp[k][k][j])
+    for (ll k = 0; k < V; ++k) {
+        for (ll i = 0; i < V; ++i) {
+            for (ll j = 0; j < V; ++j) {
+                if (d[i][k] != inf && d[k][j] != inf)
+                    d[i][j] = min(d[i][j], d[i][k] + d[k][j]);
+            }
+        }
+    }
+    for (ll i = 0; i < V; ++i) {
+        if (d[i][i] < 0) {
+            cout << "NEGATIVE CYCLE" << endl;
+            return 0;
+        }
+    }
+    for (ll i = 0; i < V; ++i) {
+        for (ll j = 0; j < V; ++j) {
+            if (d[i][j] == inf) {
+                cout << "INF";
+                if (j != V - 1)
+                    cout << " ";
+            } else {
+                cout << d[i][j];
+                if (j != V - 1)
+                    cout << " ";
+            }
+        }
+        cout << endl;
+    }
+}

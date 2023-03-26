@@ -1,0 +1,87 @@
+#include <iostream>
+
+int left_index(int index)
+{
+    return index * 2;
+}
+
+int right_index(int index)
+{
+    return index * 2 + 1;
+}
+
+void max_heapify(int* heap, int index, int heap_size)
+{
+    int left = left_index(index);
+    int right = right_index(index);
+
+    int largest;
+    if ((left <= heap_size) && (heap[left] > heap[index]))
+    {
+        largest = left;
+    }
+    else
+    {
+        largest = index;
+    }
+
+    if ((right <= heap_size) && (heap[right] > heap[largest]))
+    {
+        largest = right;
+    }
+
+    if (largest != index)
+    {
+        std::swap(heap[index], heap[largest]);
+        max_heapify(heap, largest, heap_size);
+    }
+
+    return;
+}
+
+void build_max_heap(int* heap, int heap_size)
+{
+    for (int i = heap_size / 2 ; i > 0 ; --i)
+    {
+        max_heapify(heap, i, heap_size);
+    }
+
+    return;
+}
+
+void load_heap(int* heap, int heap_size)
+{
+    for (int i = 1 ; i <= heap_size ; ++i)
+    {
+        std::cin >> heap[i];
+    }
+
+    return;
+}
+
+void print_heap(int* heap, int heap_size)
+{
+    for (int i = 1 ; i <= heap_size ; ++i)
+    {
+        std::cout << " " << heap[i];
+    }
+
+    std::cout << std::endl;
+
+    return;
+}
+
+int main()
+{
+    int heap_size;
+
+    std::cin >> heap_size;
+
+    int heap[heap_size+1];
+
+    load_heap(heap, heap_size);
+    build_max_heap(heap, heap_size);
+    print_heap(heap, heap_size);
+
+    return 0;
+}

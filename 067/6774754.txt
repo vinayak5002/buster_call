@@ -1,0 +1,57 @@
+from sys import stdin
+input=stdin.readline
+
+banpei = {}
+banpei["next"] = banpei
+banpei["prev"] = banpei
+
+def insert(k):
+  x = {}
+  x["key"] = k
+  x["next"] = banpei["next"]
+  banpei["next"]["prev"] = x
+  banpei["next"] = x
+  x["prev"] = banpei
+
+def delete(k):
+  t = banpei["next"]
+  while (t != banpei and t["key"] != k):
+    t = t["next"]
+  if t != banpei:
+    t["prev"]["next"] = t["next"]
+    t["next"]["prev"] = t["prev"]
+
+def deleteFirst():
+  t = banpei["next"]
+  t["prev"]["next"] = t["next"]
+  t["next"]["prev"] = t["prev"]
+
+def deleteLast():
+  t = banpei["prev"]
+  t["prev"]["next"] = t["next"]
+  t["next"]["prev"] = t["prev"]
+
+def show():
+  s = []
+  c = banpei["next"]
+  while c != banpei:
+    s.append(c["key"])
+    c = c["next"]
+  print(*s, end="\n")
+
+n= int(input().rstrip())
+for _ in range(n):
+    command = input().rstrip()
+    if command[0] == "i":
+        value = int(command[7:])
+        insert(value)
+    elif command[6] == "F":
+        deleteFirst()
+    elif command[6] == "L":
+        deleteLast()
+    elif command[0] == "d":
+        value = int(command[7:])
+        delete(value)
+
+
+show()

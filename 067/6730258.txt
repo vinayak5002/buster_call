@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+namespace {
+    const int WEIGHT_MAX = 10000;
+}  // namespace
+
+int solve(vector<int> &a, int minimum);
+
+int main() {
+    int n, minimum = WEIGHT_MAX;
+    cin >> n;
+    vector<int> a(n);
+    for (auto &e : a) {
+        cin >> e;
+        minimum = min(minimum, e);
+    }
+
+    cout << solve(a, minimum) << endl;
+}
+
+int solve(vector<int> &a, int minimum) {
+    int ans = 0;
+    vector<bool> hasMoved(a.size(), false);
+    vector<int> sorted_index(WEIGHT_MAX + 1, -1);
+    auto b = a;
+    sort(b.begin(), b.end());
+    for (int i = 0; i < a.size(); i++) {
+        sorted_index.at(b.at(i)) = i;
+    }
+    for (int i = 0; i < a.size(); i++) {
+        if (hasMoved.at(i)) {
+            continue;
+        }
+        int current_index = i;
+        int sum_elements = 0;
+        int min_elements = WEIGHT_MAX;
+        int num_elements = 0;
+        while (1) {
+            hasMoved.at(current_index) = true;
+            num_elements++;
+            int v = a.at(current_index);
+            min_elements = min(min_elements, v);
+            sum_elements += v;
+            current_index = sorted_index.at(v);
+            if (hasMoved.at(current_index)) {
+                break;
+            }
+        }
+        ans += min(sum_elements + (num_elements - 2) * min_elements,
+                   min_elements + sum_elements + (num_elements + 1) * minimum);
+    }
+
+    return ans;
+}

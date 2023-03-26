@@ -1,0 +1,75 @@
+#pragma region
+
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <set>
+#include <map>
+#include <algorithm>
+#include <functional>
+#include <utility>
+#include <bitset>
+#include <cmath>
+#include <numeric> // gcd, lcm
+#include <cstdlib>
+#include <ctime>
+#include <cstdio>
+#include <cassert>
+#include <iomanip>
+using namespace std;
+
+using ull = unsigned long long;
+using ll = long long;
+using vi = vector<int>;
+using vll = vector<ll>;
+using vvi = vector<vi>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using pii = pair<int,int>;
+using vpii = vector<pii>;
+
+#pragma endregion
+
+struct BIT{
+    int N;
+    vi node;
+
+    BIT(int sz){ N = sz; node.assign(N+2, 0); }
+
+    void add(int i, int x){
+        for(int j=i; j<=N; j += j & -j) node[j] += x;
+    }
+
+    int getSum(int i){
+        int ans = 0;
+        for(int j=i; j>0; j -= j & -j) ans += node[j];
+        return ans;
+    }
+};
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+
+    int n; cin >> n;
+    vi a(n);
+    int m = 0;
+    for(auto& e: a){
+        cin >> e;
+        m = max(m, e);
+    }
+    BIT b(m);
+    int ans = 0;
+    for(int i=0; i<n; ++i){
+        ans += b.getSum(a[m]) - b.getSum(a[i]);
+        if(a[i] > 0) b.add(a[i], 1);
+    }
+    cout << ans << endl;
+
+    return 0;
+}

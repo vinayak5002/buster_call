@@ -1,0 +1,51 @@
+from collections import deque
+import sys
+sys.setrecursionlimit(10 ** 7)
+input = sys.stdin.readline
+
+
+dr = [1, 0, -1, 0]
+dc = [0, 1, 0, -1]
+inf = 10 ** 18
+
+def slv(H, W, S):
+
+    sr, sc, gr, gc = 0, 0, 0, 0
+    for r in range(H):
+        for c in range(W):
+            if S[r][c] == 2:
+                sr, sc = r, c
+                S[r][c] = 0
+    
+    ans = 11
+
+    def dfs(r, c, cnt):
+        nonlocal ans
+        if cnt >= ans:
+            return
+        else:
+            for i in range(4):
+                k = 0
+                while 0 <= r + (k + 1) * dr[i] < H and 0 <= c + (k + 1) * dc[i] < W and S[r + (k + 1) * dr[i]][c + (k + 1) * dc[i]] == 0:
+                    k += 1
+                if 0 <= r + (k + 1) * dr[i] < H and 0 <= c + (k + 1) * dc[i] < W:
+                    if S[r + (k + 1) * dr[i]][c + (k + 1) * dc[i]] == 3:
+                        ans = min(ans, cnt)
+                        return
+                    if k > 0:
+                        S[r + (k + 1) * dr[i]][c + (k + 1) * dc[i]] = 0
+                        dfs(r + k * dr[i], c + k * dc[i], cnt + 1)
+                        S[r + (k + 1) * dr[i]][c + (k + 1) * dc[i]] = 1
+
+    dfs(sr, sc, 1)
+    if ans > 10:
+        print(-1)
+    else:
+        print(ans)
+
+while True:
+    W, H = map(int, input().split())
+    if H == W == 0:
+        exit()
+    S = [list(map(int, input().split())) for _ in range(H)]
+    slv(H, W, S)

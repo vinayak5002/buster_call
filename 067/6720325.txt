@@ -1,0 +1,47 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int position = 0;
+vector<int> preorder,inorder,postorder;
+
+void solve(int,int);
+ 
+int main(){
+    int n,m; cin >> n;
+   
+    for(int i=0; i<n; i++){
+        cin >> m;
+        preorder.push_back(m);
+    }
+    
+    for(int i=0; i<n; i++){
+        cin >> m;
+        inorder.push_back(m);    
+    }
+ 
+    solve(0,n);
+ 
+    for(int i=0; i<n; i++){
+        if(i < n-1) cout << postorder[i] << " ";
+        else cout << postorder[i] << endl;
+    }
+    
+    return 0;
+}
+
+void solve(int left, int right){
+    
+    if(left-right >= 0) return;
+    
+    int root = preorder[position];
+    int dist = distance(inorder.begin(),find(inorder.begin(),inorder.end(),root));
+    
+    position++;
+    
+    solve(left,dist);
+    solve(dist+1,right);
+    
+    postorder.push_back(root);
+}

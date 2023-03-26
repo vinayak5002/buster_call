@@ -1,0 +1,68 @@
+
+
+#0:中央 1:南 2:東 3:西 4:北 5:裏側
+class Dice():
+
+    def __init__(self):
+        self.number = [i for i in range(6)]
+        self.work = [i for i in range(6)]
+        self.order = 'NNNNWNNNWNNNENNNENNNWNNN'
+
+    def setNumber(self,n0,n1,n2,n3,n4,n5):
+        self.number[0] = n0     #コンストラクタで作成したリストに引数を代入していく
+        self.number[1] = n1
+        self.number[2] = n2
+        self.number[3] = n3
+        self.number[4] = n4
+        self.number[5] = n5
+
+
+    def roll(self,loc):
+        for i in range(6):
+            self.work[i] = self.number[i]
+
+        if loc == 'E':
+            self.setNumber(self.work[3],self.work[1],self.work[0],self.work[5],self.work[4],self.work[2])
+        elif loc == 'N':
+            self.setNumber(self.work[1],self.work[5],self.work[2],self.work[3],self.work[0],self.work[4])
+        elif loc == 'S':
+            self.setNumber(self.work[4],self.work[0],self.work[2],self.work[3],self.work[5],self.work[1])
+        elif loc == 'W':
+            self.setNumber(self.work[2],self.work[1],self.work[5],self.work[0],self.work[4],self.work[3])
+
+
+    def query(self,top_num,front_num):      #上面と右面の引数を受け取る
+
+        self.save_data = [i for i in range(6)]
+        #元の値の保存
+        for i in range(len(self.number)):       #リストnumberの要素の数ループ(6)
+            self.save_data[i] = self.number[i]  #リストsave_dataにダイスの六面の値を入れる
+
+        ret = -1;   #return値retの初期化？
+
+        for i in range(len(self.order)):    #NNNNの部分の長さだけループ
+            self.roll(self.order[i])    #メソッドrollに引数を渡す
+            if self.number[0] == top_num and self.number[1] == front_num:
+                ret = self.number[2]
+                break
+
+        #元の値の復元
+        for i in range(len(self.number)):
+            self.number[i] = self.save_data[i]
+
+        return ret;
+
+
+
+
+dice = Dice()       #ダイスのオブジェクト化→コンストラクタへ
+table = list(map(int,input().split()))      #リストを作成し、ダイスの6面の値を受け取る
+dice.setNumber(table[0], table[1], table[2], table[3], table[4], table[5])  #setNumberメソッドに引数を渡す（ダイスの六面の値）
+
+num_query = int(input())        #問題数の受け取り
+for loop in range(num_query):   #問題数の数だけループ
+    top_num,front_num = map(int,input().split())    #上面と右面の値の受け取り
+    print("%d"%(dice.query(top_num, front_num)))    #このように記載して出力する方法もある
+
+
+

@@ -1,0 +1,70 @@
+#include <stdio.h>
+#define MAX 200000
+
+int s[MAX];
+
+long long merge(int left, int mid, int right){
+	int i, j, k;
+	long long count = 0;
+	int n1 = mid - left;
+	int n2 = right - mid;
+	int L[MAX / 2 + 2], R[MAX / 2 + 2];
+	
+	for(i = 0; i < n1; i++){
+		L[i] = s[left + i];
+	}
+	
+	for(i = 0; i < n2; i++){
+		R[i] = s[mid + i];
+	}
+	
+	L[n1] = MAX * 1000;
+	R[n2] = MAX * 1000;
+	
+	i = j = 0;
+	for(k = left; k < right; k++){
+		if(L[i] <= R[j]){
+			s[k] = L[i++];
+		}
+		
+		else{
+			s[k] = R[j++];
+			count += n1 - i;
+		}
+	}
+	
+	return count;
+}
+
+long long mergeSort(int left, int right){
+	int mid;
+	long long a, b, c;
+	if(left + 1 < right){
+		mid = (left + right) / 2;
+		a = mergeSort(left, mid);
+		b = mergeSort(mid, right);
+		c = merge(left, mid, right);
+		return a + b + c;
+	}
+	
+	else{
+		return 0;
+	}
+}
+
+int main (void){
+	int n, i;
+	long long ans;
+	scanf("%d", &n);
+	
+	for(i = 0; i < n; i++){
+		scanf("%d", &s[i]);
+	}
+	
+	ans = mergeSort(0, n);
+	
+	printf("%d\n", ans);
+	
+	return 0;
+}
+

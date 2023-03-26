@@ -1,0 +1,58 @@
+import java.io.*;
+import java.util.*;
+
+class ProcessQueue{
+    
+    String getName(String in){
+        String[] split = in.split("\\s+");
+        return split[0];
+    }
+
+    int getValues(String in){
+        String[] split = in.split("\\s+");
+        return Integer.parseInt(split[1]);
+    }
+
+    public void process(LinkedList<String> data, int time)
+    {
+        int count = 0;
+        while(data.size() != 0) {
+            if(getValues(data.get(0)) <= time){
+                count += getValues(data.get(0));
+                System.out.println(getName(data.get(0)) + " " + count);
+                data.remove(0);
+                continue;
+            }else {
+                count += time;
+                data.addLast(getName(data.get(0)) + " " + String.valueOf(getValues(data.get(0))-time));
+                data.remove(0);
+            }       
+        }
+    }
+
+}
+
+class Main{
+
+    // Driver method
+    public static void main(String args[])
+    {
+        Scanner scan = new Scanner(System.in);
+
+        String in = scan.nextLine();
+        String[] split = in.split("\\s+");
+        int process = Integer.parseInt(split[0]);
+        int time = Integer.parseInt(split[1]);
+
+        LinkedList<String> data = new LinkedList<String>();
+
+        for(int i = 0; i < process; i++){
+            in = scan.nextLine();
+            data.add(in);
+        }
+
+        ProcessQueue queue = new ProcessQueue();
+        queue.process(data, time);
+
+    }
+}

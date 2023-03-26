@@ -1,0 +1,29 @@
+def solve(N):
+    W = list(map(int, input().split()))
+    dp = [[0] * N for _ in range(N)]
+    for l in range(N-1):
+        if abs(W[l] - W[l+1]) <= 1:
+            dp[l][l+1] = 2
+    for k in range(2, N):
+        for l in range(N-k):
+            if dp[l+1][l+k-1] == k-1 and abs(W[l] - W[l+k]) <= 1:
+                dp[l][l+k] = k+1
+                continue
+            for m in range(l+1, l+k):
+                dp[l][l+k] = max(dp[l][l+k], dp[l][m] + dp[m+1][l+k])
+    return dp[0][-1]
+
+
+def main():
+    result = []
+    while True:
+        N = int(input())
+        if N == 0:
+            break
+        result.append(solve(N))
+
+    print(*result, sep="\n")
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,46 @@
+#!/usr/bin/env pypy3
+from collections import Counter, deque, defaultdict
+from itertools import permutations, combinations, accumulate, product, chain
+from functools import lru_cache
+from bisect import bisect, bisect_left, insort, insort_left
+from heapq import heapify, heappush, heappop
+from array import array
+from decimal import Decimal
+from copy import deepcopy
+from pprint import pprint
+from string import ascii_uppercase, ascii_lowercase, ascii_letters
+from math import factorial, floor, ceil, sqrt, log, log2, log10
+import math
+import sys
+sys.setrecursionlimit(1<<30)
+
+read = sys.stdin.read
+readline = sys.stdin.readline
+readlines = sys.stdin.readlines
+
+if __name__ == '__main__':
+    V, E = map(int, readline().split())
+    INF = 1 << 60
+    dst = [[INF] * V for _ in range(V)]
+    for _ in range(E):
+        s, t, d = map(int, readline().split())
+        dst[s][t] = d
+
+    for i in range(V):
+        dst[i][i] = 0
+
+    for k in range(V):
+        for i in range(V):
+            for j in range(V):
+                if dst[i][k] != INF and dst[k][j] != INF:
+                    dst[i][j] = min(dst[i][j], dst[i][k]+dst[k][j])
+
+    for i in range(V):
+        if dst[i][i] < 0:
+            print('NEGATIVE CYCLE')
+            exit()
+
+    for i in range(V):
+        tmp = ['INF' if d == INF else d for d in dst[i]]
+        print(*tmp)
+

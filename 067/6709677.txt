@@ -1,0 +1,127 @@
+#define PROBLEM "https://onlinejudge.u-aizu.ac.jp/courses/library/6/NTL/1/NTL_1_A"
+#include <bits/stdc++.h>
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+constexpr ll MOD = 1e9 + 7;
+constexpr ll INF = 1e+18;
+constexpr ld EPS = 1e-12L;
+constexpr ld PI = 3.14159265358979323846L;
+
+// Miller test for 64bit
+// https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test
+bool isPrime(ull n) {
+  if(n == 2) {
+    return true;
+  }
+  if(!(n & 1) || n <= 1) {
+    return false;
+  }
+  auto powmod64 = [](ull x, ull y, ull mod) -> ull {
+    ull pm = 1;
+    while(y) {
+      if(y & 1) {
+        pm = (__uint128_t)pm * x % mod;
+      }
+      x = (__uint128_t)x * x % mod;
+      y >>= 1;
+    }
+    return pm;
+  };
+  int r = 0;
+  ull d = n - 1;
+  while(!(d & 1)) {
+    d >>= 1;
+    ++r;
+  }
+  for(const ull p: {2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37}) {
+    if(p > n - 2) {
+      break;
+    }
+    ull x = powmod64(p, d, n);
+    if(x == 1 || x == n - 1) {
+      continue;
+    }
+    bool cf = true;
+    for(int i = 0; i < r - 1; ++i) {
+      x = powmod64(x, 2, n);
+      if(x == n - 1) {
+        cf = false;
+        break;
+      }
+    }
+    if(cf) {
+      return false;
+    }
+  }
+  return true;
+}
+
+unordered_map<ull, int> factorize(ull n) {
+  auto f = [n](ull x) -> ull {
+    return ((__uint128_t)x * x + 1) % n;
+  };
+  auto rho = [f](ull m) -> ull {
+    ull x = 2, y = 2, d = 1;
+    while(d == 1) {
+      x = f(x);
+      y = f(f(y));
+      d = gcd(x > y ? x - y : y - x, m);
+    }
+    return d == m ? 0 : d;
+  };
+  unordered_map<ull, int> factor;
+  while(!(n & 1)) {
+    factor[2]++;
+    n >>= 1;
+  }
+  if(n == 1) {
+    return factor;
+  }
+  while(!isPrime(n)) {
+    ull r = n;
+    do {
+      r = rho(r);
+    } while(r && !isPrime(r));
+    if(r) {
+      factor[r]++;
+      n /= r;
+    } else {
+      // fallback O(sqrt(n))
+      for(ull i = 3; i * i <= n; i += 2) {
+        while(n % i == 0) {
+          factor[i]++;
+          n /= i;
+        }
+      }
+      if(n > 1) {
+        factor[n]++;
+      }
+      return factor;
+    }
+  }
+  factor[n]++;
+  return factor;
+}
+
+int main() {
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  ull n;
+  cin >> n;
+  auto f = factorize(n);
+  vector<ull> ans;
+  for(auto [p, e]: f){
+    for(int i = 0; i < e; ++i){
+      ans.emplace_back(p);
+    }
+  }
+  sort(begin(ans), end(ans));
+  cout << n << ':';
+  for(auto p: ans){
+    cout << ' ' << p;
+  }
+  cout << '\n';
+}
+

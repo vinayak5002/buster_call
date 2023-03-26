@@ -1,0 +1,28 @@
+def main():
+    from collections import defaultdict
+
+    nei_dict = defaultdict(list)
+    v, e = map(int, input().split())
+    for _ in range(e):
+        s, t, d = map(int, input().split())
+        nei_dict[s].append((t, d))
+
+    INF = 10**10
+    dp = [[INF for _ in range(v)] for _ in range(1 << v)]
+    dp[0][0] = 0
+
+    for bit in range(1 << v):
+        for i in range(v):
+            for np, nc in nei_dict[i]:
+                if (bit >> np) & 1:
+                    continue
+                dp[bit + (1 << np)][np] = min(dp[bit + (1 << np)][np], dp[bit][i] + nc)
+
+    ans = dp[-1][0]
+    if ans == INF:
+        ans = -1
+    print(ans)
+
+if __name__ == "__main__":
+    main()
+

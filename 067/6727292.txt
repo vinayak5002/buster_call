@@ -1,0 +1,86 @@
+#include <stdio.h>
+#define N 100
+#define WHITE 0 //未訪問
+#define GRAY 1  //訪問している
+#define BLACK 2 //削除されている
+
+int n, M[N][N];
+
+int color[N]; //頂点iの訪問状態をWHITE, GRAY, BLACKのいずれかで表す
+int d[N];     //頂点を発見した時刻
+int f[N];     //頂点の完了した時刻
+int tt;       //時刻
+
+void dfs_visit(int u)
+{
+  int v;
+  color[u] = GRAY; //訪問したためGRAY
+  d[u] = ++tt;     // tt++だとd[u]にttの値が足されずに代入される
+
+  for (v = 0; v < n; v++)
+  {
+    if(M[u][v] == 0){
+      continue; //隣接していなければスキップ
+    }
+    if(color[v] == WHITE){
+      dfs_visit(v); //隣接していて未探索だったらそこから探索
+    }
+  }
+
+  color[u] = BLACK; //完了したためBLACKに
+  f[u] = ++tt;
+}
+
+void dfs()
+{
+  int i;
+  for (i = 0; i < n; i++)
+  {
+    color[i] = WHITE; //全て未訪問のため白に
+  }
+
+  tt = 0;
+
+  for (i = 0; i < n; i++)
+  {
+    if (color[i] == WHITE)
+    {
+      dfs_visit(i); //未訪問を始点として探索
+    }
+  }
+
+  for(i = 0; i < n; i++){
+    printf("%d %d %d\n", i + 1, d[i], f[i]);
+  }
+}
+
+int main(void)
+{
+  int i, j, u, k, v;
+
+  scanf("%d", &n);
+
+  for (i = 0; i < n; i++)
+  {
+    for (j = 0; j < n; j++)
+    {
+      M[i][j] = 0; //隣接行列に0を格納
+    }
+  }
+
+  for (i = 0; i < n; i++)
+  {
+    scanf("%d %d", &u, &k); // uは頂点の番号,kは隣接している個数
+    u--;                    // 0オリジンにする
+    for (j = 0; j < k; j++)
+    {
+      scanf("%d", &v);
+      v--;         // 0オリジンにする
+      M[u][v] = 1; //隣接している部分を1にする
+    }
+  }
+
+  dfs();
+
+  return 0;
+}

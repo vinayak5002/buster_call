@@ -1,0 +1,91 @@
+import java.util.Scanner
+import scala.annotation.tailrec
+
+class Element(val num:Int, val pos:Int, var done:Boolean = false)
+
+object Main extends App {
+  val sc = new Scanner(System.in)
+  val N = sc.nextInt()
+  val arr = (for (p <- 0 until N) yield new Element(sc.nextInt(), p)).toArray
+
+  def quickSort(elements:Array[Element]):Array[Element] = {
+    def exchange(i:Int, j:Int):Unit = {
+      val t = elements(i)
+      elements(i) = elements(j)
+      elements(j) = t
+    }
+    def partition(p:Int, r:Int):Int = {
+      val x = elements(r)
+      @tailrec
+      def iterate(i:Int, j:Int):Int = {
+        if (j < r) {
+          if (elements(j).num <= x.num) {
+            exchange(i, j)
+            iterate(i+1, j+1)
+          } else
+            iterate(i, j+1)
+        } else {
+          exchange(i, r)
+          i
+        }
+      }
+      iterate(p, p)
+    }
+    def iterate(p:Int, r:Int):Unit = {
+      if (p < r) {
+        val q = partition(p, r)
+        iterate(p, q-1)
+        iterate(q+1, r)
+      } 
+    }
+    iterate(0, N-1)
+    elements
+  }
+  def find(elements:Array[Element], key:Int):Option[Int] = {
+    @tailrec
+    def iterate(l:Int, r:Int):Option[Int] = {
+      if (l > r) None
+      else {
+        val m = (l + r) >> 1
+        elements(m).num - key match {
+          case 0 => Some(m)
+          case d if d > 0 => iterate(l, m-1)
+          case _ => iterate(m+1, r)
+        }
+      }
+    }
+    iterate(0, elements.length-1)
+  }
+
+  def getCycleNotation(elements:Array[Element], idx:Int):List[Int] = {
+    @tailrec
+    def iterate(i:Int, ac:List[Int]):List[Int] = {
+      val j = elements(i).pos
+      elements(i).done = true
+      if (i == j || ac.nonEmpty && i == idx) ac else iterate(j, i::ac)
+    }
+    iterate(idx, Nil)
+  }
+
+  def cost(elements:Array[Element], list:List[Int]):Int =
+    if (list.isEmpty) 0
+    else {
+      val l = list.map(elements(_).num)
+      l.sum + l.min*(l.length -2)
+    }
+  
+  val elements = quickSort(arr)
+
+  @tailrec
+  def solver(idx:Int, ac:Int):Int = {
+    if (idx < N) {
+      if (elements(idx).done) solver(idx+1, ac)
+      else {
+        val cn = getCycleNotation(elements, idx)
+        solver(idx+1, ac+cost(elements, cn))
+      }
+    } else ac
+  }
+
+  println(s"${solver(0, 0)}")
+}

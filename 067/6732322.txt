@@ -1,0 +1,56 @@
+import copy
+
+def inputSplit():
+    return [int(v) for v in input().split()]
+
+
+def dfs(i, edge_dict, searched_set, already_searched):
+    if i in searched_set:
+        return 1
+
+    if i in already_searched or (i not in edge_dict):
+        return 0
+
+
+    # 今回の巡回が dfsを戻った上の関数実行に反映されないようにdeepcopy
+    searched_set = copy.deepcopy(searched_set)
+    searched_set.add(i)
+    for j in edge_dict[i]:
+        ans = dfs(j, edge_dict, searched_set, already_searched)
+
+        if ans == 1:
+            return 1
+
+    # 全部調べたがダメなので、次から調べない
+    already_searched.add(i)
+
+    return 0
+
+
+if __name__ == "__main__":
+    [V, E] = inputSplit()
+    edge_dict = {}
+
+    for _ in range(E):
+        [s, t] = inputSplit()
+
+        if s not in edge_dict:
+            edge_dict[s] = [t]
+        else:
+            edge_dict[s].append(t)
+
+    
+    # 各ノードから探索
+    already_searched = set()# 巡回が無いと分かっているノード
+    for i in range(V):
+        searched_set = set()
+        ans = dfs(i, edge_dict, searched_set, already_searched)
+
+        if ans == 1:
+            print(1)
+            quit()
+
+        already_searched.add(i)
+
+    
+    print(0)

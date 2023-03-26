@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+bool is_digit(char c) {
+    return '0' <= c and c <= '9';
+}
+
+pair<int, int> read_int(const string& s, int i) {
+    int j = i;
+    while (is_digit(s[j])) ++j;
+    while (s[i] == '0' and j - i > 1) ++i;
+    return { stoi(s.substr(i, j - i)), j };
+}
+
+pair<string, int> read_molecule(const string& s, int i) {
+    assert(isupper(s[i]));
+    string res;
+    res += s[i++];
+    while (islower(s[i])) res += s[i++];
+    return { res, i };
+}
+
+int main() {
+    map<string, int> mp_w;
+    while (true) {
+        string name;
+        cin >> name;
+        if (name == "END_OF_FIRST_PART") break;
+        int w;
+        cin >> w;
+        mp_w[name] = w;
+    }
+    while (true) {
+        string s;
+        cin >> s;
+        if (s[0] == '0') break;
+
+        const int n = s.size();
+        vector<int> rp(n, -1);
+        {
+            vector<int> st;
+            for (int pos = 0; pos < n; ++pos) {
+                if (s[pos] == '(') {
+                    st.push_back(pos);
+                } else if (s[pos] == ')') {
+                    rp[st.back()] = pos;
+                    st.pop_back();
+                }
+            }
+        }
+
+        auto scan = [&](auto scan, int l, int r) -> long long {
+            long long res = 0;
+            for (int i = l; i < r;) {
+                long long w = 0;
+                if (s[i] == '(') {
+                    int j = rp[i];
+                    w = scan(scan, i + 1, j);
+                    i = j + 1;
+                } else {
+                    auto [molecule, j] = read_molecule(s, i);
+                    w = mp_w[molecule];
+                    i = j;
+                }
+                if (w == 0) return w;
+                int c = 1;
+                if (i < r and is_digit(s[i])) tie(c, i) = read_int(s, i);
+                res += w * c;
+            }
+            return res;
+        };
+        long long ans = scan(scan, 0, n);
+        if (ans) {
+            cout << ans << endl;
+        } else {
+            cout << "UNKNOWN" << endl;
+        }
+    }
+}

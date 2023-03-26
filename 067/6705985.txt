@@ -1,0 +1,132 @@
+#include <iostream>
+#include <vector>
+
+int main()
+{
+    int H, i, j, k, l, cur, cont, ans;
+    bool flag;
+
+    while (true) {
+        std::cin >> H;
+        if (!H) {
+            break;
+        }
+
+        std::vector<std::vector<int>> stones(H, std::vector<int>(5));
+        for (i = 0; i < H; i++) {
+            for (j = 0; j < 5; j++) {
+                std::cin >> stones[i][j];
+            }
+        }
+
+        ans = 0;
+        do {
+            flag = false;
+            for (i = 0; i < H; i++) {
+                cont = 1;
+                cur = 0;
+                j = 1;
+                while (j < 5) {
+                    if (stones[i][cur] == -1) {
+                        cur = j;
+                        j = cur + 1;
+                        cont = 1;
+                    }
+                    if (stones[i][j] != stones[i][cur] || stones[i][j] == -1) {
+                        if (cont >= 3) {
+                            ans += stones[i][cur] * cont;
+                            for (k = i; k >= 0; k--) {
+                                for (l = cur; l < cur + cont; l++) {
+                                    if (k == 0) {
+                                        stones[k][l] = -1;
+                                    } else {
+                                        std::swap(stones[k][l], stones[k - 1][l]);
+                                    }
+                                }
+                            }
+                            if (!flag) {
+                                flag = true;
+                            }
+                        }
+                        cur = j;
+                        j = cur + 1;
+                        cont = 1;
+                    } else {
+                        cont++;
+                        j++;
+                        if (j == 5 && cont >= 3) {
+                            ans += stones[i][cur] * cont;
+                            for (k = i; k >= 0; k--) {
+                                for (l = cur; l < cur + cont; l++) {
+                                    if (k == 0) {
+                                        stones[k][l] = -1;
+                                    } else {
+                                        std::swap(stones[k][l], stones[k - 1][l]);
+                                    }
+                                }
+                            }
+                            if (!flag) {
+                                flag = true;
+                            }
+                        }
+                    }
+                }
+            }
+        } while (flag);
+
+        std::cout << ans << std::endl;
+
+
+        // std::vector<int> zure(5), zure_tmp(5);
+        // ans = 0;
+        // do {
+        //     flag = false;
+        //     for (i = 0; i < 2 * H; i++) {
+        //         cont = 1;
+        //         cur = 0;
+        //         j = 1;
+        //         while (j < 5) {
+        //             if (i - zure[cur] < 0 || i - zure[cur] >= H) {
+        //                 cur++;
+        //                 j = cur + 1;
+        //                 cont = 1;
+        //                 continue;
+        //             }
+        //             if (i - zure[j] < 0 || i - zure[j] >= H || stones[i - zure[j]][j] != stones[i - zure[cur]][cur] || stones[i - zure[j]][j] == -1) {
+        //                 if (cont >= 3) {
+        //                     ans += stones[i - zure[cur]][cur] * cont;
+        //                     for (k = cur; k < cur + cont; k++) {
+        //                         stones[i - zure[k]][k] = -1;
+        //                         zure_tmp[k]++;
+        //                     }
+        //                     if (!flag) {
+        //                         flag = true;
+        //                     }
+        //                 }
+        //                 cur = j;
+        //                 j = cur + 1;
+        //                 cont = 1;
+        //             } else {
+        //                 cont++;
+        //                 j++;
+        //                 if (j == 5 && cont >= 3) {
+        //                     ans += stones[i - zure[cur]][cur] * cont;
+        //                     for (k = cur; k < cur + cont; k++) {
+        //                         stones[i - zure[k]][k] = -1;
+        //                         zure_tmp[k]++;
+        //                     }
+        //                     if (!flag) {
+        //                         flag = true;
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        //     zure = zure_tmp;
+        // } while (flag);
+
+        // std::cout << ans << std::endl;
+    }
+
+    return 0;
+}

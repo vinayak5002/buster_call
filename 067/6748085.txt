@@ -1,0 +1,181 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using ld = long double;
+
+//only for atcoder
+//#include<atcoder/all>
+//using namespace atcoder;
+
+#define rep(i,l,r) for(ll i=(l); i<(r); i++)
+#define rrep(i,l,r) for(ll i=(r)-1; i>=(l); i--)
+#define ALL(c) (c).begin(), (c).end()
+#define RALL(c) (c).rbegin(), (c).rend()
+#define SORT(c) sort(ALL(c))
+#define RSORT(c) sort(RALL(c))
+#define MINV(c) *min_element(ALL(c))
+#define MAXV(c) *max_element(ALL(c))
+
+using VI = vector<int>;
+using VVI = vector<VI>;
+using VL = vector<ll>;
+using VVL = vector<VL>;
+using VS = vector<string>;
+using VVS = vector<VS>;
+using VB = vector<bool>;
+using VVB = vector<VB>;
+using VC = vector<char>;
+using VVC = vector<VC>;
+using VD = vector<ld>;
+using VVD = vector<VD>;
+using P = pair<ll,ll>;
+using VP = vector<P>;
+const ll LINF = 2e18;
+const int INF = 2e9;
+
+//構造体ver
+struct UnionFind{
+  vector<int> parent;
+  vector<int> group_size;
+  int number_groups;
+  
+  void init(int N){
+    parent.resize(N);
+    group_size.resize(N);
+    for(int i=0; i<N; i++){
+      parent[i] = i;
+      group_size[i] = 1;
+    }
+    number_groups = N;
+  }
+  
+  int root(int x){
+    while(parent[x] != x){
+      x = parent[x];
+    }
+    return x;
+  }
+  
+  bool same(int x, int y){
+    return root(x) == root(y);
+  }
+  
+  void merge(int x, int y){
+    x = root(x);
+    y = root(y);
+    if(x != y){
+      number_groups--;
+      if(group_size[x] < group_size[y]){
+        swap(x,y);
+      }
+      group_size[x] += group_size[y];
+      parent[y] = x;
+    }
+  }
+  
+  int SIZE(int x){
+    return group_size[root(x)];
+  }
+  
+  int X(){
+    return number_groups;
+  }
+  
+};
+
+
+void solve(){
+  int N, H, W;
+  cin >> N >> H >> W;
+  VP vec(N);
+  rep(i,0,N){
+    int x, y;
+    cin >> x >> y;
+    x--; y--;
+    vec[i] = P(x,y);
+  }
+  VVI h(H,VI(0));
+  VVI w(W,VI(0));
+  rep(i,0,N){
+    auto[x,y] = vec[i];
+    h[x].push_back(i);
+    w[y].push_back(i);
+  }
+  
+  UnionFind D;
+  D.init(N);
+  
+  rep(i,0,H){
+    if(h[i].size() <= 1){
+      continue;
+    }
+    rep(j,0,h[i].size()-1){
+      D.merge(h[i][j], h[i][j+1]);
+    }
+  }
+  rep(i,0,W){
+    if(w[i].size() <= 1){
+      continue;
+    }
+    rep(j,0,w[i].size()-1){
+      D.merge(w[i][j], w[i][j+1]);
+    }
+  }
+  
+  vector<set<int>> S(4);
+  int cnt = 0;
+  //0 x=0,  1 x=H-1, 2 y=0, 3 y=W-1
+  rep(i,0,N){
+    auto[x,y] = vec[i];
+    if(x == 0){
+      S[0].insert(D.root(i));
+    }
+    if(x == H-1){
+      S[1].insert(D.root(i));
+    }
+    if(y == 0){
+      S[2].insert(D.root(i));
+    }
+    if(y == W-1){
+      S[3].insert(D.root(i));
+    }
+    if(i == D.root(i)){
+      cnt++;
+    }
+  }
+  
+  int ans = N-1;
+  
+  if(cnt == 1){
+    cout << ans << endl;
+    return;
+  }
+  
+  int need = 0;
+  rep(i,0,4){
+    need = max(need, (int)S[i].size());
+  }
+  
+  cout << ans + cnt - need << endl;
+  
+}
+
+int main(){
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  //cin >> T;
+  T = 1;
+  for(int i=0; i<T; i++){
+    solve();
+  }
+  
+  /*while(true){
+    int N, M;
+    cin >> N >> M;
+    if(N == 0){
+      return 0;
+    }
+    solve(N,M);
+  }*/
+}

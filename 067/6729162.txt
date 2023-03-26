@@ -1,0 +1,31 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    int n, d, x;
+    cin >> n >> d >> x;
+    vector<vector<int>> A(d, vector<int>(n));
+    for(int i = 0; i < d; i++){
+        for(int j = 0; j < n; j++){
+            cin >> A[i][j];
+        }
+    }
+    vector<vector<vector<int>>> dp(d + 1, vector<vector<int>>(d + 1,
+                                vector<int>(100001, -1)));
+    function<int(int,int,int)> rec = [&](int l, int r, int s){
+        if(l >= r)return 0;
+        if(dp[l][r][s] != -1)return dp[l][r][s];
+        dp[l][r][s] = s;
+        for(int i = 0; i < n; i++){
+            int d = s / A[l][i];
+            if(d == 0)continue;
+            if(A[l][i] >= A[r-1][i])continue;
+            dp[l][r][s] = max(dp[l][r][s], d * A[r - 1][i] + rec(l, r, s - d * A[l][i]));
+        }
+        for(int m = l + 1; m < r; m++){
+            dp[l][r][s] = max(dp[l][r][s], rec(m, r, rec(l, m + 1, s)));
+        }
+        return dp[l][r][s];
+    };
+    cout << rec(0, d, x) << '\n';
+}

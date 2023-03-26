@@ -1,0 +1,223 @@
+#include<bits/stdc++.h>
+using namespace std;
+#include <unordered_set>
+#include <random>
+//#define int long long
+#define REP(i,m,n) for(int i=(m);i<(n);i++)
+#define rep(i,n) REP(i,0,n)
+#define pb push_back
+#define all(a) a.begin(),a.end()
+#define rall(c) (c).rbegin(),(c).rend()
+#define mp make_pair
+#define endl '\n'
+//#define vec vector<ll>
+//#define mat vector<vector<ll> >
+#define fi first
+#define se second
+#define double long double
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<ll,ll> pll;
+//typedef long double ld;
+typedef complex<double> Complex;
+const ll INF=1e9+7;
+const ll MOD=998244353;
+const ll inf=INF*INF;
+const ll mod=MOD;
+const ll MAX=200010;
+const double PI=acos(-1.0);
+typedef vector<vector<ll> > mat;
+typedef vector<ll> vec;
+
+ll dx[]={0,1,0,-1};
+ll dy[]={1,0,-1,0};
+
+//深さが同じ所の演算子を発見する。
+//した場合、左右に降りる。しなかったら、それ自身がリテラル
+
+int calc(int i, int j, int &state, string &s){
+    int d=0;
+    if(s[i]!='('){
+        if(s[i]=='-')return 1-calc(i+1,j,state,s);
+        int x;
+        if(s[i]=='0'||s[i]=='1')x=s[i]-'0';
+        else {
+            if((1<<(s[i]-'a'))&state)x=1;
+            else x=0;
+        }
+        return x;
+    }else{
+        int id=-1;
+        REP(k,i,j){
+            if(s[k]=='(')d++;
+            else if(s[k]==')')d--;
+            if(d==1&&(s[k]=='*'||s[k]=='^')){
+                id=k;
+            }
+        }
+        int x=calc(i+1,id,state,s),y=calc(id+1,j-1,state,s);
+        if(s[id]=='*')return x*y;
+        else return x^y;
+    }
+}
+string op="*^^^^^^^^^^^^^^";
+
+void solve(){
+    while(1){
+        int state=1;
+        string s;cin>>s;
+        if(s==".")break;
+        int n=s.size();
+        vector<ll>v(16);
+        rep(i,16)v[i]=calc(0,n,i,s);
+        string use="";
+        rep(j,4){
+            bool f=0;
+            rep(i,16){
+                if(v[i]!=v[(i^(1<<j))])f=1;
+            }
+            if(f)use+=(char)('a'+j);
+        }
+        if(use.size()==0){
+            cout<<1<<endl;
+            continue;
+        }
+        if(use.size()==1){
+            cout<<2-v[1<<(use[0]-'a')]<<endl;
+            continue;
+        }
+        if(use.size()==2){
+            int ans=7;
+            rep(i,2){
+                rep(j,2){
+                    rep(k,2){
+                        string t="";
+                        t+='(';
+                        if(i)t+='-';
+                        t+=use[0];
+                        t+=op[k];
+                        if(j)t+='-';
+                        t+=use[1];
+                        t+=')';
+                        bool f=1;
+                        rep(l,16){
+                            if(calc(0,t.size(),l,t)!=v[l])f=0;
+                        }
+                        if(f){
+                            ans=min(ans,(int)t.size());
+                        }
+                    }
+                }
+            }
+            cout<<ans<<endl;
+            continue;
+        }
+        if(use.size()==3){
+            int ans=16;
+            vector<int>p(3);
+            rep(i,3)p[i]=i;
+            do{
+                rep(k,8){
+                    rep(l,4){
+                        string t="";
+                        t+='(';
+                        if(k&(1<<0))t+='-';
+                        t+=use[p[0]];
+                        t+=op[l&(1<<0)];
+                        t+='(';
+                        if(k&(1<<1))t+='-';
+                        t+=use[p[1]];
+                        t+=op[l&(1<<1)];
+                        if(k&(1<<2))t+='-';
+                        t+=use[p[2]];
+                        t+=')';
+                        t+=')';
+                        bool f=1;
+                        rep(d,16){
+                            if(calc(0,t.size(),d,t)!=v[d])f=0;
+                        }
+                        if(f){
+                            ans=min(ans,(int)t.size());
+                        }
+                    }
+                }
+            }while(next_permutation(all(p)));
+            cout<<ans<<endl;
+            continue;
+        }
+        if(use.size()==4){
+            int ans=16;
+            vector<int>p(4);
+            rep(i,4)p[i]=i;
+            do{
+                rep(k,16){
+                    rep(l,8){
+                        string t="";
+                        t+='(';
+                        if(k&(1<<0))t+='-';
+                        t+=use[p[0]];
+                        t+=op[l&(1<<0)];
+                        t+='(';
+                        if(k&(1<<1))t+='-';
+                        t+=use[p[1]];
+                        t+=op[l&(1<<1)];
+                        t+='(';
+                        if(k&(1<<2))t+='-';
+                        t+=use[p[2]];
+                        t+=op[l&(1<<2)];
+                        if(k&(1<<3))t+='-';
+                        t+=use[p[3]];
+                        t+=')';
+                        t+=')';
+                        t+=')';
+                        bool f=1;
+                        rep(d,16){
+                            if(calc(0,t.size(),d,t)!=v[d])f=0;
+                        }
+                        if(f){
+                            ans=min(ans,(int)t.size());
+                        }
+                    }
+                }
+            }while(next_permutation(all(p)));
+            do{
+                rep(k,16){
+                    rep(l,8){
+                        string t="";
+                        t+='(';
+                        t+='(';
+                        if(k&(1<<0))t+='-';
+                        t+=use[p[0]];
+                        t+=op[l&(1<<0)];
+                        if(k&(1<<1))t+='-';
+                        t+=use[p[1]];
+                        t+=')';
+                        t+=op[l&(1<<1)];
+                        t+='(';
+                        if(k&(1<<2))t+='-';
+                        t+=use[p[2]];
+                        t+=op[l&(1<<2)];
+                        if(k&(1<<3))t+='-';
+                        t+=use[p[3]];
+                        t+=')';
+                        t+=')';
+                        bool f=1;
+                        rep(d,16){
+                            if(calc(0,t.size(),d,t)!=v[d])f=0;
+                        }
+                        if(f){
+                            ans=min(ans,(int)t.size());
+                        }
+                    }
+                }
+            }while(next_permutation(all(p)));
+            cout<<ans<<endl;
+        }
+    }
+}
+
+signed main(){
+    //cin.tie(0);
+    //ios::sync_with_stdio(false);
+    solve();
+}

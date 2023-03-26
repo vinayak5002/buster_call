@@ -1,0 +1,36 @@
+mod = 10**9 + 7
+N = 100256
+fact = [1]*(N+1)
+factinv = [1]*(N+1)
+
+for i in range(2, N+1):
+	fact[i] = fact[i-1] * i % mod
+
+factinv[-1] = pow(fact[-1], mod-2, mod)
+for i in range(N-1, 1, -1):
+	factinv[i] = factinv[i+1] * (i+1) % mod
+
+def cmb(a, b):
+	if (a < b) or (b < 0):
+		return 0
+	return fact[a] * factinv[b] % mod * factinv[a-b] % mod
+
+n = int(input())
+a0 = 1
+a1 = 0
+b0 = 1
+b1 = 0
+b2 = 0
+t = 0
+s = 0
+for i in range(1, n+1):
+	t = fact[i-1] * (i*a0 - a1) % mod
+	s = fact[i-1] * (i*i*b0 - 2*i*b1 + b2) % mod
+	a0 = (a0 + t*factinv[i]) % mod
+	a1 = (a1 + t*i*factinv[i]) % mod
+	b0 = (b0 + s*factinv[i]) % mod
+	b1 = (b1 + s*i*factinv[i]) % mod
+	b2 = (b2 + s*i*i*factinv[i]) % mod
+
+a = t*factinv[n]%mod
+print((s - 2*t*a + a*a*fact[n])*factinv[n]%mod)

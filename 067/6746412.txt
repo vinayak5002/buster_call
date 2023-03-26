@@ -1,0 +1,42 @@
+class Heap
+  def initialize(comp=Proc.new {|i,j| i<j})
+    @comp=comp
+    @data=Array.new
+  end
+  def size
+    @data.size
+  end
+  def empty?
+    @data.size==0
+  end
+  def insert(x)
+    idx=@data.size
+    @data << x
+    while idx>0 && !@comp.call(@data[(idx-1)/2],@data[idx]) do
+      @data[(idx-1)/2],@data[idx]=@data[idx],@data[(idx-1)/2]
+      idx=(idx-1)/2
+    end
+  end
+  def pop
+    return @data.pop if @data.size==1
+    r=@data[0].dup
+    @data[0]=@data.pop
+    idx=0
+    while 2*idx+1<@data.size do
+      n_idx=2*idx+1
+      n_idx+=1 if n_idx+1 < @data.size && @comp.call(@data[n_idx+1],@data[n_idx])
+      break if @comp.call(@data[idx],@data[n_idx])
+      @data[idx],@data[n_idx]=@data[n_idx],@data[idx]
+      idx=n_idx
+    end
+    r
+  end
+end
+h=Heap.new (Proc.new {|i,j| i>j})
+while (s=gets.chomp)!='end' do
+  if s=='extract' then
+    puts h.pop
+  else
+    h.insert(s.split[1].to_i)
+  end
+end

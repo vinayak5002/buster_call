@@ -1,0 +1,169 @@
+#include <vector>
+#include <iostream>
+#include <tuple>
+#include <optional>
+#include <algorithm>
+
+typedef std::tuple<size_t, size_t, unsigned long> edge_t;
+
+bool operator<(const edge_t &a, const edge_t &b) { return std::get<2>(a) < std::get<2>(b);  }
+
+template<typename T>
+void merge(std::vector<T> &vec, std::vector<T> &v1, std::vector<T> &v2) {
+    auto siz1 = v1.size();
+    auto siz2 = v2.size();
+    size_t p1 = 0;
+    size_t p2 = 0;
+
+    while (p1 < siz1 && p2 < siz2) {
+        if (v1.at(p1) < v2.at(p2))
+            vec.push_back(v1.at(p1++));
+        else
+            vec.push_back(v2.at(p2++));
+    }
+
+    while (p1 < siz1) vec.push_back(v1.at(p1++));
+    while (p2 < siz2) vec.push_back(v2.at(p2++));
+}
+
+template<typename T>
+void mergeSort(std::vector<T> &vec) {
+    if (vec.size() <= 1)
+        return;
+
+    auto iter = vec.begin() + vec.size() / 2;
+    std::vector<T> v1(vec.begin(), iter);
+    std::vector<T> v2(iter, vec.end());
+
+    mergeSort(v1);
+    mergeSort(v2);
+
+    vec.clear();
+    merge(vec, v1, v2);
+}
+
+namespace kruskal {
+    namespace disjoint_set {
+        class DisjointSet {
+            private:
+                std::vector<size_t> parent;
+                std::vector<size_t> rank;
+            public:
+                DisjointSet(size_t n);
+                size_t find(size_t x);
+                bool unite(size_t x, size_t y);
+                bool same(size_t x, size_t y);
+        };
+
+        DisjointSet::DisjointSet(size_t n) {
+            parent = std::vector<size_t>(n);
+            for (size_t i = 0; i < n; ++i) {
+                parent[i] = i;
+            }
+            rank = std::vector<size_t>(n, 0);
+        }
+
+        size_t DisjointSet::find(size_t x) {
+            if (parent[x] == x) {
+                return x;
+            } else {
+                auto represent = x;
+                do {
+                    represent = parent[x];
+                } while (parent[represent] != represent);
+                parent[x] = represent;
+                return represent;
+            }
+        }
+
+        bool DisjointSet::unite(size_t x, size_t y) {
+            auto x_par = this->find(x);
+            auto y_par = this->find(y);
+            if (x_par != y_par) {
+                if (rank[x_par] < rank[y_par]) {
+                    parent[x_par] = y_par;
+                } else {
+                    parent[y_par] = x_par;
+                    if (rank[x_par] == rank[y_par]) {
+                        rank[x_par] += 1;
+                    }
+                }
+            }
+            return x_par != y_par;
+        }
+
+        bool DisjointSet::same(size_t x, size_t y) {
+            return this->find(x) == this->find(y);
+        }
+    }
+
+    class Kruskal {
+        private:
+            size_t vertices;
+            std::vector<std::tuple<size_t, size_t, unsigned long>> edges;
+        public:
+            Kruskal(size_t vertices);
+            void add_edge(size_t u, size_t v, unsigned long wight);
+            std::optional<std::tuple<std::vector<std::tuple<size_t, size_t, unsigned long>>, unsigned long>> minimum_spanning_tree();
+    };
+
+    Kruskal::Kruskal(size_t vertices) : vertices(vertices) {
+        edges = std::vector<std::tuple<size_t, size_t, unsigned long>>();
+    }
+
+    void Kruskal::add_edge(size_t u, size_t v, unsigned long weight) {
+        edges.push_back(std::make_tuple(u, v, weight));
+    }
+
+    std::optional<std::tuple<std::vector<std::tuple<size_t, size_t, unsigned long>>, unsigned long>> Kruskal::minimum_spanning_tree() {
+        auto uft = disjoint_set::DisjointSet(vertices);
+        // std::sort(edges.begin(), edges.end(), [](auto const &a, auto const &b) { return std::get<2>(a) < std::get<2>(b); });
+        mergeSort<edge_t>(edges);
+        auto minimum_spanning_tree = std::vector<std::tuple<size_t, size_t, unsigned long>>();
+        auto sum = 0;
+        for (const auto &e : edges) {
+            auto u = std::get<0>(e);
+            auto v = std::get<1>(e);
+            auto w = std::get<2>(e);
+
+            if (uft.same(u, v)) {
+                continue;
+            }
+
+            uft.unite(u, v);
+            minimum_spanning_tree.push_back(std::make_tuple(u, v, w));
+            sum += w;
+            if (minimum_spanning_tree.size() == vertices - 1) {
+                break;
+            }
+        }
+        if (minimum_spanning_tree.size() == vertices -1) {
+            return std::make_optional(std::make_tuple(minimum_spanning_tree, sum));
+        } else {
+            return std::nullopt;
+        }
+    }
+}
+
+int main() {
+    using namespace std;
+
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    size_t n, m;
+    size_t u, v;
+    unsigned long w;
+    cin >> n >> m;
+
+    auto k = kruskal::Kruskal(n);
+    for (size_t i = 0; i < m; ++i) {
+        cin >> u >> v >> w;
+        k.add_edge(u, v, w);
+    }
+
+    auto tree = k.minimum_spanning_tree();
+    if (tree) {
+        cout << std::get<1>(tree.value()) << endl;
+    }
+}

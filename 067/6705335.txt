@@ -1,0 +1,70 @@
+// ALDS1_3_D
+#include <bits/stdc++.h>
+using namespace std;
+
+#pragma GCC target("avx")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+
+struct Fast {
+  Fast() {
+    std::cin.tie(0);
+    ios::sync_with_stdio(false);
+  }
+} fast;
+
+void pd(const deque<pair<int, int>> &s) {
+  int N = s.size();
+  int i = 0;
+  cout << N << " ";
+  for (auto ptr = s.begin(); ptr != s.end(); ptr++) {
+    i++;
+    cout << ptr->second;
+    if (i < N) {
+      cout << " ";
+    }
+  }
+  cout << endl;
+}
+
+int main() {
+  deque<int> depth;
+  deque<pair<int, int>> history;
+  string input;
+
+  cin >> input;
+  int result_count = 0;
+  int index = 0;
+  int depth_count = 0;
+  for (auto c : input) {
+    if (c == '\\') {
+      depth.push_back(index);
+    } else if (c == '/') {
+      if (depth.size() > 0) {
+        const int p = depth.back();
+        depth.pop_back();
+        const int area = index - p;
+        result_count += area;
+        int temp = area;
+        while (1) {
+          if (history.size() == 0) {
+            break;
+          }
+          if (history.back().first < p) {
+            break;
+          }
+          temp += history.back().second;
+          history.pop_back();
+        }
+        history.push_back({p, temp});
+      }
+    }
+    index++;
+  }
+
+  cout << result_count << endl;
+  pd(history);
+
+  return 0;
+}
+

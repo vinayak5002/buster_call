@@ -1,0 +1,66 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+namespace Yourein{
+    struct edge{
+        int to;
+        long long cost;
+        int id;
+
+        edge(int _to, long long _cost, int _id) : to(_to), cost(_cost), id(_id) {}
+    };
+
+    pair<vector<long long>, vector<long long>> dijkstra(const vector<vector<edge>> &g, int start){
+        vector<long long> dist(g.size(), 1001001001001001001LL), path(g.size(), -1);
+        priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> q;
+        
+        dist[start] = 0;
+        path[start] = 0;
+
+        q.push({dist[start], start});
+        while(!q.empty()){
+            auto p = q.top();
+            q.pop();
+            int next = p.second;
+            if (dist[next] < p.first){
+                continue;
+            }
+
+            for (auto &e : g[next]){
+                if (dist[e.to] > dist[next] + e.cost){
+                    dist[e.to] = dist[next] + e.cost;
+                    path[e.to] = e.id;
+                    q.push({dist[e.to], e.to});
+                }
+            }
+        }
+
+        return {dist, path};
+    }
+}
+
+int main(){
+    int n, m, r;
+    cin >> n >> m >> r;
+
+    vector<vector<Yourein::edge>> graph(n);
+
+    for (int i = 0; i < m; i++){
+        int ai, bi, ci;
+        cin >> ai >> bi >> ci;
+        Yourein::edge edgei = Yourein::edge(bi, ci, i+1);
+        graph[ai].push_back(edgei);
+    }
+
+    pair<vector<long long>, vector<long long>> res = Yourein::dijkstra(graph, r);
+    
+    for (auto x : res.first){
+        if (x == 1001001001001001001LL) cout << "INF" << endl;
+        else cout << x << endl;
+    }
+}
+

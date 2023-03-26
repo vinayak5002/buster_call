@@ -1,0 +1,145 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+struct Element
+{
+	int val;
+	int prev;
+	int next;
+};
+
+class List
+{
+public:
+	void insert( int num )
+	{
+		if( !data.empty() )
+		{
+			Element e;
+			int back = head;
+
+			while( data[back].next != -1 ) back = data[back].next;
+			data[back].next = back + 1;
+
+			e.val = num;
+			e.prev = back;
+			e.next = -1;
+
+			data.push_back( e );
+		}
+		else
+		{
+			// No next, nor prev
+			data.push_back( { num, -1, -1 } );
+		}
+	}
+	void del( int num )
+	{
+		if( data.empty() ) return;
+
+		for( int i = head; i != -1; i = data[i].next )
+		{
+			if( data[i].val == num )
+			{
+				int prev = data[i].prev;
+				int next = data[i].next;
+				if( i == head )
+				{
+					head = next;
+				}
+				else
+				{
+					data[prev].next = next;
+				}
+				data[next].prev = prev;
+
+
+				data[i].val = -1;
+				data[i].prev = -1;
+				data[i].next = -1;
+
+				break;
+			}
+		}
+	}
+	void deleteFirst()
+	{
+		int next = data[head].next;
+		data[next].prev = -1;
+
+		data[head].val = -1;
+		data[head].prev = -1;
+		data[head].next = -1;
+
+		head = next;
+	}
+	void deleteLast()
+	{
+		int back = head;
+		while( data[back].next != -1 ) back = data[back].next;
+		int prev = data[back].prev;
+		data[prev].next = -1;
+
+		data[back].val = -1;
+		data[back].prev = -1;
+		data[back].next = -1;
+	}
+	void print()
+	{
+		// prints in reverse
+
+		int i = head;
+		while( data[i].next != -1 ) i = data[i].next;
+		
+		while( data[i].prev != -1)
+		{
+			cout << data[i].val << ' ';
+			i = data[i].prev;
+		}
+		
+		cout << data[i].val << endl; 
+	}
+public:
+	int head = 0;
+	vector<Element> data;
+};
+
+int main()
+{
+	int size;
+	cin >> size;
+	List l;
+
+	for( int i = 0; i < size; i++ )
+	{
+		string str;
+		int num;
+
+		cin >> str;
+
+		if( str[0] == 'i' )
+		{
+			cin >> num;
+			l.insert( num );
+		}
+		else if( str.size() == 6 )
+		{
+			cin >> num;
+			l.del( num );
+		}
+		else if( str[6] == 'F' )
+		{
+			l.deleteFirst();
+		}
+		else if( str[6] == 'L' )
+		{
+			l.deleteLast();
+		}
+	}
+
+	l.print();
+
+	return 0;
+}

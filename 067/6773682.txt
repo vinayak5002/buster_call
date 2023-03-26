@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (long long  i = 0; i < (long long )(n); i++) 
+#define all(x) (x).begin(),(x).end() 
+#define fix(x) fixed << setprecision(x)
+#define BACK(x) x.rbegin(),x.rend()
+//MOD1 1000000007
+//MOD2 998244353
+#define pb push_back
+#define mp make_pair
+#define bit(n) (1LL<<(n))
+using namespace std;
+using ull = unsigned long long;
+using ll = long long;
+using vl = vector<long long>;
+using vvl = vector<vector<long long>>;
+using vs = vector<string>;
+using pl = pair<long long, long long>;
+template <typename T> inline bool chmin(T& a, const T& b) {bool compare = a > b; if (a > b) a = b; return compare;}
+template <typename T> inline bool chmax(T& a, const T& b) {bool compare = a < b; if (a < b) a = b; return compare;}
+const ll INF = 1LL << 60;
+//#include <atcoder/all>
+//using namespace atcoder;
+//using mint = modint1000000007;
+//using mint = modint998244353;
+
+
+
+
+int dp[1110][111000];
+ int N,W;
+ int V[1110],weight[1110];
+ // i番目以降の品物から重さの和がj以下なるように選んだときの、
+ // 取りうる価値の総和の最大値を返す関数
+ int dfs(int i,int w){
+   int res;
+   if(dp[i][w]!=0)return dp[i][w];
+   if(i==N)res = 0;
+   else if(w<weight[i])res=dfs(i+1,w);
+   else {
+     res = max(dfs(i+1,w),dfs(i+1,w-weight[i])+V[i]);
+   }
+   dp[i][w]=res;
+   return res;
+ }
+ void solve(){
+   cin>>N>>W;
+   rep(i,N)cin>>V[i]>>weight[i];
+   cout<<dfs(0,W)<<endl;
+ }
+int main(){cin.tie(nullptr);ios::sync_with_stdio(false);solve();}

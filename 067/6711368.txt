@@ -1,0 +1,97 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long  ll;
+
+double PI = 3.1415926535;
+const int INF = 1 << 30;
+const ll LINF = 1000;
+#define repe(i,s,n)for(ll i=s;i<=n;i++)
+#define rep(i,s,n)for(ll i=s;i<n;i++)
+#define rep_r(i,s,n)for(ll i=n-1;i>=s;i--)
+#define rep_re(i,s,n)for(ll i=n;i>=s;i--)
+const ll MOD = 1e9 + 7;
+
+//printf("%.10f\n",x)
+//vector<ll> a(N + 1, -1);
+
+// Floyd-Warshall
+const ll MAX_V = 300;
+ll V;
+
+//vector<vector<long long>> d = { {0, 5, -1, INF},
+//							  {INF, 0, INF, 3},
+//							  {INF, INF, 0, 1},
+//							  {INF, INF, 4, 0} };
+ll d[MAX_V][MAX_V];
+void floyd_warshall() {
+	for (int k = 0; k < V; ++k) {
+		for (int i = 0; i < V; ++i) {
+			for (int j = 0; j < V; ++j) {
+				d[i][j] = min(d[i][j], d[i][k] + d[k][j]);
+			}
+		}
+	}
+}
+int main() {
+	int E; cin >> V >> E;
+
+	rep(i, 0, V) {
+		rep(j, 0, V) {
+			d[i][j] = LINF;
+		}
+	}
+
+	rep(i, 0, V) d[i][i] = 0;
+
+	rep(e, 0, E) {
+		ll a, b, x; cin >> a >> b >> x;
+		d[a][b] = x;
+	}
+
+	floyd_warshall();
+
+	rep(i, 0, V) {
+		rep(j, 0, V) {
+			if (d[i][j] == LINF) {
+				cout << "INF";
+			}
+			else {
+				cout << d[i][j];
+			}
+			if (j != V - 1) {
+				cout << " ";
+			}
+		}
+		cout << endl;
+	}
+	//vector<vector<long long> > dp(V, vector<long long>(V, INF));
+	//for (int i = 0; i < V; ++i) dp[i][i] = 0;  // necessary
+
+	//// input
+	//for (int e = 0; e < E; ++e) {
+	//	int a, b, w; cin >> a >> b >> w;
+	//	dp[a][b] = w;
+	//}
+
+	//// Floyd-Warshall
+	//for (int k = 0; k < V; ++k)
+	//	for (int i = 0; i < V; ++i)
+	//		for (int j = 0; j < V; ++j)
+	//			dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j]);
+
+	//// output
+	//bool isnegative = false;
+	//for (int v = 0; v < V; ++v) if (dp[v][v] < 0) isnegative = true;
+
+	//if (isnegative) puts("NEGATIVE CYCLE");
+	//else {
+	//	for (int i = 0; i < V; ++i) {
+	//		for (int j = 0; j < V; ++j) {
+	//			if (dp[i][j] < INF / 2) cout << dp[i][j];
+	//			else cout << "INF";
+	//			if (j != V - 1) cout << " ";
+	//		}
+	//		cout << endl;
+	//	}
+	//}
+}

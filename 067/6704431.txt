@@ -1,0 +1,133 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <unordered_set>
+
+using namespace std;
+
+namespace Yourein{
+    struct SCC{
+        public:
+            SCC(int n) : _n(n) {}
+
+            int size() {return _n;}
+            void push_edge(int s, int t){g_edges.push_back({s, {t}});}
+
+            pair<int, vector<int>> scc_ids() {
+                Sparse_table g = Sparse_table(_n, g_edges);
+                int now_ord = 0, group_num = 0;
+                vector<int> explored, low(_n), ord(_n, -1), ids(_n);
+                explored.reserve(_n);
+
+                auto dfs = [&](auto self, int v) -> void {
+                    low[v] = ord[v] = now_ord++;
+                    explored.push_back(v);
+
+                    for (int i = g.start[v]; i < g.start[v+1]; i++){
+                        int to = g.elist[i].t;
+                        if (ord[to] == -1){
+                            self(self, to);
+                            low[v] = min(low[v], low[to]);
+                        }
+                        else{
+                            low[v] = min(low[v], ord[to]);
+                        }
+                    }
+
+                    if (low[v] == ord[v]) {
+                        while(1){
+                            int u = explored.back();
+                            explored.pop_back();
+                            ord[u] = _n;
+                            ids[u] = group_num;
+                            if (u == v) break;
+                        }
+                        group_num++;
+                    }
+                };
+                for (int i = 0; i < _n; i++) if (ord[i] == -1) dfs(dfs, i);
+                for (auto &x : ids) x = group_num - 1 - x;
+                return {group_num, ids};
+            }
+
+            vector<vector<int>> init_scc(){
+                pair<int, vector<int>> ids = scc_ids();
+                int group_num = ids.first;
+                counts.assign(group_num, 0);
+                for (auto x : ids.second) counts[x]++;
+                scc_res.resize(group_num);
+                for (int i = 0; i < group_num; i++) scc_res[i].reserve(counts[i]);
+                for (int i = 0; i < _n; i++) scc_res[ids.second[i]].push_back(i);
+
+                initialized = true;
+                return scc_res;
+            }
+
+            vector<unordered_set<int>> res_as_set(){
+                if (initialized == false) init_scc();
+
+                vector<unordered_set<int>> res_set(scc_res.size());
+                for (int i = 0; i < (int)scc_res.size(); i++){
+                    for (auto x : scc_res[i]){
+                        res_set[i].insert(x);
+                    }
+                }
+                return res_set;
+            }
+        private:
+            int _n;
+            bool initialized = false;
+
+            struct edge{
+                int t;
+            };
+            vector<pair<int, edge>> g_edges;
+
+            vector<vector<int>> scc_res;
+            vector<int> counts;
+
+            struct Sparse_table{
+                vector<int> start;
+                vector<edge> elist;
+
+                Sparse_table(int nodes, vector<pair<int, edge>>& edges) : start(nodes+1), elist(edges.size()) {
+                    for (auto e : edges) start[e.first + 1]++;
+                    for (int i = 1; i <= nodes; i++) start[i] += start[i-1];
+
+                    auto counter = start;
+                    for (auto e : edges) elist[counter[e.first]++] = e.second;
+                }
+            };
+    };
+}
+
+int main(){
+    int n, m;
+    cin >> n >> m;
+
+    Yourein::SCC scc(n);
+
+    for (int i = 0; i < m; i++){
+        int ai, bi;
+        cin >> ai >> bi;
+        scc.push_edge(ai, bi);
+    }
+
+    scc.init_scc();
+    auto res = scc.res_as_set();
+    int q;
+    cin >> q;
+    for (int qq = 0; qq < q; qq++){
+        int ai, bi;
+        bool y = false;
+        cin >> ai >> bi;
+        for (auto x : res){
+            if (x.count(ai) > 0 && x.count(bi) > 0) {
+                y = true;
+                break;
+            }
+        }
+        cout << (y?1:0) << endl;
+    }
+}
+

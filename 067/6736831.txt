@@ -1,0 +1,52 @@
+#include<iostream>
+#include<queue>
+#include<map>
+using namespace std;
+int dx[] = {-4,4,1,-1};
+map <string,int> mp;
+void bfs(string s)
+{
+    queue<string> q;
+    mp[s] = 1;
+    q.push(s);
+   while(!q.empty())
+   {
+       s = q.front();
+       q.pop();
+       int pos = s.find('0');
+       for(int i = 0;i < 4;i++)
+       {
+           int nx = pos + dx[i];
+           if (nx < 0 || nx>7 || pos == 3 && dx[i] == 1 || pos == 4 && dx[i] == -1)
+				continue;
+               string s1 = s;
+               swap(s1[pos],s1[pos + dx[i]]);
+               if(!mp[s1])
+               {
+                   q.push(s1);
+                   mp[s1] = mp[s] + 1;
+
+               }
+
+       }
+   }
+}
+int main()
+{
+    string s = "01234567";
+    bfs(s);
+    int num;
+   while (cin >> num)
+	{
+		s[0] = num + '0';
+		for (int i = 1; i < 8; i++)
+		{
+			cin >> num;
+			s[i] = num + '0';
+		}
+        cout << mp[s] - 1 <<endl;
+    }
+    return 0;
+
+}
+

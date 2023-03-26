@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for (int i = 0; i < (n); ++i)
+template<class t,class u> bool chmin(t&a,u b){if(b<a){a=b;return true;}else return false;}
+const int INF = 1001001001;
+
+void solve() {
+    int n, m;
+    cin >> n >> m;
+    vector<int> c(m);
+    rep(i,m) cin >> c[i];
+
+    // dp[i][j] := i番目までの効果で j円払うときの、コインの最小値
+    vector<vector<int>> dp(m+1, vector<int>(n+1, INF));
+    for (int j = 0; j * c[0] <= n; j++) {
+        dp[0][j * c[0]] = j;
+    }
+    for (int i = 1; i < m; i++) {
+        for (int j = 0; j <= n; j++) {
+            dp[i][j] = dp[i-1][j];
+            if (j >= c[i]) {
+                chmin(dp[i][j], dp[i-1][j - c[i]] + 1);
+                chmin(dp[i][j], dp[i][j - c[i]] + 1);
+            }
+        }
+    }
+
+    cout << dp[m-1][n] << endl;
+}
+
+int main(){
+    solve();
+} 

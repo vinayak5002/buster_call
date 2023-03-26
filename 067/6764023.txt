@@ -1,0 +1,113 @@
+#include<bits/stdc++.h>
+#define int ll
+#define rep(i, N) for(int i = 0; i < (int)(N); ++i)
+#define rep1(i, N) for(int i = 1; i <= (int)(N); ++i)
+#define per(i, N) for(int i = (N)-1; i >= 0; --i)
+#define all(v) (v).begin(), (v).end()
+#define rall(v) (v).rbegin(), (v).rend()
+#define bit(n, k) ((n) >> (k))
+#define pcnt(n) (__builtin_popcount(n))
+#define TakAo(ans) ans ? cout << "Takahashi\n" : cout << "Aoki\n"
+#define YesNo(ans) ans ? cout << "Yes\n" : cout << "No\n"
+#define endl '\n'
+#define fi first
+#define se second
+#define mkpr make_pair
+#define mktpl make_tuple
+#define eb emplace_back
+
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+using point = struct{ ll x, y; };
+using pointld = struct{ ld x, y; };
+using State = string::const_iterator;
+template<class T> using max_heap = priority_queue<T>;
+template<class T> using min_heap = priority_queue<T, vector<T>, greater<T>>;
+template<class T> using vec = vector<T>;
+template<class T> using vvec = vec<vec<T>>;
+template<class T> using vvvec = vec<vvec<T>>;
+template<class T> using vvvvec = vvec<vvec<T>>;
+
+constexpr ld EPS = 1e-10;
+constexpr int INF = 1001001001;
+constexpr ll LINF = 1001001001001001001ll;
+constexpr ll MOD = (0) ? 998244353 : 1e9+7;
+constexpr int NIL = -1;
+constexpr int pm[2] = {1, -1};
+constexpr int dy[6] = {0, 1, 1, 0, -1, -1};
+constexpr int dx[6] = {1, 1, 0, -1, -1, 0};
+
+ll cel(ll a, ll b){ return (a + b - 1) / b;}
+ll Gcd(ll a, ll b){ return b ? Gcd(b, a % b) : abs(a);}
+template<class T> T powi(T x, ll exp){
+    return exp > 0 ? (exp & 1 ? x : 1) * powi(x * x, exp >> 1) : x / x;
+}
+ll modpow(ll x, ll exp, ll mod){
+    x %= mod;
+    return exp > 0 ? (exp & 1 ? x : 1) * modpow(x * x, exp >> 1, mod) % mod : 1;
+}
+template<class T> bool chmin(T &a, T b){ return a > b ? (a = b, true) : 0;}
+template<class T> bool chmax(T &a, T b){ return a < b ? (a = b, true) : 0;}
+
+using Pair = pair<ll, ll>;
+using Tpl = tuple<int, int, int>;
+
+void Main(){
+    int N, D, X; cin >> N >> D >> X;
+    vvec<int> P(D, vec<int>(N));
+    rep(i, D)rep(j, N) cin >> P[i][j];
+
+    const int MAX_N = 4e5 + 1;
+
+    vvvec<int> dp(D, vvec<int>(N + 1, vec<int>(MAX_N, NIL)));
+    rep(i, D) dp[i][N][X] = 1;
+
+    rep(i, D){
+        // sell 
+        if(i > 0){
+            rep(j, N){
+                rep(k, MAX_N){
+                    if(dp[i - 1][j][k] != NIL)
+                        dp[i][N][k + P[i][j] * dp[i - 1][j][k]] = 1;
+                    if(dp[i - 1][N][k] != NIL)
+                        dp[i][N][k] = 1;
+                }
+            }
+        }
+
+        ll mx = 0;
+        per(k, MAX_N){
+            if(dp[i][N][k] != NIL){
+                mx = k;
+                break;
+            }
+        }
+
+        if(i > 0) rep(j, N){
+            rep(k, MAX_N) dp[i][j][k] = dp[i - 1][j][k];
+        }
+
+        //buy
+        if(i < D - 1){
+            rep(j, N){
+                rep1(k, MAX_N){
+                    if(mx - P[i][j] * k < 0) break;
+                    chmax(dp[i][j][mx - P[i][j] * k], k);
+                }
+            }
+        }
+        else{
+            cout << mx << endl;
+        }
+    }
+}
+ 
+signed main(){
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    cout << fixed << setprecision(10);
+    Main();
+    return 0;
+}

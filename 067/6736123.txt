@@ -1,0 +1,36 @@
+#define BUF_SIZE 4096
+#define POINT_SIZE 1024
+
+#include <stdio.h>
+#include <math.h>
+
+int main(void)
+{
+	char buf[BUF_SIZE];
+	double stdev;
+	double variance;
+	int num, i;
+	int point[POINT_SIZE];
+	int sum, avg;
+
+	do {
+		sum = 0;
+		variance = 0;
+		fgets(buf, sizeof(buf) - 1, stdin);
+		sscanf(buf, "%d", &num);
+		fgets(buf, sizeof(buf) - 1, stdin);
+		for (i = 0; i < num; i++) {
+			sscanf(buf, "%d %[^\n]", &point[i], buf);
+			sum += point[i];
+		}
+
+		avg = sum / num;
+		for (i = 0; i < num; i++) {
+			variance += pow((double)(avg-point[i]), 2);
+		}
+		variance /= num;
+		stdev = sqrt(variance);
+		printf("%lf\n", stdev);
+	} while (num != 0);
+	return 0;
+}

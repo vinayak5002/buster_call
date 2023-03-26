@@ -1,0 +1,44 @@
+import sys
+import math
+from collections import defaultdict, deque
+
+sys.setrecursionlimit(10 ** 6)
+stdin = sys.stdin
+
+INF = float('inf')
+
+ni = lambda: int(ns())
+na = lambda: list(map(int, stdin.readline().split()))
+ns = lambda: stdin.readline().strip()
+
+def round255(x):
+    if x > 255:
+        return 255
+    if x < 0:
+        return 0
+    return x
+
+while True:
+    N, M = na()
+    if N == 0 and M == 0:
+        break
+    C = []
+    X = []
+    for _ in range(M):
+        C.append(ni())
+    for _ in range(N):
+        X.append(ni())
+    dp = [[INF] * 256 for _ in range(N + 1)]
+    dp[0][128] = 0
+    for i in range(N):
+        for j in range(256):
+            if dp[i][j] == INF:
+                continue
+            for k in range(M):
+                yn = round255(j + C[k])
+                sum = (X[i] - yn) ** 2
+                dp[i + 1][yn] = min(dp[i + 1][yn], dp[i][j] + sum)
+    ans = INF
+    for i in range(256):
+        ans = min(ans, dp[N][i])
+    print(ans)

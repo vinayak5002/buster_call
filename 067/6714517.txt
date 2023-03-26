@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long  ll;
+#define rep(i,s,n)for(ll i=s;i<n;i++)
+
+vector<int> topological_sort(vector<vector<int>>& g, vector<int>& in, int N) {
+	queue<int> q;
+	rep(i, 0, N) {
+		if (in[i] == 0) q.push(i);
+	}
+
+	vector<int> v_sorted;
+	while (q.empty() == false) {
+		int v = q.front(); q.pop();
+		rep(i, 0, g[v].size()) {
+			int u = g[v][i];
+			in[u] -= 1;
+			if (in[u] == 0) q.push(u);
+		}
+		v_sorted.push_back(v);
+	}
+	return v_sorted;
+}
+
+int main(void) {
+	//Input Graph Data
+	int V, E;
+	cin >> V >> E;
+	vector<vector<int>> G(V);
+	vector<int> indegree(V);
+	for (int i = 0; i < E; i++) {
+		int u, v;
+		cin >> u >> v;
+		G[u].push_back(v);
+		indegree[v] += 1;
+	}
+
+	//Toporogical Sort
+	vector<int> sorted_vertices = topological_sort(G, indegree, V);
+
+	if (sorted_vertices.size() != V) {
+		cout << "cannot topological sort" << endl;
+		return 0;
+	}
+	//Output Sorted Data
+	for (int i = 0; i < sorted_vertices.size(); i++) {
+		cout << sorted_vertices[i] << endl;
+	}
+	return 0;
+}

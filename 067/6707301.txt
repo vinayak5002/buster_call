@@ -1,0 +1,115 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 50
+int n;
+int t = NIL;
+
+struct Node {
+    int dist; //d,fは幅優先探索では使わないけど。。。 
+    int con; // 
+};
+vector<Node> X;
+set<int> T ;
+stack<int> df ;
+queue<int> Q ;
+int A[101][101] ; // 0以外では初期化できないんだってーーー。
+
+
+void calc_ans () {
+    int ans = 0;
+    for (int i=0; i < n; i++) {
+        cout << i << " " <<  X.at(i).dist << endl ; 
+    }
+}
+
+/*int prt_route () {
+    for (int i=0; i < R.size(); i++) {
+        cout << R.at(i).from << "  " << R.at(i).to  << "  " << R.at(i).cost << endl ;
+    }
+    return 0;
+}*/
+
+void clearvalueA() {
+    for (int i=0 ; i<101; i++) {
+        for  (int j=0; j<101; j++) {
+            A[i][j] = INF ;
+        }
+    }
+}
+void printvalueA(int a, int b) {
+    for (int i=0 ; i<a ; i++) {
+        for (int j=0 ; j<b ; j++) {
+            cout << A[i][j]  << " " ;
+        }
+        cout << endl ;
+    }
+}
+
+void doBSSP(){
+    // 今回は頂点0から回っていく。
+    T.insert(0); // 0をTにいれる。
+    X.at(0).dist = 0 ;
+    // 0に隣接しているところのdistを書き換える。
+    for (int j=0; j < n ; j++) {
+        if ( A[0][j] != INF ) { X.at(j).dist = A[0][j]; }
+    }
+
+    //ここからスタート
+    while ( T.size() < n ) { //Tが全体になるまで続ける。
+        // cout << T.size() << endl ;
+        int mincost = INF;
+        int min_from = -1 ;    int min_to = -1 ;
+        // Tに入っていないところで最小コストになるところを全探索する。
+        for (int i=0 ; i < n ; i++ ) {
+            // cout << i << ":" << X.at(i).dist << endl ;
+            //訪問済みだったらcontinue : 
+            if (T.count(i)) {continue;}
+            else if ( X.at(i).dist < mincost) {
+                mincost = X.at(i).dist;  min_to = i; 
+                // cout << "mincost: "<< mincost << "  minto: " << min_to << endl; 
+            }
+        }
+        // cout << "minto: " << min_to << endl; 
+        // min_toを選択しコストを書き換える。
+        T.insert(min_to);
+        for (int j=0; j < n ; j++) {
+            //訪問済みだったらcontinue : 
+            if (T.count(j)) {continue;}
+            if ( X.at(min_to).dist + A[min_to][j] < X.at(j).dist ) {
+                X.at(j).dist = X.at(min_to).dist + A[min_to][j];
+            }
+        }
+    }    
+}
+
+int main() {
+    cin >> n  ;
+    // nは登場人物の人数、
+    clearvalueA();
+
+    Node indata;
+    indata.dist = INF; 
+    indata.con = NIL;
+
+    for (int i = 0 ; i < n ; i++ ) {
+        X.push_back(indata); //とりあえずn人をつくる。
+    }
+    for (int i = 0 ; i < n ; i++ ) {
+        int a , b, c , id;
+        cin >> id >> c ; // cは情報の数
+        for (int j = 0 ; j < c ; j ++ ){
+            cin >> a >> b ;
+            A[i][a] = b ; 
+        }
+    }
+    // printvalueA(5,5);
+    doBSSP();
+    calc_ans() ;
+    // prt_route();
+
+	return 0 ;
+}
+

@@ -1,0 +1,112 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < n; ++i)
+typedef long long ll;
+using namespace std;
+
+typedef string::const_iterator State;
+void consume(State &begin, char expected);
+bool parse_equation(State &s, map<char, bool> &mp);
+bool parse_formula(State &s, map<char, bool> &mp);
+
+void consume(State &begin, char expected) {
+    if (*begin == expected) {
+        begin++;
+    } else {
+        cerr << "Expected '" << expected << "' but got '" << *begin << "'" << endl;
+        exit(1);
+    }
+}
+
+bool parse_equation(State &s, map<char, bool> &mp) {
+    bool l = parse_formula(s, mp);
+    consume(s, '=');
+    bool r = parse_formula(s, mp);
+
+    return l == r;
+}
+
+bool parse_formula(State &s, map<char, bool> &mp) {
+    if (*s == '-') {
+        consume(s, '-');
+        return !parse_formula(s, mp);
+    }
+    if (*s == '(') {
+        consume(s, '(');
+        bool l = parse_formula(s, mp);
+        char op = *s;
+        consume(s, op);
+        if (*s == '>') {
+            consume(s, '>');
+        }
+        bool r = parse_formula(s, mp);
+
+        bool res = false;
+        if (op == '*') {
+            res = l & r;
+        } else if (op == '+') {
+            res = l | r;
+        } else if (op == '-') {
+            res = !(l & !r);
+        }
+        consume(s, ')');
+        return res;
+    }
+
+    if (*s == 'T') {
+        s++;
+        return true;
+    }
+    if (*s == 'F') {
+        s++;
+        return false;
+    }
+
+    bool res = mp[*s];
+    s++;
+    return res;
+}
+
+void solve(string S) {
+    map<char, bool> mp;
+    for (char &c : S) {
+        if (c >= 'a' && c <= 'k') {
+            mp[c] = true;
+        }
+    }
+
+    int n = mp.size();
+    vector<bool> b(n);
+
+    bool ans = true;
+    rep(bit, 1 << n) {
+        rep(i, n) {
+            b[i] = bit & (1 << i);
+        }
+
+        int id = 0;
+        for (auto &p : mp) {
+            mp[p.first] = b[id];
+            id++;
+        }
+
+        State s = S.begin();
+        bool res = parse_equation(s, mp);
+        ans &= res;
+    }
+
+    cout << (ans ? "YES\n" : "NO\n");
+}
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+
+    string S;
+    while (cin >> S) {
+        if (S == "#") break;
+        solve(S);
+    }
+
+    return 0;
+}
+

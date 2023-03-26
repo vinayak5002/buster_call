@@ -1,0 +1,45 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;
+
+    int Ai = -1, Aj;
+    vector<vector<int>> list_of_group;
+    int number_of_groups = 0;
+    vector<int> list_of_grouplength;
+    int current_group = -1;
+    for (int j = 0; j < n; j++) {
+        cin >> Aj;
+        if (Ai < Aj) {
+            number_of_groups += 1;
+            current_group += 1;
+            list_of_group.push_back({});
+            list_of_grouplength.push_back(0);
+        }
+        list_of_group[current_group].push_back(Aj);
+        list_of_grouplength[current_group] += 1;
+        Ai = Aj;
+    }
+
+    int cnt = 0;
+    for (int i = 0; i < number_of_groups; i++) {
+        cnt += (list_of_grouplength[i] - 1) * list_of_grouplength[i] / 2;
+        for (int j = 0; j < list_of_grouplength[i]; j++) {
+            for (int k = i + 1; k < number_of_groups; k++) {
+                for (int l = 0; l < list_of_grouplength[k]; l++) {
+                    if (list_of_group[i][j] > list_of_group[k][l]) {
+                        cnt += list_of_grouplength[k] - l;
+                        break;
+                    } 
+                }
+            }
+
+        }
+    }
+    cout << cnt << endl;
+    return 0;
+}

@@ -1,0 +1,120 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+//2次元セグ木(自動座圧)
+template <class S, S (*op)(S, S), S (*e)(), class C = long long int> struct segtree2D_lite {
+    int H;
+    std::vector<int> logsize, W;
+    std::vector<C> Yc;
+    std::vector<std::vector<C>> pos;
+    std::vector<std::pair<C, C>> preorder;
+    std::vector<std::vector<S>> d;
+    segtree2D_lite()  {}
+    void insert(C y, C x){
+        preorder.emplace_back(y, x);
+    }
+    void build(){
+        for(int i = 0; i < int(preorder.size()) ; i++){
+            Yc.push_back(preorder[i].first);
+        }
+        std::sort(Yc.begin(), Yc.end());
+        Yc.erase(std::unique(Yc.begin(), Yc.end()), Yc.end());
+        H = 1 << ceil_pow2(Yc.size());
+        pos.resize(2*H), d.resize(2*H);
+        logsize.resize(2*H), W.resize(2*H);
+        for(int i = 0; i < int(preorder.size()) ; i++){
+            int y = std::lower_bound(Yc.begin(), Yc.end(), preorder[i].first) - Yc.begin();
+            y += H;
+            while(y){
+                pos[y].push_back(preorder[i].second);
+                y >>= 1;
+            }
+        }
+        for(int y = 0; y < int(pos.size()) ; y++){
+            std::sort(pos[y].begin(), pos[y].end());
+            pos[y].erase(std::unique(pos[y].begin(), pos[y].end()), pos[y].end());
+            logsize[y] = ceil_pow2(pos[y].size());
+            W[y] = 1 << logsize[y] ;
+            d[y].resize(2 * W[y] , e());
+        }
+    }
+    void set(C py, C px, S v){
+        int y = std::lower_bound(Yc.begin(), Yc.end(), py) - Yc.begin();
+        y += H;
+        while(y){
+            int x = std::lower_bound(pos[y].begin(), pos[y].end(), px) - pos[y].begin();
+            x += W[y];
+            d[y][x] =  v;
+            x >>= 1;
+            while(x){
+                updateX(y, x);
+                x >>= 1;
+            }
+            y >>= 1;
+        }
+    }
+    S get(C py, C px){
+        int y = std::lower_bound(Yc.begin(), Yc.end(), py) - Yc.begin();
+        y += H;
+        int x = std::lower_bound(pos[y].begin(), pos[y].end(), px) - pos[y].begin();
+        return d[y][x + W[y]];
+    }
+    S prod(C lpy, C lpx , C rpy , C rpx){
+        int ly = std::lower_bound(Yc.begin(), Yc.end(), lpy) - Yc.begin();
+        int ry = std::lower_bound(Yc.begin(), Yc.end(), rpy) - Yc.begin();
+        S sml = e(), smr = e();
+        ly += H, ry += H ;
+        while (ly < ry) {
+            if (ly & 1) sml = op(sml, yline_prod(lpx, rpx , ly++));
+            if (ry & 1) smr = op(yline_prod(lpx, rpx , --ry), smr);
+            ly >>= 1, ry >>= 1;
+        }
+        return op(sml, smr);
+    }
+    S yline_prod(C lpx, C rpx , int y){
+        int lx = std::lower_bound(pos[y].begin(), pos[y].end(), lpx) - pos[y].begin();
+        int rx = std::lower_bound(pos[y].begin(), pos[y].end(), rpx) - pos[y].begin();
+        S sml = e(), smr = e();
+        lx += W[y], rx += W[y] ;
+        while (lx < rx) {
+            if (lx & 1) sml = op(sml, d[y][lx++]);
+            if (rx & 1) smr = op(d[y][--rx], smr);
+            lx >>= 1, rx >>= 1;
+        }
+        return op(sml, smr);
+    }
+    private:
+    int ceil_pow2(int n) {
+        int x = 0;
+        while ((1U << x) < (unsigned int)(n)) x++;
+        return x;
+    }
+    void updateX(int yi, int xi) { d[yi][xi] = op(d[yi][2 * xi], d[yi][2 * xi + 1]); }
+};
+
+int op(int a,int b){return a + b;}
+int e(){return 0;}
+
+int main(){
+    int n, m;
+    cin >> n >> m;
+    segtree2D_lite<int,op,e,int> seg;
+    vector<int> x(n), y(n), lx(m), ly(m), rx(m), ry(m);
+    for(int i = 0; i < n; i++){
+        cin >> x[i] >> y[i];
+        seg.insert(x[i], y[i]);
+    }
+    for(int i = 0; i < m; i++){
+        cin >> lx[i] >> ly[i] >> rx[i] >> ry[i];
+        seg.insert(lx[i], ly[i]);
+        seg.insert(++rx[i], ++ry[i]);
+    }
+    seg.build();
+    for(int i = 0; i < n; i++){
+        cin >> x[i] >> y[i];
+        seg.set(x[i], y[i], 1);
+    }
+    for(int i = 0; i < m; i++){
+        cout << seg.prod(lx[i], ly[i], rx[i], ry[i]) << '\n';
+    }
+}

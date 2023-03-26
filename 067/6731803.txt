@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define rep(i,n) for(i = 0;i < n;++i)
+#define all(v) v.begin(), v.end()
+using ll = long long;
+
+int dfs(int now, int dist, const vector<vector<ll>>& graph, vector<ll>& arrived, vector<ll>& finished)
+{
+    arrived.at(now) = dist;
+
+    for(int i = 0;i < graph.at(now).size();++i){
+        int next = graph.at(now).at(i);
+        if(arrived.at(next) == -1){
+            dist = dfs(next, dist + 1, graph, arrived, finished);
+        }
+    }
+
+    finished.at(now) = dist + 1;
+    return dist + 1;
+}
+
+int main()
+{
+    int n;
+    cin >> n;
+    vector<vector<ll>> graph(n);
+    for(int i = 0;i < n;++i){
+        int u, k;
+        cin >> u >> k;
+        for(int j = 0;j < k;++j){
+            int v;
+            cin >> v;
+            graph.at(u - 1).push_back(v - 1);
+        }
+    }
+
+    vector<ll> arrived(n, -1);
+    vector<ll> finished(n, -1);
+    int dist = 0;
+
+    for(int i = 0;i < n;++i){
+        if(arrived.at(i) == -1){
+            dist = dfs(i, dist + 1, graph, arrived, finished);
+        }
+    }
+
+    for(int i = 0;i < n;++i){
+        cout << i + 1 << " " << arrived.at(i) << " " << finished.at(i) << endl;
+    }
+
+    return 0;
+}
+

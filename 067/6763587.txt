@@ -1,0 +1,173 @@
+#include <bits/stdc++.h>
+#include <chrono>
+#include <thread>
+////#include <atcoder/all>
+
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using vvvb = vector<vvb>;
+using vd = vector<double>;
+using vvd = vector<vd>;
+using vvvd = vector<vvd>;
+#define all(A) A.begin(),A.end()
+#define ALL(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q, bool C = 1) {
+    if (C == 0 && p == q) {
+        return 1;
+    }
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+double EPS = 1e-9;
+template<class T>
+bool chmin(T& p, T q) {
+    if (p > q + EPS) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+ll gcd(ll(a), ll(b)) {
+    if (b == 0)return a;
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+vector<ll> fact, factinv, inv;
+ll mod = 998244353;
+void prenCkModp(ll n) {
+    fact.resize(n + 5);
+    factinv.resize(n + 5);
+    inv.resize(n + 5);
+    fact.at(0) = fact.at(1) = 1;
+    factinv.at(0) = factinv.at(1) = 1;
+    inv.at(1) = 1;
+    for (ll i = 2; i < n + 5; i++) {
+        fact.at(i) = (fact.at(i - 1) * i) % mod;
+        inv.at(i) = mod - (inv.at(mod % i) * (mod / i)) % mod;
+        factinv.at(i) = (factinv.at(i - 1) * inv.at(i)) % mod;
+    }
+
+}
+ll nCk(ll n, ll k) {
+    if (k < 0)return 0;
+    if (n < k) return 0;
+    return fact.at(n) * (factinv.at(k) * factinv.at(n - k) % mod) % mod;
+}
+vector<string>S;
+ll dfs(ll L, ll R, ll n, char c = '+') {
+    ll res = 0;
+    if (c == '*')res = 1;
+    for (ll i = L; i <= R; i++) {
+        ll d = 0;
+        if (S[i].size() != n + 1)continue;
+        if (S[i][n] == '+') {
+            bool OK = 1;
+            for (ll j = i + 1; j < R; j++) {
+                if (S[j].size() == n + 1) {
+                    d = dfs(i + 1, j - 1, n + 1, '+');
+                    OK = 0;
+                    break;
+                }
+
+            }
+            if (OK)d = dfs(i + 1, R, n + 1, '+');
+        }
+        else if (S[i][n] == '*') {
+            bool OK = 1;
+            for (ll j = i + 1; j < R; j++) {
+                if (S[j].size() == n + 1) {
+                    d = dfs(i + 1, j - 1, n + 1, '*');
+                    OK = 0;
+                    break;
+                }
+
+            }
+            if (OK)d = dfs(i + 1, R, n + 1, '*');
+        }
+        else {
+            d = S[i][n] - '0';
+        }
+        if (c == '+')res += d;
+        else res *= d;
+    }
+    return res;
+}
+unordered_map<ll, ll> MA;
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    vvll comb(51,vll(51,0));
+    rep(i,51){
+        comb[i][0]=1;
+        rep(j,50){
+            comb[i][j+1]=comb[i][j]*double(i-j)/double(j+1);
+        }
+    }
+
+    ll N,M,L;
+    cin>>N>>M>>L;
+    vector<tuple<double,ll,ll>> H(N);
+    rep(n,N){
+        double p;ll t,v;
+        cin>>p>>t>>v;
+        H[n]={p/100.0,t,v};
+    }
+    rep(n,N){
+        double an=0.0;
+        double p=get<0>(H[n]);
+        ll t=get<1>(H[n]);
+        ll v=get<2>(H[n]);
+        if(v<0.5){
+            cout<<0.0<<endl;
+            continue;
+        }
+        rep(m,M+1){
+            double q=double(comb[M][m])*pow(p,m)*pow(1-p,M-m);
+            rep(i,N){
+                if(n==i)continue;
+                double res=0.0;
+                double pi=get<0>(H[i]);
+                ll ti=get<1>(H[i]);
+                ll vi=get<2>(H[i]);
+                rep(j,M+1){
+                    if(L*v+j*ti*vi*v<=L*vi+m*t*vi*v)continue;
+                    res+=double(comb[M][j])*pow(pi,j)*pow(1-pi,M-j);
+                }
+                q*=res;
+            }
+            an+=q;
+        }
+        cout<<fixed<<setprecision(16)<<an<<endl;
+    }
+}
+
+
+

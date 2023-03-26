@@ -1,0 +1,99 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <cstdio>
+#include <iostream>
+#include <stack>
+#include <queue>
+#include <algorithm>
+#include <functional>
+#include <set>
+#include <map>
+#include <string>
+#include <vector>
+#include <cmath>
+#include<sstream>
+#include<list>
+#include<iomanip>
+#include <cstdlib>
+#include <cstring>
+#include <stack>
+#include <bitset>
+#include <cassert>
+#include <stdlib.h>
+#include <stdio.h>
+using namespace std;
+const int INF = 1000000000;
+const long long LINF = 3e18 + 7;
+const int MAX_N = 50010;
+const int MAX_W = 1000010;
+const int MAX_ARRAYK = 100000;
+double PI = 3.14159265358979323846;
+//using ll = long long;
+
+
+int R, C;
+int field[12][10100];
+int original[12][10100];
+bool has_bit(int n, int i) {
+	return ((n & (1 << i)) > 0);
+}
+
+int main() {
+
+	int ans = 0;
+	while (true) {
+		cin >> R >> C;
+		if (R == 0 && C == 0) {
+			break;
+		}
+		for (int r = 0; r < R; r++) {
+			for (int c = 0; c < C; c++) {
+				cin >> field[r][c];
+				original[r][c] = field[r][c];
+			}
+		}
+
+		int ALL = 1 << R;
+
+		for (int n = 0; n < ALL; n++) {
+			
+			for (int r = 0; r < R; r++) {
+				for (int c = 0; c < C; c++) {
+					field[r][c] = original[r][c];
+				}
+			}
+			
+			for (int r = 0; r < R; r++) {
+				if (has_bit(n, r)) {
+					for (int c = 0; c < C; c++) {
+						field[r][c] = (field[r][c] ^ 1);
+					}
+				}
+			}
+
+			//cout << endl;
+			//for (int r = 0; r < R; r++) {
+			//	for (int c = 0; c < C; c++) {
+			//		cout << field[r][c] << " ";
+			//	}
+			//	cout << endl;
+			//}
+
+			int res = 0;
+			for (int c = 0; c < C; c++) {
+				int one = 0;
+				for (int r = 0; r < R; r++) {
+					one += field[r][c];
+				}
+				int zero = R - one;
+				res += max(one, zero);
+			}
+			ans = max(ans, res);
+		}
+
+		cout << ans << endl;
+	}
+
+
+
+	return 0;
+}

@@ -1,0 +1,142 @@
+#include<bits/stdc++.h>
+using namespace std;
+/*#include <atcoder/dsu>
+#include <atcoder/all>
+using namespace atcoder;*/
+
+// loop
+#define rep(i,a,b) for(int i=(a);i<(b);i++)
+#define rrep(i,a,b) for(int i=(a);i>=(b);i--)
+
+// Type aliases
+using ull = unsigned long long;
+using ll = long long;
+using ld = long double;
+using pll = pair<ll, ll>;
+using pii = pair<int, int>;
+using vi = vector<int>;
+using vvi = vector<vi>;
+//vector<vector<int>> A(3, vector<int>(4));
+
+// x:コンテナ
+#define ALL(x) x.begin(),x.end() //sort(ALL(x))　昇順ソート
+#define RALL(x) x.rbegin(),x.rend() //sort(RALL(x)) 降順ソート
+#define SIZE(x) ll(x.size()) // 要素数
+
+// const
+const int MOD = 1000000007;
+#define yes "Yes"
+#define no "No"
+
+//library
+// int 型の要素を持ち、最も小さい値を取り出す形の priority_queue を定義する場合
+priority_queue<int, vector<int>, greater<int>> Q1;
+priority_queue<int, vector<int>, less<int>> Q2;
+
+const int dy[4] = { 0, 1, -1, 0 };
+const int dx[4] = { 1, 0, 0, -1 };
+
+// pow関数(返り値整数値ver)
+ll pow_ll(ll n, ll cnt){
+	ll ans=1;
+	while(cnt){
+		ans*=n;
+		--cnt;
+	}
+	return ans;
+}
+
+// pow関数(返り値整数値verMOD)
+ll pow_mod(ll n, ll cnt, ll mod){
+	ll ans=1;
+	while(cnt>0){
+		if(cnt&1) ans=ans*n%mod;
+		n=n*n%mod;
+		cnt>>=1;
+	}
+	return ans;
+}
+
+
+ll fact[200009];
+// nCrの計算modを取る。
+ll Division(ll a,ll b, ll m){
+	return (a*pow_mod(b,m-2,m))%m;
+}
+
+ll nCr(ll n, ll r){
+	return Division(fact[n], fact[r]*fact[n-r]%MOD,MOD);
+}
+
+//エラトステネスの篩
+vector<bool> Era(int n){
+	vector<bool> isprime(n+1,true);
+	isprime[1]=false; // 1は予めふるい落とす
+	for(int p=2;p<=n;p++){
+		if(!isprime[p]) continue;
+		for(int q=p*2;q<=n;q+=p){
+			isprime[q]=false;
+		}
+	}
+	return isprime;
+}
+
+//UnionFind
+struct UnionFind{
+	vector<int> par; //ex par[3]=2 : 3の親が2
+
+	UnionFind(int n): par(n){ //最初はすべての親が根
+		for(int i=0;i<n;i++) par[i]=i;
+	}
+
+	int root(int x){ //データxが属する木の根を取得 : root(x)={xの木の根}
+		if(par[x]==x) return x;
+		return par[x]=root(par[x]);
+	}
+
+	void unite(int x, int y){ //x,yの木を結合
+ 		int rx=root(x);
+		int ry=root(y);
+		if(rx==ry) return;
+		par[rx]=ry;
+	}
+
+	bool same(int x, int y){ //x,yは同じ木に属するか？
+		return root(x)==root(y);
+	}
+};
+
+int st[101],ed[101];
+vector<int> A[101];
+
+void dfs(int now, int &t){
+	st[now]=t++;
+	for(auto v:A[now]){
+		if(st[v]>0) continue;
+		dfs(v,t);
+	}
+	ed[now]=t++;
+}
+
+int main(){
+	int n; cin >> n;
+	rep(i,0,n){
+		int g,k; cin >> g >> k;
+		rep(i,0,k){
+			int v; cin >> v;
+			A[g-1].push_back(v-1);
+		}
+	}
+	for(int i=0;i<n;i++){
+		st[i]=-1;
+		ed[i]=-1;
+	}
+	int t=1;
+	for(int i=0;i<n;i++){
+		if(st[i]>0) continue;
+		dfs(i,t);
+	}
+	for(int i=0;i<n;i++){
+		cout << i+1 << " " << st[i] << " " << ed[i] << endl;
+	}
+}

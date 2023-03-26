@@ -1,0 +1,45 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+  for(;;){
+    int N=-1,S;
+    cin >> N >> S;
+    if(N == -1) break;
+    if(500 <= S) cout << 0 << endl;
+    else{
+      vector<vector<int>> dp(1024,vector<int>(S+1,0));
+      dp[0][0] = 1;
+      for(int i=0;i<1024;i++){
+        int cnt = 0;
+        vector<bool> used(10,false);
+        for(int j=0;j<10;j++){
+          if(i & (1<<j)){
+            cnt++;
+            used[j] = true;
+          }
+        }
+        for(int j=0;j<10;j++){
+          if(!(i & (1<<j))){
+            int ni = i+(1<<j);
+            for(int k=0;k<=S;k++){
+              int nk = k+(cnt+1)*j;
+              if(nk <= S) dp[ni][nk] += dp[i][k];
+            }
+          }
+        }
+      }
+      int ans = 0;
+      for(int i=0;i<1024;i++){
+        int cnt = 0;
+        for(int j=0;j<10;j++){
+          if(i & (1<<j)){
+            cnt++;
+          }
+        }
+        if(cnt == N) ans += dp[i][S];
+      }
+      cout << ans << endl;
+    }
+  }
+}

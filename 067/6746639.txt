@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+using namespace std;
+template <class Info, class Merge = plus<Info> >
+struct Fenwick {
+	const Merge merge;
+	int n;
+	vector<Info> bit;
+	Fenwick() : merge(Merge()) {}
+	Fenwick(int n) : n(n), bit(n), merge(Merge()) {}
+	void update(int i, const Info &v) {
+		while (i <= n) {
+			bit[i - 1] = merge(bit[i - 1], v);
+			i += i & -i;
+		}
+	}
+	Info query(int i) {
+		Info res = Info();
+		while (i) {
+			res = merge(res, bit[i - 1]);
+			i -= i & -i;
+		}
+		return res;
+	}
+};
+template<class Info, class Merge = plus<Info> >
+struct TDFenwick {
+	const Merge merge;
+	int n, m;
+	vector<Fenwick<Info, Merge> > bit;
+	TDFenwick() : merge(Merge()) {}
+	TDFenwick(int n, int m) : n(n), m(m), bit(n, Fenwick<Info, Merge>(m)), merge(Merge()) {}
+	void update(int x, int y, const Info &v) {
+		while (x <= n) {
+			bit[x - 1].update(y, v);
+			x += x & -x;
+		}
+	}
+	Info query(int x, int y) {
+		Info res = Info();
+		while (x) {
+			res = merge(res, bit[x - 1].query(y));
+			x -= x & -x;
+		}
+		return res;
+	}
+};
+const int N = 1E3 + 100;
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	TDFenwick<int> fen(N, N);
+	int _;
+	cin >> _;
+	while (_--) {
+		int x1, y1, x2, y2;
+		cin >> x1 >> y1 >> x2 >> y2;
+		x1 += 1;
+		y1 += 1;
+		fen.update(x1, y1, 1);
+		fen.update(x1, y2 + 1, -1);
+		fen.update(x2 + 1, y1, -1);
+		fen.update(x2 + 1, y2 + 1, 1);
+	}
+	int res = 0;
+	for (int i = 1; i <= N; i++) {
+		for (int j = 1; j <= N; j++) {
+			res = max(res, fen.query(i, j));
+		}
+	}
+	cout << res << "\n";
+	return 0;
+}

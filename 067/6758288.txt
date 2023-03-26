@@ -1,0 +1,105 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000001
+#define NIL -2000000002
+#define INF 1e9
+#define MAXN 20
+typedef long long int ll;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+#define REP(i,n) for(int i=0; i<(int)n; i++)
+
+struct vertex {
+    int con;
+    vector<pair<int,int>> edge; // cost, to
+
+};
+int DP[1<<MAXN][MAXN] ; // DP[Sの部分集合][最後に訪問する頂点]
+int G[MAXN][MAXN];
+vertex VS[MAXN];
+
+ll V, E;
+ll ans;
+int S;
+
+void init() {
+    REP (i,1<<MAXN) REP (j,MAXN) {DP[i][j] = INF; }
+    REP (i,MAXN) REP (j,MAXN) {G[i][j]=INF;}
+    DP[0][0] = 0 ;
+}
+
+
+int calc_cost(int u, int v){
+    if (u==v) {return 0;}
+    int res = INF;
+    for (int i=0; i<VS[u].edge.size() ; i++) {
+        if ( VS[u].edge[i].second == v ) {res= VS[u].edge[i].first;  } 
+    }
+    // printf( "calc_cost : %d -> %d : %d  \n", u, v, res );
+    return res;
+}   
+
+int rec(int S, int v) {  
+    //printf("Do rec %d , %d  \n", S, v );
+    // 集合Sの要素をすべて使って0から最後にvに至る経路のうち最小コスト
+    // ただし最初の 0 を含まない。
+    if (S == 0) {  // Sが空集合のときはINF
+        if (v == 0) { return 0; }
+        else { return INF; }
+    }
+
+    if (DP[S][v]<INF) return DP[S][v]; //計算済みの場合
+
+    int res = INF ;
+    REP(u, V) { 
+        //if ((S & (1<<u)) ==0 && (1<<v) ==S ){
+        //救済したい場合を先に書く。
+        //救済したいのは u=0 S=[0010]=2 v=2で DP[0010][1] = DP[0000][0]+C(0,1)
+        // DP[0100][2]=DP[0000][0]+C(0,2)
+        //としたいような場合
+        //
+        //} else if ((S & (1 << u)) == 0 ) {  // Sに{u}が含まれていないときは計算しない
+            //printf ("S(%d)に{u}(%d)が含まれていないときは計算しない \n", S, u );
+        //    continue; 
+        // }
+        
+        if (u==v) {continue;}
+
+        //printf("resと rec(%d,%d)+calc(%d,%d)のminを取得 \n", S ^ (1 << v), u ,u , v ) ;
+        if (G[u][v] < INF) {  
+            res = min(res, rec(S ^ (1 << v), u) + G[u][v] );  //calc_cost(u,v) ); 
+            // ^ = XOR で{v}が含まれていない集合を表している。
+        }
+    }
+    DP[S][v] = res ; 
+    //printf ("DP[%d][%d] is %d\n" , S, v, DP[S][v]) ;
+    return res;
+}
+
+int main(){
+    cin >> V >> E ;
+    //頂点の番号は 0からV-1; 
+    ll tmp ,tmp2 , tmp3; 
+    init();
+    for (int i=1 ; i<= E ; i++){
+        cin >> tmp >> tmp2 >> tmp3 ;
+        VS[tmp].edge.push_back(make_pair(tmp3, tmp2));
+        G[tmp][tmp2]=tmp3;
+    }
+    /*for(int u=0; u<V; u++) {
+        for (int i=0; i<VS[u].edge.size() ; i++) {
+             printf ("%d ", VS[u].edge[i].second); 
+        }
+        cout << endl;
+    }*/
+    
+    ans = rec((1<<V)-1,0) ;
+    if (ans == INF) {ans = -1;}
+    printf("%lld\n",ans ) ;
+    /*REP (i, V) {
+        REP (j, V) { cout << DP[i][j]<< " "; }
+        cout << endl; }*/
+    return 0;
+}
+
+

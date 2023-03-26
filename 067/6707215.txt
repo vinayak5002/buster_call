@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+void solve(int N) {
+    V<V<int>> res(N, V<int>(N, -1));
+    int M;
+    cin >> M;
+    rep(i, M) {
+        int x, y;
+        cin >> x >> y;
+        x--, y--;
+        res[x][y] = 1;
+        res[y][x] = 0;
+    }
+    int ans = 0;
+    auto rec = [&](auto f, int x, int y) -> void {
+        auto check = [&](int i) -> bool {
+            int wc = 0, dc = N - 1;
+            rep(j, N) {
+                if (i == j) continue;
+                if (res[i][j] == 1) {
+                    wc++, dc--;
+                } else if (res[i][j] == 0) {
+                    dc--;
+                }
+            }
+            return wc <= N / 2 and N - 1 - dc - wc <= N / 2;
+        };
+        if (x == N) {
+            ans++;
+            return;
+        }
+        if (y == N) {
+            f(f, x + 1, 0);
+            return;
+        }
+        if (x == y) {
+            f(f, x, y + 1);
+            return;
+        }
+        if (res[x][y] != -1) {
+            f(f, x, y + 1);
+            return;
+        }
+
+        // decide some play's result
+        res[x][y] = 1;
+        res[y][x] = 0;
+        if (check(x) and check(y)) f(f, x, y + 1);
+        res[x][y] = 0;
+        res[y][x] = 1;
+        if (check(x) and check(y)) f(f, x, y + 1);
+        res[x][y] = -1;
+        res[y][x] = -1;
+        return;
+    };
+    rec(rec, 0, 0);
+    cout << ans << '\n';
+    return;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N;
+    while (cin >> N, N != 0) solve(N);
+    return 0;
+}
+

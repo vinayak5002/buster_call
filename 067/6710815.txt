@@ -1,0 +1,49 @@
+def cross3(a, b, c):
+    return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
+    
+def iscross(a1, a2, b1, b2):
+    flg1 = cross3(a1, a2, b1) * cross3(a1, a2, b2) < 0
+    flg2 = cross3(b1, b2, a1) * cross3(b1, b2, a2) < 0
+    return flg1 and flg2
+
+def dot_dist(a, b):
+    dx = a[0] - b[0]
+    dy = a[1] - b[1]
+    return (dx ** 2 + dy ** 2) ** 0.5
+
+def dot_line_dist(p, a, b):
+    d0 = (b[0] - a[0], b[1] - a[1])
+    d1 = (p[0] - a[0], p[1] - a[1])
+    dot = d0[0] * d1[0] + d0[1] * d1[1]
+    dd = d0[0] ** 2 + d0[1] ** 2
+    if 0 <= dot <= dd:
+        cross = d0[0] * d1[1] - d0[1] * d1[0]
+        return abs(cross) / (dd ** 0.5)
+    else:
+        return min(dot_dist(p, a), dot_dist(p, b))
+
+def line_dist(a1, a2, b1, b2):
+    if iscross(a1, a2, b1, b2):
+        return 0
+    ret = dot_line_dist(a1, b1, b2)
+    ret = min(ret, dot_line_dist(a2, b1, b2))
+    ret = min(ret, dot_line_dist(b1, a1, a2))
+    ret = min(ret, dot_line_dist(b2, a1, a2))
+    return ret
+
+while 1:
+    n = int(input())
+    if n == 0:
+        break
+    ans = 1
+    edges = []
+    for i in range(n):
+        x1, y1, x2, y2 = map(int, input().split())
+        p1 = (x1, y1)
+        p2 = (x2, y2)
+        ans += 1
+        for p3, p4 in edges:
+            if iscross(p1, p2, p3, p4):
+                ans += 1
+        edges.append((p1, p2))
+    print(ans)

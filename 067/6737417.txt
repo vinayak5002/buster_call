@@ -1,0 +1,86 @@
+from collections import deque
+
+
+inf = 10 ** 9
+dd = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+
+def valid(r, c, R, C):
+    return 0 <= r < R and 0 <= c < C
+
+def get_dist(R, C, D):
+    S, G = 0, R * C - 1
+    res = [inf] * (R * C)
+    dq = deque([G])
+    res[G] = 0
+    while dq:
+        now = dq.popleft()
+        nowr, nowc = now // C, now % C
+        for dr, dc in dd:
+            nxtr, nxtc = nowr + dr, nowc + dc
+            nxt = nxtr * C + nxtc
+            if valid(nxtr, nxtc, R, C):
+                if res[nxt] < inf or D[now][nxt] == 0:
+                    continue
+                res[nxt] = res[now] + 1
+                dq.append(nxt)
+    return res
+
+def slv(R, C, D, door):
+    S, G = 0, R * C - 1
+    dists = []
+    door_num = dict()
+    num = 0
+    for r1, r2 in door:
+        door_num[(r1, r2)] = num
+        door_num[(r2, r1)] = num
+        num += 1
+        D[r1][r2], D[r2][r1] = 0, 0
+        dist = get_dist(R, C, D)
+        D[r1][r2], D[r2][r1] = 1, 1
+        dists.append(dist)
+    ans = get_dist(R, C, D)
+    x = R * C
+    u = 0
+    for _ in range(x):
+        # print(ans)
+        u = 0
+        for now in range(R * C - 1):
+            nowr, nowc = now // C, now % C
+            res = [inf] * 4
+            for i in range(4):
+                dr, dc = dd[i]
+                nxtr, nxtc = nowr + dr, nowc + dc
+                nxt = nxtr * C + nxtc
+                if valid(nxtr, nxtc, R, C):
+                    if D[now][nxt] == 1:
+                        res[i] = max(ans[nxt] + 1, dists[door_num[(now, nxt)]][now])
+            if min(res) != ans[now]:
+                u = 1
+                ans[now] = min(res)
+    if u == 1 or ans[S] == inf:
+        print(-1)
+    else:
+        print(ans[0])
+
+while True:
+    R, C = map(int, input().split())
+    if R == C == 0:
+        exit()
+    D = [[0] * (R * C) for _ in range(R * C)]
+    door = []
+    for i in range(2 * R - 1):
+        d = list(map(int, input().split()))
+        if i % 2 == 0:
+            for j in range(C - 1):
+                if d[j] == 0:
+                    D[C * (i // 2) + j][C * (i // 2) + j + 1] = 1
+                    D[C * (i // 2) + j + 1][C * (i // 2) + j] = 1
+                    door.append((C * (i // 2) + j, C * (i // 2) + j + 1))
+        else:
+            for j in range(C):
+                if d[j] == 0:
+                    D[C * (i // 2) + j][C * (i // 2 + 1) + j] = 1
+                    D[C * (i // 2 + 1) + j][C * (i // 2) + j] = 1
+                    door.append((C * (i // 2) + j, C * (i // 2 + 1) + j))
+    slv(R, C, D, door)
+

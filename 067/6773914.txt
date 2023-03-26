@@ -1,0 +1,27 @@
+class Dice:
+    def __init__(self, top, front, right, left, back, bottom):
+        self.top = top
+        self.front = front
+        self.right = right
+        self.left = left
+        self.back = back
+        self.bottom = bottom
+    
+    def roll(self, c):
+        if(c == 'N'):
+            self.top, self.front, self.bottom, self.back = self.front, self.bottom, self.back, self.top
+        elif(c == 'S'):
+            self.top, self.front, self.bottom, self.back = self.back, self.top, self.front, self.bottom
+        elif(c == 'W'):
+            self.top, self.left, self.bottom, self.right = self.right, self.top, self.left, self.bottom
+        elif(c == 'E'):
+            self.top, self.left, self.bottom, self.right = self.left, self.bottom, self.right, self.top
+
+
+if(__name__ == '__main__'):
+    top, front, right, left, Back, bottom = map(int,input().split())
+    dice = Dice(top, front, right, left, Back, bottom)
+    message = input()
+    for s in message:
+        dice.roll(s)
+    print(dice.top)

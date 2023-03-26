@@ -1,0 +1,46 @@
+#include <stdio.h>
+#include <ctype.h>
+
+int main(){
+	char buf[100000];
+	int r, c;
+	int a[101][101];
+	for (int i = 0; i < 101; i++){
+		for (int j = 0; j < 101; j++){
+			a[i][j] = 0;
+		}
+	}
+
+	// 標準入力
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d %d", &r, &c);
+	char *p;
+	for (int i = 0; i < r; i++){
+		fgets(buf, sizeof(buf) - 1, stdin);
+		p = buf;
+		for (int j = 0; j < c+1; j++){
+			if (j < c){
+				sscanf(p, "%d", &a[i][j]);
+				while (*p == '-') p++;
+				while (isdigit(*p)) p++;
+				while (isspace(*p)) p++;
+				a[i][c] += a[i][j];
+			}
+			a[r][j] += a[i][j];
+		}
+	}
+	for (int i = 0; i < r; i++){
+	    printf("%d", a[i][0]);
+		for (int j = 1; j < c + 1; j++){
+			printf(" %d", a[i][j]);
+		}
+		puts("");
+	}
+	printf("%d", a[r][0]);
+	for (int j = 1; j < c + 1; j++){
+		printf(" %d", a[r][j]);
+	}
+	puts("");
+	
+	return 0;
+}

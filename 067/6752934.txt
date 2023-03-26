@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <limits.h>
+#include <string.h>
+#define WHITE 0 //未訪問
+#define GRAY 1  //訪問している
+#define BLACK 2 //削除されている
+#define MAX 100
+#define INFTY INT_MAX
+
+int n, M[MAX][MAX];
+
+int prim()
+{
+  int i, u, minv, v, sum;
+  int d[MAX]; // d[v]にTに属する頂点とV-Tに属する頂点を繋ぐ辺の中で、重みが最小の辺の重み
+  int p[MAX]; // p[v]にMSTにおける頂点vの親を記録
+  int color[MAX];
+
+  for (i = 0; i < n; i++)
+  { //初期化
+    d[i] = INFTY;
+    p[i] = -1;
+    color[i] = WHITE;
+  }
+
+  d[0] = 0;
+
+  while (1)
+  {
+    minv = INFTY;
+    u = -1;
+    for (i = 0; i < n; i++)
+    {
+      if (minv > d[i] && color[i] != BLACK)
+      {
+        u = i;
+        minv = d[i];
+      }
+    }
+    if (u == -1)
+    {
+      break;
+    }
+
+    color[u] = BLACK;
+
+    for (v = 0; v < n; v++)
+    {
+      if (color[v] != BLACK && M[u][v] != INFTY)
+      {
+        if (d[v] > M[u][v])
+        {
+          d[v] = M[u][v];
+          p[v] = u;
+          color[v] = GRAY;
+        }
+      }
+    }
+  }
+  sum = 0;
+  for (i = 0; i < n; i++)
+  {
+    if (p[i] != -1)
+    {
+      sum += M[i][p[i]];
+    }
+  }
+
+  return sum;
+}
+
+int main(void)
+{
+  int i, j, e;
+
+  scanf("%d", &n);
+
+  for (i = 0; i < n; i++)
+  {
+    for (j = 0; j < n; j++)
+    {
+      scanf("%d", &e);
+      if (e == -1)
+      {
+        M[i][j] = INFTY; //辺がなければINFTYにする
+      }
+      else
+      {
+        M[i][j] = e;
+      }
+    }
+  }
+
+  printf("%d\n", prim());
+
+  return 0;
+}

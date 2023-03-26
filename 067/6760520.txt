@@ -1,0 +1,326 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < n; i++)
+#define rep2(i, x, n) for (int i = x; i <= n; i++)
+#define rep3(i, x, n) for (int i = x; i >= n; i--)
+#define each(e, v) for (auto &e : v)
+#define pb push_back
+#define eb emplace_back
+#define all(x) x.begin(), x.end()
+#define rall(x) x.rbegin(), x.rend()
+#define sz(x) (int)x.size()
+using ll = long long;
+using pii = pair<int, int>;
+using pil = pair<int, ll>;
+using pli = pair<ll, int>;
+using pll = pair<ll, ll>;
+
+template <typename T>
+bool chmax(T &x, const T &y) {
+    return (x < y) ? (x = y, true) : false;
+}
+
+template <typename T>
+bool chmin(T &x, const T &y) {
+    return (x > y) ? (x = y, true) : false;
+}
+
+template <typename T>
+int flg(T x, int i) {
+    return (x >> i) & 1;
+}
+
+template <typename T>
+void print(const vector<T> &v, T x = 0) {
+    int n = v.size();
+    for (int i = 0; i < n; i++) cout << v[i] + x << (i == n - 1 ? '\n' : ' ');
+    if (v.empty()) cout << '\n';
+}
+
+template <typename T>
+void printn(const vector<T> &v, T x = 0) {
+    int n = v.size();
+    for (int i = 0; i < n; i++) cout << v[i] + x << '\n';
+}
+
+template <typename T>
+int lb(const vector<T> &v, T x) {
+    return lower_bound(begin(v), end(v), x) - begin(v);
+}
+
+template <typename T>
+int ub(const vector<T> &v, T x) {
+    return upper_bound(begin(v), end(v), x) - begin(v);
+}
+
+template <typename T>
+void rearrange(vector<T> &v) {
+    sort(begin(v), end(v));
+    v.erase(unique(begin(v), end(v)), end(v));
+}
+
+template <typename T>
+vector<int> id_sort(const vector<T> &v, bool greater = false) {
+    int n = v.size();
+    vector<int> ret(n);
+    iota(begin(ret), end(ret), 0);
+    sort(begin(ret), end(ret), [&](int i, int j) { return greater ? v[i] > v[j] : v[i] < v[j]; });
+    return ret;
+}
+
+template <typename S, typename T>
+pair<S, T> operator+(const pair<S, T> &p, const pair<S, T> &q) {
+    return make_pair(p.first + q.first, p.second + q.second);
+}
+
+template <typename S, typename T>
+pair<S, T> operator-(const pair<S, T> &p, const pair<S, T> &q) {
+    return make_pair(p.first - q.first, p.second - q.second);
+}
+
+template <typename S, typename T>
+istream &operator>>(istream &is, pair<S, T> &p) {
+    S a;
+    T b;
+    is >> a >> b;
+    p = make_pair(a, b);
+    return is;
+}
+
+template <typename S, typename T>
+ostream &operator<<(ostream &os, const pair<S, T> &p) {
+    return os << p.first << ' ' << p.second;
+}
+
+struct io_setup {
+    io_setup() {
+        ios_base::sync_with_stdio(false);
+        cin.tie(NULL);
+        cout << fixed << setprecision(15);
+    }
+} io_setup;
+
+const int inf = (1 << 30) - 1;
+const ll INF = (1LL << 60) - 1;
+const int MOD = 1000000007;
+// const int MOD = 998244353;
+
+template <int mod>
+struct Mod_Int {
+    int x;
+
+    Mod_Int() : x(0) {}
+
+    Mod_Int(long long y) : x(y >= 0 ? y % mod : (mod - (-y) % mod) % mod) {}
+
+    static int get_mod() { return mod; }
+
+    Mod_Int &operator+=(const Mod_Int &p) {
+        if ((x += p.x) >= mod) x -= mod;
+        return *this;
+    }
+
+    Mod_Int &operator-=(const Mod_Int &p) {
+        if ((x += mod - p.x) >= mod) x -= mod;
+        return *this;
+    }
+
+    Mod_Int &operator*=(const Mod_Int &p) {
+        x = (int)(1LL * x * p.x % mod);
+        return *this;
+    }
+
+    Mod_Int &operator/=(const Mod_Int &p) {
+        *this *= p.inverse();
+        return *this;
+    }
+
+    Mod_Int &operator++() { return *this += Mod_Int(1); }
+
+    Mod_Int operator++(int) {
+        Mod_Int tmp = *this;
+        ++*this;
+        return tmp;
+    }
+
+    Mod_Int &operator--() { return *this -= Mod_Int(1); }
+
+    Mod_Int operator--(int) {
+        Mod_Int tmp = *this;
+        --*this;
+        return tmp;
+    }
+
+    Mod_Int operator-() const { return Mod_Int(-x); }
+
+    Mod_Int operator+(const Mod_Int &p) const { return Mod_Int(*this) += p; }
+
+    Mod_Int operator-(const Mod_Int &p) const { return Mod_Int(*this) -= p; }
+
+    Mod_Int operator*(const Mod_Int &p) const { return Mod_Int(*this) *= p; }
+
+    Mod_Int operator/(const Mod_Int &p) const { return Mod_Int(*this) /= p; }
+
+    bool operator==(const Mod_Int &p) const { return x == p.x; }
+
+    bool operator!=(const Mod_Int &p) const { return x != p.x; }
+
+    Mod_Int inverse() const {
+        assert(*this != Mod_Int(0));
+        return pow(mod - 2);
+    }
+
+    Mod_Int pow(long long k) const {
+        Mod_Int now = *this, ret = 1;
+        for (; k > 0; k >>= 1, now *= now) {
+            if (k & 1) ret *= now;
+        }
+        return ret;
+    }
+
+    friend ostream &operator<<(ostream &os, const Mod_Int &p) { return os << p.x; }
+
+    friend istream &operator>>(istream &is, Mod_Int &p) {
+        long long a;
+        is >> a;
+        p = Mod_Int<mod>(a);
+        return is;
+    }
+};
+
+using mint = Mod_Int<MOD>;
+
+template <typename T, bool directed = false>
+struct Dijkstra {
+    struct edge {
+        int to;
+        T cost;
+        int id;
+        edge(int to, T cost, int id) : to(to), cost(cost), id(id) {}
+    };
+
+    vector<vector<edge>> es;
+    vector<T> d;
+    vector<int> pre_v, pre_e;
+    const T zero_T, INF_T;
+    const int n;
+    int m;
+
+    Dijkstra(int n, T zero_T = 0, T INF_T = numeric_limits<T>::max() / 2) : es(n), d(n), pre_v(n), pre_e(n), zero_T(zero_T), INF_T(INF_T), n(n), m(0) {}
+
+    void add_edge(int from, int to, T cost) {
+        es[from].emplace_back(to, cost, m);
+        if (!directed) es[to].emplace_back(from, cost, m);
+        m++;
+    }
+
+    T shortest_path(int s, int t = 0) {
+        fill(begin(d), end(d), INF_T);
+        using P = pair<T, int>;
+        priority_queue<P, vector<P>, greater<P>> que;
+        que.emplace(d[s] = zero_T, s);
+        while (!que.empty()) {
+            auto [p, i] = que.top();
+            que.pop();
+            if (p > d[i]) continue;
+            for (auto &e : es[i]) {
+                if (d[i] + e.cost < d[e.to]) {
+                    pre_v[e.to] = i, pre_e[e.to] = e.id;
+                    que.emplace(d[e.to] = d[i] + e.cost, e.to);
+                }
+            }
+        }
+        return d[t];
+    }
+
+    vector<int> restore_path(int s, int t, bool use_id = false) {
+        if (d[t] == INF_T) return {};
+        vector<int> ret;
+        for (int now = t; now != s; now = pre_v[now]) ret.push_back(use_id ? pre_e[now] : now);
+        if (!use_id) ret.push_back(s);
+        reverse(begin(ret), end(ret));
+        return ret;
+    }
+};
+
+int main() {
+    int K = 50;
+
+    while (true) {
+        int N, A, B;
+        cin >> N >> A >> B;
+        if (N == 0) break;
+
+        vector<vector<pil>> es1(N), es2(N);
+
+        Dijkstra<pil, true> G(2 * N, pil(0, 0), pil(inf, 0));
+
+        rep(i, A) {
+            int u, v;
+            ll c;
+            cin >> u >> v >> c;
+            u--, v--;
+            es1[u].eb(v, c), es1[v].eb(u, c);
+            G.add_edge(u, v, pil(0, c));
+            G.add_edge(v, u, pil(0, c));
+            G.add_edge(N + u, v, pil(0, c));
+            G.add_edge(N + v, u, pil(0, c));
+        }
+        rep(i, B) {
+            int u, v;
+            ll c;
+            cin >> u >> v >> c;
+            u--, v--;
+            es2[u].eb(v, c), es2[v].eb(u, c);
+            G.add_edge(u, N + v, pil(1, c));
+            G.add_edge(v, N + u, pil(1, c));
+            G.add_edge(N + u, N + v, pil(0, c));
+            G.add_edge(N + v, N + u, pil(0, c));
+        }
+
+        G.shortest_path(0);
+        pil res = min(G.d[N - 1], G.d[2 * N - 1]);
+        if (res.first == inf) {
+            cout << "-1\n";
+            continue;
+        }
+        if (res.first >= K) {
+            mint ans = mint(2).pow(res.first) - 1 + res.second;
+            cout << ans << '\n';
+            continue;
+        }
+
+        vector<vector<vector<ll>>> d(N, vector<vector<ll>>(K, vector<ll>(2, INF)));
+        using T = tuple<int, int, int>;
+        using P = pair<ll, T>;
+        priority_queue<P, vector<P>, greater<P>> que;
+        que.emplace(d[0][0][0] = 0, make_tuple(0, 0, 0));
+
+        while (!empty(que)) {
+            auto [t, p] = que.top();
+            que.pop();
+            auto [i, j, k] = p;
+            if (t > d[i][j][k]) continue;
+            each(e, es1[i]) {
+                int ni = e.first, nj = j, nk = 0;
+                ll tmp = t + e.second;
+                if (chmin(d[ni][nj][nk], tmp)) que.emplace(d[ni][nj][nk], make_tuple(ni, nj, nk));
+            }
+            each(e, es2[i]) {
+                int ni = e.first, nj = j, nk = 1;
+                ll tmp = t + e.second;
+                if (k == 0) {
+                    nj = j + 1;
+                    tmp += 1LL << j;
+                }
+                if (nj >= K) continue;
+                if (chmin(d[ni][nj][nk], tmp)) que.emplace(d[ni][nj][nk], make_tuple(ni, nj, nk));
+            }
+        }
+
+        ll ans = INF;
+
+        rep(j, K) rep(k, 2) chmin(ans, d[N - 1][j][k]);
+        cout << ans % MOD << '\n';
+    }
+}

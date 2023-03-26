@@ -1,0 +1,83 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace _0621 {
+    class Program {
+        static void Main(string[] args) {
+            int[] input = Console.ReadLine()
+                                 .Split()
+                                 .Select(int.Parse).ToArray();
+
+            int n = input[0];
+            int m = input[1];
+
+            int whiteCount = 0;
+            int blueCount = 0;
+            int redCount = 0;
+            int count = 0;
+            int flag = 0;
+            for (int i = 0; i < n; i++) {
+                char[] array = Console.ReadLine().ToCharArray();
+                for (int j = 0; j < array.Length; j++) {
+                    //1行目は白
+                    if (i == 0) {
+                        if (array[j] != 'W') {
+                            count++;
+                        }
+                    }
+                    else if (i != 0) {
+                        if (array[j] == 'W') {
+                            whiteCount++;
+                        }
+                        if (array[j] == 'B') {
+                            blueCount++;
+                        }
+                        if (array[j] == 'R') {
+                            redCount++;
+                        }
+                    }
+                }
+                //2列目は同じ数の時、青
+                if (i == 1 && flag == 0) {
+                    if (whiteCount == blueCount || blueCount == redCount || whiteCount == redCount) {
+                        if (i == n - 3) {
+                            count += whiteCount + redCount;
+                            flag = 1;
+                        } else if (whiteCount >= blueCount) {
+                            count += blueCount + redCount;
+                        }
+                        //白が多ければ白
+                    } else if (whiteCount > blueCount) {
+                        count += blueCount + redCount;
+                        //青が多ければ青
+                    } else if (whiteCount < blueCount) {
+                        count += whiteCount + redCount;
+                        flag = 1;
+                    }
+                    //3列目
+                } else if (i > 1 && flag == 1) {
+                    count += whiteCount + blueCount;
+                    flag = 1;
+                } else if (i > 1 && flag == 0) {
+                    if (i != n -2) {
+                       count += blueCount + redCount;
+                    } else {
+                        count += whiteCount + redCount;
+                        flag = 1;
+                    }
+                } else if (i == n - 1) {
+                    count += whiteCount + redCount;
+                } else if (i == n) {
+                    count += blueCount + redCount;
+                }
+                whiteCount = 0;
+                blueCount = 0;
+                redCount = 0;
+            }
+            Console.WriteLine(count);
+        }
+    }
+}

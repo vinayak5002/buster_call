@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+using namespace std;
+using pii = pair<int, int>;
+
+inline int rev(int d) {
+    return (d + 2) % 4;
+}
+
+vector<vector<int>> input(int n) {
+    vector<vector<int>> g(n, vector<int>(4, -1));
+    for (int i = 1 ; i < n ; i++) {
+        int p, d; cin >> p >> d;
+        g[p][d] = i;
+        g[i][rev(d)] = p;
+    }
+
+    return g;
+}
+
+// 0 hidari
+// 1 sita
+// 2 migi
+// 3 ue
+pii solve(int n) {
+    auto g = input(n);
+    
+    int my = 0, mx = 0;
+    for (int i = 0 ; i < n ; i++) {
+        int ty = 1;
+        int now = i;
+        while(g[now][3] != -1) {
+            ty++;
+            now = g[now][3];
+        }
+        now = i;
+        while(g[now][1] != -1) {
+            ty++;
+            now = g[now][1];
+        }
+
+        if (ty > my) my = ty;
+
+        int tx = 1;
+        now = i;
+        while(g[now][0] != -1) {
+            tx++;
+            now = g[now][0];
+        }
+        now = i;
+        while(g[now][2] != -1) {
+            tx++;
+            now = g[now][2];
+        }
+        
+        if (tx > mx) mx = tx;
+    }
+
+    return {mx, my};
+}
+
+int main() {
+    while(1) {
+        int n; cin >> n;
+        if (!n) break;
+        auto [y, x] = solve(n);
+        cout << x << ' ' << y << endl;
+    }
+}
+
+

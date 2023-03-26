@@ -1,0 +1,103 @@
+h, w = map(int, input().split())
+A = ["#" * (w + 2)] + ["#" + input() + "#" for _ in range(h)] + ["#" * (w + 2)]
+S = input()
+se = set()
+dx = [0, 1, 0, -1]
+dy = [-1, 0, 1, 0]
+for i in range(h):
+    for j in range(w):
+        if A[i][j] == "s":
+            y, x = i, j
+            break
+sp = 0
+t = 0
+ans = 0
+while_ = []
+tt = 0
+while sp < len(S):
+    if S[sp] == "^":        
+        ans += 1
+        nx = x + dx[t]
+        ny = y + dy[t]
+        if A[ny][nx] != "#":
+            x, y = nx, ny
+    elif S[sp] == "v":
+        ans += 1
+        nx = x - dx[t]
+        ny = y - dy[t]
+        if A[ny][nx] != "#":
+            x, y = nx, ny
+    elif S[sp] == "<":
+        ans += 1
+        t -= 1
+        if t == -1:
+            t = 3
+    elif S[sp] == ">":
+        ans += 1
+        t += 1
+        if t == 4:
+            t = 0
+    elif S[sp] == "[":
+        sp += 1
+        flg = False
+        if S[sp] == "~":
+            flg = True
+            sp += 1
+        if S[sp] == "T":
+            flg ^= True
+        elif S[sp] == "C":
+            nx = x + dx[t]
+            ny = y + dy[t]
+            if A[ny][nx] == "#":
+                flg ^= True
+        elif "NESW"[t] == S[sp]:
+            flg ^= True
+        if not flg:
+            tot = 1
+            while tot > 0:
+                sp += 1
+                if S[sp] == "[":
+                    tot += 1
+                elif S[sp] == "]":
+                    tot -= 1
+    elif S[sp] == "]":
+        pass
+    elif S[sp] == "{":
+        ss = sp
+        sp += 1
+        flg = False
+        if S[sp] == "~":
+            flg = True
+            sp += 1
+        if S[sp] == "T":
+            flg ^= True
+        elif S[sp] == "C":
+            nx = x + dx[t]
+            ny = y + dy[t]
+            if A[ny][nx] == "#":
+                flg ^= True
+        elif "NESW"[t] == S[sp]:
+            flg ^= True
+        if flg:
+            while_.append(ss)
+
+        else:
+            tot = 1
+            while tot > 0:
+                sp += 1
+                if S[sp] == "{":
+                    tot += 1
+                elif S[sp] == "}":
+                    tot -= 1
+    elif S[sp] == "}":
+        sp = while_.pop() - 1
+    
+    if A[y][x] == "g":
+        print(ans)
+        exit()
+    sp += 1
+    if (x, y, t, sp) in se:
+        break
+    se.add((x, y, t, sp))
+    
+print(-1)

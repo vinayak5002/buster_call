@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+bool is_digit(char c) {
+    return '0' <= c and c <= '9';
+}
+
+long long solve(string s) {
+    const int n = s.size();
+
+    auto dfs = [&](auto dfs, int r) -> long long {
+        int cnt = 0;
+        while (s[r - 1] == '>') ++cnt, --r;
+        assert(is_digit(s[r - 1]));
+        int l = r - 1;
+        while (l > 0 and is_digit(s[l - 1])) --l;
+        long long v = stoi(s.substr(l, r - l));
+        if (l - 1 >= 0 and s[l - 1] == '>') {
+            v = dfs(dfs, l - 2) >> min(v, 32LL);
+        }
+        while (cnt --> 0) v = (v * v) % 1000000007;
+        return v;
+    };
+    return dfs(dfs, n);
+}
+
+int main() {
+    while (true) {
+        string s;
+        getline(cin, s);
+        if (s == "#") break;
+        string t;
+        for (char c : s) if (c != ' ' and c != 'S') t += c;
+        cout << solve(t) << endl;
+    }
+}

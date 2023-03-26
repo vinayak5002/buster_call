@@ -1,0 +1,40 @@
+n = int(input())
+nodes = []
+for i in range(n):
+    node = list(map(int, input().split(' ')))
+    if len(node) >= 3:
+        node = node[:3] + [*node[2:]]
+    nodes.append(node)
+    
+def main(nodes, n):
+    graph = [[-1, 0, []] for i in range(n)]
+    for i in nodes:
+        # write children
+        id_ = nodes[0]
+        graph[id_][2] = nodes[2]
+        for j in graph[id_][2]:
+            # set parent
+            graph[j][0] = id_
+            
+    # find out root node
+    root = next((i for i in graph if i[0] == -1), False)
+    if root == False:
+        raise Exception('Invalid data structure.')
+    
+    def setDepth(node, depth=0):
+        # recursively set depth 
+        node[1] = depth
+        for i in node[2]:
+            setDepth(depth+1)
+    setDepth(root)
+    
+    #output
+    for i in range(n):
+        node = graph[i]
+        status = 'internal node'
+        if node[0] == -1:
+            status = 'root'
+        elif node[2] == []:
+            status = 'leaf'
+        print(f'node {i}: parent = {node[0]}, depth = {node[1]}, {status}, {node[2]}')
+main(nodes, n)

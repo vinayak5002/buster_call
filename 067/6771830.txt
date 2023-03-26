@@ -1,0 +1,112 @@
+#include<stdio.h>
+
+#define N_MAX 100
+#define IFTY 10000
+#define NEW 2
+#define YET 1
+#define ALR 0
+
+int A[N_MAX][N_MAX];
+int state[N_MAX],d[N_MAX];
+int Q[N_MAX];
+int d[N_MAX];
+int n;
+
+int head,tail;
+
+int isEmpty(){
+    if(head==tail){
+        return 1;
+    }
+    else return 0;
+}
+
+void enq(int v){
+    if(tail >= N_MAX){
+        ;
+    }
+    else{
+        Q[tail]=v;
+        tail=(tail+1)%(N_MAX+1);
+        
+    }
+}
+
+int deq(){
+    int x = Q[head];
+    head=(head+1)%(N_MAX+1);
+    return x;
+}
+
+
+
+void bfs(int s){
+    int u,v;
+    head=0;
+    tail=0;
+    
+    for(u=0;u<n;u++){
+        state[u]=NEW;
+        d[u]=IFTY;
+    }
+
+    state[s]=YET;
+    d[s]=0;
+
+    enq(s);
+
+    while(isEmpty()==0){
+        u=deq();
+
+        for(v=0;v<n;v++){
+            if(A[u][v] == 1 && state[v]==NEW){
+                state[v]=YET;            
+                d[v]=d[u]+1;
+                enq(v);
+            }
+        }
+        state[u]=ALR;
+    }
+    for(u=0;u<n;u++){
+        printf("%d ",u+1);
+        if(d[u]==IFTY){
+            printf("-1\n");
+        }
+        else{
+            printf("%d\n",d[u]);
+        }
+    }
+}
+
+int main(void){
+    int i,j,u,k,v;
+
+    scanf("%d",&n);           //頂点数
+
+    for(i=0; i<n; i++){
+        for(j=0; j<n; j++){
+            A[i][j] = 0;
+        }
+    }
+
+
+    for(i=0; i<n; i++){
+
+        scanf("%d",&u);       //頂点番号
+        scanf("%d",&k);       //出次数
+        u = u-1;
+        
+        for(j=0; j<k; j++){
+            scanf("%d",&v);
+            v = v-1;
+            A[u][v] = 1;
+        }
+
+    }
+
+    bfs(0);
+
+
+
+    return 0;
+}

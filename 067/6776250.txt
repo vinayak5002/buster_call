@@ -1,0 +1,80 @@
+from collections import defaultdict
+
+def read_wgraph(inp=None, gitGraph=True):
+    if inp is not None:
+        V, E = inp.split()[:2]
+        G = defaultdict(list)
+        W = {}
+        for i in inp.split('\n')[1:]:
+            if i:
+                s, t, w = map(int, i.split())
+                if gitGraph:
+                    G[s].append((t, w))
+                else:
+                    G[s].append(t)
+                    W[(s, t)] = w
+                if t not in G:
+                    G[t] = []
+
+    else:
+        V, E = [int(v) for v in input().split()]
+        G = defaultdict(list)
+        W = {}
+        for i in range(V):
+            G[i]
+        for e in range(E):
+            s, t, w = [int(v) for v in input().split()]
+            G[s].append(t)
+            if t not in G:
+                G[t] = []
+            W[(s, t)] = w
+    return G, W
+
+
+def BFS(G, W, s):
+    q = [s]
+    visit = defaultdict(int)
+    path = {}
+    while q:
+        v = q.pop(0)
+        visit[v] = 1
+        for ch in G[v]:
+            if visit[ch] == 0 and W[(v, ch)]:
+                q.append(ch)
+                path[ch] = v
+        visit[v] == 2
+    return visit, path
+
+
+def get_augmented_path(path, s, t, W):
+    pathw = []
+    prev = t
+    curv = path[prev]
+    mincap = 1e8
+    while curv != s:
+        pathw.append([curv, prev, W[(curv, prev)]])
+        prev = curv
+        curv = path[curv]
+        if W[(curv, prev)] < mincap:
+            mincap = W[(curv, prev)]
+    pathw.append([curv, prev, W[(curv, prev)]])
+    return pathw, mincap
+
+
+def FFlic(G, W, s, t):
+    allcap = 0
+    while True:
+        _, path = BFS(G, W, s)
+        # print(path)
+        if t not in path:
+            print(allcap)
+            return
+        p, mincap = get_augmented_path(path, s, t, W)
+        for [v, c, _] in p:
+            W[(v, c)] -= mincap
+        allcap += mincap
+
+
+G, W = read_wgraph(inp=None, gitGraph=False)
+FFlic(G, W, 0, len(G) - 1)
+

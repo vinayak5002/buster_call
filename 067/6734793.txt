@@ -1,0 +1,136 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 393939
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 50
+int n,q;
+int t = 0;
+
+long long int res;
+const long long int infty = (1LL<<31) - 1;
+
+//セグメントツリーで実装し直します。
+/* RMQ：[0,n-1] について、区間ごとの最小値を管理する構造体
+    update(i,x): i 番目の要素を x に更新。O(log(n))
+    query(a,b): [a,b) での最小の要素を取得。O(log(n))
+*/
+
+template <typename T>
+struct RMQ {
+//    const T INF = numeric_limits<T>::max();
+    int n;         // 葉の数
+    vector<T> dat; // 完全二分木の配列 U
+    vector<T> vs; // 完全二分木の配列 S
+    vector<T> vt; // 完全二分木の配列 T 
+    // vector<T> vu; // 完全二分木の配列
+
+    RMQ(int n_) : n(), dat(n_ * 4, 0), vs(n_ * 4, 0), vt(n_ * 4, 0)
+     { // 葉の数は 2^x の形
+        int x = 1;
+        while (n_ > x) {
+            x *= 2;
+        }
+        n = x;
+    }
+    void update(int i, T x) {
+        int ii = i;  // もともとのiを保管
+        i += n-1 ;  // i番目は、配列上では n-1+i 番目に格納されている
+        dat[i] = x;
+        vs[i] = ii * ii * x; 
+        vt[i] = ii * x ;
+        // printf("upd %d : %d", i, dat[i]);
+        while (i > 0) {
+            i = (i - 1) / 2;  // parent
+            dat[i] = dat[i * 2 + 1] + dat[i * 2 + 2] ;
+            vs[i] = vs[i * 2 + 1] + vs[i * 2 + 2] ;
+            vt[i] = vt[i * 2 + 1] + vt[i * 2 + 2] ;
+        }
+    }
+    // the minimum element of [a,b)
+    T query(int a, int b) { return query_sub(a, b, 0, 0, n); }
+    T query_sub(int a, int b, int k, int l, int r) {
+        if (r <= a || b <= l) {
+            //printf("return A");
+            return 0;
+        } else if (a <= l && r <= b) {
+            //printf("return B %d ", dat[k]);
+            return dat[k];
+        } else {
+            //printf("return C ");
+            T vl = query_sub(a, b, k * 2 + 1, l, (l + r) / 2);
+            T vr = query_sub(a, b, k * 2 + 2, (l + r) / 2, r);
+            return vl + vr;
+        }
+    }
+
+    T query2(int a, int b) { return query_sub2(a, b, 0, 0, n); }
+    T query_sub2(int a, int b, int k, int l, int r) {
+        if (r <= a || b <= l) {
+            //printf("return A");
+            return 0;
+        } else if (a <= l && r <= b) {
+            //printf("return B %d ", dat[k]);
+            return vs[k];
+        } else {
+            //printf("return C ");
+            T vl = query_sub2(a, b, k * 2 + 1, l, (l + r) / 2);
+            T vr = query_sub2(a, b, k * 2 + 2, (l + r) / 2, r);
+            return vl + vr;
+        }
+    }
+
+    T query3(int a, int b) { return query_sub3(a, b, 0, 0, n); }
+    T query_sub3(int a, int b, int k, int l, int r) {
+        if (r <= a || b <= l) {
+            //printf("return A");
+            return 0;
+        } else if (a <= l && r <= b) {
+            //printf("return B %d ", dat[k]);
+            return vt[k];
+        } else {
+            //printf("return C ");
+            T vl = query_sub3(a, b, k * 2 + 1, l, (l + r) / 2);
+            T vr = query_sub3(a, b, k * 2 + 2, (l + r) / 2, r);
+            return vl + vr;
+        }
+    }
+
+};
+
+
+int main() {
+    cin >> n >> q;
+    int a;
+    int x, v;
+    n++ ; // 0番というダミー　データはn+1個ということ。
+    RMQ<long long int> R(n);
+  
+    for (int i=1 ; i<n ; i++) {
+        cin >> a ;
+        R.update(i,a);
+    }
+    for (int i=1 ; i<=q ; i++) {
+        int com ; 
+        cin >> com ;
+        if (com == 1) {
+            cin >> x >> v;
+            R.update(x, v); 
+        }
+        if (com == 2) {
+            cin >> x;
+            long long int U1 = R.query(1,x+1);
+            long long int S1 = R.query2(1,x+1);
+            long long int T1 = R.query3(1,x+1);
+            //printf ("%lld  %lld  %lld",S1, T1, U1);
+            res = (S1 - (2*x+3) * T1 + (x*x + 3*x +2) * U1 ) /2 ;
+            res = res % 998244353 ;
+            printf("%lld\n", res );
+        }
+    }
+
+
+    return 0;
+
+}
+

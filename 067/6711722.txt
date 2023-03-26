@@ -1,0 +1,43 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for(int i=0; i < (n); i++)
+using ll = long long;
+
+const int inf = 9999999;
+
+int main(void) {
+    int V, E; cin >> V >> E;
+
+    vector<vector<int>> graph(V, vector<int>(V, -1));
+
+    rep(i, E) {
+        int s, t, d; cin >> s >> t >> d;
+        graph[s][t] = d;
+    }
+
+    int ans = inf;
+    rep(i, V) {
+        vector<vector<int>> dp(1<<V, vector<int>(V, inf));
+        dp[0][i] = 0;
+
+        rep(S, 1<<V) {
+            rep(v, V) {
+                int sub = S | (1<<v);
+
+                if(S == sub) continue;
+
+                rep(u, V) {
+                    if(graph[u][v] != -1 && dp[S][u] != inf) {
+                        dp[sub][v] = min(dp[sub][v], dp[S][u] + graph[u][v]);
+                    }
+                }
+            }
+        }
+
+        ans = min(ans, dp[(1 << V) - 1][i]);
+    }
+
+    cout << (ans == inf ? -1 : ans) << endl;
+    return 0;
+}
+

@@ -1,0 +1,108 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <functional>
+#include <vector>
+#include <cstring>
+#include <iomanip>
+#include <numeric>
+#include <cmath>
+#include <cassert>
+#include <queue>
+#include <map>
+#include <set>
+using namespace std;
+using Int = int64_t;
+const Int INF = 1 << 30;
+const Int MOD = (Int)1e9 + 7;
+const Int MAX_N = (Int)1e5 + 5;
+#define debug(x) cout << #x << ": " << x << endl
+#define debug2(x, y) cout << #x << ": " << x << ", " << #y << ": " << y << endl;
+template <typename T1, typename T2>
+ostream &operator<<(ostream &os, const pair<T1, T2> &p)
+{
+    os << p.first << " " << p.second;
+    return os;
+}
+template <typename T>
+ostream &operator<<(ostream &os, const vector<T> &v)
+{
+    for (int i = 0; i < (int)v.size(); i++)
+        os << v[i] << (i + 1 != v.size() ? " " : "");
+    return os;
+}
+
+class UnionFind
+{
+public:
+    vector<int> parent, rank;
+    UnionFind(int size) : parent(size, -1), rank(size, 0) {}
+
+    int root(int x)
+    {
+        if (this->parent[x] == -1)
+            return x;
+        else
+            return this->parent[x] = root(this->parent[x]);
+    }
+
+    bool unite(int x, int y)
+    {
+        int parent_x = root(x);
+        int parent_y = root(y);
+        if (parent_x == parent_y) // same group
+            return false;
+
+        parent[parent_y] = parent_x;
+
+        return true;
+    }
+
+    bool is_same(int x, int y) { return root(x) == root(y); }
+};
+
+using P = pair<int, int>;
+using PP = pair<int, P>;
+using Graph = vector<vector<P>>;
+
+void solve()
+{
+    int V, E;
+    cin >> V >> E;
+
+    Graph g(V);
+
+    vector<PP> edges;
+    for (int i = 0; i < E; i++)
+    {
+        int s, t, w;
+        cin >> s >> t >> w;
+        edges.push_back(PP(w, P(s, t)));
+    }
+
+    sort(edges.begin(), edges.end());
+
+    UnionFind uf(V);
+
+    int ans = 0;
+    for (auto &e : edges)
+    {
+        int v = e.second.first;
+        int u = e.second.second;
+        if (uf.is_same(v, u))
+            continue;
+
+        uf.unite(v, u);
+        ans += e.first;
+    }
+    cout << ans << endl;
+}
+
+signed main()
+{
+    cin.tie(0);
+    ios::sync_with_stdio(false);
+    solve();
+    return 0;
+}
+

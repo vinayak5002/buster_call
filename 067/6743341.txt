@@ -1,0 +1,84 @@
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+
+#include <bits/stdc++.h>
+
+#define _overload(_1, _2, _3, _4, name, ...) name
+#define _rep1(Itr, N) _rep3(Itr, 0, N, 1)
+#define _rep2(Itr, a, b) _rep3(Itr, a, b, 1)
+#define _rep3(Itr, a, b, step) for (i64 Itr = a; Itr < b; Itr += step)
+#define repeat(...) _overload(__VA_ARGS__, _rep3, _rep2, _rep1)(__VA_ARGS__)
+#define rep(...) repeat(__VA_ARGS__)
+
+#define ALL(X) begin(X), end(X)
+
+using namespace std;
+using i64 = int64_t;
+using u64 = uint64_t;
+
+int main() {
+  cin.tie(nullptr);
+  ios::sync_with_stdio(false);
+
+  i64 s;
+  cin >> s;
+
+  // x までの fizzbuzz 文字列の長さ
+  auto f = [](i64 x) -> i64 {
+    if (x == 0) return 0;
+
+    i64 ret = 0;
+    i64 k = 1;
+    i64 r = 10;
+    i64 l = 1;
+
+    while (r <= x) {
+      ret += k * (r - l);
+      ret -= k * (r / 5 - l / 5) + k * (r / 3 - l / 3) - k * (r / 15 - l / 15);
+      r *= 10;
+      l *= 10;
+      k++;
+    }
+    ret += k * (x - l + 1);
+    ret -= k * (x / 5 - (l - 1) / 5) + k * (x / 3 - (l - 1) / 3) -
+           k * (x / 15 - (l - 1) / 15);
+    ret += 4 * (x / 3) + 4 * (x / 5);
+
+    if (x >= 10)
+      return ret + 1;
+    else
+      return ret;
+  };
+
+  i64 valid = 0;
+  i64 invalid = 1'000'000'000'000'000'000;
+  while (abs(valid - invalid) > 1) {
+    i64 mid = (valid + invalid) / 2;
+    if (f(mid) < s) {
+      valid = mid;
+    } else {
+      invalid = mid;
+    }
+  }
+
+  s -= f(valid);
+  string t;
+  i64 i = valid + 1;
+  while (t.size() < s + 20) {
+    if (i % 15 == 0) {
+      t += "FizzBuzz";
+    } else if (i % 3 == 0) {
+      t += "Fizz";
+    } else if (i % 5 == 0) {
+      t += "Buzz";
+    } else {
+      t += to_string(i);
+    }
+    i++;
+  }
+
+  rep(i, 20) cout << t[s + i - 1];
+  cout << endl;
+
+  return 0;
+}

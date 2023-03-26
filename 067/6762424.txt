@@ -1,0 +1,43 @@
+import sys
+
+sys.setrecursionlimit(100000)
+n = int(input())
+S = list(map(int, input().split()))
+counter = 0
+
+
+def mergeSort(targetList):
+    if len(targetList) <= 1:
+        return targetList
+
+    middleIndex = len(targetList) // 2
+    leftList = mergeSort(targetList[:middleIndex])
+    rightList = mergeSort(targetList[middleIndex:])
+    return merge(leftList, rightList)
+
+
+def merge(leftList, rightList):
+    global counter
+    mergedList = []
+    i, j = 0, 0
+    while (i < len(leftList)) and (j < len(rightList)):
+        counter += 1
+        if leftList[i] <= rightList[j]:
+            mergedList.append(leftList[i])
+            i += 1
+        else:
+            mergedList.append(rightList[j])
+            j += 1
+
+    if i < len(leftList):
+        counter += len(leftList) - i
+        mergedList.extend(leftList[i:])
+    if j < len(rightList):
+        counter += len(rightList) - j
+        mergedList.extend(rightList[j:])
+    return mergedList
+
+
+print(*mergeSort(S))
+print(counter)
+

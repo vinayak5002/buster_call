@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
+void chmax(int& a, int b){ if(a < b) a = b; }
+
+
+const int MOD = 10007;
+struct Modint{
+    int x = 0;
+    Modint(){}
+    Modint(int x): x(x){}
+    Modint& operator+=(const Modint& a){
+        x += a.x;
+        if(x >= MOD) x -= MOD;
+        return *this;
+    }
+    Modint operator+(const Modint& a) const {
+        return Modint(*this) += a;
+    }
+};
+int main(){
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    int N;
+    cin >> N;
+    array<Modint, 8> dp = {0, 1, 0, 0, 0, 0, 0, 0};
+    string S;
+    cin >> S;
+    for(char& c : S){
+        if(c == 'J') c = 0;
+        else if(c == 'O') c = 1;
+        else c = 2;
+    }
+    for(char c : S){
+        array<Modint, 8> dp2;
+        dp2.fill(0);
+        for(int j = 1; j < 8; j++) if(j & 1 << c) for(int i = 1; i < 8; i++) if(i & j) dp2[j] += dp[i];
+        dp = dp2;
+    }
+    cout << accumulate(dp.begin(), dp.end(), Modint{}).x << endl;
+}

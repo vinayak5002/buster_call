@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int N;
+        cin >> N;
+        if (N == 0) break;
+        vector<int> r(N), w(N);
+        rep(i,0,N) cin >> r[i] >> w[i];
+        int m = 0, s = 0, t = 0;
+        rep(i,0,N) chmax(m, r[i]), s += r[i], t += w[i];
+        if (2*m > s) {
+            int rem = m - (s-m);
+            // put as much w as possible into rem
+
+            vector<bool> dp(rem+1);
+            dp[0] = 1;
+            rep(i,0,N) {
+                if (r[i] == m) continue;
+                auto ndp = dp;
+                rep(j,0,rem+1) if (dp[j] && j+w[i] <= rem) ndp[j+w[i]] = true;
+                dp.swap(ndp);
+            }
+            revrep(j,rem+1,0) {
+                if (dp[j]) {
+                    cout << 2*m + t - j << "\n";
+                    break;
+                }
+            }
+        } else {
+            cout << s + t << "\n";
+        }
+    }
+}

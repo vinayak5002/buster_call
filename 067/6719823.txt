@@ -1,0 +1,156 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 650000
+#define INF 2000000002
+#define MINF -2000000002
+#define MAXN 50
+int n;
+int np=0;
+int ct = 0;
+/*
+ C++では再帰関数を「ポインタ」でかかないとだめ
+ */
+
+struct node {
+    node* left;
+    node* right;
+    int location;
+};
+
+struct point {
+    pair<int,int> val; // メンバーを保管
+    int id ;
+    bool operator < (const point &p) {
+        return id < p.id ;
+    }
+};
+
+bool lessX(const point &p1, const point &p2) {return p1.val.first < p2.val.first;}
+bool lessY(const point &p1, const point &p2) {return p1.val.second < p2.val.second;}
+
+vector<point> P ;
+
+vector<point> res; //findの結果を保存
+ 
+
+struct TwoDtree {  
+    vector<node> ND; 
+    
+    TwoDtree(int n) {
+        // constructor
+        for (int i=0 ; i< n ; i++) {
+                node* newnd;
+            newnd = new node;
+            newnd->left= nullptr; newnd->right=nullptr; newnd->location = MINF;
+            ND.push_back(*newnd);
+            delete(newnd);
+        }
+    }
+
+    node* make2Dtree(int left, int right, int depth) { 
+        //printf ("[make] %d : %d <%d> \n", left, right, depth) ; 
+        // 再帰関数は漸化式。一回固定値が与えられれば終わりになる。
+        // left,rightは P の中での順序
+        if (left > right) {return nullptr;}
+    
+        if (depth % 2 == 0){ //奇数回目の操作ではx座標
+            sort (&(P.at(left)) , &(P.at(right))+1 ,lessX); // treeのmemberをxで並び替える必要がある。
+        } else {   //偶数回目の操作ではy座標
+            sort (&(P.at(left)) , &(P.at(right))+1 ,lessY); // treeのmemberをyで並び替える必要がある。
+        }
+        //for (int i=0 ; i < P.size() ; i++ ) {
+        //    printf("(%d, %d)", P.at(i).val.first,P.at(i).val.second);
+        //}
+        //printf( "\n");
+        // ソートのしかたは見直し　sort(member.begin(),member.end()); 
+        // tree * はメモリ番地を返す
+        // *(a) は メモリ番地aにある値（実態）を表す。
+        // &a は 変数aのメモリの番地
+        int mid = (left+right)/2; //切り捨てになる
+        int t=np; np++;
+        // npは登録するノードがNDの何番目かを保存している。    
+    
+        // node* newnd;
+        // newnd = new node;
+        // newnd->left= nullptr; newnd->right=nullptr; newnd->location = mid;
+        // ND.push_back(*newnd);
+
+        ND[t].location = mid;
+        // printf ("t:%d  mid: %d (%d, %d) \n",t,mid,P.at(mid).val.first,P.at(mid).val.second );
+        ND[t].left = make2Dtree(left,mid-1,depth+1);
+        ND[t].right = make2Dtree(mid+1,right,depth+1);
+        return &ND[t];
+    }
+
+    void find (node *v, int sx, int tx, int sy, int ty, int depth){     
+        //printf ( "count_: %d [v_loc] [%d]   \n" , ++ct, v->location ) ; 
+        // printf("v-left == %10p, v-right == %10p\n", v->left, v->right );
+        //if (v->left != nullptr) {cout << "L:" << v->left->location << "  " ;}
+        //if (v->right != nullptr) {cout << "R:" << v->right->location << "  ";}
+        //cout << endl;
+        // printf ( "[find] [%d, %d]: %d \n" , sx, tx, depth) ; 
+        // ノードvの点がsxとtxの間に含まれるか
+        int x = P.at(v->location).val.first;
+        int y = P.at(v->location).val.second ; 
+
+        //printf ( "[x] [%d] [y] [%d]  \n" ,  x, y ) ; 
+        if (sx <= x && x <= tx && sy <= y && y <= ty) {
+            //printf("depth: %d  FOUND\n",depth );
+            res.push_back( P.at(v->location) ) ;
+        }
+
+        if (depth %2 == 0) {
+            if ( v->left != nullptr && sx <= x ){
+                //printf("depth: %d  PAT1: %d \n",depth, v->left->location );
+                find ( v->left, sx, tx, sy, ty, depth +1);
+            }
+            if ( v->right != nullptr && x <= tx ){
+                //printf("depth: %d  PAT2: %d \n",depth, v->right->location );
+                find ( v->right , sx, tx, sy, ty, depth+1);
+            }
+        } else {
+            if ( v->left != nullptr && sy <= y ){
+                //printf("depth: %d  PAT3: %d \n",depth, v->left->location );
+                find ( v->left, sx, tx, sy, ty, depth +1);
+            }
+            if ( v->right != nullptr && y <= ty ){
+                //printf("depth: %d  PAT4: %d \n",depth, v->right->location );
+                find ( v->right , sx, tx, sy, ty, depth+1);
+            }
+        }
+    }
+
+}; 
+
+int main(){
+    //入力をscanfで書き直す。
+    scanf("%d",&n);
+    TwoDtree D(n);
+    for (int i=0 ; i<n ; i++) {
+        int a, b;
+        scanf ("%d %d", &a, &b);
+        //(a, b)をpairにしてとりあえず保管
+        point NP ;
+        NP.id = i; NP.val=make_pair(a,b);
+        P.push_back(NP);  
+    }
+    //for (int i=0; i<n; i++ ){ 
+    //    printf("(%d)", P[i].id); }
+    D.make2Dtree(0, n-1, 0);
+    //for (int i=0; i<n; i++ ){ 
+    //    printf("(%d)", ND[i].location); }
+    int c;
+    scanf("%d",&c);
+    for (int j=0; j<c ; j++) {
+        int sx, sy, tx, ty;
+        scanf("%d %d %d %d", &sx, &tx, &sy, &ty);
+        D.find( &(D.ND[0]), sx, tx, sy, ty, 0) ;
+        sort ( res.begin() , res.end() ); // lastを含まない
+        for (int k=0; k < res.size(); k++){ 
+            printf ("%d\n", res.at(k).id); }
+        printf ("\n");
+        res.clear();
+        res.resize(0);
+    }
+    return 0;
+}

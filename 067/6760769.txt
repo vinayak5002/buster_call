@@ -1,0 +1,139 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for(int i=0; i<(n); i++)
+#define INF ((1LL<<62)-(1LL<<31))
+#define all(a)  (a).begin(),(a).end()
+#define rall(a)  (a).rbegin(),(a).rend()
+typedef long long ll;
+typedef pair<ll,ll> pl;
+
+struct UnionFind {
+    vector<ll> v;
+    UnionFind(ll n=0): v(n,-1) {}
+    int find(ll x) {
+        if(v[x]<0) return x;
+        return v[x]=find(v[x]);
+    }
+    bool unite(ll x,ll y) {
+        x=find(x);
+        y=find(y);
+        if(x==y) return false;
+        if(v[x]>v[y]) swap(x,y);
+        v[x]+=v[y];
+        v[y]=x;
+        return true;
+    }
+    bool same(ll x,ll y) { return find(x)==find(y); }
+    ll size(ll x) { return -v[find(x)]; }
+};
+
+int main() {
+    while(true) {
+        int n;
+        cin >> n;
+        if(n==0) break;
+        map<string,int> mp;
+        map<int,string> rmp;
+        vector<vector<string>> v(n,vector<string> ());
+        vector<ll> p(n);
+        rep(i,n) {
+            string a; int b,c;
+            cin >> a >> b >> c;
+            mp[a]=i; rmp[i]=a;
+            p[i]=b;
+            rep(j,c) {
+                string d;
+                cin >> d;
+                v[i].push_back(d);
+            }
+        }
+        vector<vector<int>> g(n,vector<int> ());
+        rep(i,n) rep(j,(int)v[i].size()) g[i].push_back(mp[v[i][j]]);
+        UnionFind uf(n);
+        rep(i,n) rep(j,(int)v[i].size()) uf.unite(i,g[i][j]);
+        map<int,int> mp2;
+        rep(i,n) mp2[uf.find(i)]++;
+        int idx=0;
+        for(auto &u:mp2) u.second=idx++;
+        vector<vector<int>> gg((int)mp2.size(),vector<int> ());
+        rep(i,n) gg[mp2[uf.find(i)]].push_back(i);
+        ll ans=0;
+        rep(l,idx) {
+            int n=(int)gg[l].size();
+            vector<int> id(n);
+            bool in0=false;
+            rep(i,n) {
+                id[i]=i;
+                if(gg[l][i]==0) in0=true;
+            }
+            int x=n/2,y=n-x;
+            vector<pair<int,int>> vec1,vec2;
+            for(int bit=0;bit<(1<<x);bit++) {
+                vector<bool> flag(n,false);
+                vector<int> sel;
+                rep(i,x) if(1<<i&bit) {
+                    flag[gg[l][i]]=true;
+                    sel.push_back(gg[l][i]);
+                }
+                bool check=true;
+                for(auto u:sel) if(flag[u]) {
+                    for(auto u2:g[u]) {
+                        if(flag[u2]) check=false;
+                    }
+                }
+                if(check) {
+                    ll tot=0;
+                    for(auto u:sel) tot+=p[u];
+                    vec1.push_back({tot,bit});
+                }
+            }
+            for(int bit=0;bit<(1<<y);bit++) {
+                vector<bool> flag(n,false);
+                vector<int> sel;
+                rep(i,y) if(1<<i&bit) {
+                    flag[gg[l][i+x]]=true;
+                    sel.push_back(gg[l][i+x]);
+                }
+                bool check=true;
+                for(auto u:sel) if(flag[u]) {
+                    for(auto u2:g[u]) {
+                        if(flag[u2]) check=false;
+                    }
+                }
+                if(check) {
+                    ll tot=0;
+                    for(auto u:sel) tot+=p[u];
+                    vec2.push_back({tot,bit});
+                }
+            }
+            int ma=0;
+            for(int i=0;i<(int)vec1.size();i++) {
+                vector<bool> flag(n,false);
+                bool is0=false;
+                rep(k,x) if(1<<k&vec1[i].second) {
+                    flag[gg[l][k]]=true;
+                    if(gg[l][k]==0) is0=true;
+                }
+                for(int j=0;j<(int)vec2.size();j++) {
+                    bool check=true;
+                    rep(k,y) if(1<<k&vec2[j].second) {
+                        for(auto u:g[gg[l][k+x]]) if(flag[u]) check=false;
+                    }
+                    if(in0) {
+                        if(check&&is0) {
+                            ma=max(ma,vec1[i].first+vec2[j].first);
+                        }
+                    } else {
+                        if(check) {
+                            ma=max(ma,vec1[i].first+vec2[j].first);
+                        }
+                    }
+                }
+            }
+            //cout << ma << endl;
+            ans+=ma;
+        }
+        cout << ans << endl;
+    }
+    return 0;
+}

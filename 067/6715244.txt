@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+struct UnionFind {
+    vector<int> par;
+    UnionFind(int n) : par(n, -1) {}
+    int leader(int x) { return par[x] < 0 ? x : par[x] = leader(par[x]); }
+    bool merge(int x, int y) {
+        x = leader(x), y = leader(y);
+        if (x == y) return false;
+        if (par[x] > par[y]) swap(x, y);
+        par[x] += par[y];
+        par[y] = x;
+        return true;
+    }
+    bool same(int x, int y) { return leader(x) == leader(y); }
+};
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N, M;
+    while (cin >> N >> M, !(N == 0 and M == 0)) {
+        V<tuple<ll, int, int>> es(M);
+        rep(i, M) {
+            int a, b, c;
+            cin >> a >> b >> c;
+            a--, b--;
+            es[i] = {c, a, b};
+        }
+        sort(es.begin(), es.end());
+        UnionFind uf(N);
+        int cnt = 0, ans = -1;
+        for (auto [c, a, b] : es) {
+            if (uf.same(a, b)) continue;
+            uf.merge(a, b);
+            cnt++;
+            if (cnt == N / 2) ans = c;
+        }
+        cout << ans << '\n';
+    }
+    return 0;
+}
+

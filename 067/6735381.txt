@@ -1,0 +1,145 @@
+#include <iostream>
+#include <string>
+#include <unistd.h>
+using namespace std;
+
+struct node{
+    long index;
+    node *parent;
+    node *left;
+    node *right;
+};
+
+node *NIL, *root;
+
+void insert(long k){
+    node *temp = root;
+    node *temp_p = NIL;
+    node *z = (node *)malloc(sizeof(node));
+    z->index = k;
+    z->left = NIL;
+    z->right = NIL;
+
+    while(temp!=NIL){
+        temp_p = temp;
+        if(k<=temp->index){
+            temp = temp->left;
+        }else{
+            temp = temp->right;
+        }
+    }
+    z->parent = temp_p;
+    if(temp==root){
+        root = z;
+    }else if(k <= temp_p->index){
+        temp_p->left = z;
+    }else{
+        temp_p->right = z;
+    }
+}
+
+void find(long k){
+    node *temp = root;
+    while(temp!=NIL){
+        if(temp->index==k){
+        cout << "yes" << endl;
+        return;
+        }else if(temp->index>k){
+            temp = temp->left;
+        }else{
+            temp = temp->right;
+        }
+    }
+    cout << "no" << endl;
+    return;
+}
+
+void deleteKey(long k, node *temp, node * p_temp){
+    bool isleft = false;
+    while(temp!=NIL){
+        if(temp->index==k){
+            if(temp->left==NIL && temp->right==NIL){
+                if(isleft) p_temp->left = NIL;
+                else p_temp->right = NIL;
+            }else if(temp->left!=NIL && temp->right!=NIL){
+                node *next = temp->right;
+                while(next->left!=NIL){
+                    next = next->left;
+                }
+                // cout << "next is "<< next->index << endl;
+                deleteKey(next->index, temp->right, temp);
+                temp->index = next->index;
+            }else if(temp->left!=NIL){
+                if(isleft){
+                    p_temp->left = temp->left;
+                    temp->left->parent = p_temp;
+                }else{
+                    p_temp->right = temp->left;
+                    temp->left->parent = p_temp;
+                }
+            }else if(temp->right!=NIL){
+                if(isleft){
+                    p_temp->left = temp->right;
+                    temp->right->parent = p_temp;
+                }else{
+                    p_temp->right = temp->right;
+                    temp->right->parent = p_temp;
+                }
+            }
+            return;
+        }else if(temp->index>k){
+            p_temp = temp;
+            temp = temp->left;
+            isleft = true;
+        }else{
+            p_temp = temp;
+            temp = temp->right;
+            isleft = false;
+        }
+    }
+    return;
+}
+
+void PreOrder(node *root){
+    if(root==NIL) return;
+    cout << " " << root->index;
+    PreOrder(root->left);
+    PreOrder(root->right);
+}
+
+void InOrder(node *root){
+    if(root==NIL) return;
+    InOrder(root->left);
+    cout << " " << root->index;
+    InOrder(root->right);
+}
+
+int main(){
+    int n;
+    cin >> n;
+
+    for(int i=0;i<n;i++){
+        long k;
+        char c[6];
+        scanf("%s", c);
+
+        if(c[0]=='i'){
+            scanf("%ld", &k);
+            insert(k);
+        }else if(c[0]=='f'){
+            scanf("%ld", &k);
+            find(k);
+        }else if(c[0]=='d'){
+            scanf("%ld", &k);
+            deleteKey(k, root, NIL);
+            // cout << "deleted" << endl;
+        }else{
+            InOrder(root);
+            cout << endl;
+            PreOrder(root);
+            cout << endl;
+        }
+    }
+
+    return 0;
+}

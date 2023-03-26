@@ -1,0 +1,126 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#include<bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for (int i=0; i < (n); i++)
+
+/* 基本要素 */
+
+typedef double D;      // 座標値の型。doubleかlong doubleを想定
+typedef complex<D> P;  // Point
+typedef pair<P, P> L;  // Line
+typedef vector<P> VP;
+const D EPS = 1e-9;    // 許容誤差。問題によって変える
+#define X real()
+#define Y imag()
+#define LE(n,m) ((n) < (m) + EPS)
+#define GE(n,m) ((n) + EPS > (m))
+#define EQ(n,m) (abs((n)-(m)) < EPS)
+
+// 内積　dot(a,b) = |a||b|cosθ
+D dot(P a, P b) {
+  return (conj(a)*b).X;
+}
+// 外積　cross(a,b) = |a||b|sinθ
+D cross(P a, P b) {
+  return (conj(a)*b).Y;
+}
+
+// 点の進行方向
+int ccw(P a, P b, P c) {
+  b -= a;  c -= a;
+  if (cross(b,c) >  EPS) return +1;  // counter clockwise
+  if (cross(b,c) < -EPS) return -1;  // clockwise
+  if (dot(b,c)   < -EPS) return +2;  // c--a--b on line
+  if (norm(b) < norm(c)) return -2;  // a--b--c on line or a==b
+  return 0;                          // a--c--b on line or a==c or b==c
+}
+
+/* 多角形 */
+
+// 頂点の順序（sortやmax_elementに必要）
+namespace std {
+  bool operator<(const P a, const P b) {
+    return a.X != b.X ? a.X < b.X : a.Y < b.Y;
+  }
+}
+
+// 凸包
+VP convexHull(VP& ps) {  // 元の点集合がソートされていいならVP&に
+  int n = ps.size(), k = 0;
+  sort(ps.begin(), ps.end());
+  VP ch(2*n);
+  for (int i = 0; i < n; ch[k++] = ps[i++]) // lower-hull
+    while (k >= 2 && ccw(ch[k-2], ch[k-1], ps[i]) <= 0) --k;  // 余計な点も含むなら == -1 とする
+  for (int i = n-2, t = k+1; i >= 0; ch[k++] = ps[i--]) // upper-hull
+    while (k >= t && ccw(ch[k-2], ch[k-1], ps[i]) <= 0) --k;
+  ch.resize(k-1);
+  return ch;
+}
+
+// 凸多角形の内部判定　O(logn)
+// 点が領域内部なら1、境界上なら2、外部なら0を返す
+int inCcwConvex(const VP& ps, P p) {
+  int n = ps.size();
+  P g = (ps[0] + ps[n / 3] + ps[n*2 / 3]) / 3.0;
+  if (g == p) return 1;
+  P gp = p - g;
+
+  int l = 0, r = n;
+  while (l + 1 < r) {
+    int mid = (l + r) / 2;
+    P gl = ps[l] - g;
+    P gm = ps[mid] - g;
+    if (cross(gl, gm) > 0) {
+      if (cross(gl, gp) >= 0 && cross(gm, gp) <= 0) r = mid;
+      else l = mid;
+    }
+    else {
+      if (cross(gl, gp) <= 0 && cross(gm, gp) >= 0) l = mid;
+      else r = mid;
+    }
+  }
+  r %= n;
+  D cr = cross(ps[l] - p, ps[r] - p);
+  return EQ(cr, 0) ? 2 : cr < 0 ? 0 : 1;
+}
+
+// 多角形の内部判定
+// 点が領域内部なら1、境界上なら2、外部なら0を返す
+int inPolygon(const VP& ps, P p) {
+  int n = ps.size();
+  bool in = false;
+  rep (i, n) {
+    P a = ps[i] - p;
+    P b = ps[(i + 1) % n] - p;
+    if (EQ(cross(a,b), 0) && LE(dot(a,b), 0)) return 2;
+    if (a.Y > b.Y) swap(a,b);
+    if ((a.Y*b.Y < 0 || (a.Y*b.Y < EPS && b.Y > EPS)) && LE(cross(a, b), 0)) in = !in;
+  }
+  return in;
+}
+
+int main(){
+  for(;;){
+    int N;
+    cin >> N;
+    if(N == 0) break;
+    VP ps(N);
+    vector<pair<long double,long double>> vec(N);
+    for(int i=0;i<N;i++){
+      long double x,y;
+      char k;
+      cin >> x >> k >> y;
+      complex<D> c(x,y);
+      ps[i] = c;
+      vec[i] = make_pair(x,y);
+    }
+    VP CH = convexHull(ps);
+    int ans = 0;
+    for(int i=0;i<N;i++){
+      if(inCcwConvex(CH,ps[i]) == 1) ans++;
+    }
+    cout << ans << endl;
+  }
+}

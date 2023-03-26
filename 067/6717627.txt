@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int V,E; 
+vector<vector<int>> G; 
+vector<int> h; 
+vector<int> ld; 
+vector<int> ans; 
+
+
+void topoSort(){
+
+  queue<int> q;
+  
+  for(int i = 0; i < V; i++){
+    if(h[i] == 0){
+      q.push(i); 
+      ld[i] = 0; 
+    }
+  }
+  
+  while(!q.empty()){
+  
+    int tag = q.front();
+    q.pop();
+    ans.push_back(tag); 
+
+    for(int next: G[tag]){ 
+      h[next]--; 
+      ld[next] =  max(ld[next], ld[tag]+1);
+      if(h[next] == 0){ 
+        q.push(next);
+      }
+    }
+  }
+}
+
+int main(){
+
+  cin >> V >> E;
+  
+  G.resize(V);
+  h.resize(V, 0); 
+  ld.resize(V, -1);
+  
+  int f,t;
+  for(int i = 0; i < E; i++){
+    cin >> f >> t;
+    G[f].push_back(t); 
+    h[t]++; 
+   }
+
+   topoSort();
+
+  if(ans.size() == V){
+    cout<<"0"<<endl;
+  }else{
+    cout<<"1"<<endl;
+  }
+}

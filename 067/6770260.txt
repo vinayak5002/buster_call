@@ -1,0 +1,62 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <iomanip>
+using namespace std;
+using ll = long long;
+using ld = long double;
+using Pii = pair<int, int>;
+
+#define debug1(x1) std::cout << #x1 << ": " << (x1) << std::endl;
+#define debug2(x1, x2) std::cout << #x1 << ": " << (x1) << "	" << #x2 << ": " << (x2) << std::endl;
+#define debug3(x1, x2, x3) std::cout << #x1 << ": " << (x1) << "	" << #x2 << ": " << (x2) << "	" << #x3 << ": " << (x3) << std::endl;
+
+const long double eps = 0.5;
+const int MOD = 1'000'000'007;
+// const int MOD = 998'244'353;
+
+
+
+struct Edge {
+    int to, cost;
+    Edge(int _to, int _cost) : to(_to), cost(_cost) {}
+};
+
+int main()
+{
+    int n;
+    cin >> n;
+
+    vector<vector<Edge>> Graph(n);
+    for(int i = 0; i < n; i++) {
+        for(int j = 0; j < n; j++) {
+            int a;
+            cin >> a;
+            if(a != -1) Graph[i].emplace_back(j, a);
+        }
+    }
+
+    // prim
+    vector<int> seen(n, 0);
+    priority_queue<Pii, vector<Pii>, greater<Pii>> pq;
+    pq.emplace(0, 0);
+
+    int ans = 0;
+    while(!pq.empty()) {
+        auto [w, v] = pq.top();
+        pq.pop();
+        if(seen[v]) continue;
+        seen[v] = 1;
+
+        ans += w;
+        for( auto e : Graph[v] ) {
+            if(!seen[e.to]) pq.emplace(e.cost, e.to);
+        }
+    }
+
+    cout << ans << endl;
+
+
+
+    return 0;
+}

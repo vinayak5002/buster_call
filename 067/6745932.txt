@@ -1,0 +1,81 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int N = 100005;
+
+class DisjointSet{
+    public:
+    int parent[N], rank[N], weight[N];
+
+    public:
+    DisjointSet(int n){
+        for(int i=0; i<n; i++) make_set(i);
+    };
+
+    void make_set(int x){
+        rank[x] = 0;
+        parent[x] = x;
+        weight[x] = 0;
+    }
+
+    int findSet(int x){
+        if(x == parent[x]){
+            return x;
+        }else{
+            int tmp = findSet(parent[x]);
+            weight[x] += weight[parent[x]];
+            parent[x] = tmp;
+        }
+    }
+
+    void relate(int x, int y, int w){ // unite
+        parent[x] = findSet(x);
+        parent[y] = findSet(y);
+        w = w - (weight[y] - weight[x]);
+
+        if(rank[parent[x]] > rank[parent[y]]){
+            weight[parent[y]] = w;
+            parent[parent[y]] = parent[x];
+        }else{
+            weight[parent[x]] = -w;
+            parent[parent[x]] = parent[y];
+
+            if(rank[parent[x]] == rank[parent[y]]){
+                rank[parent[y]] = rank[parent[y]] + 1;
+            }
+        }
+    }
+
+    bool same(int x, int y){
+        return findSet(x) == findSet(y);
+    }
+
+    int diff(int x, int y){
+        return weight[y] - weight[x];
+    }
+
+};
+
+int main(){
+    int n, q;
+    int query, x, y, z;
+    cin >> n >> q;
+
+    DisjointSet UF(n);
+
+    for(int i=0; i<q; i++){
+        cin >> query;
+        if(query == 0){
+            cin >> x >> y >> z;
+            UF.relate(x,y,z);
+        }else{
+            cin >> x >> y;
+            if(UF.same(x,y)) cout << UF.diff(x,y) << endl;
+            else cout << '?' << endl;
+        }
+    }
+
+    return 0;
+}

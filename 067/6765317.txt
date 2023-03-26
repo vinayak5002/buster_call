@@ -1,0 +1,108 @@
+#define N_MAX 100000
+#define N_MIN 1
+#define Q_MAX 1000
+#define Q_MIN 1
+#define TIME_MAX 50000
+#define TIME_MIN 1
+
+#include<stdio.h>
+
+/*Structure definition*/
+typedef struct Process
+{
+    char name[11];
+    int time;
+} pro;
+
+/*Function prototype declaration*/
+int isEmpty();
+int isFull();
+void enqueue(pro x);
+pro dequeue();
+
+/*Global variables*/
+pro queue[N_MAX]={0};
+int head=0;
+int tail=0;
+int command_num=0;
+
+int main()
+{   
+    int quantum=0;
+    int elapsed_time=0;
+    pro finished_process={0};
+    int i=0;
+    scanf("%d %d", &command_num, &quantum);
+
+    for(i=0;i<command_num;i++)
+    {
+        scanf("%s", queue[i].name);
+        scanf("%d", &queue[i].time);
+        tail++;
+    }
+
+    while(!isEmpty())
+    {
+        if(queue[head].time<=quantum)
+        {
+            elapsed_time += queue[head].time;
+            printf("%s %d\n",queue[head].name,elapsed_time);
+            finished_process = dequeue();
+        }
+        else
+        {
+            queue[head].time -= quantum;
+            elapsed_time += quantum;
+            enqueue(queue[head]);
+            finished_process = dequeue();    
+        }
+    }
+
+    return 0;
+}
+
+int isEmpty()
+{
+    return head == tail;
+}
+
+int isFull()
+{
+    return head == (tail+1) % N_MAX;
+}
+
+void enqueue(pro x)
+{
+    if (isFull())
+    {
+        printf("ERROR: Overflow\n");
+    }
+    queue[tail]=x;
+    if (tail+1==N_MAX)
+    {
+        tail=0;
+    }
+    else
+    {
+        tail++;
+    }
+    return;
+}
+
+pro dequeue()
+{
+    if (isEmpty())
+    {
+        printf("ERROR: Underflow\n");
+    }
+    pro x = queue[head];
+    if (head+1==N_MAX)
+    {
+        head=0;
+    }
+    else
+    {
+        head++;
+    }
+    return x;
+}

@@ -1,0 +1,34 @@
+N = int(input())
+links = [[] for _ in range(N)]
+for _ in range(N):
+    V = list(map(int, input().split()))
+    u = V[0]
+    for i in range(2, len(V)):
+        links[u-1].append(V[i]-1)
+
+D = [-1] * N
+F = [-1] * N
+import sys
+sys.setrecursionlimit(10**9)
+
+def dfs(x):
+    global t
+    for nx in links[x]:
+        if D[nx] != -1:
+            continue
+        D[nx] = t
+        t += 1
+        dfs(nx)
+    F[x] = t
+    t += 1
+
+t = 1
+for i in range(N):
+    if D[i] != -1:
+        continue
+    D[0] = t
+    t += 1
+    dfs(i)
+
+for i in range(N):
+    print(i+1, D[i], F[i])

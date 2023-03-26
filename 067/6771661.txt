@@ -1,0 +1,90 @@
+#include <stdio.h>
+
+#define MAX 100
+
+int data[MAX][MAX];
+int d[MAX];
+int n;
+
+
+//標準入力からデータを受け取る関数
+void getdata()
+{
+    int i, j, v, u, k;
+    //データ数の取得
+    scanf("%d", &n);
+
+    // 2次元配列の初期化
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < n; j++)
+        {
+            data[i][j] = 0;
+        }
+    }
+
+    //データの格納
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d %d", &u, &k); //頂点番号と出次数の取得
+
+        u--;
+
+        //頂点リストを作製
+        for (j = 0; j < k; j++)
+        {
+            scanf("%d", &v); //隣接頂点番号の格納
+            v--;
+            data[i][v] = 1;
+        }
+    }
+}
+
+//幅優先探索を再帰的に実行する関数
+void bfs(int t)
+{
+    int i;
+
+    //幅優先探索
+    for (i = 0; i < n; i++)
+    {
+        if (data[t][i] == 0)    //ノードがつながっていなければ以下を飛ばす
+        {
+            continue;
+        }
+        if (d[i] != -1 && d[i] < d[t] + 1)  //探索済みまたはより短い探索を行っていれば以下を飛ばす
+        {
+            continue;
+        }
+
+        //探索時間を配列に格納
+        d[i] = d[t] + 1;
+
+        //再帰的に探索
+        bfs(i);
+    }
+}
+
+int main(void)
+{
+    int i;
+
+    getdata();
+
+    //最短距離を保存する配列の初期化
+    for (i = 0; i < n; i++)
+    {
+        d[i] = -1;
+    }
+
+    d[0] = 0;
+    bfs(0);
+
+    //結果の表示
+    for (i = 0; i < n; i++)
+    {
+        printf("%d %d\n", i + 1, d[i]);
+    }
+
+    return 0;
+}

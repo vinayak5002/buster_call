@@ -1,0 +1,45 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    int n;
+    while(cin >> n, n){
+        vector<string> s(n);
+        vector<vector<string>> tb;
+        map<string,int> mp;
+        auto parse = [&](string s){
+            for(int i = 0, pre = 0; i < s.size(); i++){
+                if(s[i] == ':'){
+                    string t = s.substr(0, i);
+                    pre = i + 1;
+                    mp[t] = tb.size();
+                    tb.push_back(vector<string>());
+                }else if(s[i] == ',' || s[i] == '.'){
+                    string t = s.substr(pre, i - pre);
+                    pre = i + 1;
+                    tb.back().push_back(t);
+                }
+            }
+        };
+        function<vector<string>(int)> dfs=[&](int pos){
+            vector<string> res;
+            for(int i = 0; i < tb[pos].size(); i++){
+                if(mp.find(tb[pos][i]) == mp.end())res.push_back(tb[pos][i]);
+                else{
+                    vector<string> ch = dfs(mp[tb[pos][i]]);
+                    for(auto &&s:ch){
+                        res.push_back(s);
+                    }
+                }
+            }
+            sort(res.begin(), res.end());
+            res.erase(unique(res.begin(), res.end()),res.end());
+            return res;
+        };
+        for(int i = 0; i < n; i++){
+            cin >> s[i];
+            parse(s[i]);
+        }
+        cout << dfs(0).size() << '\n';
+    }
+}

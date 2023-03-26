@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+vector<vector<int>> G;
+vector<bool> visited;
+
+bool dfs(int s) {
+    bool ret = false;
+    if(visited[s]) return true;
+    for(auto n : G[s]) ret = dfs(n);
+    return ret;
+}
+
+bool isCyclic(int s) {
+    bool ret = false;
+    visited[s] = true;
+    for(auto n : G[s]) ret = dfs(n);
+    return ret;
+}
+
+int main() {
+    int V, E;
+    cin >> V >> E;
+    G.resize(V);
+    visited.resize(V);
+    for (int i = 0; i < E; ++i) {
+        int s, t;
+        cin >> s >> t;
+        G[s].push_back(t);
+    }
+
+    for (int i = 0; i < V; ++i) {
+        fill(visited.begin(), visited.end(), false);
+        if(isCyclic(i)) {
+            cout << "1" << endl;
+            return 0;
+        }
+    }
+
+    cout << "0" << endl;
+
+    return 0;
+}

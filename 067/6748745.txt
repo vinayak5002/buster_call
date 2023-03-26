@@ -1,0 +1,88 @@
+using namespace std;
+#include <bits/stdc++.h>
+
+int si = 0, sj = 1;
+int gi, gj;
+int d[61][61];
+int maze[61][61] = {0};
+int di[4] = {1, 0, -1, 0}, dj[4] = {0, 1, 0, -1};
+int w, h;
+int inf = 1000000;
+
+int bfs()
+{
+    queue<pair<int, int>> que;
+    for (int i = 0; i < 61; i++)
+        for (int j = 0; j < 61; j++)
+            d[i][j] = inf;
+    que.push(pair<int, int>(si, sj));
+    d[si][sj] = 0;
+
+    while (que.size() > 0)
+    {
+        pair<int, int> p = que.front();
+        que.pop();
+        if (p.first == gi && p.second == gj)
+            break;
+        for (int i = 0; i < 4; i++)
+        {
+            int ni = p.first + di[i], nj = p.second + dj[i];
+            if (0 <= ni && ni < 2 * h + 1 && 0 <= nj && nj < 2 * w + 1 && maze[ni][nj] != 1 && d[ni][nj] == inf)
+            {
+                que.push(pair<int, int>(ni, nj));
+                d[ni][nj] = d[p.first][p.second] + 1;
+            }
+        }
+    }
+
+    if (d[gi][gj] == inf)
+        return 0;
+    return d[gi][gj] / 2;
+}
+
+int main()
+{
+    vector<int> ans;
+    while (true)
+    {
+        cin >> w >> h;
+        if (w == 0 && h == 0)
+            break;
+        for (int i = 0; i < 2 * h + 1; i++)
+            for (int j = 0; j < 2 * w + 1; j++)
+                maze[i][j] = 1;
+        for (int i = 0; i < 2 * h + 1; i++)
+            for (int j = 0; j < 2 * w + 1; j++)
+                if (i % 2 == 1 && j % 2 == 1)
+                    maze[i][j] = 0;
+        maze[0][1] = 2;
+        maze[2 * h][2 * w - 1] = 3;
+        gi = 2 * h;
+        gj = 2 * w - 1;
+        for (int i = 0; i < h; i++)
+        {
+            for (int j = 0; j < w; j++)
+            {
+                if (j < w - 1)
+                    cin >> maze[2 * i + 1][2 * j + 2];
+            }
+            for (int j = 0; j < w; j++)
+            {
+                if (i < h - 1)
+                    cin >> maze[2 * i + 2][2 * j + 1];
+            }
+        }
+        /*
+        for (int i = 0; i < 2 * h + 1; i++)
+        {
+            for (int j = 0; j < 2 * w + 1; j++)
+            {
+                cout << maze[i][j] << " ";
+            }
+            cout << endl;
+        }*/
+        ans.push_back(bfs());
+    }
+    for (int e : ans)
+        cout << e << endl;
+}

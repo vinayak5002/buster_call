@@ -1,0 +1,148 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+template <typename M, typename O, typename M::T (*act)(typename M::T, typename O::T)>
+class LazySegmentTree {
+    using T = typename M::T;
+    using E = typename O::T;
+
+public:
+    LazySegmentTree() = default;
+    explicit LazySegmentTree(int n) : LazySegmentTree(std::vector<T>(n, M::id())) {}
+    explicit LazySegmentTree(const std::vector<T>& v) {
+        size = 1;
+        while (size < (int) v.size()) size <<= 1;
+        node.resize(2 * size, M::id());
+        lazy.resize(2 * size, O::id());
+        std::copy(v.begin(), v.end(), node.begin() + size);
+        for (int i = size - 1; i > 0; --i) node[i] = M::op(node[2 * i], node[2 * i + 1]);
+    }
+
+    T operator[](int k) {
+        return fold(k, k + 1);
+    }
+
+    void update(int l, int r, const E& x) { update(l, r, x, 1, 0, size); }
+
+    T fold(int l, int r) { return fold(l, r, 1, 0, size); }
+
+private:
+    int size;
+    std::vector<T> node;
+    std::vector<E> lazy;
+
+    void push(int k) {
+        if (lazy[k] == O::id()) return;
+        if (k < size) {
+            lazy[2 * k] = O::op(lazy[2 * k], lazy[k]);
+            lazy[2 * k + 1] = O::op(lazy[2 * k + 1], lazy[k]);
+        }
+        node[k] = act(node[k], lazy[k]);
+        lazy[k] = O::id();
+    }
+
+    void update(int a, int b, const E& x, int k, int l, int r) {
+        push(k);
+        if (r <= a || b <= l) return;
+        if (a <= l && r <= b) {
+            lazy[k] = O::op(lazy[k], x);
+            push(k);
+            return;
+        }
+        int m = (l + r) / 2;
+        update(a, b, x, 2 * k, l, m);
+        update(a, b, x, 2 * k + 1, m, r);
+        node[k] = M::op(node[2 * k], node[2 * k + 1]);
+    }
+
+    T fold(int a, int b, int k, int l, int r) {
+        push(k);
+        if (r <= a || b <= l) return M::id();
+        if (a <= l && r <= b) return node[k];
+        int m = (l + r) / 2;
+        return M::op(fold(a, b, 2 * k, l, m),
+                     fold(a, b, 2 * k + 1, m, r));
+    }
+};
+
+struct MinMonoid {
+    using T = int;
+    static T id() { return (1u << 31) - 1; }
+    static T op(T a, T b) {
+        return min(a, b);
+    }
+};
+
+struct AddMonoid {
+    using T = int;
+    static T id() { return 0; }
+    static T op(T a, T b) {
+        return a + b;
+    }
+};
+
+int act(int x, int a) {
+    return x + a;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    int N, Q;
+    cin >> N >> Q;
+    string s;
+    cin >> s;
+
+    vector<int> zeros(N+1);
+    LazySegmentTree<MinMonoid, AddMonoid, act> st(zeros);
+    set<int> close;
+
+    rep(i,0,N) {
+        st.update(i+1, N+1, s[i] == '(' ? 1 : -1);
+        if (s[i] == ')') close.insert(i);
+    }
+
+    while (Q--) {
+        int q;
+        cin >> q;
+        --q;
+        if (s[q] == '(') {
+            s[q] = ')';
+            close.insert(q);
+            st.update(q+1, N+1, -2);
+            // flip the leftmost )
+            auto it = close.begin();
+            int i = *it;
+            s[i] = '(';
+            st.update(i+1, N+1, 2);
+            close.erase(it);
+            cout << i+1 << "\n";
+        } else {
+            s[q] = '(';
+            close.erase(q);
+            st.update(q+1, N+1, 2);
+            // flip the leftmost ( s.t. min(i+1,...,N+1) == 2
+            int lb = 0, ub = N;
+            while (ub - lb > 1) {
+                int m = (lb + ub) / 2;
+                if (st.fold(m, N+1) >= 2) {
+                    ub = m;
+                } else {
+                    lb = m;
+                }
+            }
+            s[lb] = ')';
+            st.update(lb+1, N+1, -2);
+            close.insert(lb);
+            cout << lb+1 << "\n";
+        }
+    }
+}

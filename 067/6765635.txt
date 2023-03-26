@@ -1,0 +1,105 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define true 0
+#define false -1
+
+#define MAX 36
+
+typedef struct C
+{
+	char mark;
+	int number;
+}Card;
+
+void BubbleSort(Card C[], int n)
+{
+	int i, j;
+	for(i = 0; i < n; i++)
+	{
+		for(j = n-1; j > i; j--)
+		{
+			if(C[j].number < C[j-1].number)
+			{
+				Card tmp = C[j];
+				C[j] = C[j-1];
+				C[j-1] = tmp;
+			}
+		}
+	}
+}
+
+
+void SelectionSort(Card C[], int n) 
+{
+	int i, j;
+	for(i = 0; i < n; i++)
+	{
+		int minj = i;
+		for(j = i; j < n; j++)
+		{
+			if(C[j].number < C[minj].number)
+			{
+				minj = j;
+			}
+		}
+		Card tmp = C[i];
+		C[i] = C[minj];
+		C[minj] = tmp;
+	}
+}
+
+
+int isStable(Card in[], Card out[], int n)
+{
+	for(int i = 0; i < n; i++)
+	{
+		if(in[i].mark != out[i].mark){ return false; }
+	}
+	return true;
+}
+
+
+void print(Card C[], int n)
+{
+	int i;
+	for(i = 0; i < n; i++)
+	{
+		if(i){ printf(" "); }
+		printf("%c%d", C[i].mark, C[i].number);
+	}
+	printf("\n");
+}
+
+
+int main (void)
+{
+	int N;
+	scanf("%d", &N);
+	
+	Card B[MAX], S[MAX];
+	char a[10];
+	
+	int i;
+	for(i = 0; i < N; i++)
+	{
+		scanf("%s", a);
+		B[i].mark = a[0];
+		B[i].number = atoi(a + 1);
+		S[i] = B[i];
+	}
+	
+	
+	
+	BubbleSort(B, N);
+	print(B, N);
+	printf("Stable\n");
+	
+	SelectionSort(S, N);
+	print(S, N);
+	if(isStable(B, S, N) == true){ printf("Stable\n"); }
+	else{ printf("Not stable\n"); }
+	
+	return 0;
+}

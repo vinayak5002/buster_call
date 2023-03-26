@@ -1,0 +1,31 @@
+import sys
+readline = sys.stdin.readline
+
+if __name__ == '__main__':
+    V, E = map(int, readline().split())
+    INF = 1 << 60
+    dp = [[INF] * V for _ in range(V)]
+    for i in range(V):
+        dp[i][i] = 0
+    for _ in range(E):
+        s, t, d = map(int, readline().split())
+        dp[s][t] = d
+    for k in range(V):
+        for i in range(V):
+            for j in range(V):
+                if dp[i][k] != INF and dp[k][j] != INF:
+                    dp[i][j] = min(dp[i][j], dp[i][k]+dp[k][j])
+
+    flag = False
+    for i in range(V):
+        if dp[i][i] < 0:
+            flag = True
+            break
+
+    if flag:
+        print('NEGATIVE CYCLE')
+    else:
+        for i in range(V):
+            d = ['INF' if value == INF else value for value in dp[i]]
+            print(*d)
+

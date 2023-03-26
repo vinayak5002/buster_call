@@ -1,0 +1,110 @@
+using System;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace _220626
+{
+class ProblemA
+{
+  public class UnionFind<T>
+  {
+    public class Vertex
+    {
+      public T value;
+      public int n;
+      public Vertex parent;
+      public Vertex(T value)
+      {
+        this.value = value;
+        this.n = 1;
+        this.parent = this;
+      }
+    }
+    public Dictionary<T, Vertex> vertices;
+    public UnionFind(IEnumerable<T> values)
+    {
+      vertices = values
+        .Select(v => new Vertex(v))
+        .ToDictionary(v => v.value, v => v);
+    }
+
+    public Vertex Root(Vertex v)
+    {
+      if (v.parent == v) return v;
+      return v.parent = Root(v.parent);
+    }
+
+    public Vertex Root(T v)
+    {
+      return Root(vertices[v]);
+    }
+
+    public bool Same(T v0, T v1)
+    {
+      return Root(v0) == Root(v1);
+    }
+    
+    public Vertex Union(T v0, T v1)
+    {
+      var r0 = Root(v0);
+      var r1 = Root(v1);
+      var r = r0.n >= r1.n ? r0 : r1;
+      var c = r0.n >= r1.n ? r1 : r0;
+      r.n += c.n;
+      c.parent = r;
+      return r;
+    }
+  }
+
+  public static IEnumerable<int> Execution(Input input, UnionFind<int> uf)
+  {
+    foreach (var c in input.commands)
+    {
+      switch(c[0])
+      {
+        case 0 :
+          uf.Union(c[1], c[2]);
+          break;
+        case 1 :
+          var b = uf.Same(c[1], c[2]);
+          yield return b ? 1 : 0;
+          break;
+      }
+    }
+  }
+
+  public struct Input
+  {
+    public int n;
+    public int q;
+    public List<int[]> commands;
+  }
+
+  public static Input ReadInput()
+  {
+    var arr = Console.ReadLine().Split(' ').Select(s => int.Parse(s)).ToArray();
+    var n = arr[0];
+    var q = arr[1];
+    var commands = new List<int[]>();
+    for (int i = 0; i < q; i++)
+    {
+      commands.Add(Console.ReadLine().Split(' ').Select(s => int.Parse(s)).ToArray());
+    }
+    return new Input { n = n, q = q, commands = commands };
+  }
+
+  public static void Main(string[] args)
+  {
+    var input = ReadInput();
+    var uf = new UnionFind<int>(Enumerable.Range(0, input.n));
+    var outputs = Execution(input, uf);
+    foreach (var o in outputs)
+    {
+      Console.WriteLine(o);
+    }
+  }
+}
+}
+
+

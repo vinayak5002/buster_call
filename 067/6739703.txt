@@ -1,0 +1,27 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    int T, N;
+    while(cin >> T, T){
+        vector<int> t(T);
+        for(auto &&v:t)cin >> v;
+        vector<int> day(100, 24);
+        cin >> N;
+        while(N--){
+            int d, m;
+            cin >> d >> m;
+            d--;
+            day[d] = min(day[d], m);
+        }
+        vector<vector<int>> dp(100, vector<int>(T, 1 << 30));
+        dp[0][0] = 0;
+        for(int i = 0; i + 1 < 100; i++){
+            for(int j = 0; j < T; j++){
+                if(t[(j + 1) % T] <= day[i + 1])dp[i+1][(j+1)%T] = min(dp[i+1][(j+1)%T], dp[i][j]);
+                dp[i+1][0] = min(dp[i+1][0], dp[i][j] + 1);
+            }
+        }
+        cout << *min_element(dp[99].begin(), dp[99].end()) << '\n';
+    }
+}

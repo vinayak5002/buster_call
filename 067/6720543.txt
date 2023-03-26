@@ -1,0 +1,122 @@
+#include <bits/extc++.h>
+
+using namespace std;
+
+#define rep(i,n) for(int i=0;i<(n);++i)
+#define reps(i,s,n) for(int i=(s);i<=(n);++i)
+#define all(x) begin(x), end(x)
+#define Fixed fixed << setprecision(12)
+#define updiv(a,b) ((a + b - 1) / b)
+constexpr int32_t INF  = 0x3f3f3f3f;
+constexpr int64_t LINF = 0x3f3f3f3f3f3f3f3fLL;
+constexpr int mod = 1e9+7;
+// constexpr int mod = 998244353;
+
+template <class Func>
+class FixPoint : Func {
+public:
+    explicit constexpr FixPoint(Func&& f) noexcept : Func(forward<Func>(f)) {}
+
+    template <class... Args>
+    constexpr decltype(auto) operator()(Args&&... args) const {
+        return Func::operator()(*this, std::forward<Args>(args)...);
+    }
+};
+
+template <class Func>
+static inline constexpr decltype(auto) makeFixPoint(Func&& f) noexcept {
+    return FixPoint<Func>{forward<Func>(f)};
+}
+
+template <class A, class B> inline bool chmax(A &a, const B &b) { return b > a && (a = b, true); }
+template <class A, class B> inline bool chmin(A &a, const B &b) { return b < a && (a = b, true); }
+
+template <class T> using max_heap = priority_queue<T>;
+template <class T> using min_heap = priority_queue<T,vector<T>,greater<T> >;
+template <class A, class B> using umap = unordered_map<A,B>;
+template <class A, class B> using uset = unordered_set<A,B>;
+
+template <class T> using Set = __gnu_pbds::tree<T, __gnu_pbds::null_type, less<T>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
+
+template <class T> inline void bye(T x) { cout << x << '\n'; exit(0); }
+
+constexpr int dx[] = {1, 0, -1, 0, 1, 1, -1, -1};
+constexpr int dy[] = {0, -1, 0, 1, 1, -1, -1, 1};
+
+
+signed main() {
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+
+    int h, w, c;
+    while (cin >> h >> w >> c, h) {
+        auto inside = [&](int y, int x) {
+            return (0 <= y && y < h && 0 <= x && x < w);
+        };
+        vector<vector<int> > p(h, vector<int>(w));
+        for (int i = 0; i < h; ++i) {
+            for (int j = 0; j < w; ++j) {
+                cin >> p[i][j];
+            }
+        }
+        int res = 0;
+        reps(a, 1, 6) reps(b, 1, 6) reps(d, 1, 6) reps(f, 1, 6) {
+            vector<int> v;
+            v.emplace_back(a);
+            v.emplace_back(b);
+            v.emplace_back(d);
+            v.emplace_back(f);
+            v.emplace_back(c);
+            auto q = p;
+            for (auto e : v) {
+                int nc = q[0][0];
+                q[0][0] = e;
+                queue<pair<int, int> > que;
+                vector<vector<bool> > visited(h, vector<bool>(w));
+                visited[0][0] = true;
+                que.emplace(0, 0);
+                while (!que.empty()) {
+                    int cy, cx;
+                    tie(cy, cx) = que.front();
+                    que.pop();
+                    for (int i = 0; i < 4; ++i) {
+                        int ny, nx;
+                        ny = cy + dy[i];
+                        nx = cx + dx[i];
+                        if (inside(ny, nx) && q[ny][nx] == nc && !visited[ny][nx]) {
+                            q[ny][nx] = e;
+                            visited[ny][nx] = true;
+                            que.emplace(ny, nx);
+                        }
+                    }
+                }
+            }
+            int cnt = 1;
+            queue<pair<int, int> > que;
+            vector<vector<bool> > visited(h, vector<bool>(w));
+            visited[0][0] = true;
+            que.emplace(0, 0);
+            while (!que.empty()) {
+                int cy, cx;
+                tie(cy, cx) = que.front();
+                que.pop();
+                for (int i = 0; i < 4; ++i) {
+                    int ny, nx;
+                    ny = cy + dy[i];
+                    nx = cx + dx[i];
+                    if (inside(ny, nx) && q[ny][nx] == c && !visited[ny][nx]) {
+                        ++cnt;
+                        visited[ny][nx] = true;
+                        que.emplace(ny, nx);
+                    }
+                }
+            }
+            chmax(res, cnt);
+        }
+        cout << res << '\n';
+    }
+
+    return(0);
+}
+
+

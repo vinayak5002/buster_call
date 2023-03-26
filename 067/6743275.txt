@@ -1,0 +1,61 @@
+use std::io;
+
+fn main() {
+    let mut s = String::new();
+    io::stdin().read_line(&mut s).expect("Error");
+    let line_vec: Vec<&str> = s.split_whitespace().collect();
+    let r = line_vec[0].parse().unwrap_or(0);
+    let c = line_vec[1].parse().unwrap_or(0);
+
+    let mut rc_elements: Vec<_> = vec![];
+
+    for i in 0..r as usize {
+        let mut columns = String::new();
+        io::stdin().read_line(&mut columns).expect("Error");
+        let column_vec: Vec<&str> = columns.split_whitespace().collect();
+
+        let mut column_value: Vec<i32> = vec![];
+        for x in column_vec {
+            column_value.push(x.parse().unwrap_or(0));
+        }
+        rc_elements.push(column_value);
+    }
+    // 行合計
+    let mut total_vec: Vec<i32> = vec![];
+    for i in 0..r as usize {
+        let mut column_sum = 0;
+        for j in 0..c as usize {
+            column_sum += rc_elements[i][j];
+        }
+
+        rc_elements[i].push(column_sum);
+    }
+
+    let mut outer = c + 1;
+    let mut inner = r;
+    if r > c {
+        outer = r;
+        inner = c + 1;
+    }
+    // 列合計
+    for i in 0..outer {
+        let mut sum = 0;
+        for j in 0..inner {
+            sum += rc_elements[j][i];
+        }
+        total_vec.push(sum);
+    }
+    rc_elements.push(total_vec);
+
+    for r in rc_elements {
+        for (index, value) in r.iter().enumerate() {
+            if index != c  {
+                print!("{} ", value);
+            } else {
+                print!("{}", value);
+            }
+        }
+        println!();
+    }
+}
+

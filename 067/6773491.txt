@@ -1,0 +1,61 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+template<class T> bool chmin(T& a,T b){
+  if(a > b){
+    a = b;
+    return true;
+  }
+  else return false;
+}
+
+int main(){
+  int N,M;
+  cin >> N >> M;
+  vector<vector<pair<int,int>>> G(N);
+  for(int i=0;i<M;i++){
+    int a,b,c,d;
+    char c1,c2,c3;
+    cin >> a >> c1 >> b >> c2 >> c >> c3 >> d;
+    a--;
+    b--;
+    G[a].push_back(make_pair(b,c));
+    G[b].push_back(make_pair(a,d));
+  }
+  int s,g,V,P;
+  char C1,C2,C3;
+  cin >> s >> C1 >> g >> C2 >> V >> C3 >> P;
+  s--;
+  g--;
+  vector<int> dist1(N,1000000000);
+  dist1[s] = 0;
+  priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>> que;
+  que.push(make_pair(0,s));
+  while(!que.empty()){
+    int v = que.top().second;
+    int d = que.top().first;
+    que.pop();
+    if(d > dist1[v]) continue;
+    for(auto e:G[v]){
+      int nv = e.first;
+      int cost = e.second;
+      if(chmin(dist1[nv],d+cost)) que.push(make_pair(d+cost,nv));
+    }
+  }
+  vector<int> dist2(N,1000000000);
+  dist2[g] = 0;
+  que.push(make_pair(0,g));
+  while(!que.empty()){
+    int v = que.top().second;
+    int d = que.top().first;
+    que.pop();
+    if(d > dist2[v]) continue;
+    for(auto e:G[v]){
+      int nv = e.first;
+      int cost = e.second;
+      if(chmin(dist2[nv],d+cost)) que.push(make_pair(d+cost,nv));
+    }
+  }
+  int ans = V-P-dist1[g]-dist2[s];
+  cout << ans << endl;
+}

@@ -1,0 +1,70 @@
+from itertools import accumulate
+import itertools
+import sys
+sys.setrecursionlimit(10**9)
+import math
+import heapq
+import bisect
+from collections import deque, Counter, defaultdict, OrderedDict
+from sys import stdin
+import copy
+from decimal import Decimal
+from operator import mul
+from functools import reduce
+
+
+MOD = 10 ** 9 + 7
+int1 = lambda x: int(x) - 1
+stinput = lambda: stdin.readline()[:-1]
+ii = lambda: int(stinput())  # int input
+mi = lambda: map(int, stdin.readline().split())  # map input (int)
+li = lambda: list(mi())  # list input (int)
+mi1 = lambda: map(int1, stdin.readline().split())  # map input (int)-1
+li1 = lambda: list(mi1())  # list input (int)-1
+mis = lambda: map(str, stdin.readline().split())  # map input (string)
+lis = lambda: list(mis())  # list input (string)
+def my_lcm(x, y):
+    return (x * y) // math.gcd(x, y)
+def combnations_count(n, r):
+    return math.factorial(n) // (math.factorial(n-r) * math.factorial(r))
+
+def Maze(start):
+    #スタート位置（x座標, y座標, 移動回数）をセット
+    pos = start
+    ans = 1
+    while len(pos) > 0:#探索可能ならTrue
+        x, y, depth = pos.pop(0) #リストから探索する位置を取得
+        # #ゴールについた時点で終了
+        # if maze[x][y] == 1:
+        #     return [(x, y), depth]
+        depth += 1
+        
+        #現在位置の上下左右を探索：〇<2は壁でもなく探索済みでもないものを示す
+        for dx,dy in [[1,0],[0,1],[-1,0],[0,-1]]:
+            if 0 <= x+dx < W and 0 <= y+dy < H:
+                if maze[y+dy][x+dx] == 1:
+                    ans += 1
+                    pos.append([x+dx,y+dy,depth])
+                    maze[y+dy][x+dx] = 2
+    return ans
+
+
+while True:
+    W, H = mi()
+    ans = 1
+    if W == 0:
+        break
+    maze = [[2 for _ in range(W)] for _ in range(H)]
+    for i in range(H):
+        field = input()
+        for j in range(len(field)):
+            if field[j] == '.':
+                maze[i][j] = 1
+            elif field[j] == '@':
+                maze[i][j] = 2
+                x,y = j,i
+    start = [[x,y,1]]
+    result = Maze(start)
+    print(result)
+
+

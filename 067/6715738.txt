@@ -1,0 +1,49 @@
+#include <iostream>
+#include <vector>
+#include <utility>
+#include <algorithm>
+#include <map>
+#include <tuple>
+using namespace std;
+struct edge{
+    int s;
+    int t;
+    int w;
+};
+int main(){
+    int n,m,s,t,w,sum=0;
+    cin>>n>>m;
+    vector<vector<edge>> connect(n);
+    map<tuple<int,int,int>,edge> heap;
+    for(int i=0;i<m;++i){
+        edge tmp;
+        cin>>tmp.s>>tmp.t>>tmp.w;
+        connect[s].push_back(tmp);
+        connect[t].push_back(tmp);
+    }
+    bool flag[n]={1};
+    int nextv=0;
+    for(int i=1;i<n;++i){
+        for(edge x:connect[nextv]){
+            if(flag[x.t]+flag[x.s]==1){
+                heap[make_tuple(x.w,x.s,x.t)]=x;
+            }
+        }
+        sum+=begin(heap)->second.w;
+        if(flag[begin(heap)->second.s]){
+            nextv=begin(heap)->second.t;
+            flag[nextv]=1;
+        }else{
+            nextv=begin(heap)->second.s;
+            flag[nextv]=1;
+        }
+        for(edge x:connect[nextv]){
+            if(flag[x.t]+flag[x.s]==2){
+                heap.erase(make_tuple(x.w,x.s,x.t));
+            }
+        }        
+
+    }
+    cout<<sum<<endl;
+}
+

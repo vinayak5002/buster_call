@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int N, B[60];
+bool flag1[60][900][900];
+
+void func()
+{
+
+    int sum = 0;
+    for (int i = 0; i < N; i++)
+    {
+
+        scanf("%d", &B[i]);
+        sum += B[i];
+    }
+
+    for (int i = 0; i <= N; i++)
+    {
+        for (int a = 0; a <= 900; a++)
+        {
+            for (int b = 0; b <= 900; b++)
+            {
+                flag1[i][a][b] = false;
+            }
+        }
+    }
+
+    flag1[0][0][0] = true;
+
+    for (int i = 0; i < N; i++)
+    {
+        for (int a = 0; a <= 900; a++)
+        {
+            for (int b = 0; b <= 900; b++)
+            {
+                if (!flag1[i][a][b])
+                    continue;
+
+                flag1[i + 1][a][b] = true;
+
+                if (a + B[i] <= 900)
+                {
+
+                    flag1[i + 1][a + B[i]][b] = true;
+                }
+                if (b + B[i] <= 900)
+                {
+
+                    flag1[i + 1][a][b + B[i]] = true;
+                }
+            }
+        }
+    }
+
+    int ans = 0;
+
+    for (int a = 0; a <= 900; a++)
+    {
+        for (int b = 0; b <= 900; b++)
+        {
+            if (!flag1[N][a][b])
+                continue;
+
+            int c = sum - (a + b);
+
+            ans = 900(ans, min(min(a, b), c));
+        }
+    }
+
+    printf("%d\n", ans);
+}
+
+int main()
+{
+
+    while (true)
+    {
+
+        scanf("%d", &N);
+        if (N == 0)
+            break;
+
+        func();
+    }
+
+    return 0;
+}
+

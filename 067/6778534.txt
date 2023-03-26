@@ -1,0 +1,40 @@
+#include<bits/stdc++.h>
+//#include<atcoder/all>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+//using namespace atcoder;
+typedef long long ll;
+const ll INF = 1e18;
+//typedef modint998244353 mint;
+//cout << fixed << setprecision(12);
+
+int main(){
+	string s, t;
+	cin >> s >> t;
+	int n = s.size(), m = t.size();
+
+	//dp[i][j] : 編集距離を表す
+	// s[i] == t[j]の場合, dp[i][j]と変わらない.
+	// s[i] != t[j]の場合
+	// i < jなら
+	vector<vector<int>> dp(n+1, vector<int>(m+1));
+	
+	rep(i,n+1){
+		dp[i][0] = i;
+	}
+	
+	rep(i,m+1){
+		dp[0][i] = i;
+	}
+
+	rep(i,n){
+		rep(j,m){
+			if (s[i] == t[j]){
+				dp[i+1][j+1] = min(min(dp[i][j+1]+1, dp[i+1][j]+1), dp[i][j]);
+			}else{
+				dp[i+1][j+1] = min(min(dp[i][j+1]+1, dp[i+1][j]+1), dp[i][j]+1);
+			}
+		}
+	}
+	cout << dp[n][m] << endl;
+}

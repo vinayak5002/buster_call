@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1000000000
+#define LINF 1000000000000000000
+using namespace std;
+using ll=long long;
+using PL=pair<ll,int>;
+
+int N,M,K,S,P,Q;
+vector<int> C;
+vector<vector<int>> g;
+vector<int> z;
+
+template<typename T>bool chmin(T &a,const T &b){if(a>b){a=b;return true;}return false;}
+
+void bfs() {
+   queue<int> q;
+   vector<int> dist(N,INF);
+   for(auto i:C) {
+      dist[i]=0;
+      z[i]=2;
+      q.push(i);
+   }
+   while(!q.empty()) {
+      int u=q.front(); q.pop();
+      if(dist[u]+1<=S) for(auto v:g[u]) {
+         if(chmin(dist[v],dist[u]+1)) q.push(v);
+      }
+   }
+   rep(i,N) if(dist[i]<=S && z[i]!=2) z[i]=1;
+}
+
+ll dijkstra() {
+   priority_queue<PL,vector<PL>,greater<PL>> q;
+   vector<ll> dist(N,LINF);
+   dist[0]=0;
+   q.push(make_pair(0,0));
+   while(!q.empty()) {
+      ll d; int u;
+      tie(d,u)=q.top(); q.pop();
+      if(d>dist[u]) continue;
+      for(auto v:g[u]) {
+         if(z[v]==2) continue;
+         int c=(z[v] ? Q : P);
+         if(v==N-1) c=0;
+         if(chmin(dist[v],dist[u]+c)) q.push(make_pair(dist[v],v));
+      }
+   }
+   return dist[N-1];
+}
+
+int main(void) {
+   cin.tie(0);
+   ios::sync_with_stdio(0);
+   cin >> N >> M >> K >> S >> P >> Q;
+   C.resize(K);
+   g.resize(N);
+   z.resize(N,0);
+   rep(i,K) {
+      cin >> C[i];
+      C[i]--;
+   }
+   rep(i,M) {
+      int a,b; cin >> a >> b;
+      a--; b--;
+      g[a].push_back(b);
+      g[b].push_back(a);
+   }
+   bfs();
+   cout << dijkstra() << endl;
+   return 0;
+}

@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+using namespace std;
+void chmax(int& a, int b){ if(a < b) a = b; }
+
+
+int main(){
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    int D, N;
+    cin >> D >> N;
+    vector<int> temp(D);
+    for(int& t : temp) cin >> t;
+    vector<array<int, 3>> cloth(N);
+    for(auto& [L, R, C] : cloth) cin >> L >> R >> C;
+    vector dp(101, INT_MIN);
+    for(auto [L, R, C] : cloth){
+        if(L <= temp[0] && temp[0] <= R) dp[C] = 0;
+    }
+    for(int d = 1; d < D; d++){
+        const int t = temp[d];
+        vector dp_l = dp, dp_r = dp, dp2(101, INT_MIN);
+        for(int i = 0; i < 100; i++) chmax(dp_l[i + 1], dp_l[i] + 1);
+        for(int i = 100; i--; ) chmax(dp_r[i], dp_r[i + 1] + 1);
+        for(auto [L, R, C] : cloth) if(L <= t && t <= R){
+             dp2[C] = max(dp_l[C], dp_r[C]);
+        }
+        dp = move(dp2);
+    }
+    cout << *max_element(dp.begin(), dp.end()) << endl;
+}
+

@@ -1,0 +1,19 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    string s;
+    cin >> s;
+    int n = s.size();
+    vector<vector<int>> dp(n + 1, vector<int>(n + 1, -1));
+    function<int(int, int)> rec = [&](int l, int r){
+        if(l >= r)return 1;
+        if(dp[l][r] != -1)return dp[l][r];
+        if(s[l] != 'm' || s[r - 1] != 'w')return 0;
+        for(int m = l + 1; m + 1 < r; m++){
+            if(s[m] == 'e' && rec(l + 1, m) && rec(m + 1, r - 1))return dp[l][r] = 1;
+        }
+        return dp[l][r] = 0;
+    };
+    cout << (rec(0, n) ? "Cat" : "Rabbit") << '\n';
+}

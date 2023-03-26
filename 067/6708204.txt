@@ -1,0 +1,81 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using vi = vector<int>;
+using vl = vector<long long>;
+using vs = vector<string>;
+using vc = vector<char>;
+using vb = vector<bool>;
+using vpii = vector<pair<int, int>>;
+using vpll = vector<pair<long long, long long>>;
+using vvi = vector<vector<int>>;
+using vvl = vector<vector<long long>>;
+using vvc = vector<vector<char>>;
+using vvb = vector<vector<bool>>;
+using vvvi = vector<vector<vector<int>>>;
+using pii = pair<int, int>;
+//#include <atcoder/all>
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define MAX 10000
+#define INFTY (1 << 30)
+// 浮動小数点の誤差を考慮した等式
+#define EPS (1e-10)
+#define equal(a, b) (fabs((a) - (b)) < EPS)
+ll llMax(ll x, ll y) { return (x >= y) ? x : y; }
+ll llMin(ll x, ll y) { return (x <= y) ? x : y; }
+
+template <typename T>
+inline bool chmax(T &a, T b) {
+  return ((a < b) ? (a = b, true) : (false));
+}
+template <typename T>
+inline bool chmin(T &a, T b) {
+  return ((a > b) ? (a = b, true) : (false));
+}
+
+struct Solver {
+  void solve() {
+    /* input */
+    int V;
+    int E;
+    cin >> V >> E;
+    vector<pair<int, pii>> vec;
+
+    rep(i, E) {
+      int s, t, w;
+      cin >> s >> t >> w;
+      vec.emplace_back(w, make_pair(s, t));
+    }
+
+    /* solve */
+    sort(vec.begin(), vec.end());
+
+    set<int> st;
+    ll ans = 0;
+    for (auto e : vec) {
+      int w = e.first;
+      int v = e.second.first;
+      int u = e.second.second;
+      // 既にv, uが入っているならその辺はいらない
+      if (st.count(v) && st.count(u)) continue;
+      // 片方でも入っていないならその辺は必要
+      ans += w;
+      st.insert(v);
+      st.insert(u);
+      // 全部の頂点が入ったら終わり
+      if ((int)st.size() == V) break;
+    }
+
+    /* output */
+    cout << ans << endl;
+  }
+};
+
+int main() {
+  int ts = 1;
+  rep(ti, ts) {
+    Solver solver;
+    solver.solve();
+  }
+  return 0;
+}

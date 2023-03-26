@@ -1,0 +1,64 @@
+# 二次元累積和
+def make_two_dimentions_accumulate(grid, imos=False):
+    H, W = len(grid), len(grid[0])
+    if imos:
+        new_grid = grid
+        for h in range(H):
+            for w in range(W):
+                value = 0
+                if h != 0:
+                    value += new_grid[h-1][w]
+                if w != 0:
+                    value += new_grid[h][w-1]
+                if h != 0 and w != 0:
+                    value -= new_grid[h-1][w-1]
+                new_grid[h][w] = value + grid[h][w]
+    else:
+        new_grid = [[0]*(W+1) for _ in range(H+1)]
+        for h in range(H):
+            for w in range(W):
+                new_grid[h+1][w+1] = new_grid[h+1][w] + new_grid[h][w+1] + \
+                                     -new_grid[h][w] + grid[h][w]
+    return new_grid
+
+
+# 0-index 左上(a, b) 右下(c, d)の二次元閉区間に含まれる総和を返す
+def calc_interval_sum(grid, a, b, c, d):
+    return grid[a][b] + grid[c+1][d+1] - grid[c+1][b] - grid[a][d+1]
+
+# dictを使う(こっちの方が早そう)
+def compress(data):
+    vals = sorted(list(set(data)))
+    f = dict(zip(vals, range(len(vals))))
+    result = list(map(lambda d: f[d], data))
+    return result
+
+
+N, M = map(int, input().split())
+X, Y = [], []
+for _ in range(N):
+    x, y = map(int, input().split())
+    X.append(x)
+    Y.append(y)
+
+for _ in range(M):
+    x1, y1, x2, y2 = map(int, input().split())
+    X.append(x1)
+    X.append(x2)
+    Y.append(y1)
+    Y.append(y2)
+
+X = compress(X)
+Y = compress(Y)
+
+grid = [[0] * (N+10) for _ in range(N+10)]
+for i in range(N):
+    x, y = X[i], Y[i]
+    grid[x][y] += 1
+
+grid = make_two_dimentions_accumulate(grid)
+
+for i in range(N, N+2*M, 2):
+    x1, x2 = X[i], X[i+1]
+    y1, y2 = Y[i], Y[i+1]
+    print(calc_interval_sum(grid, x1, y1, x2, y2))

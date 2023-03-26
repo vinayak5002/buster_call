@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+
+
+int main(){
+    vector<int> ans;
+    while (1) {
+        int n, m;
+        cin >> n >> m;
+        if (n * m == 0) break;
+
+        int a[101], w[11];
+        for (int i = 0; i < n; i++) cin >> a[i];
+        for (int i = 0; i < m; i++) cin >> w[i];
+
+        vector<int> vec;
+        vec.push_back(w[0]);
+        vec.push_back(-w[0]);
+        for (int i = 1; i < m; i++) {
+            int sz = vec.size();
+            vec.push_back(w[i]);
+            for (int j = 0; j < sz; j++) {
+                vec.push_back(vec[j] + w[i]);
+                vec.push_back(vec[j] - w[i]);
+            }
+        }
+
+        set<int> st[101];
+        for (int i = 0; i < n; i++) {
+            for (auto v: vec) {
+                if (v < 0) continue;
+                st[i].insert(abs(a[i] - v));
+                st[i].insert(v + a[i]);
+            }
+        }
+
+        bool flag = 1;
+        int id;
+        for (int i = 0; i < n; i++) {
+            if (st[i].find(0) == st[i].end()) {
+                flag = 0;
+                id = i;
+            }
+        }
+
+        if (flag) {
+            ans.push_back(0);
+            continue;
+        }
+        for (auto s: st[id]) {
+            flag = 1;
+            for (int i = 1; i < n; i++) {
+                if (st[i].find(s) == st[i].end() && st[i].find(0) == st[i].end()) flag = 0;
+            }
+            if (flag) {
+                ans.push_back(s);
+                break;
+            }
+        }
+        if (flag) continue;
+        else {
+            ans.push_back(-1);
+        }
+    }
+
+    for (auto a: ans) cout << a << endl;
+}

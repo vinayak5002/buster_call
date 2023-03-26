@@ -1,0 +1,103 @@
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+using namespace std;
+
+using lint = long long;
+using ulint = unsigned long long;
+template<class T> using vec = vector<T>;
+
+#define rep(i,n) for(int i = 0; i < n; i++)
+#define repr(i,n) for(int i = n - 1; i >= 0; i--)
+#define repi(i,ini,n) for(int i = ini; i < n; i++)
+#define repir(i,ini,n) for(int i = n - 1; i >= ini; i--)
+#define repb(i,mn,mx) for(int i = mn; i <= mx; i++)
+#define repbr(i,mn,mx) for(int i = mx; i >= mn; i--)
+#define all(a) begin(a),end(a)
+#define rall(a) rbegin(a),rend(a)
+
+template<class T> auto chmax(T& a, const T b) { return a = max(a, b); }
+template<class T> auto chmin(T& a, const T b) { return a = min(a, b); }
+
+template<class It>
+auto acc(It begin, It end) -> decltype(*begin) { return accumulate(begin, end, 0); }
+
+constexpr lint inf = 1100100100100100100ll;
+constexpr int infi = 1100100100;
+
+constexpr int mod = 1'000'000'007;
+
+template<class T>
+auto div2(T a, T b) {
+	return (a + b - 1) / b;
+}
+
+template<class T, class Pred>
+pair<T, T> bin(T begin, T end, Pred p)
+{
+	while (end - begin > 1)
+	{
+		T tgt = begin + (end - begin) / 2;
+
+		if (p(tgt))
+		{
+			begin = tgt;
+		}
+		else
+		{
+			end = tgt;
+		}
+	}
+
+	return make_pair(begin, end);
+}
+
+
+void solve() {
+	int n;
+	cin >> n;
+	int rr;
+	vec<int> r(n-1);
+	cin >> rr;
+	rep(i, n - 1)
+		cin >> r[i];
+
+	vec<int> x(n - 1);
+	rep(i, n - 1) {
+		x[i] = div2(rr, r[i]);
+	}
+
+	sort(all(x));
+
+	auto ans = bin(-10, 200, [&](int m) {
+		if (m <= 0)
+			return true;
+		if (m > n - 1)
+			return false;
+
+		set<int> s;
+		repb(i, 2, n)
+			s.insert(i);
+
+		repr(i, m) {
+			auto it = s.lower_bound(x[i]);
+			if (it == s.end())
+				return false;
+			s.erase(it);
+		}
+		});
+
+	cout << n - ans.first << endl;
+
+}
+
+int main() {
+	{
+		solve();
+	}
+}
+

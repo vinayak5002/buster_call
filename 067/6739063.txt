@@ -1,0 +1,85 @@
+#include<iostream>
+#include<math.h>
+#include<vector>
+#include<algorithm>
+using namespace std;;
+
+int v, e;
+vector<int> p;
+vector<int> Rank;
+void makeSet(int);
+void unite(int, int);
+void link(int, int);
+int findSet(int);
+bool same(int, int);
+vector<vector<int>> kruskal(vector<vector<int>> const &);
+
+bool comp(const vector<int> &x, const vector<int> &y){
+    return x[2] < y[2];
+}
+
+int main(){
+    int x, y, w, i, t = 0;
+
+    cin >> v >> e;
+    vector<vector<int>> Edges(e, vector<int>(3));
+    vector<vector<int>> MST;
+    vector<int> W(e);
+
+    for(i=0; i<e; i++){
+        cin >> x >> y >> w;
+        Edges[i][0] = x;
+        Edges[i][1] = y;
+        Edges[i][2] = w;
+    }
+
+    sort(Edges.begin(), Edges.end(), comp);
+    MST = kruskal(Edges);
+
+    for(i=0; i<MST.size(); i++) t += MST[i][2];
+
+    cout << t << endl;
+
+}
+
+vector<vector<int>> kruskal(vector<vector<int>> const &Edges){
+    int i, u, v;
+    vector<vector<int>> MST;
+    for(i=0; i<v; i++) makeSet(i);
+
+    for(i=0; i<e; i++){
+        u = Edges[i][0];
+        v = Edges[i][1];
+        if(!same(u, v)){
+            unite(u, v);
+            MST.push_back(Edges[i]);
+        }
+    }
+    return MST;
+}
+
+void makeSet(int x){
+    p.push_back(x);
+    Rank.push_back(0);
+}
+void unite(int x, int y){
+    link(findSet(x), findSet(y));
+}
+void link(int x, int y){
+    if(Rank[x] > Rank[y])
+        p[y] = x;
+    else{
+        p[x] = y;
+        if(Rank[x] == Rank[y])
+            Rank[y] = Rank[x] + 1;
+    }
+}
+int findSet(int x){
+    if(x != p[x]){
+        p[x] = findSet(p[x]);
+    }
+    return p[x];
+}
+bool same(int x, int y){
+    return findSet(x) == findSet(y);
+}

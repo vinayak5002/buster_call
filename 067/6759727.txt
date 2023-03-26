@@ -1,0 +1,57 @@
+from sys import stdin
+input = stdin.readline
+
+b = {}
+b['n'] = b
+b['p'] = b
+
+def insert(k):
+  x = {}
+  x['k'] = k
+  x['n'] = b['n']
+  b['n']['p'] = x
+  b['n'] = x
+  x['p'] = b
+
+def delete(k):
+  c = b['n']
+  while(c != b and c['k'] != k):
+    c = c['n']
+  if c != b:
+    c['p']['n'] = c['n']
+    c['n']['p'] = c['p']
+
+def deleteFirst():
+  c = b['n']
+  c['p']['n'] = c['n']
+  c['n']['p'] = c['p']
+
+def deleteLast():
+  c = b['p']
+  c['p']['n'] = c['n']
+  c['n']['p'] = c['p']
+
+def show():
+  s = []
+  c = b['n']
+  while(c != b):
+    s.append(c['k'])
+    c = c['n']
+  print(*s, end='\n')
+
+n = int(input())
+for i in range(n):
+  cmd = input() #insert 7
+  if  cmd[6] == 'F':
+    deleteFirst()
+  elif  cmd[6] == 'L':
+    deleteLast()
+  else:
+    if cmd[0] == 'i':
+      insert(cmd[7:])
+    elif  cmd[0] == 'd':
+      delete(cmd[7:])
+
+show()
+
+

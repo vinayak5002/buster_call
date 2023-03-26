@@ -1,0 +1,37 @@
+def search_min_cost(l): #リストの中から-1を除いた最小値を探す
+  min_cost = 10
+  for i,item in enumerate(l):
+    if min_cost > item and item != -1:
+      min_index = i
+      min_cost = item
+  return min_index, min_cost
+
+
+n = int(input())
+adj = []
+V = []
+T = []
+min_dic = {}
+cost = 0
+
+for i in range(n):
+  V.append(i)
+  adj.append(list(map(int, input().split())))
+
+for i in range(n):
+  if i not in T:
+    T.append(i)
+  while len(T) != n:
+    for v in T:
+      min_id, min_c = search_min_cost(adj[v])
+      min_dic[v, min_id] = [min_c]
+
+    min_kv = min(min_dic.items(), key=lambda x: x[1])
+    (min_row, min_col), min_cost = min_kv
+    adj[min_row][min_col] = -1
+    adj[min_col][min_row] = -1
+    cost = cost + min_cost[0]
+    T.append(min_col)
+    min_dic.clear()
+
+print(cost)

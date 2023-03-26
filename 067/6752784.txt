@@ -1,0 +1,103 @@
+#include <stdio.h>
+#include <limits.h>
+#include <string.h>
+#define WHITE 0 //未訪問
+#define GRAY 1  //訪問している
+#define BLACK 2 //削除されている
+#define N 100
+#define INFTY INT_MAX
+#define LEN 100005
+
+int Q[LEN];
+int head, tail, n;
+int n, M[N][N];
+int d[N];     //始点から各頂点までの最短距離
+int color[N]; //頂点iの訪問状態をWHITE, GRAY, BLACKのいずれかで表す
+
+void enqueue(int x)
+{
+  Q[tail] = x;
+  tail = (tail + 1) % LEN;
+}
+
+int dequeue()
+{
+  int x = Q[head];
+  head = (head + 1) % LEN;
+  return x;
+}
+
+void bfs(int s)
+{
+  int i;
+  int u;
+
+  for (i = 0; i < n; i++)
+  {
+    color[i] = WHITE;
+    d[i] = INFTY;
+  }
+
+  color[s] = GRAY;
+  d[s] = 0;
+  enqueue(s);
+
+  while (head != tail)
+  {
+    u = dequeue();
+    for (i = 0; i < n; i++)
+    {
+      if (M[u][i] && color[i] == WHITE)
+      {
+        color[i] = GRAY;
+        d[i] = d[u] + 1;
+        enqueue(i);
+      }
+    }
+    color[u] = BLACK;
+  }
+
+  for (i = 0; i < n; i++)
+  {
+    printf("%d ", i + 1);
+    if (d[i] == INFTY)
+    {
+      printf("%d\n", -1);
+    }
+    else
+    {
+      printf("%d\n", d[i]);
+    }
+  }
+}
+
+int main(void)
+{
+  int i, j, u, k, v;
+
+  scanf("%d", &n);
+
+  for (i = 0; i < n; i++)
+  {
+    for (j = 0; j < n; j++)
+    {
+      M[i][j] = 0; //隣接行列に0を格納
+    }
+  }
+
+  for (i = 0; i < n; i++)
+  {
+    scanf("%d %d", &u, &k); // uは頂点の番号,kは隣接している個数
+    u--;                    // 0オリジンにする
+    for (j = 0; j < k; j++)
+    {
+      scanf("%d", &v);
+      v--;         // 0オリジンにする
+      M[u][v] = 1; //隣接している部分を1にする
+    }
+  }
+
+  bfs(0);
+
+  return 0;
+}

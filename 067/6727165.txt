@@ -1,0 +1,73 @@
+#include <stdio.h>
+#define MAX 101
+#define LIM 2001
+
+int A[MAX][MAX], parent[MAX + 1];
+int n;
+
+void prim(){
+	//d[n]は最小の辺の重みを格納
+	//parent[n]はnの親を格納
+	int d[n + 1], i, judge[n + 1], u, min;
+	
+	for(i = 1; i <= n; i++){
+		d[i] = LIM;
+		judge[i] = 0;
+	}
+	
+	d[1] = 0;
+	parent[1] = -1;
+	
+	while(1){
+		min = LIM;
+		u = -1;
+		for(i = 1; i <= n; i++){
+			if(judge[i] != 2 && d[i] < min){
+				u = i;
+				min = d[i];
+			}
+		}
+		
+		if(u == -1){
+			return;
+		}
+		
+		judge[u] = 2;
+		
+		for(i = 1; i <= n; i++){
+			if(judge[i] != 2){
+				if(A[u][i] < d[i]){
+					d[i] = A[u][i];
+					parent[i] = u;
+					judge[i] = 1;
+				}
+			}
+		}
+	}
+}
+
+int main (void){
+	int i, j, sum = 0;
+	scanf("%d", &n);
+	
+	for(i = 1; i <= n; i++){
+		for(j = 1; j <= n; j++){
+			scanf("%d", &A[i][j]);
+			if(A[i][j] == -1){
+				A[i][j] = LIM;
+			}
+		}
+	}
+	
+	prim();
+	
+	for(i = 1; i<= n; i++){	
+		if(parent[i] != -1){
+			sum += A[i][parent[i]];
+		}
+	}
+	
+	printf("%d\n", sum);
+	
+	return 0;
+}

@@ -1,0 +1,49 @@
+#include<stdio.h>
+#include<string.h>
+
+int main(){
+	char buf[10000] = {};
+	int length, cposi = 0, count = 0, flag = 0 ,moji_count = 0;
+	char check_sen[20] = {}, end_sen[13] = {"END_OF_TEXT"};
+
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%s", &check_sen);
+
+	length = strlen(check_sen);
+	
+	while (1){
+		fgets(buf, sizeof(buf) - 1, stdin);
+		char* p = buf;
+		for (int i = 0; i < 13; i++){
+			if (*p == end_sen[i]){
+				flag++;
+			}
+			p++;
+		}
+		if (flag == 12)break;
+		else flag = 0;
+
+		p -= 13;
+		while (*p != '\n'){
+			if (*p != ' '){
+				if (*p == check_sen[cposi]) cposi++;
+				else if (*p == check_sen[cposi] - 32) cposi++;
+				else cposi = 0;
+				moji_count++;
+			}
+			else{
+				if (moji_count == length) count++;
+				moji_count = 0;
+			}
+			p++;
+			if (*p == '\n'){
+				if (moji_count == length) count++;
+				else cposi = 0;
+				moji_count = 0;
+			}
+		}
+	}
+
+	printf("%d\n", count);
+	return 0;
+}

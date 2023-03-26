@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+map<string, int> mp;
+bool ok;
+
+ll rec(string &S, int l, int &r) {
+    show(l, S);
+    ll ret = 0;
+    if (S[l] == '(') {
+        // eval many molucule
+        l++;
+        while (S[l] != ')') {
+            ret += rec(S, l, r);
+            l = r;
+        }
+        assert(S[l] == ')');
+        l++;
+        int mul = 0;
+        while (l < S.size() and '0' <= S[l] and S[l] <= '9') {
+            mul = 10 * mul + S[l] - '0';
+            l++;
+        }
+        r = l;
+        if (mul == 0) mul = 1;
+        return ret * mul;
+    } else if ('A' <= S[l] and S[l] <= 'Z') {
+        // eval molucule
+        string atom = S[l];
+        l++;
+        while (l < S.size() and 'a' <= S[l] and S[l] <= 'z') {
+            atom += S[l];
+            l++;
+        }
+        int mul = 0;
+        while (l < S.size() and '0' <= S[l] and S[l] <= '9') {
+            mul = 10 * mul + S[l] - '0';
+            l++;
+        }
+        r = l;
+        if (mul == 0) mul = 1;
+        if (mp[atom] == 0) ok = false;
+        return mp[atom] * mul;
+    }
+    assert(0);
+}
+
+void solve(string &S) {
+    int r;
+    ok = true;
+    S = "(" + S + ")";
+    ll ans = rec(S, 0, r);
+    assert(r == (int)S.size());
+    if (!ok) {
+        cout << "UNKNOWN" << '\n';
+    } else {
+        cout << ans << '\n';
+    }
+    return;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    string S;
+    while (cin >> S, S != "END_OF_FIRST_PART") {
+        int x;
+        cin >> x;
+        mp[S] = x;
+    }
+    while (cin >> S, S != "0") solve(S);
+    return 0;
+}
+

@@ -1,0 +1,117 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+
+public class Main {
+
+	static int[][] graph;
+	static StringBuilder sb = new StringBuilder();
+	static final int NULL = -1;
+	static final int INFINITY = 2001;		//重みの最大が2000
+	static int[] path;
+	static int[] d;
+	static boolean[] searched;
+	static int endJudge = 0;
+
+	public static void main(String[] args) throws IOException{
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		PrintWriter out = new PrintWriter(System.out);
+
+		int n = Integer.parseInt(br.readLine());
+
+		graph = new int[n][n];
+		path = new int[n];
+		d = new int[n];
+		searched = new boolean[n];
+
+		String[] num;
+		String input;
+
+		for(int i=0; i<n; i++) {
+
+			path[i] = NULL;
+			d[i] = INFINITY;
+			searched[i] = false;
+		}
+
+
+		for(int i=0; i<n; i++) {
+
+			//入力&格納
+			input = br.readLine();
+			num = input.split(" ");
+
+			int u = 0;
+
+			while(u+1 != num.length) {
+
+				if(Integer.parseInt(num[u+1]) != -1)
+					graph[i][u] = Integer.parseInt(num[u+1]);
+				else
+					graph[i][u] = INFINITY;
+				u++;
+			}
+		}
+
+		//出力
+		out.println(minSum(n));
+
+		out.flush();
+	}
+
+
+	static int minSum(int n) {
+
+		int result = 0;
+		int min, u;
+
+		d[0] = 0;
+
+		while(true) {
+
+			min = INFINITY;
+			u = NULL;
+
+			for(int i=0; i<n; i++) {
+
+				//最小の重みを探す
+				if(min > d[i] && !searched[i]) {
+					u = i;
+					min = d[i];
+				}
+
+			}
+
+			if(u == NULL)
+				break;
+
+			searched[u] = true;
+
+			for(int i=0; i<n; i++) {
+				if(!searched[i] && graph[u][i] != INFINITY) {
+
+					//最小重みに更新
+					if(d[i] > graph[u][i]) {
+
+						d[i] = graph[u][i];
+						path[i] = u;
+					}
+				}
+			}
+		}
+
+		//重みの合計
+		for(int i=0; i<n; i++) {
+
+			if(path[i] != NULL)
+				result += graph[i][path[i]];
+		}
+
+		return result;
+	}
+
+
+}
+

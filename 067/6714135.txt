@@ -1,0 +1,41 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+using vi = vector<int>;
+using vvi = vector<vi>;
+
+#define rep(i, n) for (int i = 0; i < n; i++)
+
+
+void dfs(int now, int &time, const vvi &graph, vi &d, vi &f){
+    if(d[now] != -1) return;
+    time++;
+    d[now] = time;
+    for(auto v:graph[now])
+        dfs(v,time,graph,d,f);
+    time++;
+    f[now] = time;
+}
+
+int main(){
+    int n; cin >> n;
+    vvi graph(n+1,vi(0));
+    rep(i,n){
+        int u,k; cin >> u >> k;
+        rep(j,k){
+            int v; cin >> v;
+            graph[u].push_back(v);
+        }
+    }
+
+    vi d(n+1,-1);
+    vi f(n+1);
+    int time = 0;
+
+    dfs(1,time,graph,d,f);
+
+    for(int i=1; i<n+1; i++) cout << i << " " << d[i] << " " << f[i] << endl;
+
+}

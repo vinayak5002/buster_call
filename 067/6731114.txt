@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+using namespace std;
+using vi = vector<int64_t>;
+using vii = vector<vi>;
+using pii = pair<int64_t, int64_t>;
+
+#define rep(i, n) for (int64_t i = 0; i < (int64_t)(n); i++)
+#define all(v) v.begin(), v.end()
+
+const int64_t inf = numeric_limits<int64_t>::max();
+
+// 以下可変
+
+struct UNION_FIND
+{
+    vi prt; // prt[i] = j のとき、i の親は j
+    int64_t Nnode;
+    vi now_root;
+    int64_t Nroot;
+
+    UNION_FIND(int64_t N) : prt(N)
+    { // 全部自分が根（node N 個 edge 0 の森）
+        Nnode = N;
+        Nroot = Nnode;
+        rep(i, N)
+        {
+            prt[i] = i;
+        }
+    }
+
+    int64_t root(int64_t chl)
+    {
+        if (prt[chl] != chl)
+        {
+            prt[chl] = root(prt[chl]);
+        };
+        return prt[chl];
+    }
+
+    bool same(int64_t x, int64_t y)
+    {
+        if (root(x) == root(y))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    void unite(int64_t x, int64_t y)
+    {
+        if (root(x) == root(y))
+        {
+            return;
+        }
+        prt[root(x)] = root(y);
+        Nroot--;
+    }
+};
+
+int64_t Kruskal(deque<vi> &Graph, int64_t Nnode){
+    sort(all(Graph));
+    UNION_FIND UF(Nnode);
+    int64_t ans = 0;
+    while (!(Graph.empty()))
+    {
+        vi now = Graph.front();
+        Graph.pop_front();
+        if (UF.same(now[1], now[2]))
+        {
+            continue;
+        }
+            ans += now[0];
+            UF.unite(now[1], now[2]);
+    }
+    return ans;
+}
+
+    /////////////////////////////////////////////////////////////
+    int
+    main()
+{
+    int64_t N, M;
+    cin >> N >> M;
+
+    deque<vi> G;
+    rep(i, M)
+    {
+        int64_t st, gl, dis;
+        cin >> st >> gl >> dis;
+        G.push_back({dis, st, gl});
+    }
+
+    
+
+    cout << Kruskal(G, N) << endl;
+
+    return 0;
+    }
+

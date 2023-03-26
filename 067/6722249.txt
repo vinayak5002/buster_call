@@ -1,0 +1,56 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 123456
+#define MM 12345
+#define NIL -20000000002
+#define INF 20000000002
+#define MAXN 50
+int n, q ;
+int t = 0;
+
+struct vertex {
+    vector<int> from;
+    vector<int> to;
+    int con = 0 ;
+    int indeg = 0;
+};
+
+vertex R[11000];
+vector<int> res;
+
+void bfs (int s) {
+    queue<int> Q;
+    Q.push(s);  R[s].con=1;
+    while( Q.size() > 0 ) {
+        int u = Q.front();
+        Q.pop(); res.push_back(u);
+        for (int i=0; i < R[u].to.size() ; i++ ) {
+            int v = R[u].to.at(i);
+            R[v].indeg--;
+            if (R[v].indeg ==0 && R[v].con ==0) {
+                R[v].con=1;  Q.push(v);}
+        }
+    }
+}
+
+
+int main(){
+    cin >> n >> q ;
+    for (int j=0; j<q ; j++ ){
+        int from, to;
+        cin >> from >> to ;
+        R[to].from.push_back(from);
+        R[from].to.push_back(to);
+        R[to].indeg++;
+    }
+    for (int j=0; j<n; j++) {
+        if (R[j].con==0 && R[j].indeg ==0) {bfs(j);}
+    }
+    vector<int>::iterator it = res.begin();
+    for ( ; it != res.end(); it++ ){
+        printf("%d\n", *it );
+    }
+
+    return 0;
+}
+

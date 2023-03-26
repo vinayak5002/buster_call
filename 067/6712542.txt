@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int w[300];
+bool isOK[301][301];    // isOK[l][r] := [l, r)が連続して取り出し可能かどうか
+int DP[301][301];       // DP[l][r] := [l, r)取り出し可能なブロック数
+
+bool isConnected(int i, int j) {
+    return abs(w[i] - w[j]) <= 1;
+}
+
+bool solve()
+{
+    int n;
+    cin >> n;
+    if(n == 0) return false;
+    for(int i = 0; i < n; ++i) cin >> w[i];
+    memset(isOK, 0, sizeof(isOK));
+    memset(DP, 0, sizeof(DP));
+    for(int i = 0; i < n; ++i) {
+        isOK[i][i] = true;
+    }
+    for(int len = 2; len <= n; ++len) {
+        for(int i = 0; i + len <= n; ++i) {     // [i, i + len) が取り出し可能か調べる
+                                                
+                                                
+            if(isOK[i+1][i + len - 1] && isConnected(i, i + len - 1)) {     // [i + 1, i + len - 1) が取り出し可能で、i番目と(i+len-1)番目のブロックの差が1以下なら
+                isOK[i][i+len] = true;      // [i, i + len) は取り出し可能
+                continue;
+            }
+
+            // [i, i+k) と [i+k, i+len)が取り出し可能なら[i, i+len)も取り出し可能
+            for(int k = 0; k <= len; ++k) {
+                if(isOK[i][i+k] && isOK[i+k][i+len]) {
+                    isOK[i][i+len] = true;
+                    break;
+                }
+            }
+        }
+    }
+    
+    // 区間DPで「区間どうしがおなじ頂点（ブロック）を被覆しないようにいくつか区間を選ぶときの、
+    // 被覆できる頂点（ブロック）の最大値」を求める
+    for(int left = 0; left < n; ++left) {
+        for(int right = left; right <= n; ++right) {
+            if(isOK[left][right]) DP[left][right] = right - left;
+        }
+    }
+
+    for(int len = 0; len <= n; ++len) {
+        for(int left = 0; left <= n; ++left) {
+            int right = left + len;
+            if(n < right) break;
+            for(int k = left; k <= right; ++k) {
+                DP[left][right] = max(DP[left][right], DP[left][k] + DP[k][right]);
+            }
+        }
+    }
+   
+    cout << DP[0][n] << endl;
+    return true;
+}
+
+int main() {
+    while(solve());
+    return 0;
+}
+

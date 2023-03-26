@@ -1,0 +1,63 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+struct UnionFind{
+  vector<int> par,siz;
+  UnionFind(int n):par(n,-1),siz(n,1){}
+  int root(int x){
+    if(par[x] == -1) return x;
+    else return par[x] = root(par[x]);
+  }
+  bool issame(int x,int y){
+    if(root(x) == root(y)) return true;
+    else return false;
+  }
+  bool unite(int x,int y){
+    x = root(x);
+    y = root(y);
+    if(x == y) return false;
+    if(siz[x] < siz[y]) swap(x,y);
+    par[y] = x;
+    siz[x] += siz[y];
+    return true;
+  }
+  int size(int x){
+    return siz[root(x)];
+  }
+};
+
+int main(){
+  for(;;){
+    int H,W;
+    cin >> H >> W;
+    if(H == 0 && W == 0) break;
+    vector<string> vec(H);
+    for(int i=0;i<H;i++) cin >> vec[i];
+    UnionFind uf(H*W);
+    vector<int> dx = {1,-1,0,0};
+    vector<int> dy = {0,0,1,-1};
+    for(int i=0;i<H;i++){
+      for(int j=0;j<W;j++){
+        for(int k=0;k<4;k++){
+          int ni = i+dx[k];
+          int nj = j+dy[k];
+          if(ni < 0 || ni >= H || nj < 0 || nj >= W) continue;
+          if(vec[i][j] == vec[ni][nj]) uf.unite(i*W+j,ni*W+nj);
+        }
+      }
+    }
+    for(int i=0;i<H;i++) for(int j=0;j<W;j++) uf.root(i*W+j);
+    int ans = 0;
+    vector<bool> seen(H*W,false);
+    for(int i=0;i<H;i++){
+      for(int j=0;j<W;j++){
+        int r = uf.root(i*W+j);
+        if(!seen[r]){
+          ans++;
+          seen[r] = true;
+        }
+      }
+    }
+    cout << ans << endl;
+  }
+}

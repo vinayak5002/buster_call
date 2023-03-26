@@ -1,0 +1,44 @@
+#include<stdio.h>
+#define N 50000
+#define INF 1000000000
+int A[N],n,count = 0;
+
+void merge(int left,int middle,int right){
+  int i,j,k;
+  int n1 = middle - left;
+  int n2 = right - middle;
+  int L[n1],R[n2];
+  for(i=0 ;i<n1 ;i++) L[i] = A[left+i];
+  for(i=0 ;i<n2 ;i++) R[i] = A[middle+i];
+  L[n1] = R[n2] = INF;
+  i = j = 0;
+  for(k=left ;k<right ;k++){
+    count++;
+    if(L[i] <= R[j]) A[k] = L[i++];
+    else A[k] = R[j++];
+  }
+}
+
+void mergeSort(int left,int right){
+  if(right > left + 1){
+    int middle = (left + right) / 2;
+    mergeSort(left,middle);
+    mergeSort(middle,right);
+    merge(left,middle,right);
+  }
+  return;
+}
+
+int main(){
+  int i;
+  scanf("%d",&n);
+  for(i=0 ;i<n ;i++) scanf("%d",&A[i]);
+  mergeSort(0,n);
+  for(i=0 ;i<n ;i++){
+    if(i) printf(" ");
+    printf("%d",A[i]);
+  }
+  printf("\n");
+  printf("%d\n",count);
+}
+

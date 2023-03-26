@@ -1,0 +1,50 @@
+#include <iostream>
+
+using namespace std;
+
+int box1[100000];
+int box2[200000];
+
+int find(int x){
+	if(box1[x]==x)return x;
+	else{
+		int fx=box1[x];
+		box1[x]=find(box1[x]);
+		box2[x]+=box2[fx];
+		return box1[x];
+	}
+}
+
+void join(int x,int y,int z){
+	int fx=find(x);
+	int fy=find(y);
+	if(fx!=fy){
+		box2[fx]=z+box2[y]-box2[x];
+		box1[fx]=fy;
+	}
+}
+int main(){
+	int n,q,t,l,r;
+	cin>>n>>q;
+	for(int i=0;i<=n;i++)box1[i]=i;
+
+	while(q--){
+		cin>>t>>l>>r;
+		if(t){
+			int fx=find(l);
+			int fy=find(r);
+			if(fx==fy){
+				cout<<box2[l]-box2[r]<<endl;
+			}
+			else cout<<"?"<<endl;
+		}
+		else{
+			int z;
+            cin>>z;
+			join(l,r,z);
+		}
+	}
+	return 0;
+}
+
+

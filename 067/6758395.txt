@@ -1,0 +1,88 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+struct UnionFind {
+    vector<int> rank, p;
+    UnionFind(int n) {
+        rank.resize(n, 0);
+        p.resize(n, 0);
+        for (int i = 0; i < n; i++)
+            tree(i);
+    }
+
+    void tree(int x) {
+        p[x] = x;
+        rank[x] = 0;
+    }
+
+    bool check(int x, int y)
+    {
+      return root(x) == root(y);
+    }
+
+    void unit(int x, int y) {
+        x = root(x);
+        y = root(y);
+        if (rank[x] > rank[y])
+            p[y] = x;
+        else {
+            p[x] = y;
+            if (rank[x] == rank[y])
+                rank[y]++;
+        }
+    }
+
+    int root(int x) {
+        if (x != p[x]) p[x] = root(p[x]);
+        return p[x];
+    }
+
+};
+
+struct Edge {
+    int a, b, cost;
+};
+
+bool comp(const Edge &e1, const Edge &e2)
+{
+  return e1.cost < e2.cost;
+}
+
+struct Kruskal {
+    int total;
+    vector<Edge> edge;
+    int v;
+    UnionFind uf = UnionFind(v);
+    Kruskal(const vector<Edge> &edge_, int v_) : edge(edge_), v(v_)
+    {
+      init();
+    }
+    void init() {
+        qsort(edge.begin(), edge.end(), comp);
+        total = 0;
+        for (auto e : edge) {
+            if (!uf.check(e.a, e.b)) {
+                uf.unit(e.a, e.b);
+                total += e.cost;
+            }
+        }
+    }
+};
+
+int main() {
+    int v, e;
+    cin >> v >> e;
+    vector<Edge> edge(e);
+    for (int i = 0; i < e; i++) {
+        int s, t, w;
+        cin >> s >> t >> w;
+        Edge ed = {s, t, w};
+        edge[i] = ed;
+    }
+    Kruskal k(edge, v);
+    cout << k.total << endl;
+    return 0;
+}
+

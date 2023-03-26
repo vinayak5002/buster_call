@@ -1,0 +1,84 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long int ull;
+#define BIG_NUM 2000000000
+#define HUGE_NUM 4000000000000000000
+#define MOD 1000000007
+#define EPS 0.000000001
+
+
+
+#define MAX 850
+#define SIZE 55
+
+int array1, array2[SIZE];
+bool dp[SIZE][MAX+1][MAX+1];
+
+void func(){
+
+	int sum = 0;
+	for(int i = 0; i < array1; i++){
+
+		scanf("%d",&array2[i]);
+		sum += array2[i];
+	}
+
+	for(int i = 0; i <= array1; i++){
+		for(int a = 0; a <= MAX; a++){
+			for(int b = 0; b <= MAX; b++){
+
+				dp[i][a][b] = false;
+			}
+		}
+	}
+
+	dp[0][0][0] = true;
+
+	for(int i = 0; i < array1; i++){
+		for(int a = 0; a <= MAX; a++){
+			for(int b = 0; b <= MAX; b++){
+				if(!dp[i][a][b])continue;
+
+				dp[i+1][a][b] = true;
+
+				if(a+array2[i] <= MAX){
+
+					dp[i+1][a+array2[i]][b] = true;
+				}
+				if(b+array2[i] <= MAX){
+
+					dp[i+1][a][b+array2[i]] = true;
+				}
+			}
+		}
+	}
+
+	int ans = 0;
+
+	for(int a = 0; a <= MAX; a++){
+		for(int b = 0; b <= MAX; b++){
+			if(!dp[array1][a][b])continue;
+
+			int c = sum-(a+b);
+
+			ans = max(ans,min(min(a,b),c));
+		}
+	}
+
+	printf("%d\n",ans);
+}
+
+int main(){
+
+	while(true){
+
+		scanf("%d",&array1);
+		if(array1 == 0)break;
+
+		func();
+	}
+
+	return 0;
+}
+

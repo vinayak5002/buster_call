@@ -1,0 +1,214 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX 10000 //supposed to use 10^9 but am using 10^6 //MAX value of input integer
+#define TOT_INPUT_MAX 199
+#define STACK_MAX 1000000000
+
+
+int stack[STACK_MAX];
+int top = -1;
+
+void scan_(char c)
+{
+    scanf("%c", &c);
+}
+
+int isOperand(char c)
+{
+    if (isdigit(c) != 0 && c>= '0') //&& c<=MAX
+    {
+        return 0;
+    }
+    return 1;
+}
+
+int isOperator(char c)
+{
+    if (c=='/' || c=='*' || c=='+' || c=='-' || c=='^')
+    {
+        return 0;
+    }
+    return 1;
+}
+
+bool isFull()
+{
+    if (top == STACK_MAX)
+    {
+        return true; //it is full
+    }
+    return false; // it is not full
+}
+
+bool isEmpty()
+{
+    if (top == -1)
+    {
+        return true; // it is empty
+    }
+    return false; // it is not empty
+}
+
+int push(int c)
+{
+    if(isFull() == false)
+    {
+        top = top+1;
+        stack[top] = c;
+        return 0;
+    }
+    return 1;
+
+}
+
+int pop()
+{
+    int data;
+    if(isEmpty() == false)
+    {
+        top = top-1;
+        data = stack[top+1];
+        return data;
+    }
+    return EXIT_FAILURE;
+
+}
+
+int add(int x, int y)
+{
+    return x+y;
+}
+
+int divide(int x, int y)
+{
+    return x/y;
+}
+
+int multiply(int x, int y)
+{
+    return x*y;
+}
+
+int substract(int x, int y)
+{
+    return x-y;
+}
+
+int power(int x, int y)
+{
+    return x^y;
+}
+
+int main()
+{
+    char ch = '\0'; //store the operand and operators
+    char space = '\0'; //store space
+
+    for (int i=0; i<TOT_INPUT_MAX; i++)
+    {
+        scanf("%c", &ch);
+        scanf("%c", &space);
+
+        if (isOperand(ch) == 0)
+        {
+            int data = atoi(&ch);
+            if (push(data) != 0 )
+            {
+                printf("the sctack is full ERROR!\n");
+                return 1;
+            }
+        }
+        else if (isOperator(ch) == 0)
+        {
+            int a, b, x;
+
+                if (ch=='+'){
+                    a = pop();
+                    b = pop();
+                    x = add(a, b);
+                    if (push(x) != 0 )
+                    {
+                        printf("the sctack is full ERROR!\n");
+                        return 1;
+                    }
+                    if (space == '\n')
+                    {
+                        break;
+                    }
+                }
+                else if (ch == '-'){
+                    a = pop();
+                    b = pop();
+                    x = substract(b, a);
+                    if (push(x) != 0 )
+                    {
+                        printf("the sctack is full ERROR!\n");
+                        return 1;
+                    }
+                    if (space == '\n')
+                    {
+                        break;
+                    }
+                }
+                else if(ch =='/'){
+                    a = pop();
+                    b = pop();
+                    x = divide(b, a);
+                    if (push(x) != 0 )
+                    {
+                        printf("the sctack is full ERROR!\n");
+                        return 1;
+                    }
+                    if (space == '\n')
+                    {
+                        break;
+                    }
+                }
+                else if (ch =='*'){
+                    a = pop();
+                    b = pop();
+                    x = multiply(a, b);
+                    if (push(x) != 0 )
+                    {
+                        printf("the sctack is full ERROR!\n");
+                        return 1;
+                    }
+                    if (space == '\n')
+                    {
+                        break;
+                    }
+                }
+                else if(ch =='^'){
+                    a = pop();
+                    b = pop();
+                    x = power(a, b);
+                    if (push(x) != 0 )
+                    {
+                        printf("the sctack is full ERROR!\n");
+                        return 1;
+                    }
+                    if (space == '\n')
+                    {
+                        break;
+                    }
+                }
+        }
+        else
+        {
+            break;
+        }
+    }
+    printf("%d\n", stack[top]);
+    return 0;
+}
+
+
+
+
+
+
+
+

@@ -1,0 +1,106 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 50
+int n;
+int c;
+int t = 0;
+int A[101][101] ; // 0以外では初期化できないんだってーーー。
+
+struct Node {
+    int d; //d,f,conは幅優先探索では使わないけど。。。 
+    int f;
+    int con; // 1:発見された 2:完了された　訪問は関係なし
+    vector<int> go ;
+};
+vector<Node> X;
+stack<int> df ;
+queue<int> Q ; 
+
+bool visitcheck(int u) {
+    for (int i=0; i < X.at(u).go.size() ; i++ ) {
+        int  y = X.at(u).go.at(i);
+        if ( X.at(y).con == NIL ) {return false;}
+    }
+    return true ; 
+}
+
+int ansBFS (int v){
+    // 1からvまで最短経路の長さを返す。
+    // conに記録していく。
+    if (X.at(v).con == NIL) { return -1; }
+    else { return X.at(v).con; }
+}
+
+void insert_q(int u) {
+    // uの経路のうち未訪問のところだけをQに入れる。
+    // 地点 u に書かれているgoをQに書き出す。
+
+    for (int i=0; i < X.at(u).go.size() ; i++ ) {
+        int  y = X.at(u).go.at(i);
+        if ( X.at(y).con == NIL ) {
+            Q.push(y) ; // yをQにいれる
+            X.at(y).con =  X.at(u).con + 1 ;  
+        } 
+    }
+}
+
+int doBFS () {
+    // 距離をtとする。
+    // Qにpushのタイミングでtを記録していく。
+    while ( Q.size() > 0) {
+        int u = Q.front();
+        Q.pop();
+        insert_q(u);
+
+        //初回訪問
+        if ( X.at(u).con == NIL ) {
+            X.at(u).con = t;
+        }
+    }
+    return 0;
+}
+
+
+void clearvalueA() {
+    for (int i=0 ; i<101; i++) {
+        for  (int j=0; j<101; j++) {
+            A[i][j] = 0 ;
+        }
+    }
+}
+
+int main() {
+    cin >> c ;
+    Node indata;
+    indata.d = INF; indata.f = INF; indata.con = NIL;
+    X.push_back(indata);        // 0番のダミー
+
+    for (int i = 0 ; i < c ; i++ ) {
+        int a, b ;
+        cin >> a  >> b ;
+        indata.go.clear();
+        for (int j=0; j < b ; j++) { 
+            int g;
+            cin >> g ;
+            indata.d = INF; indata.f = INF; indata.con = NIL;
+            indata.go.push_back(g);
+        }
+        X.push_back(indata);
+    }
+
+    t = 0;
+    Q.push(1);
+    X.at(1).con = t ;  
+    doBFS();
+
+    for (int i = 1 ; i <= c ; i++ ) {
+        cout << i << " " ; 
+        cout << ansBFS(i) << endl ;
+    }
+
+	return 0 ;
+}
+

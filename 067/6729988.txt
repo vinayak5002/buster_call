@@ -1,0 +1,49 @@
+from heapq import heapify as hpi , heappop as hpop , heappush as hpush
+n,m,r=map(int,input().split())
+g = [[] for i in range(n)]
+for _ in range(m):
+    x,y,z = map(int,input().split())
+    g[x].append((y,z))
+    #g[y].append((x,z))
+
+
+d = [float('inf')]*n
+done=[0]*n
+pre=[-1]*n
+hp=[]
+
+def  daiku(s):
+    d[s]=0
+    hpush(hp,(d[s],s))
+    
+    while hp:
+        _ ,now = hpop(hp)
+        if done[now]:
+            continue
+           
+        done[now] = 1
+        
+        for go,cost in g[now]:
+            if d[go] > d[now] + cost:
+                d[go] = d[now] + cost
+                pre[go] = now
+                hpush(hp,(d[go],go))
+            
+
+def  fk(x):
+    path=[]
+    while x != -1:
+        path.append(x)
+        x=pre[x]
+    return path[::-1]
+
+daiku(r)
+#print(fk(6))
+
+for i in d:
+  if i == float('inf'):
+    print('INF')
+    continue
+                
+  print(i)
+

@@ -1,0 +1,119 @@
+#include <iostream>
+
+void printArray( int arr[], int size );
+void printArrayFrom( int arr[], int size, int i );
+int insertionSort( int arr[], int size, int g );
+int shellSort( int arr[], int size, int gArr[], int gSize );
+
+int main()
+{
+	int gSize = 16;
+	int gArr[] = {
+		510774, 227011, 
+		100894, 44842, 
+		19930, 8858, 
+		3937, 1750, 
+		701, 301, 
+		132, 57, 
+		23, 10,
+		4, 1 
+	}; // Ciura gap sequence
+	int size;
+	std::cin >> size;
+	int* arr = new int[size];
+
+	// Fill array
+	for( int i = 0; i < size; i++ ) std::cin >> arr[i];
+	
+	for( int i = 0; i < gSize; i++ )
+	{
+		if( gArr[i] < size )
+		{
+			std::cout << gSize - i << std::endl;
+			printArrayFrom( gArr, gSize, i );
+			break;
+		}
+	}
+
+	int totalSwap = shellSort( arr, size, gArr, gSize );
+
+	std::cout << totalSwap << std::endl;
+	for( int i = 0; i < size; i++ )
+	{
+		std::cout << arr[i] << std::endl;
+	}
+
+	delete[] arr;
+
+	return 0;
+}
+
+void printArray( int arr[], int size )
+{
+	for( int i = 0; i < size - 1; i++ )
+	{
+		std::cout << arr[i] << ' ';
+	}
+	if( size > 0 )
+	{
+		std::cout << arr[size - 1] << std::endl;
+	}
+}
+
+void printArrayFrom( int arr[], int size, int i )
+{
+	for( ; i < size - 1; i++ )
+	{
+		std::cout << arr[i] << ' ';
+	}
+	if( size > 0 )
+	{
+		std::cout << arr[size - 1] << std::endl;
+	}
+}
+
+int insertionSort( int arr[], int size, int g )
+{
+	/*
+	Takes in an array to sort, size of the array,
+	and the gap between each element to compare
+	*/
+	int count = 0;
+
+	for( int i = g; i < size; i++ )
+	{
+		int key = arr[i];
+		int j = i - g;
+		while( j >= 0 && arr[j] > key )
+		{
+			arr[j + g] = arr[j];
+			j -= g;
+			count++;
+		}
+
+		arr[j + g] = key;
+	}
+
+	return count;
+}
+
+int shellSort( int arr[], int size, int gArr[], int gSize )
+{
+	/*
+	Shell sort
+	*/
+	if( size == 1 )
+	{
+		std::cout << 1 << std::endl << 1 << std::endl;
+		return 0;
+	}
+
+	int count = 0;
+
+	for( int i = 0; i < gSize; i++ )
+	{
+		count += insertionSort( arr, size, gArr[i] );
+	}
+
+	return count;
+}

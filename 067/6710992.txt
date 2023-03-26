@@ -1,0 +1,197 @@
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.NoSuchElementException;
+
+public class Main {
+	static StringBuilder sb = new StringBuilder();
+
+	public static void main(String[] args) {
+		FastScanner sc = new FastScanner();
+		final var n = sc.nextInt();
+		var temp = n;
+		var output = new ArrayList<>();
+
+		for (int i = 2; i < n; i++) {
+			while (temp % i == 0) {
+				output.add(i);
+				temp /= i;
+			}
+		}
+		System.out.println(n + ": " + output.toString().replaceAll("[,\\[\\]]", ""));
+
+	}
+
+	public static boolean nextP(int[] array) {
+		int i = array.length - 1;
+		while (i > 0 && array[i - 1] >= array[i])
+			i--;
+
+		if (i == 0) return false;
+
+		int pivot = array[i - 1];
+		int rightIndex = array.length - 1;
+		while (pivot > array[rightIndex])
+			rightIndex--;
+
+		int temp = array[i - 1];
+		array[i - 1] = array[rightIndex];
+		array[rightIndex] = temp;
+		int j = array.length - 1;
+		while (j > i) {
+			swap(array, i, j);
+			i++;
+			j--;
+		}
+
+		return true;
+	}
+
+	static void swap(int[] array, int i, int j) {
+		int temp = array[i];
+		array[i] = array[j];
+		array[j] = temp;
+	}
+
+	static boolean nextPermutation(int[] array) {
+		// Find longest non-increasing suffix
+		int i = array.length - 1;
+		while (i > 0 && array[i - 1] >= array[i])
+			i--;
+		// Now i is the head index of the suffix
+
+		// Are we at the last permutation already?
+		if (i <= 0) return false;
+
+		// Let array[i - 1] be the pivot
+		// Find rightmost element greater than the pivot
+		int j = array.length - 1;
+		while (array[j] <= array[i - 1])
+			j--;
+		// Now the value array[j] will become the new pivot
+		// Assertion: j >= i
+
+		// Swap the pivot with j
+		int temp = array[i - 1];
+		array[i - 1] = array[j];
+		array[j] = temp;
+
+		// Reverse the suffix
+		j = array.length - 1;
+		while (i < j) {
+			temp = array[i];
+			array[i] = array[j];
+			array[j] = temp;
+			i++;
+			j--;
+		}
+
+		// Successfully computed the next permutation
+		return true;
+	}
+
+	public static boolean hasNoBit(int bit, int i) {
+		return (bit & (1 << i)) != 1 << i;
+	}
+
+	public static boolean hasBit(int bit, int i) {
+		return (bit & (1 << i)) == 1 << i;
+	}
+
+}
+
+class FastScanner {
+	private final InputStream in = System.in;
+	private final byte[] buffer = new byte[1024];
+	private int ptr = 0;
+	private int buflen = 0;
+
+	private boolean hasNextByte() {
+		if (ptr < buflen) {
+			return true;
+		} else {
+			ptr = 0;
+			try {
+				buflen = in.read(buffer);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			if (buflen <= 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private int readByte() {
+		if (hasNextByte())
+			return buffer[ptr++];
+		else
+			return -1;
+	}
+
+	private static boolean isPrintableChar(int c) {
+		return 33 <= c && c <= 126;
+	}
+
+	public boolean hasNext() {
+		while (hasNextByte() && !isPrintableChar(buffer[ptr]))
+			ptr++;
+		return hasNextByte();
+	}
+
+	public String next() {
+		if (!hasNext()) throw new NoSuchElementException();
+		StringBuilder sb = new StringBuilder();
+		int b = readByte();
+		while (isPrintableChar(b)) {
+			sb.appendCodePoint(b);
+			b = readByte();
+		}
+		return sb.toString();
+	}
+
+	public long nextLong() {
+		if (!hasNext()) throw new NoSuchElementException();
+		long n = 0;
+		boolean minus = false;
+		int b = readByte();
+		if (b == '-') {
+			minus = true;
+			b = readByte();
+		}
+		if (b < '0' || '9' < b) {
+			throw new NumberFormatException();
+		}
+		while (true) {
+			if ('0' <= b && b <= '9') {
+				n *= 10;
+				n += b - '0';
+			} else if (b == -1 || !isPrintableChar(b)) {
+				return minus ? -n : n;
+			} else {
+				throw new NumberFormatException();
+			}
+			b = readByte();
+		}
+	}
+
+	public int nextInt() {
+		long nl = nextLong();
+		if (nl < Integer.MIN_VALUE || nl > Integer.MAX_VALUE) throw new NumberFormatException();
+		return (int) nl;
+	}
+
+	public double nextDouble() {
+		return Double.parseDouble(next());
+	}
+
+	public int[] readIntArray(final int size) {
+		int[] intArray = new int[size];
+		Arrays.setAll(intArray, i -> nextInt());
+		return intArray;
+	}
+
+}
+

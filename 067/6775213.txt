@@ -1,0 +1,233 @@
+#ifdef LOCAL
+#define _GLIBCXX_DEBUG
+#endif  // LOCAL
+
+#include <bits/stdc++.h>
+
+#include "atcoder/segtree.hpp"
+
+#pragma region debug
+
+#pragma region output
+template <typename T1, typename T2>
+std::ostream &std::operator<<(std::ostream &os, const std::pair<T1, T2> &p) {
+    os << p.first << " " << p.second;
+    return os;
+}
+template <class T>
+std::ostream &std::operator<<(std::ostream &os, const std::vector<T> &v) {
+    for (int i = 0; i < (int)v.size(); i++) {
+        if (i) os << " ";
+        os << v[i];
+    }
+    return os;
+}
+#pragma endregion
+
+#pragma region view
+
+namespace viewer {
+template <typename T>
+void view(const T e) {
+    std::cerr << e;
+}
+
+template <typename T, typename U>
+void view(const std::pair<T, U> &p) {
+    std::cerr << "(";
+    view(p.first);
+    std::cerr << ", ";
+    view(p.second);
+    std::cerr << ")";
+}
+
+template <typename T>
+void view(const std::set<T> &s) {
+    if (s.empty()) {
+        std::cerr << "{ }";
+        return;
+    }
+    std::cerr << "{ ";
+    for (auto &t : s) {
+        view(t);
+        std::cerr << ", ";
+    }
+    std::cerr << "\b\b }";
+}
+
+template <typename T>
+void view(const std::unordered_set<T> &s) {
+    if (s.empty()) {
+        std::cerr << "{ }";
+        return;
+    }
+    std::cerr << "{ ";
+    for (auto &t : s) {
+        view(t);
+        std::cerr << ", ";
+    }
+    std::cerr << "\b\b }";
+}
+
+template <typename T>
+void view(const std::vector<T> &v) {
+    if (v.empty()) {
+        std::cerr << "{ }";
+        return;
+    }
+    std::cerr << "{ ";
+    for (const auto &e : v) {
+        view(e);
+        std::cerr << ", ";
+    }
+    std::cerr << "\b\b }";
+}
+
+template <typename T>
+void view(const std::vector<std::vector<T>> &vv) {
+    std::cerr << "{\n";
+    for (const auto &v : vv) {
+        std::cerr << "\t";
+        view(v);
+        std::cerr << '\n';
+    }
+    std::cerr << "}";
+}
+
+template <typename T, typename U>
+void view(const std::vector<std::pair<T, U>> &v) {
+    std::cerr << "{\n";
+    for (const auto &c : v) {
+        std::cerr << "\t(";
+        view(c.first);
+        std::cerr << ", ";
+        view(c.second);
+        std::cerr << ")\n";
+    }
+    std::cerr << "}";
+}
+
+template <typename T, typename U>
+void view(const std::map<T, U> &m) {
+    std::cerr << "{\n";
+    for (const auto &t : m) {
+        std::cerr << "\t[";
+        view(t.first);
+        std::cerr << "] : ";
+        view(t.second);
+        std::cerr << '\n';
+    }
+    std::cerr << "}";
+}
+
+template <typename T, typename U>
+void view(const std::unordered_map<T, U> &m) {
+    std::cerr << "{\n";
+    for (const auto &t : m) {
+        std::cerr << "\t[";
+        view(t.first);
+        std::cerr << "] : ";
+        view(t.second);
+        std::cerr << '\n';
+    }
+    std::cerr << "}";
+}
+}  // namespace viewer
+
+#pragma endregion
+
+// when debugging : g++ foo.cpp -DLOCAL
+#ifdef LOCAL
+void debug_out() {}
+template <typename Head, typename... Tail>
+void debug_out(Head H, Tail... T) {
+    viewer::view(H);
+    std::cerr << ", ";
+    debug_out(T...);
+}
+#define debug(...)                                                \
+    do {                                                          \
+        std::cerr << __LINE__ << " [" << #__VA_ARGS__ << "] : ["; \
+        debug_out(__VA_ARGS__);                                   \
+        std::cerr << "\b\b]\n";                                   \
+    } while (0)
+#define dump(x)                                      \
+    do {                                             \
+        std::cerr << __LINE__ << " " << #x << " : "; \
+        viewer::view(x);                             \
+        std::cerr << '\n';                           \
+    } while (0)
+
+#else
+#define debug(...) (void(0))
+#define dump(x) (void(0))
+#endif
+
+#pragma endregion
+
+using namespace std;
+using namespace atcoder;
+
+using ll = long long;
+
+const int INF = 1001001001;
+
+int op(int a, int b) { return min(a, b); }
+
+int e() { return INF; }
+
+int main() {
+    int W;
+    cin >> W;
+    vector<int> As(W);
+    for (int i = 0; i < W; i++) {
+        cin >> As[i];
+    }
+
+    W += 4;
+    As.insert(As.begin(), {0, -1});
+    As.insert(As.end(), {-1, 0});
+
+    vector<int> left(W, INF), right(W, INF);
+    for (int i = 0; i < W; i++) {
+        if (As[i] < 0) {
+            left[i] = abs(As[i]) + i;
+            right[i] = abs(As[i]) - i;
+        }
+    }
+
+    segtree<int, op, e> seg_left(left), seg_right(right);
+
+    set<int> s;
+    for (int i = 0; i < W; i++) {
+        if (As[i] == 0) {
+            s.insert(i);
+        }
+    }
+
+    debug(s);
+
+    int answer = 0;
+    for (int i = 2; i < W - 2; i++) {
+        auto r = *(s.lower_bound(i));
+        auto l = *(--(s.lower_bound(i)));
+        debug(l, i, r);
+        if (As[i] > 0) {
+            int tmp = As[i];
+            // debug(seg_left.prod(l, i + 1), seg_right.prod(i, r + 1));
+            int left_close = seg_left.prod(l, i + 1) - i;
+            int right_close = seg_right.prod(i, r + 1) + i;
+            debug(left_close, right_close);
+            int close = max(left_close, right_close);
+            tmp = min(tmp, close);
+            tmp = max(tmp, 0);
+            debug(i, tmp);
+            answer += tmp;
+        }
+    }
+
+    cout << answer << endl;
+
+    return 0;
+}
+

@@ -1,0 +1,52 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+
+public class Main {
+
+    public static void main(String[] args) throws IOException{
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String[] str = br.readLine().split(" ");
+        int v = Integer.parseInt(str[0]);
+        int e = Integer.parseInt(str[1]);
+
+
+        int[][] map = new int[v][v];
+        for(int i=0; i<v; i++) Arrays.fill(map[i], -Integer.MAX_VALUE / 2);
+        for(int i=0; i<v; i++) map[i][i] = 0;
+
+
+        for(int i=0; i<e; i++){
+            str = br.readLine().split(" ");
+            int s = Integer.parseInt(str[0]);
+            int t = Integer.parseInt(str[1]);
+            map[s][t] = 1;
+        }
+
+        for(int k=0; k<v; k++){
+            for(int i=0; i<v;i++){
+                for(int j=0;j<v;j++){
+                    if(map[i][j] < map[i][k] + map[k][j]){
+                        map[i][j] = map[i][k] + map[k][j];
+                    }
+                }
+            }
+        }
+
+        boolean closed = false;
+        for(int i=0; i<v; i++){
+            if(map[i][i] != 0){
+                closed = true;
+                break;
+            }
+        }
+
+        if(!closed){
+            System.out.println(0);
+        } else {
+            System.out.println(1);
+        }
+    }
+}
+

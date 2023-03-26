@@ -1,0 +1,140 @@
+#include<iostream>
+#include<string>
+#include<cstdio>
+#include<algorithm>
+#include<cstdlib>
+#include<cmath>
+#include<vector>
+#include<utility>
+#include<queue>
+#include<stack>
+#include<set>
+#include<map>
+#include<bitset>
+#include<iomanip>
+#include<list>
+#include<deque>
+#include<unordered_set>
+using namespace std;
+//#define MODE 1
+#ifdef MODE
+#define DEB(X) cout<< #X <<": "<<X<<" ";
+#define DEB2(X) cout<<X<<" ";
+#define END cout<<endl;
+#else
+#define DEB(X) {}
+#define DEB2(X) {}
+#define END {}
+#endif
+#define int long long
+typedef std::pair<int,int> P;
+struct edge{
+	int from,to,cost;
+};
+const int INF2=2000000000000000000;
+const int INF =200000000000000000;
+const int MOD=1000000007;
+//const int MOD=998244353;
+#define REP(i,n) for(int i=0;i<(int)(n);i++)
+#define min(X,Y) (((int)(X)<(int)(Y))?(X):(Y))
+#define max(X,Y) (((int)(X)>(int)(Y))?(X):(Y))
+#define NP(X,Y) next_permutation(X,Y)
+int ceil2(int a,int b){if(a%b==0){return a/b;}else{return a/b+1;}}
+int pow2(int a,int b){int r=1;for(int i=1;i<=b;i++){r*=a;}return r;}
+void add(int &a,int b){a=(a+b)%MOD;}
+void sub(int &a,int b){a=(a-b+MOD)%MOD;}
+void seki(int &a,int b){a=(a*b)%MOD;}
+
+int W,H;
+int C[110][110];
+int X[310],Y[310],N[310];
+bool F[110][110];
+int h[110],w[110];
+
+signed main(){
+	cin.tie(nullptr);
+	ios_base::sync_with_stdio(false);
+	vector<bool> ans;
+	while(true){
+		cin>>W>>H;
+		if(W==0&&H==0)break;
+		REP(i,H){
+			REP(j,W){
+				C[i][j]=INF;
+				F[i][j]=0;
+			}
+		}
+		REP(i,H){
+			h[i]=INF;
+		}
+		REP(i,W){
+			w[i]=INF;
+		}
+		REP(i,W+H-1){
+			cin>>Y[i]>>X[i]>>N[i];
+			X[i]--,Y[i]--;
+			C[X[i]][Y[i]]=N[i];
+		}
+		w[0]=0;
+		int mode=0;
+		vector<int> v;
+		bool flag=true;
+		v.push_back(0);
+		int cnt=0;
+		while(v.size()){
+			if(mode==0){
+				vector<int> v2;
+				REP(i,v.size()){
+					int num=v[i];
+					REP(j,H){
+						if(C[j][num]!=INF&&F[j][num]==0){
+							h[j]=C[j][num]-w[num];
+							v2.push_back(j);
+							F[j][num]=1;
+							cnt++;
+						}
+					}
+				}
+				v=v2;
+				mode=1;
+			}
+			else{
+				vector<int> v2;
+				REP(i,v.size()){
+					int num=v[i];
+					REP(j,W){
+						if(C[num][j]!=INF&&F[num][j]==0){
+							w[j]=C[num][j]-h[num];
+							v2.push_back(j);
+							F[num][j]=1;
+							cnt++;
+						}
+					}
+				}
+				v=v2;
+				mode=0;
+			}
+		}
+		REP(i,H){
+			if(h[i]==INF)flag=false;
+		}
+		REP(i,W){
+			if(w[i]==INF)flag=false;
+		}
+		REP(i,H){
+			REP(j,W){
+				if(C[i][j]==INF)continue;
+				if(h[i]+w[j]!=C[i][j]){
+					flag=false;
+				}
+			}
+		}
+		ans.push_back(flag);
+	}
+	REP(i,ans.size()){
+		if(ans[i]==1)cout<<"YES"<<endl;
+		else cout<<"NO"<<endl;
+	}
+	return 0;
+}
+

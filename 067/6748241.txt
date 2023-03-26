@@ -1,0 +1,28 @@
+n, m = list(map(int,input().split()))
+c = list(map(int,input().split()))
+
+num = 0 
+list_len = len(c)
+dp_table = [[0 for j in range(n+1)] for i in range(list_len + 1)]
+
+
+#価格の行を記入する
+for j in range(len(dp_table[0])):
+    dp_table[0][j] = j
+
+#n円玉取り出す
+for row,value in enumerate(c):
+    row += 1
+    for col,price in enumerate(dp_table[0]):#価格m取り出す
+
+        if value > price: #比較を行う n>mなら上の行の値にする
+            dp_table[row][col] = dp_table[row-1][col]
+        else:#n<=mなら列の方向でさかのぼってn個前の値に1を足して追加する
+            if (dp_table[row][col-value] + 1) < dp_table[row-1][col]:  # 最小値が更新されるなら更新
+                dp_table[row][col] = dp_table[row][col-value] + 1
+            else:
+                dp_table[row][col] = dp_table[row-1][col]
+
+#テーブルの[n][list_len]の値をプリントする
+print(dp_table[-1][-1])
+#dp_table

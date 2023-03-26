@@ -1,0 +1,102 @@
+#include <stdio.h>
+
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+
+int color[100];
+int d[100];
+int M[100][100];
+int n;
+
+typedef struct queue_
+{
+    int value[100];
+    int head;
+    int tail;
+} queue;
+
+queue Q;
+
+void enqueue(int a)
+{
+    if (Q.tail > 100)
+    {
+        Q.tail = 0;
+    }
+    Q.value[Q.tail] = a;
+    Q.tail++;
+}
+
+int dequeue()
+{
+    int v = Q.value[Q.head];
+    Q.head++;
+    if (Q.head > 100)
+    {
+        Q.head = 0;
+    }
+    return v;
+}
+
+void bfs(int u)
+{
+    int m;
+    color[u] = GRAY;
+    d[u] = 0;
+    enqueue(u);
+    while (Q.head != Q.tail)
+    {
+        m = dequeue(u);
+        for (int v = 0; v < n; v++)
+        {
+            if (M[m][v] && color[v] == WHITE)
+            {
+                enqueue(v);
+                color[v] = GRAY;
+                d[v] = d[m] + 1;
+            }
+        }   
+    }
+}
+
+void bfs_init(int u)
+{
+    for (int i = 0; i < n; i++)
+    {
+        color[i] = WHITE;
+        d[i] = -1;
+    }
+    bfs(u);
+}
+
+int main()
+{
+    int i, j, k, u, v;
+    Q.head = 0;
+    Q.tail = 0;
+
+    for (i = 0; i < 100; i++)
+    {
+        for (j = 0; j < 100; j++)
+        {
+            M[i][j] = 0;
+        }
+    }
+    scanf("%d", &n);
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d %d", &u, &k);
+        for (j = 0; j < k; j++)
+        {
+            scanf("%d", &v);
+            M[u - 1][v - 1] = 1;
+        }
+    }
+    bfs_init(0);
+    for (i = 0; i < n; i++)
+    {
+        printf("%d %d\n", i + 1, d[i]);
+    }
+    return 0;
+}

@@ -1,0 +1,122 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 50
+int n;
+int t = NIL;
+
+struct Root {
+    int from;  int to; int cost;
+};
+struct Node {
+    int name;
+    int dist; //d,fは幅優先探索では使わないけど。。。
+    int con; 
+};
+    //Overload the < operator.
+    bool operator< (const Node & n1, const Node & n2)
+    {
+        return n1.dist < n2.dist ;
+    }
+    //Overload the > operator.
+    bool operator> (const Node & n1, const Node & n2)
+    {
+        return n1.dist > n2.dist ;
+    }
+
+vector<Root> R; 
+vector<Node> X;
+set<int> T ;
+stack<int> df ;
+priority_queue<Node, vector<Node>, greater<Node> > Q;
+int A[10001][10001] ; // 0以外では初期化できないんだってーーー。
+
+
+void calc_ans () {
+    int ans = 0;
+    for (int i=0; i < n; i++) {
+        cout << i << " " <<  X.at(i).dist << endl ; 
+    }
+}
+
+void clearvalueA() {
+    for (int i=0 ; i<10001; i++) {
+        for  (int j=0; j<10001; j++) {
+            A[i][j] = INF ;
+        }
+    }
+}
+void printvalueA(int a, int b) {
+    for (int i=0 ; i<a ; i++) {
+        for (int j=0 ; j<b ; j++) {
+            cout << A[i][j]  << " " ;
+        }
+        cout << endl ;
+    }
+}
+
+void doBSSP(){
+    // 今回は頂点0から回っていく。
+    T.insert(0); // 0をTにいれる。
+    X.at(0).dist = 0 ;
+    Q.push(X.at(0));
+
+    /*
+    // 0に隣接しているところのdistを書き換える。
+    for (int j=1 ; j < n ; j++) {
+            X.at(j).dist = A[0][j]; 
+            Q.push(X.at(j));        // まず一回ヒープを更新する。
+    }**/
+
+    //ここからスタート
+    while ( Q.size() > 0 ) { 
+        Node min_node = Q.top();
+        int min_to = min_node.name;
+        X.at(min_to).con = 1;
+       
+        // min_toを選択しコストを書き換える。
+        T.insert(min_to);
+        Q.pop(); 
+
+        // min_toに隣接する頂点がある限り
+        for (int j=0; j < n ; j++) {
+            //訪問済みだったらcontinue : 
+            if (T.count(j)) {continue;}
+            else if ( X.at(min_to).dist + A[min_to][j] < X.at(j).dist ) {
+                X.at(j).dist = X.at(min_to).dist + A[min_to][j];
+                Q.push( X.at(j)) ; 
+            }
+        }
+    }    
+}
+
+int main() {
+    cin >> n  ;
+    // nは登場人物の人数、
+    clearvalueA();
+
+    Node indata;
+    indata.dist = INF;     indata.con = -1; 
+
+    for (int i = 0 ; i < n ; i++ ) {
+        indata.name = i;
+        X.push_back(indata); //とりあえずn人をつくる。
+    }
+    for (int i = 0 ; i < n ; i++ ) {
+        int a , b, c , id;
+        cin >> id >> c ; // cは情報の数
+        for (int j = 0 ; j < c ; j ++ ){
+            cin >> a >> b ;
+            A[i][a] = b ; 
+        }
+    }
+    // printvalueA(5,5);
+    doBSSP();
+    calc_ans() ;
+    // prt_route();
+
+	return 0 ;
+}
+

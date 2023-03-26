@@ -1,0 +1,43 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+vector<vector<int>> g;
+
+auto bfs(int s) {
+    int n = (int)g.size();
+    vector<int> q;
+    vector<int> d(n, -1);
+    q.push_back(s);
+    d[s] = 0;
+    while (q.size() != 0) {
+        int u = q[0];
+        q.erase(q.begin());
+        for (auto& nu : g[u]) {
+            if (d[nu] != -1) continue;
+            q.push_back(nu);
+            d[nu] = d[u] + 1;
+        }
+    }
+    return d;
+}
+
+int main() {
+    int n;
+    cin >> n;
+    g.resize(n);
+    for(int i=0;i<n;++i){
+        int v, u, k;
+        cin >> u >> k;
+        for(int j=0;j<k;++j) {
+            cin >> v;
+            g[u-1].push_back(v-1);
+        }
+    }
+    auto dist = bfs(0);
+
+    for(int i=0;i<n;++i) {
+        cout << i + 1 << " " << dist[i] << "\n";
+    }
+}

@@ -1,0 +1,119 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <stdint.h>
+#include <string.h>
+#include <iostream>
+#include <queue>
+using namespace std;
+long* max_elem(long* array, size_t size){
+    long m = LONG_MIN;
+    long* p = array;
+    for (long i = 0; i < size; i++){
+        if (array[i] > m) {
+            m = array[i];
+            p = array + i;
+        }
+    }
+    return p;
+}
+long* min_elem(long* array, size_t size){
+    long m = LONG_MAX;
+    long* p = array;
+    for (long i = 0; i < size; i++){
+        if (array[i] < m) {
+            m = array[i];
+            p = array + i;
+        }
+    }
+    return p;
+}
+long sum(long* array, size_t size){
+    long r = 0;
+    for (long i = 0; i < size; i++){
+        r += array[i];
+    }
+    return r;
+}
+void getLM(long** array, size_t h, size_t w) {
+    for (size_t i = 0; i < h; i++) {
+        for (size_t j = 0; j < w; j++) {
+            scanf("%ld", array + (i * h + j));
+        }
+    }
+}
+typedef struct {
+    int x;
+    int y;
+} point;
+
+int main(){
+    int w=0,h=0,n=0,d=0,b=0;
+    queue<point> q1;
+    while(1){
+        int q[100]={0},a[101][101]={0},x1=0,y1=0,x2=0,y2=0,count=0;
+        scanf("%d %d %d %d %d",&w,&h,&n,&d,&b);
+        if(w==0){
+            return 0;
+        }
+        for(int i=0;i<n;i++){
+            scanf("%d %d",&x1,&y1);
+            if(i+1==b){
+                a[x1][y1]=1;
+                x2=x1;
+                y2=y1;
+            }
+            else{
+                a[x1][y1]=1;
+            }
+        }
+        q1.push({x2,y2});
+        a[x2][y2]=0;
+        while(!q1.empty()){
+            x2=q1.front().x;
+            y2=q1.front().y;
+            q1.pop();
+            count++;
+            for(int i=1;i<=d;i++){
+                if(y2+i>h){
+                    continue;
+                }
+                if(a[x2][y2+i]==1){
+                    q1.push({x2,y2+i});
+                    a[x2][y2+i]=0;
+                }
+            }
+            for(int i=1;i<=d;i++){
+                if(x2+i>w){
+                    continue;
+                }
+                if(a[x2+i][y2]==1){
+                    q1.push({x2+i,y2});
+                    a[x2+i][y2]=0;
+                }
+            }
+            for(int i=1;i<=d;i++){
+                if(y2-i<0){
+                    continue;
+                }
+                if(a[x2][y2-i]==1){
+                    q1.push({x2,y2-i});
+                    a[x2][y2-i]=0;
+                }
+            }
+            for(int i=1;i<=d;i++){
+                if(x2-i<0){
+                    continue;
+                }
+                if(a[x2-i][y2]==1){
+                    q1.push({x2-i,y2});
+                    a[x2-i][y2]=0;
+                }
+            }
+            a[x2][y2]=0;
+        }
+        printf("%d\n",count);
+        count=0;
+    }
+    return 0;
+}

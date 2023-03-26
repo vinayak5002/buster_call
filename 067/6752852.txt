@@ -1,0 +1,47 @@
+import sys
+from heapq import heappush, heappop
+readline = sys.stdin.readline
+
+class UnionFind():
+
+    def __init__(self, n):
+        self.n = n
+        self.parents = [-1] * n
+
+    def find(self, x):
+        if self.parents[x] < 0:
+            return x
+        else:
+            self.parents[x] = self.find(self.parents[x])
+            return self.parents[x]
+
+    def union(self, x, y):
+        xp = self.find(x)
+        yp = self.find(y)
+
+        if xp == yp:
+            return False
+
+        if self.parents[xp] > self.parents[yp]:
+            xp, yp = yp, xp
+
+        self.parents[xp] += self.parents[yp]
+        self.parents[yp] = xp
+
+        return True
+
+if __name__ == '__main__':
+    V, E = map(int, readline().split())
+    uf = UnionFind(V)
+    que = list()
+    for _ in range(E):
+        s, t, w = map(int, readline().split())
+        heappush(que, [w, s, t])
+
+    ans = 0
+    while que:
+        w, s, t = heappop(que)
+        if uf.union(s, t):
+            ans += w
+    print(ans)
+

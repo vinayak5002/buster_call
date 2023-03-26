@@ -1,0 +1,214 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef struct _NODE{
+	int key;
+	struct _NODE *parent;
+	struct _NODE *left;
+	struct _NODE *right;
+}NODE;
+
+void preorder(NODE *node)
+{
+	printf(" %d",node->key);
+	if(node->left!=NULL){
+		preorder(node->left);
+	}
+	
+	if(node->right!=NULL){
+		preorder(node->right);
+	}
+}
+
+void inorder(NODE *node)
+{
+	if(node->left != NULL){
+		inorder(node->left);
+	}
+	printf(" %d",node->key);
+	if(node->right != NULL){
+		inorder(node->right);
+	}
+}
+
+NODE *next_node(NODE *node, NODE *org, int flag)
+{
+	NODE *x;
+	
+	if(node->left != NULL){
+		x = next_node(node->left, org, flag);
+		if(x != NULL){
+			return x;
+		}
+	}
+	
+	if(flag == 1){
+		return node;
+	}
+	
+	if(node == org){
+		flag = 1;
+	}
+	
+	if(node->right != NULL){
+		x=next_node(node->right, org, flag);
+		if(x!=NULL){
+			return x;
+		}
+	}
+	
+	return NULL;
+}
+
+void postorder(NODE *node)
+{
+	if(node->left != NULL){
+		postorder(node->left);
+	}
+	
+	if(node->right != NULL){
+		postorder(node->right);
+	}
+	printf(" %d",node->key);
+}
+
+void insert(NODE **T,NODE *z)
+{
+	NODE *x,*y;
+	
+	y=NULL;
+	x=*T;
+	
+	while(x!=NULL){
+		y=x;
+		if(z->key < x->key){
+			x=x->left;
+		}else{
+			x=x->right;
+		}
+	}
+	z->parent=y;
+	if(y==NULL){
+		*T=z;
+	}
+	else if(z->key < y->key){
+		y->left=z;
+	}
+	else{
+		y->right=z;
+	}
+}
+
+NODE *find(NODE *T,int key)
+{
+	NODE *x;
+	
+	x=T;
+	while(x!=NULL){
+		if(x->key == key){
+			return x;
+		}
+		else if(x->key > key){
+			x=x->left;
+		}
+		else{
+			x=x->right;
+		}
+	}
+	return NULL;
+}
+
+void del_node(NODE *del)
+{
+	NODE *x;
+	
+	if(del->left == NULL && del->right ==NULL){
+		if(del->parent->left == del){
+			del->parent->left = NULL;
+		}else{
+			del->parent->right = NULL;
+		}
+	}else if(del->left == NULL || del->right == NULL){
+		if(del->left != NULL){
+			x=del->left;
+		}else{
+			x=del->right;
+		}
+		if(del->parent->left == del){
+			del->parent->left = x;
+		}else{
+			del->parent->right = x;
+		}
+		x->parent = del->parent;
+	}
+	
+	free(del);
+}
+
+
+int main(void)
+{
+	int m;
+	NODE *T;
+	char instruction[10];
+	NODE *y,*z;
+	int key;
+	int i;
+	
+	scanf("%d",&m);
+	
+	T=NULL;
+	for(i=0;i<m;i++){
+		scanf("%s",instruction);
+		switch(instruction[0]){
+		case 'i':
+			scanf("%d",&key);
+			z=(NODE *)malloc(sizeof(NODE));
+			z->key=key;
+			z->parent=z->left=z->right=NULL;
+			insert(&T,z);
+			break;
+			
+		case 'f':
+			scanf("%d",&key);
+			if(find(T,key)!= NULL){
+				printf("yes\n");
+			}
+			else{
+				printf("no\n");
+			}
+			break;
+		case 'd':
+			scanf("%d",&key);
+			if((z=find(T,key))==NULL){
+				break;
+			}
+			if(z->left == NULL && z->right == NULL){
+				del_node(z);
+			}else if(z->left != NULL && z->right != NULL){
+				y=next_node(z,z,0);
+				if(y != NULL){
+					z->key=y->key;
+					del_node(y);
+				}
+			}else{
+				del_node(z);
+			}
+			break;
+		
+		case 'p':
+			inorder(T);
+			printf("\n");
+		
+			preorder(T);
+			printf("\n");
+			break;
+		}
+	}
+	
+	return 0;
+}
+
+
+
+

@@ -1,0 +1,57 @@
+// ダイクストラ法
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using VI = vector<int>;
+using VVI = vector<VI>;
+using P = pair<int, int>;
+
+const int MAX = 10000001;
+
+int check_route(const VVI& route, const int from, const int to, const int n) {
+    VI distance(n + 1, MAX);
+    distance[from] = 0;
+    priority_queue<P, vector<P>, greater<P>> pq;
+    pq.push(make_pair(0, from));
+    while (!pq.empty()) {
+        P p = pq.top();
+        pq.pop();
+        if (p.first == to) continue;
+        for (int i = 1; i < (int)route[p.second].size(); ++i) {
+            if (distance[i] < p.first + route[p.second][i]) continue;
+            pq.push(make_pair(p.first + route[p.second][i], i));
+            distance[i] = p.first + route[p.second][i];
+        }
+    }
+    if (distance[to] == MAX)
+        return -1;
+    else
+        return distance[to];
+}
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+    while (true) {
+        int n, k;
+        cin >> n >> k;
+        if (n == 0 && k == 0) break;
+
+        VVI route(n + 1, VI(n + 1, MAX));
+
+        for (int i = 0; i < k; ++i) {
+            int x, a, b, c, d, e;
+            cin >> x;
+            if (x == 0) {
+                cin >> a >> b;
+                cout << check_route(route, a, b, n) << endl;
+            } else {
+                cin >> c >> d >> e;
+                route[c][d] = min(route[c][d], e);
+                route[d][c] = min(route[d][c], e);
+            }
+        }
+    }
+    return 0;
+}

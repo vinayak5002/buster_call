@@ -1,0 +1,80 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX_NUM 100000
+#define MAX_QUESTION 50000
+#define MAX_VALUE 1000000000 /*10^9*/
+#define MIN_VALUE 0
+
+int BinarySearch(int *Array, int Num, int Query);
+int InputArray(int *Array, int Num);
+int InputError(int cur, int lo, int hi);
+int main(void){
+    int NumSource=0;
+    int *Source;
+    int NumQuestion=0;
+    int *Question;
+    int Cnt=0;
+    scanf("%d",&NumSource);
+    Source = (int *)malloc(sizeof(int)*NumSource);
+    if(InputArray(Source, NumSource) == 1){
+        return 1;
+    }
+    scanf("%d", &NumQuestion);
+    Question = (int *)malloc(sizeof(int)*NumQuestion);
+    if(InputArray(Question, NumQuestion) == 1){
+        return 1;
+    }
+
+    for(int i=0; i < NumQuestion; i++){
+        Cnt += BinarySearch(Source, NumSource, Question[i]);
+    }
+    printf("%d\n", Cnt);
+    
+    free(Source);
+    free(Question);
+    return 0;
+}
+
+int BinarySearch(int *Array, int Num, int Query){
+    if(Array == NULL){
+        printf("NULL error\n");
+        return -1;
+    }
+    //int ans = (Array[Num/2] == Query);
+    int Ans = 0;
+    //printf("%d %d %d\n", Num/2, Array[Num/2], Query);
+    if(Num == 0){
+        Ans = 0;
+    }
+    else if(Array[Num/2] == Query){
+        Ans = 1;
+    }else if(Array[Num/2] > Query){
+        Ans = BinarySearch(Array, Num/2, Query);
+    }else{
+
+        Ans = BinarySearch(Array + (int)(Num/2)+1 , Num/2, Query);
+    }
+    return Ans;
+}
+int InputArray(int *Array, int Num){
+    int res = 0;
+    if(Array== NULL){
+        res = 1;
+    }else{
+        for(int i = 0; i < Num; i++){
+            scanf("%d",Array+i);
+            if(InputError(*(Array+i), MIN_VALUE, MAX_VALUE)== 1){
+                res = 1;
+                break;;
+            }
+        }
+    }
+    return 0;
+}
+int InputError(int cur, int lo, int hi){   /*入力異常検知*/
+    int tmp = ((cur < lo) || (hi < cur))?1:0;  /*与えられた値が下限上限を超えていた場合1、そうでなければ0を返す*/
+    if(tmp){
+        printf("input_error\n");
+    }
+    return tmp;
+}

@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for(int i=0; i<(n); i++)
+#define INF ((1LL<<62)-(1LL<<31))
+#define all(a)  (a).begin(),(a).end()
+#define rall(a)  (a).rbegin(),(a).rend()
+typedef long long ll;
+typedef pair<ll,ll> pl;
+
+int main() {
+    while(true) {
+        int t,p,r;
+        cin >> t >> p >> r;
+        if(t+p+r==0) break;
+        vector<vector<int>> pena(t,vector<int> (p,0));
+        vector<vector<bool>> ac(t,vector<bool> (p,false));
+        vector<int> time(t);
+        rep(i,r) {
+            int ti,pi,tim; string mes;
+            cin >> ti >> pi >> tim >> mes;
+            ti--; pi--;
+            if(mes[0]=='C') {
+                if(!ac[ti][pi]) {
+                    ac[ti][pi]=true;
+                    time[ti]+=tim+1200*pena[ti][pi];
+                }
+            } else {
+                if(!ac[ti][pi]) pena[ti][pi]++;
+            }
+        }
+        vector<pair<pair<int,int>,int>> res;
+        rep(i,t) {
+            int cntac=0;
+            rep(j,p) if(ac[i][j]) cntac++;
+            res.push_back({{cntac,-time[i]},-(i+1)});
+        }
+        sort(rall(res));
+        rep(i,t) cout << -res[i].second << " " << res[i].first.first << " " << -res[i].first.second << endl;
+    }
+    return 0;
+}

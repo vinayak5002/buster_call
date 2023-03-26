@@ -1,0 +1,163 @@
+#include <bits/stdc++.h>
+#include <chrono>
+#include <thread>
+////#include <atcoder/all>
+
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using vvvb = vector<vvb>;
+using vd = vector<double>;
+using vvd = vector<vd>;
+using vvvd = vector<vvd>;
+#define all(A) A.begin(),A.end()
+#define ALL(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q, bool C = 1) {
+    if (C == 0 && p == q) {
+        return 1;
+    }
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+double EPS = 1e-9;
+template<class T>
+bool chmin(T& p, T q) {
+    if (p > q + EPS) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+ll gcd(ll(a), ll(b)) {
+    if (b == 0)return a;
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+vector<ll> fact, factinv, inv;
+ll mod = 998244353;
+void prenCkModp(ll n) {
+    fact.resize(n + 5);
+    factinv.resize(n + 5);
+    inv.resize(n + 5);
+    fact.at(0) = fact.at(1) = 1;
+    factinv.at(0) = factinv.at(1) = 1;
+    inv.at(1) = 1;
+    for (ll i = 2; i < n + 5; i++) {
+        fact.at(i) = (fact.at(i - 1) * i) % mod;
+        inv.at(i) = mod - (inv.at(mod % i) * (mod / i)) % mod;
+        factinv.at(i) = (factinv.at(i - 1) * inv.at(i)) % mod;
+    }
+
+}
+ll nCk(ll n, ll k) {
+    if (k < 0)return 0;
+    if (n < k) return 0;
+    return fact.at(n) * (factinv.at(k) * factinv.at(n - k) % mod) % mod;
+}
+vector<string>S;
+ll dfs(ll L, ll R, ll n, char c = '+') {
+    ll res = 0;
+    if (c == '*')res = 1;
+    for (ll i = L; i <= R; i++) {
+        ll d = 0;
+        if (S[i].size() != n + 1)continue;
+        if (S[i][n] == '+') {
+            bool OK = 1;
+            for (ll j = i + 1; j < R; j++) {
+                if (S[j].size() == n + 1) {
+                    d = dfs(i + 1, j - 1, n + 1, '+');
+                    OK = 0;
+                    break;
+                }
+
+            }
+            if (OK)d = dfs(i + 1, R, n + 1, '+');
+        }
+        else if (S[i][n] == '*') {
+            bool OK = 1;
+            for (ll j = i + 1; j < R; j++) {
+                if (S[j].size() == n + 1) {
+                    d = dfs(i + 1, j - 1, n + 1, '*');
+                    OK = 0;
+                    break;
+                }
+
+            }
+            if (OK)d = dfs(i + 1, R, n + 1, '*');
+        }
+        else {
+            d = S[i][n] - '0';
+        }
+        if (c == '+')res += d;
+        else res *= d;
+    }
+    return res;
+}
+
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    ll N;
+    cin>>N;
+    map<string,set<ll>> M;
+    rep(i,N){
+        string S;
+        ll C;
+        cin>>S>>C;
+        M[S].insert(C);
+    } 
+    bool OK=1;
+    ll Q;
+    cin>>Q;
+    ll B=-1e18;
+    rep(q,Q){
+        string T;
+        cin>>T;
+        if(!M.count(T)){
+            cout<<"No"<<endl;
+            return 0;
+        }
+        if(M[T].size()==0){
+            cout<<"No"<<endl;
+            return 0;
+        }
+        auto p=M[T].upper_bound(B);
+        if(p==M[T].end()){
+            cout<<"No"<<endl;
+            return 0;
+        }
+        B=*p;
+    }
+    cout<<"Yes"<<endl;
+    
+}
+
+
+

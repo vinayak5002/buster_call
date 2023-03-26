@@ -1,0 +1,62 @@
+def link(x, y):
+    if rank[x] > rank[y]:
+        p[y] = x;
+    else:
+        p[x] = y;
+        if rank[x] == rank[y]:
+            rank[y] = rank[y] + 1;
+
+def findSet(x):
+    if x != p[x]:
+        p[x] = findSet(p[x]);
+    return p[x];
+
+def union(x, y):
+    link(findSet(x), findSet(y));
+
+
+V, E = map(int, input().split());
+
+if V < 1 and V > 10000:
+    print(-1);
+    exit;
+elif E < 1 and E > 100000:
+    print(-2);
+    exit;
+
+p = [0]*V;
+rank = [0]*V;
+
+edge = [0]*E;
+W = [0]*E;
+
+for i in range(E):
+    x, y, w = map(int, input().split());
+    if x == y:
+        print(-3);
+        exit;
+    elif w < 0 and w > 10000:
+        print(-4);
+        exit;
+    else:
+        edge[i] = [x, y];
+        W[i] = [w, i];
+
+W.sort();
+
+sum = 0;
+for i in range(V):
+    p[i] = i;
+
+for i in range(len(W)):
+    # print("x=" + str(edge[W[i][1]][0]) + " y=" + str(edge[W[i][1]][1]));
+    if findSet(edge[W[i][1]][0]) != findSet(edge[W[i][1]][1]):
+        sum = sum + W[i][0];
+        union(edge[W[i][1]][0], edge[W[i][1]][1]);
+
+print(sum);
+
+
+
+
+

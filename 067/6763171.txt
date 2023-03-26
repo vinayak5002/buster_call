@@ -1,0 +1,110 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+bool is_digit(char c) {
+    return '0' <= c and c <= '9';
+}
+
+pair<int, int> read_int(const string &s, int i) {
+    int j = i;
+    while (is_digit(s[j])) ++j;
+    return { stoi(s.substr(i, j - i)), j };
+}
+
+int prime;
+
+int inv_mod(int x) {
+    int res = 1;
+    int pow_x = x;
+    for (int v = prime - 2; v; v >>= 1) {
+        if (v & 1) res = (long long) res * pow_x % prime;
+        pow_x = (long long) pow_x * pow_x % prime;
+    }
+    return res;
+}
+int add(int x, int y) {
+    return (x + y) % prime;
+}
+int sub(int x, int y) {
+    return (x - y + prime) % prime;
+}
+int mul(int x, int y) {
+    return (long long) x * y % prime;
+}
+
+void solve() {
+    string s_;
+    getline(cin, s_);
+    
+    if (s_[0] == '0') exit(0);
+
+    string s;
+    for (char c : s_) if (c != ' ') s += c;
+
+    auto [p, exp_begin] = read_int(s, 0);
+    prime = p;
+    assert(s[exp_begin] == ':');
+    s = s.substr(exp_begin + 1);
+
+    const int n = s.size();
+
+    vector<int> rp(n, -1);
+    vector<int> st;
+    for (int i = 0; i < n; ++i) {
+        if (s[i] == '(') {
+            st.push_back(i);
+        } else if (s[i] == ')') {
+            int l = st.back();
+            rp[l] = i;
+            st.pop_back();
+        }
+    }
+
+    auto scan = [&](auto scan, int l, int r) -> optional<int> {
+        vector<int> terms;
+        char op = '\0';
+        for (int i = l; i < r; ++i) {
+            int val;
+            if (s[i] == '(') {
+                int j = rp[i];
+                auto opt_val = scan(scan, i + 1, j);
+                if (not opt_val.has_value()) return nullopt;
+                val = *opt_val;
+                i = j + 1;
+            } else {
+                assert(is_digit(s[i]));
+                auto [v, j] = read_int(s, i);
+                val = v;
+                i = j;
+            }
+            if (op == '*') {
+                terms.back() = mul(terms.back(), val);
+            } else if (op == '/') {
+                if (val == 0) return nullopt;
+                terms.back() = mul(terms.back(), inv_mod(val));
+            } else {
+                if (op == '-') {
+                    terms.push_back(prime - val);
+                } else {
+                    terms.push_back(val);
+                }
+            }
+            op = s[i];
+        }
+        int res = 0;
+        for (int v : terms) res = add(res, v);
+        return res;
+    };
+
+    auto ans = scan(scan, 0, n);
+    if (ans.has_value()) {
+        cout << s << " = " << *ans << " (mod " << p << ")" << endl;
+    } else {
+        cout << "NG" << endl;
+    }
+}
+
+int main() {
+    while (true) solve();
+}

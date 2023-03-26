@@ -1,0 +1,49 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+	int n;
+	cin >> n;
+	// 隣接リスト
+	vector<vector<int>>Graph(n);
+	for (int a = 0; a < n; a++)
+	{
+		int u, k;
+		cin >> u >> k;
+		// 添え字0始まりの補正
+		u--;
+		if (k == 0)
+			continue;
+		for (int b = 0; b < k; b++)
+		{
+			int v;
+			cin >> v;
+			v--;
+			Graph[u].push_back(v);
+		}
+	}
+
+	// 各頂点について頂点0からの距離 -1で初期化
+	vector<int>distance(n, -1);
+	// BFS
+	distance[0] = 0;
+	queue<int>que;
+	que.push(0);
+	while (!que.empty())
+	{
+		int curV = que.front();
+		que.pop();
+		for (int nextV :Graph[curV])
+		{
+			// 訪れたことがあれば除外
+			if (distance[nextV] != -1)
+				continue;
+			que.push(nextV);
+			distance[nextV] = distance[curV] + 1;
+		}
+	}
+	for (int a = 0; a < n; a++)
+	{
+		cout << a + 1 << " " << distance[a] << endl;
+	}
+}

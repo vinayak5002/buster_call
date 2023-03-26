@@ -1,0 +1,90 @@
+#include <stdio.h>
+#define MAX 200000000
+
+int size = 0;
+int pri[MAX + 1];
+
+void increaseKey(int size, int key){
+	pri[size] = key;
+	while(size > 1 && pri[size] > pri[size / 2]){
+		int tmp = pri[size];
+		pri[size] = pri[size / 2];
+		pri[size / 2] = tmp;
+		size = size / 2;
+	}
+}
+
+void insert(int key){
+	size++;
+	increaseKey(size, key);
+}
+
+void maxHeapify(int i){
+	int left, right, tmp;
+	int largest = i;
+	left = i * 2;
+	right = i * 2 + 1;
+	
+	
+	// 左の子、自分、右の子で値が最大のノードを選ぶ
+	//自分に対して、子が左のみの場合があるため、左の子、自分、右の子の順に探す
+	if(left <= size && pri[left] > pri[largest]){
+		largest = left;
+	}
+	
+	else{
+		largest = i;
+	}
+	
+	if(right <= size && pri[right] > pri[largest]){
+		largest = right;
+	}
+	
+	//iがlargestと異なるときには再構築を行わなければならない
+	//再構築する木の高さが2以上の時は再帰的に計算する
+	if(largest != i){
+		tmp = pri[i];				
+		pri[i] = pri[largest];
+		pri[largest] = tmp;
+		maxHeapify(largest);
+	}
+}
+
+void buildMaxHeap(){
+	int i;
+	//sizeの半分からヒープの再構築を行い、再構築の範囲を広げていく
+	for(i = size / 2; i >= 1; i--){
+		maxHeapify(i);
+	}
+}
+
+void extract(){
+	printf("%d\n", pri[1]);
+	pri[1] = pri[size];
+	size--;
+	buildMaxHeap();
+}
+
+int main (void){
+	char com[10];
+	int number;
+	
+	for(;;){
+		scanf("%s", com);
+		if(com[0] == 'i'){
+			scanf("%d", &number);
+			insert(number);
+		}
+		
+		else if(com[0] == 'e' && com[1] == 'x'){
+			extract();
+		}
+		
+		else if(com[0] == 'e' && com[1] == 'n'){
+			break;
+		}
+	}
+	
+	return 0;
+}
+

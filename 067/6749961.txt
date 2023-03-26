@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+
+using P = pair<int, int>;
+struct dijkstra_graph
+{
+    vector<vector<pair<long long, int>>> g;
+    vector<long long> dis;
+
+    dijkstra_graph(int n)
+    {
+        g.resize(n);
+        dis.resize(n, LLONG_MAX);
+    }
+
+    void add(int from, int to, long long cost)
+    {
+        g[from].push_back({cost, to});
+    }
+
+    vector<long long> start(int st)
+    {
+        priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> pq;
+        dis[st] = 0;
+        pq.push({0, st});
+
+        while (!pq.empty())
+        {
+            auto [dis_sum, now] = pq.top();
+            pq.pop();
+
+            if (dis[now] < dis_sum)
+                continue;
+
+            for (auto [cost, next] : g[now])
+            {
+                if (dis[next] > dis[now] + cost)
+                {
+                    if (dis[next] < 0 and dis[now] + cost < 0)
+                        return (vector<long long>){-1};
+
+                    dis[next] = dis[now] + cost;
+                    pq.push({dis[next], next});
+                }
+            }
+        }
+
+        return dis;
+    }
+};
+
+
+
+
+
+
+
+int v, e, r;
+int s, t;
+long long c;
+
+
+
+
+
+int main()
+{
+    cin >> v >> e >> r;
+
+    dijkstra_graph d(v);
+
+    while (e--)
+    {
+        cin >> s >> t >> c;
+
+        d.add(s, t, c);
+    }
+
+
+    if (d.start(r) == (vector<long long>){-1})
+    {
+        cout << "NEGATIVE CYCLE\n";
+        return 0;
+    }
+
+    for (int i = 0; i < v; i++)
+    {
+        if (d.dis[i] == LLONG_MAX)
+            cout << "INF\n";
+
+        else
+            cout << d.dis[i] << '\n';
+    }
+}

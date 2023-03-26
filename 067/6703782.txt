@@ -1,0 +1,185 @@
+#pragma GCC ta g("avx2")
+#pragma GCC optimize("Ofast")
+#pragma GCC optimize("unroll-loops")
+#include <bits/stdc++.h>
+using namespace std;
+#define DEBUG
+#ifdef DEBUG
+template <class T, class U>
+ostream &operator<<(ostream &os, const pair<T, U> &p) {
+    os << '(' << p.first << ',' << p.second << ')';
+    return os;
+}
+template <class T> ostream &operator<<(ostream &os, const vector<T> &v) {
+    os << '{';
+    for(int i = 0; i < (int)v.size(); i++) {
+        if(i) { os << ','; }
+        os << v[i];
+    }
+    os << '}';
+    return os;
+}
+void debugg() { cerr << endl; }
+template <class T, class... Args>
+void debugg(const T &x, const Args &... args) {
+    cerr << " " << x;
+    debugg(args...);
+}
+#define debug(...)                                                             \
+    cerr << __LINE__ << " [" << #__VA_ARGS__ << "]: ", debugg(__VA_ARGS__)
+#define dump(x) cerr << __LINE__ << " " << #x << " = " << (x) << endl
+#else
+#define debug(...) (void(0))
+#define dump(x) (void(0))
+#endif
+using namespace std;
+typedef long long ll;
+typedef vector<ll> vl;
+typedef vector<vl> vvl;
+typedef vector<char> vc;
+typedef vector<string> vs;
+typedef vector<bool> vb;
+typedef vector<double> vd;
+typedef pair<ll,ll> P;
+typedef pair<int,int> pii;
+typedef vector<P> vpl;
+typedef tuple<ll,ll,ll> tapu;
+#define rep(i,n) for(int i=0; i<(n); i++)
+#define REP(i,a,b) for(int i=(a); i<(b); i++)
+#define all(x) (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+template<typename T1,typename T2> inline bool chmin(T1 &a,T2 b){
+	if(a>b){
+		a = b; return true;
+	}
+	else return false;
+}
+template<typename T1,typename T2> inline bool chmax(T1 &a,T2 b){
+	if(a<b){
+		a = b; return true;
+	}
+	else return false;
+}
+template<typename T> inline void print(T &a){
+    int sz = a.size();
+    for(auto itr = a.begin(); itr != a.end(); itr++){
+		cout << *itr;
+        sz--;
+        if(sz) cout << " ";
+	}
+    cout << "\n";
+}
+template<typename T1,typename T2> inline void print2(T1 a, T2 b){
+	cout << a << " " << b << "\n";
+}
+template<typename T1,typename T2,typename T3> inline void print3(T1 a, T2 b, T3 c){
+	cout << a << " " << b << " " << c << "\n";
+}
+void mark() {cout << "#" << "\n";}
+ll pcount(ll x) {return __builtin_popcountll(x);}
+// #include <atcoder/convolution>
+// using namespace atcoder;
+const int inf = (1<<30)-1;
+const ll linf = 1LL<<61;
+const int MAX = 1020000;
+int dy[8] = {0,1,0,-1,1,-1,-1,1};
+int dx[8] = {-1,0,1,0,1,-1,1,-1};
+const double pi = acos(-1);
+const double eps = 1e-9;
+const int mod = 1e9 + 7;
+//const int mod = 998244353;
+
+int main(){
+	while(1){
+		int n; cin >> n;
+		if(!n) break;
+		int d; cin >> d;
+		vs s(n); rep(i,n) cin >> s[i];
+		sort(all(s));
+		vector<vb> b(n,vb(n,false));
+		rep(i,n) REP(j,i+1,n){
+			string t,u;
+			int si = s[i].size();
+			int sj = s[j].size();
+			int sz = si + sj;
+			if(d == 2){ //erase, erase
+				rep(k,sz) rep(l,k){
+					t = s[i];
+					u = s[j];
+					if(k >= si){
+						u.erase(k-si,1);
+					}else{
+						t.erase(k,1);
+					}
+					if(l >= si){
+						if(u.empty()) continue;
+						u.erase(l-si,1);
+					}else{
+						if(t.empty()) continue;
+						t.erase(l,1);
+					}
+					if(t == u) b[i][j] = true;
+				}
+			}
+			if(si == sj){ //mutate
+				int cnt = 0;
+				rep(k,si){
+					if(s[i][k] != s[j][k]) cnt++;
+				}
+				if(cnt <= d) b[i][j] = true;
+			}
+			t = s[i];
+			u = s[j];
+			rep(k,si) rep(l,k){ //swap
+				swap(t[l],t[k]);
+				if(t == u) b[i][j] = true;
+				if(d >= 2){
+					rep(m,si) rep(o,m){ //swap
+						swap(t[m],t[o]);
+						if(t == u) b[i][j] = true;
+						swap(t[m],t[o]);
+					}
+					if(si == sj){ //mutate
+						int cnt = 0;
+						rep(m,si) if(t[m] != u[m]) cnt++;
+						if(cnt <= 1) b[i][j] = true;
+					}
+				}
+				swap(t[l],t[k]);
+			} 
+			rep(k,sz){
+				t = s[i];
+				u = s[j];
+				if(k >= si){
+					u.erase(k-si,1);
+				}else{
+					t.erase(k,1);
+				}
+				if(u == t) b[i][j] = true;
+				if(d >= 2 && t.size() == u.size()){
+					//erase, swap
+					int cnt = 0;
+					rep(l,t.size()) if(t[l] != u[l]) cnt++;
+					if(cnt <= 1) b[i][j] = true;
+					rep(l,t.size()) rep(m,l){
+						swap(t[l],t[m]);
+						if(t == u) b[i][j] = true;
+						swap(t[l],t[m]);
+					}
+				}
+			}
+		}
+		vector<pair<string,string>> ans;
+		rep(i,n) REP(j,i+1,n){
+			if(b[i][j]){
+				string t = s[i];
+				string u = s[j];
+				if(t > u) swap(t,u);
+				ans.emplace_back(t,u);
+			}
+		}
+		sort(all(ans));
+		for(auto p : ans) cout << p.first << "," << p.second << "\n";
+		cout << ans.size() << "\n";
+	}
+}

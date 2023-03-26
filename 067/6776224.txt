@@ -1,0 +1,63 @@
+#include<stdio.h>
+#define MAX 500000
+#define N 2000000000
+
+int left[(MAX/2)+2], right[(MAX/2)+2];
+int cnt, n;
+int A[MAX];
+
+void merge(int l, int mid, int r)
+{
+    int x=mid-l;
+    int y=r-mid;
+    int i, j=0;
+
+    for(i=0;i<x;i++) left[i]=A[l+i]; //分割
+    for(i=0;i<y;i++) right[i]=A[mid+i]; //分割
+    left[x]=right[y]=N; //番兵
+    i=0;
+    for(int p=l;p<r;p++)
+    {
+        cnt++;
+        if(left[i]<=right[j]) //左の要素と右の要素を比較
+        {
+            A[p]=left[i++]; //昇順に並べて、i+1
+        }
+        else A[p]=right[j++];
+    }
+}
+
+void sort(int l, int r)
+{
+    int mid;
+
+    if(l+1<r)
+    {
+        mid=(l+r)/2;
+        sort(l,mid);
+        sort(mid,r);
+        merge(l, mid, r);
+    }
+}
+
+int main(void)
+{
+    int i;
+    cnt=0;
+
+    scanf("%d", &n);
+    for(i=0;i<n;i++)
+    {
+        scanf("%d", &A[i]);
+    }
+    sort(0, n);
+    for(i=0;i<n;i++)
+    {
+        if(i>0) printf(" ");
+        printf("%d", A[i]);
+    }
+    printf("\n");
+    printf("%d\n", cnt);
+
+    return 0;
+}

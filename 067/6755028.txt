@@ -1,0 +1,87 @@
+import sys
+from collections import deque
+readline = sys.stdin.readline
+write = sys.stdout.write
+def solve():
+    W, H = map(int, readline().split())
+    if W == H == 0:
+        return False
+    C = [list(map(int, readline().split())) for i in range(H)]
+
+    dd = ((-1, 0), (1, 0), (0, -1), (0, 1))
+
+    sx = sy = -1
+    ct = 0
+    ok = 1
+    p = 0
+    used = [[0]*W for i in range(H)]
+    for i in range(H):
+        for j in range(W):
+            if C[i][j] == 0:
+                sy = i; sx = j
+                ct += 1
+
+                c = 0
+                for dx, dy in dd:
+                    nx = j + dx; ny = i + dy
+                    if not 0 <= nx < W or not 0 <= ny < H or C[i][j] == 1:
+                        continue
+                    c += 1
+                if c <= 1:
+                    ok = 0
+                if (i+j) % 2 == 0:
+                    p += 1
+                else:
+                    p -= 1
+            else:
+                used[i][j] = 1
+    if ct == 0 or not ok or p != 0:
+        write("No\n")
+        return True
+    def check(used):
+        que = deque()
+        u = [[0]*W for i in range(H)]
+        c = 0
+        for i in range(H):
+            for j in range(W):
+                if C[i][j] or used[i][j] == 1 or u[i][j]:
+                    continue
+                que.append((j, i))
+                u[i][j] = 1
+                while que:
+                    x, y = que.popleft()
+                    for dx, dy in dd:
+                        nx = x + dx; ny = y + dy
+                        if not 0 <= nx < W or not 0 <= ny < H or C[ny][nx] or used[ny][nx] == 1 or u[ny][nx]:
+                            continue
+                        u[ny][nx] = 1
+                        que.append((nx, ny))
+                if c:
+                    return 0
+                c = 1
+        return 1
+    def dfs(x, y, used, k):
+        if not check(used):
+            return 0
+        for dx, dy in dd:
+            nx = x + dx; ny = y + dy
+            if not 0 <= nx < W or not 0 <= ny < H:
+                continue
+            if used[ny][nx]:
+                if k == ct and used[ny][nx] == 2:
+                    return 1
+                continue
+            used[ny][nx] = 1
+            if dfs(nx, ny, used, k+1):
+                return 1
+            used[ny][nx] = 0
+        return 0
+
+    used[sy][sx] = 2
+    if dfs(sx, sy, used, 1):
+        write("Yes\n")
+    else:
+        write("No\n")
+    return True
+while solve():
+    ...

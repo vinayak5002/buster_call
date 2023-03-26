@@ -1,0 +1,47 @@
+import sys
+
+readline = sys.stdin.readline
+
+def f(x):
+    return x * (x + 1) * (x + 2) // 6
+
+def main(): 
+    odd, even = [list() for _ in range(2)]
+    for i in range(1, 201):
+        tmp = f(i)
+        even.append(tmp)
+        if tmp % 2:
+            odd.append(tmp)
+
+    INF = 1 << 30
+
+    while True:
+        N = int(readline())
+        if not N:
+            break
+
+        even_dp = [INF] * (N+1)
+        even_dp[0] = 0
+        for i in range(5):
+            tmp = even_dp[:]
+            for j in range(200):
+                e = even[j]
+                for k in range(N+1):
+                    if k + e <= N:
+                        even_dp[k+e] = min(even_dp[k+e], tmp[k] + 1)
+
+        odd_dp = [INF] * (N+1)
+        odd_dp[0] = 0
+        for i in range(100):
+            tmp = odd_dp[:]
+            for j in range(len(odd)):
+                o = odd[j]
+                for k in range(N+1):
+                    if k + o <= N:
+                        odd_dp[k+o] = min(odd_dp[k+o], tmp[k] + 1)
+
+        print(even_dp[-1], odd_dp[-1])
+
+if __name__ == '__main__':
+    main()
+

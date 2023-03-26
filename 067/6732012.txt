@@ -1,0 +1,34 @@
+from heapq import heapify, heappop, heappush
+
+V, E, r = map(int, input().split())
+
+
+C = float("Inf")
+cost = [C for _ in range(V)]
+cost[r] = 0
+
+G = {}
+for i in range(V):
+    G[i] = {}
+
+for _ in range(E):
+    s, t, d = map(int, input().split())
+    G[s][t] = d
+
+
+L = [r]
+heapify(L)
+
+while len(L) != 0:
+    s = heappop(L)
+    for i in G[s].keys():
+        if cost[i] > cost[s] + G[s][i]:
+            cost[i] = cost[s] + G[s][i]
+            heappush(L, i)
+
+for i in cost:
+    if i == C:
+        print("INF")
+    else:
+        print(i)
+

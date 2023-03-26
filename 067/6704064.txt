@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+#define rep(i,a,b) for(int i=a;i<b;i++)
+#define rrep(i,a,b) for(int i=b-1;i>=a;i--)
+#define all(x) (x).begin(),(x).end()
+#define pb(x) push_back(x);
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a = b; return 1; } return 0; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a = b; return 1; } return 0; }
+typedef long long ll;
+typedef long double lld;
+using namespace std;
+const ll mod=998244353;
+//const ll mod=1e9+7;
+int dx[4]={1,0,-1,0};
+int dy[4]={0,1,0,-1};
+const string zton="0123456789";
+const string atoz="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const ll inf=(1ll<<60);
+ll gcd(ll a,ll b){
+    ll r;
+    r=a%b;
+    if(r==0){
+        return b;
+    }
+    else{
+        return gcd(b,r);
+    }
+}
+typedef pair<int,int> P;
+
+bool solve(){
+    int n,w,h;cin >> n >> w >> h;
+    if(n+h+w==0)return false;
+    int H[n+1],W[n+1];
+    H[0]=h;
+    W[0]=w;
+    rep(i,1,n+1){
+        int id,s;cin >> id >> s;
+        id--;
+        rep(j,id,i-1){
+            swap(H[j],H[j+1]);
+            swap(W[j],W[j+1]);
+        }
+        id=i-1;
+        s%=((H[id]+W[id])*1);
+        int h1=H[id];
+        int h2=h1;
+        int w1=W[id];
+        int w2=w1;
+        if(0<=s&&s<=W[id]){
+            w1=s;
+            w2-=s;
+        }
+        else if(W[id]<=s&&s<=W[id]+H[id]){
+            s-=W[id];
+            h1=s;
+            h2-=s;
+        }
+        H[id]=min(h1,h2);
+        H[i]=max(h1,h2);
+        W[id]=min(w1,w2);
+        W[i]=max(w1,w2);
+    }
+    int ans[n+1];
+    rep(i,0,n+1)ans[i]=(H[i]*W[i]);
+    sort(ans,ans+n+1);
+    rep(i,0,n+1)cout << ans[i] << " ";
+    cout << endl;
+    return true;
+}
+
+int main(void){
+    bool f=true;
+    do{
+        f=solve();
+    }while(f);
+}

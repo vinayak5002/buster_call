@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+struct edge {
+    long from;
+    long to;
+    long cost;
+};
+using Graph = vector<vector<edge>>;
+constexpr ll inf = (1LL << 62);
+
+
+ll prim(ll start, Graph& G)
+{
+    ll sum = 0;
+    vector<int> used(G.size());
+    using P = pair<ll, ll>;
+    priority_queue<P, vector<P>, greater<P>> que;
+    que.emplace(0, start);
+    while (!que.empty()) {
+        auto p = que.top();
+        que.pop();
+        if (used[p.second])
+            continue;
+        used[p.second] = true;
+        sum += p.first;
+        for (auto& e : G[p.second]) {
+            //if (!used[e.to]) {
+            que.emplace(e.cost, e.to);
+            //}
+        }
+    }
+    return sum;
+}
+
+int main()
+{
+    ll V, E;
+    cin >> V >> E;
+    vector<ll> s(E), t(E), w(E);
+    vector<vector<edge>> g(V);
+    for (ll i = 0; i < E; ++i) {
+        cin >> s[i] >> t[i] >> w[i];
+        g[s[i]].push_back(edge{s[i], t[i], w[i]});
+        g[t[i]].push_back(edge{t[i], s[i], w[i]});
+    }
+    cout << prim(0, g) << endl;
+}

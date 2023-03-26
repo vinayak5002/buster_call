@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < (n); ++i)
+using namespace std;
+#include <vector>
+
+int n, m, t, p;
+int d[20], c[100], x[20], y[20];
+
+bool input() {
+    cin >> n >> m >> t >> p;
+    if (n == 0 && m == 0 && t == 0 && p == 0) return false;
+    rep(i, t) cin >> d[i] >> c[i];
+    rep(i, p) cin >> x[i] >> y[i];
+    return true;
+}
+
+int main() {
+    while (input()) {
+        vector<vector<int> > v(100, vector<int>(100));
+        rep(i, m) {
+            rep(j, n) { v[i][j] = 1; }
+        }
+
+        rep(i, t) {
+            if (d[i] == 1) {
+                rep(h, m) {
+                    rep(w, c[i]) { v[h][c[i] + w] += v[h][c[i] - 1 - w]; }
+                    rep(w, n * 2) { v[h][w] = v[h][c[i] + w]; }
+                }
+            } else if (d[i] == 2) {
+                rep(w, n) {
+                    rep(h, c[i]) { v[c[i] + h][w] += v[c[i] - 1 - h][w]; }
+                    rep(h, m * 2) { v[h][w] = v[c[i] + h][w]; }
+                }
+            }
+        }
+        rep(i, p) { cout << v[y[i]][x[i]] << endl; }
+    }
+
+    return 0;
+}

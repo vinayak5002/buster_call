@@ -1,0 +1,152 @@
+#include<iostream>
+#include<vector>
+#include <algorithm>
+using namespace std;
+
+// Node of disjoint set
+class Node{
+private:
+	int parent;
+	int rank;
+
+public:
+	Node(){
+		parent = 0;
+		rank = 0;
+	}
+
+	Node(int parent){
+		this->parent = parent;
+		rank = 0;
+	}
+
+	void setParent(int parent){
+		this->parent = parent;
+	}
+
+	int getParent(){
+		return parent;
+	}
+
+	void setRank(int rank){
+		this->rank = rank;
+	}
+
+	int getRank(){
+		return rank;
+	}
+};
+
+// edge of tree
+class Edge{
+private:
+	int v1, v2;
+	int weight;
+
+public:
+	Edge(){
+		v1 = v2 = 0;
+		weight = 0;
+	}
+
+	Edge(int v1, int v2, int weight){
+		this->v1 = v1;
+		this->v2 = v2;
+		this->weight = weight;
+	}
+
+	int getV1(){
+		return v1;
+	}
+
+	int getV2(){
+		return v2;
+	}
+
+	int getWeight(){
+		return weight;
+	}
+};
+
+class createMST{
+private:
+	vector<Node> tree;
+	vector<Edge> edge;
+	vector<Edge> mst;
+
+public:
+	createMST(){
+		int v, e;
+		cin >> v >> e;
+
+		// Create disjoint set
+		for(int i=0; i<v; i++){
+			tree.push_back(Node(i));
+		}
+
+		// Edges
+		for(int i=0; i<e; i++){
+			int s, t, w;
+			cin >> s >> t >> w;
+
+			edge.push_back(Edge(s, t, w));
+		}
+
+		sortEdgeByWeight();
+
+		// create minimum spanning tree
+		for(int i=0; i<edge.size(); i++){
+			int u = edge[i].getV1();
+			int v = edge[i].getV2();
+
+			if(find(u) != find(v)){
+				unite(u, v);
+				mst.push_back(Edge(u, v, edge[i].getWeight()));
+			}
+		}
+
+		// output the sum of weights
+		int sum = 0;
+		for(int i=0; i<mst.size(); i++){
+			sum += mst[i].getWeight();
+		}
+
+		cout << sum << endl;
+	}
+
+	void sortEdgeByWeight(){
+		std::sort(edge.begin(), edge.end(), [](Edge a, Edge b) {
+			return a.getWeight() < b.getWeight();
+		});
+	}
+
+	/*** the orepation for disjoint set ***/
+
+	void unite(int x, int y){
+		link(find(x), find(y));
+	}
+
+	void link(int x, int y){
+		if(tree[x].getRank() > tree[y].getRank()){
+			tree[y].setParent(x);
+		}
+		else{
+			tree[x].setParent(y);
+
+			if(tree[x].getRank() == tree[y].getRank()){
+				tree[y].setRank(tree[y].getRank()+1);
+			}
+		}
+	}
+
+	int find(int x){
+		if(x != tree[x].getParent())
+			tree[x].setParent(find(tree[x].getParent()));
+		return tree[x].getParent();
+	}
+};
+
+int main(){
+	createMST mst = createMST();
+	return 0;
+}

@@ -1,0 +1,84 @@
+danmen = input()
+
+danmen_max = []
+height_list = [0]
+height = 0
+
+
+for i in range(len(danmen)):
+#	height_list.append(height)
+
+	if danmen[i] == "\\":
+		height -= 1
+		height_list.append(height)
+	elif danmen[i] == "_":
+		height_list.append(height)
+	else:
+		height += 1
+		height_list.append(height)
+
+for i in range(len(height_list)-1):
+	target = height_list[i+1:]
+	danmen_max.append(max(target))
+
+
+#print(height_list)
+#print(danmen_max)
+
+
+menseki_list = []
+menseki = 0
+maxkasa = ""
+
+
+for i in range(len(height_list)-1):
+
+	if danmen[i] == "\\" and maxkasa == "":
+		# 水が入るかを判定
+		menseki = 0
+
+		if danmen_max[i] >= height_list[i]:
+			# 今後の最大標高が高いとき
+			# 水が入る
+			maxkasa = height_list[i]
+		else:
+			# まだ入らない
+			#maxkasa = danmen_max[i]
+			maxkasa = ""
+
+	if maxkasa != "" and height_list[i] <= maxkasa and danmen[i] == "\\":
+		# 水入り継続
+		#print("1")
+		menseki += (maxkasa-(height_list[i+1])-1) * 1 + 0.5
+	
+	elif maxkasa != "" and height_list[i] < maxkasa and danmen[i] == "_":
+		#print("2")
+		menseki += (maxkasa-height_list[i]) * 1
+
+	elif maxkasa != "" and height_list[i]+1 < maxkasa and danmen[i] == "/":
+		#print("3")
+		menseki += (maxkasa-height_list[i]-1) * 1 + 0.5
+	
+	elif maxkasa != "" and height_list[i]+1 == maxkasa and danmen[i] == "/":
+		# 水入り終了
+		#print("4")
+		menseki += 0.5
+		menseki_list.append(int(menseki))
+		menseki = 0
+		maxkasa = ""
+
+
+	#print(menseki)
+	#elif maxkasa != "" and height_list[i] > maxkasa:
+		
+print(sum(menseki_list))
+
+anslist = [len(menseki_list)]
+for i in range(len(menseki_list)):
+	anslist.append(menseki_list[i])
+
+print(*anslist)
+
+
+
+

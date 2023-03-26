@@ -1,0 +1,143 @@
+#![allow(non_snake_case)]
+use std::io::{BufWriter, stdin, stdout, Write};
+
+fn main() {
+    let mut scan = Scanner::default();
+    let out = &mut BufWriter::new(stdout());
+    let n = scan.next::<usize>();
+    let q = scan.next::<usize>();
+    let mut st = SegTree::<MinMonoid>::new(n);
+    for _ in 0..q {
+        let com = scan.next::<usize>();
+        let x = scan.next::<usize>();
+        let y = scan.next::<usize>();
+        if com == 0 {
+            st.update(x, MinMonoid(y));
+        } else {
+            writeln!(out, "{}", st.fold(x, y + 1)).unwrap();
+        }
+    }
+}
+
+#[derive(Default)]
+struct Scanner {
+    buffer: Vec<String>
+}
+impl Scanner {
+    fn next<T: std::str::FromStr>(&mut self) -> T {
+        loop {
+            if let Some(token) = self.buffer.pop() {
+                return token.parse().ok().expect("Failed parse");
+            }
+            let mut input = String::new();
+            stdin().read_line(&mut input).expect("Failed read");
+            self.buffer = input.split_whitespace().rev().map(String::from).collect();
+        }
+    }
+}
+
+pub trait Monoid {
+    fn e() -> Self;
+    fn ope(&self, rhs: &Self) -> Self;
+}
+
+#[macro_export]
+macro_rules! monoid {
+    (
+        $type:ty;
+        e = $e:expr;
+        ope($self:ident, $rhs:ident) = $code:block
+        $(;)*
+    ) => {
+        impl Monoid for $type {
+            fn e() -> Self { $e }
+            fn ope(&$self, $rhs: &Self) -> Self { $code }
+        }
+        impl std::fmt::Display for $type {
+            fn fmt<'a>(&self, f: &mut std::fmt::Formatter<'a>) -> std::fmt::Result {
+                write!(f, "{}", self.0)
+            }
+        }
+        impl std::str::FromStr for $type {
+            type Err = std::num::ParseIntError;
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                let val = s.parse()?;
+                Ok(val)
+            }
+        }
+    };
+}
+
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub struct MinMonoid(usize);
+
+monoid! {
+    MinMonoid;
+    e = MinMonoid((1 << 31) - 1);
+    ope(self, rhs) = { MinMonoid(self.0.min(rhs.0)) }
+}
+
+pub struct SegTree<X> {
+    size: usize,
+    data: Vec<X>
+}
+
+impl<X> std::ops::Index<usize> for SegTree<X> {
+    type Output = X;
+    fn index(&self, i: usize) -> &Self::Output {
+        &self.data[self.size / 2 + i]
+    }
+}
+
+impl<X: Copy + Monoid> SegTree<X> {
+    pub fn new(length: usize) -> Self {
+        let mut M = 1;
+        while M <= length {
+            M <<= 1;
+        }
+        let size = M + M;
+        let data = vec![X::e(); size];
+        SegTree { size, data }
+    }
+
+    pub fn from(xs: Vec<X>) -> Self {
+        let mut tree = Self::new(xs.len());
+        for (i, &x) in xs.iter().enumerate() {
+            tree.data[tree.size / 2 + i] = x;
+        }
+        for i in (0..tree.size / 2).rev() {
+            tree.data[i] = tree.data[i << 1].ope(&tree.data[i << 1 | 1])
+        }
+        tree
+    }
+
+    pub fn update(&mut self, i: usize, x: X) {
+        let mut idx = self.size / 2 + i;
+        self.data[idx] = x;
+        while idx > 1 {
+            idx >>= 1;
+            self.data[idx] = self.data[idx << 1].ope(&self.data[idx << 1 | 1]);
+        }
+    }
+
+    pub fn fold(&self, l: usize, r: usize) -> X {
+        let mut idx_l = self.size / 2 + l;
+        let mut idx_r = self.size / 2 + r;
+        let mut vl = X::e();
+        let mut vr = X::e();
+        while idx_l < idx_r {
+            if idx_l & 1 == 1 {
+                vl = vl.ope(&self.data[idx_l]);
+                idx_l += 1;
+            }
+            if idx_r & 1 == 1 {
+                idx_r -= 1;
+                vr = vr.ope(&self.data[idx_r]);
+            }
+            idx_l >>= 1; idx_r >>= 1;
+        }
+        vl.ope(&vr)
+    }
+}
+
+

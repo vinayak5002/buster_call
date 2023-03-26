@@ -1,0 +1,76 @@
+#include<stdio.h>
+#include<string.h>
+#define LEN 100005
+#define N 100
+#define INFTY  (1<<21)
+
+int n, M[N][N];  //頂点iから頂点jに辺がある場合、M[i][j]がtrueになる隣接行列
+int d[N];        //始点sから各頂点iまでの最短距離をd[i]に記録
+                 //距離で訪問状態(color)を管理する
+
+typedef struct pp{  //構造体ppの宣言
+	char name[100]; //データ型 変数名
+	int t;          //データ型 変数名
+} P;                //今後扱うためのデータ型の宣言(任意のデータ型名)
+
+P Q[LEN];
+int head, tail, n;
+
+void enqueue(P x){            //enqueue関数
+	Q[tail] = x;              //tailのある場所にxを追加
+	tail = (tail + 1) % LEN;  
+}
+
+P dequeue(){                  //dequeue関数
+	P x = Q[head];            //headが指すキューの先頭の要素を変数xに記録
+	head = (head + 1) % LEN;  
+	return x;
+}
+                 
+
+void bfs(int s){
+	enqueue(s);
+	for ( int i = 0; i < n; i++ ) d[i] = INFTY;
+	d[s] = 0;
+	int u;
+	while ( !q.empty() ){  //キューQに頂点が入っていればループ
+		u = dequeue();
+		for( int v = 0; v < n; v++ ){
+			if( M[u][v] == 0 ) continue;
+			if( d[v] != INFTY ) continue;
+			d[v] = d[u] + 1;
+			enqueue(v);
+		}
+	}
+	for ( int i = 0; i < n; i++ ){
+		printf("%d",i+1);  //頂点の番号を出力
+		printf(" ");       
+		printf("%d",( d[i] == INFTY) ? (-1) : d[i] );  //d[i] == INFTYが真なら-1を、偽ならd[i]を出力
+		printf("\n");
+	}
+}
+
+
+int main(void){
+	int u, k, v;
+	
+	scanf("%d", &n);  //頂点数nを入力
+	for ( int i = 0; i < n; i++ ){
+		for ( int j = 0; j < n; j++ ) M[i][j] = 0;  //隣接行列の初期化
+	}
+	
+	for ( int i = 0; i < n; i++ ){
+		scanf("%d", &u);  //頂点の番号u
+		scanf("%d", &k);  //uの出次数(=頂点から出ていく辺数) kを入力
+		u--;
+		for ( int j = 0; j < k; j++ ){
+			scanf("%d", &v);  //uに隣接する頂点の番号を入力
+			v--;
+			M[u][v] = 1;      //例えばu=1、v=2の場合 → M[1][2] = 1 
+		}
+	}
+	
+	bfs(0);
+	
+	return 0;
+}

@@ -1,0 +1,66 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define MAX 100
+
+void add(int u, int v);
+void dfs(int u);
+
+typedef struct Edge {
+    int dir;
+    struct Edge *next;
+} Edge;
+
+int size, t;
+int d[MAX];
+int f[MAX];
+Edge buff[MAX * MAX];
+Edge *adj[MAX];
+
+int main(void)
+{
+    int n, u, k, v_cou;
+    int v[MAX];
+    
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++) {
+        scanf("%d %d", &u, &k);
+        for (v_cou = 0; v_cou < k; v_cou++) {
+            scanf("%d", v + v_cou);
+        }
+        for (v_cou = k - 1; v_cou >= 0; v_cou--) {
+            add(u - 1, v[v_cou] - 1);
+            
+        }
+    }
+    
+    t = 1;
+    for (u = 0; u < n; u++) {
+        if (d[u] == 0) {
+            dfs(u);
+        }
+        printf("%d %d %d\n", u + 1, d[u], f[u]);
+    }
+    
+    return EXIT_SUCCESS;
+}
+
+void add(int u, int v)
+{
+    Edge *e = buff + size++;
+    e->dir = v;
+    e->next = adj[u];
+    adj[u] = e;
+}
+
+void dfs(int u)
+{
+    Edge *e;
+    d[u] = t++;
+    for (e = adj[u]; e != NULL; e = e->next) {
+        if (d[e->dir] == 0) {
+            dfs(e->dir);
+        }
+    }
+    f[u] = t++;
+}

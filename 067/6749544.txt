@@ -1,0 +1,68 @@
+// 两条直线的位置关系
+#include <cstdio>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+const double EPS = 1e-14;
+inline int sgn(double x) {
+    if(fabs(x) < EPS) return 0;
+    return x > 0 ? 1 : -1;
+}
+struct Point {
+    double x, y;
+    Point(double a = 0, double b = 0): x(a), y(b) {}
+    Point operator + (const Point &B) const {
+        return Point(x + B.x, y + B.y);
+    }
+    Point operator - (const Point &B) const {
+        return Point(x - B.x, y - B.y);
+    }
+    Point operator * (const double &v) const {
+        return Point(x * v, y * v);
+    }
+    Point l90() const {
+        return Point(-y, x);
+    }
+    Point r90() const {
+        return Point(y, -x);
+    }
+    double dot(const Point &B) const {
+        return x * B.x + y * B.y;
+    }
+    double mult(const Point &B) const {
+        // 小于 0，在 B 的逆时针
+        return x * B.y - y * B.x;
+    }
+    double dis2() {
+        return x * x + y * y;
+    }
+    double dis() {
+        return sqrt(x * x + y * y);
+    }
+};
+struct Line {
+    Point A, B;
+    Line(Point a = Point(), Point b = Point()): A(a), B(b) {}
+    Point Projection(const Point &P) const {
+        Point l = B - A, x = P - A;
+        return A + (l * (l.dot(x) / l.dis2()));
+    }
+    Point Reflection(const Point &P) const {
+        Point l = B - A, x = P - A;
+        return P + (l.r90() * (l.mult(x) / l.dis2() * 2));
+    }
+};
+int main() {
+    int q; scanf("%d", &q);
+    while(q--) {
+        double x1, y1, x2, y2, x3, y3, x4, y4;
+        scanf("%lf%lf%lf%lf", &x1, &y1, &x2, &y2);
+        scanf("%lf%lf%lf%lf", &x3, &y3, &x4, &y4);
+        Point A(x1, y1), B(x2, y2), C(x3, y3), D(x4, y4);
+        Point l1 = A - B, l2 = C - D;
+        if(sgn(l1.dot(l2)) == 0) puts("1");
+        else if(sgn(l1.mult(l2)) == 0) puts("2");
+        else puts("0");
+    }
+    return 0;
+}

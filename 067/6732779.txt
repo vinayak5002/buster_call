@@ -1,0 +1,62 @@
+#include<iostream>
+using namespace std;
+const int MAX_N = 100;
+const int MAX_V = MAX_N;
+const int MAX_E = MAX_N * MAX_N;
+const int INF = 0x3f3f3f3f;
+int G[MAX_V][MAX_V];
+bool used[MAX_V];
+int d[MAX_V];
+
+int prim(int n) {
+	for (int i = 0; i < n; i++) {
+		used[i] = false;//初始化所有节点均未被访问
+		d[i] = INF;//初始化所有节点距离为无穷
+	}
+	d[0] = 0;//起始节点距离为0
+	used[0] = true;//访问起始节点
+	int ret = 0;//总权重数
+	int m = 0;//最新加入的节点索引值
+	while (1) {
+		int du = INF;
+		for (int i = 0; i < n; i++)
+			if (!used[i] && G[m][i] < d[i])
+				d[i] = G[m][i];
+		for(int i=0;i<n;i++)
+			if (!used[i] && d[i] < du) {
+				m = i;
+				du = d[i];
+			}
+		if (du==INF)
+			break;
+		ret += du;
+		used[m] = true;
+		//cout << "du:" << du << "  m:" << m << endl;
+		//for (int i = 0; i < n; i++)
+		//	cout << "d[i]:" << d[i] << endl;
+	}
+	for (int i = 0; i < n; i++)
+		if (!used[i])
+			return -1;
+	return ret;
+}
+
+int main() {
+	int n;
+	int MAX = 100;
+	cin >> n;
+	int k;
+	for (int i = 0; i < n; i++)
+		for (int j = 0; j < n; j++) {
+			cin >> k;
+			if (k == -1)
+				G[i][j] = INF;
+			else
+				G[i][j] = k;
+		}
+	if (prim(n) != -1)
+		cout << prim(n) << endl;
+	else
+		cout << "not a connected graph" << endl;
+	return 0;
+}

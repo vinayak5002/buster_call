@@ -1,0 +1,88 @@
+#include<stdio.h>
+#define STILL 0
+#define VISIT 1
+#define FINISH 2
+#define NIL -1
+#define N 100
+#define MAX 100000;
+
+
+int Q[N],state[N],A[N][N],d[N];
+int head=0,tail=0,n,u,v;
+
+void enqueue(int u)//要素を入れる
+{
+	Q[tail]=u;
+	tail=(tail+1)%MAX;
+}
+int dequeue()//要素取り出し
+{
+	int tmp=Q[head];
+	head=(head+1)%MAX;
+	return tmp;
+}
+	
+void bfs(int s)
+{
+	for(u=0;u<n;u++)
+	{
+		state[u]=STILL;//初期化
+	}
+	for(u=0;u<n;u++)
+	{
+		d[u]=NIL;//全てたどり着けないー1を入れておく
+	}
+	
+	state[s]=VISIT;
+	d[s]=0;
+	enqueue(s);
+	
+	while(head!=tail)//探索待ちのセルがなくなるまで続ける
+	{
+		u=dequeue();//探索対象のセルを取り出す
+		for(v=0;v<n;v++)
+		{
+			if(A[u][v] && state[v]==STILL)//要素とつながっている要素を全てキューの中に入れる
+			{
+				state[v]=VISIT;
+				d[v]=d[u]+1;
+				enqueue(v);
+			}
+		}
+		state[u]=FINISH;
+	}
+	
+	for(u=0;u<n;u++)
+	{
+		printf("%d %d\n",u+1,d[u]);
+	}
+}
+int main(void)
+{
+	int u,v,k,i,j;
+	
+	scanf("%d\n",&n);//頂点数
+	for(i=0;i<n;i++)
+	{
+		for(j=0;j<n;j++)
+		{
+			A[i][j]=0;//A[i][j]の初期化
+		}
+	}
+	for(i=0;i<n;i++)
+	{
+		scanf("%d %d\n",&u,&k);//u=頂点の番号,k=u  の出次数
+		u--;
+		for(j=0;j<k;j++)
+		{
+			scanf("%d",&v);//uに隣接する頂点の番号
+			v--;
+			A[u][v]=1;
+		}
+	}
+	bfs(0);
+	
+	return 0;
+}
+
+

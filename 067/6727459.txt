@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+
+/*
+ |Hoge| ≥ |O| である場合
+ rev(O) + Hoge + Zaki + rev(O) + Hoge + O
+ <=>
+ Hoge + Zaki + rev(O) + Hoge が回文
+ <=>
+ Hoge が回文
+ Zaki + rev(O) が回文
+ 
+ |Hoge| ≤ |O| である場合
+ Hoge は rev(O) の先頭 N 文字
+ */
+string rev(string s){
+    reverse(s.begin(), s.end());
+    return s;
+}
+bool is_palidrome(string s){
+    return equal(s.begin(), s.end(), s.rbegin());
+}
+const ll MOD = 1000000007;
+ll modpow(ll a, ll b){
+    ll ans = 1;
+    while(b){
+        if(b & 1) (ans *= a) %= MOD;
+        b >>= 1;
+        (a *= a) %= MOD;
+    }
+    return ans;
+}
+int main(){
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    string Zaki, O;
+    int N;
+    cin >> Zaki >> O >> N;
+    cout << [&]() -> ll {
+        if(N >= O.size()){
+            if(!is_palidrome(Zaki + rev(O))) return 0;
+            return modpow(26, (N - O.size() + 1) / 2);
+        }
+        string Hoge = string(O.rbegin(), O.rbegin() + N);
+        return is_palidrome(Hoge + Zaki + Hoge + O);
+    }() << endl;
+}

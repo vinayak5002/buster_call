@@ -1,0 +1,70 @@
+import java.util.Scanner;
+import java.util.ArrayList;
+import java.io.*;
+
+class Main{
+
+    static boolean isOperator(String input){
+        boolean temp = false;
+        char in = input.charAt(0);
+        if (in == '%' || in == '/' || in == '*' || in == '+' || in == '-'){temp = true;}
+        return temp;
+    }
+
+    static boolean isNumeric(String str) { 
+        try {  
+                Double.parseDouble(str);  
+                return true;
+            } catch(NumberFormatException e){  
+                return false;  
+            }  
+        }
+ 
+    // Driver method
+    public static void main(String args[])
+    {
+        Scanner scan = new Scanner(System.in);
+        String data = scan.nextLine();
+        ArrayList<Integer> arr = new ArrayList<Integer>();
+        //ArrayList<Integer> arr_2 = new ArrayList<Integer>();
+
+        String[] splited = data.split("\\s+");
+
+        for(int i = 0; i < splited.length; i++){
+            if(isNumeric(splited[i])){
+                arr.add(Integer.parseInt(splited[i]));
+            } else if (isOperator(splited[i])){
+                switch (splited[i].charAt(0)) {
+                    case '+':
+                        int result = 0;
+                        for(int a = 0; a < arr.size(); a++) result += arr.get(a);
+                        arr.removeAll(arr);
+                        arr.add(result);
+                        break;
+                    case '-':
+                        result = arr.get(0);
+                        for(int a = 0; a < arr.size()-1; a++) result -= arr.get(a);
+                        arr.removeAll(arr);
+                        arr.add(result);
+                        break;
+                    case '*':
+                        result = arr.get(0);
+                        for(int a = 0; a < arr.size()-1; a++) result *= arr.get(a);
+                        arr.removeAll(arr);
+                        arr.add(result);
+                        break;
+                    case '/':
+                        result = arr.get(0);
+                        for(int a = 0; a < arr.size()-1; a++) result /= arr.get(a);
+                        arr.removeAll(arr);
+                        arr.add(result);
+                    default:
+                        System.out.println("Unknown error");
+                }
+            }
+        }
+
+        System.out.println(arr.get(0));
+
+    }
+}

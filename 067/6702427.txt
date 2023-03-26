@@ -1,0 +1,132 @@
+#include <algorithm>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+#include <random>
+#include <complex>
+#include <bitset>
+#include <iomanip>
+#include <memory>
+#include <functional>
+
+#define rep(i, n, s) for (int i = (s); i < int(n); i++)
+#define per(i, n, s) for (int i = (n) - 1; i >= int(s); i--)
+#define MM << " " <<
+#define all(x) begin(x), end(x)
+#define rall(x) rbegin(x), rend(x)
+
+template <class T>
+using MinHeap = std::priority_queue<T, std::vector<T>, std::greater<T>>;
+template <class T>
+using MaxHeap = std::priority_queue<T>;
+
+using ll = long long;
+using Pii = std::pair<int, int>;
+using Pll = std::pair<ll, ll>;
+using Pdd = std::pair<double, double>;
+
+template <class T>
+bool chmin(T &a, const T b) {
+    if (b < a) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <class T>
+bool chmax(T &a, const T b) {
+    if (a < b) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <class T>
+void vdeb(const std::vector<T> &da) {
+    auto n = da.size();
+    for (size_t i = 0; i < n; i++) {
+        if (i == n - 1)
+            std::cout << da[i];
+        else
+            std::cout << da[i] << " ";
+    }
+    std::cout << std::endl;
+}
+template<class T>
+void vdeb(const std::vector<std::vector<T>> &da) {
+    auto n = da.size();
+    for (size_t i = 0; i < n; i++) {
+        // std::cout << i << " : ";
+        vdeb(da[i]);
+    }
+    std::cout << std::endl;
+}
+
+using namespace std;
+
+const int MAX_C = 2e9;
+
+int n;
+
+void normalize(vector<Pii> &x) {
+    int m = x.size();
+    per(i,m,0) {
+        x[i].first -= x[0].first;
+        x[i].second -= x[0].second;
+    }
+    int a = x[1].first ? abs(x[1].first) / x[1].first : 0;
+    int b = x[1].second ? abs(x[1].second) / x[1].second : 0;
+    rep(i,m,0) {
+        int xx = x[i].first;
+        int yy = x[i].second;
+        x[i].first = a * xx + b * yy;
+        x[i].second = a * yy - b * xx;
+    }
+    // cerr << x[1].first MM x[1].second << endl;
+}
+
+void solve() {
+    vector<vector<Pii>> da(n+1, vector<Pii>(0));
+    rep(i,n+1,0) {
+        int m; cin >> m;
+        rep(j,m,0) {
+            int x, y; cin >> x >> y;
+            da[i].emplace_back(x, y);
+        }
+    }
+    normalize(da[0]);
+    rep(i,n+1,1) {
+        normalize(da[i]);
+        if(da[0] == da[i]) {
+            cout << i << endl;
+        } else {
+            reverse(all(da[i]));
+            normalize(da[i]);
+            if(da[0] == da[i]) {
+                cout << i << endl;
+            }
+        }
+    }
+    cout << "+++++" << endl;
+}
+
+int main() {
+    while(1) {
+        cin  >> n;
+        if(n == 0) break;
+        solve();
+    }
+}

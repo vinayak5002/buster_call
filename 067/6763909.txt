@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define N 1000
+#define M 10000
+#define FILE_NAME "item2.txt"
+
+
+int main(void)
+{
+	FILE *fp = NULL;
+	int goods_num = 0;
+	int capacity_knapsack = 0;
+	int input_arr[N+1][2];
+	int left, right;
+	// int DP_arr[N][M];   // こいつは実行しちゃだめ。
+	int DP_arr_small[10][10]; // 可変長ってｺﾄ?...
+	int error;
+	int i = 0;
+	int n, m;
+
+	//	ファイルからデータ読み込み配列保存
+	error = fopen_s(&fp, FILE_NAME, "r");
+	if(error != 0){
+		printf("can't open file");
+		return 0;
+	}else{
+		while(fscanf(fp, "%d %d", &left, &right) != EOF){
+		// while(fscanf(fp, "%d %d", &input_arr[i][1], &input_arr[i][2]) != EOF){
+			// printf("index: %d, %d, %d\n", i, left, right);
+			input_arr[i][0] = left;
+			input_arr[i][1] = right;
+			i++;
+		}
+	}
+	fclose(fp);
+
+	// 配列の情報で動的計画法
+	goods_num = input_arr[0][0];
+	capacity_knapsack = input_arr[0][1];
+	printf("goods_num: %d\ncapacity: %d\n", goods_num, capacity_knapsack);
+	for(n=1; n<=goods_num; n++){
+		for(m=1; m<=capacity_knapsack; m++){
+			// printf("%d", m);
+			if(n==1){
+				if(m < input_arr[n][1]){
+					DP_arr_small[n-1][m-1] = 0;
+				}else{
+					DP_arr_small[n-1][m-1] = input_arr[1][0];
+				}
+			}else{
+				DP_arr_small[n-1][m-1] = DP_arr_small[n-2][m-1];
+				if(input_arr[n][1] <=m){
+					if(DP_arr_small[n-1][m-1] < (input_arr[n][0] + DP_arr_small[n-2][m-1-input_arr[n][1]])){
+						DP_arr_small[n-1][m-1] = input_arr[n][0] + DP_arr_small[n-2][m-1-input_arr[n][1]];
+					}
+				}
+			}
+		}
+	}
+	printf("\n");
+	for(n=0; n<goods_num; n++){
+		for(m=0; m < capacity_knapsack; m++){
+			printf("%4d ", DP_arr_small[n][m]);
+		}
+		printf("\n");
+	}
+	printf("max = %d", DP_arr_small[goods_num-1][capacity_knapsack-1]);
+    return 0;
+}

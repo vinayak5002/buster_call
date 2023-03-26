@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N, M, Q;
+    while (cin >> N >> M >> Q) {
+        if (N == 0 and M == 0 and Q == 0) break;
+        V<string> B(Q), S(Q);
+        rep(i, Q) cin >> B[i] >> S[i];
+        show(B, S);
+        V<string> st(Q + 1, string(N, '0'));
+        st[0] = string(N, '0');
+        rep(i, Q) rep(j, N) st[i + 1][j] = ((st[i][j] - '0') ^ (B[i][j] - '0')) + '0';
+        show(st);
+        rep(i, M) {
+            V<int> ansvec;
+            rep(j, N) {
+                int ok = 1;
+                for (int k = 1; k <= Q; k++) {
+                    if (st[k][j] != S[k - 1][i]) ok = 0;
+                }
+                if (ok) ansvec.push_back(j);
+            }
+            if (ansvec.size() == 1) {
+                char o = (ansvec[0] < 10 ? '0' + ansvec[0] : 'A' + ansvec[0] - 10);
+                cout << o;
+            } else {
+                cout << '?';
+            }
+        }
+        cout << '\n';
+    }
+    return 0;
+}
+

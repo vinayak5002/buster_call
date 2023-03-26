@@ -1,0 +1,71 @@
+#include<iostream>
+#include<cstdio>
+using namespace std;
+int n=0;//頂点数 ○
+int u=0;//頂点の番号　○
+int k[101]={0};//頂点番号の値　○
+int v[101][101]={0};//??
+int d[101]={0};//shortest ○
+int fptr=0;//デキューをするための変数　○
+int lptr=0;//エンキューをするための変数　○
+int u1[10000];//頂点の番号　○
+int d1[10000];//頂点への最短距離　○
+int id=0;//i==id.　○
+void enqueue(int u2,int d2)
+{
+	u1[lptr]=u2;//頂点の番号はu2
+	d1[lptr]=d2;//頂点への最短距離はd2
+	lptr=(lptr+1)%10000;//今何番目の配列か求める
+}
+void bfs(void)
+{
+	int u3;
+	int d3;
+
+	while(fptr!=lptr)
+	{
+		u3=u1[fptr];//頂点番号代入
+		d3=d1[fptr];//最短距離代入
+		fptr=(fptr+1)%10000;
+		if(d[u3]!=-1)
+		{
+			continue;
+		}
+		for(int i=0;i<k[u3];i++)
+		{
+			enqueue(v[u3][i],d3+1);
+		}
+		d[u3]=d3;
+	}
+	/*
+	bfsの引数は二つ→それぞれをu1[fptr]、d1[fptr]に代入
+	1.whileで全体を回す（条件付）
+	2.デキューをする（whileの直後）
+	3.最短距離が更新されてなければcontinue（条件付）	
+	4.enqueue（for文で回す）
+	*/
+}
+int main(void)
+{	
+	scanf("%d",&n);//頂点数を決める
+	for(int i=0;i<n;i++)//0が頂点数になるまで
+	{
+		scanf("%d",&u);//各頂点の隣接リスト入力 1:u=%d...%d(n):u=%d
+		scanf("%d",&k[u]);//配列ｋ[u]に値を入れる 1:k[1]=%d...k[u]=%d
+		for(int j=0;j<k[u];j++)//j<k[u]のとき
+		{
+			scanf("%d",&v[u][j]);//配列ｖ[頂点の番号][]に値を入れる
+		}
+	}
+	enqueue(1,0);
+	for(int i=0;i<n+1;i++)//全ての値を未探索にする
+	{
+		d[i]=-1;//未探索の値
+	}
+	bfs();
+	for(int i=1;i<=n;i++)
+	{
+	printf("%d %d\n",i,d[i]);
+	}
+	return 0;
+}

@@ -1,0 +1,82 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<bool> seen;//探索済みかどうかの判定
+vector<int> d; // 距離
+
+//幅優先探索
+void BFS(vector<vector<int>> &G, int u, int dist) { 
+    d[u] = dist;// 距離を記憶
+    if(dist<0) dist=dist-1;
+    dist=dist+1;
+    seen[u] = true;//探索済みにしている。
+    for (auto next_u : G[u]){ 
+        if (seen[next_u]){
+            continue;//探索済みであればスキップ
+        }
+        BFS(G, next_u, dist);//再帰
+        
+    }
+    dist=dist-1;//戻るとき距離を-1している
+}
+
+//vectorから任意の要素を消去するための関数
+void erase(vector<int> &root, int v)
+{
+    for (auto it = root.begin(); it != root.end();)
+    {
+        if (*it == v) {
+            it = root.erase(it);
+        }
+        else {
+            it++;
+        }
+    }
+}
+
+int main(){
+    int n;// 頂点数
+    cin >> n ;
+    int i,j,u,k,v;//uは頂点数, kはuの出次数, vはuに隣接する頂点
+
+    // グラフの入力
+    vector<vector<int>> G(n+1);
+    vector<int> root;// 根を記憶するコンテナ
+    for (i = 0; i < n; i++) {
+        root.push_back(i+1);
+    }
+    
+    G[0].push_back(-1);
+    for (i = 0; i < n; i++) {
+        cin >> u >> k;
+        for(j=0;j<k;j++){
+            cin >> v;
+            G[u].push_back(v);
+            erase(root, v);//根以外を消去
+        }
+    }
+              
+
+    // 頂点 1 から幅優先探索
+    seen.assign(n+1, false); // 全て未探索に設定
+    d.resize(n+1);
+    int  dist = 0;//距離
+    
+    int size=root.size();
+    if(size>=2){// 根が複数ある場合
+        for (i = 0; i < size; i++) {
+            if(i==0)
+            BFS(G, root[i], dist);
+            else
+            BFS(G, root[i], -1);//根が1以外の場合距離は-1
+      }
+    }else{// 根が頂点1だけの場合
+        BFS(G, 1, dist);
+    }
+    // 結果の出力
+    for (u = 1; u <= n; u++)
+        cout << u << " " << d[u] << endl;
+}
+
+

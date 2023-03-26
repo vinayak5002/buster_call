@@ -1,0 +1,87 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <tuple>
+#include <map>
+#include <queue>
+
+using namespace std;
+
+using ll = long long;
+using pii = pair<int, int>;	using pll = pair<ll, ll>;	using pil = pair<int, ll>;	using pli = pair<ll, int>;
+using vi = vector<int>;		using vvi = vector<vi>;		using vvvi = vector<vvi>;
+using vll = vector<ll>;		using vvll = vector<vll>;	using vvvll = vector<vvll>;
+using vb = vector<bool>;	using vvb = vector<vb>;		using vvvb = vector<vvb>;
+template <class T> using pqr = priority_queue<T, vector<T>, greater<T>>;
+
+const ll INFL = (ll)1e18;	const int INF = (int)1e9;
+const int MOD = 1000000007;
+
+template <class T> inline bool chmax(T& M, const T& x) { if (M < x) { M = x; return true; } return false; } // 最大値を更新（更新されたら true を返す）
+template <class T> inline bool chmin(T& m, const T& x) { if (m > x) { m = x; return true; } return false; } // 最小値を更新（更新されたら true を返す）
+
+
+int main()
+{
+	int n, m;
+	vector<int> ans;
+	vi num_bit_ones(1 << (10 + 1), 0);
+
+	//各ビットで1の個数を計算
+	for (int i = 0; i < (1 << (10 + 1)); i++) {
+		int count = 0, tmp = i;
+		while (tmp > 0) {
+			count += tmp & 1;
+			tmp >>= 1;
+		}
+		num_bit_ones[i] = count;
+	}
+
+
+	while (1) {
+		cin >> n >> m;
+
+		//終了条件
+		if (n == 0 && m == 0)
+			break;
+
+		//入力
+		vi plate_bit(1 << n, 0);
+		vvi plate(n, vi(m, 0));
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < m; j++)
+				cin >> plate[i][j];
+		}
+
+		//0,1のそれぞれの組み合わせの個数を求める
+		for (int j = 0; j < m; j++) {
+			int bit = 0;
+			for (int i = 0; i < n; i++) {
+				bit = (bit << 1) | plate[i][j];
+			}
+			plate_bit[bit]++;
+		}
+
+		//行方向全探索
+		int greatest = 0;
+		for (int bit = 0; bit < (1 << n); bit++) {
+			//各組合せについて最適なひっくり返し方を選ぶ
+			int tmp = 0;
+			for (int j = 0; j < (1 << n); j++) {
+				int select = max(n - num_bit_ones[j ^ bit], num_bit_ones[j ^ bit]);
+
+				tmp += select * plate_bit[j];
+			}
+			chmax(greatest, tmp);
+		}
+
+
+		ans.push_back(greatest);
+	}
+
+	//結果を出力
+	for (int i = 0; i < ans.size(); i++)
+		cout << ans[i] << endl;
+
+	return 0;
+}

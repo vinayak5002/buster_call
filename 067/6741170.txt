@@ -1,0 +1,165 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+
+using namespace std;
+
+class List
+{
+private:
+	struct Element
+	{
+		int val;
+		int prev;
+		int next;
+	};
+public:
+	List( int maxSize )
+	{
+		data = new Element[maxSize];
+	}
+	~List()
+	{
+		delete[] data;
+	}
+public:
+	void insert( int num )
+	{
+		if( empty() )
+		{
+			data[arrayFront] = { num, arrayFront, arrayFront };
+		}
+		else
+		{
+			int next = data[head].next;
+			data[next].prev = arrayFront;
+			data[arrayFront] = { num, head, next };
+			data[head].next = arrayFront;
+		}
+
+		head = arrayFront;
+		arrayFront++;
+	}
+	void del( int num )
+	{
+		if( empty() ) return;
+
+		for( int i = head, j = 0; j < arrayFront; i = data[i].prev, j++ )
+		{
+			if( data[i].val == num )
+			{
+				int prev = data[i].prev;
+				int next = data[i].next;
+				if( prev == next ) // If it is the only item 
+				{
+					head = -1;
+				}
+				else
+				{
+					data[next].prev = prev;
+					data[prev].next = next;
+				}
+
+				if( head == i ) // If it is the first item
+				{
+					head = prev;
+				}
+
+				break;
+			}
+		}
+	}
+	void deleteFirst()
+	{
+		if( empty() ) return;
+
+		int prev = data[head].prev;
+		int next = data[head].next;
+		if( prev == next ) // If it is the only item
+		{
+			head = -1;
+		}
+		else
+		{
+			data[prev].next = data[head].next;
+			data[next].prev = data[head].prev;
+			head = prev;
+		}
+	}
+	void deleteLast()
+	{
+		if( empty() ) return;
+
+		int back = data[head].next;
+
+		if( back == head ) // If it is the only item
+		{
+			head = -1;
+		}
+		else
+		{
+			int next = data[back].next;
+			data[next].prev = head;
+			data[head].next = data[back].next;
+		}
+	}
+	bool empty() const
+	{
+		return head == -1;
+	}
+	void print() const
+	{
+		if( empty() ) return;
+
+		int i = head;
+		while( i != data[head].next )
+		{
+			cout << data[i].val << ' ';
+			i = data[i].prev;
+		}
+
+		cout << data[i].val << endl;
+	}
+private:
+	int arrayFront = 0;
+	int head = -1;
+	Element* data = nullptr;
+};
+
+int main()
+{
+	int size;
+	cin >> size;
+	List l( size );
+
+	for( int i = 0; i < size; i++ )
+	{
+		string str;
+		int num;
+
+		cin >> str;
+
+		if( str[0] == 'i' )
+		{
+			cin >> num;
+			l.insert( num );
+		}
+		else if( str.size() == 6 )
+		{
+			cin >> num;
+			l.del( num );
+		}
+		else if( str[6] == 'F' )
+		{
+			l.deleteFirst();
+		}
+		else if( str[6] == 'L' )
+		{
+			l.deleteLast();
+		}
+	}
+
+	l.print();
+
+	return 0;
+}

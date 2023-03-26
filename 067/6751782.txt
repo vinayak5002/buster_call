@@ -1,0 +1,488 @@
+extern crate core;
+
+#[allow(unused_imports)]
+use std::collections::HashMap;
+#[allow(unused_imports)]
+use std::collections::{VecDeque, BinaryHeap};
+#[allow(unused_imports)]
+use std::hash::Hash;
+#[allow(unused_imports)]
+use std::io::{BufWriter, Write};
+#[allow(unused_imports)]
+use std::iter::Sum;
+#[allow(unused_imports)]
+use std::ops::{Add, Div, Deref};
+#[allow(unused_imports)]
+use std::ops::Index;
+#[allow(unused_imports)]
+use std::ops::Mul;
+#[allow(unused_imports)]
+use std::ops::Sub;
+#[allow(unused_imports)]
+use std::ptr::NonNull;
+#[allow(unused_imports)]
+use std::str::FromStr;
+#[allow(unused_imports)]
+use std::{collections::BTreeMap, collections::BTreeSet, fs::read, ops::AddAssign, ops::Neg, ops::RangeInclusive, rc::Rc, vec};
+#[allow(unused_imports)]
+use std::cmp::{Ordering, Reverse};
+#[allow(unused_imports)]
+use std::fmt::Debug;
+
+const PARSE_ERROR: &str = "Can't Parse";
+const EOF_ERROR: &str = "No Line";
+#[allow(unused_macros)]
+macro_rules! freeze {
+    ($($id:ident), *) => {
+        $(let $id = $id;)*
+    };
+}
+#[allow(unused_macros)]
+macro_rules! read_line {
+    () => {
+        {
+            let mut buffer = String::new();
+            std::io::stdin().read_line(&mut buffer).expect(EOF_ERROR);
+            buffer.trim().to_owned()
+        }
+    };
+    (&mut $buffer: ident) => {
+        {
+            std::io::stdin().read_line(&mut $buffer).expect(EOF_ERROR);
+            $buffer.trim().to_owned()
+        }
+    };
+}
+#[allow(unused_macros)]
+macro_rules! show {
+    () => {};
+    ($tt:expr) => {
+        println!("{} {} => {:?}", line!(), stringify!($tt), $tt);
+    };
+    ($tt:tt) => {
+        println!("{} {} => {:?}", line!(), stringify!($tt), $tt);
+    };
+    ($head:expr, $($tail:expr)*) => {
+        show!($head);
+        show!($($tail)*);
+    };
+}
+#[allow(unused_macros)]
+macro_rules! read {
+    () => {
+        read_line!()
+    };
+    ([[char]; $size: expr]) => {
+        (0 .. $size).into_iter().map(|_| read!([char])).collect::<Vec<_>>()
+    };
+    ([[usize1]; $size: expr]) => {
+        (0 .. $size).into_iter().map(|_| read!([usize1])).collect::<Vec<_>>()
+    };
+    ([[$ty:ty]; $size: expr]) => {
+        (0 .. $size).into_iter().map(|_| read!([$ty])).collect::<Vec<_>>()
+    };
+    ([usize1; $size: expr]) => {
+        (0 .. $size).into_iter().map(|_| read!(usize1)).collect::<Vec<_>>()
+    };
+    ([$ty:ty; $size: expr]) => {
+        (0 .. $size).into_iter().map(|_| read!($ty)).collect::<Vec<_>>()
+    };
+    ([$block: block; $size: expr]) => {
+        (0 .. $size).into_iter().map(|_| read!($block)).collect::<Vec<_>>()
+    };
+    
+    ([f64] ASC) => {
+        {
+            read!(mut vec: [f64]);
+            vec.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            vec
+        }
+    };
+    ([f64; $len: expr] ASC) => {
+        {
+            read!(mut vec: [f64; $len]);
+            vec.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            vec
+        }
+    };
+    ([$($tt: tt)*] ASC) => {
+        {
+            read!(mut vec: [$($tt)*]);
+            vec.sort();
+            vec
+        }
+    };
+    ([f64] DESC) => {
+        {
+            read!(mut vec: [f64]);
+            vec.sort_by(|a, b| a.partial_cmp(b).unwrap().reverse());
+            vec
+        }
+    };
+    ([f64; $len: expr] DESC) => {
+        {
+            read!(mut vec: [f64; $len]);
+            vec.sort_by(|a, b| a.partial_cmp(b).unwrap().reverse());
+            vec
+        }
+    };
+    ([$($tt: tt)*] DESC) => {
+        {
+            read!(mut vec: [$($tt)*]);
+            vec.sort_by_key(|&v| Reverse(v));
+            vec
+        }
+    };
+    ([char]) => {
+        read_line!().chars().collect::<Vec<_>>()
+    };
+    ([String]) => {
+        read_line!().split_whitespace().map(|s| s.to_owned()).collect::<Vec<String>>()
+    };
+    ([usize1]) => {
+        read_line!().split_whitespace().map(|x| x.parse::<usize>().ok().expect(PARSE_ERROR) - 1).collect::<Vec<usize>>()
+    };
+    ([$ty: ty]) => {
+        read_line!().split_whitespace().map(|x| x.parse().ok().expect(PARSE_ERROR)).collect::<Vec<$ty>>()
+    };
+    (usize1) => {
+        read_line!().parse::<usize>().ok().expect(PARSE_ERROR) - 1
+    };
+    ($ty: ty) => {
+        read_line!().parse::<$ty>().ok().expect(PARSE_ERROR)
+    };
+    ($block: block) => {
+        $block
+    };
+    ($ident: ident: [$($tt:tt)*]) => {
+        let $ident = read!([$($tt)*]);
+    };
+    (mut $ident: ident: [$($tt:tt)*]) => {
+        let mut $ident = read!([$($tt)*]);
+    };
+    ($ident: ident: [$($tt:tt)*] ASC) => {
+        let $ident = read!([$($tt)*] ASC);
+    };
+    ($ident: ident: [$($tt:tt)*] DESC) => {
+        let $ident = read!([$($tt)*] DESC);
+    };
+    ($ident: ident: String) => {
+        let $ident = read!();
+    };
+    (mut $ident: ident: String) => {
+        let mut $ident = read!();
+    };
+    ($ident: ident: $ty: ty) => {
+        let $ident = read_line!().parse::<$ty>().unwrap();
+    };
+    (mut $ident: ident: $ty: ty) => {
+        let mut $ident = read_line!().parse::<$ty>().unwrap();
+    };
+    ($($token: tt)*) => {
+        let line = read_line!();
+        let mut iter = line.split_whitespace().into_iter();
+        read_from_iter!(iter; $($token)*);
+    };
+}
+#[allow(unused_macros)]
+macro_rules! read_from_iter {
+    ($iter:expr; mut $ident:ident:usize1, $($rest:tt)*) => {
+        let mut $ident = $iter.next().unwrap().parse::<usize>().expect(PARSE_ERROR) - 1;
+        read_from_iter!($iter; $($rest)*);
+    };
+    ($iter:expr; mut $ident:ident:$ty:ty, $($rest:tt)*) => {
+        let mut $ident = $iter.next().unwrap().parse::<$ty>().expect(PARSE_ERROR);
+        read_from_iter!($iter; $($rest)*);
+    };
+    ($iter:expr; $ident:ident:usize1, $($rest:tt)*) => {
+        let $ident = $iter.next().unwrap().parse::<usize>().expect(PARSE_ERROR) - 1;
+        read_from_iter!($iter; $($rest)*);
+    };
+    ($iter:expr; $ident:ident:$ty:ty, $($rest:tt)*) => {
+        let $ident = $iter.next().unwrap().parse::<$ty>().expect(PARSE_ERROR);
+        read_from_iter!($iter; $($rest)*);
+    };
+    ($iter:expr; mut $ident:ident:usize1) => {
+        let mut $ident = $iter.next().unwrap().parse::<usize>().expect(PARSE_ERROR) - 1;
+    };
+    ($iter:expr; mut $ident:ident:$ty:ty) => {
+        let mut $ident = $iter.next().unwrap().parse::<$ty>().expect(PARSE_ERROR);
+    };
+    ($iter:expr; $ident:ident:usize1) => {
+        let $ident = $iter.next().unwrap().parse::<usize>().expect(PARSE_ERROR) - 1;
+    };
+    ($iter:expr; $ident:ident:$ty:ty) => {
+        let $ident = $iter.next().unwrap().parse::<$ty>().expect(PARSE_ERROR);
+    };
+    ($iter: expr; ) => {};
+}
+
+#[derive(Clone, Debug)]
+struct SegmentTree {
+    log: usize,
+    max_vec: Vec<(i32, usize)>,
+    min_vec: Vec<(i32, usize)>,
+    lazy: Vec<i32>
+}
+impl SegmentTree {
+    fn log2_ceil(value: usize) -> usize {
+        let mut log = 0;
+        while 1 << log < value {
+            log += 1;
+        }
+        log
+    }
+    fn from_vec(vec: &Vec<i32>) -> SegmentTree {
+        let log = SegmentTree::log2_ceil(vec.len());
+        let mut max_vec = vec![(std::i32::MIN, 1); 2 << log];
+        let mut min_vec = vec![(std::i32::MAX, 1); 2 << log];
+        let lazy = vec![0; 2 << log];
+        for (i, &v) in vec.iter().enumerate() {
+            max_vec[(1 << log) + i].0 = v;
+            min_vec[(1 << log) + i].0 = v;
+        }
+        let mut result = SegmentTree{log, max_vec, min_vec, lazy};
+        for i in (1 .. (1 << log)).rev() {
+            result.update(i);
+        }
+        result
+    }
+    fn get_max(&mut self, from: usize, until: usize) -> (i32, usize) {
+        self.apply_range(from, until);
+        let mut l = from + (1 << self.log);
+        let mut r = until + (1 << self.log);
+        let mut max = std::i32::MIN;
+        let mut count = 0;
+        while l < r {
+            if l & 1 == 1 {
+                match self.max_vec[l].0.cmp(&max) {
+                    Ordering::Equal => count += self.max_vec[l].1,
+                    Ordering::Greater => {
+                        max = self.max_vec[l].0;
+                        count = self.max_vec[l].1;
+                    },
+                    _ => ()
+                }
+                l += 1;
+            }
+            if r & 1 == 1 {
+                match self.max_vec[r - 1].0.cmp(&max) {
+                    Ordering::Equal => count += self.max_vec[r - 1].1,
+                    Ordering::Greater => {
+                        max = self.max_vec[r - 1].0;
+                        count = self.max_vec[r - 1].1;
+                    },
+                    _ => ()
+                }
+                r -= 1;
+            }
+            l >>= 1;
+            r >>= 1;
+        }
+        (max, count)
+    }
+    fn get_min(&mut self, from: usize, until: usize) -> (i32, usize) {
+        self.apply_range(from, until);
+        let mut l = from + (1 << self.log);
+        let mut r = until + (1 << self.log);
+        let mut min = std::i32::MAX;
+        let mut count = 0;
+        while l < r {
+            if l & 1 == 1 {
+                match self.min_vec[l].0.cmp(&min) {
+                    Ordering::Equal => count += self.min_vec[l].1,
+                    Ordering::Less => {
+                        min = self.min_vec[l].0;
+                        count = self.min_vec[l].1;
+                    },
+                    _ => ()
+                }
+                l += 1;
+            }
+            if r & 1 == 1 {
+                match self.min_vec[r - 1].0.cmp(&min) {
+                    Ordering::Equal => count += self.min_vec[r - 1].1,
+                    Ordering::Less => {
+                        min = self.min_vec[r - 1].0;
+                        count = self.min_vec[r - 1].1;
+                    },
+                    _ => ()
+                }
+                r -= 1;
+            }
+            l >>= 1;
+            r >>= 1;
+        }
+        (min, count)
+    }
+    fn add(&mut self, from: usize, until: usize, value: i32) {
+        self.apply_range(from, until);
+        let mut l = from + (1 << self.log);
+        let mut r = until + (1 << self.log);
+        while l < r {
+            if l & 1 == 1 {
+                self.add_lazy(l, value);
+                l += 1;
+            }
+            if r & 1 == 1 {
+                r -= 1;
+                self.add_lazy(r, value);
+            }
+            l >>= 1;
+            r >>= 1;
+        }
+        self.update_range(from, until);
+    }
+    fn apply_range(&mut self, from: usize, until: usize) {
+        let l = from + (1 << self.log);
+        let r = until + (1 << self.log);
+        for d in (1 .. self.log + 1).rev() {
+            if ((l >> d) << d) != l {
+                self.apply_lazy(l >> d);
+            }
+            if ((r >> d) << d) != r {
+                self.apply_lazy(r >> d);
+            }
+        }
+        self.update_range(from, until);
+    }
+    fn update_range(&mut self, from: usize, until: usize) {
+        let l = from + (1 << self.log);
+        let r = until + (1 << self.log);
+        for d in 1 .. self.log + 1 {
+            if ((l >> d) << d) != l {
+                self.update(l >> d);
+            }
+            if ((r >> d) << d) != r {
+                self.update(r >> d);
+            }
+        }
+    }
+    fn update(&mut self, position: usize) {
+        if (position << 1) < self.max_vec.len() {
+            let left = position << 1;
+            let right = left + 1;
+            self.max_vec[position] = match self.max_vec[left].0.cmp(&self.max_vec[right].0) {
+                Ordering::Equal => (self.max_vec[left].0, self.max_vec[left].1 + self.max_vec[right].1),
+                Ordering::Less => self.max_vec[right],
+                Ordering::Greater => self.max_vec[left],
+            };
+            self.min_vec[position] = match self.min_vec[left].0.cmp(&self.min_vec[right].0) {
+                Ordering::Equal => (self.min_vec[left].0, self.min_vec[left].1 + self.min_vec[right].1),
+                Ordering::Less => self.min_vec[left],
+                Ordering::Greater => self.min_vec[right],
+            }
+        }
+    }
+    fn add_lazy(&mut self, position: usize, value: i32) {
+        self.lazy[position] += value;
+        self.min_vec[position].0 += value;
+        self.max_vec[position].0 += value;
+    }
+    fn apply_lazy(&mut self, position: usize) {
+        if self.lazy[position] != 0 && position << 1 < self.lazy.len() {
+            self.add_lazy(position << 1, self.lazy[position]);
+            self.add_lazy((position << 1) + 1, self.lazy[position]);
+        }
+        self.lazy[position] = 0;
+    }
+}
+fn main() {
+    read!(height: usize, width: usize, q: usize);
+    read!(row: [i32]);
+    read!(column: [i32]);
+    read!(queries: [[i32]; q]);
+    let mut row_seg = SegmentTree::from_vec(&row);
+    let mut column_seg = SegmentTree::from_vec(&column);
+    for query in queries {
+        match query[..] {
+            [1, a, b, v] => {
+                row_seg.add(a as usize - 1, b as usize, v);
+            },
+            [2, c, d, v] => {
+                column_seg.add(c as usize - 1, d as usize, v);
+            },
+            [3, a, b, c, d] => {
+                let (row_min, row_min_count) = row_seg.get_min(a as usize - 1, b as usize);
+                let (column_min, column_min_count) = column_seg.get_min(c as usize - 1, d as usize);
+                let (row_max, row_max_count) = row_seg.get_max(a as usize - 1, b as usize);
+                let (column_max, column_max_count) = column_seg.get_max(c as usize - 1, d as usize);
+                let min_min = row_min as i64 * column_min as i64;
+                let min_max = row_min as i64 * column_max as i64;
+                let max_min = row_max as i64 * column_min as i64;
+                let max_max = row_max as i64 * column_max as i64;
+                let min_value = std::cmp::min(std::cmp::min(min_min, min_max), std::cmp::min(max_min, max_max));
+                let count = if min_value == 0 {
+                    let row_zero = if row_min == 0 { row_min_count } else if row_max == 0 { row_max_count } else {0} as u64;
+                    let column_zero = if column_min == 0 { column_min_count } else if column_max == 0 { column_max_count } else {0} as u64;
+                    (d - c + 1) as u64 * row_zero + (b - a + 1) as u64 * column_zero - row_zero * column_zero
+                }else if row_min == row_max && column_min == column_max {
+                    row_min_count as u64 * column_min_count as u64
+                }else if row_min == row_max {
+                    let column_count = if row_min as i64 * column_min as i64 == min_value { column_min_count } else {column_max_count} as u64;
+                    row_min_count as u64 * column_count
+                }else if column_min == column_max {
+                    let row_count = if row_min as i64 * column_min as i64 == min_value { row_min_count } else { row_max_count } as u64;
+                    row_count * column_min_count as u64
+                }else {
+                    let mut count = 0;
+                    if min_min == min_value {
+                        count += row_min_count as u64 * column_min_count as u64;
+                    }
+                    if min_max == min_value {
+                        count += row_min_count as u64 * column_max_count as u64;
+                    }
+                    if max_min == min_value {
+                        count += row_max_count as u64 * column_min_count as u64;
+                    }
+                    if max_max == min_value {
+                        count += row_max_count as u64 * column_max_count as u64;
+                    }
+                    count
+                };
+                println!("{} {}", min_value, count);
+            },
+            [4, a, b, c, d] => {
+                let (row_min, row_min_count) = row_seg.get_min(a as usize - 1, b as usize);
+                let (column_min, column_min_count) = column_seg.get_min(c as usize - 1, d as usize);
+                let (row_max, row_max_count) = row_seg.get_max(a as usize - 1, b as usize);
+                let (column_max, column_max_count) = column_seg.get_max(c as usize - 1, d as usize);
+                let min_min = row_min as i64 * column_min as i64;
+                let min_max = row_min as i64 * column_max as i64;
+                let max_min = row_max as i64 * column_min as i64;
+                let max_max = row_max as i64 * column_max as i64;
+                let max_value = std::cmp::max(std::cmp::max(min_min, min_max), std::cmp::max(max_min, max_max));
+                let count = if max_value == 0 {
+                    let row_zero = if row_min == 0 { row_min_count } else if row_max == 0 { row_max_count } else {0} as u64;
+                    let column_zero = if column_min == 0 { column_min_count } else if column_max == 0 { column_max_count } else {0} as u64;
+                    (d - c + 1) as u64 * row_zero + (b - a + 1) as u64 * column_zero - row_zero * column_zero
+                }else if row_min == row_max && column_min == column_max {
+                    row_min_count as u64 * column_min_count as u64
+                }else if row_min == row_max {
+                    let column_count = if row_min as i64 * column_min as i64 == max_value { column_min_count } else {column_max_count} as u64;
+                    row_min_count as u64 * column_count
+                }else if column_min == column_max {
+                    let row_count = if row_min as i64 * column_min as i64 == max_value { row_min_count } else { row_max_count } as u64;
+                    row_count * column_min_count as u64
+                }else {
+                    let mut count = 0;
+                    if min_min == max_value {
+                        count += row_min_count as u64 * column_min_count as u64;
+                    }
+                    if min_max == max_value {
+                        count += row_min_count as u64 * column_max_count as u64;
+                    }
+                    if max_min == max_value {
+                        count += row_max_count as u64 * column_min_count as u64;
+                    }
+                    if max_max == max_value {
+                        count += row_max_count as u64 * column_max_count as u64;
+                    }
+                    count
+                };
+                println!("{} {}", max_value, count);
+            },
+            _ => panic!()
+        }
+    }
+}

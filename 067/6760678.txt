@@ -1,0 +1,74 @@
+from curses.ascii import NUL
+
+
+class segmentT:
+    def __init__(self,n_):
+        self.n = 1
+        self.inf = 2**31 - 1
+        while self.n<n_:
+            self.n *= 2
+        self.D = [self.inf] * (2*self.n-1)
+        self.lazy = [NUL] * (2*self.n-1)
+        
+
+
+    def lazy_evaluate(self,k):
+        if self.lazy[k] == NUL:
+            return
+        self.D[k] = self.lazy[k]
+
+        if k<n-1:
+            self.lazy[2*k+1] = self.lazy[k]
+            self.lazy[2*k+2] = self.lazy[k]
+        self.lazy[k] = NUL
+
+    def update_query(self,a,b,x,k,l,r):
+        self.lazy_evaluate(k)
+        if a <= l and r<= b:
+            self.lazy[k] = x
+            self.lazy_evaluate(k)
+        elif a < r and l < b:
+            self.update_query(a,b,x,k*2+1,l,(l+r)/2)
+            self.update_query(a,b,x,k*2+2,(l+r)/2,r)
+            self.D[k] = min(self.D[k*2+1],self.D[k*2+2])
+
+        
+
+    
+    def find_query(self,a,b,k,l,r):
+        self.lazy_evaluate(k)
+        if r<= a or b <= l:
+            return self.inf
+        if a <= l and r<= b:
+            return self.D[k]
+        
+        vl = self.find_query(a,b,k*2+1,l,(l+r)/2)
+        vr = self.find_query(a,b, k*2+2,(l+r)/2,r)
+
+        return min(vl,vr)
+
+
+
+    def findmin(self,a,b):
+        return self.find_query(a,b+1,0,0,self.n)
+    def update(self,a,b,x):
+        self.update_query(a,b,x,0,0,self.n)
+
+        
+
+
+n,q = map(int,input().split())
+seg = segmentT(n)
+
+for _ in range(q):
+    com = input()
+
+    if com[0] == "0":
+        _,s,t,x = map(int,com.split())
+        seg.update(s,t,x)
+        
+
+    elif com[0] == "1":
+        _,i = map(int,com.split())
+        print(seg.findmin(i,i))
+

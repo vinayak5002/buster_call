@@ -1,0 +1,90 @@
+#define BUF_SIZE 1024
+
+#include <stdio.h>
+#include <string.h>
+
+struct dice {
+	int up;
+	int south;
+	int east;
+	int west;
+	int north;
+	int down;
+};
+
+void roll_south(struct dice *d) {
+	int tmp;
+	tmp = d->south;
+	d->south = d->up;
+	d->up = d->north;
+	d->north = d->down;
+	d->down = tmp;
+}
+
+void roll_east(struct dice *d) {
+	int tmp;
+	tmp = d->east;
+	d->east = d->up;
+	d->up = d->west;
+	d->west = d->down;
+	d->down = tmp;
+}
+
+void roll_west(struct dice *d) {
+	int tmp;
+	tmp = d->west;
+	d->west = d->up;
+	d->up = d->east;
+	d->east = d->down;
+	d->down = tmp;
+}
+
+void roll_north(struct dice *d) {
+	int tmp;
+	tmp = d->north;
+	d->north = d->up;
+	d->up = d->south;
+	d->south = d->down;
+	d->down = tmp;
+}
+
+
+
+int main(void)
+{
+	char buf[BUF_SIZE];
+	char command;
+	int up, south, east, west, north, down;
+
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d %d %d %d %d %d", &up, &south, &east, &west, &north, &down);
+	struct dice d = { up, south, east, west, north, down };
+	fgets(buf, sizeof(buf) - 1, stdin);
+	while(1) {
+		char orig_buf[BUF_SIZE];
+		strncpy(orig_buf, buf, sizeof(buf));
+		sscanf(buf, "%c%[^\n]", &command, buf);
+
+		switch (command) {
+		case 'E':
+			roll_east(&d);
+			break;
+		case 'W':
+			roll_west(&d);
+			break;
+		case 'S':
+			roll_south(&d);
+			break;
+		case 'N':
+			roll_north(&d);
+			break;
+		default:
+			break;
+		}
+		if (strcmp(buf, orig_buf) == 0) {
+			break;
+		}
+	}
+	printf("%d\n", d.up);
+	return 0;
+}

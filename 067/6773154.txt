@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+
+template <std::uint32_t MOD>
+class ModInt {
+	std::uint32_t value;
+	friend std::ostream &operator<<(std::ostream &os, const ModInt &x){ return os << x.value; }
+	friend std::istream &operator>>(std::istream &is, ModInt &x){ is >> x.value; x.value %= MOD; return is; }
+	friend constexpr ModInt operator+(ModInt left, const ModInt &right){ return left += right; }
+	friend constexpr ModInt operator-(ModInt left, const ModInt &right){ return left -= right; }
+	friend constexpr ModInt operator*(ModInt left, const ModInt &right){ return left *= right; }
+	friend constexpr ModInt operator/(ModInt left, const ModInt &right){ return left /= right; }
+public:
+	constexpr ModInt(std::uint32_t x = 0): value(x % MOD) {}
+	constexpr ModInt operator-() const { return value == 0 ? 0 : MOD - value; }
+	constexpr ModInt &operator+=(const ModInt &other){ if(value < MOD - other.value) value += other.value; else value -= MOD - other.value; return *this; }
+	constexpr ModInt &operator-=(const ModInt &other){ if(value >= other.value) value -= other.value; else value += MOD - other.value; return *this; }
+	constexpr ModInt &operator*=(const ModInt &other){ value = static_cast<std::uint64_t>(value) * other.value % MOD; return *this; }
+	constexpr ModInt &operator/=(const ModInt &other){ return *this *= other.inv(); }
+	constexpr ModInt inv() const { unsigned a = MOD, s = 0; unsigned b = value, t = 1; bool sign = true; while(b){ s += t * (a / b); a %= b; sign = !sign; std::swap(a, b); std::swap(s, t); } if(sign) s = MOD - s; return s; }
+	constexpr ModInt pow(unsigned n) const { ModInt tmp = *this, ret = 1; while(n){ if(n % 2) ret *= tmp; tmp *= tmp; n /= 2; } return ret; }
+};
+
+template <class T> bool chmax(T &a, const T &b){ bool ret = a < b; if(ret) a = b; return ret; }
+template <class T> bool chmin(T &a, const T &b){ bool ret = a > b; if(ret) a = b; return ret; }
+
+using lint = long long;
+using std::cin, std::cout, std::cerr, std::endl;
+
+int main(){
+	lint b;
+	while(cin >> b, b){
+		b *= 2;
+		for(lint n = sqrt(b) + 5; n > 0; n--){
+			if(n * n > b) continue;
+			if(b % n == 0){
+				lint m = b / n - n + 1;
+				if(m % 2 == 0){
+					cout << m / 2 << " " << n << endl;
+					break;
+				}
+			}
+		}
+	}
+}
+

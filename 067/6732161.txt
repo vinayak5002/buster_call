@@ -1,0 +1,51 @@
+#include<iostream>
+#include<vector>
+#include<queue>
+#include<map>
+#include<set>
+
+int main(){
+  
+  long long INF = 1000000000000000000;
+  int V, E, r;
+  std::cin >> V >> E >> r;
+
+  std::map<int, std::set<std::pair<long long, int>>> links;
+
+  for(int i = 0; i < E; ++i){
+
+    int s, t;
+    long long d;
+    std::cin >> s >> t >> d;
+    links[s].insert({-d, t});
+  }
+
+  std::vector<std::pair<long long, bool>> ans(V, {INF, false});
+  std::priority_queue<std::pair<long long, int>> cand;
+  
+  ans.at(r) = {0, true};
+  for(auto p: links[r]){
+    ans.at(p.second).first = - p.first;
+    cand.push(p); 
+  }
+
+  while(!cand.empty()){
+    auto base = cand.top();
+    cand.pop();
+    ans.at(base.second).second = true;
+    for(auto p : links[base.second]){
+       if(!ans.at(p.second).second){
+          ans.at(p.second).first = std::min(ans.at(p.second).first, ans.at(base.second).first - p.first);
+          cand.push(p);
+       }
+    }
+  }
+  
+  for(auto a : ans){
+    if(a.second){
+      std::cout << a.first << std::endl;
+    }else{
+      std::cout << "INF" << std::endl;
+    }
+  }
+}

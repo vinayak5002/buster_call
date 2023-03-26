@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+#include <string>
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <string.h>
+#include <queue>
+using namespace std;
+int closs(int a_1, int a_2, int b_1, int b_2){
+  //a×bのクロス積
+  return a_1*b_2-a_2*b_1;
+}
+
+int main(){
+  int n;
+  cin>>n;
+  vector<pair<int,int>> V;
+  int x,y;
+  for(int i=0; i<n; i++){
+    cin>>x>>y;
+    V.push_back({x,y});}
+  int q;
+  cin>>q;
+  int px,py;
+  
+  for(int j=0; j<q; j++){
+    cin>>px>>py;
+    int count=0;//交わった回数
+    //(x[i],y[i]),(x[i+1],y[i+1])のうちy-pyが小さいほうをl,大きいほうをmとする
+    for(int i=0; i<n; i++){
+    int m_1,m_2,l_1,l_2;
+    if(V[i].second-py>V[i+1].second-py){
+      m_1=V[i].first-px,m_2=V[i].second-py,l_1=V[(i+1)%n].first-px,l_2=V[(i+1)%n].second-py;
+    }
+    else{
+      l_1=V[i].first-px,l_2=V[i].second-py,m_1=V[(i+1)%n].first-px,m_2=V[(i+1)%n].second-py;
+    }
+    //外積を調べる、0なら別で調べる 0でなければl×mが正でかつこれらが半直線を跨いでる必要がある
+    //半直線は点Pからx正方向に伸ばしたものを考える
+    if(l_2<=0&&m_2>0&&closs(l_1,l_2,m_1,m_2)>0)count++;
+    else if(closs(l_1,l_2,m_1,m_2)==0&&l_1>0&&m_1>0)count++;
+    else if(closs(l_1,l_2,m_1,m_2)==0&&(l_1*m_1<=0)){count=-1;
+                                                    break;}//このときPは辺上にある、countを-1にして保存
+    }
+    if(count==-1)cout<<1<<endl;
+    else if(count%2==0)cout<<0<<endl;
+    else cout<<2<<endl;
+  }
+}

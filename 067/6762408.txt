@@ -1,0 +1,47 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+int main()
+{
+    const int dirx[4] = {  1,  0, -1,  0 };
+    const int diry[4] = {  0,  1,  0, -1 };
+
+    while ( true )
+    {
+        int w, h;
+        cin >> w >> h;
+        if ( w == 0  &&  h == 0 )
+            break;
+
+        vector<string> wall(2*h-1);
+        cin.ignore();
+        for ( int i=0; i<2*h-1; i++ )
+            getline( cin, wall[i] );
+
+        vector<vector<int> > dist( h, vector<int>( w, 0 ) );
+        dist[0][0] = 1;
+
+        for ( int d=1; d<w*h; d++ )
+        {
+            for ( int y=0; y<h; y++ )
+            for ( int x=0; x<w; x++ )
+            if ( dist[y][x] == d )
+            for ( int r=0; r<4; r++ )
+            {
+                int tx = x + dirx[r];
+                int ty = y + diry[r];
+
+                if ( 0 <= tx  &&  tx < w  &&
+                     0 <= ty  &&  ty < h  &&
+                     wall[ty+y][tx+x] == '0'  &&
+                     dist[ty][tx] == 0 )
+                    dist[ty][tx] = d + 1;
+            }
+        }
+
+        cout << dist[h-1][w-1] << endl;
+    }
+}

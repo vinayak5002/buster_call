@@ -1,0 +1,34 @@
+#include<iostream>
+using namespace std;
+const int MAX_N = 100;
+const int MAX_W = 10000;
+int v[MAX_N+1];
+int w[MAX_W+1];
+int opt[MAX_N+1][MAX_W+1];
+
+int main() {
+	int N, W;
+	cin >> N >> W;
+	for (int i = 0; i < N; i++) {
+		int a, b;
+		cin >> a >> b;
+		v[i+1] = a;
+		w[i+1] = b;
+	}
+	for (int i = 0; i <= N; i++)
+		opt[i][0] = 0;
+	for (int j = 0; j <= W; j++)
+		opt[0][j] = 0;
+	for(int i=1;i<=N;i++)
+		for (int j = 1; j <= W; j++)
+		{
+			opt[i][j] = opt[i - 1][j];
+			if (j - w[i] >= 0)
+				opt[i][j] = max(opt[i][j], opt[i - 1][j - w[i]] + v[i]);
+		}
+	//for (int i = 0; i <= N; i++)
+	//	for (int j = 0; j <= W; j++)
+	//		cout << "opt[" << i << "][" << j << "] = " << opt[i][j] << endl;
+	cout << opt[N][W]<<endl;
+	return 0;
+}

@@ -1,0 +1,48 @@
+import sys
+input = lambda: sys.stdin.readline().rstrip()
+
+def plus(*args):
+  ret = 0
+  for arg in args:
+    ret += int(arg)
+  return ret
+
+def multi(*args):
+  ret = 1
+  for arg in args:
+    ret *= int(arg)
+  return ret
+
+##################
+
+while True:
+  li = [[' '], []]
+  n = int(input())
+  if n == 0:
+    break
+  for _ in range(n):
+    li.append([])
+    s = input()
+    if s[-1] == '*' or s[-1] == '+':
+      li[len(s)].append(' ')
+      li[len(s)+1].append(s[-1])
+    else:
+      li[len(s)].append(s[-1])
+
+  for i in range(len(li)-1, 0, -1):
+    if not li[i]: continue
+    tmp = [[]]
+    for j in li[i]:
+      if j in {'*', '+'}:
+        tmp.append([j])
+      else:
+        tmp[-1].append(j)
+    for tm in tmp:
+      if not tm: continue
+      op = tm[0]
+      if op == '+':
+        li[i-1][li[i-1].index(' ')] = (plus(*tm[1:]))
+      elif op == '*':
+        li[i-1][li[i-1].index(' ')] = (multi(*tm[1:]))
+  print(li[1][0])
+

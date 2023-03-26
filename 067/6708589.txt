@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+#ifdef MY_DEBUG
+  #include "dprint.cpp"
+  # define dprint(a, ...);\
+      do {\
+          printf("line : %d, func : %s\n",\
+                __LINE__, __func__);\
+          dprint(#a,a,##__VA_ARGS__ );\
+      } while (0)
+#else
+  #define dprint(a,...) 
+#endif
+using namespace std;
+
+bool check(string & s1, string & s2,int& i1,int& i2){//i1から次の"まで同じ文字か判定する。
+int next_d1=-1;
+for (int z1 = i1+1; z1 < (int)s1.size(); z1++){
+  if(s1[z1]=='"'){
+    next_d1=z1;
+    break;
+  }
+}
+int next_d2=-1;
+for (int z2 = i2+1; z2 < (int)s2.size(); z2++){
+  if(s2[z2]=='"'){
+    next_d2=z2;
+    break;
+  }
+}
+
+if(next_d2-i2!=next_d1-i1){
+  i1=next_d1;
+  i2=next_d2;
+  return false;//文字数が違うなら絶対ダメ。
+}
+while (i1<next_d1){
+  if(s1[i1]==s2[i2]){
+    i1++;
+    i2++;
+  }else{
+    return false;
+  }
+}
+return true;
+
+
+}
+string solve(string & s1,string & s2){
+  int i1=0;
+  int i2=0;
+  bool f_moziretu=false;
+  while (i1<(int)s1.size() && i2<(int)s2.size()){
+   if(s1[i1]==s2[i2]){
+    //ふたつの文字列が等しい。
+
+    if(s1[i1]=='"'){
+      if(check(s1,s2,i1,i2)==false){
+        if(f_moziretu==false) f_moziretu=true;
+        else return  "DIFFERENT";
+      }
+    }
+   }else{
+    return "DIFFERENT";
+   }
+    i1++; 
+    i2++;
+  }
+  if(i1==(int)s1.size() &&i2==(int)s2.size()){
+    if(f_moziretu==false){
+    return "IDENTICAL";
+    }else{
+       return "CLOSE";
+    }
+    
+  }else{
+   
+    return "DIFFERENT";
+  }
+
+}
+int main() {
+
+while (true){
+  string s1,s2;
+  cin >>s1>>s2;
+  if(s1==".")break;
+  cout << solve(s1,s2) << endl;
+
+}
+
+
+return 0;
+}

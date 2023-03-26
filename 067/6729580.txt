@@ -1,0 +1,138 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+template <typename T>
+struct segtree{
+    using ll = long long;
+    
+    //ここでモノイドopと単位元eを定義
+    const ll e = (1ll<<31) - 1;
+    const auto op = [](ll a, ll b){return min(a, b);};
+    
+    struct node{
+        T val;
+        ll left, right;
+        node *nl, *nr;
+        
+        inline ll mid(ll a, ll b){
+            return (a + b) / 2;
+        }
+        
+        void update(){
+            if (nl == nullptr && nr == nullptr){
+                return;
+            }
+            else if (nl == nullptr){
+                val = nr->val;
+            }
+            else if (nr == nullptr){
+                val = nl->val;
+            }
+            else {
+                val = op(nl->val, nr->val);
+            }
+            return;
+        }
+        
+        void set(ll i, T n){
+            if (right - left <= 1){
+                val = n;
+                return;
+            }
+            
+            if (i < mid(left, right)){
+                if (nl == nullptr) {
+                    node* p = (node*)malloc(sizeof(node));
+                    nl = p;
+                    
+                    nl->left = left;
+                    nl->right = mid(left, right);
+                }
+                
+                nl->set(i, n);
+            }
+            else {
+                if (nr == nullptr){
+                    node* p = (node*)malloc(sizeof(node));
+                    nr = p;
+                    
+                    nr->left = mid(left, right);
+                    nr->right = right;
+                }
+                
+                nr->set(i, n);
+            }
+            
+            update();
+            return;
+        }
+        
+        T get(ll i){
+            if (right - left <= 1) return val;
+            
+            if (i < mid(left, right)){
+                if (nl == nullptr) return e;
+                return nl->get(i);
+            }
+            else {
+                if (nr == nullptr) return e;
+                return nr->get(i);
+            }
+        }
+        
+        T prod(ll l, ll r){
+			if (l >= r) return e;
+            if (r == right && l == left) return val;
+            
+            return op((nl == nullptr ? e : nl->prod(l, min(r, mid(left, right)))), (nr == nullptr ? e : nr->prod(max(l, mid(left, right)), r)));
+        }
+    };
+    
+    using pn = node*;
+    node* root;
+    
+    segtree(ll mx){
+        root = (pn)malloc(sizeof(node));
+        root->val = e;
+        root->left = 0;
+        root->right = mx;
+        root->nr = nullptr;
+        root->nl = nullptr;
+    }
+    
+    void set(ll i, T n){
+        root->set(i, n);
+        return;
+    }
+    
+    T get(ll i){
+        return root->get(i);
+    }
+    
+    T prod(ll l, ll r){
+        return root->prod(l, r);
+    }
+};
+
+int main(){
+    int n, q;
+    cin >> n >> q;
+    segtree<ll> seg(n);
+
+    for (int i = 0; i < q; i++){
+        int c;
+        cin >> c;
+        if (c == 0){
+            ll p, x;
+            cin >> p >> x;
+            seg.set(p, x);
+        }
+
+        else {
+            ll l, r;
+            cin >> l >> r;
+            cout << seg.prod(l, r) << endl;
+        }
+    }
+}
+

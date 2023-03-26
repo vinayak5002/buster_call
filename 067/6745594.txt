@@ -1,0 +1,258 @@
+#define FACE_NUM 6
+#define VALUE_MAX 100
+#define VALUE_MIN 0
+
+/*Initialization for an int array*/
+void initialize (int a[FACE_NUM]);
+/*Error check for input values*/
+void checkValue (int a);
+/*Get an array from console input*/
+void getArray (int a[FACE_NUM]);
+void cpArray (int a[FACE_NUM], int b[FACE_NUM]);
+void rolltoE (int a[FACE_NUM]);
+void rolltoW (int a[FACE_NUM]);
+void rolltoN (int a[FACE_NUM]);
+void rolltoS (int a[FACE_NUM]);
+void rolltoC (int a[FACE_NUM]);
+void reset(int a[FACE_NUM], int b[FACE_NUM]);
+void rotate(int x, int a[FACE_NUM]);
+int isIdentical (int a[FACE_NUM], int b[FACE_NUM]);
+
+#include<stdio.h>
+#include<stdlib.h>
+int backup[FACE_NUM];
+
+int main()
+{
+    int dice1[FACE_NUM];
+    int dice2[FACE_NUM];
+    initialize(dice1);
+    initialize(dice2);
+    getArray(dice1);
+    getArray(dice2);
+    cpArray(dice1,backup);
+
+    if (isIdentical(dice1,dice2))
+    {
+        printf("Yes\n");
+    }
+    else
+    {
+        printf("No\n");
+    }
+    return 0;
+}
+
+/*Function to initialize an integer array to zeros*/
+void initialize (int a[FACE_NUM])
+{
+    int i=0;
+    for (i=0;i<FACE_NUM;i++)
+    {
+        a[i]=0;
+    }
+    return;
+}
+
+/*Function to check a value if it fits the constraints*/
+void checkValue (int a)
+{
+    if (a>VALUE_MAX)
+    {
+        printf("ERROR: The input value must be less than or equal to %d.\n",VALUE_MAX);
+        exit(0);
+    }
+    else if (a<VALUE_MIN)
+    {
+        printf("ERROR: The input value must be greater than or equal to %d.\n",VALUE_MIN);
+        exit(0);
+    }
+    return;
+}
+
+/*Function to get an array from console input*/
+void getArray (int a[FACE_NUM])
+{
+    int i=0;
+    for (i=0;i<FACE_NUM;i++)
+    {
+        scanf("%d",&a[i]);
+        /*Error check for the input value*/
+        checkValue(a[i]);
+    }
+    return;
+}
+
+void cpArray (int a[FACE_NUM], int b[FACE_NUM])
+{
+    int i=0;
+    for(i=0;i<FACE_NUM;i++)
+    {
+        b[i]=a[i];
+    }
+    return;
+}
+
+void rolltoE (int a[FACE_NUM])
+{
+    int temp_arr[6]={0,0,0,0,0,0};
+    temp_arr[0]=a[3];
+    temp_arr[1]=a[1];
+    temp_arr[2]=a[0];
+    temp_arr[3]=a[5];
+    temp_arr[4]=a[4];
+    temp_arr[5]=a[2];
+    
+    int i=0;
+    for(i=0;i<FACE_NUM;i++)
+    {
+        a[i]=temp_arr[i];
+    }
+    return;
+}
+
+void rolltoW (int a[FACE_NUM])
+{
+    int temp_arr[6]={0,0,0,0,0,0};
+    temp_arr[0]=a[2];
+    temp_arr[1]=a[1];
+    temp_arr[2]=a[5];
+    temp_arr[3]=a[0];
+    temp_arr[4]=a[4];
+    temp_arr[5]=a[3];
+
+    int i=0;
+    for(i=0;i<FACE_NUM;i++)
+    {
+        a[i]=temp_arr[i];
+    }
+    return;
+}
+
+void rolltoN (int a[FACE_NUM])
+{
+    int temp_arr[6]={0,0,0,0,0,0};
+    temp_arr[0]=a[1];
+    temp_arr[1]=a[5];
+    temp_arr[2]=a[2];
+    temp_arr[3]=a[3];
+    temp_arr[4]=a[0];
+    temp_arr[5]=a[4];
+
+    int i=0;
+    for(i=0;i<FACE_NUM;i++)
+    {
+        a[i]=temp_arr[i];
+    }
+    return;
+}
+
+void rolltoS (int a[FACE_NUM])
+{
+    int temp_arr[6]={0,0,0,0,0,0};
+    temp_arr[0]=a[4];
+    temp_arr[1]=a[0];
+    temp_arr[2]=a[2];
+    temp_arr[3]=a[3];
+    temp_arr[4]=a[5];
+    temp_arr[5]=a[1];
+
+    int i=0;
+    for(i=0;i<FACE_NUM;i++)
+    {
+        a[i]=temp_arr[i];
+    }
+    return;
+}
+
+void rolltoC (int a[FACE_NUM])
+{
+   int temp_arr[6]={0,0,0,0,0,0};
+    temp_arr[0]=a[0];
+    temp_arr[1]=a[2];
+    temp_arr[2]=a[4];
+    temp_arr[3]=a[1];
+    temp_arr[4]=a[3];
+    temp_arr[5]=a[5];
+
+    int i=0;
+    for(i=0;i<FACE_NUM;i++)
+    {
+        a[i]=temp_arr[i];
+    }
+    return;    
+}
+
+
+void rotate(int x, int a[FACE_NUM])
+{
+    int i=0;
+    char pattern[24][6]=
+    {
+    "NNNN","C","CC","CCC",
+    "N","NC","NCC","NCCC",
+    "W","WC","WCC","WCCC",
+    "E","EC","ECC","ECCC",
+    "S","SC","SCC","SCCC",
+    "NN","NNC","NNCC","NNCCC"
+    };
+    while (pattern[x][i]!='\0')
+    {   
+        switch (pattern[x][i])
+        {
+            case 'E':
+            rolltoE(a);
+            break;
+
+            case 'N':
+            rolltoN(a);
+            break;
+
+            case 'S':
+            rolltoS(a);
+            break;
+
+            case 'W':
+            rolltoW(a);
+            break;
+
+            case 'C':
+            rolltoC(a);
+            break;
+
+            default:
+            break;
+        }
+        i++;
+    }
+    return;
+}
+
+int isIdentical (int a[FACE_NUM], int b[FACE_NUM])
+{
+    int i=0;
+    int j=0;
+    int result=0;
+
+    while (i<24)
+    {   
+        cpArray(backup,a);
+        rotate(i,a);
+        printf("%d %d %d %d %d %d %d\n",i,a[0],a[1],a[2],a[3],a[4],a[5]);
+        for (j=0;j<FACE_NUM;j++)
+        {
+            if (a[j]!=b[j])
+            {
+                break;
+            }
+        }
+        if (j==FACE_NUM)
+        {
+            result=1;
+            break;
+        }
+        i++;
+    }
+
+    return result;
+}

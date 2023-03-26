@@ -1,0 +1,102 @@
+#include <bits/stdc++.h>
+
+// #include <boost/multiprecision/cpp_dec_float.hpp>
+// #include <boost/multiprecision/cpp_int.hpp>
+
+// namespace mp = boost::multiprecision;
+
+// using Bint = mp::cpp_int;
+// using Bfloat = mp::number<mp::cpp_dec_float<1024>>;
+
+using namespace std;
+
+struct UnionFind {
+  vector<int> d;
+  UnionFind(int n) : d(n, -1) {}
+  int root(int x) {
+    if (d[x] < 0) return x;
+    return d[x] = root(d[x]);
+  }
+  bool unite(int x, int y) {
+    x = root(x);
+    y = root(y);
+    if (x == y) return false;
+    if (d[x] > d[y]) swap(x, y);
+    d[x] += d[y];
+    d[y] = x;
+    return true;
+  }
+  bool same(int x, int y) { return root(x) == root(y); }
+  int size(int x) { return -d[root(x)]; }
+};
+
+typedef long long ll;
+typedef unsigned long long ul;
+typedef long double ld;
+#define rep(i, n) for (int i = 0; i < n; i++)
+
+void dfs(vector<vector<int> > &a, int maxh, int maxw, int nowh, int noww, int x,
+         int y, ll *ans, int mincircle, bool *flag) {
+  if (nowh + y >= maxh || noww + x >= maxw) {
+    return;
+  }
+
+  for (int i = nowh; i <= nowh + y; i++) {
+    for (int j = noww; j <= noww + x; j++) {
+      if (i == nowh) {
+        mincircle = min(mincircle, a.at(i).at(j));
+      } else if (j == nowh || j == nowh + y) {
+        mincircle = min(mincircle, a.at(i).at(j));
+      }
+    }
+    if (i == nowh + y && abs(nowh - y) >= 3 && abs(noww - x) >= 3) {
+      dfs(a, maxh, maxw, nowh + 1, noww + 1, x - 1, y - 1, ans, mincircle,
+          flag);
+      if (*flag == false) {
+        *ans = 0;
+      }
+    }
+  }
+
+  for (int i = nowh + 1; i < nowh + y; i++) {
+    for (int j = noww + 1; j < noww + x; j++) {
+      if (a.at(i).at(j) <= mincircle) {
+        *flag = false;
+        return;
+      }
+      *ans = abs(mincircle - a.at(i).at(j));
+    }
+  }
+
+  dfs(a, maxh, maxw, nowh, noww, x + 1, y, ans, mincircle, flag);
+  dfs(a, maxh, maxw, nowh, noww, x, y + 1, ans, mincircle, flag);
+}
+
+int main() {
+  while (1) {
+    ll d, w;
+    cin >> d >> w;
+    if (d == 0 && w == 0) {
+      return 0;
+    }
+    vector<vector<int> > e(d, vector<int>(w));
+
+    for (int i = 0; i < d; i++) {
+      for (int j = 0; j < w; j++) {
+        int ee;
+        cin >> ee;
+        e.at(i).at(j) = ee;
+      }
+    }
+
+    ll ans = 0;
+    bool flag = true;
+
+    for (int i = 0; i < d; i++) {
+      for (int j = 0; j < w; j++) {
+        dfs(e, d, w, i, j, 2, 2, &ans, 1000000, &flag);
+      }
+    }
+    cout << ans << endl;
+  }
+}

@@ -1,0 +1,85 @@
+#include <iostream>
+#include <string>
+#include <unistd.h>
+using namespace std;
+
+struct node{
+    int index;
+    node *parent;
+    node *left;
+    node *right;
+};
+
+node *NIL, *root;
+
+void insert(int k){
+    //sleep(1);
+    node *temp = root;
+    node *temp_p = NIL;
+    node *z = (node *)malloc(sizeof(node));
+    z->index = k;
+    z->left = NIL;
+    z->right = NIL;
+
+    while(temp!=NIL){
+        temp_p = temp;
+        if(k<=temp->index){
+            temp = temp->left;
+        }else{
+            temp = temp->right;
+        }
+    }
+    z->parent = temp_p;
+    if(temp==root){
+        root = z;
+    }else if(k <= temp_p->index){
+        temp_p->left = z;
+    }else{
+        temp_p->right = z;
+    }
+    // cout << "insert" << endl;
+}
+
+void PreOrder(node *root){
+    if(root==NIL) return;
+    //cout << "Pre";
+    cout << " " << root->index;
+    PreOrder(root->left);
+    PreOrder(root->right);
+}
+
+void InOrder(node *root){
+    if(root==NIL) return;
+    //cout << "In";
+    InOrder(root->left);
+    cout << " " << root->index;
+    InOrder(root->right);
+}
+
+int main(){
+    int n;
+    cin >> n;
+
+    for(int i=0;i<n;i++){
+        int k;
+        char c[6];
+        scanf("%s", c);
+        // NIL->index = -1;
+        // NIL->parent = NIL;
+        // NIL->left = NIL;
+        // NIL->right = NIL;
+        //root = NIL;
+
+        if(c[0]=='i'){
+            scanf("%d", &k);
+            insert(k);
+        }else{
+            InOrder(root);
+            cout << endl;
+            PreOrder(root);
+            cout << endl;
+        }
+    }
+
+    return 0;
+}

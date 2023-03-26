@@ -1,0 +1,130 @@
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<climits>
+
+struct relation_format{
+    int to;
+    int w;
+};
+
+void makeSet(int);
+void Union(int,int);
+void link(int,int);
+int findSet(int);
+int cal_cost(int,int);
+int get_cost(int,int,int,std::vector<int>);
+
+
+std::vector<int> rank(100000),p(100000),Cost(100000,0);
+std::vector<std::vector<relation_format> > relation(100000);
+int n,q,com;
+int main(){
+    std::cin>>n>>q;
+    std::vector<int> visited(n,0);
+    for(int i=0;i<n;i++){
+        makeSet(i);
+    }
+
+    for(int i=0;i<q;i++){
+        std::cin>>com;
+        if(com==0){
+            int id1,id2,w;
+            std::cin>>id1>>id2>>w;
+            if(findSet(id1)!=findSet(id2)){
+                // modify here
+                relation_format new_one;
+                new_one.to=id2;
+                new_one.w = w;
+                relation[id1].push_back(new_one);
+                // relation_format new_one;
+                new_one.to=id1;
+                new_one.w = -w;
+                relation[id2].push_back(new_one);
+
+                Union(id1,id2);
+            }
+            // std::cout<<" oya:";
+            // for(int i = 0;i<n;i++){
+            //     std::cout<<p[i]<<" ";
+            // }
+            // std::cout<<std::endl;
+            // std::cout<<"cost:";
+            // for(int i = 0;i<n;i++){
+            //     std::cout<<Cost[i]<<" ";
+            // }
+            // std::cout<<std::endl;
+        }
+        if(com==1){
+            int id1,id2,w;
+            std::cin>>id1>>id2;
+            if(findSet(id1) != findSet(id2)){
+                std::cout<<"?"<<std::endl;
+            }
+            else{
+                // std::cout<< get_cost(id1,id2,visited,n,0)<<std::endl;
+                // std::cout<< get_cost(id1,id2,0,visited)<<std::endl;
+                std::cout<<cal_cost(id1,0)-cal_cost(id2,0)<<std::endl;
+                
+            }
+        }
+    }
+
+    // std::cout<<"******"<<cal_cost(4,0)<<std::endl;
+    return 0;
+}
+void makeSet(int x){
+    p[x]=x;
+    rank[x]=0;
+}
+
+void Union(int x,int y){
+    link(findSet(x),findSet(y));
+}
+
+void link(int x,int y){
+    std::vector<int> visited(n,0);
+    if(rank[x]> rank[y]){
+        p[y]=x;
+        Cost[y]=get_cost(y,x,0,visited);
+    }
+    else{
+        p[x] = y;
+        if(rank[x]==rank[y]){
+            rank[y] = rank[y] + 1;
+        }
+        Cost[x]=get_cost(x,y,0,visited);
+    }
+}
+
+int findSet(int x){
+    if (x != p[x]){
+        return findSet(p[x]);
+    }
+    return p[x];
+}
+
+int get_cost(int now, int target,int cost,std::vector<int> visited){
+    visited[now]=1;
+    if(now==target)return cost;
+    // std::cout<<relation[now].size()<<std::endl;
+    for(int i = 0; i<relation[now].size() ;i++){
+        if(visited[relation[now][i].to]!=1){
+            int update_cost = cost + relation[now][i].w;
+            int return_cost = get_cost(relation[now][i].to,target,update_cost,visited);
+            if(return_cost)return return_cost;
+        }
+    }
+    return 0;
+}
+
+int cal_cost(int x,int cost){
+    int update_cost = cost + Cost[x];
+    // std::cout<<update_cost<<" ";
+    if(x != p[x]){
+        // std::cout<<"next->"<<p[x]<<std::endl;
+        return cal_cost(p[x],update_cost);
+    }
+    return update_cost;
+}
+

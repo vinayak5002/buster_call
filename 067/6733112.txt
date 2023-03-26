@@ -1,0 +1,53 @@
+import java.util.Scanner;
+
+public class Main {
+    static int count = 0;
+    static char one = "1".charAt(0);
+    static boolean[][] world = new boolean[12][12]; // 陸(1)はtrue
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        wh: while (true) {
+            count = 0;
+            if (!sc.hasNext()) break;
+            for (boolean[] line:
+                    world) {
+                String str = sc.nextLine();
+                if (str.length() != 12) continue wh;
+                for (int i = 0; i < line.length; i++) {
+                    line[i] = str.charAt(i) == one;
+                }
+            }
+            for (int i = 0; i < 12; i++) {
+                for (int j = 0; j < 12; j++) {
+                    if(world[i][j]) {
+                        count++;
+                        check(i, j);
+                    }
+                }
+            }
+            System.out.println(count);
+        }
+    }
+
+    static void check (int i, int j) {
+        world[i][j] = false;
+        try {
+            if (world[i-1][j]) check(i-1, j);
+        } catch (IndexOutOfBoundsException e) {
+        }
+        try {
+            if (world[i+1][j]) check(i+1, j);
+        } catch (IndexOutOfBoundsException e) {
+        }
+        try {
+            if (world[i][j-1]) check(i, j-1);
+        } catch (IndexOutOfBoundsException e) {
+        }
+        try {
+            if (world[i][j+1]) check(i, j+1);
+        } catch (IndexOutOfBoundsException e) {
+        }
+    }
+
+}
+

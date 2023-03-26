@@ -1,0 +1,73 @@
+#include<iostream>
+#include<string>
+#include<map>
+#include<set>
+#include<queue>
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+#include<vector>
+#include<cmath>
+using namespace std;
+//#define int long long
+#define INF 0x3f3f3f3f
+pair<int,int> arr[100010];
+int n,m,num;
+char maps[1005][1005];
+struct node{
+    int x,y,step;
+};
+int  book[1005][1005];
+int dirt[4][2]={0,1,1,0,-1,0,0,-1};
+int bfs(int sx,int sy,int fx,int fy){
+   memset(book,0,sizeof(book));
+    queue<node> que;
+    que.push({sx,sy,0});
+    book[sx][sy]=1;
+    int ans=0;
+    while(!que.empty())
+    {
+        int x=que.front().x;
+        int y=que.front().y;
+        int step=que.front().step;
+        que.pop();
+        for(int i=0;i<4;i++)
+        {
+            int tx=x+dirt[i][0];
+            int ty=y+dirt[i][1];
+            if(tx<1||tx>n||ty<1||ty>m||maps[tx][ty]=='X'||book[tx][ty]==1)  continue;
+            if(tx==fx&&ty==fy)
+            {
+                return step+1;
+            }
+            //cout<<tx<<" "<<ty<<" "<<step+1<<endl;
+            que.push({tx, ty, step + 1});
+            book[tx][ty]=1;
+        }
+    }
+}
+int main()
+{
+    cin>>n>>m>>num;
+    for(int i=1;i<=n;i++)
+        for(int j=1;j<=m;j++)
+        {
+            cin>>maps[i][j];
+            if(maps[i][j]!='.')
+            {
+                if(maps[i][j]=='S')
+                {
+                    arr[0].first=i;
+                    arr[0].second=j;
+                }
+                else arr[maps[i][j]-'0'] ={i,j};
+            }
+        }
+    int ans=0;
+    for(int i=0;i<num;i++)
+    {
+       // cout<<endl;
+        ans+=bfs(arr[i].first,arr[i].second,arr[i+1].first,arr[i+1].second);
+    }
+    cout<<ans;
+}

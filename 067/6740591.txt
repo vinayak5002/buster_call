@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
+struct node *nil;
+void list(){
+    nil = (struct node *)malloc(sizeof(struct node));
+    nil->next = nil;
+    nil->prev = nil;
+}
+void insert(int K){
+    struct node *n = (struct node *)malloc(sizeof(struct node));
+    n->K = K;
+    n->next = nil->next;
+    nil->next->prev = n;
+    nil->next = n;
+    n->prev = nil;
+}
+
+struct node *listSearch(int K){
+    struct node *c = nil->next;
+    while(c != nil && c->K != K){
+        c = c->next;
+    }
+    return c;
+}
+
+void deleteNode(struct node *i){
+    if( i == nil )
+        return;
+    i->prev->next = i->next;
+    i->next->prev = i->prev;
+    free(i);
+}
+
+
+
+void deleteFirst(){
+    deleteNode(nil->next);
+}
+
+void deleteLast(){
+    deleteNode(nil->prev);
+}
+
+void deleteKey(int K){
+    deleteNode(listSearch(K));
+}
+
+void main(){
+    int I;
+    scanf("%d", &I);
+    printf(insert(I));
+}

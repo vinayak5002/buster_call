@@ -1,0 +1,43 @@
+import sys
+import math
+import heapq
+from collections import deque, Counter, defaultdict
+from sys import stdin
+from bisect import bisect, bisect_left
+
+
+INF = 10 ** 7
+int1 = lambda x: int(x) - 1
+stinput = lambda: stdin.readline()[:-1]
+ii = lambda: int(stinput())  # int input
+mi = lambda: map(int, stdin.readline().split())  # map input (int)
+li = lambda: list(mi())  # list input (int)
+mi1 = lambda: map(int1, stdin.readline().split())  # map input (int)-1
+li1 = lambda: list(mi1())  # list input (int)-1
+mis = lambda: map(str, stdin.readline().split())  # map input (string)
+lis = lambda: list(mis())  # list input (string)
+
+while 1:
+    N, M, A = mi()
+    if N == 0: break
+    d = [{} for i in range(N)] # 各接点のあみだ
+    l = [[] for i in range(N)]
+    for i in range(M):
+        h, p, q = mi1()
+        d[p][h] = q
+        d[q][h] = p
+        l[p].append(h)
+        l[q].append(h)
+    for i in range(N):
+        l[i].sort()
+
+    A -= 1
+    now_bar = A
+    now_h = 0
+    while 1:
+        ind = bisect_left(l[now_bar], now_h)
+        if ind == len(l[now_bar]):
+            print(now_bar + 1)
+            break
+        now_bar = d[now_bar][l[now_bar][ind]]
+

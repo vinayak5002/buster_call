@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+bool isnum(char c) {
+    return '1' <= c and c <= '9';
+}
+
+int parse(string s) {
+    int res = 0;
+    auto m = s.find("m");
+    if (m != string::npos) {
+        if (m != 0 and isnum(s[m - 1])) res += 1000*(s[m - 1] - '0');
+        else res += 1000;
+    }
+
+    auto c = s.find("c");
+    if (c != string::npos) {
+        if (c != 0 and isnum(s[c - 1])) res += 100*(s[c - 1] - '0');
+        else res += 100;
+    }
+
+    auto x = s.find("x");
+    if (x != string::npos) {
+        if (x != 0 and isnum(s[x - 1])) res += 10*(s[x - 1] - '0');
+        else res += 10;
+    }
+
+    auto i = s.find("i");
+    if (i != string::npos) {
+        if (i != 0 and isnum(s[i - 1])) res += (s[i - 1] - '0');
+        else res += 1;
+    }
+
+    return res;
+}
+
+string solve(int a) {
+    deque<char> deq;
+    int i = a % 10;
+    a /= 10;
+    int x = a % 10;
+    a /= 10;
+    int c = a % 10;
+    a /= 10;
+    int m = a % 10;
+
+    // cout << m << c << x << i << endl;
+    if (i != 0) {
+        deq.push_front('i');
+        if (i > 1) deq.push_front(i + '0');
+    }
+    if (x != 0) {
+        deq.push_front('x');
+        if (x > 1) deq.push_front(x + '0');
+    }
+    if (c != 0) {
+        deq.push_front('c');
+        if (c > 1) deq.push_front(c + '0');
+    }
+    if (m != 0) {
+        deq.push_front('m');
+        if (m > 1) deq.push_front(m + '0');
+    }
+
+    string res;
+    while(deq.size()) {
+        res += deq.front();
+        deq.pop_front();
+    }
+    return res;
+}
+
+int main() {
+    int q; cin >> q;
+    for (int _ = 0 ; _ < q ; _++) {
+        string f, b; cin >> f >> b;
+        cout << solve(parse(f) + parse(b)) << endl;
+    }
+}
+

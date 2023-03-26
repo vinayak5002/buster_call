@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for(int i = 0; i < (n); i++)
+using namespace std;
+typedef long long ll;
+
+string Cipher(string &, int &);
+string String(string &, int &);
+char Letter(string &, int &);
+
+string Cipher(string &s, int &i) {
+    string res = String(s, i);
+    int n = (int)s.size();
+    while(i < n && s[i] != ']') res += String(s, i);
+    return res;
+}
+
+string String(string &s, int &i) {
+    string res = "";
+    if(s[i] == '[') {
+        i++;
+        res = Cipher(s, i);
+        i++;
+        reverse(res.begin(), res.end());
+        return res;
+    } else {
+        res += Letter(s, i);
+        return res;
+    }
+}
+
+char Letter(string &s, int &i) {
+    if(s[i] == '+') {
+        i++;
+        char c = Letter(s, i);
+        return (c == '?' ? '?' : (char)(((c - 'A') + 1) % 26 + 'A'));
+    }
+    if(s[i] == '-') {
+        i++;
+        char c = Letter(s, i);
+        return (c == '?' ? '?' : (char)(((c - 'A') - 1 + 26) % 26 + 'A'));
+    }
+    return s[i++];
+}
+
+int main(){
+    cin.tie(0);
+    ios::sync_with_stdio(0);
+    
+    while(true) {
+        string s; cin >> s; if(s == ".") break;
+        int i = 0;
+        string ans = Cipher(s, i);
+        for(char &x : ans) if(x == '?') x = 'A';
+        cout << ans << endl;
+
+        // stack で管理できそう
+    }
+}

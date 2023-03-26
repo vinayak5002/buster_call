@@ -1,0 +1,44 @@
+#include<iostream>
+#include<vector>
+
+using namespace std;
+int parentof[10002];
+int Rank[10002];
+int findRoot(int x) {
+	if (x != parentof[x] ) parentof[x] = findRoot(parentof[x]);
+	return parentof[x];
+}
+void unite(int x, int y) {
+	int rx = findRoot(x);
+	int ry = findRoot(y);
+	if (Rank[rx] > Rank[ry]) {
+		parentof[ry] = rx;
+	}
+	else {
+		parentof[rx] = ry;
+		if (Rank[rx] == Rank[ry])Rank[ry] ++;
+	}
+}
+bool same(int x, int y) {
+	return findRoot(x) == findRoot(y);
+}
+int main() {
+	int n, q;
+	cin >> n >> q;
+	for (int i = 0; i < n; i++) { 
+		parentof[i] = i; 
+		Rank[i] = 1;
+	}
+	for (int i = 0; i < q; i++) {
+		int c;
+		int x, y;
+		cin >> c >> x >> y;
+		if (!c) {
+			unite(x, y);
+		}
+		else{
+			if (same(x, y))cout << 1 << endl;
+			else cout << 0 << endl;
+		}
+	}
+}

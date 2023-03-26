@@ -1,0 +1,45 @@
+# B問題
+
+import sys
+input = sys.stdin.readline
+
+res = []
+while 1:
+    n, m, t, p = map(int, input().split())
+    if n == m == t == p == 0:
+        break
+
+    a = [[1] * m for _ in range(n)]
+    x = n
+    y = m
+    for _ in range(t):
+        d, c = map(int, input().split())
+        if d == 1:
+            b = [[0] * (y) for _ in range(max(x - c, c))]
+            for i in range(x - c):
+                for j in range(y):
+                    b[i][j] = a[i + c][j]
+            for i in range(c):
+                for j in range(y):
+                    b[c - i - 1][j] += a[i][j]
+            x = max(x - c, c)
+
+        else:
+            b = [[0] * (max(y - c, c)) for _ in range(x)]
+            for i in range(x):
+                for j in range(y - c):
+                    b[i][j] = a[i][j + c]
+            for i in range(x):
+                for j in range(c):
+                    b[i][c - j - 1] += a[i][j]
+            y = max(y - c, c)
+
+        a = b
+
+    for _ in range(p):
+        x, y = map(int, input().split())
+        res.append(a[x][y])
+
+
+print(*res, sep="\n")
+

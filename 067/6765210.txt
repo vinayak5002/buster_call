@@ -1,0 +1,107 @@
+#include <bits/stdc++.h>
+////#include <atcoder/all>
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using vvvb = vector<vvb>;
+using vd = vector<double>;
+using vvd = vector<vd>;
+using vvvd = vector<vvd>;
+#define all(A) A.begin(),A.end()
+#define ALL(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q, bool C = 1) {
+    if (C == 0 && p == q) {
+        return 1;
+    }
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+template<class T>
+bool chmin(T& p, T q, bool C = 1) {
+    if (C == 0 && p == q) {
+        return 1;
+    }
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+ll gcd(ll(a), ll(b)) {
+    if (b == 0)return a;
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+vector<ll> fact, factinv, inv;
+ll mod = 998244353;
+void prenCkModp(ll n) {
+    fact.resize(n + 5);
+    factinv.resize(n + 5);
+    inv.resize(n + 5);
+    fact.at(0) = fact.at(1) = 1;
+    factinv.at(0) = factinv.at(1) = 1;
+    inv.at(1) = 1;
+    for (ll i = 2; i < n + 5; i++) {
+        fact.at(i) = (fact.at(i - 1) * i) % mod;
+        inv.at(i) = mod - (inv.at(mod % i) * (mod / i)) % mod;
+        factinv.at(i) = (factinv.at(i - 1) * inv.at(i)) % mod;
+    }
+
+}
+ll nCk(ll n, ll k) {
+    if (k < 0)return 0;
+    if (n < k) return 0;
+    return fact.at(n) * (factinv.at(k) * factinv.at(n - k) % mod) % mod;
+}
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    ll C,N,M;
+    cin>>C>>N>>M;
+    vvll DP(N+1,vll(C+1,0));
+    rep(i,N){
+        ll S,P;
+        cin>>S>>P;
+        rep(c,C+1){
+            chmax(DP[i+1][c],DP[i][c]);
+            if(c+S<=C)chmax(DP[i+1][c+S],DP[i][c]+P);
+        }
+    }
+    rep(c,C){
+        chmax(DP[N][c+1],DP[N][c]);
+    }
+    rep(k,M){
+        cout<<DP[N][C/(k+1)]*(k+1)<<endl;
+    }
+
+}
+
+
+

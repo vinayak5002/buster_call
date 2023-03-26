@@ -1,0 +1,111 @@
+#include <iostream>
+#include<vector>
+#include<queue>
+#include<string>
+using namespace std;
+
+class dequeue{
+private:
+    vector<int> ver,front,back;
+    queue<int> nilp;
+    
+public:
+    
+    dequeue():ver(2,0),front(2),back(2){
+        front[0]=-1;
+        front[1]=0;
+        back[0]=1;
+        back[1]=-1;
+    }
+    
+    void push_front(int n){
+        int p;
+        if (nilp.empty()){
+            ver.push_back(0);
+            front.push_back(0);
+            back.push_back(0);
+            p=ver.size()-1;
+        }
+        else{
+            p=nilp.front();
+            nilp.pop();
+        }
+        front[back[0]]=p;
+        back[p]=back[0];
+        front[p]=0;
+        back[0]=p;
+        ver[p]=n;
+    }
+    
+    int erase(int n){
+        int p=back[0];
+        while (p!=1){
+            if (ver[p]==n){
+                nilp.push(p);
+                front[back[p]]=front[p];
+                back[front[p]]=back[p];
+                return n;
+            }
+            p=back[p];
+        }
+        return -1;
+    }
+    
+    int deleteFirst(){
+        int p=back[0];
+        nilp.push(p);
+        front[back[p]]=front[p];
+        back[front[p]]=back[p];
+        return ver[p];
+    }
+    
+    int deleteLast(){
+        int p=front[1];
+        nilp.push(p);
+        front[back[p]]=front[p];
+        back[front[p]]=back[p];
+        return ver[p];
+    }
+    
+    void show_all(){
+        int p=back[0];
+        if (ver.size()>2){
+            cout << ver[p];
+            p=back[p];
+        }
+        while (p!=1){
+            cout << ' ' << ver[p];
+            p=back[p];
+        }
+        cout << endl;
+    }
+    
+};
+
+int main(void){
+    int n;
+    cin >> n;
+    dequeue d;
+    for (int i=0;i<n;i++){
+        string command;
+        cin >> command;
+        if (command=="insert"){
+            int x;
+            cin >> x;
+            d.push_front(x);
+        }
+        else if (command=="delete"){
+            int x;
+            cin >> x;
+            d.erase(x);
+        }
+        else if (command=="deleteFirst"){
+            d.deleteFirst();
+        }
+        else{
+            d.deleteLast();
+        }
+    }
+    
+    d.show_all();
+}

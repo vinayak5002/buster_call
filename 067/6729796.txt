@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#pragma GCC target("avx")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+
+using ull = unsigned long long;
+using ll = long long;
+using vi = vector<int>;
+using vll = vector<long long>;
+using vvi = vector<vi>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+
+#define all(obj) (obj).begin(), (obj).end()
+#define reps(i, a, n) for (ll i = (a); i < (ll)(n); ++i)
+#define rep(i, n) reps(i, 0, n)
+#define repd(i, n) for (ll i = n - 1; i >= 0; i--)
+template <typename T>
+inline void print(const vector<T>& v, string s = " ") {
+    rep(i, v.size()) cout << v[i] << (i != (ll)v.size() - 1 ? s : "\n");
+}
+template <typename T, typename S>
+inline void print(const pair<T, S>& p) {
+    cout << p.first << " " << p.second << "\n";
+}
+template <typename T>
+inline void print(const T& x) {
+    cout << x << "\n";
+}
+
+bool rinsetsu[110][110];
+bool visited[110];
+ll a, b;
+void solve(ll m, ll n, ll p) {
+    rep(i, n) {
+        cin >> a >> b;
+        rinsetsu[a - 1][b - 1] = rinsetsu[b - 1][a - 1] = true;
+    }
+    // visited[p - 1] = true;
+    // rep(i, m) {
+    //     if (!rinsetsu[p - 1][i]) continue;
+    //     visited[i] = true;
+    //     rep(j, m) {
+    //         if (rinsetsu[i][j]) visited[j] = true;
+    //     }
+    // }
+    ll now;
+    queue<ll> q;
+    q.push(p - 1);
+    while (!q.empty()) {
+        now = q.front();
+        q.pop();
+        visited[now] = true;
+        rep(ne, m) {
+            if (!visited[ne] && rinsetsu[now][ne]) {
+                q.push(ne);
+            }
+        }
+    }
+    ll ans = 0;
+    rep(i, m) if (visited[i]) ans++;
+    print(ans);
+    rep(i, 110) {
+        visited[i] = false;
+        rep(j, 110) { rinsetsu[i][j] = false; }
+    }
+}
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(0);
+    ll m, n, p;
+    while (1) {
+        cin >> m >> n >> p;
+        if (m == 0) break;
+        solve(m, n, p);
+    }
+    return 0;
+}

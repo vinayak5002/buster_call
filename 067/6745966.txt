@@ -1,0 +1,70 @@
+#include <iostream>
+using namespace std;
+
+void makeSet(int);
+void relate(int,int,int);
+int findSet(int);
+bool same(int,int);
+int diff(int,int);
+
+int p[100000];
+int r[100000];
+int w[100000];
+
+int main(){
+  int n,q; cin >> n >> q;
+  int query,x,y,z;
+
+  for(int i=0; i<n; i++) makeSet(i);
+
+  for(int i=0; i<q; i++){
+    cin >> query;
+    if(query == 0){
+      cin >> x >> y >> z;
+      relate(x,y,z);
+    } else {
+      cin >> x >> y;
+      if(same(x,y)) cout << diff(x,y) << endl;
+      else cout << '?' << endl;
+    }
+  }
+
+  return 0;
+}
+
+void makeSet(int x){
+  p[x] = x;
+  r[x] = 0;
+  w[x] = 0;
+}
+
+void relate(int x, int y, int z){
+  p[x] = findSet(x);
+  p[y] = findSet(y);
+  z = z - (w[y] - w[x]);
+
+  if(r[p[x]] > r[p[y]]){
+    w[p[y]] = z;
+    p[p[y]] = p[x];
+  } else {
+    w[p[x]] = -z;
+    p[p[x]] = p[y];
+  }
+
+  if(r[p[x]] == r[p[y]]) r[p[y]] = r[p[y]]+1;
+}
+
+int findSet(int x){
+  if(x == p[x]){ return x;
+    int tmp = findSet(p[x]);
+    w[x] += w[p[x]];
+    return p[x] = tmp;
+}
+
+bool same(int x, int y){
+  return findSet(x) == findSet(y);
+}
+
+int diff(int x, int y){
+  return w[y] - w[x];
+}

@@ -1,0 +1,52 @@
+#include <iostream>
+#include <vector>
+
+struct Vertex {
+  int id_;
+  int weight_;
+
+  Vertex(int id, int weight) : id_(id), weight_(weight) {}
+};
+
+using Graph = std::vector<std::vector<Vertex>>;
+
+int total_cost;
+int nv, ne;
+
+int main() {
+  Graph g;
+
+  std::cin >> nv >> ne;
+  g.resize(nv);
+
+  for(int i = 0; i < ne; ++i) {
+    int s, t, w;
+    std::cin >> s >> t >> w;
+
+    g[s].push_back(Vertex(t, w));
+    g[t].push_back(Vertex(s, w));
+  }
+
+  std::vector<int> Q;
+  Q.push_back(0);
+
+  while(Q.size() != nv) {
+    int min_id;
+    int min_weight = 100000;
+    for(int i = 0; i < Q.size(); ++i) { 
+      for(auto it = g[Q[i]].begin(); it != g[Q[i]].end(); ++it) {
+        if(it->weight_ < min_weight) {
+          min_id = it->id_;
+          min_weight = it->weight_;
+        }
+      }
+    }
+    total_cost += min_weight;
+    Q.push_back(min_id);
+  }
+  
+  std::cout << total_cost << "\n";
+
+  return 0;
+}
+

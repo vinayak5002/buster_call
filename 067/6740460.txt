@@ -1,0 +1,88 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+const int N = 10005;
+
+class DisjointSet{
+    int parent[N], rank[N];
+
+    public:
+    DisjointSet(int n){
+        for(int i=0; i<n; i++) make_set(i);
+    };
+
+    void make_set(int x){
+        rank[x] = 0;
+        parent[x] = x;
+    }
+
+    int findSet(int x){
+        if(x != parent[x]) parent[x] = findSet(parent[x]);
+        return parent[x];
+    }
+
+    void unite(int x, int y){
+        link(findSet(x), findSet(y));    
+    }
+
+    void link(int x, int y){
+        if(rank[x] > rank[y]){
+            parent[y] = x;
+        }else{
+            parent[x] = y;
+            if(rank[x] == rank[y]){
+                rank[y] = rank[y] + 1;
+            }
+        }
+    }
+
+    bool same(int x, int y){
+        return findSet(x) == findSet(y);
+    }
+
+};
+
+struct Edge
+{
+    int s, t, w;
+
+    bool operator<(const Edge& e)const{
+        return w < e.w;
+    }
+};
+
+int kruskal(vector<Edge> es, int v, int e){
+    
+    int min_cost = 0;
+    DisjointSet uf(v);
+    
+    sort(es.begin(), es.end());
+
+    for(int i=0; i<es.size(); i++){
+        Edge& e = es[i];
+        if (!uf.same(e.s, e.t)) {
+        min_cost += e.w;
+        uf.unite(e.s, e.t);
+        }
+    }
+
+    return min_cost;
+}
+
+
+int main(){
+    int v, e;
+    vector<Edge> es;
+    
+    cin >> v >> e;
+    for(int i=0; i<e; i++){
+        Edge e;
+        cin >> e.s >> e.t >> e.w;
+        es.push_back(e);
+    }
+
+    cout << kruskal(es, v, e) << endl;
+
+    return 0;
+}

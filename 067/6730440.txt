@@ -1,0 +1,24 @@
+INF = float("inf")
+mod = 10**9+7
+    
+N = int(input())
+#S = input()
+#N,M = map(int,input().split())
+#A = list(map(int,input().split()))
+rc = []
+for _ in range(N):
+    rc.append(list(map(int,input().split())))
+dp = [[INF]*N for _ in range(N)]
+
+for i in range(N-1):
+    dp[i][i+1] = rc[i][0]*rc[i][1]*rc[i+1][1]
+    dp[i][i] = 0
+dp[N-1][N-1] = 0
+for k in range(2,N):
+    for i in range(N):
+        j = i+k
+        if j>=N:
+            continue
+        for l in range(j-i):
+            dp[i][j] = min(dp[i][j], dp[i][i+l] + dp[i+l+1][j] + rc[i][0]*rc[i+l][1]*rc[j][1])
+print(dp[0][N-1])

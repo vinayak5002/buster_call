@@ -1,0 +1,220 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+template <int mod>
+class Modint {
+    using mint = Modint;
+    static_assert(mod > 0, "Modulus must be positive");
+
+public:
+    static constexpr int get_mod() noexcept { return mod; }
+
+    constexpr Modint(long long y = 0) noexcept : x(y >= 0 ? y % mod : (y % mod + mod) % mod) {}
+
+    constexpr int value() const noexcept { return x; }
+
+    constexpr mint& operator+=(const mint& r) noexcept { if ((x += r.x) >= mod) x -= mod; return *this; }
+    constexpr mint& operator-=(const mint& r) noexcept { if ((x += mod - r.x) >= mod) x -= mod; return *this; }
+    constexpr mint& operator*=(const mint& r) noexcept { x = static_cast<int>(1LL * x * r.x % mod); return *this; }
+    constexpr mint& operator/=(const mint& r) noexcept { *this *= r.inv(); return *this; }
+
+    constexpr mint operator-() const noexcept { return mint(-x); }
+
+    constexpr mint operator+(const mint& r) const noexcept { return mint(*this) += r; }
+    constexpr mint operator-(const mint& r) const noexcept { return mint(*this) -= r; }
+    constexpr mint operator*(const mint& r) const noexcept { return mint(*this) *= r; }
+    constexpr mint operator/(const mint& r) const noexcept { return mint(*this) /= r; }
+
+    constexpr bool operator==(const mint& r) const noexcept { return x == r.x; }
+    constexpr bool operator!=(const mint& r) const noexcept { return x != r.x; }
+
+    constexpr mint inv() const noexcept {
+        int a = x, b = mod, u = 1, v = 0;
+        while (b > 0) {
+            int t = a / b;
+            std::swap(a -= t * b, b);
+            std::swap(u -= t * v, v);
+        }
+        return mint(u);
+    }
+
+    constexpr mint pow(long long n) const noexcept {
+        mint ret(1), mul(x);
+        while (n > 0) {
+            if (n & 1) ret *= mul;
+            mul *= mul;
+            n >>= 1;
+        }
+        return ret;
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const mint& r) {
+        return os << r.x;
+    }
+
+    friend std::istream& operator>>(std::istream& is, mint& r) {
+        long long t;
+        is >> t;
+        r = mint(t);
+        return is;
+    }
+
+private:
+    int x;
+};
+
+using mint = Modint<2011>;
+
+vector<string> s;
+
+pair<mint, int> expr(int l, int r, int t, int b);
+pair<mint, int> term(int l, int r, int t, int b);
+pair<mint, int> factor(int l, int r, int t, int b);
+pair<mint, int> powexpr(int l, int r, int t, int b);
+pair<mint, int> primary(int l, int r, int t, int b);
+pair<mint, int> fraction(int l, int r, int t, int b);
+
+void print(int l, int r, int t, int b) {
+    cout << l << " " << r << " " << t << " " << b << endl;
+    rep(i,t,b) cout << s[i].substr(l, r-l) << endl;
+}
+
+bool empty(int j, int t, int b) {
+    rep(i,t,b) if (s[i][j] != '.') return false;
+    return true;
+}
+
+pair<mint, int> expr(int l, int r, int t, int b) {
+    // cout << "expr" << endl;
+    // print(l, r, t, b);
+    while (empty(l, t, b)) ++l;
+    while (empty(r-1, t, b)) --r;
+    // find base
+    int base;
+    rep(i,t,b) if (s[i][l] != '.') base = i;
+
+    // calc
+    mint res = 0;
+    char op = '+';
+    while (l < r) {
+        auto [x, nl] = term(l, r, t, b);
+        if (op == '+') res += x;
+        else res -= x;
+        l = nl;
+        if (nl == r) break;
+        op = s[base][l+1];
+        if (op != '+' && op != '-') break;
+        l += 3;
+    }
+    return {res, l};
+}
+pair<mint, int> term(int l, int r, int t, int b) {
+    // cout << "term" << endl;
+    // print(l, r, t, b);
+    while (empty(l, t, b)) ++l;
+    while (empty(r-1, t, b)) --r;
+    // find base
+    int base;
+    rep(i,t,b) if (s[i][l] != '.') base = i;
+
+    // calc
+    mint res = 1;
+    while (l < r) {
+        auto [x, nl] = factor(l, r, t, b);
+        res *= x;
+        l = nl;
+        if (l == s[0].size()) break;
+        if (s[base][l+1] != '*') break;
+        l += 3;
+    }
+    return {res, l};
+}
+pair<mint, int> factor(int l, int r, int t, int b) {
+    // cout << "factor" << endl;
+    // print(l, r, t, b);
+    while (empty(l, t, b)) ++l;
+    while (empty(r-1, t, b)) --r;
+    // find base
+    int base;
+    rep(i,t,b) if (s[i][l] != '.') base = i;
+
+    // calc
+    if (s[base][l] == '(' || ('0' <= s[base][l] && s[base][l] <= '9')) return powexpr(l, r, t, b);
+    else if (s[base][l+1] == '.') {
+        auto [x, nl] = factor(l+2, r, t, b);
+        return {-x, nl};
+    } else {
+        return fraction(l, r, t, b);
+    }
+}
+pair<mint, int> powexpr(int l, int r, int t, int b) {
+    // cout << "powexpr" << endl;
+    // print(l, r, t, b);
+    while (empty(l, t, b)) ++l;
+    while (empty(r-1, t, b)) --r;
+    // find base
+    int base;
+    rep(i,t,b) if (s[i][l] != '.') base = i;
+
+    auto [x, nl] = primary(l, r, t, b);
+    if (nl < r && base > t && s[base-1][nl] != '.') {
+        x = x.pow(s[base-1][nl] - '0');
+        ++nl;
+    }
+    return {x, nl};
+}
+pair<mint, int> primary(int l, int r, int t, int b) {
+    // cout << "primary" << endl;
+    // print(l, r, t, b);
+    while (empty(l, t, b)) ++l;
+    while (empty(r-1, t, b)) --r;
+    // find base
+    int base;
+    rep(i,t,b) if (s[i][l] != '.') base = i;
+
+    // digit | ( expr )
+    if (s[base][l] == '(') {
+        auto [x, nl] = expr(l+2, r, t, b);
+        return {x, nl+2};
+    } else {
+        return {s[base][l] - '0', l+1};
+    }
+}
+pair<mint, int> fraction(int l, int r, int t, int b) {
+    // cout << "fraction" << endl;
+    // print(l, r, t, b);
+    while (empty(l, t, b)) ++l;
+    while (empty(r-1, t, b)) --r;
+    // find base
+    int base;
+    rep(i,t,b) if (s[i][l] != '.') base = i;
+
+    int k = l;
+    while (k < r && s[base][k] == '-') ++k;
+
+    mint num = expr(l+1, k-1, t, base).first;
+    mint den = expr(l+1, k-1, base+1, b).first;
+    return {num/den, k};
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int n;
+        cin >> n;
+        if (n == 0) break;
+        s.resize(n);
+        for (auto& x : s) cin >> x;
+
+        cout << expr(0, s[0].size(), 0, n).first << "\n";
+    }
+}

@@ -1,0 +1,210 @@
+using System;
+
+
+class Program
+{
+    static void Main()
+    {
+        // 自分の得意な言語で
+        // Let's チャレンジ！！
+        int n = int.Parse(Console.ReadLine()); //回転数を取得
+        int R_count = 0;                       //文字列　R　がいくつか
+        int G_count = 0;                       //文字列　G　がいくつか
+        int B_count = 0;                       //文字列　B　がいくつか
+        string tmp;                            //昇順ソートの為の変数
+        int count1 = 0;                        //値が == の時カウントプラス
+        int count2 = 0;                        //値が 1違う時カウントプラス
+        int count_sum = 0;                     //count1かcount2が2になったときカウントプラス３なら条件を満たす
+        
+
+
+        for (int i = 0; i < n; i++) {
+            string[] num = Console.ReadLine().Split(' ');
+            string[] rgb = Console.ReadLine().Split(' ');
+
+            for(int j = 0; j < 9; j++) {      //色を識別
+                if(rgb[j] == "R") {
+                    R_count++;
+                }
+
+                if(rgb[j] == "G") {
+                    G_count++;
+                }
+
+                if(rgb[j] == "B") {
+                    B_count++;
+                }
+            }
+
+            string[,] R = new string[2,R_count];   //識別した色をもとに配列を初期化
+            string[,] G = new string[2, G_count];
+            string[,] B = new string[2, B_count];
+
+            R_count = 0;
+            G_count = 0;
+            B_count = 0;
+
+
+            //--------------配列に色と数字を入れる-----------------//
+
+            for (int j = 0; j < 9; j++) {           
+                if(rgb[j] == "R") {
+                    R[0, R_count] = num[j];
+                    R[1,R_count] = rgb[j];
+                    //Console.WriteLine("R[0]={0}  R[1]={1}", R[0, R_count], R[1,R_count]);
+                    R_count++;
+                }
+
+                if(rgb[j] == "G") {
+                    G[0, G_count] = num[j];
+                    G[1, G_count] = rgb[j];
+                    G_count++;
+                }
+
+                if(rgb[j] == "B") {
+                    B[0, B_count] = num[j];
+                    B[1, B_count] = rgb[j];
+                    B_count++;
+                }
+            }
+
+            //--------------昇順に配列をソート-----------------------//
+
+            for(int j = 0; j < R_count; j++) {
+                for(int k = j + 1; k < R_count; k++) {
+                    if (int.Parse(R[0,j]) > int.Parse(R[0,k])) {
+                        tmp = R[0, j];
+                        R[0,j] = R[0,k];
+                        R[0,k] = tmp;
+
+                        tmp = R[1, j];
+                        R[1, j] = R[1, k];
+                        R[1, k] = tmp;
+                        //Console.WriteLine("R[0]={0}  R[1]={1}", R[0, j], R[1, j]);
+                    }
+                }
+                //Console.WriteLine("R[0]={0}  R[1]={1}", R[0, j], R[1, j]);
+            }
+
+            for(int j = 0; j < G_count; j++) {
+                for(int k = j + 1; k < G_count; k++) {
+                    if (int.Parse(G[0,j]) > int.Parse(G[0,k])) {
+                        tmp = G[0, j];
+                        G[0,j] = G[0,k];
+                        G[0,k] = tmp;
+
+                        tmp = G[1, j];
+                        G[1, j] = G[1, k];
+                        G[1, k] = tmp;
+                    }
+                }
+            }
+
+            for(int j = 0; j < B_count; j++) {
+                for(int k = j + 1; k < B_count; k++) {
+                    if (int.Parse(B[0,j]) > int.Parse(B[0,k])) {
+                        tmp = B[0, j];
+                        B[0,j] = B[0,k];
+                        B[0,k] = tmp;
+
+                        tmp = B[1, j];
+                        B[1, j] = B[1, k];
+                        B[1, k] = tmp;
+                    }
+                }
+            }
+
+            //--------------値が同じか、値が1違うか判別-----------------------//
+
+            for (int j = 0; j < R_count - 1; j++) {
+                if (R[0,j] == R[0,j + 1]) {
+                    count1++;
+                    count2 = 0;
+                    if(count1 == 2) {
+                        count_sum++;
+                        count1 = 0;
+                    }
+                } else if(int.Parse(R[0,j]) + 1 == int.Parse(R[0,j + 1])) {
+                    count2++;
+                    count1 = 0;
+                    if(count2 == 2) {
+                        count_sum++;
+                        count2 = 0;
+                    }
+                } else {
+                    count1 = 0;
+                    count2 = 0;
+                }
+            }
+
+            count1 = 0;
+            count2 = 0;
+
+            for (int j = 0; j < G_count - 1; j++) {
+                if (G[0,j] == G[0,j + 1]) {
+                    count1++;
+                    count2 = 0;
+                    if(count1 == 2) {
+                        count_sum++;
+                        count1 = 0;
+                        j++;
+                    }
+                } else if(int.Parse(G[0,j]) + 1 == int.Parse(G[0,j + 1])) {
+                    count2++;
+                    count1 = 0;
+                    if(count2 == 2) {
+                        count_sum++;
+                        count2 = 0;
+                        j++;
+                    }
+                } else {
+                    count1 = 0;
+                    count2 = 0;
+                }
+            }
+
+            count1 = 0;
+            count2 = 0;
+
+            for (int j = 0; j < B_count - 1; j++) {
+                if (B[0,j] == B[0,j + 1]) {
+                    count1++;
+                    count2 = 0;
+                    if(count1 == 2) {
+                        count_sum++;
+                        count1 = 0;
+                    }
+                } else if(int.Parse(B[0,j]) + 1 == int.Parse(B[0,j + 1])) {
+                    count2++;
+                    count1 = 0;
+                    if(count2 == 2) {
+                        count_sum++;
+                        count2 = 0;
+                    }
+                } else {
+                    count1 = 0;
+                    count2 = 0;
+                }
+            }
+
+            count1 = 0;
+            count2 = 0;
+
+            R_count = 0;
+            G_count = 0;
+            B_count = 0;
+
+            //--------------結果を出力-----------------------//
+
+            if (count_sum == 3) {
+                Console.WriteLine(1);
+            } else {
+                Console.WriteLine(0);
+            }
+
+            count_sum = 0;
+        }
+  
+
+    }
+}

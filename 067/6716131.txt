@@ -1,0 +1,69 @@
+#include <iostream>
+#include <vector>
+#include <utility>
+#include <algorithm>
+using namespace std;
+class UnionFind {
+private:
+    vector<int> par,height;
+public:
+    UnionFind(const int  N) 
+        : par(N),height(N,0){
+        for(int i = 0; i < N; i++){
+            par[i] = i;
+        }
+    }
+
+    int Find(const int x) {
+        if (par[x] == x) return x;
+        return par[x] = Find(par[x]);
+    }
+
+    void Union(int x,int y){
+        int rx = Find(x);
+        int ry = Find(y);
+        if (rx == ry) return;
+        if(height[rx]<height[ry]){
+            par[rx] = ry;
+        }else{
+            par[ry] = rx;
+            if(height[rx]==height[ry]){
+                ++height[rx];
+            }
+        }
+    }
+
+    bool Same(int x, int y) {
+        int rx = Find(x);
+        int ry = Find(y);
+        return rx == ry;
+    }
+};
+struct edge{
+    int s;
+    int t;
+    int w;
+};
+int main(){
+    int n,m,sum=0;
+    cin>>n>>m;
+    edge input;
+    vector<edge> edges;
+    for(int i=0;i<m;++i){
+        cin>>input.s>>input.t>>input.w;
+        edges.push_back(input);
+        
+    }
+    sort(begin(edges),end(edges),[](const edge& x,const edge& y){
+        return x.w<y.w;
+    });
+    UnionFind tree(n);
+    for(int i=0;i<m;++i){
+        if(!tree.Same(edges[i].s,edges[i].t)){
+            tree.Union(edges[i].s,edges[i].t);
+            sum+=edges[i].w;
+        }
+    }
+    cout<<sum<<endl;
+}
+

@@ -1,0 +1,91 @@
+class Point:
+    def __init__(self, x_, y_):
+        self.x = x_
+        self.y = y_
+
+    def __lt__(self, other):
+        if self.x < other.x:
+            return True
+        elif self.x == other.x:
+            if self.y < other.y:
+                return True
+        return False
+
+    def __gt__(self, other):
+        if self.x > other.x:
+            return True
+        elif self.x == other.x:
+            if self.y > other.y:
+                return True
+        return False
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+
+
+def area(pos):
+    pos.sort()
+    max_x = max_y = 0
+    min_x = min_y = 50000
+    for i in range(4):
+        max_x = max(max_x, pos[i].x)
+        min_x = min(min_x, pos[i].x)
+        max_y = max(max_y, pos[i].y)
+        min_y = min(min_y, pos[i].y)
+
+    outer_square = (max_x - min_x) * (max_y - min_y)
+    p1 = pos[0]
+    p2 = pos[1]
+    triangle = abs(p1.x - p2.x) * abs(p1.y - p2.y)
+    return outer_square - triangle * 4 // 2
+
+
+def search(v, a):
+    left = -1
+    right = len(v)
+    while right - left > 1:
+        mid = (left + right) // 2
+        if v[mid] == a:
+            return True
+        elif v[mid] > a:
+            right = mid
+        else:
+            left = mid
+    return False
+
+
+while True:
+    n = int(input())
+    if n == 0:
+        exit(0)
+
+    p = []
+    for _ in range(n):
+        x, y = map(int, input().split())
+        p.append(Point(x, y))
+
+    p.sort()
+    max_area = 0
+    for i in range(n):
+        flg = False
+        for j in range(n - 1, i, -1):
+            diff_x = abs(p[i].x - p[j].x)
+            diff_y = abs(p[i].y - p[j].y)
+            left_down = Point(p[i].x - diff_y, p[i].y + diff_x)
+            if search(p, left_down):
+                left_up = Point(p[j].x - diff_y, p[j].y + diff_x)
+                if search(p, left_up):
+                    max_area = max(max_area, area([p[i], p[j], left_down, left_up]))
+                    flg = True
+            right_down = Point(p[i].x + diff_y, p[i].y - diff_x)
+            if search(p, right_down):
+                right_up = Point(p[j].x + diff_y, p[j].y - diff_x)
+                if search(p, right_up):
+                    max_area = max(max_area, area([p[i], p[j], right_down, right_up]))
+                    flg = True
+            if flg:
+                print(max_area)
+                break
+        if flg:
+            break
+

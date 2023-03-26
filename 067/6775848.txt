@@ -1,0 +1,143 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define MOD 1000000007
+//#define MOD 998244353
+#define INF 10000000000000000
+#define EPS 1e-9
+#define F first
+#define S second
+
+#define debug(x) cout<<x<<endl;
+#define repi(i,x,n) for(int i=x;i<n;i++)
+#define rep(i,n) repi(i,0,n)
+#define lp(i,n) repi(i,0,n)
+#define repn(i,n) for(int i=n;i>=0;i--)
+#define int long long
+#define endl "\n"
+
+typedef pair<int,int> PII;
+typedef pair<int,string> PIS;
+typedef pair<string,int> PSI;
+
+template <typename T>
+bool chmax(T &a, const T& b) {
+  if (a < b) {
+    a = b; 
+    return true;
+  }
+  return false;
+}
+
+template <typename T>
+bool chmin(T &a, const T& b) {
+  if (a > b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+
+typedef string::const_iterator State;
+class ParseError {};
+
+int number(State &begin){
+  int num=0;
+  while(isdigit(*begin)){
+      num*=10;
+    num+= *begin - '0';
+    begin++;
+  }
+  return num;
+}
+
+string poow(string s,int x){
+  string ret="";
+  int siz=s.size();
+  while(x){
+    if(x%2!=0) ret+=s;
+    s+=s;
+    x/=2;
+    siz+=siz;
+    if(siz>1000000) return ret;
+  }
+  return ret;
+}
+
+string solve(State &begin,int n,int &now){
+  int x=1;
+  int cnt=0;
+  string t="";
+  int st=now;
+  //cout<<(*begin)<<endl;
+  if(isdigit(*begin) ){
+    x=number(begin);
+  }
+  if((*begin)=='('){
+    begin++;
+    while((*begin) != ')' ){
+      t+=solve(begin,n,now);
+      if(t[t.size()-1]=='#'){
+	return t=t.substr(t.size()-2,2);
+      }
+    }
+    begin++;
+    
+    cnt=t.size();
+  }else{
+    while('A'<=(*begin) && (*begin)<='Z'){
+      cnt++;
+      t.push_back(*begin);
+      begin++;
+    }
+  }
+  //cout<<t<<" "<<st<<" "<<cnt<<" "<<x<<endl;
+  if(t[t.size()-1]=='#'){
+    return t=t.substr(t.size()-2,2);
+  }
+  if((st+(cnt*x)+1) > n){
+    int p=n-st-1;
+    now=st+(cnt*x);
+    char c=t[p%(t.size())];
+    string ret="";
+    ret.push_back(c);
+    ret.push_back('#');
+    return ret;
+  }else{
+    now=st+(cnt*x);
+    return poow(t,x);
+  }
+}
+
+
+
+
+
+signed main(){
+  // cin.tie(0);	
+  //ios::sync_with_stdio(false);
+  while(1){
+    string s;
+    int n;
+    cin>>s>>n;
+    if(s=="0" && n==0) break;
+    
+    int now=-1;
+    string ans="";
+    s=s+"!";
+    //cout<<s<<endl;
+    State beg=s.begin();
+    //cout<<(*beg)<<endl;
+    while((*beg)!='!' && n>now){
+      //cout<<"?"<<endl;
+      ans=solve(beg,n,now);
+      //cout<<now<<endl;
+      //cout<<(*beg)<<endl;
+    }
+    if(n>now) cout<<0<<endl;
+    else cout<<ans[0]<<endl;
+  }
+  
+  return 0;
+}
+

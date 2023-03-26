@@ -1,0 +1,44 @@
+def dfs(grid, dominoes, n, r):
+    if len(dominoes) == n:
+        return True
+    else:
+        for i in range(7):
+            if grid[r][i] == 1:
+                grid[r][i] = grid[i][r] = 0
+                dominoes.append((r, i))
+                if dfs(grid, dominoes, n, i):
+                    return True
+                grid[r][i] = grid[i][r] = 1
+                dominoes.pop()
+
+        return False
+
+
+def main():
+    while True:
+        try:
+            n = int(input())
+        except EOFError:
+            break
+        v = list(input().split())
+
+        grid = [[0] * 7 for _ in range(7)]
+        dominoes = []
+        for i in range(n):
+            x = int(v[i][0])
+            y = int(v[i][1])
+            grid[x][y] = grid[y][x] = 1
+
+        flg = False
+        for i in range(7):
+            if dfs(grid, dominoes, n, i):
+                print('Yes')
+                flg = True
+                break
+        if not flg:
+            print('No')
+
+
+if __name__ == '__main__':
+    main()
+

@@ -1,0 +1,95 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+typedef vector<int> vi;
+typedef vector<ll> vl;
+typedef vector<vector<int>> vvi;
+typedef vector<vector<ll>> vvl;
+
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+typedef vector<pii> vpii;
+typedef vector<pll> vpll;
+
+#define FOR(i, a, b) for(ll i=(a); i<(b); ++i)
+#define REP(i, n) FOR(i, 0, n)
+#define NREP(i, n) FOR(i, 1, n+1)
+
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return 1; } return 0; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return 1; } return 0; }
+
+bool isfin = 0;
+const ll INF = 1e15;
+
+const ll nmax = 1e5 + 1000;
+ll isprime[nmax];
+ll preprime[nmax];
+
+void init() {
+    REP(i, nmax) {
+        if(i <= 1) {continue;}
+        
+        ll flg = 1;
+        for(ll j = 2; j * j <= i; ++j) {
+            if(i % j == 0) {flg = 0;}
+        }
+        
+        if(flg) {isprime[i] = 1;}
+    }
+    
+    ll now = -1;
+    REP(i, nmax) {
+        if(isprime[i]) {
+            now = i;
+        }
+        preprime[i] = now;
+    }
+    
+    return;
+}
+
+void calc() {
+    ll M, A, B; cin >> M >> A >> B;
+    
+    if(M == 0) {
+        isfin = 1;
+        return;
+    }
+    
+    ll P = 2, Q = 2;
+    ll mult = P * Q;
+    
+    REP(q, nmax) {
+        if(q <= 1) {continue;}
+        if(isprime[q] == 0) {continue;}
+        
+        ll mn = (A * q + B - 1) / B;
+        ll mx = min(q, M / q);
+        
+        ll p = preprime[mx];
+        
+        if(p == -1) {continue;}        
+        if(p < mn) {continue;}
+        
+        if(chmax(mult, p * q)) {
+            P = p, Q = q;
+        }
+    }
+    
+    cout << P << " " << Q << endl;
+    
+    return;
+}
+
+int main(void) {
+    init();
+    while(1) {
+        calc();
+        if(isfin) {break;}
+    }
+    
+    return 0;
+}

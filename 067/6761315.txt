@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int H, W, M;
+    cin >> H >> W >> M;
+    V<string> S(H);
+    rep(i, H) cin >> S[i];
+    V<V<int>> A(H, V<int>(W)), B(H, V<int>(W)), C(H, V<int>(W));
+    rep(i, H) rep(j, W) cin >> A[i][j];
+    rep(i, H) rep(j, W) cin >> B[i][j];
+    rep(i, H) rep(j, W) cin >> C[i][j];
+    V<int> X(M), Y(M);
+    rep(i, M) cin >> X[i] >> Y[i];
+    V<int> P;
+    const int dx[4] = {1, 0, -1, 0}, dy[4] = {0, 1, 0, -1}, INF = 1 << 30;
+    rep(i, M - 1) {
+        // calculate path
+        V<V<int>> d(H, V<int>(W, INF)), pre(H, V<int>(W, -1));
+        d[X[i]][Y[i]] = 0;
+        queue<int> que;
+        que.push(X[i] * W + Y[i]);
+        while (!que.empty()) {
+            int val = que.front();
+            que.pop();
+            int cx = val / W, cy = val % W;
+            if (cx == X[i + 1] and cy == Y[i + 1]) break;
+            rep(k, 4) {
+                int nx = cx + dx[k], ny = cy + dy[k];
+                if (!(0 <= nx and nx < H and 0 <= ny and ny < W)) continue;
+                if (S[nx][ny] == '#') continue;
+                if (d[nx][ny] != INF) continue;
+                d[nx][ny] = d[cx][cy] + 1;
+                pre[nx][ny] = cx * W + cy;
+                que.push(nx * W + ny);
+            }
+        }
+        V<int> PP;
+        int cx = X[i + 1], cy = Y[i + 1];
+        while (cx != X[i] or cy != Y[i]) {
+            PP.push_back(pre[cx][cy]);
+            int nx = pre[cx][cy] / W, ny = pre[cx][cy] % W;
+            cx = nx, cy = ny;
+        }
+        reverse(PP.begin(), PP.end());
+        for (auto p : PP) P.push_back(p);
+    }
+    P.push_back(X[M - 1] * W + Y[M - 1]);
+    show(P);
+    V<V<int>> lt(H, V<int>(W, -1));
+    int N = P.size();
+    ll ans = 0;
+    for (int i = 0; i < N; i++) {
+        int cx = P[i] / W, cy = P[i] % W;
+        if (lt[cx][cy] != -1) {
+            ans += min(A[cx][cy] * (i - lt[cx][cy]), B[cx][cy] + C[cx][cy]);
+        } else {
+            ans += B[cx][cy] + C[cx][cy];
+        }
+        lt[cx][cy] = i;
+    }
+    cout << ans << '\n';
+    return 0;
+}
+

@@ -1,0 +1,43 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <queue>
+#include <set>
+
+using namespace std;
+using Strings = vector<string>;
+using CoOrd = pair<int, int>;
+using Data = unordered_map<char, set<CoOrd>>;
+
+bool f(Strings& S, Data& C)
+{
+	queue<pair<char, CoOrd>> Q;
+	for (auto [c, P] : C) for (auto [h, w] : P) {
+		int s = 0;
+		for (int i = h - 1; i <= h + 1; ++i) for (int j = w - 1; j <= w + 1; ++j) s += S[i][j] == '.';
+		if (c - '0' <= s) Q.push({c, {h, w}});
+	}
+	if (Q.empty()) return true;
+	for (; !Q.empty(); Q.pop()) {
+		auto [c, p] = Q.front();
+		C[c].erase(p);
+		S[p.first][p.second] = '.';
+	}
+	return false;
+}
+
+int main()
+{
+	int H, W; cin >> H >> W;
+	Strings S(H); for (auto& s : S) cin >> s;
+	Data C;
+	for (int i = 0; i < H; ++i) for (int j = 0; j < W; ++j) C[S[i][j]].insert({i, j});
+	C.erase('.');
+	C.erase('9');
+	int c;
+	for (c = 0; c < H * W; ++c) if (f(S, C)) break;
+	cout << c << endl;
+	return 0;
+}
+

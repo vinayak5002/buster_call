@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef long double ld ;
+typedef pair<ll,ll> P ;
+typedef tuple<ll,ll,ll> TP ;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define rep2(i, s, n) for (int i = (s); i < (int)(n); i++)
+#define endl "\n"
+#define chmin(a,b) a = min(a,b)
+#define chmax(a,b) a = max(a,b)
+#define bit_count(x) __builtin_popcountll(x)
+#define gcd(a,b) __gcd(a,b)
+#define lcm(a,b) a / gcd(a,b) * b
+
+
+int v,e;
+ll dp[101][101];
+ll inf = 1e18;
+
+int main(){
+  cin >> v >> e;
+  rep(i, v){
+    rep(j, v){
+      dp[i][j] = inf;
+      if(i == j) dp[i][j] = 0;
+    }
+  }
+  rep(i, e){
+    ll s,t,d;
+    cin >> s >> t >> d;
+    dp[s][t] = d;
+  }
+
+  rep(k, v){
+    rep(i, v){
+      rep(j, v){
+        if(dp[i][k] == inf || dp[k][j] == inf) continue;
+        dp[i][j] = min(dp[i][j], dp[i][k]+dp[k][j]);
+      }
+    }
+  }
+
+  rep(i, v){
+    if(dp[i][i] != 0){
+      cout << "NEGATIVE CYCLE" << endl;
+      return 0;
+    }
+  }
+
+  rep(i, v){
+    rep(j,v){
+      if(dp[i][j] == inf) cout << "INF";
+      else cout << dp[i][j];
+      if(j != v-1) cout << " ";
+    }
+    cout << endl;
+  }
+}
+

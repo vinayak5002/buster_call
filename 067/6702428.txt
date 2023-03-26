@@ -1,0 +1,142 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define for_(i, a, b) for(int i = (a);i < (b);++i)
+#define rfor_(i, a, b) for(int i = (b)-1;i >= (a);--i)
+#define rep(i, n) for_(i, 0, n)
+#define rrep(i, n) rfor_(i, 0, n)
+
+/* accelration */
+// 高速バイナリ生成
+#pragma GCC target("avx")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+// cin cout の結びつけ解除, stdioと同期しない(入出力非同期化)
+// cとstdの入出力を混在させるとバグるので注意
+struct Fast {Fast() {std::cin.tie(0); ios::sync_with_stdio(false);}} fast;
+
+/* define short */
+#define all(obj) (obj).begin(), (obj).end()
+
+/* alias */
+using ull = unsigned long long;
+using ll = long long;
+const int inf = INT_MAX;
+const ll infl = 1LL << 60;
+
+ll mul(ll a, ll b) { if (infl / a < b) return infl; return min(infl, a * b); }
+ll gcd(ll a, ll b) { return a ? gcd(b % a, a) : b; }
+ll lcm(ll a, ll b) { if (a == infl || b == infl) return infl; return mul(a / gcd(a, b), b); }
+
+template<class T>bool chmax(T& a, const T& b) { if (a < b) { a = b; return 1; } return 0; }
+template<class T>bool chmin(T& a, const T& b) { if (b < a) { a = b; return 1; } return 0; }
+
+
+// 初めてのbitDP（はーと）
+// 何をどうすればいいかわからんかったので答え見た
+// 参考にしたのは下の2つ
+// https://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=4971556#1
+// https://qiita.com/drken/items/7c6ff2aa4d8fce1c9361
+int v_num, e_num;
+
+
+int main() {
+    cin >> v_num >> e_num;
+    
+    vector<vector<pair<int, int>>> graph(v_num);    // 有効グラフ
+                                                    // graph[s]とすると、スタート点sから
+                                                    // 行くことができる点tと、そこまでの距離d
+                                                    // のpairを取り出すことができる
+    vector<pair<int, int>> to0_points;    // 点0にもどることができる点とその距離
+                                            // 出発点に戻るときの距離計算で使用する
+    rep(_, e_num) {
+        int s, t, d;
+        cin >> s >> t >> d;
+
+        graph[s].push_back({t, d});
+
+        if (t == 0) {
+            to0_points.push_back({s, d});
+        }
+    }
+
+    // 通過点の情報と最後に通る点の情報から、最短距離を返すvector
+    // ※ここbitDP
+    // v_bitは通る点のbitを1としたもの、v_endはv_bitの中の最終点としたとき、
+    // dist_mins[v_bit][v_end]には、v_bitで指定した点をすべて通過し、
+    // その中で最終点はv_endとしたときの最短距離が入っている
+    vector<vector<int>> dist_mins((1 << v_num), vector<int>(v_num, -1));
+
+    // すべてのbitパターンを見ていき、過去情報を基にして更新していく（dp）
+    // ※変数v_bitが1からどんどん大きな値になっていくとき、
+    // dist_mins[v_bit_next][v_end]の更新で
+    // 必要となる過去のdist_mins[v_bit_crnt][v_start]は、
+    // 既に通った値であることが保証されている
+    // (グラフの指定した点の中で通れないなら-1となっている)
+    // ※全ての点を1回だけ通って、出発点に戻るという考え方において、
+    // ※出発点はどこから始めても最小距離は変わらんらしい
+    // そのため、ここでは出発点を0と考える
+    dist_mins[1][0] = 0;
+    for_(v_bit_crnt, 1, (1 << v_num)) {
+        bitset<15> v_bset_crnt(v_bit_crnt);
+
+        // v_bit_crntの中で最終点とする点
+        // （次の点に遷移するときのスタートとする点）を見ていく
+        rep(v_start, v_num) {
+            if (!v_bset_crnt.test(v_start)) {   // まだ通っていない点のとき
+                continue;
+            }
+
+            int dist_min_crnt = dist_mins[v_bit_crnt][v_start];
+            if (dist_min_crnt == -1) {  // グラフの形からして通ることがないとき
+                continue;
+            }
+
+            //cout << "debug " << v_start << endl; 
+
+            for (const auto &td : graph[v_start]) {
+                int v_end = td.first;
+                int stoe_dist = td.second;  // start to end
+
+                if (v_bset_crnt.test(v_end)) {   // 既に通っている点のとき
+                    continue;
+                }
+
+                int dist_min_next = dist_min_crnt + stoe_dist;
+                //cout << dist_min_next << endl;
+                int v_bit_next = v_bit_crnt + (1 << v_end);
+
+                if (dist_mins[v_bit_next][v_end] == -1) {
+                    dist_mins[v_bit_next][v_end] = dist_min_next;
+                }
+                else {
+                    chmin(dist_mins[v_bit_next][v_end], dist_min_next);
+                }
+            }
+        }
+    }
+
+    // 出発点（点0）に戻るときの距離も加算して、最短距離を求める
+    int ans = -1;
+    for (const auto &to0_p : to0_points) {
+        int v_start = to0_p.first;
+        int to0_dist = to0_p.second;
+
+        int dist_min_crnt = dist_mins[(1 << v_num) - 1][v_start];   // ((1 << v_num) - 1)はすべての点のbitが1となる値
+
+        if (dist_min_crnt == -1) {  // すべての点を通って最後の点としてv_startになることができないとき
+            continue;
+        }
+
+        int dist_min_next = dist_min_crnt + to0_dist; 
+
+        if (ans == -1) {
+            ans = dist_min_next;
+        }
+        else {
+            chmin(ans, dist_min_next);
+        }
+    }
+
+    cout << ans << endl;
+}

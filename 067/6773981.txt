@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const int INF = 1000000100;
+const ll INFL = 2e18;
+template <class T>bool chmin(T &a, T b){ if (a > b) { a = b; return true;} else return false;}
+template <class T>bool chmax(T &a, T b){ if (a < b) { a = b; return true;} else return false;}
+#define rep(i, n) for (int i = 0;i < (n);i++)
+
+bool cov(int x1, int y1, int r1, int x2, int y2, int r2) {
+    if ((r1 + r2) * (r1 + r2) > (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) {
+        return true;
+    }
+    else return false;
+}
+
+int ans = 0;
+
+void rec(int cnt, int flag, vector<int>& indeg, vector<int>& col, vector<vector<int>>& e, map<int, int>& usd) {
+    vector<int> in_zeros[4];
+
+    for (int i = 0;i < indeg.size();i++) {
+        if (indeg[i] == 0)in_zeros[col[i]].push_back(i);
+    }
+
+    for (int i = 0;i < 4;i++) {
+        if (in_zeros[i].size() >= 2) {
+            for (int j = 0;j < in_zeros[i].size()-1;j++) {
+                for (int k = j + 1;k < in_zeros[i].size();k++) {
+                    int nflag = flag | 1 << in_zeros[i][j] | 1 << in_zeros[i][k];
+                    if (usd[nflag])continue;
+                    usd[nflag] = true;
+                    for (int v: e[in_zeros[i][j]]) {
+                        indeg[v]--;
+                    }
+                    for (int v: e[in_zeros[i][k]]) {
+                        indeg[v]--;
+                    }
+                    indeg[in_zeros[i][j]] = -1;
+                    indeg[in_zeros[i][k]] = -1;
+                    ans = max(ans, cnt+2);
+                    rec(cnt+2, nflag,indeg, col, e, usd);
+                    indeg[in_zeros[i][j]] = 0;
+                    indeg[in_zeros[i][k]] = 0;
+                    /* cout << in_zeros[i][j] << " " << in_zeros[i][k] << endl; */
+                }
+            }
+        }
+    }
+}
+
+void solve(int n) {
+    ans = 0;
+    vector<int> x(n), y(n), r(n), c(n);
+    vector<int> indeg(n);
+    vector<vector<int>> e(n);
+
+    for (int i = 0;i < n;i++) {
+        cin >> x[i] >> y[i] >> r[i] >> c[i];
+        c[i]--;
+    }
+
+    for (int i = 0;i < n-1;i++){ 
+        for (int j = i+1;j < n;j++) {
+            if (cov(x[i], y[i], r[i], x[j], y[j], r[j])) {
+                /* cout << i << "->" << j << endl; */
+                indeg[j]++;
+                e[i].push_back(j);
+            }
+        }
+    }
+
+    /* for (int i = 0;i < n;i++) { */
+    /*     for (int v : e[i])cout << v << " "; */
+    /*     cout << endl; */
+    /* } */
+    map<int,int> usd;
+
+    rec(0, 0, indeg, c, e, usd);
+
+    cout << ans << endl;
+}
+
+int main() {
+    while (true) {
+        int n;
+        cin >> n;
+        if (n == 0)return 0;
+        solve(n);
+    }
+}
+

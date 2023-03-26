@@ -1,0 +1,28 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// 動的計画法
+int main() {
+    int n, q;
+    cin >> n;
+    vector<int> A(n);
+    for(int i=0; i<n; i++) cin >> A.at(i);
+    cin >> q;
+    vector<int> M(q);
+    for(int i=0; i<q; i++) cin >> M.at(i);
+    // メインの処理
+    bool dp[2010][2010];
+    memset(dp, 0, sizeof(dp));
+    dp[0][0] = true;
+    for(int i=0; i<n; i++){
+        for(int j=0; j<=2000; j++){
+            dp[i+1][j] |= dp[i][j];
+            if(j>=A.at(i)) dp[i+1][j] |= dp[i][j-A.at(i)];
+        }
+    }
+    // 出力
+    for(int i=0; i<q; i++){
+        if (dp[n][M.at(i)]) cout << "yes" << endl;
+        else cout << "no" << endl;
+    }
+}

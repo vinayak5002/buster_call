@@ -1,0 +1,133 @@
+#include <stdio.h>
+
+#define MAX 100
+#define Amax 2097152
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+
+int data[MAX][MAX];
+int n;
+
+//標準入力からデータを受け取る関数
+void getdata()
+{
+    int i, j, v;
+    //データ数の取得
+    scanf("%d", &n);
+
+    // 2次元配列の初期化
+    for (i = 0; i < n; i++)
+    {
+        for (j = 0; j < n; j++)
+        {
+            data[i][j] = 0;
+        }
+    }
+
+    //データの格納
+    for (i = 0; i < n; i++)
+    {
+        //頂点リストを作製
+        for (j = 0; j < n; j++)
+        {
+
+            scanf("%d", &v);
+            if (v == -1)
+            {
+                v = Amax;
+            }
+
+            data[i][j] = v;
+        }
+    }
+}
+
+//プリムのアルゴリズム
+int prim()
+{
+    int d[MAX];
+    int p[MAX];
+    int color[MAX];
+    int i, min, u, v;
+
+    //配列の初期化
+    for (i = 0; i < n; i++)
+    {
+        color[i] = WHITE;
+        d[i] = Amax;
+        p[i] = -1;
+    }
+
+    //初期値の入力
+    d[0] = 0;
+
+    //プリムのアルゴリズムを実行
+    while (1)
+    {
+        min = Amax;
+        u = -1;
+
+        //探索して最小の経路を発見する
+        for (i = 0; i < n; i++)
+        {
+            //最小経路の保管
+            if (min > d[i] && color[i] != BLACK)
+            {
+                u = i;
+                min = d[i];
+            }
+        }
+
+        //探索が終わったときにループを終了する
+        if (u == -1)
+        {
+            break;
+        }
+
+        //探索したことを書き込む
+        color[u] = BLACK;
+
+        //直接的な探索したときに最短路が更新されないか確認　
+        for (v = 0; v < n; v++)
+        {
+            //辺が存在しその頂点を探索していないとき
+            if (color[v] != BLACK && data[u][v] != Amax)
+            {
+                //上で求めた最短路の方が長いなら書き換える
+                if (d[v] > data[u][v])
+                {
+
+                    d[v] = data[u][v];
+                    p[v] = u;
+                    color[v] = GRAY;
+                }
+            }
+        }
+    }
+
+    //最短路の総和を求める
+    int sum = 0;
+    for (i = 0; i < n; i++)
+    {
+        if (p[i] != -1)
+        {
+
+            sum += data[i][p[i]];
+        }
+    }
+
+    //最短路の総和を返す
+    return sum;
+}
+
+int main(void)
+{
+    //データの取得
+    getdata();
+
+    //結果の出力
+    printf("%d\n", prim());
+
+    return 0;
+}

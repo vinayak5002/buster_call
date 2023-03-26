@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+
+int board[65][65];
+
+void init_board(int n, int m) {
+    for (int i = 0; i < 2 * n; i++) {
+        for (int j = 0; j < 2 * m; j++) {
+            if (i < n && j < m) board[i][j] = 1;
+            else board[i][j] = 0;
+        }
+    }
+}
+
+void slide_board(int o_i, int o_j, int n, int m) {
+    for (int i = 0; i < 2 * n; i++) {
+        for (int j = 0; j < 2 * m; j++) {
+            if (i + o_i < 2 * n && j + o_j < 2 * m) board[i][j] = board[i + o_i][j + o_j];
+            else board[i][j] = 0;
+        }
+    }
+}
+
+int main(){
+    vector<int> ans;
+    while (1) {
+        int n, m, t, p;
+        cin >> n >> m >> t >> p;
+        if (n * m * t * p == 0) break;
+        init_board(n, m);
+
+        while (t--) {
+            int d, c;
+            cin >> d >> c;
+            int o_i = 0, o_j = 0;
+            if (d == 1) {
+                for (int i = 0; i < c; i++) {
+                    for (int j = 0; j < m; j++) {
+                        board[2 * c - 1 - i][j] += board[i][j];
+                        board[i][j] = 0;
+                    }
+                }
+                o_i += c;
+            } else {
+                for (int j = 0; j < c; j++) {
+                    for (int i = 0; i < n; i++) {
+                        board[i][2 * c - 1 - j] += board[i][j];
+                        board[i][j] = 0;
+                    }
+                }
+                o_j += c;
+            }
+            slide_board(o_i, o_j, n, m);
+
+            
+            /*for (int i = 0; i < 2 * n; i++) {
+                for (int j = 0; j < 2 * m; j++) {
+                    cout << board[i][j] << " ";
+                }
+                cout << endl;
+            }
+            printf(" (%d, %d)\n", o_i, o_j);*/
+        }
+        while (p--) {
+            int x, y;
+            cin >> x >> y;
+            ans.push_back(board[x][y]);
+        }
+    }
+    for (auto a: ans) cout << a << endl;
+}

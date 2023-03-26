@@ -1,0 +1,45 @@
+import java.util.Scanner;
+
+public class Main {
+    public static int n;
+    public static int k;
+    public static int []w;
+	public static void main(String[] args) {
+        Scanner scan = new Scanner(System.in);
+        n = scan.nextInt();
+        k = scan.nextInt();
+        w = new int[n];
+        for(int i = 0; i < n; i++) {
+            w[i] = scan.nextInt();
+        }
+        scan.close();
+        long ans = solve();
+        System.out.println(ans);
+    }
+    public static int check(long p) {
+        int i = 0;
+        for(int j = 0; j < k; j++) {
+            long s = 0;
+            while(s + w[i] <= p) {
+                s += w[i];
+                i++;
+                if(i == n) return n;
+            }
+        }
+        return i;
+    }
+    public static long solve() {
+        long left = 0;
+        // 荷物の個数×1個当たりの最大重量
+        long right = 100000 * 10000;
+        long mid;
+        while(right - left > 1) {
+            mid = (left + right) / 2;
+            int v = check(mid);
+            if(v >= n) right = mid;
+            else left = mid;
+        }
+        return right;
+    }
+}
+

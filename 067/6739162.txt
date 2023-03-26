@@ -1,0 +1,132 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+
+void showArray(std::vector<int> W)
+{
+    for (auto it = W.begin(); it != W.end(); it++)
+    {
+        if (it != W.begin())
+        {
+            std::cout << " ";
+        }
+        std::cout << *it;
+    }
+    std::cout << std::endl;
+}
+void merge(std::vector<int> &S, int left, int mid, int right)
+{
+    int n1 = mid - left;
+    int n2 = right - mid;
+    std::vector<int> L(n1);
+    std::vector<int> R(n2);
+    for (int m = 0; m < n1; m++)
+    {
+        L[m] = S[left + m];
+    }
+    for (int n = 0; n < n2; n++)
+    {
+        R[n] = S[mid + n];
+    }
+    L.push_back(INT_MAX);
+    R.push_back(INT_MAX);
+    int i = 0;
+    int j = 0;
+    for (int k = left; k < right; k++)
+    {
+        if (L[i] <= R[j])
+        {
+            S[k] = L[i];
+            i++;
+        }
+        else
+        {
+            S[k] = R[j];
+            j++;
+        }
+    }
+}
+
+void mergeSort(std::vector<int> &S, int left, int right)
+{
+    if (left + 1 >= right) //判定に入らないものを先に除外する
+    {
+        return;
+    }
+
+    int mid = (left + right) / 2;
+    mergeSort(S, left, mid);
+    mergeSort(S, mid, right);
+    merge(S, left, mid, right);
+}
+
+int otherSortCost(std::vector<int> &W)
+{
+    int ret = 0;
+    for (size_t i = 0; i < W.size(); i++)
+    {
+        std::vector<int>::iterator itr = std::min_element(W.begin() + i, W.end());
+        if (W[i] == *itr)
+        {
+            continue; //その数字自身がMINなら移動しない
+        }
+        else
+        {
+            size_t index = std::distance(W.begin(), itr);
+            std::swap(W[index], W[i]);
+            ret += W[i] + W[index];
+        }
+    }
+    return ret;
+}
+
+int minimumSortCost(std::vector<int> W, const std::vector<int> sortedArray)
+{
+    int ret = 0;
+
+    for (size_t i = 0; i < W.size(); i++)
+    {
+        std::vector<int>::iterator min_itr = std::min_element(W.begin(), W.end());
+        size_t min_index = std::distance(W.begin(), min_itr);
+
+        // W[min_index](MIN値)と入るべきW[?](=sortedArray[index])を入れ替える
+        std::vector<int>::iterator itr = std::find(W.begin(), W.end(), sortedArray[min_index]);
+        size_t index = std::distance(W.begin(), itr);
+
+        if (*min_itr == *itr)
+        {
+            ret += otherSortCost(W);
+            break;
+        }
+        else
+        {
+            std::swap(W[index], W[min_index]);
+            ret += W[index] + W[min_index];
+        }
+        // showArray(W);
+    }
+    // showArray(W);
+    return ret;
+}
+int main()
+{
+    int n;
+    std::cin >> n;
+    std::vector<int> W(n);
+    for (int i = 0; i < n; i++)
+    {
+        std::cin >> W[i]; //すべて異なる数字が入る
+    }
+
+    std::vector<int> sortedArray = W;
+
+    mergeSort(sortedArray, 0, n);
+
+    int count = minimumSortCost(W, sortedArray); //並び替えのコストをreturnする関数1(最小値を積極的に動かす)
+    int count_other = otherSortCost(W);          //並び替えのコストをreturnする関数2(左から順にソート)
+
+    std::cout << (count < count_other ? count : count_other) << std::endl; //コストの小さいほうを表示
+
+    return 0;
+}

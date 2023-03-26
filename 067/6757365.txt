@@ -1,0 +1,148 @@
+#include<bits/stdc++.h>
+#define int ll
+#define rep(i, N) for(int i = 0; i < (int)(N); ++i)
+#define rep1(i, N) for(int i = 1; i <= (int)(N); ++i)
+#define per(i, N) for(int i = (N)-1; i >= 0; --i)
+#define all(v) (v).begin(), (v).end()
+#define rall(v) (v).rbegin(), (v).rend()
+#define bit(n, k) ((n) >> (k))
+#define pcnt(n) (__builtin_popcount(n))
+#define TakAo(ans) ans ? cout << "Takahashi\n" : cout << "Aoki\n"
+#define YesNo(ans) ans ? cout << "Yes\n" : cout << "No\n"
+#define endl '\n'
+#define fi first
+#define se second
+#define mkpr make_pair
+#define mktpl make_tuple
+#define eb emplace_back
+
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+using point = struct{ ll x, y; };
+using pointld = struct{ ld x, y; };
+using State = string::const_iterator;
+template<class T> using max_heap = priority_queue<T>;
+template<class T> using min_heap = priority_queue<T, vector<T>, greater<T>>;
+template<class T> using vec = vector<T>;
+template<class T> using vvec = vec<vec<T>>;
+template<class T> using vvvec = vec<vvec<T>>;
+template<class T> using vvvvec = vvec<vvec<T>>;
+
+constexpr ld EPS = 1e-10;
+constexpr int INF = 1001001001;
+constexpr ll LINF = 1001001001001001001ll;
+constexpr ll MOD = (0) ? 998244353 : 1e9+7;
+constexpr int NIL = -1;
+constexpr int pm[2] = {1, -1};
+constexpr int dy[4] = {0, 1, 0, -1};
+constexpr int dx[4] = {1, 0, -1, 0};
+
+ll cel(ll a, ll b){ return (a + b - 1) / b;}
+ll Gcd(ll a, ll b){ return b ? Gcd(b, a % b) : abs(a);}
+template<class T> T powi(T x, ll exp){
+    return exp > 0 ? (exp & 1 ? x : 1) * powi(x * x, exp >> 1) : x / x;
+}
+ll modpow(ll x, ll exp, ll mod){
+    x %= mod;
+    return exp > 0 ? (exp & 1 ? x : 1) * modpow(x * x, exp >> 1, mod) % mod : 1;
+}
+template<class T> bool chmin(T &a, T b){ return a > b ? (a = b, true) : 0;}
+template<class T> bool chmax(T &a, T b){ return a < b ? (a = b, true) : 0;}
+
+using Pair = pair<ll, ll>;
+using Tpl = tuple<int, int, int>;
+
+class Combination{
+    int max_val; // (2^n)-2
+    vector<ll> fact_, invf_;
+
+    void build(int n){
+        int prev_val = max_val;
+        while(max_val < n) max_val = (max_val << 1) | 2;
+        fact_.resize(max_val + 1);
+        invf_.resize(max_val + 1);
+        for(int i = prev_val + 1; i <= max_val; i++){
+            fact_[i] = fact_[i-1] * i % MOD;
+        }
+        invf_[max_val] = 1;
+        for(ll x = fact_[max_val], k = MOD-2; k > 0; k >>= 1){
+            if(k & 1) invf_[max_val] = invf_[max_val] * x % MOD;
+            x = x * x % MOD;
+        }
+        for(int i = max_val; i > prev_val + 1; i--){
+            invf_[i-1] = invf_[i] * i % MOD;
+        }
+    }
+    bool check(int n){
+        if(n < 0) return false;
+        if(n > max_val) build(n);
+        return true;
+    }
+    bool check(int n, int r){
+        if(n < r || r < 0) return false;
+        if(n > max_val) build(n);
+        return true;
+    }
+
+    public:
+    Combination() : max_val(0), fact_(1, 1), invf_(1, 1) {}
+    Combination(int N) : max_val(0), fact_(1, 1), invf_(1, 1) {build(N);}
+    int fact(int n){
+        check(n);
+        return fact_[n];
+    }
+    int invf(int n){
+        check(n);
+        return invf_[n];
+    }
+    int nPr(int n, int r){
+        check(n, r);
+        return fact_[n] * invf_[n-r] % MOD;
+    }
+    int nCr(int n, int r){
+        check(n, r);
+        return fact_[n] * invf_[n-r] % MOD * invf_[r] % MOD;
+    }
+};
+
+void Main(){
+    Combination comb(4e6+10);
+    while(1){
+        ll A, B, C, SX, SY;
+        cin >> A >> B >> C >> SX >> SY;
+        if(A + B + C == 0) break;
+
+        ll ans = comb.nCr(A + B + C, A) * comb.nCr(B + C, B) % MOD;
+        ll val = 0;
+
+        for(ll scr = 0; scr <= max(SX, SY); scr++){
+            // 2
+            ll val2 = comb.nCr(scr + A + B + C - 1, scr);
+
+            // 3
+            if(A == 0 && SX - scr) continue;
+            if(B == 0 && SY - scr) continue;
+
+            if(SX - scr < A || SY - scr < B) continue;
+
+            ll val3 = A ? comb.nCr(SX - scr - 1, A - 1) : 1;
+            val3 = B ? val3 * comb.nCr(SY - scr - 1, B - 1) % MOD : val3;
+
+            val2 = val2 * val3 % MOD;
+
+            val = (val + val2) % MOD;
+        }
+
+        cout << ans * val % MOD << endl;
+    }
+}
+ 
+signed main(){
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    cout << fixed << setprecision(10);
+    Main();
+    return 0;
+}

@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 393939
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 50
+int n;
+int t = 0;
+
+
+const long long int infty = (1LL<<31) - 1;
+
+
+struct vertex {
+    vector<pair<int,int>> edge;  //firstが行き先(to),secondがweight
+    vector<int> children;
+    int parent = -1;
+    int ord = -1;
+    int con = 0 ;
+    int dist = INF;
+};
+
+vertex R[MAX];
+priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>> > Q;
+vector<int> res;
+int total_w = 0 ;
+
+void prim() {
+    //プリムのアルゴリズム
+    //未訪問の中から最小コストの行き先を返す
+    while ( ! Q.empty() ){
+        pair<int,int> e = Q.top();  Q.pop();
+        if (R[e.second].con > 0) { continue; }
+        else {
+            total_w += e.first;
+            R[e.second].con=1 ;  res.push_back(e.second);
+            for (auto x : R[e.second].edge) {
+                int w = x.first ;
+                int v = x.second; //行き先
+                if (  R[v].con > 0 ){continue;}
+                else {
+                    Q.push(make_pair(w, v));
+                }
+            }        
+        }
+
+    }
+}
+
+int main() {
+    int q ;
+    cin >> n >> q ;
+
+    // nは登場人物の人数、qはクエリ（命令）の個数
+    // この時点でn個のノードが成立している。
+    for (int i = 0 ; i < q ; i++ ) {
+        int s , t, w ;
+        cin >> s >> t >> w;
+        R[s].edge.push_back(make_pair(w,t));
+        R[t].edge.push_back(make_pair(w,s));
+    }
+
+    Q.push(make_pair(0,0));
+    prim();
+
+    //for (auto e : res) {
+    //    printf("%d \n" , e);
+    //}
+    printf("%d\n" , total_w );
+
+}

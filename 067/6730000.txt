@@ -1,0 +1,147 @@
+#include <bits/stdc++.h>
+////#include <atcoder/all>
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using vvvb = vector<vvb>;
+using vd = vector<double>;
+using vvd = vector<vd>;
+using vvvd = vector<vvd>;
+#define all(A) A.begin(),A.end()
+#define ALL(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q) {
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+template<class T>
+bool chmin(T& p, T q) {
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+ll gcd(ll(a), ll(b)) {
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+
+#define ss second.second
+#define sf second.first
+using paii = pair<int, int>;
+//chmin必要
+/*
+有向木の最小全域木を求める.
+O(|V|*|E|^2)らしい.知らんけど
+*/
+template<class T>
+T Chu_Liu_Edmonds_algorithm(const vector<pair<T, paii>>& E, int v, int root = 0) {//E:{重み,{start,end}} //v:|V| //root:根
+
+    vector<pair<T, int>> Vm(v, pair<T, int>(1e9, -1));
+    vector<int> gr(v, 0);
+    vector<bool> P(v, false), f(v, false);
+    int cnt = 0;
+    T res = 0;
+    vector<pair<T, paii>> nE;
+
+    for (auto e : E) {
+        chmin(Vm[e.ss], { e.first, e.sf });
+    }
+    Vm[root] = paii(-1, -1);
+
+    rep(i, v) {
+        if (f[i]) continue;
+        vector<int> ch;
+        int x = i;
+        while (x != -1 && !f[x]) {
+            f[x] = 1;
+            ch.push_back(x);
+            x = Vm[x].second;
+        }
+        if (x == -1) {
+            rep(j, ch.size()) {
+                gr[ch[j]] = cnt;
+                cnt++;
+            }
+        }
+        else {
+            bool Q = 0;
+             for (long long j : ch){
+                gr[j] = cnt;
+                if (j == x) {
+                    P[cnt] = 1;
+                    Q = 1;
+                }
+                if (!Q) cnt++;
+            }
+            if (Q) cnt++;
+        }
+    }
+    if (cnt == v) {
+        res = 1;
+        rep(i, v)res += Vm[i].first;
+        return res;
+    }
+
+    rep(i, v){
+        if (i != root && P[gr[i]]) res += Vm[i].first;
+    }
+
+    for (auto e : E) {
+        int p = e.ss;
+        int s = gr[e.sf];
+        int t = gr[e.ss];
+        if (s == t) continue;
+        else if (P[t]) {
+            nE.emplace_back(e.first - Vm[p].first, paii(s, t));
+        }
+        else {
+            nE.emplace_back(e.first, paii(s, t));
+        }
+    }
+
+    return res + Chu_Liu_Edmonds_algorithm(nE, cnt, gr[root]);
+}
+
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    ll N, M, R;
+    cin >> N >> M >> R;
+    vector<pair<int, pair<int, int>>> E(M);
+    rep(i, M) {
+        int S, T, W;
+        cin >> S >> T >> W;
+        E[i] = { W,{S ,T } };
+    }
+    R+=0;
+    cout << Chu_Liu_Edmonds_algorithm(E, N, R) << endl;
+
+}
+

@@ -1,0 +1,143 @@
+import java.math.BigInteger
+import kotlin.math.sqrt
+
+data class Edge(val a: Int, val b: Int) {
+    fun hasPoint(p: Int): Boolean = p == a || p == b
+
+    // 引数の頂点と辺で結ばれた頂点を返す
+    fun next(p: Int): Int = when (p) {
+        a -> b
+        b -> a
+        else -> error("$p must be $a or $b")
+    }
+}
+
+fun main() {
+    val n = readInt()
+    val vs = mutableListOf<List<Int>>(listOf()) // vs[u][k] u番目の頂点のk番の辺がどこに伸びているか
+    repeat(n) {
+        val us = readInts() // u番目の頂点がk個の辺を持っていて、それぞれがvk
+        val u = us[0]
+        val uv = us.drop(2) // u,kを無視
+        vs.add(u, uv)
+    }
+
+    val answer = mutableListOf<Triple<Int, Int, Int>>()
+    //println("vs $vs")
+
+    // i番目の頂点でdps
+    fun dps(i: Int, arrivalStep: Int): Int {
+        //println("dps $i(i) $arrivalStep(arrivalStep)")
+        val finishStep =
+            vs[i].filterNot { answer.map { a -> a.first }.contains(it) }.fold(arrivalStep) { currentStep, vk ->
+                //println("next $vk ${currentStep + 1}(step)")
+                dps(vk, currentStep + 1)
+            } + 1 // 戻ってきたら + 1
+        //println("$i(i) finish $finishStep")
+
+        answer.add(Triple(i, arrivalStep, finishStep))
+        return finishStep
+    }
+
+    dps(1, 1)
+    answer.sortBy { it.first }
+    answer.forEach {
+        println("${it.first} ${it.second} ${it.third}")
+    }
+}
+
+//answer的なの
+
+
+fun Int.isEven(): Boolean = this % 2 == 0
+
+fun Int.isOdd(): Boolean = !isEven()
+
+fun Int.factorial() = (1..this).reduce { a, b -> a * b }
+
+fun Int.permutation(k: Int = 1) = (k..this).reduce { a, b -> a * b }
+
+fun <T> List<T>.permutations(): Set<List<T>> {
+    val source = this
+    val permutations = mutableSetOf<List<T>>()
+    fun permutation(source: List<T>, perm: List<T>) {
+        if (source.size <= 1) {
+            permutations += perm + source
+        } else {
+            repeat(source.size) {
+                permutation(source.take(it) + source.drop(it + 1), perm + source[it])
+            }
+        }
+    }
+    permutation(source, emptyList())
+    return permutations
+}
+
+/*fun <T> List<T>.permutations(): List<List<T>> {
+    if (this.isEmpty()) return listOf(emptyList())
+
+    val result: MutableList<List<T>> = mutableListOf()
+    for (i in this.indices) {
+        (this - this[i]).permutations().forEach { item ->
+            result.add(0, item + this[i])
+        }
+    }
+    return result
+}*/
+
+fun Int.combination(k: Int = 1) = permutation(k) / k.factorial()
+
+// digitToIntが1.5からなので自前で定義
+fun Char.digitToInt(): Int {
+    @Suppress("DEPRECATION")
+    return Character.digit(this.toInt(), 10).also {
+        if (it < 0) throw IllegalArgumentException("Char $this is not a decimal digit")
+    }
+}
+
+
+operator fun Regex.contains(text: CharSequence): Boolean = this.matches(text)
+
+fun divisor(value: Long): List<Long> {
+    return (1..(sqrt(value.toDouble()).toLong() + 1)).filter { value % it == 0L }
+        .flatMap {
+            if (value / it == it) listOf(it) else listOf(
+                it,
+                value / it
+            )
+        }//.also { println("value: $value, divisors $it") }
+}
+
+fun primeFactor(value: Long): List<Long> {
+    if (value == 1L) return listOf(1)
+    val max = Math.sqrt(value.toDouble()).toLong()
+    return prime(2, max).filter { value % it == 0L }.also { println("value: $value, primeFactor $it") }
+}
+
+// 範囲内の素数を取得
+// fromだけ指定すると戻り値の個数で素数判定ができる
+fun prime(from: Long, to: Long = from): List<Long> {
+    return (from..to).filter { i ->
+        val max = Math.sqrt(i.toDouble()).toLong()
+        (2..max).all { j -> i % j != 0L }
+    }
+}
+
+
+fun readInt(): Int = readLine()!!.toInt()
+
+fun readLong(): Long = readLine()!!.toLong()
+
+fun readDouble(): Double = readLine()!!.toDouble()
+
+fun readInts(): List<Int> = readLine()!!.split(" ").map { it.toInt() }
+
+fun readBigInts(): List<BigInteger> = readLine()!!.split(" ").map { it.toBigInteger() }
+
+fun readLongs(): List<Long> = readLine()!!.split(" ").map { it.toLong() }
+
+fun readDoubles(): List<Double> = readLine()!!.split(" ").map { it.toDouble() }
+
+fun readStrList(): List<String> = readLine()!!.split(" ")
+
+fun Double.decimalFormat(decimalCount: Int): String = String.format("%.${decimalCount}f", this)

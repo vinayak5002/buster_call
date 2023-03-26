@@ -1,0 +1,38 @@
+from collections import deque
+
+def fish(a,w,h):
+  b=[[0 for i in range(w)] for i in range(h)]
+  c=0
+  st=deque()
+  st.append(0)
+  sd=deque()
+  sd.append(0)
+  b[0][0]=1
+  while st:
+    x=st.popleft()
+    y=sd.popleft()
+    if  x==h-1 and y==w-1:
+      return b[x][y]
+    if y<w-1 and a[x*2][y*2+1]=="0" and b[x][y+1]==0:
+      b[x][y+1]=b[x][y]+1
+      st.append(x)
+      sd.append(y+1)
+    if x<h-1 and a[x*2+1][y*2]=="0" and b[x+1][y]==0:
+      b[x+1][y]=b[x][y]+1
+      st.append(x+1)
+      sd.append(y)
+    if 0<y and  a[x*2][y*2-1]=="0" and b[x][y-1]==0:
+      b[x][y-1]=b[x][y]+1
+      st.append(x)
+      sd.append(y-1)
+    if 0<x and a[x*2-1][y*2]=="0" and b[x-1][y]==0:
+      b[x-1][y]=b[x][y]+1
+      st.append(x-1)
+      sd.append(y)
+  return 0
+
+w,h=map(int,input().split())
+while w!=0 and h!=0:
+  c= [list(input()) for _ in range(h*2-1)]
+  print(fish(c,w,h))
+  w,h=map(int,input().split())

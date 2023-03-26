@@ -1,0 +1,56 @@
+import sys
+input = sys.stdin.readline
+
+banpei = {}
+banpei['n'] = banpei
+banpei['p'] = banpei
+
+def insert(k):
+  x = {}
+  x['k'] = k
+  x['n'] = banpei['n']
+  banpei['n']['p'] = x
+  banpei['n'] = x
+  x['p'] = banpei
+
+def delete(k):
+  c = banpei['n']
+  while(c != banpei and c['k'] != k):
+    c = c['n']
+  if c != banpei:
+    c['p']['n'] = c['n']
+    c['n']['p'] = c['p']
+
+def show():
+  s = []
+  c = banpei['n']
+  while(c != banpei):
+    s.append(c['k'])
+    c = c['n']
+  print(*s, end='\n')
+
+def deleteFirst():
+  c = banpei['n']
+  c['p']['n'] = c['n']
+  c['n']['p'] = c['p']
+
+def deleteLast():
+  c = banpei['p']
+  c['p']['n'] = c['n']
+  c['n']['p'] = c['p']
+
+a = int(input())
+for i in range(a):
+  cmd = input().rstrip()
+  if cmd[6] == ' ':
+    if cmd[0] == 'i':
+      insert(cmd[7:])
+    if cmd[0] == 'd':
+      delete(cmd[7:])
+  else:
+    if cmd[6] == 'F':
+      deleteFirst()
+    if cmd[6] == 'L':
+      deleteLast()
+
+show()

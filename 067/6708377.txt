@@ -1,0 +1,45 @@
+#include<vector>
+#include<iostream>
+#include<stack>
+using namespace std;
+void dfs(vector<vector<int>>&graph,vector<int>&color,int i,int& id){
+    stack<int> st;
+    st.push(i);
+    color[i]=id;
+    while(!st.empty()){
+        int temp=st.top();
+        st.pop();
+        for(auto&num:graph[temp]){
+            if(color[num])continue;
+            color[num]=id;
+            st.push(num); 
+        }   
+    }
+}
+int main(){
+    int n,m;
+    cin>>n;
+    cin>>m;
+    vector<vector<int>> graph(n,vector<int>(n));
+    vector<int> color(n);
+    for(int i=0;i<m;i++){
+        int s,t;
+        cin>>s>>t;
+        graph[s].push_back(t);
+        graph[t].push_back(s);
+    }
+    int id=1;
+    for(int i=0;i<n;i++){
+        if(color[i]==0){
+            dfs(graph,color,i,id);
+            id++;    
+        }
+    }
+    int u;
+    cin>>u;
+    for(int i=0;i<u;i++){
+        int s,t;
+        cin>>s>>t;
+        cout<<(color[s]==color[t]?"yes":"no")<<endl;
+    }
+}

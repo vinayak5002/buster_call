@@ -1,0 +1,60 @@
+#include <iostream>
+#include <math.h>
+using namespace std;
+
+struct Point {
+    double x;
+    double y;
+   
+    Point(double x0, double y0) {
+	x = x0;  y = y0;
+    }
+    void print(void) {
+	cout << x << " " << y << endl;
+    }
+};
+
+void koch(int d, Point p1, Point p2)
+{
+    if (d == 0) {
+	p1.print();
+	return;
+    }
+
+    double x1 = (2 * p1.x + p2.x) / 3;
+    double y1 = (2 * p1.y + p2.y) / 3;
+    Point q1(x1, y1);
+
+    double x2 = (p1.x + 2 * p2.x) / 3;
+    double y2 = (p1.y + 2 * p2.y) / 3;
+    Point q2(x2, y2);
+
+    double x = x2 - x1;  
+    double y = y2 - y1;  
+
+    double x3 = x1 + 0.5 * (      1 * x - sqrt(3) * y);
+    double y3 = y1 + 0.5 * (sqrt(3) * x +       1 * y);
+    Point q3(x3, y3);
+  
+    --d;
+
+    koch(d, p1, q1);
+    koch(d, q1, q3);
+    koch(d, q3, q2);
+    koch(d, q2, p2);
+}
+
+int main()
+{
+    int n;
+    cin >> n;
+
+    Point p1(0.0, 0.0);
+    Point p2(100.0, 0.0);
+    koch(n, p1, p2);
+    p2.print();  
+
+    return 0;
+}
+  
+

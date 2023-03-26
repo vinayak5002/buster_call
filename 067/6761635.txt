@@ -1,0 +1,64 @@
+#include <bits/stdc++.h>
+using namespace std;
+using vi = vector<int64_t>;
+using vii = vector<vi>;
+using pii = pair<int64_t, int64_t>;
+
+#define rep(i, n) for (int64_t i = 0; i < (int64_t)(n); i++)
+#define all(v) v.begin(), v.end()
+
+const int64_t inf = numeric_limits<int64_t>::max();
+
+// 以下可変
+
+template <typename T>
+void upgrade(T &LEFT, const T &RIGHT)
+{
+    if (LEFT < RIGHT)
+        LEFT = RIGHT;
+
+    return;
+}
+
+/////////////////////////////////////////////////////////////
+int main() // １次元０次いもす法
+{
+    while(true){
+    int64_t N;
+    cin >> N;
+    if(N==0){
+        break;
+    }
+    vi table(24*3600 + 1, 0);
+    vi S(N), E(N); // 客 i の入店時間 S[i], 出店時間 E[i]
+
+    rep(i,N){
+        string G, T;
+        cin >> G >> T;
+        S[i] = stoi(G.substr(0, 2)) * 3600 + stoi(G.substr(3, 2)) * 60 + stoi(G.substr(6, 2));
+        E[i] = stoi(T.substr(0, 2)) * 3600 + stoi(T.substr(3, 2)) * 60 + stoi(T.substr(6, 2));
+    }
+
+    for (int i = 0; i < 24 * 3600 + 1; i++)
+        table[i] = 0;
+    for (int i = 0; i < N; i++)
+    {
+        table[S[i]]++; // 入店処理: カウントを 1 増やす
+        table[E[i]]--; // 出店処理: カウントを 1 減らす
+    }
+    // シミュレート
+    int64_t M = 0;
+    for (int i = 0; i < 24 * 3600 + 1; i++)
+    {
+        if (0 < i)
+            table[i] += table[i - 1];
+        if (M < table[i])
+            M = table[i];
+    }
+    cout << M << endl;
+    }
+
+    return 0;
+}
+
+

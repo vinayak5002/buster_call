@@ -1,0 +1,61 @@
+#include <iostream>
+using namespace std;
+
+const int N = 10005;
+
+class DisjointSet{
+    int parent[N], rank[N];
+
+    public:
+    DisjointSet(int n){
+        for(int i=0; i<n; i++) make_set(i);
+    };
+
+    void make_set(int x){
+        rank[x] = 0;
+        parent[x] = x;
+    }
+
+    int findSet(int x){
+        if(x != parent[x]) parent[x] = findSet(parent[x]);
+        return parent[x];
+    }
+
+    void unite(int x, int y){
+        link(findSet(x), findSet(y));    
+    }
+
+    void link(int x, int y){
+        if(rank[x] > rank[y]){
+            parent[y] = x;
+        }else{
+            parent[x] = y;
+            if(rank[x] == rank[y]){
+                rank[y] = rank[y] + 1;
+            }
+        }
+    }
+
+    bool same(int x, int y){
+        return findSet(x) == findSet(y);
+    }
+
+};
+
+int main(){
+    int n, q;
+    int c, x, y;
+    cin >> n >> q;
+
+    DisjointSet ds(n);
+
+    for(int i=0; i<q; i++){
+        cin >> c >> x >> y;
+        if(c == 0){
+           ds.unite(x,y);
+        }else{
+            cout << ds.same(x,y) << endl;
+        }
+    }
+    return 0;
+}

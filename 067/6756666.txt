@@ -1,0 +1,64 @@
+def div(a, k):
+    n = len(a)
+    b = a[:]
+    c = [0] * (n - 1)
+    for i in range(n - 1, 0, -1):
+        c[i - 1] = b[i]
+        b[i - 1] -= b[i] * k
+        b[i] = 0
+    return b, c
+
+
+form = input()
+a = [0] * 6
+
+size = len(form)
+i = 0
+pos = "+"
+while i < size:
+    coef = ""
+    exp = ""
+    while i < size and (form[i].isdigit() or form[i] in "+-"):
+        coef += form[i]
+        i += 1
+
+    if i < size and form[i] == "x":
+        i += 1
+        if form[i] == "^":
+            i += 1
+            exp = form[i]
+            i += 1
+        else:
+            exp = "1"
+    if (not coef) or coef == "+":
+        coef = "1"
+    elif coef == "-":
+        coef = "-1"
+    if not exp:
+        exp = "0"
+
+    a[int(exp)] = int(coef)
+
+while a[-1] == 0:
+    a.pop()
+
+res = []
+while len(a) > 2:
+    r = abs(a[0])
+    for i in range(-r, r + 1):
+        b, c = div(a, i)
+        if any(b):
+            continue
+        a = c
+        res.append(i)
+        break
+
+res.append(a[0] * a[1])
+res.sort()
+for i in res:
+    if i > 0:
+        print(f"(x+{i})", end="")
+    else:
+        print(f"(x{i})", end="")
+print()
+

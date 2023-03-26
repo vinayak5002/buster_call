@@ -1,0 +1,38 @@
+import scala.annotation.tailrec
+import scala.io.StdIn.{readInt, readLine}
+
+object Main extends App {
+  val N = readInt()
+  val arr = readLine().split(' ').map(_.toInt)
+
+  def partition(p:Int, r:Int):Int = {
+    val x = arr(r)
+    def exchange(i:Int, j:Int):Unit = {
+      val t = arr(i)
+      arr(i) = arr(j)
+      arr(j) = t
+    }
+    @tailrec
+    def iterate(i:Int, j:Int):Int = {
+      if (j < r) {
+        if (arr(j) <= x) {
+          exchange(i, j)
+          iterate(i+1, j+1)
+        } else
+          iterate(i, j+1)
+      } else {
+        exchange(i, r)
+        i
+      }
+    }
+
+    iterate(p, p)
+  }
+  val idx = partition(0, N-1)
+  for (i <- 0 until N) i match {
+    case 0 => print(arr(0))
+    case i if i == idx => print(s" [${arr(i)}]")
+    case i => print(s" ${arr(i)}")
+  }
+  println("")
+}

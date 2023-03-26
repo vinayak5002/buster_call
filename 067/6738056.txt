@@ -1,0 +1,41 @@
+def is_cyclic(node, adj_list, visited, stack):
+    visited[node] = True
+    # this node is being processed
+    stack[node] = True
+    for neighbor in adj_list.get(node, []):
+        if not visited[neighbor]:
+            if is_cyclic(neighbor, adj_list, visited, stack):
+                return True
+        elif stack[neighbor]:
+            return True
+    
+    # done process for the current node
+    stack[node] = False
+    return False
+
+
+if __name__ == "__main__":
+    n_vertices, n_edges = input().split()
+    n_vertices = int(n_vertices)
+    n_edges = int(n_edges)
+
+    adj_list = {}
+
+    for _ in range(n_edges):
+        src, dest = input().split()
+        src = int(src)
+        dest = int(dest)
+        adj_list[src] = adj_list.get(src, [])
+        adj_list[src].append(dest)
+    
+    visited = [False for _ in range(n_vertices)]
+    stack = [False for _ in range(n_vertices)]
+
+    found = False
+    for node in range(n_vertices):
+        if not visited[node]:
+            if is_cyclic(node, adj_list, visited, stack):
+                found = True
+                break
+    
+    print(int(found))

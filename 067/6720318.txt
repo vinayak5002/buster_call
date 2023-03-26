@@ -1,0 +1,94 @@
+#include <iostream>
+#include <vector>
+#include <set>
+
+
+using namespace std;
+//グラフの変数
+using Graph = vector<vector<int> >;
+Graph graph;
+
+//探索済みの点をtrue、未探索の点をfalseで保持する
+bool searched[100];
+//帰りがけかどうかを保持する
+bool finish[100];
+
+bool dfs(int point)
+{
+    //探索済みの点を探索した、つまりサイクルがあったならreturn
+    //if(searched[point] == true)
+      //  return true;
+    //else
+        searched[point] = true;    
+
+    int next_edge = 0;      //次の辺の添字
+    int next_point;         //次の点の添字
+    vector<int> edge;
+
+    edge = graph[point];    //探索点の辺を得る
+
+    while(1)
+    {
+        //探索する辺がないならその点の探索終了
+        if(edge.size() == next_edge)
+            break;
+
+        next_point = edge[next_edge];
+
+        if(searched[next_point] && (finish[next_point] == false))
+            return true;
+        else if(searched[next_point] == false){
+            if(dfs(next_point) )
+                return true;
+        }
+
+        //次の辺を探索する
+        next_edge++;
+    }
+
+    finish[point] = true;    //未探索状態に戻す
+
+    return false;
+}
+
+int main()
+{
+    int v, e; //vは点の数、eは辺の数
+    int start, end;
+    bool isCyclic;
+
+    cin >> v;
+    cin >> e;
+
+    //Graph graph(v);
+    graph = Graph(v);
+    //set<int> start_point;
+    //set<int>::iterator iter;
+
+    //各点を未探索で初期化
+    for(int i = 0; i < v; i++)
+    {
+        searched[i] = false;
+        finish[i] = false;
+    }
+
+    //グラフの初期化
+    for(int i = 0; i < e; i++)
+    {
+        cin >> start >> end;
+        //start_point.insert(start);
+        graph[start].push_back(end);
+    }
+
+    //グラフの探索
+    for(int i = 0; i < v; i++)
+    {
+        isCyclic = dfs(i);
+        if(isCyclic){
+           cout << 1 << endl;  //サイクルあり
+            return 0; 
+        }
+    }
+
+    cout << 0 << endl;  //サイクルなし
+}

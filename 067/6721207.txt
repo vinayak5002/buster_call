@@ -1,0 +1,40 @@
+#include <iostream>
+#include <random>
+#include <regex>
+using namespace std;
+
+int main(void) {
+    int n;
+    while (true) {
+        cin >> n;
+        if (n == 0) break;
+        // vector<string> s(n);
+        vector<int> c(n);
+        for (auto &e : c) {
+            string s; cin >> s;
+            e = s.length();
+        }
+        bool ok = false;
+        for (int l = 0; l <= n - 5; ++l) {
+            int r = l, cnt = 0, ku = 0;
+            while (r < n && ku < 5) {
+                auto just = [&]()->bool {
+                    return ((ku == 0 || ku == 2) && cnt == 5) || ((ku == 1 || ku == 3 || ku == 4) && cnt == 7);
+                };
+                auto over = [&]()->bool {
+                    return ((ku == 0 || ku == 2) && cnt > 5) || ((ku == 1 || ku == 3 || ku == 4) && cnt > 7);
+                };
+                cnt += c[r++];
+                if (over()) break;
+                if (just()) { cnt = 0; ++ku; }
+            }
+            if (ku == 5) {
+                ok = true;
+                cout << l + 1 << endl;
+                break;
+            }
+        }
+        if (!ok) cout << -1 << endl;
+    }
+    return 0;
+}

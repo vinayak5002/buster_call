@@ -1,0 +1,56 @@
+N = int(input())
+A = list(map(int, input().split()))
+
+class BIT:
+    def __init__(self, n):
+        self.n = n
+        self.a = [0] * (n + 1)
+
+    # a[i] に xを加算する
+    def add(self, i, x):
+        if i == 0:
+            return
+        k = i
+        while k <= self.n:
+            self.a[k] += x
+            k += (k & -k)
+
+    # b[i] + b[i+1] + ... + b[j]
+    def sum(self, i, j):
+        return self.sum_sub(j) - self.sum_sub(i - 1)
+
+    def sum_sub(self, i):
+        if i == 0:
+            return 0
+        s = 0
+        k = i
+        while k > 0:
+            s += self.a[k]
+            k -= (k & -k)
+        return s
+
+    def lower_bound(self, x):
+        if x <= 0:
+            return 0
+        else:
+            i = 0
+            r = 1
+            while r < self.n:
+                r = r << 1
+            len = r
+            while len > 0:
+                if i + len < self.n and self.a[i+len] < x:
+                    x -= self.a[i+len]
+                    i += len
+                len = len >> 1
+            return i
+
+compress = lambda x : { v: i for i, v in enumerate(sorted(set(x)), 1) } 
+compressed = compress(A)
+bit = BIT(N)
+ans = 0
+for i, a in enumerate(A, 1):
+    a = compressed[a]
+    bit.add(a, 1)
+    ans += i - bit.sum(1, a)
+print(ans)

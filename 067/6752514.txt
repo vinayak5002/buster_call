@@ -1,0 +1,62 @@
+class DisjointSet: 
+    def __init__(self, num_vertices):
+        self.parent = [idx for idx in range(num_vertices)]
+        self.rank = [0] * num_vertices # rank[i] = height of subtree rooted at i
+
+    def find_set(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find_set(self.parent[x])
+        return self.parent[x]
+    
+    def link(self, x, y): 
+        if self.rank[x] > self.rank[y]: 
+            self.parent[y] = x 
+        else:
+            self.parent[x] = y 
+            if self.rank[x] == self.rank[y]: 
+                self.rank[y] += 1 
+    
+    def union(self, x, y): 
+        self.link(self.find_set(x), self.find_set(y))
+    
+class Graph: 
+    def __init__(self, num_vertices) -> None:
+        self.edges = [] # list of tuples (x, y, weight)
+        self.num_vertices = num_vertices 
+
+    
+    def add_edge(self, x, y, weight):
+        self.edges.append((x, y, weight))
+
+    def kruskal(self): 
+        mst = []
+        mst_weight = 0 
+        self.edges.sort(key=lambda edge: edge[2])
+
+        ds = DisjointSet(self.num_vertices)
+
+        for edge in self.edges:
+            x, y = edge[0], edge[1]
+
+            if ds.find_set(x) != ds.find_set(y):
+                mst.append((x, y))
+                mst_weight += edge[2]
+                ds.union(x, y)
+
+        return mst, mst_weight 
+        
+class Solution:
+    def solve(self): 
+        num_vertices, num_edges = map(int, input().split()) 
+        g = Graph(num_vertices)
+
+        for _ in range(num_edges):
+            x, y, w = map(int, input().split())
+            g.add_edge(x, y, w)
+
+        mst, mst_weight = g.kruskal()
+
+        print(mst_weight)
+
+
+Solution().solve()

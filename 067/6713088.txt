@@ -1,0 +1,27 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+int main(){
+	int s, t, d;
+	cin >> s >> t >> d;
+	ll need = - (t - s), ans = 1ll << 60, h = -1;
+	vector<ll> a(d), sumv(d + 1);
+	for(int i = 0; i < d; i++){
+		cin >> a[i];
+		a[i] *= -1;
+		sumv[i + 1] = sumv[i] + a[i];
+		if(sumv[i + 1] >= need)ans = min(ans, (ll)i + 1);
+		h = max(h, sumv[i + 1]);
+	}
+	if(ans >= (1ll << 60) && sumv[d] <= 0){
+		cout << -1 << '\n';
+		return 0;
+	}
+	for(ll c = (need - h) / sumv[d]; c <= (need - h) / sumv[d] + 2; c++){
+		for(int i = 0; i <= d; i++){
+			if(c * sumv[d] + sumv[i] >= need)ans = min(ans, c * d + i);
+		}
+	}
+	cout << ans << '\n';
+}

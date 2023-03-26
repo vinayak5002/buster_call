@@ -1,0 +1,91 @@
+#include <iostream>
+typedef long long ll;
+using namespace std;
+
+ll N, M, C, S, G;
+ll P[25], Q[25][55], R[25][55];
+ll DIST[25][105][105]; // 会社ごとに最短距離（後に運賃に変換）を隣接行列で管理.
+ll FARE[105][105]; // 最安の運賃を管理.
+ll f[25][10010]; // 会社ごとの距離0~10000における運賃を管理.
+const ll inf = 100000000;
+
+void Warshall(ll K[105][105]) {
+    for (ll k = 1; k < N + 1; k++) {
+        for (ll i = 1; i < N + 1; i++) {
+            for (ll j = 1; j < N + 1; j++) {
+                if (K[i][j] > K[i][k] + K[k][j]) K[i][j] = K[i][k] + K[k][j];
+            }
+        }
+    }
+}
+
+// i会社の距離dにおける運賃を返す.
+ll calc_fare(ll i, ll d) {
+    if (d <= 10000) return f[i][d];
+    else return f[i][10000] + (d - 10000) * R[i][P[i]-1];
+}
+
+int main() {
+    while (1) {
+        cin >> N >> M >> C >> S >> G;
+        if (N == 0 && M == 0 && C == 0 && S == 0 && G == 0) break;
+
+        // 初期化
+        for (ll i = 1; i < C + 1; i++) {
+            for (ll j = 1; j < N + 1; j++) {
+                for (ll k = 1; k < N + 1; k++) {
+                    DIST[i][j][k] = inf;
+                    if (j == k) DIST[i][j][k] = 0;
+                }
+            }
+        }
+
+        ll X, Y, D, CMP;
+        for (ll i = 0; i < M ; i++) {
+            cin >> X >> Y >> D >> CMP;
+            DIST[CMP][X][Y] = min(DIST[CMP][X][Y], D);
+            DIST[CMP][Y][X] = min(DIST[CMP][Y][X], D);
+        }
+        for (ll i = 1; i < C + 1; i++) cin >> P[i];
+        for (ll i = 1; i < C + 1; i++) {
+            for (ll j = 0; j < P[i] - 1; j++) cin >> Q[i][j];
+            Q[i][P[i] - 1] = inf;
+            for (ll j = 0; j < P[i]; j++) cin >> R[i][j];
+
+            ll z = 0, sum = 0;
+            for (ll j = 0; j <10001; j++) {
+                f[i][j] = sum;
+                if (j >= Q[i][z]) z++;
+                sum += R[i][z];
+            }
+        }
+
+        for (ll i = 1; i < C + 1; i++) {
+            Warshall(DIST[i]);
+            for (ll j = 1; j < N + 1; j++) {
+                for (ll k = 1; k < N + 1; k++) {
+                    DIST[i][j][k] = calc_fare(i, DIST[i][j][k]); // 距離を料金に変換
+                }
+            }
+        }
+
+        // 会社を合わせて考える.
+        // 初期化
+        for (ll i = 1; i < N + 1; i++) {
+            for (ll j = 1; j < N + 1; j++) {
+                FARE[i][j] = inf;
+            }
+        }
+        for (ll i = 1; i < C + 1; i++) {
+            for (ll j = 1; j < N + 1; j++) {
+                for (ll k = 1; k < N + 1; k++) {
+                    FARE[j][k] = min(FARE[j][k], DIST[i][j][k]);
+                }
+            }
+        }
+        Warshall(FARE);
+
+        if (FARE[S][G] == inf) cout << "-1" << endl;
+        else cout << FARE[S][G] << endl;
+    }
+}

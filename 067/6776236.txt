@@ -1,0 +1,42 @@
+use std::io;
+
+fn main() {
+    let mut rc = String::new();
+    io::stdin().read_line(&mut rc).ok();
+    let rc: Vec<u8> = rc.trim().split_whitespace().map(|s| s.parse::<u8>().unwrap()).collect();
+
+    let mut table: Vec<Vec<u8>> = Vec::new();
+
+    for _ in 1..=rc[0] {
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).ok();
+        let input: Vec<u8> = input.trim().split_whitespace().map(|s| s.parse::<u8>().unwrap()).collect();
+        table.push(input);
+    }
+
+
+
+    for i in 0..rc[0] {
+        let mut sum_r = 0;
+        for j in 0..rc[1] {
+            sum_r += table[i as usize][j as usize]
+        }
+        table[i as usize].push(sum_r);
+    }
+    let mut new_row: Vec<u8> = Vec::new();
+    for i in 0..rc[1]+1 {
+        let mut sum_c = 0;
+        for j in 0..rc[0] {
+            sum_c += table[j as usize][i as usize];
+        }
+        new_row.push(sum_c);
+    }
+    table.push(new_row);
+
+
+
+    for i in 0..table.len() {
+        println!("{}", table[i].iter().map(|c| c.to_string()).collect::<Vec<String>>().join(" "));
+    }
+}
+

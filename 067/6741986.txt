@@ -1,0 +1,73 @@
+#include <iostream>
+#include <unistd.h>
+using namespace std;
+#define MAX 2000000
+long n = 0;
+long A[MAX+1];
+
+int parent(int i){
+    return i/2;
+}
+
+int left(int i){
+    return 2*i;
+}
+
+int right(int i){
+    return 2*i+1;
+}
+
+void maxHeapify(int i){
+    int l = left(i);
+    int r = right(i);
+    int max;
+
+    if(l<=n && A[l]>A[i]) max = l;
+    else max = i;
+    if(r<=n && A[r]>A[max]) max = r;
+
+    if(max!=i){
+        // cout << "exchange" << A[i] << "-" << A[max];
+        long temp = A[i];
+        A[i] = A[max];
+        A[max] = temp;
+        maxHeapify(max);
+    }
+}
+
+void insert(long k){
+    A[n] = k;
+    long index = n;
+    while(index>1 && A[parent(index)]<A[index]){
+        long temp = A[parent(index)];
+        A[parent(index)] = A[index];
+        A[index] = temp;
+        index = parent(index);
+    }
+}
+
+void extract(){
+    cout << A[1] << endl;
+    A[1] = A[n];
+    n--;
+    for(int i=n;i>0;i--) maxHeapify(i);
+    // cout << "->" << A[1] << endl;
+}
+
+int main(){
+    char c[10];
+    cin >> c;
+    while(c[2]!='d'){
+        // sleep(1);
+        if(c[0]=='i'){
+            int k;
+            scanf("%d", &k);
+            n++;
+            insert(k);
+        }else{
+            extract();
+        }
+        cin >> c;
+    }
+    
+}

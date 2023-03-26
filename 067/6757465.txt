@@ -1,0 +1,85 @@
+#include<bits/stdc++.h>
+#define rep(i,n) for(int i=0; i< (n); i++)
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> Pe;
+const int inf=(1<<30);
+struct edge
+{
+    /* data */
+    int x;
+    int bl;
+    int ti;
+};
+
+bool operator<(edge a,edge b){
+    return a.ti<b.ti;
+}
+bool operator>(edge a,edge b){
+    return a.ti>b.ti;
+}
+
+
+
+int main(){
+    while(true){
+        int n,m,l,k,a,h; cin>>n>>m>>l>>k>>a>>h;
+        if(n==0) break;
+        vector<bool> ft(n);
+        vector<vector<Pe>> g(n);
+        vector<vector<int>> d(150,vector<int>(150,inf));
+        rep(i,l){
+            int x; cin>>x;
+            ft[x]=true;
+        }
+        rep(i,k){
+            int x,y,t; cin>>x>>y>>t;
+            g[x].push_back(make_pair(y,t));
+            g[y].push_back(make_pair(x,t));
+        }
+        /*rep(i,n){
+            for(Pe j: g[i]){
+                cout<<i<<" "<<j.first<<endl;
+            }
+        }*/
+
+        priority_queue<edge,vector<edge>,greater<edge>> q;
+        edge o; o.x=a; o.bl=m; o.ti=0;
+        bool can=false;
+        q.push(o);
+        while(!q.empty()){
+            edge p=q.top(); q.pop();
+           // cout<<p.x<<" "<<p.ti<<" "<<p.bl<<endl;
+            if(p.x == h){
+                can=true;
+                cout<<p.ti-p.bl<<endl;
+                break;
+            }
+            if(d[p.x][p.bl] < p.ti )continue;
+            for(Pe i: g[p.x]){
+                int t=i.second; int y=i.first;
+                
+                if(p.bl>=t){
+                   //cout<<"K "<<p.x<<" "<<y<<" "<<d[p.x][p.bl]<<endl;
+                    edge next; next.x=y; next.ti=p.ti+t;
+                    next.bl=p.bl-t;
+                    if(ft[next.x]){
+                       // cout<<m<<endl;
+                        next.ti+=m-next.bl;
+                        next.bl=m;
+                    }
+                    //cout<<next.bl<<endl;
+                    if(d[next.x][next.bl] > next.ti ){
+                        d[next.x][next.bl] = next.ti;
+                        q.push(next);
+                    }
+
+                }
+                
+            }  
+        
+
+        }
+        if(!can) cout<<"Help!"<<endl;
+    }
+}

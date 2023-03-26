@@ -1,0 +1,107 @@
+import java.io.IOException;
+import java.util.Scanner;
+
+public class Main {
+    public static void main (String[] args) throws IOException {
+    	Scanner sc = new Scanner(System.in);
+        //ダイス生成
+    	Dice dice = new Dice(sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt());  	
+    	
+    	int order = sc.nextInt();
+    	
+    	for (int i = 0; i < order; i++) {
+    		int T = sc.nextInt();
+    		int S = sc.nextInt();
+    		Dice copy = new Dice(dice.top, dice.S, dice.E, dice.W, dice.N, dice.bottom);
+    		
+    		int answer = solve(T, S, copy, 0);
+    		System.out.println(answer);
+    	}
+    	
+    	sc.close();
+    }
+    
+    public static int solve(int num1, int num2, Dice dice, int count) {
+		if (dice.top == num1 && dice.S == num2) {
+			return dice.E;
+		}
+		
+		if (count == 4) {
+			return -1;
+		} 
+		
+		int answer = -1;
+		
+		Dice dice2 = new Dice(dice.top, dice.S, dice.E, dice.W, dice.N, dice.bottom);
+		
+		dice2.turnE();
+		answer = Math.max(solve(num1, num2, dice2, count + 1), answer);
+		dice2 = new Dice(dice.top, dice.S, dice.E, dice.W, dice.N, dice.bottom);
+		
+		dice2.turnN();
+		answer = Math.max(solve(num1, num2, dice2, count + 1), answer);
+		dice2 = new Dice(dice.top, dice.S, dice.E, dice.W, dice.N, dice.bottom);
+		
+		dice2.turnS();
+		answer = Math.max(solve(num1, num2, dice2, count + 1), answer);
+		dice2 = new Dice(dice.top, dice.S, dice.E, dice.W, dice.N, dice.bottom);
+		
+		dice2.turnW();
+		answer = Math.max(solve(num1, num2, dice2, count + 1), answer);
+		dice2 = new Dice(dice.top, dice.S, dice.E, dice.W, dice.N, dice.bottom);
+		
+		return answer;
+	}
+}
+
+class Dice {
+	int top; //1
+	int bottom; //6
+	int E; //3
+	int N; //5
+	int S; //2
+	int W; //4
+	
+	//コンストラクタ
+	Dice(int d1, int d2, int d3, int d4, int d5, int d6) {
+		top = d1;
+		S = d2;
+		E = d3;
+		W = d4;
+		N = d5;
+		bottom = d6;
+	}
+	
+	public void turnE() {
+		int t = top;
+		top = W;
+		W = bottom;
+		bottom = E;
+		E = t;
+	}
+	
+	public void turnN() {
+		int t = top;
+		top = S;
+		S = bottom;
+		bottom = N;
+		N = t;
+	}
+	
+	public void turnS() {
+		int t = top;
+		top = N;
+		N = bottom;
+		bottom = S;
+		S = t;
+	}
+	
+	public void turnW() {
+		int t = top;
+		top = E;
+		E = bottom;
+		bottom = W;
+		W = t;
+	}
+	
+}

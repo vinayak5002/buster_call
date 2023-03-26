@@ -1,0 +1,336 @@
+#line 1 "a.cpp"
+#define PROBLEM "https://onlinejudge.u-aizu.ac.jp/courses/lesson/8/ITP2/7/ITP2_7_B"
+#line 2 "/home/kuhaku/home/github/algo/lib/template/template.hpp"
+#pragma GCC target("sse4.2,avx2,bmi2")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+#include <bits/stdc++.h>
+using namespace std;
+template <class T, class U>
+bool chmax(T &a, const U &b) {
+    return a < (T)b ? a = (T)b, true : false;
+}
+template <class T, class U>
+bool chmin(T &a, const U &b) {
+    return (T)b < a ? a = (T)b, true : false;
+}
+constexpr int64_t INF = 1000000000000000003;
+constexpr int Inf = 1000000003;
+constexpr int MOD = 1000000007;
+constexpr int MOD_N = 998244353;
+constexpr double EPS = 1e-7;
+constexpr double PI = M_PI;
+#line 3 "/home/kuhaku/home/github/algo/lib/random/split_mix_64.hpp"
+
+/**
+ * @brief 疑似乱数生成器 SplitMix64
+ * @details 周期：$2^64-1$
+ */
+struct split_mix_64 {
+    using state_type = std::uint64_t;
+    using result_type = std::uint64_t;
+
+    constexpr split_mix_64() noexcept : state(1234567890) {}
+    constexpr split_mix_64(std::uint64_t seed) noexcept : state(seed) {}
+
+    constexpr result_type min() const noexcept { return std::numeric_limits<result_type>::min(); }
+    constexpr result_type max() const noexcept { return std::numeric_limits<result_type>::max(); }
+    constexpr result_type operator()() {
+        std::uint64_t z = (this->state += 0x9e3779b97f4a7c15);
+        z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
+        z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
+        return z ^ (z >> 31);
+    }
+
+    constexpr state_type serialize() const noexcept { return this->state; }
+    constexpr void deserialize(const state_type state) noexcept { this->state = state; }
+
+    template <std::size_t N>
+    constexpr std::array<std::uint64_t, N> generate_seed_sequence() noexcept {
+        std::array<std::uint64_t, N> seeds = {};
+        for (auto& seed : seeds) { seed = this->operator()(); }
+        return seeds;
+    }
+
+    /**
+     * @brief a以上b以下の整数を生成
+     *
+     * @param a
+     * @param b
+     * @return int [a, b]
+     */
+    int rand_range(int a, int b) { return a + this->operator()() % (b - a + 1); }
+
+    /**
+     * @brief 0.0以上1.0未満の浮動小数点数を生成
+     *
+     * @return double [0, 1)
+     */
+    double random() { return (double)this->operator()() / this->max(); }
+
+  private:
+    state_type state;
+};
+#line 4 "/home/kuhaku/home/github/algo/lib/random/xorshift.hpp"
+
+/**
+ * @brief 擬似乱数生成器
+ * @details 周期：$2^128-1$
+ */
+struct Xorshift {
+    using state_type = std::array<std::uint32_t, 4>;
+    using result_type = std::uint32_t;
+    constexpr Xorshift() : state{123456789, 362436069, 521288629, 88675123} {}
+
+    constexpr result_type min() { return std::numeric_limits<result_type>::min(); }
+    constexpr result_type max() { return std::numeric_limits<result_type>::max(); }
+    result_type operator()() {
+        std::uint32_t t = (state[0] ^ (state[0] << 11));
+        state[0] = state[1], state[1] = state[2], state[2] = state[3];
+        return state[3] = (state[3] ^ (state[3] >> 19)) ^ (t ^ (t >> 8));
+    }
+    bool operator==(const Xorshift& rhs) noexcept { return (this->state == rhs.state); }
+    bool operator!=(const Xorshift& rhs) noexcept { return (this->state != rhs.state); }
+
+    constexpr state_type serialize() const noexcept { return this->state; }
+    constexpr void deserialize(const state_type state) noexcept { this->state = state; }
+
+    /**
+     * @brief a以上b以下の整数を生成
+     *
+     * @param a
+     * @param b
+     * @return int [a, b]
+     */
+    int rand_range(int a, int b) { return a + this->operator()() % (b - a + 1); }
+
+    /**
+     * @brief 0.0以上1.0未満の浮動小数点数を生成
+     *
+     * @return double [0.0, 1.0)
+     */
+    double random() { return (double)this->operator()() / this->max(); }
+
+  private:
+    state_type state;
+};
+#line 3 "/home/kuhaku/home/github/algo/lib/binary_tree/treap.hpp"
+
+/**
+ * @brief Treap
+ *
+ * @tparam T 要素の型
+ * @tparam UniformRandomBitGenerator 疑似乱数生成器
+ */
+template <class T, class UniformRandomBitGenerator = Xorshift>
+struct Treap {
+  private:
+    struct Node {
+        using pointer = Node *;
+        T val;
+        typename UniformRandomBitGenerator::result_type priority;
+        pointer left, right;
+
+        Node(T _val, typename UniformRandomBitGenerator::result_type _priority)
+            : val(_val), priority(_priority), left(nullptr), right(nullptr) {}
+    };
+
+  public:
+    using node_pointer = typename Node::pointer;
+
+    constexpr Treap() : root(nullptr) {}
+
+    void insert(T val) { this->root = this->insert(this->root, val); }
+
+    void erase(T val) { this->root = this->erase(this->root, val); }
+
+    bool contains(T val) const {
+        node_pointer node = this->root;
+        while (node && node->val != val) {
+            if (val < node->val) node = node->left;
+            else node = node->right;
+        }
+        return node != nullptr;
+    }
+
+    int count(T val) const { return this->count(this->root, val); }
+
+  private:
+    UniformRandomBitGenerator gen;
+    node_pointer root;
+
+    constexpr T get_min_val(node_pointer node) const {
+        assert(node);
+        while (node->left) {
+            node = node->left;
+        }
+        return node->val;
+    }
+
+    constexpr node_pointer rotl(node_pointer node) {
+        assert(node);
+        node_pointer pivot = node->right;
+        assert(pivot);
+        node->right = pivot->left;
+        pivot->left = node;
+        return pivot;
+    }
+
+    constexpr node_pointer rotr(node_pointer node) {
+        assert(node);
+        node_pointer pivot = node->left;
+        assert(pivot);
+        node->left = pivot->right;
+        pivot->right = node;
+        return pivot;
+    }
+
+    constexpr node_pointer rotate(node_pointer node) {
+        if (node->right && node->priority < node->right->priority) {
+            node = this->rotl(node);
+        } else if (node->left && node->priority < node->left->priority) {
+            node = this->rotr(node);
+        }
+        return node;
+    }
+
+    constexpr node_pointer insert(node_pointer node, T val) {
+        if (node == nullptr) return new Node(val, this->gen());
+        if (val < node->val) node->left = this->insert(node->left, val);
+        else node->right = this->insert(node->right, val);
+        return this->rotate(node);
+    }
+
+    constexpr node_pointer erase(node_pointer node, T val) {
+        if (node == nullptr) return nullptr;
+        if (val < node->val) {
+            node->left = this->erase(node->left, val);
+        } else if (node->val < val) {
+            node->right = this->erase(node->right, val);
+        } else {
+            if (node->right == nullptr) {
+                return node->left;
+            } else {
+                node->val = this->get_min_val(node->right);
+                node->right = this->erase_min(node->right);
+            }
+        }
+        return this->rotate(node);
+    }
+
+    constexpr node_pointer erase_min(node_pointer node) {
+        if (node->left == nullptr) return node->right;
+        node->left = this->erase_min(node->left);
+        return this->rotate(node);
+    }
+
+    int count(node_pointer node, T val) const {
+        if (node == nullptr) return 0;
+        int res = node->val == val;
+        if (!(node->val < val)) res += this->count(node->left, val);
+        if (!(val < node->val)) res += this->count(node->right, val);
+        return res;
+    }
+};
+#line 3 "/home/kuhaku/home/github/algo/lib/template/atcoder.hpp"
+using ll = int64_t;
+using ld = long double;
+#define FOR(i, m, n) for (int i = (m); i < int(n); ++i)
+#define FORR(i, m, n) for (int i = (m)-1; i >= int(n); --i)
+#define FORL(i, m, n) for (int64_t i = (m); i < int64_t(n); ++i)
+#define rep(i, n) FOR (i, 0, n)
+#define repn(i, n) FOR (i, 1, n + 1)
+#define repr(i, n) FORR (i, n, 0)
+#define repnr(i, n) FORR (i, n + 1, 1)
+#define all(s) (s).begin(), (s).end()
+template <class T, class U>
+std::istream &operator>>(std::istream &is, std::pair<T, U> &p) {
+    is >> p.first >> p.second;
+    return is;
+}
+template <class T>
+std::istream &operator>>(std::istream &is, std::vector<T> &v) {
+    for (T &i : v) is >> i;
+    return is;
+}
+template <class T, class U>
+std::ostream &operator<<(std::ostream &os, const std::pair<T, U> &p) {
+    return os << '(' << p.first << ',' << p.second << ')';
+}
+template <class T>
+std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
+    for (auto it = v.begin(); it != v.end(); ++it) {
+        os << (it == v.begin() ? "" : " ") << *it;
+    }
+    return os;
+}
+template <class Head, class... Tail>
+void co(Head &&head, Tail &&...tail) {
+    if constexpr (sizeof...(tail) == 0) std::cout << head << '\n';
+    else std::cout << head << ' ', co(forward<Tail>(tail)...);
+}
+template <class Head, class... Tail>
+void ce(Head &&head, Tail &&...tail) {
+    if constexpr (sizeof...(tail) == 0) std::cerr << head << '\n';
+    else std::cerr << head << ' ', ce(forward<Tail>(tail)...);
+}
+template <typename T, typename... Args>
+auto make_vector(T x, int arg, Args... args) {
+    if constexpr (sizeof...(args) == 0) return std::vector<T>(arg, x);
+    else return std::vector(arg, make_vector<T>(x, args...));
+}
+void sonic() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+}
+void setp(const int n) {
+    std::cout << std::fixed << std::setprecision(n);
+}
+void Yes(bool is_correct = true) {
+    std::cout << (is_correct ? "Yes" : "No") << std::endl;
+}
+void No(bool is_not_correct = true) {
+    Yes(!is_not_correct);
+}
+void YES(bool is_correct = true) {
+    std::cout << (is_correct ? "YES" : "NO") << std::endl;
+}
+void NO(bool is_not_correct = true) {
+    YES(!is_not_correct);
+}
+void Takahashi(bool is_correct = true) {
+    std::cout << (is_correct ? "Takahashi" : "Aoki") << std::endl;
+}
+void Aoki(bool is_not_correct = true) {
+    Takahashi(!is_not_correct);
+}
+#line 4 "a.cpp"
+
+int main(void) {
+    sonic();
+    int q;
+    cin >> q;
+    int size = 0;
+    Treap<int> treap;
+    rep(i, q) {
+        int x, y;
+        cin >> x >> y;
+        if (x == 0) {
+            if (!treap.contains(y)) {
+                treap.insert(y);
+                ++size;
+            }
+            co(size);
+        } else if (x == 1) {
+            co(treap.contains(y));
+        } else if (x == 2) {
+            if (treap.contains(y)) {
+                treap.erase(y);
+                --size;
+            }
+        }
+    }
+
+    return 0;
+}
+

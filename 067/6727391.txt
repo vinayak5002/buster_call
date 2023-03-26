@@ -1,0 +1,83 @@
+#include<stdio.h>
+#define N 100
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+
+
+int G[N][N], n, time;              // 隣接行列，行数，時間
+int d[N], f[N], color[N];          // 最初に訪問した時間，訪問終了した時間，色
+
+void dfs_visit(int u)              // 頂点uの訪問
+{
+	int v;
+	color[u] = GRAY;               // uには隣接行列の行が探索されて代入されるのでu-1などしなくていい
+	d[u] = ++time;                 // 最初の訪問した時間
+	for( v = 0; v < n; v++)
+	{
+		if(G[u][v] == 0) continue;
+		if(color[v] == WHITE)
+		{
+			dfs_visit(v);
+		}
+	}
+	
+	color[u] = BLACK;
+	f[u] = ++time;                 // 訪問終了
+}
+
+void dfs()                         // すべての頂点を探索
+{
+	int u;
+	for(u = 0; u < n; u++)         // 初期化
+	{
+		color[u] = WHITE;
+	}
+	time = 0;
+	
+	for(u = 0; u < n; u++)         // 未探索の頂点を探して深さ優先探索を行う
+	{
+		if(color[u] == WHITE)
+		{
+			dfs_visit(u);
+		}
+	}
+	
+	for(u = 0; u < n; u++)
+	{
+		printf("%d %d %d\n", u+1, d[u], f[u]);  // 頂点番号，発見時間，完了時間を報告する
+	}
+}
+
+
+int main(void)
+{
+	int u, k, v;
+	int i, j;
+	
+	scanf("%d", &n);               // 行数
+	for(i = 0; i < n; i++)
+	{
+		for(j = 0; j < n; j++)
+		{
+			G[i][j] = 0;
+		}
+	}
+	
+	for(i = 0; i < n; i++)         // n行に隣接リストが与えられる
+	{
+		scanf("%d", &u);           // 頂点番号
+		scanf("%d", &k);           // 隣接する頂点の数
+		
+		for(j = 0; j < k; j++)
+		{
+			scanf("%d", &v);       // u-1に隣接している頂点番号
+			G[u-1][v-1] = 1;       // 行列は0オリジンだが，入力は1からなので，u-1
+		}
+	}
+	
+	
+	dfs();
+	
+	return 0;
+}

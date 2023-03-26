@@ -1,0 +1,61 @@
+#include<stdio.h>
+#define Max 20000000
+int H = 0;
+int A[Max+1];
+
+void maxHeap(int i){
+      int left,right,large,temp;
+      left = 2*i;
+      right = 2*i + 1;
+      large = i;
+     
+      //if(left > H || right > H) return;
+     
+      if(H >= left && A[left] > A[i]) large = left;
+      if(H >= right && A[right] > A[large]) large = right;
+     
+      if(large != i){
+            temp = A[i];
+            A[i] = A[large];
+            A[large] = temp;
+            maxHeap(large);
+      }
+      return;
+}
+
+void extract(){
+      int max;
+      max = A[1];
+      A[1] = A[H--];
+      maxHeap(1);
+      printf("%d\n",max);
+}
+
+
+void insert(int key){
+      int k;
+      H++;
+      A[H] = key;
+      //printf("%d H = %d:\n",A[1],H);
+      if(!(H/2)) return;
+      for(k=H/2 ;k>0 ;k--)
+      maxHeap(k);
+}
+
+
+int main(){
+      int key;
+      char com[10];
+     
+      while(1){
+            scanf("%s",com);
+            if(com[2] == 'd') break;
+            else if(com[0] == 'i'){
+                  scanf("%d",&key);
+                  insert(key);
+            }
+            else extract();
+      }
+      return 0;
+}
+

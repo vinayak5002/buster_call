@@ -1,0 +1,68 @@
+#include <iostream>
+#include <stdio.h>
+#include <limits>
+#include <stack>
+#include <vector>
+
+#define MAX 101
+#define NIL -1
+
+using namespace std;
+
+int d[MAX];
+int n,m;
+vector<int> G[MAX];
+
+void bfs(int r,int c) {
+	stack<int> S;
+	S.push(r);
+
+	d[r] = c;
+
+	while (!S.empty()) {
+		int u = S.top();
+		S.pop();
+		for (int i = 0; i < G[u].size(); i++) {
+			int v = G[u][i];
+			if (d[v] == NIL) {
+				d[v] = c;
+				S.push(v);
+			}
+		}
+		
+	}
+}
+
+void assignColor() {
+	int id = 1;
+	for (int i = 0; i < n; i++) d[i] = NIL;
+	for (int i = 0; i < n; i++) {
+		if (d[i] == NIL) bfs(i, id++);
+	}
+}
+
+int main() {
+
+	int s,t,q;
+
+	
+	scanf("%d""%d", &n,&m);
+	for (int i = 0; i < m; i++) {
+		scanf("%d""%d", &s, &t);
+		G[s].push_back(t);
+		G[t].push_back(s);
+	}
+	
+	cin >> q;
+	for (int i = 0; i < q; i++) {
+		scanf("%d""%d", &s, &t);
+		if (d[s] == d[t]) {
+			cout << "yes" << endl;
+		}
+		else {
+			cout << "no" << endl;
+		}
+	}
+
+	return 0;
+}

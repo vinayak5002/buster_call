@@ -1,0 +1,38 @@
+import 'dart:io';
+
+import 'dart:math';
+
+void main() {
+  final n = readInt();
+  final S = readInts();
+  final q = readInt();
+  final T = readInts();
+
+  print(S.toSet().intersection(T.toSet()).length);
+}
+
+List<List<T>> combination<T>(List<T> list, int n) {
+  return n == 1
+      ? list.map((el) => [el]).toList()
+      : list.asMap().entries.expand((entry) {
+          return combination(list.sublist(entry.key + 1), n - 1).map((el) => [entry.value] + el).toList();
+        }).toList();
+}
+
+bool isNumeric(String s) {
+  return double.tryParse(s) != null;
+}
+
+int readInt() {
+  return int.parse(stdin.readLineSync());
+}
+
+List<int> readInts() {
+  return stdin.readLineSync().split(" ").map(int.parse).toList();
+}
+
+extension Iterables<E> on Iterable<E> {
+  Map<K, List<E>> groupBy<K>(K Function(E) keyFunction) => fold(<K, List<E>>{},
+      (Map<K, List<E>> map, E element) => map..putIfAbsent(keyFunction(element), () => <E>[]).add(element));
+}
+

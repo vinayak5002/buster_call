@@ -1,0 +1,228 @@
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <deque>
+#include <iostream>
+#include <istream>
+#include <iterator>
+#include <map>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <vector>
+#include <tuple>
+#include <iomanip>
+#include <climits>
+#include <fstream>
+#include <random>
+#include <stdio.h>
+//#include <atcoder/all>
+using namespace std;
+
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<ll, ll> P;
+typedef pair<P, P> PP;
+typedef pair<ll,P> TP;
+#define rep(i, n) for(int i = 0; i < (n); i++)
+#define revrep(i, n) for(int i = (n)-1; i >= 0; i--)
+#define pb push_back
+#define f first
+#define s second
+#define chmin(x, y) x = min(x, y);
+#define chmax(x, y) x = max(x, y);
+#define len(x) ((int)(x).size())
+
+//const ll INFL = LLONG_MAX;//10^18 = 2^60
+const ll INFL = 1LL<<60;
+//const int INF = INT_MAX;
+const int INF = 1 << 30;//10^9
+const ll MOD = 1000000007;
+// const ll MOD = 998244353;
+double EPS = 1e-10;
+
+vector<ll> dy = {0, 1, 0, -1, 1, 1, -1, -1, 0};
+vector<ll> dx = {1, 0, -1, 0, 1, -1, 1, -1, 0};
+
+void pres(double A){printf("%.9lf\n", A);}
+void BinarySay(ll x, ll y = 8){rep(i, y) cout << (x>>(y-1-i) & 1); cout << endl;}
+ll cnt_bit(ll x){return __builtin_popcountll(x);}
+
+template<typename __T__>
+void vecout(vector<__T__> x){rep(i, len(x)){cout<<x[i]<<" ";}cout<<endl;}
+
+ll pow_long(ll x, ll k){
+  ll res = 1;
+  while(k > 0){
+    if(k % 2) res *= x;
+    x *= x; k /= 2;
+  }
+  return res;
+}
+
+ll pow_mod(ll x, ll k, ll _mod=MOD){
+  ll res = 1;
+  while(k > 0){
+    if(k % 2){
+      res *= x; res %= _mod;
+    }
+    x *= x; x %= _mod;
+    k /= 2;
+  }
+  res %= _mod;
+  return res;
+}
+
+ll inverse(ll x){return pow_mod(x, MOD - 2);};
+
+ll gcd(ll a, ll b){
+    if(b == 0) return a;
+    return gcd(b, a % b);
+}
+
+ll lcm(ll x, ll y){
+  ll res = x / gcd(x, y);
+  res *= y;
+  return res;
+};
+
+ll _keta(ll A, ll base){
+  int cnt = 0;
+  while(A != 0){
+    A /= base;
+    cnt++;
+  }
+  return cnt;
+}
+
+// ll bit[200010];
+// ll sum(ll i) {
+//   ll s = 0;
+//   while (i > 0) {
+//     s += bit[i];
+//     i -= i & -i;
+//   }
+//   return s;
+// }
+// void add(ll i, ll x, ll n) {
+//   while (i <= n+1) {
+//     bit[i] += x;
+//     i += i & -i;
+//   }
+// }
+// void doFirst(ll l, ll r, ll x, ll M) {
+//   add(l,x,M);
+//   add(r+1,-x,M);
+// }
+// ll doThird(ll j) {
+//   return sum(j);
+// }
+
+//エラトステネスの篩O(n);
+ll prime[1000010];//i番目の素数
+bool is_prime[1000011];
+vector<ll> sosu;
+//n以下の素数の個数を全て返す関数
+void sieve(ll n){
+    ll p = 0;
+    for(ll i = 0; i <= n; i++) is_prime[i] = true;
+    is_prime[0] = false;
+    is_prime[1] = false;
+    for(ll i = 2; i <= n; i++){
+        if(is_prime[i]){
+            sosu.push_back(i);
+            prime[p++] = i;
+            for(int j = 2 * i; j <= n; j += i) is_prime[j] = false;
+        }
+    }
+    // return p;
+    // return sosu;
+}
+
+vector<ll> fac,finv,inv;
+#define FOR(i,a,b) for(ll i=a;i<=ll(b);i++)
+void COMinit(ll n) {
+    fac.resize(n+1);
+    finv.resize(n+1);
+    inv.resize(n+1);
+    fac[0]=fac[1]=1;
+    finv[0]=finv[1]=1;
+    inv[1]=1;
+    FOR(i,2,n){
+        fac[i]=fac[i-1]*i%MOD;
+        inv[i]=MOD-inv[MOD%i]*(MOD/i)%MOD;
+        finv[i]=finv[i-1]*inv[i]%MOD;
+    }
+}
+
+// 二項係数の演算
+ll COM(ll n,ll k){
+    if(n<k)return 0;
+    if(n<0 || k<0)return 0;
+    return fac[n]*(finv[k]*finv[n-k]%MOD)%MOD;
+}
+
+// bool isAble(vector<ll> &A, ll mid, ll K) {
+//   // ll summ = 0;
+//   ll need = K*mid;
+//   rep(i,A.size()) {
+//     // summ += min(A[i],mid);
+//     need -= min(A[i],mid);
+//   }
+//   return need <= 0;
+// }
+
+const ll N_ = (1 << 18);
+ll seg[2*N_-1];
+//一点変更区間最小
+void init_seg(ll x = INFL){
+  rep(i, 2 * N_ - 1){
+    seg[i] = x;
+  }
+}
+
+void update(ll k, ll x){
+  k += N_-1;
+  seg[k] = x;
+  while(k > 0){
+    k = (k-1)/2;
+    seg[k] = min(seg[2*k+1], seg[2*k+2]);
+  }
+}
+
+ll getminimum(ll x, ll y, ll k = 0, ll left = 0, ll right = N_){
+  if(right <= x || y <= left) return INFL;
+  if(x <= left && right <= y) return seg[k];
+  ll mid = (left + right) / 2;
+  ll l = getminimum(x, y, 2*k+1, left, mid);
+  ll r = getminimum(x, y, 2*k+2, mid, right);
+  return min(l, r);
+}
+
+void solve(){
+  init_seg((1LL<<31)-1);
+  ll n, q; cin >> n >> q;
+  rep(i,q) {
+    ll com, x, y;
+    cin >> com >> x >> y;
+    if (com == 0) {
+      update(x,y);
+    } else {
+      cout << getminimum(x,y+1) << endl;
+    }
+  }
+}
+
+void test() {
+  sieve(1000000);
+  cout << sosu.size() << endl;
+}
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  solve();
+  // test();
+}
+

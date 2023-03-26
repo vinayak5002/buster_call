@@ -1,0 +1,98 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+
+
+class Solver {
+
+        using Permutation = array<int, 8>;
+        using Board = array<array<char, 8>, 8>;
+
+public:
+
+        Solver () {
+                cin >> k;
+                a.resize(k);
+
+                for (int i = 0; i < k; ++i) {
+                        cin >> a[i].first >> a[i].second;
+                }
+                sort(a.begin(), a.end());
+
+                for (int i = 0; i < 8; ++i) {
+                        ans[i].fill('.');
+                }
+
+                solve();
+        }
+
+        ~Solver () {
+                for (int i = 0; i < 8; ++i) {
+                        for (int j = 0; j < 8; ++j) {
+                                cout << ans[i][j];
+                        }
+                        cout << endl;
+                }
+        }
+
+private:
+
+        void solve () {
+                Permutation perm;
+                iota(perm.begin(), perm.end(), 0);
+
+                do {
+                        if (ok(perm)) {
+                                generateAnswer(perm);
+                                return;
+                        }
+                } while(next_permutation(perm.begin(), perm.end()));
+        }
+
+        bool includes (const Permutation& perm) {
+                array<pair<int, int>, 8> queens;
+
+                for (int i = 0; i < 8; ++i) {
+                        queens[i] = {perm[i]+1, i+1};
+                }
+
+                sort(queens.begin(), queens.end());
+
+                return std::includes(queens.begin(), queens.end(), a.begin(), a.end());
+        }
+
+        bool safe (const Permutation& perm) {
+                for (int i = 0; i < 7; ++i) {
+                        for (int j = i+1; j < 8; ++j) {
+                                if (abs(j - i) == abs(perm[j] - perm[i])) {
+                                        return false;
+                                }
+                        }
+                }
+
+                return true;
+        }
+
+        bool ok (const Permutation& perm) {
+                return includes(perm) and safe(perm);
+        }
+
+        void generateAnswer (const Permutation& perm) {
+                for (int i = 0; i < 8; ++i) {
+                        ans[perm[i]][i] = 'Q';
+                }
+        }
+
+        int k;
+
+        vector<pair<int, int>> a;
+
+        Board ans;
+
+};
+
+
+
+int main () {
+        Solver{};
+}

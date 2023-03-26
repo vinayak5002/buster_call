@@ -1,0 +1,158 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 123456
+#define MM 12345
+#define NIL -200000002
+#define INF 200000002
+#define MAXN 50
+int n, q ;
+int t;
+
+struct vertex {
+    vector<int> to;
+    vector<int> children;
+    int parent = -1;
+    int ord = -1;
+    int con = 0 ;
+    int indeg = 0;
+};
+
+vertex R[100001];
+vector<int> res;
+stack<int> Q;
+
+int next (int u) {
+    // uから次に訪問すべき頂点をgetする。
+
+    for (int i=0; i < R[u].to.size() ; i++ ) {
+        int v = R[u].to.at(i);
+        if ( R[v].con ==0) { return v ; } 
+    }
+    return NIL;
+}
+
+void dfs () {
+    // DFSの基本アイディア
+    // 訪問したらstackに積む。
+
+    while( Q.size() > 0 ) {
+        int u = Q.top(); 
+        res.push_back(u);  //printf("%d を訪問\n", u );
+
+        //自分のすべての行き先が訪問済みなら自分をstackから消す。
+        int v = next(u);
+        if ( v == NIL) {
+            R[u].con = 2;  //完了
+            Q.pop(); 
+        } else {
+            R[v].con=1;  Q.push(v);  //printf("%d をQ追加\n", v);
+            R[v].parent=u;
+            R[u].children.push_back(v);               
+            R[v].ord=t++ ; 
+        }
+    }
+}
+
+void dfs_init (int s) {
+    res.clear();
+    Q.push(s);  //printf("%d をQ追加\n", s);
+    // res.push_back(s);
+    R[s].con=1; // sを訪問済みにする。
+    // DFSでは完了になったときにpopする。
+    t=0;   R[s].ord=t++   ;
+    dfs() ;
+}
+
+/*以下の2つのどちらかが成立すれば u は関節点
+u が DFS tree の根(root) で、u は少なくとも 2 つの子を持つ
+u が DFS tree の根(root) でなく、子として以下を満たす頂点 v を持つ
+v を根とする DFS tree の部分木において、u の祖先への後退辺を持つ頂点が存在しない
+
+ord[u] : DFS で頂点 u を何番目に探索したか
+lowest[u] : u からの後退辺を高々1回まで用いて到達できる頂点 w について、ord[w] の最小値
+2つの条件のどちらかを満たす点 u が関節点
+u が DFS tree の根(root) で、子が2つ以上存在する
+u が DFS tree の根(root) でなく、頂点 u のある子 v について ord[u] ≤ low[v] を満たす
+*/
+
+
+bool backedge(int u, int v){
+//    printf ("%dから%dへのbackedgeを検査\n",u,v);
+    // ord
+
+    // uとvの間にbackedgeがあるかを判別する。
+    // vがres(経路)に含まれていて　かつ　子供であること。
+    // vが経路に含まれていて、uより後に訪問されている
+
+    if ( R[u].ord > R[v].ord ) {
+//        printf ("%dから%dへのbackedge\n",u,v);
+        return true ;
+    } 
+    return false;
+}
+
+int lowest(int u) {
+    int low = R[u].ord;
+    for (int j=0; j< R[u].to.size(); j++) {
+        // uにつながる辺すべてを捜査
+        int v = R[u].to.at(j) ; 
+//        printf ("%d <--> %d \n" , u,  v);
+//        printf ("%dの親は%d\n",v,R[v].parent);
+        if ( R[u].parent == v ) {
+            continue;}
+        if ( backedge(u, v ) ) { 
+            low = min(low, R[v].ord );
+        }
+    }
+    for (int j=0; j< R[u].children.size() ; j++ ){
+        low = min (low, lowest(R[u].children.at(j)) );
+    }
+//    printf ("lowest[%d] = %d\n",u ,low); 
+    return low;
+}
+
+
+bool articulationPoint (int u ){
+    int childcnt = 0 ;
+    if (R[u].ord == 0)  {
+        // 親の場合、子供が2人以上のときは関節点
+        if (R[u].children.size() >= 2) {return true; } else {return false;}       
+    } else {
+        for (int j=0; j < R[u].children.size(); j++ ) {
+            int v = R[u].children[j];
+            if ( R[u].ord <= lowest(v)) {return true; } 
+        }
+    }
+    return false; 
+
+}
+
+int main(){
+    cin >> n >> q ; //n:頂点　q:辺
+    for (int j=0; j<q ; j++ ){
+        int from, to;
+        cin >> from >> to ;
+        R[to].to.push_back(from);
+        R[from].to.push_back(to);
+    }
+    //for (int j=0; j<n; j++) {
+    //    if (R[j].con==0 ) {dfs(j);}
+    //     }
+    dfs_init(0);
+    for (int i=0; i<n; i++) {
+        if(articulationPoint(i)){
+            printf("%d\n", i );
+        }
+    }
+    /*
+    for (int i=0; i<n; i++) {
+         printf("ord : %d\n", R[i].ord );
+        
+    }
+    for (int i=0; i<n; i++) {
+         printf("parent : %d\n", R[i].parent );
+        
+    }*/
+    return 0;
+}
+

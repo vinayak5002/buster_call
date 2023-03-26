@@ -1,0 +1,78 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000001
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 55500
+typedef long long int ll;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+
+int MAP[MAXN];
+int n;
+ll maxsquare = 0; 
+int pos;
+stack<pair<int,int>> ST;
+/// st.first :　cur位置 / st.second : cur位置の高さ
+
+////Histogramの面積をstackをつかって書き直すパターン///////
+
+void init(){
+    MAP[0]=0;
+    MAP[n+1]=0;
+    pos = 0;
+    ST.push(make_pair(0,0));
+}
+
+void shori(){
+    ll tmp;
+    int leftcur;
+    int rightcur;
+    int prevht=0; //1つの前の高さ
+
+    for (int i=1; i<=n+1 ; i++) { //n+1は壁
+        if (MAP[i] > prevht) {
+            //stackに積むだけ
+            ST.push(make_pair(i,MAP[i]));
+            prevht = MAP[i];
+
+        } else if  (MAP[i] == prevht) {
+            //何もしない
+        } else {
+            prevht = MAP[i];
+            rightcur = i;
+            tmp=0;
+            // MAP[i]より高い部分をすべて清算する
+            while (ST.top().second > MAP[i] && ST.size() > 0 ) {
+                if (ST.top().first==0) {break;}
+                leftcur = ST.top().first;
+                int height = ST.top().second;
+                tmp = height * (rightcur - leftcur ) ;
+                maxsquare = max(maxsquare,tmp);
+                ST.pop();
+            }
+            if (ST.top().second == MAP[i]) {
+                //何もしなくてOK
+            } else {
+                ST.push(make_pair(leftcur,MAP[i]));
+            }
+
+        }
+    }
+}
+
+
+int main(){
+    init();
+    cin >> n;
+    int tmp ; 
+    for (int i=1 ; i<= n ; i++){
+            cin >> tmp ; MAP[i]= tmp ; 
+    }
+ 
+    shori();
+
+    printf("%lld\n",maxsquare ) ;
+    return 0;
+}
+

@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+#define r(i,a,b) for(int i = (int)(a); i < (int)(b); i++)
+
+using namespace std;
+
+bool take[305][305];        //[s, t]が連続して取り出し可能かどうか
+int dp[305][305];           //[s, t]で取り出し可能な最大ブロック数
+
+int main() {
+    int n;
+    while(cin >> n, n) {
+        int w[310];
+        r(i,0,n) cin >> w[i];
+        memset(take, false, sizeof(take));  //初期化
+        memset(dp, 0, sizeof(dp));          //初期化
+
+        r(i,0,n) {
+            r(j,0,n-i) {
+                int len = i+1;
+                int s = j, t = j+i;
+                r(k,s,t) {                      //
+                    if(take[s][k] && take[k+1][t]) take[s][t] = true;
+                }
+                if(len == 2) {                  //隣り合う項の差が１以下か調べる
+                    if(abs(w[s] - w[t]) < 2) {  //１以下なら取り出し可能
+                        take[s][t] = true;
+                    }
+                }
+                if(take[s][t]) {                //[s, t]が取り出し可能なとき、[s-1, t+1]が取り出し可能か調べる
+                    int x = s-1, y = t+1;       //(s-1)番目と(t+1)番目のブロックの差が1以下なら,[s-1, t+1]が取り出し可能
+                    while(1) {
+                        if(x < 0 || y >= n) break;
+                        if(abs(w[x] - w[y]) >= 2) break;
+                        take[x][y] = true;
+                        x--; y++;
+                    }
+                }
+            }
+        }
+
+        r(i,0,n) r(j,i+1,n) {               //連続して取り除ける最大個数をDPに格納
+            if(take[i][j]) dp[i][j] = j-i+1;
+        }
+
+        r(i,0,n) r(j,i,n) r(k,i,j) {        //それぞれの区間における最大個数を求める
+            dp[i][j] = max(dp[i][j], dp[i][k] + dp[k+1][j]);
+        }
+        cout << dp[0][n-1] << endl;
+    }
+    return 0;
+}

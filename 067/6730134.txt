@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    while (true) {
+        int N, M;
+        cin >> N >> M;
+        if (N == 0 and M == 0) break;
+        V<int> s(N);
+        rep(i, N) cin >> s[i];
+        int lb = s[0], ub = s.back();
+        // [lb, ub)
+        while (ub - lb > 1) {
+            int x = (ub + lb) / 2;
+            int lv = 1, cnt = 1;
+            while (lv + x <= s.back()) {
+                // si <= lv
+                int nlv = lv + 1;
+                int i1 = lower_bound(s.begin(), s.end(), lv) - s.begin();
+                if (lv + x > s[i1]) {
+                    nlv = max(nlv, lv + max(1, x - abs(lv - s[i1])));
+                }
+                int i2 = upper_bound(s.begin(), s.end(), lv) - s.begin();
+                if (i2 > 0) {
+                    i2--;
+                    nlv = max(nlv, s[i2] + x);
+                }
+                lv = nlv;
+                cnt++;
+            }
+            if (cnt < M) {
+                ub = x;
+            } else {
+                lb = x;
+            }
+        }
+        int x = lb;
+        int lv = 1, cnt = 1;
+        while (lv + x <= s.back()) {
+            // si <= lv
+            int nlv = lv + 1;
+            int i1 = lower_bound(s.begin(), s.end(), lv) - s.begin();
+            if (lv + x > s[i1]) {
+                nlv = max(nlv, lv + max(1, x - abs(lv - s[i1])));
+            }
+            int i2 = upper_bound(s.begin(), s.end(), lv) - s.begin();
+            if (i2 > 0) {
+                i2--;
+                nlv = max(nlv, s[i2] + x);
+            }
+            lv = nlv;
+            cnt++;
+        }
+        if (cnt < M) {
+            cout << -1 << '\n';
+        } else {
+            cout << lb << '\n';
+        }
+    }
+    return 0;
+}
+

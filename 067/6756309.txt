@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <math.h>
+
+int main(){
+	char buf[4000];
+	char *p;
+	typedef struct{
+		int suf1; // N   5
+		int suf2; // W 4 1 3 6 E
+		int suf3; // S   2
+		int suf4;
+		int suf5;
+		int suf6;
+	}dice;
+	dice a = {1, 2, 3, 4, 5, 6};
+	char code;
+
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d %d %d %d %d %d", &a.suf1, &a.suf2, &a.suf3, &a.suf4, &a.suf5, &a.suf6);
+	fgets(buf, sizeof(buf) - 1, stdin);
+	p = buf;
+	while (*p){
+		sscanf(p, "%c", &code);
+		int tmp;
+		switch (code){
+		case 'N': 
+			tmp = a.suf1;
+			a.suf1 = a.suf2;
+			a.suf2 = a.suf6;
+			a.suf6 = a.suf5;
+			a.suf5 = tmp;
+			break;
+		case 'E': 
+			tmp = a.suf1;
+			a.suf1 = a.suf4;
+			a.suf4 = a.suf6;
+			a.suf6 = a.suf3;
+			a.suf3 = tmp; 
+			break;
+		case 'W': 
+			tmp = a.suf1;
+			a.suf1 = a.suf3;
+			a.suf3 = a.suf6;
+			a.suf6 = a.suf4;
+			a.suf4 = tmp; 
+			break;
+		case 'S': 
+			tmp = a.suf1;
+			a.suf1 = a.suf5;
+			a.suf5 = a.suf6;
+			a.suf6 = a.suf2;
+			a.suf2 = tmp;
+			break;
+		defaults: ; // nothing
+		}
+		p++;
+	}
+	printf("%d\n", a.suf1);
+
+	return 0;
+}

@@ -1,0 +1,96 @@
+#include <stdio.h>
+#include <limits.h>
+#define MAX 100
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+
+int M[MAX][MAX];
+int color[MAX], dis[MAX], Q[MAX];
+int head, tail, i, n;
+
+/*typedef struct p
+{
+  int num;
+} P;
+
+P Q[MAX];*/
+
+void enqueue(int x)
+{
+  Q[MAX] = x;
+  tail = (tail + 1) % MAX;
+}
+int dequeue()
+{
+  int a;
+  a = Q[head];
+  head = (head + 1) % MAX;
+
+  return a;
+}
+
+void bfs(int s)
+{
+  enqueue(s);
+  for (i = 0; i < n; i++)
+  {
+    dis[i] = INT_MAX;
+  }
+  dis[s] = 0;
+  int u;
+
+  while (head != tail)
+  {
+    u = Q[head];
+    dequeue();
+
+    for (int j = 0; j < n; j++)
+    {
+      if (M[u][j] == 0)
+        continue;
+      if (dis[j] != INT_MAX)
+        continue;
+      dis[j] = dis[u] + 1;
+      enqueue(j);
+    }
+  }
+
+  for (i = 0; i < n; i++)
+  {
+    int x = (dis[i] == INT_MAX) ? (-1) : dis[i];
+    printf("%d %d\n", i + 1, x);
+  }
+}
+
+int main(void)
+{
+  int u, k, v, j;
+
+  scanf("%d", &n);
+
+  for (i = 0; i < n; i++)
+  {
+    for (j = 0; j < n; j++)
+    {
+      M[i][j] = 0;
+    }
+  }
+
+  for (i = 0; i < n; i++)
+  {
+    scnaf("%d %d", &u, &k);
+    u--;
+    for (j = 0; j < k; j++)
+    {
+      scanf("%d", &v);
+      v--;
+      M[u][v] == 1;
+    }
+  }
+
+  bfs(0);
+
+  return 0;
+}
+

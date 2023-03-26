@@ -1,0 +1,250 @@
+#include <iostream>
+#include <string>
+
+class Node {
+ public:
+    Node* parent = nullptr;
+    Node* left = nullptr;
+    Node* right = nullptr;
+    int key;
+
+    Node(int k)
+    {
+        key = k;
+    }
+};
+
+Node* root = nullptr;
+
+void insert(Node* z)
+{
+    if (root == nullptr)
+    {
+        root = z;
+        return;
+    }
+
+    Node* x = root;
+    while (x != nullptr)
+    {
+        if (z->key < x->key)
+        {
+            if (x->left == nullptr)
+            {
+                x->left = z;
+                z->parent = x;
+                break;
+            }
+            else
+            {
+                x = x->left;
+            }
+        }
+        else
+        {
+            if (x->right == nullptr)
+            {
+                x->right = z;
+                z->parent = x;
+                break;
+            }
+            else
+            {
+                x = x->right;
+            }
+        }
+    }
+
+    return;
+}
+
+Node* find(int key)
+{
+    Node* x = root;
+
+    while(x != nullptr)
+    {
+        if (x->key == key)
+        {
+            return x;
+        }
+        else if (x->key > key)
+        {
+            x = x->left;
+        }
+        else
+        {
+            x = x->right;
+        }
+    }
+
+    return nullptr;
+}
+
+Node* min_node(Node* node)
+{
+    Node* x = node;
+
+    while (x->left != nullptr)
+    {
+        x = x->left;
+    }
+
+    return x;
+}
+
+Node* next_node(Node* node)
+{
+    if (node->right != nullptr)
+    {
+        return min_node(node->right);
+    }
+
+    Node* x = node;
+    Node* p = node->parent;
+    while ((p != nullptr) && (p->right == x))
+    {
+        x = p;
+        p = p->parent;
+    }
+
+    return p;
+}
+
+void delete_node(Node* x)
+{
+    Node* to_delete;
+    Node* to_link;
+
+    if ((x->left == nullptr) || (x->right == nullptr))
+    {
+        to_delete = x;
+    }
+    else
+    {
+        to_delete = next_node(x);
+    }
+
+    if (to_delete->left != nullptr)
+    {
+        to_link = to_delete->left;
+    }
+    else
+    {
+        to_link = to_delete->right;
+    }
+
+    if (to_link != nullptr)
+    {
+        to_link->parent = to_delete->parent;
+    }
+
+    if (to_delete->parent == nullptr)
+    {
+        root = to_link;
+    }
+    else
+    {
+        if (to_delete == to_delete->parent->left)
+        {
+            to_delete->parent->left = to_link;
+        }
+        else
+        {
+            to_delete->parent->right = to_link;
+        }
+    }
+
+    if (to_delete != x)
+    {
+        to_link->key = x->key;
+    }
+
+    // delete to_delete;
+    to_delete = nullptr;
+
+    return;
+}
+
+void print_tree_inorder(Node* tree)
+{
+    if (tree->left != nullptr)
+    {
+        print_tree_inorder(tree->left);
+    }
+
+    std::cout << " " << tree->key;
+
+    if (tree->right != nullptr)
+    {
+        print_tree_inorder(tree->right);
+    }
+
+    return;
+}
+
+void print_tree_preorder(Node* tree)
+{
+    std::cout << " " << tree->key;
+
+    if (tree->left != nullptr)
+    {
+        print_tree_preorder(tree->left);
+    }
+
+    if (tree->right != nullptr)
+    {
+        print_tree_preorder(tree->right);
+    }
+
+    return;
+}
+
+void print_tree(Node* tree)
+{
+    print_tree_inorder(tree);
+    std::cout << std::endl;
+    print_tree_preorder(tree);
+    std::cout << std::endl;
+
+    return;
+}
+
+int main()
+{
+    int n;
+
+    std::cin >> n;
+
+    std::string cmd;
+    int key;
+    for (int i = 0 ; i < n ; ++i)
+    {
+        std::cin >> cmd;
+        if (cmd == "insert")
+        {
+            std::cin >> key;
+            Node* node = new Node(key);
+            insert(node);
+        }
+        else if (cmd == "find")
+        {
+            std::cin >> key;
+            Node* node = find(key);
+            std::cout << (node != nullptr ? "yes" : "no") << std::endl;
+        }
+        else if (cmd == "delete")
+        {
+            std::cin >> key;
+            delete_node(find(key));
+        }
+        else if (cmd == "print")
+        {
+            print_tree(root);
+        }
+    }
+
+    return 0;
+}
+
+

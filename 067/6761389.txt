@@ -1,0 +1,96 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000001
+#define NIL -2000000002
+#define INF 1e9
+#define MAXN 20
+typedef long long int ll;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+#define REP(i,n) for(int i=0; i<(int)n; i++)
+
+int WF[1<<MAXN][MAXN] ; // DP[Sの部分集合][最後に訪問する頂点]
+int G[MAXN][MAXN];
+int edge[MAXN];
+
+int V, E;
+int ans;
+int S;
+vector<int> oddlist ; 
+int M;
+
+void init() {
+    REP (i,1<<MAXN) REP (j,MAXN) { WF[i][j] = INF; }
+    REP (i,MAXN) REP (j,MAXN) {G[i][j]=INF;}
+    // G[0][0]=0;
+    REP (i,MAXN) WF[i][i] = 0 ;
+}
+
+
+int calc_cost(){
+    // DPに各点間の距離
+    for (int k=0; k< V ; k++) { 
+        for (int i=0 ; i<V ; i++) {
+            for (int j=0; j<V; j++) { 
+                if (WF[i][k] ==INF || WF[k][j] ==INF ) continue;
+                WF[i][j] = min (WF[i][j] , WF[i][k] + WF[k][j] ) ; 
+            }
+        }
+    } 
+    return 0;
+}   
+
+int main(){
+    cin >> V >> E ;
+    //頂点の番号は 0からV-1; 
+    int tmp ,tmp2 , tmp3; 
+    int edgetotal=0;
+    init();
+    for (int i=1 ; i<= E ; i++){
+        cin >> tmp >> tmp2 >> tmp3 ;
+        // VS[tmp].edge.push_back(make_pair(tmp3, tmp2));
+        G[tmp][tmp2]=tmp3;
+        G[tmp2][tmp]=tmp3;
+        if( tmp3 < WF[tmp][tmp2] ) {
+            WF[tmp][tmp2]=tmp3;
+            WF[tmp2][tmp]=tmp3; }
+        edge[tmp]++;  edge[tmp2]++;
+        edgetotal += tmp3 ;
+    }
+    calc_cost(); // WF法
+    REP(i,MAXN){
+        if (edge[i]%2 != 0) { oddlist.push_back(i); }
+    }
+    M = oddlist.size();
+    const int siz = 1<<M ;
+    int combi_min[siz] ;
+    REP (i, (1<<M)) { combi_min[i] = INF;}
+    combi_min[0] = 0;
+    REP (k,(1<<M)) {
+        REP (i, M) {
+            REP(j, M) {
+                if ( ! (k & (1<<i)) || !(k &(1<<j) ))   { //  
+                    //printf ("here k=%d i=%d j=%d",k,i,j);  
+                    continue;}
+                if (i <= j) {continue;}
+                int k_ = k ^ ( (1<<i) | (1<<j) );
+                combi_min[k] = min(combi_min[k], combi_min[k_]+WF[oddlist.at(i)][oddlist.at(j)] );
+                //printf("combi_min[k] = %d , min(combi_min[%d], combi_min[%d]=%d+WF[%d][%d]=%d ) \n", combi_min[k], k, k_, combi_min[k_],\
+                    oddlist.at(i),oddlist.at(j),WF[oddlist.at(i)][oddlist.at(j)] );
+            }
+        }
+    }
+    ans = ( combi_min[(1<<M)-1] >= INF? INF :combi_min[(1<<M)-1] + edgetotal );
+
+    if (ans == INF) {ans = -1;}
+    printf("%d\n",ans ) ;
+    
+    /*REP (i, V) {
+        cout << i << " : " ;
+        REP (j, V) { cout << WF[i][j]<< " "; }
+        cout << endl; }*/
+    
+    return 0;
+}
+
+

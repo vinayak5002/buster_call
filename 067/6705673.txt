@@ -1,0 +1,102 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 50
+int n;
+int c;
+int t = NIL;
+
+int A[101][101] ; // 0以外では初期化できないんだってーーー。
+
+struct Node {
+    int d; //d,fは幅優先探索では使わないけど。。。 
+    int f; //conにどこから検索したときにひっかったかを入れる。
+    int con; // 
+    vector<int> cost ; 
+    vector<int> go ;
+};
+struct Root {
+    int from;   int to;  int cost ; 
+};
+vector<Node> X;
+vector<Root> R;
+vector<int> TV ;
+set<int> T ;
+stack<int> df ;
+queue<int> Q ; 
+
+int calc_ans () {
+    int ans = 0;
+    for (int i=0; i < R.size(); i++) {
+        ans += R.at(i).cost ;
+    }
+    return ans;
+}
+
+
+void clearvalueA() {
+    for (int i=0 ; i<101; i++) {
+        for  (int j=0; j<101; j++) {
+            A[i][j] = 0 ;
+        }
+    }
+}
+
+void doMST(){
+    // 今回は頂点0から回っていく。
+    T.insert(0); // 0をTにいれる。
+    int mincost = INF;
+    int min_from = -1 ;    int min_to = -1 ;
+
+    while ( T.size() < n ) { //Tが全体になるまで続ける。
+        // Tに入っているところで最小コストになるところを全探索する。
+
+        for (auto it = T.begin(); it != T.end(); it++) {
+            int b = *it ;
+            int j = -1;
+
+            for ( j=0; j < n ; j++) {
+                //訪問済みだったらcontinue : 
+                if (T.count(j)) {continue;}
+                if ( X.at(b).cost.at(j) > 0 && X.at(b).cost.at(j) < mincost ) {
+                    mincost = X.at(b).cost.at(j) ;
+                    min_from = b ;  min_to = j ;
+                } 
+            }         
+        
+        }
+        T.insert(min_to);
+        Root fr;
+        fr.from = min_from; fr.to=min_to; fr.cost=mincost;
+        R.push_back(fr);
+    }
+    
+}
+
+int main() {
+    cin >> n  ;
+    // nは登場人物の人数、
+    Node indata;
+    indata.d = INF; indata.f = INF; indata.con = NIL;
+
+    for (int i = 0 ; i < n ; i++ ) {
+        X.push_back(indata); //とりあえずn人をつくる。
+        TV.push_back(i) ;    // TV(=未訪問リスト)にすべて頂点をいれる。
+    }
+
+    for (int i = 0 ; i < n ; i++ ) {
+        int a, b ;
+        for (int j = 0 ; j < n ; j ++ ){
+            cin >> a ;
+            X.at(i).cost.push_back(a) ;
+        }
+    }
+    doMST();
+
+    cout << calc_ans() << endl  ;
+
+	return 0 ;
+}
+

@@ -1,0 +1,84 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+class DisjointSets{
+    vector<int> parent;
+    vector<int> rank;
+    vector<int> diff_weight;
+
+public:
+    
+    DisjointSets(int n){
+        parent.resize(n, 0);
+        rank.resize(n, 0);
+        diff_weight.resize(n,0);
+    }
+
+    void makeset(int i){
+        parent[i] = i;
+    }
+
+    int findset(int i){
+        if(parent[i] == i) return i;
+        int r = findset(parent[i]);
+        diff_weight[i] += diff_weight[parent[i]];
+        return parent[i] = r;
+    }
+
+    int weight(int i)
+    {
+        findset(i);
+        return diff_weight[i];
+    }
+
+    void unite(int x, int y, int weight)
+    {
+        weight += diff_weight[x];
+        weight -= diff_weight[y];
+        x = findset(x);
+        y = findset(y);
+        if( x == y ) return;
+        if (rank[x] < rank[y]) {
+            swap(x, y);
+            weight *= -1;
+        } 
+        if (rank[x] == rank[y]) rank[x]++;
+        parent[y] = x; 
+        diff_weight[y] = weight;
+    }
+
+    int distance(int x, int y){
+        return weight(y) - weight(x);
+    }
+};
+
+
+int main()
+{
+    int n, q;
+    cin >> n;
+    DisjointSets ds(n);
+    for(int i = 0; i < n ; i++) ds.makeset(i);
+
+    cin >> q;
+    int info, x, y, z;
+    for(int i = 0; i < q; i++){
+        cin >> info >> x >> y;
+
+        switch(info){
+            case 0:
+                cin >> z;
+                ds.unite(x,y,z);
+                break;
+            case 1:
+                if (ds.findset(x) == ds.findset(y)) cout << ds.distance(x, y) << endl;
+                else cout << "?" << endl;
+                break;
+        }
+    }
+    return 0;
+}
+

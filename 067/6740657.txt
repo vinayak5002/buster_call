@@ -1,0 +1,76 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <queue>
+#include <array>
+#include <algorithm>
+#include <numeric>
+#include <unordered_map>
+#include <unordered_set>
+#include <map>
+#include <set>
+#include <cassert>
+#include <iterator>
+#include <random>
+#include <stack>
+#include <climits>
+#include <chrono>
+#include <iomanip>
+
+
+struct Vector {
+	double dx, dy;
+	double dot(const Vector other) const {
+		return dx * other.dx + dy * other.dy;
+	}
+	double cross(const Vector other) const {
+		return dx * other.dy - dy * other.dx;
+	}
+	double length() const {
+		return std::sqrt(dx * dx + dy * dy);
+	}
+	Vector operator-() const {
+		return Vector{ -dx, -dy };
+	}
+};
+struct Coordinate {
+	double x, y;
+	Vector operator-(const Coordinate& other) const {
+		return Vector{ x - other.x, y - other.y };
+	}
+	Coordinate move(const Vector other) const {
+		return Coordinate{ x + other.dx, y + other.dy };
+	}
+};
+int main() {
+	double radius; std::cin >> radius;
+	Coordinate from, to; std::cin >> from.x >> from.y >> to.x >> to.y;
+	int q; std::cin >> q;
+	std::vector<Coordinate> coordinates(q);
+	for (auto& [x, y] : coordinates) {
+		std::cin >> x >> y;
+	}
+	const auto vec = to - from;
+	const auto right = Vector{ -vec.dy * radius / vec.length(), vec.dx * radius / vec.length() };
+	const auto from_a = from.move(right);
+	const auto from_b = from.move(-right);
+	const auto to_a = to.move(right);
+	const auto to_b = to.move(-right);
+	const std::vector<std::pair<Coordinate, Coordinate>> edges{ std::make_pair(from_a, from_b), std::make_pair(from_b, to_b), std::make_pair(to_b, to_a), std::make_pair(to_a, from_a)};
+	for (const auto coordinate: coordinates) {
+		const auto fx = coordinate - from;
+		const auto tx = coordinate - to;
+		if (fx.dx * fx.dx + fx.dy * fx.dy <= radius * radius || tx.dx * tx.dx + tx.dy * tx.dy <= radius * radius) {
+			std::cout << "Yes\n";
+		}
+		else if (std::all_of(edges.begin(), edges.end(), [coordinate](const std::pair<Coordinate, Coordinate> e) {
+			const auto [from, to] = e;
+			return (to - from).cross(coordinate - from) >= 0;
+			})) {
+			std::cout << "Yes\n";
+		}
+		else {
+			std::cout << "No\n";
+		}
+	}
+}

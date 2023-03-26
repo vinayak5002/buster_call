@@ -1,0 +1,86 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using P = pair<int,long long>;
+#define INF 1020304050
+
+int main() {
+  
+  ios::sync_with_stdio(false);
+  cin.tie(0);
+
+  int n;
+  cin >> n;
+  while (n != 0) {
+    vector<int> p(n-1);
+    vector<int> d(n-1);
+    for (int i=0;i<n-1;i++) {
+      cin >> p[i];
+      p[i]--;
+    }
+    for (int i=0;i<n-1;i++) {
+      cin >> d[i];
+    }
+    vector<vector<P>> g(n);
+    long long gsum = 0;
+    for (int i=0;i<n-1;i++) {
+      g[i+1].emplace_back(P(p[i],d[i]));
+      g[p[i]].emplace_back(P(i+1,d[i]));
+    }
+    for (int i=0;i<n-1;i++) {
+      gsum += d[i];
+    }
+    vector<bool> mult(n,false);
+    for (int i=0;i<n;i++) {
+      if (g[i].size() > 1) {
+        mult[i] = true;
+      }
+    }
+    vector<vector<P>> ng(n);
+    for (int i=0;i<n-1;i++) {
+      if (mult[i+1] && mult[p[i]]) {
+        ng[i+1].emplace_back(P(p[i],d[i]));
+        ng[p[i]].emplace_back(P(i+1,d[i]));
+      }
+    }
+    long long dmax = 0;
+    for (int i=0;i<n;i++) {
+      if (!mult[i]) continue;
+      //cerr << i << endl;
+      vector<long long> costs(n,INF);
+      costs[i] = 0;
+      priority_queue<P,vector<P>,greater<P>> pq;
+      pq.push(P(0,i));
+      while (!pq.empty()) {
+        P np = pq.top();
+        pq.pop();
+        int now = np.second;
+        int ndist = np.first;
+        if (ndist > costs[now]) continue;
+        for (P tp : ng[now]) {
+          int to = tp.first;
+          int add = tp.second;
+          int todist = ndist+add;
+          if (todist < costs[to]) {
+            costs[to] = todist;
+            pq.push(P(costs[to],to));
+          }
+        }
+      }
+      for (int j=0;j<n;j++) {
+        if (!mult[j]) continue;
+        dmax = max(dmax,costs[j]);
+      }
+    }
+    long long dsum = 0;
+    for (int i=0;i<n;i++) {
+      for (P np : ng[i]) {
+        dsum += np.second;
+      }
+    }
+    dsum /= 2;
+    cout << gsum+dsum*2-dmax << endl;
+    cin >> n;
+  }
+}
+

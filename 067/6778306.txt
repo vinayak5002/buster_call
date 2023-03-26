@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+typedef long long ll;
+static const int INF = 2000000000;
+static const int NF = -1 ;
+
+int n ,q, A[100001];
+char mk[100001];
+pair<char, int> M[100001];
+
+int partition (int A[], int p, int r) {
+  // rには基準にしたいものをいれる。
+  int x = A[r] ; 
+  int i = p - 1 ; //　iの左側に壁があると考えている。
+  if ( A[i] <= x ) { i++; }
+  for (int j = p  ; j < r ; j++ ) {
+    if ( A[j] <= x ) { swap(A[i],A[j]); swap(mk[i],mk[j]);  i++; }
+  }
+  swap(A[i],A[r]);  swap(mk[i],mk[r]);
+  
+  return i;
+}
+
+int qsort (int A[], int p, int r ) {
+  // partitionはrの位置を確定してくれる。
+  if ( p < r ) {
+    int ans = partition(A, p, r);
+    qsort(A, p, ans-1);
+    qsort(A, ans+1, r);
+  }
+  return 0 ;
+}
+
+// mergeSortでは元の数列は整列されていない。
+// つまり適当に真ん中で分ける。整列することによって
+// left~mid-1 mid~rightがそれぞれ整列されている。
+int merge (pair<char,int> M[], int left, int mid, int right ) {
+  int n1 = mid - left ; //n1,n2は要素の数を表している。
+  int n2 = right - mid ;
+  int L[n1+1];  int R[n2+1];
+  char LM[n1];  char RM[n2];
+  for (int i=0; i < n1 ; i++ ) { 
+    LM[i] = M[left+i].first;  L[i]=M[left+i].second;  }
+  for (int i=0; i < n2 ; i++ ) { 
+    RM[i] = M[mid+i].first;  R[i]=M[mid+i].second; }
+  L[n1]=INF;  R[n2]= INF;
+  int i = 0, j = 0 ; 
+  for (int k=0 ; k < right - left ; k++ ) {
+    if ( L[i] <= R[j] ) { 
+      M[left+k].second = L[i]; M[left+k].first = LM[i];  i++;}
+    else { 
+      M[left+k].second = R[j]; M[left+k].first = RM[j];  j++;}
+  }
+  return 0;
+}
+
+int mergeSort(pair<char,int> M[], int left, int right) {
+  if ( right - left > 1 ) { // right は indexの最後より１大きい数
+    // つまりright-left=1ということは要素がただ１つということ。
+    int mid = (left + right ) /2;
+    mergeSort(M,left,mid); // rightは整列に含めない仕様（要素の個数）
+    mergeSort(M,mid,right);
+    merge(M,left,mid,right);
+  }
+  return 0 ;
+}
+
+int main() {
+  scanf("%d",&n);
+  for (int i = 0; i < n ; i++ ) {
+    scanf("%s %d",&mk[i], &A[i]);
+    M[i].first = mk[i];  M[i].second = A[i];
+  }
+  qsort(A, 0, n-1);    
+  mergeSort (M, 0 ,n);
+  
+  bool flg = true ;
+
+  for (int i = 0; i < n ; i++ ) {
+    if ( mk[i] != M[i].first ) { flg = false ; break ;}
+  }
+  if ( flg ) { cout << "Stable" << endl ; }
+  else { cout << "Not stable" << endl ; }
+  
+  
+  for (int i = 0; i < n ; i++ ) {
+    //if (i > 0) {cout << " ";}
+    cout << mk[i] << " " << A[i] << endl; 
+  }
+
+  return 0 ;
+}

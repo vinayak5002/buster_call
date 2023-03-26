@@ -1,0 +1,61 @@
+def oi(): return int(input())
+def os(): return input()
+def mi(): return list(map(int, input().split()))
+
+def check(pat):
+    # 縦横チェック
+    tate_sets = set([])
+    yoko_sets = set([])
+    for p in pat:
+        # 縦チェック(横かも)
+        if p[0] in tate_sets:
+            return False
+        tate_sets.add(p[0])
+ 
+        # 横チェック(縦かも)
+        if p[1] in yoko_sets:
+            return False
+        yoko_sets.add(p[1])
+        
+            
+    
+    # 斜めチェック
+    for i in range(len(pat)):
+        p1 = pat[i]
+        for j in range(i+1, len(pat)):
+            p2 = pat[j]
+            if abs(p1[1]-p2[1]) == abs(p1[0]-p2[0]):
+                return False
+    return True
+
+input_count=0
+N = oi()
+queens = []
+for _ in range(N):
+    y,x = mi()
+    queens.append((y,x))
+
+
+from collections import deque
+
+deq = deque([[queens, N]])
+while deq:
+    pat,k = deq.pop()
+#     print(pat)
+    if not check(pat):
+        continue
+    if k==8:
+        break
+        
+    for y in range(8):
+        for x in range(8):
+            temp = pat[:]
+            temp.append((y,x))
+            deq.append([temp, k+1])
+
+maps = [["."]*8 for i in range(8)]
+for y,x in list(pat)+queens:
+    maps[y][x] = "Q"
+
+for row in maps:
+    print("".join(row))

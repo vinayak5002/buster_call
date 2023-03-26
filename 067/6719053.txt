@@ -1,0 +1,152 @@
+#include<iostream>
+#include<vector>
+#include<algorithm>
+using namespace std;
+
+// each node of tree
+class Node{
+private:
+	int data;
+	int left, right;
+	int parent;
+public:
+	Node(){
+		data=-1;
+		left=-1;
+		right=-1;
+		parent=-1;
+	}
+
+	Node(int data){
+		this->data = data;
+		left=-1;
+		right=-1;
+		parent=-1;
+	}
+
+	int getNode(){ return data; }
+	void setLeft(int left){ this->left = left; }
+	void setRight(int right){ this->right = right; }
+	void setParent(int parent){ this->parent = parent; }
+	int getLeft(){ return left; }
+	int getRight(){ return right; }
+	int getParent(){ return parent; }
+
+	// for debug
+	void Print(){
+		cout << "[node " << data 
+		<< ", left="<< left 
+		<< ", right=" << right 
+		<< ", parent=" << parent 
+		<< "]" << endl;
+	}
+};
+
+class Tree{
+private:
+	vector<int> preorder;
+	vector<int> inorder;
+	vector<int> postorder;
+	vector<Node> tree;
+	int root;
+public:
+	Tree(){
+		int n;
+		cin >> n;
+
+		// input preorder
+		for(int i=0; i<n; i++){
+			int val;
+			cin >> val;
+			preorder.push_back(val-1);
+		}
+
+		// input inorder
+		for(int i=0; i<n; i++){
+			int val;
+			cin >> val;
+			inorder.push_back(val-1);
+		}
+
+		// init the tree
+		tree.resize(n);
+		for(int i=0; i<tree.size(); i++){
+			tree[i] = Node(i);
+		}
+	}
+
+	void createTree(){
+		int node = preorder[0];
+		preorder.erase(preorder.begin());
+		auto root_itr = find(inorder.begin(), inorder.end(), node);
+		vector<int> inorder_left{inorder.begin(), root_itr};
+		vector<int> inorder_right{root_itr+1, inorder.end()};
+
+		root = *root_itr;
+
+		createLeft(inorder_left, node);
+		createRight(inorder_right, node);
+
+		/*
+		for(int i=0; i<tree.size(); i++){
+			tree[i].Print();
+		}
+		*/
+
+		// walk postorder
+		walkPost(root);
+
+		// result
+		for(int i=0; i<postorder.size(); i++){
+			if(i<postorder.size()-1)
+				cout << postorder[i] << " ";
+			else
+				cout << postorder[i] << endl;
+		}
+	}
+
+	void createLeft(vector<int> left, int parent){
+		if(left.empty() || preorder.empty()) return;
+
+		int node = preorder[0];
+		preorder.erase(preorder.begin());
+		auto root_itr = find(left.begin(), left.end(), node);
+		vector<int> inorder_left{left.begin(), root_itr};
+		vector<int> inorder_right{root_itr+1, left.end()};
+
+		tree[parent].setLeft(node);
+		tree[node].setParent(parent);
+
+		createLeft(inorder_left, node);
+		createRight(inorder_right, node);
+	}
+
+	void createRight(vector<int> right, int parent){
+		if(right.empty() || preorder.empty()) return;
+		
+		int node = preorder[0];
+		preorder.erase(preorder.begin());
+		auto root_itr = find(right.begin(), right.end(), node);
+		vector<int> inorder_left{right.begin(), root_itr};
+		vector<int> inorder_right{root_itr+1, right.end()};
+
+		tree[parent].setRight(node);
+		tree[node].setParent(parent);
+
+		createLeft(inorder_left, node);
+		createRight(inorder_right, node);
+	}
+
+	void walkPost(int node){
+		if(node == -1) return;
+		walkPost(tree[node].getLeft());
+		walkPost(tree[node].getRight());
+		postorder.push_back(node+1);
+	}
+};
+
+int main(){
+	Tree t = Tree();
+	t.createTree();
+	return 0;
+}

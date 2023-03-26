@@ -1,0 +1,98 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+constexpr long long mod = 1000000007;
+
+long long safe_mod(long long x) {
+    return (x %= mod) < 0 ? x + mod : x;
+}
+
+using State = std::string::const_iterator;
+
+struct ParseError {
+    ParseError(const std::string& message = "") {
+        std::cerr << message << std::endl;
+    }
+};
+
+void consume(State& it, char expected) {
+    if (*it == expected) {
+        *it++;
+    } else {
+        cerr << "Expected '" << expected << "' but got '" << *it << "'" << endl;
+        cerr << "Rest string is '";
+        while (*it) cerr << *it++;
+        cerr << "'" << endl;
+        throw ParseError{};
+    }
+}
+
+bool in(State& it, char l, char r) {
+    return l <= *it and *it <= r;
+}
+bool is(State& it, char c) {
+    return *it == c;
+}
+
+array<long long, 2> atom(State& it) {
+    consume(it, 'x');
+    while (in(it, '0', '9')) it++;
+    return { 1, 1 };
+}
+
+array<long long, 2> expr(State& it);
+array<long long, 2> term(State& it);
+array<long long, 2> factor(State& it);
+
+array<long long, 2> expr(State& it) {
+    array<long long, 2> res = term(it);
+    while (true) {
+        if (*it == '|') {
+            consume(it, '|');
+            auto [r0, r1] = res;
+            auto [t0, t1] = term(it);
+            long long a = (r0 + r1) * (t0 + t1) % mod;
+            long long nr0 = safe_mod(r0 * t0);
+            long long nr1 = safe_mod(a - nr0);
+            res = { nr0, nr1 };
+        } else break;
+    }
+    return res;
+}
+array<long long, 2> term(State& it) {
+    array<long long, 2> res = factor(it);
+    while (true) {
+        if (*it == '&') {
+            consume(it, '&');
+            auto [r0, r1] = res;
+            auto [t0, t1] = factor(it);
+            long long a = (r0 + r1) * (t0 + t1) % mod;
+            long long nr1 = safe_mod(r1 * t1);
+            long long nr0 = safe_mod(a - nr1);
+            res = { nr0, nr1 };
+        } else break;
+    }
+    return res;
+}
+array<long long, 2> factor(State& it) {
+    bool neg = false;
+    while (is(it, '~')) neg = not neg, consume(it, '~');
+    array<long long, 2> res;
+    if (is(it, '(')) {
+        consume(it, '(');
+        res = expr(it);
+        consume(it, ')');
+    } else {
+        res = atom(it);
+    }
+    if (neg) swap(res[0], res[1]);
+    return res;
+}
+
+int main() {
+    string s;
+    cin >> s;
+    auto it = s.cbegin();
+    cout << expr(it)[1] << endl;
+}

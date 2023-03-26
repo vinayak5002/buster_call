@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000001
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 1001
+typedef long long int ll;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+
+char CH1[MAXN] ;  int len1=0;
+char CH2[MAXN] ;  int len2=0;
+ll DP[MAXN][MAXN] ;
+
+void init(){
+    for (int i=0; i<MAXN; i++) {
+        for (int j=0; j<MAXN; j++) {
+            DP[i][j] = INF ;
+        }        
+    }
+    for (int i=0; i<MAXN; i++) {
+        DP[0][i] = 0;      DP[i][0] = 0;
+    }
+}
+
+ll shori(int i, int j){
+    // DP[i][j]
+    // Aのi文字目までの部分列をBのj文字目までの部分列と一致
+    // させるための最小操作回数を記録する。
+    //
+    if ( DP[i][j] < INF ) {return DP[i][j]; }
+
+    ll a = shori(i-1,j-1) +  (CH1[i]==CH2[j]? 0: 1);
+
+    DP[i][j] = min (shori(i-1,j)+1, shori(i,j-1)+1);
+    DP[i][j] = min (a, DP[i][j]);
+    return DP[i][j];
+}
+
+
+int main(){
+    cin >> CH1; //scanf("%s", CH1);  
+    len1 = strlen(CH1);
+    cin >> CH2;  // scanf("%s", CH2); 
+    len2 = strlen(CH2);
+    if (len1 < len2) { swap(CH1,CH2); swap(len1,len2); }
+    init();
+    int ans = 0;
+    ans = shori(len1,len2);
+
+    printf ("%d\n", ans);
+    return 0;
+}
+
+/*
+
+編集距離
+２つの文字列 s1、s2 の編集距離（レーベンシュタイン距離）を求めて下さい。
+
+編集距離とは、以下３種類の操作によって、１つの文字列を別の文字列に変形するのに必要な手順の最小回数です：
+
+挿入: 文字列に１つの文字を挿入する。
+削除: 文字列から１つの文字を削除する。
+置換: 文字列の中の１文字を別な文字に置き換える。
+入力
+s1
+s2
+２つの文字列 s1, s2 がそれぞれ１行目と２行目に与えられる。文字列はアルファベットの小文字で構成されている。
+
+出力
+編集距離を１行に出力する。
+
+制約
+1 ≤ s1 の長さ ≤ 1000
+1 ≤ s2 の長さ ≤ 1000
+入力例 1
+acac
+acm
+出力例 1
+2
+
+
+*/

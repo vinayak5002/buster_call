@@ -1,0 +1,121 @@
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.PriorityQueue;
+
+
+public class Main {
+
+	public static void main(String[] args) {
+//		Scanner sc = new Scanner(System.in);
+		FastScanner sc = new FastScanner();
+		int v = sc.nextInt();
+		int e = sc.nextInt();
+		int r = sc.nextInt();
+		int dist[][] = new int[v][v];
+		ArrayList<ArrayList<Integer>> rel = new ArrayList<ArrayList<Integer>>();
+		for (int i = 0; i < v; i++) rel.add(new ArrayList<Integer>());
+		for (int i = 0; i < e; i++) {
+			int s = sc.nextInt();
+			int t = sc.nextInt();
+			int d = sc.nextInt();
+			dist[s][t] = d;
+			rel.get(s).add(t);
+		}
+		
+		int distToR[] = new int[v];
+		Arrays.fill(distToR, Integer.MAX_VALUE/16);
+		distToR[r] = 0;
+		boolean[] looked = new boolean[v];
+		Arrays.fill(looked, true);
+		
+		PriorityQueue<List<Integer>> queue = new PriorityQueue<>(new Comparator<>() {
+			@Override
+			public int compare(List a, List b) {
+				return (int)a.get(0) > (int)b.get(0) ? 1 : a.get(0) == b.get(0) ? 0 : -1;
+			}
+		});
+		queue.add(List.of(0, r));
+		while (!queue.isEmpty()) {
+			List<Integer> now = queue.poll();
+			looked[now.get(1)] = false;
+			for (int i : rel.get(now.get(1))) {
+				if (looked[i]) {
+					distToR[i] = Math.min(distToR[now.get(1)] + dist[now.get(1)][i], distToR[i]);
+					queue.add(List.of(distToR[i], i));
+				}
+			}
+		}
+		for (int i : distToR) System.out.println(i == Integer.MAX_VALUE/16 ? "INF" : i);
+	}
+}
+
+class FastScanner {
+    private final InputStream in = System.in;
+    private final byte[] buffer = new byte[1024];
+    private int ptr = 0;
+    private int buflen = 0;
+    private boolean hasNextByte() {
+        if (ptr < buflen) {
+            return true;
+        }else{
+            ptr = 0;
+            try {
+                buflen = in.read(buffer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (buflen <= 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+    private int readByte() { if (hasNextByte()) return buffer[ptr++]; else return -1;}
+    private static boolean isPrintableChar(int c) { return 33 <= c && c <= 126;}
+    public boolean hasNext() { while(hasNextByte() && !isPrintableChar(buffer[ptr])) ptr++; return hasNextByte();}
+    public String next() {
+        if (!hasNext()) throw new NoSuchElementException();
+        StringBuilder sb = new StringBuilder();
+        int b = readByte();
+        while(isPrintableChar(b)) {
+            sb.appendCodePoint(b);
+            b = readByte();
+        }
+        return sb.toString();
+    }
+    public long nextLong() {
+        if (!hasNext()) throw new NoSuchElementException();
+        long n = 0;
+        boolean minus = false;
+        int b = readByte();
+        if (b == '-') {
+            minus = true;
+            b = readByte();
+        }
+        if (b < '0' || '9' < b) {
+            throw new NumberFormatException();
+        }
+        while(true){
+            if ('0' <= b && b <= '9') {
+                n *= 10;
+                n += b - '0';
+            }else if(b == -1 || !isPrintableChar(b)){
+                return minus ? -n : n;
+            }else{
+                throw new NumberFormatException();
+            }
+            b = readByte();
+        }
+    }
+    public int nextInt() {
+        long nl = nextLong();
+        if (nl < Integer.MIN_VALUE || nl > Integer.MAX_VALUE) throw new NumberFormatException();
+        return (int) nl;
+    }
+    public double nextDouble() { return Double.parseDouble(next());}
+}

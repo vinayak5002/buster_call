@@ -1,0 +1,101 @@
+#include<iostream>
+#include<vector>
+#include <algorithm>
+
+#define INF 2147483647
+
+void initRMQ(int n);
+void update(int s, int t, int x);
+int find(int i);
+int query(int a, int b, int k, int l, int r);
+
+int n_;
+int n;
+int min_v=INF;
+std::vector<int> D;
+
+int main(){
+    int q;
+    std::cin>>n_>>q;
+    initRMQ(n_);
+
+    for(int i = 0;i<q;i++){
+        int cmd;
+        std::cin>>cmd;
+        if(cmd==0){ //update
+            int s,t,x;
+            std::cin>>s>>t>>x;
+            update(s,t,x);
+        }
+        if(cmd==1){// findMin
+            int a;
+            std::cin>>a;
+            std::cout<<find(a)<<std::endl;
+        }
+
+    }
+    return 0;
+
+}
+
+void initRMQ(int n_){
+    n=1;
+    
+    while(n < n_){
+        n*=2;
+    }
+    std::vector<int> D_(n*2,INF);
+    D = D_;
+
+    // for(int i=0;i<2*n-1;i++){
+    //     D[i]=INF;
+    // }
+}
+
+void update(int s, int t, int x){
+    int s_ =s + n-1, t_ = t + n-1; // convert array index to tree index 
+
+    // if(t_-s_ > n_/2){
+    //     std::vector<int> tmp(n*2,x);
+    //     for(int i = n-1;i<s_;i++){
+    //         tmp[i]=D[i];
+    //     }
+    //     for(int i = t_+1;i<D.size();i++){
+    //         tmp[i]=D[i];
+    //     }
+    //     D = tmp;
+    // }
+    // else{
+    //     for(int i = s_;i<=t_;i++){
+    //         D[i] = x;
+    //     }
+    // }
+
+    for(int i = s_;i<=t_;i++){
+            D[i] = x;
+    }
+
+    // std::replace(D.begin()+s,D.end()+t+1,true,x);
+
+    if(min_v > x){
+        min_v = x;
+        query(s,t,0,0,n);
+    }
+}
+
+
+
+int find(int i){
+    i += n-1;
+    return D[i];
+}
+
+int query(int a, int b, int k, int l, int r){
+    if(r<=a || b<=l) return INF; //case1 return INF
+    if(a<=l && r<=b) return D[k]; //case2 return D[k]
+    // case 3
+    int vl = query(a, b, k*2 + 1, l, (l + r)/2);
+    int vr = query(a, b, k*2 + 2, (l + r)/2, r);
+    D[k]=std::min(vl, vr);
+    return std::min(vl, vr);
+}

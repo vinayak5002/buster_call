@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int lcs(string x, string y);
+
+int main() {
+    int q;
+    cin >> q;
+    string x, y;
+    while (q--) {
+        cin >> x >> y;
+        cout << lcs(x, y) << endl;
+    }
+}
+
+int lcs(string x, string y) {
+    int m = x.size();
+    int n = y.size();
+    vector<vector<int>> dp(m + 1, vector<int>(n + 1));
+    int max_length = 0;
+    for (int i = 0; i <= m; i++) {
+        dp.at(m).at(0) = 0;
+    }
+    for (int i = 0; i <= n; i++) {
+        dp.at(0).at(i) = 0;
+    }
+
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++) {
+            if (x.at(i) == y.at(j)) {
+                dp.at(i + 1).at(j + 1) = dp.at(i).at(j) + 1;
+            } else {
+                dp.at(i + 1).at(j + 1) =
+                    max(dp.at(i + 1).at(j), dp.at(i).at(j + 1));
+            }
+        }
+    }
+    return dp.at(m).at(n);
+}

@@ -1,0 +1,74 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.*;
+
+public class Main {
+
+    public static void main(String args[]) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String[] sa;
+        LinkedList<Obj> queue = new LinkedList<>();
+        while (true) {
+            queue.clear();
+            sa = br.readLine().split(" ");
+            int w = Integer.parseInt(sa[0]);
+            int h = Integer.parseInt(sa[1]);
+            if (w == 0 && h == 0) {
+                break;
+            }
+            int[][] maze = new int[w][2 * h - 1];
+            boolean[][] isArrived = new boolean[w][h];
+            for (int i = 0; i < 2 * h - 1; i++) {
+                sa = br.readLine().trim().split(" ");
+                int end = i % 2 == 0 ? w - 1 : w;
+                for (int j = 0; j < end; j++) {
+                    maze[j][i] = Integer.parseInt(sa[j]);
+                }
+            }
+            queue.add(new Obj(0, 0, 1));
+            isArrived[0][0] = true;
+            while (true) {
+                if (queue.size() == 0) {
+                    System.out.println(0);
+                    break;
+                }
+                Obj obj = queue.removeFirst();
+                if (obj.x == w - 1 && obj.y == h - 1) {
+                    System.out.println(obj.count);
+                    break;
+                }
+                //上
+                if (obj.y > 0 && maze[obj.x][obj.y * 2 - 1] == 0 && !isArrived[obj.x][obj.y - 1]) {
+                    isArrived[obj.x][obj.y - 1] = true;
+                    queue.add(new Obj(obj.x, obj.y - 1, obj.count + 1));
+                }
+                //下
+                if (obj.y < h - 1 && maze[obj.x][obj.y * 2 + 1] == 0 && !isArrived[obj.x][obj.y + 1]) {
+                    isArrived[obj.x][obj.y + 1] = true;
+                    queue.add(new Obj(obj.x, obj.y + 1, obj.count + 1));
+                }
+                //左
+                if (obj.x > 0 && maze[obj.x - 1][obj.y * 2] == 0 && !isArrived[obj.x - 1][obj.y]) {
+                    isArrived[obj.x - 1][obj.y] = true;
+                    queue.add(new Obj(obj.x - 1, obj.y, obj.count + 1));
+                }
+                //右
+                if (obj.x < w - 1 && maze[obj.x][obj.y * 2] == 0 && !isArrived[obj.x + 1][obj.y]) {
+                    isArrived[obj.x + 1][obj.y] = true;
+                    queue.add(new Obj(obj.x + 1, obj.y, obj.count + 1));
+                }
+            }
+        }
+    }
+
+    public static class Obj {
+        int x, y, count;
+
+        public Obj(int x, int y, int count) {
+            this.x = x;
+            this.y = y;
+            this.count = count;
+        }
+    }
+}
+

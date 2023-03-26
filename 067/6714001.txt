@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    const vector<int> di = {0, 1, 0, -1};
+    const vector<int> dj = {1, 0, -1, 0};
+
+    while (true) {
+        int W, H;
+        cin >> W >> H;
+        if (H == 0) break;
+        vector<string> grid(H);
+        for (auto& s : grid) cin >> s;
+        stack<pair<int, int>> st;
+        vector<vector<bool>> visited(H, vector<bool>(W));
+        int cnt = 0;
+        rep(i,0,H) rep(j,0,W) {
+            if (grid[i][j] == '@') {
+                visited[i][j] = true;
+                st.push({i, j});
+            }
+        }
+        while (!st.empty()) {
+            auto [i, j] = st.top();
+            st.pop();
+            ++cnt;
+            rep(k,0,4) {
+                int ni = i+di[k], nj = j+dj[k];
+                if (0 <= ni && ni < H && 0 <= nj && nj < W && grid[ni][nj] == '.' && !visited[ni][nj]) {
+                    visited[ni][nj] = true;
+                    st.push({ni, nj});
+                }
+            }
+        }
+        cout << cnt << endl;
+    }
+}

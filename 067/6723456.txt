@@ -1,0 +1,57 @@
+class MyDice:
+    def __init__(self, nums=None) -> None:
+        # 一天地六 東五西二 南三北四
+        self.faces = {"天": 1, "地": 6, "東": 5, "西": 2, "南": 3, "北": 4}
+        if nums != None:
+            self.setup(nums)
+
+    def setup(self, nums):
+        self.faces["天"] = nums[0]
+        self.faces["地"] = nums[5]
+        self.faces["東"] = nums[2]
+        self.faces["西"] = nums[3]
+        self.faces["北"] = nums[4]
+        self.faces["南"] = nums[1]
+
+    def roll_to(self, direction):
+        new_faces = self.faces.copy()
+        if direction == "N":
+            # 天が北、北が地、地が南、南が天
+            new_faces["北"] = self.faces["天"]
+            new_faces["地"] = self.faces["北"]
+            new_faces["南"] = self.faces["地"]
+            new_faces["天"] = self.faces["南"]
+        elif direction == "S":
+            # 天が南、南が地、地が北、北が天
+            new_faces["南"] = self.faces["天"]
+            new_faces["地"] = self.faces["南"]
+            new_faces["北"] = self.faces["地"]
+            new_faces["天"] = self.faces["北"]
+        elif direction == "E":
+            # 天が東、東が地、地が西、西が天
+            new_faces["東"] = self.faces["天"]
+            new_faces["地"] = self.faces["東"]
+            new_faces["西"] = self.faces["地"]
+            new_faces["天"] = self.faces["西"]
+        else: # W
+            # 天が西、西が地、地が東、東が天
+            new_faces["西"] = self.faces["天"]
+            new_faces["地"] = self.faces["西"]
+            new_faces["東"] = self.faces["地"]
+            new_faces["天"] = self.faces["東"]
+        self.faces = new_faces
+
+    def head(self):
+        return self.faces["天"]
+
+
+if __name__ == "__main__":
+    nums = [int(n) for n in input().split(maxsplit=6)]
+    dirs = input()
+
+    dice = MyDice(nums=nums)
+    for d in dirs:
+        dice.roll_to(d)
+
+    print(dice.head())
+

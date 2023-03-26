@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int arr[100000], value[100000];
+
+int find(int x){
+
+	if (arr[x] == x)return x;
+	else {
+		int fx = arr[x];
+		arr[x] = find(arr[x]);
+		value[x] += value[fx];
+		return arr[x];
+	}
+	return arr[x] == x ? x : arr[x] = find(arr[x]);
+}
+
+void relate(int a, int b, int c)
+{
+
+	int fa = find(a), fb = find(b);
+	if (fa != fb){
+
+		value[fa] = c + value[b] - value[a];
+
+		arr[fa] = fb;
+	}
+}
+
+int main()
+{
+	int n, q, ch, a, b, c;
+	scanf("%d%d", &n, &q);
+	for (int i = 0; i < n; ++i)arr[i] = i;
+	while (q--){
+		scanf("%d", &ch);
+		if (ch){
+			scanf("%d%d", &a, &b);
+			if (find(a) == find(b))cout << value[a] - value[b] << endl;
+			else printf("?\n");
+		}else{
+			scanf("%d%d%d", &a, &b, &c);
+			relate(a, b, c);
+		}
+	}
+	return 0;
+}
+

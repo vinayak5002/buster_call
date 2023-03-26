@@ -1,0 +1,57 @@
+class Graph: 
+    def __init__(self, num_vertices):
+        self.edges = []
+        self.num_vertices = num_vertices
+        self.dist = [float('inf')] * num_vertices
+        self.parent = [None] * num_vertices
+    
+    def initializa_single_source(self, source: int): 
+        self.dist = [float('inf')] * self.num_vertices
+        self.parent = [None] * self.num_vertices
+        self.dist[source] = 0
+    
+    def add_edge(self, x, y, weight):
+        self.edges.append((x, y, weight))
+        self.edges.append((y, x, -weight))
+
+    def relax(self, x, y, weight):
+        if self.dist[y] > self.dist[x] + weight:
+            self.dist[y] = self.dist[x] + weight
+            self.parent[y] = x
+
+    def bellman_ford(self, source: int, dest: int):
+        self.initializa_single_source(source)
+
+        for i in range(self.num_vertices - 1):
+            for x, y, weight in self.edges:
+                self.relax(x, y, weight)
+
+        for x, y, weight in self.edges:
+            self.relax(x, y, weight)
+            if y == dest:
+                return self.dist[dest]
+                
+
+        return self.dist[dest] 
+
+        
+
+class Solution: 
+    def solution(self): 
+        num_vertices, num_queries = map(int, input().split()) 
+        g = Graph(num_vertices)
+
+        for _ in range(num_queries):
+            temp = input()
+            if temp[0] == '0': 
+                op, x, y, weight = map(int, temp.split())
+                g.add_edge(x, y, weight)
+            elif temp[0] == '1':
+                op, x, y = map(int, temp.split())
+                distance = g.bellman_ford(x, y)
+                if distance == float('inf'):
+                    print('?')
+                else: 
+                    print(distance)
+
+Solution().solution()

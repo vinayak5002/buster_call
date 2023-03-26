@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+using Double = double;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    Double K, R, L, P, E, T;
+    cin >> K >> R >> L >> P >> E >> T;
+    Double ans = 0;
+    using tp = tuple<Double, Double, Double>;
+    V<tp> cur = {{R, L, 1}};
+    rep(i, K) {
+        V<tp> nex;
+        for (auto [r, l, p] : cur) {
+            Double h = (r + l) / 2;
+            tp n1, n2;
+            if (h >= T) {
+                n1 = {r, h, p * (1 - P)};
+                n2 = {h, l, p * P};
+            } else {
+                n1 = {r, h, p * P};
+                n2 = {h, l, p * (1 - P)};
+            }
+            nex.push_back(n1);
+            nex.push_back(n2);
+        }
+        cur.clear();
+        for (auto [r, l, p] : nex) {
+            if (T - E <= r and l <= T + E) {
+                ans += p;
+            } else if (!(l < T - E or T + E < r)) {
+                cur.push_back({r, l, p});
+            }
+        }
+    }
+    for (auto [r, l, p] : cur) {
+        Double h = (r + l) / 2;
+        if (T - E <= h and h <= T + E) {
+            ans += p;
+        }
+    }
+    cout << fixed << setprecision(15) << ans << '\n';
+    return 0;
+}
+

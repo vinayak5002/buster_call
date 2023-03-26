@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+namespace {
+    const int INF = (1 << 21);
+    const int WHITE = 0;
+    const int GRAY = 1;
+    const int BLACK = 2;
+
+    int n;
+    vector<vector<int>> m;
+}  // namespace
+
+int prim();
+
+int main() {
+    cin >> n;
+    m = vector<vector<int>>(n, vector<int>(n));
+    for (auto &e : m) {
+        for (auto &f : e) {
+            cin >> f;
+            if (f == -1) {
+                f = INF;
+            }
+        }
+    }
+
+    cout << prim() << endl;
+}
+
+int prim() {
+    int u, min_cost;
+    vector<int> d(n, INF);
+    vector<int> p(n, -1);
+    vector<int> color(n, WHITE);
+
+    d.at(0) = 0;
+
+    while (1) {
+        min_cost = INF;
+        u = -1;
+        for (int i = 0; i < n; i++) {
+            if (min_cost > d.at(i) && color.at(i) != BLACK) {
+                u = i;
+                min_cost = d.at(i);
+            }
+        }
+        if (u == -1) {
+            break;
+        }
+        color.at(u) = BLACK;
+        for (int v = 0; v < n; v++) {
+            if (color.at(v) != BLACK && m.at(u).at(v) != INF) {
+                if (d.at(v) > m.at(u).at(v)) {
+                    d.at(v) = m.at(u).at(v);
+                    p.at(v) = u;
+                    color.at(v) = GRAY;
+                }
+            }
+        }
+    }
+
+    int sum = 0;
+    for (int i = 0; i < n; i++) {
+        if (p.at(i) != -1) {
+            sum += m.at(i).at(p.at(i));
+        }
+    }
+    return sum;
+}

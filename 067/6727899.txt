@@ -1,0 +1,105 @@
+#include <iostream>
+
+#define GAPSHIFT 1
+
+void printArray( int arr[], int size );
+int insertionSort( int arr[], int size, int g );
+int shellSort( int arr[], int size );
+
+int main()
+{
+	int size;
+	std::cin >> size;
+	int* arr = new int[size];
+
+	for( int i = 0; i < size; i++ )
+	{
+		std::cin >> arr[i];
+	}
+
+	int totalSwap = shellSort( arr, size );
+
+	std::cout << totalSwap << std::endl;
+	for( int i = 0; i < size; i++ )
+	{
+		std::cout << arr[i] << std::endl;
+	}
+
+	delete[] arr;
+
+	return 0;
+}
+
+void printArray( int arr[], int size )
+{
+	for( int i = 0; i < size - 1; i++ )
+	{
+		std::cout << arr[i] << ' ';
+	}
+	if( size > 0 )
+	{
+		std::cout << arr[size - 1] << std::endl;
+	}
+}
+
+int insertionSort( int arr[], int size, int g )
+{
+	/*
+	* Takes in an array to sort, size of the array,
+	and the gap between each element to compare
+	*/
+	int count = 0;
+
+	for( int i = g; i < size; i++ )
+	{
+		//printArray( arr, n );
+
+		int key = arr[i];
+		int j = i - g;
+		while( j >= 0 && arr[j] > key )
+		{
+			arr[j + g] = arr[j];
+			j -= g;
+			count++;
+		}
+
+		arr[j + g] = key;
+	}
+
+	return count;
+}
+
+int shellSort( int arr[], int size )
+{
+	/*
+	Shell sort and print out gap information
+	*/
+	if( size == 1 )
+	{
+		std::cout << 1 << std::endl << 1 << std::endl;
+		return 0;
+	}
+
+	int count = 0;
+	int m = 0;
+	for( int g = size >> GAPSHIFT; g > 0; g >>= GAPSHIFT, m++ );
+
+	int* gapArr = new int[m];
+
+	for( int i = 0, g = size >> GAPSHIFT; i < m; i++, g >>= GAPSHIFT )
+	{
+		gapArr[i] = g;
+	}
+
+	std::cout << m << std::endl;
+	printArray( gapArr, m );
+
+	for( int i = 0; i < m; i++ )
+	{
+		count += insertionSort( arr, size, gapArr[i] );
+	}
+
+	delete[] gapArr;
+
+	return count;
+}

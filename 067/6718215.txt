@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+vector<vector<int>> input(int h, int w) {
+    vector<vector<int>> res(h, vector<int>(w));
+    for (auto& y : res) for (auto& x : y) cin >> x;
+    return res;
+}
+
+vector<vector<int>> change(int c, vector<vector<int>> g) {
+    auto f = [&](int y, int x) -> int {return y*g.front().size() + x;};
+    auto rev = [&](int v) -> pair<int, int> {return {v/g.front().size(), v%g.front().size()};};
+    auto in = [&](int y, int x) -> bool {return (0 <= x and x < g.front().size() and 0 <= y and y < g.size());};
+    vector<int> d = {-1, 1};
+
+    queue<int> que;
+    set<int> used;
+    auto ist = [&](int y, int x) -> void {
+        if (used.count(f(y, x))) return;
+        que.emplace(f(y, x));
+        used.emplace(f(y, x));
+    };
+
+    ist(0, 0);
+
+    while(que.size()) {
+        auto [y, x] = rev(que.front()); que.pop();
+        for (auto dy : d) if (in(y + dy, x)) if (g[y][x] == g[y + dy][x]) ist(y + dy, x);
+        for (auto dx : d) if (in(y, x + dx)) if (g[y][x] == g[y][x + dx]) ist(y, x + dx);
+        g[y][x] = c; 
+    }
+
+    return g;
+}
+
+int calc(vector<vector<int>> g) {
+    auto f = [&](int y, int x) -> int {return y*g.front().size() + x;};
+    auto rev = [&](int v) -> pair<int, int> {return {v/g.front().size(), v%g.front().size()};};
+    auto in = [&](int y, int x) -> bool {return (0 <= x and x < g.front().size() and 0 <= y and y < g.size());};
+    vector<int> d = {-1, 1};
+
+    queue<int> que;
+    set<int> used;
+    auto ist = [&](int y, int x) -> void {
+        if (used.count(f(y, x))) return;
+        que.emplace(f(y, x));
+        used.emplace(f(y, x));
+    };
+
+    ist(0, 0);
+
+    int res = 0;
+    while (que.size()) {
+        auto [y, x] = rev(que.front()); que.pop();
+        res++;
+        for (auto dy : d) if (in(y + dy, x)) if (g[y][x] == g[y + dy][x]) ist(y + dy, x);
+        for (auto dx : d) if (in(y, x + dx)) if (g[y][x] == g[y][x + dx]) ist(y, x + dx);
+    }
+
+    return res;
+}
+
+int dfs(vector<vector<int>> g, int cnt, int c) {
+    if (cnt == 5) return calc(g);
+    if (cnt == 4) return dfs(change(c, g), cnt + 1, c);
+    int res = 1;
+    for (int i = 1 ; i <= 6 ; i++) res = max(res, dfs(change(i, g), cnt + 1, c));
+    return res;
+}
+
+int solve(int h, int w, int c) {
+    auto g = input(h, w);
+    return dfs(g, 0, c); 
+}
+
+int main() {
+    while (1) {
+        int h, w, c; cin >> h >> w >> c;
+        if (c == 0) break;
+        cout << solve(h, w, c) << endl;
+    }
+}
+

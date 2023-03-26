@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void solve() {
+  string alp = "abcdefghijklmnopqrstuvwxyz";
+  map<char, int> mp;
+  for (int i = 0; i < 26; ++i) {
+    mp[alp[i]] = i;
+  }
+
+  int ok[26];
+
+  while (true) {
+    string s;
+    cin >> s;
+    int n = s.size();
+    if (s == "#") break;
+    set<string> ans;
+
+    for (int i = 0; i < (1<<n); ++i) {
+      for (int j = 0; j < 26; ++j) ok[j] = 1;
+      string tmp = "";
+      for (int j = 0; j < n; ++j) {
+        if ((i >> j) & 1) {
+          if (!ok[mp[s[j]]]) break;
+          if (s[j] != 'z') {
+            tmp += alp[mp[s[j]]+1];
+            ok[mp[s[j]]] = 0;
+          } else { 
+            tmp += 'z';
+          }
+        } else {
+          tmp += s[j];
+        }
+      }
+      if (tmp.size() != n) continue;
+
+      if (ans.count(tmp)) continue;
+
+      set<char> seen;
+      seen.insert('a');
+      string angou = "";
+      for (int j = 0; j < n; ++j) {
+        if (seen.count(tmp[j])) {
+          angou += tmp[j];
+        } else {
+          angou += alp[mp[tmp[j]]-1];
+          seen.insert(tmp[j]);
+        }
+      }
+      if (angou == s) ans.insert(tmp);
+    }
+
+    cout << ans.size() << endl;
+    if (ans.size() <= 10) {
+      for (string i : ans) {
+        cout << i << endl;
+      }
+    } else {
+      auto it = ans.begin();
+      for (int i=0;i<5;i++) {
+        string now = *it;
+        cout << now << endl;
+        it++;
+      }
+      it = ans.end();
+      for (int i=0;i<5;i++) {
+        it--;
+      }
+      for (int i=0;i<5;i++) {
+        string now = *it;
+        cout << now << endl;
+        it++;      
+      }
+    }
+
+  }
+
+
+  return;
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(0);
+  solve();
+  return 0;
+}

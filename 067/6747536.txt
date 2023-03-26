@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX_NUM 100000      /*与えられる数字列の最大値*/
+#define MAX_QUESTION 50000  /*与えられる質問の最大値*/
+#define MAX_VALUE 1000000000 /*値の最大値10^9*/
+#define MIN_VALUE 0         /*値の最小値*/
+
+int BinarySearch(int *Array, int Num, int Query);   /*二分探索を行う*/
+int InputArray(int *Array, int Num);                /*配列に数値を入力する*/
+int InputError(int cur, int lo, int hi);            /*入力エラー検知*/
+int main(void){
+    int NumSource=0;            /*数字列のサイズ*/
+    int *Source;                /*数字列の先頭ポインタ*/
+    int NumQuestion=0;          /*質問の配列*/
+    int *Question;              /*質問の配列の先頭ポインタ*/
+    int Cnt=0;                  /*探索結果*/
+    int tmp = 0;
+    scanf("%d",&NumSource);     /*数字列のサイズの入力*/
+    Source = (int *)malloc(sizeof(int)*NumSource);      /*メモリの確保*/
+    if(InputArray(Source, NumSource) == 1){         /*数字列の入力*/
+        return 1;
+    }
+    scanf("%d", &NumQuestion);      /*質問列の入力*/
+    /*Question = (int *)malloc(sizeof(int)*NumQuestion);
+    if(InputArray(Question, NumQuestion) == 1){
+        return 1;
+    }
+
+    for(int i=0; i < NumQuestion; i++){     //探索を行う
+        Cnt += BinarySearch(Source, NumSource, Question[i]);
+    }*/
+    for(int i = 0; i < NumQuestion; i++){
+        scanf("%d", &tmp);
+        Cnt += BinarySearch(Source, NumSource, tmp);
+    }
+    printf("%d\n", Cnt);        /*結果の出力*/
+    
+    free(Source);       /*メモリの開放*/
+    free(Question);
+    return 0;
+}
+
+int BinarySearch(int *Array, int Num, int Query){
+    if(Array == NULL){      /*NULLチェック*/
+        printf("NULL error\n");
+        return -1;
+    }
+    int Ans = 0;        /*探索結果を保持する*/
+    if(Num == 1){       /*要素が一つの時はクエリチェックの結果を格納する*/
+        Ans = (Array[0] == Query);
+    }
+    else if(Array[Num/2] == Query){ /*配列の中央値に対してクエリチェックを行う*/
+        Ans = 1;
+    }else if(Array[Num/2] > Query){ /*クエリより下の場合は下半分の配列に対して再帰を行う*/
+        Ans = BinarySearch(Array, (int)(Num/2), Query);
+    }else{
+        if(Num %2 == 0){    /*クエリより上の場合は上半分の配列に対して再帰を行う、ここで要素数の偶奇によって場合分けが発生する*/
+            Ans = BinarySearch(Array + (int)(Num/2)+1 , Num/2-1, Query);
+        }else{
+            Ans = BinarySearch(Array + (int)(Num/2)+1 , Num/2, Query);
+
+        }
+    }
+    return Ans;
+}
+int InputArray(int *Array, int Num){    /*ArrayポインタからNumだけ要素を格納する*/
+    int res = 0;
+    if(Array== NULL){   /*NULLチェック*/
+        res = 1;
+    }else{
+        for(int i = 0; i < Num; i++){
+            scanf("%d",Array+i);
+            if(InputError(*(Array+i), MIN_VALUE, MAX_VALUE)== 1){   /*入力チェック*/
+                res = 1;
+                break;;
+            }
+        }
+    }
+    return 0;
+}
+int InputError(int cur, int lo, int hi){   /*入力異常検知*/
+    int tmp = ((cur < lo) || (hi < cur))?1:0;  /*与えられた値が下限上限を超えていた場合1、そうでなければ0を返す*/
+    if(tmp){
+        printf("input_error\n");
+    }
+    return tmp;
+}

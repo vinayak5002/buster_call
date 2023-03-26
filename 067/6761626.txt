@@ -1,0 +1,41 @@
+n, k = map(int, input().split())
+w = [int(input()) for i in range(n)]
+maximumNumberOfStuff = 100000
+maximumLoadPerOneStuff = 100000
+maximumLoad = maximumNumberOfStuff * maximumLoadPerOneStuff
+
+
+def caliculateNumberOfStuff(maximumWheigtPerOneCar, numberOfCar):
+    numberOfStuff = 0
+    for _ in range(numberOfCar):
+        wheigt = 0
+        while wheigt + w[numberOfStuff] <= maximumWheigtPerOneCar:
+            wheigt += w[numberOfStuff]
+            numberOfStuff += 1
+            if numberOfStuff == n:
+                return n
+    return numberOfStuff
+
+
+def isOK(index, key):
+    if caliculateNumberOfStuff(maximumWheigtPerOneCar=index, numberOfCar=k) >= key:
+        return True
+    else:
+        return False
+
+
+def binarySerchMaxOrMinValue(key):
+    ng = 0  # 「index = 0」が条件を満たすこともあるので、初期値は -1
+    ok = maximumLoad  # 「index = 右端」が条件を満たさないこともあるので、初期値は右端+1
+    while abs(ok - ng) > 1:
+        middle = (ok + ng) // 2
+        if isOK(index=middle, key=key):
+            ok = middle
+        else:
+            ng = middle
+    return ok
+
+
+answer = binarySerchMaxOrMinValue(key=n)
+print(answer)
+

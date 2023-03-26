@@ -1,0 +1,31 @@
+import sys
+from heapq import heapify, heappush, heappop
+input = lambda: sys.stdin.readline().rstrip()
+inf = float('inf')
+
+def dijkstra(G: list, s: int) -> list:
+  "Return dist from s. / O(|E|log|V|)"
+  dist = [inf] * len(G)
+  dist[s] = 0
+  hq = [(0, s)]
+  while hq:
+    d, v = heappop(hq)
+    if dist[v] < d:
+      continue
+    for x,c in G[v]:
+      if dist[x] > d + c:
+        dist[x] = d + c
+        heappush(hq, (d+c, x))
+  return dist
+
+#  -----------------------  #
+
+v, e, r = map(int, input().split())
+G = [[] for _ in range(v)]
+for _ in range(e):
+  s, t, d = map(int, input().split())
+  G[s].append((t, d))
+
+dist = dijkstra(G, r)
+print('\n'.join(map(lambda x: 'INF' if x == inf else str(x), dist)))
+

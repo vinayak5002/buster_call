@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+using pii = pair<int, int>;
+
+// 0 hidari
+// 1 sita
+// 2 migi
+// 3 ue
+
+pii f(pii a, int d) {
+    auto [x, y] = a;
+    pii res;
+    if (d == 0) res = {x - 1, y};
+    if (d == 1) res = {x, y - 1};
+    if (d == 2) res = {x + 1, y};
+    if (d == 3) res = {x, y + 1};
+    return res;
+}
+
+pii solve(int n) {
+    map<int, pii> mp;
+    mp[0] = {0, 0};
+    for (int i = 1 ; i < n ; i++) {
+        int p, d; cin >> p >> d;
+        mp[i] = f(mp[p], d);
+    }
+
+    int le = 0, ri = 0, dn = 0, up = 0;
+    for (int i = 0 ; i < n ; i++) {
+        auto [x, y] = mp[i];
+        if (x < 0) if (abs(x) > le) le = abs(x);
+        if (x >= 0) if (x > ri) ri = x;
+        if (y < 0) if (abs(y) > dn) dn = abs(y);
+        if (y >= 0) if (y > up) up = y;
+    }
+    
+    return {le + ri + 1, up + dn + 1};
+}
+
+int main() {
+    while(1) {
+        int n; cin >> n;
+        if (!n) break;
+        auto [x, y] = solve(n);
+        cout << x << ' ' << y << endl;
+    }
+}
+

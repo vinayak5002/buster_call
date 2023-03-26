@@ -1,0 +1,84 @@
+import sys
+sys.setrecursionlimit(10 ** 6)
+INF = float('inf')
+
+# from cmath import inf
+# import math
+# import re
+# import copy
+# from re import A
+# import time
+
+from itertools import permutations
+# from itertools import combinations
+# import numpy as np
+
+
+def input_int(lines=1):
+    if lines == 1:
+        return list(map(int, sys.stdin.readline().split()))
+    return [list(map(int, sys.stdin.readline().split()))[0] for l in range(lines)]
+
+
+def input_float(lines=1):
+    if lines == 1:
+        return list(map(float, sys.stdin.readline().split()))
+    return [list(map(float, sys.stdin.readline().split()))[0] for l in range(lines)]
+
+
+def input_str(lines=1):
+    if lines == 1:
+        return list(sys.stdin.readline().split())
+    return [list(sys.stdin.readline().split())[0] for l in range(lines)]
+
+
+def input_intmat(lines=1):
+    return [list(map(int, sys.stdin.readline().split())) for l in range(lines)]
+
+
+def input_floatmat(lines=1):
+    return [list(map(float, sys.stdin.readline().split())) for l in range(lines)]
+
+
+def input_strmat(lines=1):
+    return [list(sys.stdin.readline().split()) for l in range(lines)]
+
+
+def bit(num, i):
+    return num >> i & 1
+
+
+def main():
+    # pass
+    [k]=input_int()#k,あと8-k個
+    XY=input_intmat(k)#0~7
+    #各X,Yに1個ずつだから…
+    def clamp(x,y):
+        return (0<=x and x<=7 and 0<=y and y<=7 )
+    def get(x,y):
+        # li=[(x,y)]
+        li=[]
+        for i in range(1,8):
+            a,b,c,d=(x+i,y+i),(x-i,y-i),(x+i,y-i),(x-i,y+i)
+            li+=[ j for j in [a,b,c,d] if clamp(*j)]
+        return set(li)
+    pick=[i for i in range(8) if i not in list(zip(*XY))[1]]
+    masnum=0
+    for perm in permutations(pick,len(pick)):
+        li=list(perm)
+        for x,y in XY:
+            li.insert(x,y)
+        mas=set([])
+        for x,y in enumerate(li):
+            mas=mas|get(x,y)
+        let=True
+        for x,y in enumerate(li):
+            if (x,y) in mas:
+                let=False
+                break
+        if let:
+            ans=li[:]
+    for r in ans:
+        print( "".join([ "."*r ,"Q","."*(7-r) ]) )   
+
+main()

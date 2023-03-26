@@ -1,0 +1,81 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+
+int v, e, start;
+
+bool check(vector<vector<int> > s_t)
+{
+  for(int i = 0; i < e; i++)
+  {
+    if(s_t[1][i] == start)
+      return true;
+  }
+  return false;
+}
+
+bool dfs(vector<vector<int> > s_t, int nex)
+{
+  if(!check(s_t))
+    return false;
+
+  for(int i = 0; i < e; i++)
+  {
+    //cout << "start is " << start << ", next is " << nex << endl;
+    //cout << s_t[0][i] << ", " << s_t[1][i] << endl;
+    if(s_t[0][i] == nex && s_t[1][i] == start)
+    {
+      //cout << "return true" << endl;
+      return true;
+    }
+    else if(s_t[0][i] == nex)
+    {
+      //cout << "enter" << endl;
+      s_t[0][i] = -1;
+      if(dfs(s_t, s_t[1][i]))
+        return true;
+    }
+  }
+  return false;
+}
+
+bool search(vector<vector<int> > s_t)
+{
+  for(int i = 0; i < v; i++)
+  {
+    for(int j = 0; j < e; j++)
+    {
+      //cout << "ok" << endl;
+      if(i == s_t[0][j])
+      {
+        start = i;
+        if(dfs(s_t, s_t[1][j]))
+          return true;
+      }
+    }
+  }
+  return false;
+}
+
+int main(){
+  int n, m;
+  vector<vector<int> > s_t;
+
+  cin >> v >> e;
+
+  s_t.resize(2);
+
+  for(int i = 0; i < e; i++)
+  {
+     cin >> n >> m;
+     s_t[0].push_back(n);
+     s_t[1].push_back(m);
+  }
+
+
+  if(search(s_t))
+    cout << 1 << endl;
+  else
+    cout << 0 << endl;
+}
+

@@ -1,0 +1,58 @@
+
+#include <bits/stdc++.h>
+
+#ifdef _DEBUG
+#include "debug.cpp"
+#else
+#define DE(x)
+#define DE2(x, y)
+#define DEV(v)
+#define DESq(v, h, w)
+#endif
+
+using namespace std;
+#define REP(i, n) for(int i = 0; i < (n); i++)
+#define rep(i, l, r) for(int i = l; i < (r); i++)
+#define rrep(i, r, l) for(int i = r; i >= (l); i--)
+#define ALL(v) (v).begin(), (v).end()
+using ll = long long;
+using P = pair<ll, ll>;
+constexpr ll INF = 1e18;
+constexpr int mod = 1e9 + 7;
+
+int main() {
+    vector<ll> sum(150), ssum(150);
+    REP(i, 130) {
+        sum[i + 1] = sum[i] + i + 1;
+        ssum[i + 1] = ssum[i] + sum[i];
+    }
+    vector<ll> S, oddS;
+    REP(i, 130) {
+        if(ssum[i] != 0 && ssum[i] < 1e6) {
+            S.emplace_back(ssum[i]);
+            if(ssum[i] % 2 == 1)
+                oddS.emplace_back(ssum[i]);
+        }
+    }
+    vector<ll> dp(101010, INF);
+    vector<ll> oddp(101010, INF);
+    dp[0] = 0;oddp[0]=0;
+    REP(i, dp.size()) {
+        for(auto &x : S) {
+            if(i - x >= 0)
+                dp[i] = min(dp[i], dp[i - x] + 1);
+        }
+        for(auto &x : oddS) {
+            if(i - x >= 0)
+                oddp[i] = min(oddp[i], oddp[i - x] + 1);
+        }
+    }
+    while(true) {
+        ll n;
+        cin >> n;
+        if(n == 0)
+            break;
+        cout << dp[n] <<" " << oddp[n]<< endl;
+    }
+    return 0;
+}

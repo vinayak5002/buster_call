@@ -1,0 +1,78 @@
+#include <bits/stdc++.h>
+using pointer = std::string::const_iterator;
+
+int number(pointer&);
+int expression(pointer&);
+int factor(pointer&);
+int term(pointer&);
+
+int number(pointer& begin) {
+    int res = 0;
+
+    while(isdigit(*begin)) {
+        res *= 10;
+        res += *begin - '0';
+        begin++;
+    }
+
+    return res;
+}
+
+int expression(pointer& begin) {
+    int res = term(begin);
+
+    while(1) {
+        if (*begin == '+') {
+            begin++;
+            res += term(begin);
+        }
+        else if (*begin == '-') {
+            begin++;
+            res -= term(begin);
+        }
+        else break;
+    }
+
+    return res;
+}
+
+int factor(pointer& begin) {
+    if (*begin == '(') {
+        begin++;
+        int res = expression(begin);
+        begin++;
+        return res;
+    }
+    else return number(begin);
+}
+
+int term(pointer& begin) {
+    int res = factor(begin);
+    while(1) {
+        if (*begin == '*') {
+            begin++;
+            res *= factor(begin);
+        }
+        else if (*begin == '/') {
+            begin++;
+            res /= factor(begin);
+        }
+        else break;
+    }
+
+    return res;
+}
+
+
+int main() {
+    int n; std::cin >> n;
+    std::cin.ignore();
+    for (int i = 0 ; i < n ; i++) {
+        std::string s;
+        std::getline(std::cin, s);
+
+        pointer begin = s.begin();
+        std::cout << expression(begin) << std::endl;
+    }
+}
+

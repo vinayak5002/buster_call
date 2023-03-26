@@ -1,0 +1,67 @@
+#include<stdio.h>
+#define max 1000000
+#define N 100000
+int n,a[N][N],c[N],p[N],d[N];
+
+int min_node(){
+  int i;
+  int min_node = -1;
+  int min_dist = max;
+  for(i=0 ;i<n ;i++)
+    if(!c[i] && min_dist > d[i]){
+      min_dist = d[i];
+      min_node = i;
+    }
+  return min_node;
+}
+
+void dijkstra(){
+  int i,node = 0;
+  c[0] = 1;
+  d[0] = 0;
+
+  while(1){
+    for(i=0 ;i<n ;i++)
+      if(!c[i] && d[i] > d[node] + a[node][i]){
+	d[i]  = d[node] + a[node][i];
+	p[i] = node;
+      }
+    if((node = min_node()) < 0) return;
+    //else if(node = goal) return;
+    else c[node] = 1;
+  }
+  return;
+}
+
+int main(){
+  int i,j,s,t,u,k;
+  scanf("%d",&n);
+
+
+  for(i=0 ;i<n ;i++)
+    for(j=0 ;j<n ;j++)
+       a[i][j] = max;
+  
+  for(i=0 ;i<n ;i++){
+    scanf("%d%d",&k,&s);
+    for(j=0 ;j<s ;j++){
+      scanf("%d%d",&t,&u);
+      a[i][t] = u;
+    }
+  }
+
+  for(i=0 ;i<n ;i++){
+    p[i] = -1;
+    c[i] = 0;
+    d[i] = max;
+  }
+
+  for(i=0 ;i<n ;i++)
+    dijkstra();
+
+  for(i=0 ;i<n ;i++)
+    printf("%d %d\n",i,d[i]);
+
+  return 0;
+}
+

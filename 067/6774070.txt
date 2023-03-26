@@ -1,0 +1,101 @@
+#include <iostream>
+#include <vector>
+#include <bitset>
+#include <iomanip>
+#include <algorithm>
+#include <math.h>
+#include <set>
+using namespace std;
+using P = pair<int, int>; using Pll = pair<ll, ll>;
+using vi = vector<int>; using vvi = vector<vector<int>>;
+using vl = vector<ll>; using vvl = vector<vector<ll>>;
+using vb = vector<bool>; using vvb = vector<vector<bool>>;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define rep2(i, s, n) for (int i = (s); i < (int)(n); i++)
+#define all(v) v.begin(), v.end()
+#define _GLIBCXX_DEBUG
+#define INF  2147483647
+#define LINF 9223372036854775807
+#define pb push_back
+#define pf push_front
+#define pi 3.141592653589793
+#define yes cout << "Yes" << endl;
+#define no cout << "No" << endl;
+#define mod 1000000007
+#define say(n) cout << n << endl;
+#define to10(A, a) for(int i = 0;i < A.size(); i++){if(A[i] == 1)a += 1 << i;}
+
+
+int main() {
+    int k;cin>>k;
+    vector<vector<int>> F(8, vector<int>(8, 0));
+    vector<vector<int>> F2(8, vector<int>(8, 0));
+    vector<int> x;
+    vector<int> y;
+    for(int i = 0; i < k; i++){
+        int X, Y;cin >> X >> Y;
+        x.pb(X);
+        y.pb(Y);
+        for(int j = 0; j < 8; j++){
+            F[X][j] = 1;
+            F[j][Y] = 1;
+            F[X][j] = 1;
+            F[j][Y] = 1;
+            if(X-j>=0&&Y-j>=0)F[X-j][Y-j] = 1;
+            if(X-j>=0&&Y+j<8)F[X-j][Y+j] = 1;
+            if(X+j<8&&Y-j>=0)F[X+j][Y-j] = 1;
+            if(X+j<8&&Y+j<8)F[X+j][Y+j] = 1;
+            F[X][Y] = 2;
+        }
+    }
+    rep(i, 8)rep(j, 8){
+        F2[i][j] = F[i][j];
+    }
+    
+    int P[8] = {0,1,2,3,4,5,6,7};
+    do{
+        bool ok = true;
+        for(int i = 0; i < x.size(); i++){
+            if(P[x[i]] != y[i]){
+                ok = false;
+                break;
+            }
+        }
+        if(!ok)continue;
+
+        rep(i, 8)rep(j, 8){
+            F[i][j] = F2[i][j];
+        }
+
+        for(int i = 0; i < 8; i++){
+            int X = i;
+            int Y = P[i];
+            if(F[X][Y] == 1){
+                ok = false;
+                break;
+            }
+            for(int j = 0; j < 8; j++){
+                F[X][j] = 1;
+                F[j][Y] = 1;
+                F[X][j] = 1;
+                F[j][Y] = 1;
+                if(X-j>=0&&Y-j>=0)F[X-j][Y-j] = 1;
+                if(X-j>=0&&Y+j<8)F[X-j][Y+j] = 1;
+                if(X+j<8&&Y-j>=0)F[X+j][Y-j] = 1;
+                if(X+j<8&&Y+j<8)F[X+j][Y+j] = 1;
+                F[X][Y] = 2;
+
+            }
+        }
+        if(ok)break;
+    }while(next_permutation(P, P + 8));
+    
+    rep(i, 8){
+        rep(j, 8){
+            cout << (F[i][j] == 2 ? "Q" : ".");
+        }
+        cout<<endl;
+    }
+    return 0;
+}
+

@@ -1,0 +1,104 @@
+// I SELL YOU...! 
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<functional>
+#include<queue>
+#include<chrono>
+#include<iomanip>
+#include<map>
+#include<set>
+using namespace std;
+using ll = long long;
+using P = pair<ll,ll>;
+using TP = tuple<ll,ll,ll>;
+void init_io(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  cout << fixed << setprecision(18);
+}
+class union_find{
+  int n;
+  vector<int> par,rk,size;
+  public:
+  union_find(int max_n){
+    n = max_n+1;
+    for(int i=0;i<=n;i++){
+      par.emplace_back(i);
+      rk.emplace_back(0);
+      size.emplace_back(1);
+    }
+  }
+  int root(int x){
+    vector<int> nodes;
+    while(x!=par[x]){
+      nodes.emplace_back(x);
+      x = par[x];
+    }
+    for(auto v:nodes){
+      par[v] = x;
+    }
+    return x;
+  }
+  void unite(int x,int y){
+    x = root(x);
+    y = root(y);
+    if(x==y) return;
+    if(rk[x]<rk[y]){
+      par[x] = y;
+      size[y] += size[x];
+    }else{
+      par[y] = x;
+      if(rk[x]==rk[y]) rk[x]++;
+      size[x] += size[y];
+    }
+  }
+  bool same(int x,int y){
+    return root(x)==root(y);
+  }
+  int treesize(int x){
+    return size[root(x)];
+  }
+};
+signed main(){
+  init_io();
+  ll h,w,n;
+  bool kabe = false;
+  cin >> n >> w >> h;
+  union_find uf(n);
+  vector<ll> x(n),y(n);
+  map<ll, vector<ll>> mpx, mpy;
+  for (int i=0;i<n;i++) {
+    cin >> x[i] >> y[i];
+    mpx[x[i]].push_back(i);
+    mpy[y[i]].push_back(i);
+    if (x[i] == 1 || y[i] == 1 || x[i] == w || y[i] == h) kabe = true;
+  }
+  for (auto [_, vx]: mpx) {
+    for (auto idx: vx) {
+      uf.unite(idx, vx.front());
+    }
+  }
+  for (auto [_, vy]: mpy) {
+    for (auto idx: vy) {
+      uf.unite(idx, vy.front());
+    }
+  }
+  vector<ll> used(n, 0);
+  ll s = 0;
+  ll ans = 0;
+  for (int i=0;i<n;i++) {
+    ll p = uf.root(i);
+    if (!used[p]) {
+      used[p] = true;
+      s++;
+      ans += uf.treesize(p)-1;
+    }
+  }
+  if (s>1) {
+    if (kabe) ans += 2 * (s-1);
+    else ans += 2*s-1;
+  }
+  cout << ans << endl;
+}
+

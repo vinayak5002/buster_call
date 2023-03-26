@@ -1,0 +1,82 @@
+#include<stdbool.h>
+#include<stdio.h>
+#include<stdlib.h>
+
+#define MAX 100
+
+typedef struct Edge {
+    int dir;
+    struct edge *next;
+}Edge;
+
+Edge buff[MAX * MAX];
+Edge *adj[MAX];
+int size, head, tail;
+int dist[MAX];
+
+typedef int data_t;
+data_t queue[MAX];
+
+void add(int u, int v);
+void enqueue(data_t data);
+void bfs(int s);
+
+data_t dequeue() {
+    return queue[head++];
+}
+
+bool empty() {
+    return head == tail;
+}
+
+int main(void)
+{
+    int n, u, k, v;
+    
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++) {
+        scanf("%d %d", &u, &k);
+        for (int j = 0; j < k; j++) {
+            scanf("%d", &v);
+            add(u - 1, v - 1);
+        }
+    }
+    
+    bfs(0);
+    for (u = 0; u < n; u++) {
+        printf("%d %d\n", u + 1, dist[u]);
+    }
+    
+    return EXIT_SUCCESS;
+}
+
+void add(int u, int v)
+{
+    Edge *e = buff + size++;
+    e->dir = v;
+    e->next = adj[u];
+    adj[u] = e;
+}
+
+void enqueue(data_t data) {
+    queue[tail++] = data;
+}
+
+void bfs(int s) {
+    Edge *e;
+    
+    memset(dist, -1, sizeof(dist));
+    dist[s] = 0;
+    enqueue(s);
+    
+    while(!empty()) {
+        const int u = dequeue();
+        for (e = adj[u]; e != NULL; e = e->next) {
+            if (dist[e->dir] == -1) {
+                dist[e->dir] = dist[u] + 1;
+                enqueue(e->dir);
+            }
+        }
+    }
+}
+

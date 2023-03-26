@@ -1,0 +1,75 @@
+#include <stdio.h>
+
+int main(){
+	char buf[300];
+	char *p;
+	char a[101]; // 最後に改行文字付き
+	char b[101]; // 最後に改行文字付き
+	int a_len = 0;
+	int b_len = 0;
+	int n = 0; // カード枚数
+	int a_point = 0;
+	int b_point = 0;
+	
+	// n
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d", &n);
+	for(int i = 0; i < n; i++){
+		fgets(buf, sizeof(buf) - 1, stdin);
+		p = buf;
+		// a
+		a_len = 0;
+		while (*p != ' '){
+			sscanf(p, "%c", &a[a_len]);
+			a_len++;
+			p++;
+		}
+		p++;
+		// b
+		b_len = 0;
+		while (*p){
+			sscanf(p, "%c", &b[b_len]);
+			b_len++;
+			p++;
+		}
+		b_len -= 1; // 改行文字分ひく
+		/*for (int i = 0; i < a_len; i++){
+			printf("%c", a[i]);
+		}
+		putchar('\n');
+		for (int i = 0; i < b_len; i++){
+			printf("%c", b[i]);
+		}
+		putchar('\n');*/
+		// 処理
+		for (int i = 0; i < a_len && i < b_len; i++){
+			if (a[i] > b[i]){
+				a_point += 3;
+				break;
+			}
+			else if (a[i] < b[i]) {
+				b_point += 3;
+				break;
+			}
+			else{
+				if (i == a_len - 1 || i == b_len - 1){
+					if (a_len == b_len){
+						a_point += 1;
+						b_point += 1;
+					}
+					else if (a_len > b_len){
+						a_point += 3;
+					}
+					else{
+						b_point += 3;
+					}
+
+				}
+			}
+		}
+	}
+	// 画面表示
+	printf("%d %d\n", a_point, b_point);
+
+	return 0;
+}

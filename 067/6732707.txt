@@ -1,0 +1,219 @@
+#include<bits/stdc++.h> 
+using namespace std;
+typedef long long ll;
+#define all(x) (x).begin(),(x).end()
+template<typename T1,typename T2> bool chmin(T1 &a,T2 b){if(a<=b)return 0; a=b; return 1;}
+template<typename T1,typename T2> bool chmax(T1 &a,T2 b){if(a>=b)return 0; a=b; return 1;}
+int dx[4]={0,1,0,-1}, dy[4]={1,0,-1,0};
+long double eps = 1e-9;
+long double pi = acos(-1);
+
+template< typename T > istream &operator>>(istream &is, vector< T > &v) {
+    for(T &in : v) is >> in;
+    return is;
+}
+
+template< typename T > ostream &operator<<(ostream &os, const vector< T > &v) {
+    for(int i = 0; i < (int) v.size(); i++) {
+        os << v[i] << (i + 1 != (int) v.size() ? " " : "");
+    }
+    return os;
+}
+
+const ll mul[] = {1007,1009,1013,1001};
+const ll mod[] = {1000000007,1000000023,1000000087,1000000093};
+const int MAX = 400005, hash_size = 2;
+ll beki[hash_size][MAX+1];
+bool inited = false;
+
+void Hash_init() {
+    inited = true;
+    for(int i=0;i<hash_size;i++){
+        beki[i][0] = 1;
+        for(int j=0;j<MAX;j++){
+            beki[i][j+1] = (beki[i][j]*mul[i])%mod[i];
+        }
+    }
+}
+
+struct RolingHash{
+    vector<vector<ll>> hash;
+    int n;
+    RolingHash(string s){
+        if(!inited)Hash_init();
+        hash.resize(hash_size);
+        int n = s.size();
+        for(int i=0;i<hash_size;i++){
+            hash[i].resize(n+1);
+            for(int j=0;j<n;j++){
+                hash[i][j+1] = (hash[i][j] * mul[i] % mod[i] + s[j]);
+                if(hash[i][j+1] >= mod[i])hash[i][j+1] -= mod[i];
+            }
+        }
+    }
+    RolingHash(vector<ll> s){
+        if(!inited)Hash_init();
+        hash.resize(hash_size);
+        n = s.size();
+        for(int i=0;i<hash_size;i++){
+            hash[i].resize(n+1);
+            for(int j=0;j<n;j++){
+                hash[i][j+1] = (hash[i][j] * mul[i] % mod[i] + s[j]);
+                if(hash[i][j+1] >= mod[i])hash[i][j+1] -= mod[i];
+            }
+        }
+    }
+
+    // hash of S[l,r)
+    vector<ll> get(int l, int r){
+        vector<ll> ret(hash_size);
+        int x = r - l;
+        for(int i=0;i<hash_size;i++){
+            ret[i] = (hash[i][r] - (hash[i][l]*beki[i][x])%mod[i] + mod[i])%mod[i];
+        }
+        return ret;
+    }
+
+    // S[l1:r1] == T[l2:r2]かどうか. [l,r)
+    bool same(RolingHash &T, int l1, int r1, int l2=-1, int r2=-1){
+        if(l2==-1 && r2==-1)l2=l1, r2=r1;
+        assert(l2!=-1 && r2!=-1);
+        bool same = true;
+        vector<ll> v = this->get(l1,r1);
+        vector<ll> u = T.get(l2,r2);
+        for(int i=0;i<hash_size;i++){
+            if(v[i]!=u[i])same=false;
+        }
+        return same;
+    }
+
+    // S[l1:r1] == S[l2:r2]かどうか. [l,r)
+    bool same(int l1, int r1, int l2=-1, int r2=-1){
+        if(l2==-1 && r2==-1)l2=l1, r2=r1;
+        assert(l2!=-1 && r2!=-1);
+        bool same = true;
+        vector<ll> v = this->get(l1,r1);
+        vector<ll> u = this->get(l2,r2);
+        for(int i=0;i<hash_size;i++){
+            if(v[i]!=u[i])same=false;
+        }
+        return same;
+    }
+};
+
+vector<vector<int>> v1(200020), v2(200020);
+vector<bool> used1(200020), used2(200020);
+vector<int> c1,c2;
+
+int r=-1;
+bool dfs(int p, int pre, vector<vector<int>> &v, vector<bool> &used, vector<int> &c){
+    used[p] = 1;
+    bool ret = false;
+    for(auto i:v[p]){
+        if(i == pre) continue;
+        if(used[i] && r==-1){
+            r=i;
+            c.push_back(p);
+            return true;
+        }
+        if(used[i]) continue;
+        ret |= dfs(i,p,v,used,c);
+    }
+    if(ret){
+        c.push_back(p);
+        if(r==p)return 0;
+    }
+    return ret;
+}
+
+signed main(){
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout << fixed << setprecision(20);
+
+    int n;
+    cin>>n;
+    Hash_init();
+    random_device seed;
+    vector<ll> rnd(MAX);
+    for(int i=0;i<MAX;i++)rnd[i]=seed();
+    for(int i=0;i<n;i++){
+        int a,b;
+        cin>>a>>b;
+        a--,b--;
+        v1[a].push_back(b);
+        v1[b].push_back(a);
+    }
+    for(int i=0;i<n;i++){
+        int a,b;
+        cin>>a>>b;
+        a--,b--;
+        v2[a].push_back(b);
+        v2[b].push_back(a);
+    }
+    dfs(0,-1,v1,used1,c1);
+    r=-1;
+    dfs(0,-1,v2,used2,c2);
+    if(c1.size() != c2.size()){
+        cout << "No\n";
+        return 0;
+    }
+    int m = (int)c1.size();
+    vector<bool> cused1(n), cused2(n);
+    for(int i=0;i<m;i++){
+        cused1[c1[i]] = 1;
+        cused2[c2[i]] = 1;
+    }
+    vector<ll> t11(m),t21(m+m);
+    vector<ll> t12(m),t22(m+m);
+    auto dfs1=[&](auto dfs1,int now,int p,vector<vector<int>> &v, vector<bool> &used)->pair<ll,ll>{
+        ll res=1,dep=0;
+        for(auto e:v[now]){
+            if(e==p)continue;
+            if(used[e]) continue;
+            auto [ha,de]=dfs1(dfs1,e,now,v,used);
+            (res*=ha)%=mod[1];
+            if(dep<de)dep=de;
+        }
+        return make_pair((res+rnd[dep])%mod[1],dep+1);
+    };
+    auto dfs2=[&](auto dfs1,int now,int p,vector<vector<int>> &v, vector<bool> &used)->pair<ll,ll>{
+        ll res=1,dep=0;
+        for(auto e:v[now]){
+            if(e==p)continue;
+            if(used[e]) continue;
+            auto [ha,de]=dfs1(dfs1,e,now,v,used);
+            (res*=ha)%=mod[2];
+            if(dep<de)dep=de;
+        }
+        return make_pair((res+rnd[dep])%mod[2],dep+1);
+    };
+    for(int i=0;i<m;i++){
+        t11[i] = dfs1(dfs1,c1[i],-1,v1,cused1).first;
+        t21[i] = dfs1(dfs1,c2[i],-1,v2,cused2).first;
+        t12[i] = dfs2(dfs2,c1[i],-1,v1,cused1).first;
+        t22[i] = dfs2(dfs2,c2[i],-1,v2,cused2).first;
+    }
+    for(int i=m;i<m+m;i++){
+        t22[i] = t22[i-m];
+        t21[i] = t21[i-m];
+    }
+    RolingHash h11(t11), h21(t21);
+    RolingHash h12(t12), h22(t22);
+    reverse(all(t21));
+    reverse(all(t22));
+    RolingHash rh21(t21), rh22(t22);
+    for(int i=0;i<m;i++){
+        if(h11.same(h21,0,m,i,i+m) && h12.same(h22,0,m,i,i+m)){
+            cout << "Yes\n";
+            return 0;
+        }
+        if(h11.same(rh21,0,m,i,i+m) && h12.same(rh22,0,m,i,i+m)){
+            cout << "Yes\n";
+            return 0;
+        }
+    }
+    cout << "No\n";
+
+
+}

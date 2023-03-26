@@ -1,0 +1,88 @@
+import java.util.Arrays;
+import java.util.Scanner;
+
+class Test{
+    
+    static int[] insert(int[] arr, int x)
+    {
+        int newarr[] = new int[arr.length + 1];
+
+        newarr[0] = x;
+        System.arraycopy(arr, 0, newarr, 1, arr.length);
+        
+        return newarr;
+    }
+
+    static int check(int[] arr, int value)
+    {
+        for (int i = 0; i < arr.length; i++) {
+            if (arr[i] == value) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    static int[] delete(int arr[], int x)
+    {
+        int pos = check(arr, x);
+
+        if (pos >= 0){
+            int newarr[] = new int[arr.length - 1];
+            for (int i = 0; i < arr.length; i++){
+                if (i == pos) continue;
+                else if (i > pos) newarr[i-1] = arr[i]; 
+                else newarr[i] = arr[i];
+            }
+            return newarr;
+        }
+
+        return arr;
+    }
+
+    static int[] deleteFirst(int[] arr){
+        int newarr[] = new int[arr.length - 1];
+        System.arraycopy(arr, 1, newarr, 0, arr.length-1);
+
+        return newarr;
+    }
+
+    static int[] deleteLast(int[] arr){
+        int newarr[] = new int[arr.length - 1];
+        System.arraycopy(arr, 0, newarr, 0, arr.length-1);
+
+        return newarr;
+    }
+
+    static void printArr(int[] arr){
+        System.out.println(Arrays.toString(arr).replaceAll("\\[", "").replaceAll("\\]","").replaceAll(",",""));
+    }
+
+    public static void main(String args[])
+    {
+        Scanner scan = new Scanner(System.in);
+
+        int numCmd = Integer.parseInt(scan.nextLine());
+        String in, cmd;
+        String[] split;
+        int value = 0;
+        int[] arr = new int[0];
+         
+        for(int i = 0; i < numCmd; i++){
+            in = scan.nextLine();
+            split = in.split("\\s+");
+            cmd = split[0];
+            if (split.length > 1) value = Integer.parseInt(split[1]);
+
+            if(cmd.equals("insert")) {arr = insert(arr, value);}
+            else if (cmd.equals("delete")) {arr = delete(arr, value);}
+            else if (cmd.equals("deleteFirst")) {arr = deleteFirst(arr);}
+            else if (cmd.equals("deleteLast")) {arr = deleteLast(arr);}
+
+
+            if(i % 10 == 0) System.gc();           
+        }
+   
+        printArr(arr);
+    }
+}

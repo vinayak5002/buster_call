@@ -1,0 +1,103 @@
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+
+#include <bits/stdc++.h>
+
+#define _overload(_1, _2, _3, _4, name, ...) name
+#define _rep1(Itr, N) _rep3(Itr, 0, N, 1)
+#define _rep2(Itr, a, b) _rep3(Itr, a, b, 1)
+#define _rep3(Itr, a, b, step) for (i64 Itr = a; Itr < b; Itr += step)
+#define repeat(...) _overload(__VA_ARGS__, _rep3, _rep2, _rep1)(__VA_ARGS__)
+#define rep(...) repeat(__VA_ARGS__)
+
+#define ALL(X) begin(X), end(X)
+
+using namespace std;
+using i64 = int64_t;
+using u64 = uint64_t;
+
+struct Point {
+  long double x, y, z;
+  Point(long double x, long double y, long double z) : x(x), y(y), z(z){};
+  Point() : x(0), y(0), z(0){};
+  Point operator+(Point rhs) const {
+    Point ret(x, y, z);
+    ret.x += rhs.x;
+    ret.y += rhs.y;
+    ret.z += rhs.z;
+    return ret;
+  };
+  Point operator-(Point rhs) const {
+    Point ret(x, y, z);
+    ret.x -= rhs.x;
+    ret.y -= rhs.y;
+    ret.z -= rhs.z;
+    return ret;
+  };
+  Point operator*(long double d) const {
+    Point ret(x, y, z);
+    ret.x *= d;
+    ret.y *= d;
+    ret.z *= d;
+    return ret;
+  }
+  Point operator/(long double d) const {
+    Point ret(x, y, z);
+    ret.x /= d;
+    ret.y /= d;
+    ret.z /= d;
+    return ret;
+  }
+  long double dist() { return sqrt(x * x + y * y + z * z); };
+};
+
+int main() {
+  cin.tie(nullptr);
+  ios::sync_with_stdio(false);
+
+  i64 n, q;
+  cin >> n >> q;
+  vector<Point> p(n);
+  vector<i64> r(n);
+  vector<i64> l(n);
+  rep(i, n) {
+    cin >> p[i].x >> p[i].y >> p[i].z;
+    cin >> r[i] >> l[i];
+  }
+  vector<Point> s(q);
+  vector<Point> d(q);
+  rep(i, q) {
+    cin >> s[i].x >> s[i].y >> s[i].z;
+    cin >> d[i].x >> d[i].y >> d[i].z;
+  }
+
+  const long double delta = 1e-9;
+  rep(i, q) {
+    i64 ans = 0;
+    Point v = (d[i] - s[i]) / (d[i] - s[i]).dist();
+    long double dist = (d[i] - s[i]).dist();
+    rep(j, n) {
+      long double a = 0;
+      long double b = dist;
+      rep(_, 308) {
+        long double c1 = (a * 2 + b) / 3.0;
+        long double c2 = (a + b * 2) / 3.0;
+
+        if ((p[j] - (s[i] + v * c1)).dist() >=
+            (p[j] - (s[i] + v * c2)).dist()) {
+          a = c1;
+        } else {
+          b = c2;
+        }
+      }
+
+      auto tmp = s[i] + v * a;
+      if ((p[j] - tmp).dist() <= r[j] + delta) {
+        ans += l[j];
+      }
+    }
+    cout << ans << endl;
+  }
+
+  return 0;
+}

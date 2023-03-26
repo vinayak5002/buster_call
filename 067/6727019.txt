@@ -1,0 +1,64 @@
+#include<stdio.h>
+#define MAX 500000
+
+int H;
+
+void maxHeapify(int A[],int i)
+{
+	int tmp, largest;
+	int l = 2 * i;
+	int r = 2 * i + 1;
+	// 左の子、自分、右の子で値が最大のノードを選ぶ
+	if(l <= H && A[l] > A[i])
+	{
+		largest = l;
+	}
+	else
+	{
+		largest = i;
+	}
+	
+	if(r <= H && A[r] > A[largest])
+	{
+		largest = r;
+	}
+	
+	if(largest != i) // i の子の方が値が大きい場合
+	{
+         tmp = A[i];
+         A[i] = A[largest];
+         A[largest] = tmp;
+         
+         maxHeapify(A, largest); // 再帰的に呼び出し
+    }
+}
+
+void buildMaxHeap(int A[])
+{
+	int i;
+	for(i = H / 2; i >=1; i--)
+	{
+        maxHeapify(A, i);
+	}
+}
+
+int main(void)
+{
+	int i, A[MAX];
+	
+	scanf("%d", &H);
+	
+	for(i = 1; i <= H; i++)
+	{
+		scanf("%d", &A[i]);
+	}
+	
+	buildMaxHeap(A);
+	
+	for(i = 1; i <= H; i++)
+	{
+		printf(" %d", A[i]);
+	}
+	
+	return 0;
+}

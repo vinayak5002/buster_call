@@ -1,0 +1,53 @@
+use std::io;
+
+fn main() {
+    const ROOM_SIZE: i32 = 10;
+    const FLOOR_SIZE: i32 = 3;
+    const BUILDING_SIZE: i32 = 4;
+    let mut s = String::new();
+    io::stdin().read_line(&mut s).expect("Error");
+
+    let mut room_list = vec![];
+    for i in 0..ROOM_SIZE as usize {
+        room_list.push(0);
+    }
+
+    let mut floor_list = vec![];
+    for i in 0..FLOOR_SIZE as usize {
+        floor_list.push(room_list.clone());
+    }
+
+    let mut building_list = vec![];
+    for i in 0..BUILDING_SIZE as usize {
+        building_list.push(floor_list.clone());
+    }
+
+    let n: i32 = s.trim().parse().unwrap_or(0);
+    for i in 0..n as usize {
+        let mut s = String::new();
+        io::stdin().read_line(&mut s).expect("Error");
+        let input_str: Vec<&str> = s.split_whitespace().collect();
+        let building = input_str[0].parse().unwrap_or(0);
+        let floor = input_str[1].parse().unwrap_or(0);
+        let room = input_str[2].parse().unwrap_or(0);
+        let v = input_str[3].parse().unwrap_or(0);
+
+        building_list[building - 1][floor - 1][room - 1] += v;
+    }
+
+    for i in 0..BUILDING_SIZE as usize {
+        for j in 0..FLOOR_SIZE as usize {
+            for k in 0..ROOM_SIZE as usize {
+                print!(" {}", building_list[i][j][k]);
+            }
+            println!();
+        }
+        if i != BUILDING_SIZE as usize - 1  {
+            for x in 0..20 {
+                print!("#");
+            }
+            println!();
+        }
+    }
+}
+

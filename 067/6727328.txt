@@ -1,0 +1,55 @@
+#include<stdio.h>
+
+void maxHeapify(int A[], int i, int H); // 部分木でヒープを作成
+void buildMaxHeap(int A[], int H); //木の範囲を大きくしていき最大ヒープを作成する
+
+
+int main(void){
+ int H, i;
+
+    scanf("%d", &H);
+
+    int a[H+1]; /*ノードの番号と配列の番号を同じ、1からにするため配列の要素を+1する*/
+    a[0] = 0;
+
+    for(i=1; i<H+1; i++){
+        scanf("%d", &a[i]);
+    }
+
+    buildMaxHeap(a, H);
+
+    for(i=1;i<H+1;i++){
+        printf(" %d", a[i]);
+    }  
+
+return 0;
+}
+
+void maxHeapify(int A[], int i, int H){
+    int l, r, t, largest;
+    l = 2*i;
+    r = 2*i+1;
+    // 左の子、自分、右の子で値が最大のノードを選ぶ
+    if(l <= H && A[l] > A[i]){
+        largest = l;
+    }
+    else{
+        largest = i;
+    }
+    if(r <= H && A[r] > A[largest]){
+        largest = r;
+    }
+    if(largest != i){// i の子の方が値が大きい場合
+        t = A[i];
+        A[i] = A[largest];
+        A[largest] = t;
+        maxHeapify(A, largest, H); // 再帰的に呼び出し
+    }
+}
+
+void buildMaxHeap(int A[], int H){
+    int i;
+   for(i = H/2; i >= 1; i--){
+        maxHeapify(A, i, H);
+   }
+}

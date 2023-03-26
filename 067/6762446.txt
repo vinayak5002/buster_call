@@ -1,0 +1,40 @@
+#include <stdio.h>
+8
+#define N 1000000 // 与えられるデータは 1000000 より小さい
+int n_tetra[N]; // 正四面体数の最小個数を入れる配列
+int n_odd_t[N]; // 奇数の正四面体数の最小個数を入れる配列
+// 1 <= x < N に対して n_tetra[x] と n_odd_t[x] を全て求める
+prepare()
+{
+ int x,j,tetra;
+ n_tetra[0] = n_odd_t[0] = 0;
+ 
+ for(x=1; x<N; x++){
+ n_tetra[x] = n_odd_t[x] = x; // 正四面体数 1 を x 個用いれば x を表現できる
+ for(j=1; ; j++){ // 各正四面体数に対して小さい方から順にチェック
+ tetra = j*(j+1)*(j+2)/6; // tetra は j 番目の正四面体数
+ if(tetra > x) break; // x より大きくなれば、
+// これ以降の正四面体数は用いられない
+ // この正四面体数を用いることにより、必要な正四面体数の個数が少なくなるなら、
+// その個数を採用
+ if(n_tetra[x] > n_tetra[x - tetra] + 1)
+n_tetra[x] = n_tetra[x - tetra] + 1;
+ if(tetra & 1){ // 正四面体数が奇数の場合も同様にチェック
+if(n_odd_t[x] > n_odd_t[x-tetra]+1)
+ n_odd_t[x] = n_odd_t[x-tetra]+1;
+ }
+ }
+ }
+}
+main()
+{
+ int x;
+ // まず最初に 1 <= x < N に対して n_tetra[x] と n_odd_t[x] を全て求めておく
+ prepare();
+ while(1){
+ scanf("%d", &x); // x を入力
+ if(x==0) break; // x == 0 なら終了
+ printf("%d %d¥n", n_tetra[x], n_odd_t[x]); // n_tetra[x]と n_odd_t[x]を出力
+ }
+}
+

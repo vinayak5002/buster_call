@@ -1,0 +1,98 @@
+#include <bits/stdc++.h>
+#pragma GCC optimize("Ofast")
+#define _GLIBCXX_DEBUG
+using namespace std;
+using std::cout;
+using std::cin;
+using std::endl;
+using ll=long long;
+using ld=long double;
+ll ILL=2167167167167167167;
+const int INF=100000000;
+const ll mod=1e9+7;
+#define rep(i,a) for (ll i=0;i<a;i++)
+#define all(p) p.begin(),p.end()
+template<class T> using _pq = priority_queue<T, vector<T>, greater<T>>;
+template<class T> ll LB(vector<T> &v,T a){return lower_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> ll UB(vector<T> &v,T a){return upper_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> bool chmin(T &a,const T &b){if(a>b){a=b;return 1;}else return 0;}
+template<class T> bool chmax(T &a,const T &b){if(a<b){a=b;return 1;}else return 0;}
+template<class T> void So(vector<T> &v) {sort(v.begin(),v.end());}
+template<class T> void Sore(vector<T> &v) {sort(v.begin(),v.end(),[](T x,T y){return x>y;});}
+void yneos(bool a){if(a) cout<<"Yes\n"; else cout<<"No\n";}
+template<class T> void vec_out(vector<T> &p){for(int i=0;i<(int)(p.size());i++){if(i) cout<<" ";cout<<p[i];}cout<<"\n";}
+
+
+
+void solve();
+// oddloop
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	
+	int t=1;
+	//cin>>t;
+	rep(i,t) solve();
+}
+
+void solve(){
+	int N,C,M=102;
+	cin>>N>>C;
+	vector<vector<int>> dp((N+1)*(N+1),vector<int>(M*M,INF));
+	int a,b,c;
+	cin>>a>>b>>c;
+	dp[0][a*M+b]=0;
+	int ans=0,val=0;
+	vector<pair<int,int>> order={{0,a*M+b}};
+	vector<int> X(N),Y(N),Z(N);
+	rep(i,N) cin>>X[i]>>Y[i]>>Z[i];
+	vector<int> dx={1,1,-1,-1,0,0};
+	vector<int> dy={0,-1,0,1,1,-1};
+	while(C>=val&&!order.empty()){
+		vector<pair<int,int>> n_order;
+		int ind=0;
+		while(ind!=(int)(order.size())){
+			if(dp[order[ind].first][order[ind].second]!=val){
+				ind++;
+				continue;
+			}
+			int battle=order[ind].first/(N+1);
+			int win=order[ind].first%(N+1);
+			int x=order[ind].second/M;
+			int y=order[ind].second%M;
+			//cout<<battle<<" "<<win<<" "<<x<<" "<<y<<" "<<val<<endl;
+			chmax(ans,win);
+			if(battle==N){
+				ind++;
+				continue;
+			}
+			rep(k,6){
+				int n_x=dx[k]+x,n_y=dy[k]+y;
+				int n_z=a+b+c-n_x-n_y;
+				if(min(n_x,min(n_y,n_z))==-1||max(n_x,max(n_y,n_z))==M) continue;
+				if(chmin(dp[order[ind].first][n_x*M+n_y],val+1)){
+					n_order.push_back({order[ind].first,n_x*M+n_y});
+				}
+			}
+			int J=0;
+			if(X[battle]<x) J++;
+			if(Y[battle]<y) J++;
+			if(Z[battle]<a+b+c-x-y) J++;
+			if(J>=2){
+				if(chmin(dp[order[ind].first+N+1+1][order[ind].second],val)){
+					order.push_back({order[ind].first+N+2,order[ind].second});
+				}
+			}else{
+				if(chmin(dp[order[ind].first+N+1][order[ind].second],val)){
+					order.push_back({order[ind].first+N+1,order[ind].second});
+				}
+			}
+			ind++;
+		}
+		val++;
+		swap(n_order,order);
+	}
+	cout<<ans<<"\n";
+}
+
+

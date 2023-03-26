@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define rep(i,n) for(i = 0;i < n;++i)
+#define all(v) v.begin(), v.end()
+using ll = long long;
+
+void dfs(ll now, ll parent, int depth, const vector<vector<ll>>& graph, vector<string>& ans)
+{
+    string tmp = "node " + to_string(now) + ": " + "parent = " + to_string(parent) + ", depth = " + to_string(depth) + ", ";
+    ans.at(now) = tmp;
+    if(parent == -1){
+        tmp += "root, ";
+    }else{
+        if(graph.at(now).size() == 0){
+            tmp += "leaf, ";
+        }else{
+            tmp += "internal node, ";
+        }
+    }
+    tmp += "[";
+    for(int i = 0;i < graph.at(now).size();++i){
+        int next = graph.at(now).at(i);
+        if(i != 0) tmp += ", ";
+        tmp += to_string(next);
+        dfs(next, now, depth + 1, graph, ans);
+    }
+    tmp += "]";
+    ans.at(now) = tmp;
+}
+
+int main()
+{
+    int n;
+    cin >> n;
+    vector<vector<ll>> graph(n);
+    vector<ll> nyuuji(n, 0);
+    vector<string> ans(n);
+    for(int i = 0;i < n;++i){
+        int id,k;
+        cin >> id >> k;
+        for(int j = 0;j < k;++j){
+            int c;
+            cin >> c;
+            graph.at(id).push_back(c);
+            ++nyuuji.at(c);
+        }
+    }
+    int root = -1;
+    for(int i = 0;i < n;++i){
+        if(nyuuji.at(i) == 0){
+            root = i;
+            break;
+        }
+    }
+    dfs(root, -1, 0, graph, ans);
+    for(int i = 0;i < n;++i){
+        cout << ans.at(i) << endl;
+    }
+
+    return 0;
+}
+

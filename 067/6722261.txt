@@ -1,0 +1,97 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#pragma GCC target("avx")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+
+struct Fast {
+  Fast() {
+    std::cin.tie(0);
+    ios::sync_with_stdio(false);
+  }
+} fast;
+
+unsigned int convert_code(string word) {
+  int num = word.size();
+  for (const auto &buf : word) {
+    switch (buf) {
+    case 'A':
+      num = num << 2 | 0;
+      break;
+    case 'C':
+      num = num << 2 | 1;
+      break;
+    case 'G':
+      num = num << 2 | 2;
+      break;
+    case 'T':
+      num = num << 2 | 3;
+      break;
+    }
+  }
+  return num;
+}
+
+class Dict {
+private:
+  const int m;
+  vector<int> ary;
+  unsigned int hash1(const unsigned int key) { return key % m; }
+  unsigned int hash2(const unsigned int key) { return 1 + (key % (m - 1)); }
+  unsigned int hash(const unsigned int key, const int i) {
+    return (hash1(key) + i * hash2(key)) % m;
+  }
+
+public:
+  Dict(const int num) : m(num), ary(num - 1, -1) {}
+  void insert(int code) {
+    int i = 0;
+    while (true) {
+      unsigned int j = hash(code, i);
+      if (ary[j] < 0) {
+        ary[j] = code;
+        return;
+      } else {
+        i++;
+      }
+    }
+  }
+
+  bool search(int code) {
+    int i = 0;
+    while (true) {
+      unsigned int j = hash(code, i);
+      if (ary[j] == code) {
+        return true;
+      } else if ((ary[j] < -1) || (i >= m)) {
+        return false;
+      } else {
+        i++;
+      }
+    }
+  }
+};
+
+int main() {
+  int n;
+  Dict dic(1046527);
+  cin >> n;
+  for (int i = 0; i < n; i++) {
+    string command, word;
+    cin >> command >> word;
+    const int code = convert_code(word);
+    if (command == "insert") {
+      dic.insert(code);
+    } else {
+      if (dic.search(code)) {
+        cout << "yes" << endl;
+      } else {
+        cout << "no" << endl;
+      }
+    }
+  }
+
+  return 0;
+}
+

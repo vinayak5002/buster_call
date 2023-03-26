@@ -1,0 +1,69 @@
+// C program for array round-robin scheduling
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+int main()
+{
+  int number_of_process,runtime, flag = 0,total = 0;
+  scanf("%d %d",&number_of_process,&runtime);
+  if (number_of_process >= 100001 || number_of_process < 1)
+    {
+      printf("Exceed  \n ");
+      return EXIT_FAILURE;      
+    }
+  if (runtime >= 10001 || runtime < 1)
+    {
+      printf("Exceed  \n ");
+      return EXIT_FAILURE;      
+    }  
+  char process[number_of_process][10], monitor[number_of_process][10];
+  int runtimeofProcess[number_of_process];
+  int total_time[number_of_process];
+  for (int i = 0; i < number_of_process; i++)
+    {
+      scanf("%s %d",process[i],&runtimeofProcess[i]);
+      if (process[i] < 0)
+        {
+          printf("Exceed possible process");
+          return EXIT_FAILURE;          
+        }
+      if (runtimeofProcess[i] < 1 || runtimeofProcess[i] >= 50000)
+        {
+          printf("Exceed possible runtime");
+          return EXIT_FAILURE;          
+        } 
+    }
+  while(flag < number_of_process)
+    {
+      for(int i = 0; i < number_of_process;i++)
+        {
+          if(runtimeofProcess[i] == -1)
+          {
+            continue;
+          }
+          else
+            {
+              if(runtimeofProcess[i] <= runtime)
+                {
+                  strcpy(monitor[flag],process[i]);
+                  total_time[flag] = total + runtimeofProcess[i];
+                  total = runtimeofProcess[i] + total;
+                  flag++;
+                  runtimeofProcess[i] = -1;
+                }
+              else
+                {
+                  runtimeofProcess[i] = runtimeofProcess[i] - runtime;
+                  total = total + runtime;
+                }
+            }
+        }
+    }
+  for(int i = 0; i < number_of_process; i++)
+    {
+      printf("%s %d",monitor[i],total_time[i]);
+      printf("\n");
+    }
+  return EXIT_SUCCESS;  
+}
+

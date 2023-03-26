@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+    string s;
+    while (true) {
+        cin >> s;
+        if (s == "#") break;
+        int n = s.size();
+        map<pair<int, int>, set<int>> mp;
+        auto dfs = [&](auto dfs, int l, int r) -> set<int> {
+            pair<int, int> key { l, r };
+            if (auto it = mp.find(key); it != mp.end()) return it->second;
+            int zpos = 0;
+            bool all_digits = true;
+            int lev = 0;
+            set<int> res;
+            for (int i = l; i < r; ++i) {
+                all_digits &= '0' <= s[i] and s[i] <= '9';
+                if (s[i] == '(') {
+                    ++lev;
+                } else if (s[i] == ')') {
+                    --lev;
+                }
+                if (lev == 0) {
+                    ++zpos;
+                    if (s[i] == '+') {
+                        auto sl = dfs(dfs, l, i);
+                        auto sr = dfs(dfs, i + 1, r);
+                        for (int x : sl) for (int y : sr) {
+                            res.insert(x + y);
+                        }
+                    } else if (s[i] == '-') {
+                        auto sl = dfs(dfs, l, i);
+                        auto sr = dfs(dfs, i + 1, r);
+                        for (int x : sl) for (int y : sr) {
+                            res.insert(x - y);
+                        }
+                    } else if (s[i] == '*') {
+                        auto sl = dfs(dfs, l, i);
+                        auto sr = dfs(dfs, i + 1, r);
+                        for (int x : sl) for (int y : sr) {
+                            res.insert(x * y);
+                        }
+                    } else if (s[i] == '/') {
+                        auto sl = dfs(dfs, l, i);
+                        auto sr = dfs(dfs, i + 1, r);
+                        for (int x : sl) for (int y : sr) if (y != 0) {
+                            res.insert(x / y);
+                        }
+                    }
+                }
+            }
+            if (all_digits) {
+                res.insert(stoi(s.substr(l, r - l)));
+                return mp[key] = res;
+            }
+            if (zpos == 1 and s[l] == '(' and s[r - 1] == ')') {
+                return mp[key] = dfs(dfs, l + 1, r - 1);
+            }
+            return mp[key] = res;
+        };
+        cout << dfs(dfs, 0, n).size() << endl;
+    }
+}

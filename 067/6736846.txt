@@ -1,0 +1,44 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+	int V, E, r;
+	cin >> V >> E >> r;
+	// 各辺のコスト
+	vector<tuple<int, int, int>>s_g_cost(E);
+	for (int a = 0; a < E; a++)
+	{
+		int s, g, cost;
+		cin >> s >> g >> cost;
+		s_g_cost[a] = make_tuple(s, g, cost);
+	}
+	const int INF = 1000000000 + 100;
+	// 始点から各頂点までのパスのコスト
+	vector<int>d(V, INF);
+	d[r] = 0;
+	// Bellman-Ford
+	for (int _ = 0; _ < V - 1; _++)
+	{
+		bool updateFlag = false;
+		for (int a = 0; a < E; a++)
+		{
+			int s = get<0>(s_g_cost[a]);
+			int g = get<1>(s_g_cost[a]);
+			int cost = get<2>(s_g_cost[a]);
+			if (d[g] > d[s] + cost)
+			{
+				d[g] = d[s] + cost;
+				updateFlag = true;
+			}
+		}
+		if (!updateFlag)
+			break;
+	}
+	for (int a = 0; a < V; a++)
+	{
+		if (d[a] == INF)
+			cout << "INF" << endl;
+		else
+			cout << d[a] << endl;
+	}
+}

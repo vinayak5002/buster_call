@@ -1,0 +1,121 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+/*
+  可変長配列 Vector 
+ */
+
+typedef struct cell {
+  int data;
+  struct cell *next;
+} Cell;
+
+// Vector 構造体(中身は単なる片方向リスト)
+typedef struct {
+  Cell *head;  // リストの先頭
+  Cell *tail;  // リストの最後尾
+} Vector;
+
+int pos;
+Vector v_pre, v_in, v_post;
+Cell *p;
+
+// Vector の初期化
+void init_vector(Vector *vec)
+{
+  vec->head = vec->tail = NULL;
+}
+
+// Vector の最後尾に cell を追加
+void push_back(Vector *vec, int data)
+{
+  Cell *x = malloc(sizeof(Cell));
+
+  x->data = data;
+  x->next = NULL;
+
+  if (vec->tail == NULL)
+    vec->head = vec->tail = x;
+  else { 
+    vec->tail->next = x;
+    vec->tail = x;
+  }
+}
+
+int size_vector(Cell *first){
+	int count = 0;
+	for(Cell *p = first; p != NULL; p = p->next){
+		count++;
+	}
+	
+	return count;
+}
+
+int distance_vector(Cell *p, int number){
+	int count = 0;
+	for(Cell *h = p ; p != NULL; p = p->next){
+		if(p->data != number){
+			count++;
+		}
+		
+		else{
+			break;
+		}
+	}
+	
+	return count;
+}
+
+void rec(int l, int r){
+	if(l >= r){
+		return;
+	}
+	
+	int root = p->data;
+	p = p->next;
+	int m = distance_vector(v_in.head, root);
+	rec(l, m);
+	rec(m + 1, r);
+	push_back(&v_post, root);
+}
+	
+
+void solve(){
+	pos = 0;
+	rec(0, size_vector(v_pre.head));
+	Cell *h = v_post.head;
+	for(int i = 0; i < size_vector(v_post.head); i++){
+		printf("%d",h->data);
+		if(h->next != NULL){
+			printf(" ");
+		}
+		h = h->next;
+	}
+	
+	printf("\n");
+}
+
+int main (void){
+	int n, data;
+	
+	init_vector(&v_pre);
+	init_vector(&v_in);
+	init_vector(&v_post);
+	scanf("%d", &n);
+	
+	for(int i = 0; i < n; i++){
+		scanf("%d", &data);
+		push_back(&v_pre, data);
+	}
+	
+	for(int i = 0; i < n; i++){
+		scanf("%d", &data);
+		push_back(&v_in, data);
+	}
+	
+	p = v_pre.head;
+	
+	solve();
+	
+	return 0;
+}

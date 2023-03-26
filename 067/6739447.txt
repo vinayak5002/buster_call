@@ -1,0 +1,47 @@
+from bisect import *
+
+#nの約数のうち, upper以下のものを列挙
+def make_divisors(n, upper):
+    lower_divisors , upper_divisors = [], []
+    i = 1
+    while i*i <= n:
+        if n % i == 0:
+            if i <= upper:
+                lower_divisors.append(i)
+            else:
+                break
+            if i != n // i and n // i <= upper:
+                upper_divisors.append(n//i)
+        i += 1
+    return lower_divisors + upper_divisors[::-1]
+
+#return min(d + h)   s.t. x = d * h
+def min_d_plus_h(x):
+    i = bisect_right(div, int(x**.5)+1)-1
+    while x % div[i]:
+        i -= 1
+    return div[i] + (x // div[i])
+
+
+ans_list = []
+
+while True:
+    p = int(input())
+    if p == 0:
+        break
+
+    upper = int(p**(2/3)) + 1
+    div = make_divisors(p, upper)
+
+    ans = p + 2
+
+    for dh in reversed(div):
+        w = p // dh
+        if w > ans:
+            break
+        ans = min(ans, min_d_plus_h(dh) + w)
+
+    ans_list.append(ans)
+
+print(*ans_list, sep = "\n")
+

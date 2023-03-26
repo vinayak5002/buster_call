@@ -1,0 +1,65 @@
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <queue>
+#include <climits>
+#include <optional>
+
+using namespace std;
+
+struct aaa{aaa(){cin.tie(nullptr); ios::sync_with_stdio(false); cout<<fixed<<setprecision(20);};}aaa;
+template <class T>ostream &operator<<(ostream &o,const optional<T>&v){o<<(v? to_string(v.value()) : "-");return o;}
+template <class T>ostream &operator<<(ostream &o,const vector<T>&v){o<<"{";for(int i=0;i<(int)v.size();i++)o<<(i>0?", ":"")<<v[i];o<<"}";return o;}
+#define debug(v) {cerr<<"\033[1;36m[debug]\033[m "<<#v<<" : "<<(v)<<endl;}
+
+vector dx = {0,0,1,-1};
+vector dy = {1,-1,0,0};
+
+
+int dfs(int x, int y, int gx, int gy, int w, int h, int c, vector<vector<int>>& s) {
+    if (x == gx && y == gy) return c;
+    if (c > 10) return INT_MAX;
+
+    int res = INT_MAX / 2;
+
+    for (int i=0; i<4; i++) {
+        int nx = x, ny = y;
+        while (0 <= nx && nx < w && 0 <= ny && ny < h && s[ny][nx] == 0) {
+            nx += dx[i];
+            ny += dy[i];
+        }
+
+        if (nx == gx && ny == gy) {
+            return c + 1;
+        }
+        if (0 <= nx && nx < w && 0 <= ny && ny < h && s[ny][nx] == 1) {
+            if (nx - dx[i] == x && ny - dy[i] == y) { continue; }
+            s[ny][nx] = 0;
+            res = min(res, dfs(nx - dx[i], ny - dy[i], gx, gy, w, h, c + 1, s));
+            s[ny][nx] = 1;
+        }
+    }
+    return res;
+}
+
+int main() {
+    int h, w;
+    vector s = vector(0, vector(0, 0));
+    while (cin >> w >> h, h||w) {
+        s.resize(h, vector(w, 0));
+        for (int i=0; i<h; i++) { s[i].resize(w,0); }
+        for (int i =0; i<h; i++) for (int j =0; j<w; j++) cin >> s[i][j];
+        
+        int sx, sy;
+        int gx, gy;
+        for (int i=0; i<h; i++) for (int j=0; j<w; j++) {
+            if (s[i][j] == 2) { s[i][j] = 0; sy = i; sx = j; }
+            if (s[i][j] == 3) { gy = i; gx = j; }
+        }
+
+
+        int ans = dfs(sx, sy, gx, gy, w, h, 0, s);
+        if (ans >= 11) cout << "-1" << endl;
+        else cout << ans << endl;
+    }
+}

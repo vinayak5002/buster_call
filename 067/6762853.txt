@@ -1,0 +1,142 @@
+#include<stdio.h>
+
+int main(void){
+    
+    // n,mは長方形の紙の幅,高さで、32以下の正整数
+    // t,pは折る操作,穴をあける操作の回数で、20以下の正整数
+    int n=1,m,t,p;
+
+    while(n!=0&&m!=0&&t!=0&&p!=0){
+
+        // ↓nの標準入力
+        scanf("%d %d %d %d", &n,&m,&t,&p);
+        if(n==0&&m==0&&t==0&&p==0){
+            break;
+        }
+
+        // ↓処理
+
+        int paper[m][n]; // m行n列のpaperを1で初期化
+        int j,k;
+        for(j=0;j<m;j++){
+            for(k=0;k<n;k++){
+                paper[j][k]=1;
+            }
+        }
+
+        int ans=0; // 出力用の変数
+
+        // ↓d,cの標準入力
+        int i;
+        for(i=1;i<=t;i++){
+            int d,c;
+            scanf("%d %d",&d,&c);
+
+            if((d==1 && c>(int)(n/2))||(d==2 && c>(int)(m/2))){
+
+                if (d==1){
+                    int temp[m][c];
+                    for(j=0;j<m;j++){
+                        for(k=0;k<c;k++){
+                            temp[j][k]=0;
+                        }
+                    }
+
+                    for(j=0;j<m;j++){
+                        for(k=0;k<c;k++){
+                            temp[j][k]=paper[j][c-k-1];
+                            paper[j][c-k-1]=0;
+                        }
+                    }
+
+                    for(j=0;j<m;j++){
+                        for(k=c;k<n;k++){
+                            paper[j][k-c]=paper[j][k];
+                            if (k>(n-c)){
+                                paper[j][k]=0;
+                            }
+                        }
+                    }
+                            
+                    for(j=0;j<m;j++){
+                        for(k=0;k<c;k++){
+                            paper[j][k]+=temp[j][k];
+                        }
+                    }
+                }else if (d==2){
+
+                    int temp[c][n];
+                    for(j=0;j<m;j++){
+                        for(k=0;k<c;k++){
+                            temp[j][k]=0;
+                        }
+                    }
+
+                    for(j=0;j<c;j++){
+                        for(k=0;k<n;k++){
+                            temp[j][k]=paper[m-j-1][k];
+                            paper[m-j-1][k]=0;
+                        }
+                    }
+                            
+                    for(j=c;j<m;j++){
+                        for(k=0;k<n;k++){
+                            paper[m-(j-c)-1][k]=paper[m-j-1][k];
+                            if(j>(m-c)){
+                                paper[m-j-1][k]=0;
+                            }
+                        }
+                    }
+                                
+                    for(j=0;j<c;j++){
+                        for(k=0;k<n;k++){
+                            paper[m-j-1][k]+=temp[c-j-1][k];
+                        }
+                    }
+                }
+            }else{
+                if(d==1){
+                    for(j=0;j<c;j++){
+                        for(k=0;k<m;k++){
+                            paper[k][c+j]+=paper[k][c-1-j];
+                            paper[k][c-1-j]=0;
+                        }
+                    }
+                            
+                    for(j=0;j<m;j++){
+                        for(k=c;k<n;k++){
+                            paper[j][k-c]=paper[j][k];
+                            paper[j][k]=0;
+                        }
+                    }
+                }else if(d==2){
+
+                    for(j=0;j<c;j++){
+                        for(k=0;k<n;k++){
+                            paper[m-c-j-1][k]+=paper[m-c+j][k];
+                            paper[m-c+j][k]=0;
+                        }
+                    }
+
+                    for(j=c;j<m;j++){
+                        for(k=0;k<n;k++){
+                            paper[m-j+c-1][k]=paper[m-j-1][k];
+                            if(j>(j-c)){
+                                paper[m-j-1][k]=0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            int x,y;
+            for(j=0;j<p;j++){
+                scanf("%d %d",&x,&y);
+                ans=paper[m-1-y][x];
+                printf("%d\n",ans);
+            }
+        
+        }
+    }
+    return 0;
+}

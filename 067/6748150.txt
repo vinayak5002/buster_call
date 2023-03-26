@@ -1,0 +1,117 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using ld = long double;
+
+//only for atcoder
+//#include<atcoder/all>
+//using namespace atcoder;
+
+#define rep(i,l,r) for(ll i=(l); i<(r); i++)
+#define rrep(i,l,r) for(ll i=(r)-1; i>=(l); i--)
+#define ALL(c) (c).begin(), (c).end()
+#define RALL(c) (c).rbegin(), (c).rend()
+#define SORT(c) sort(ALL(c))
+#define RSORT(c) sort(RALL(c))
+#define MINV(c) *min_element(ALL(c))
+#define MAXV(c) *max_element(ALL(c))
+
+using VI = vector<int>;
+using VVI = vector<VI>;
+using VL = vector<ll>;
+using VVL = vector<VL>;
+using VS = vector<string>;
+using VVS = vector<VS>;
+using VB = vector<bool>;
+using VVB = vector<VB>;
+using VC = vector<char>;
+using VVC = vector<VC>;
+using VD = vector<ld>;
+using VVD = vector<VD>;
+using P = pair<ll,ll>;
+using VP = vector<P>;
+const ll LINF = 2e18;
+const int INF = 2e9;
+
+const int MAXN = 201;
+const int MAXW = 10001;
+const int MOD = 1e9+7;
+int dp[MAXN][MAXW];
+int dp2[MAXN][MAXW];
+
+void solve(){
+  int N, W;
+  cin >> N >> W;
+  VI vec(N);
+  rep(i,0,N){
+    cin >> vec[i];
+  }
+  SORT(vec);
+  
+  dp[N][vec[0]] = 1;
+  dp[0][0] = 1;
+  
+  rep(i,0,N-1){
+    rep(j,0,N+1){
+      rep(k,0,W+1){
+        if(dp[j][k] == 0){
+          continue;
+        }
+        //use
+        if(k + vec[i+1] <= W){
+          dp2[j][k+vec[i+1]] += dp[j][k];
+          dp2[j][k+vec[i+1]] %= MOD;
+        }
+               
+        //not use
+        if(j == N){
+          dp2[i+1][k] += dp[j][k];
+          dp2[i+1][k] %= MOD;
+        }
+        else{
+          dp2[j][k] += dp[j][k];
+          dp2[j][k] %= MOD;
+        }
+      }
+    }
+    rep(j,0,N+1){
+      rep(k,0,W+1){
+        dp[j][k] = dp2[j][k];
+        dp2[j][k] = 0;
+      }
+    }
+  }
+  
+  ll ans = 0;
+  rep(j,0,N+1){
+    rep(k,0,W+1){
+      if(j == N){
+        ans += dp[j][k];
+      }
+      else if(W-k < vec[j]){
+        ans += dp[j][k];
+      }
+    }
+  }
+  cout << ans % MOD << endl;
+}
+
+int main(){
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  //cin >> T;
+  T = 1;
+  for(int i=0; i<T; i++){
+    solve();
+  }
+  
+  /*while(true){
+    int N, M;
+    cin >> N >> M;
+    if(N == 0){
+      return 0;
+    }
+    solve(N,M);
+  }*/
+}

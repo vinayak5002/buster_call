@@ -1,0 +1,58 @@
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int[][] times;
+        int[][] costs;
+        while (true) {
+            int rail_num = sc.nextInt();
+            int station_num = sc.nextInt();
+            if(rail_num == 0) break;
+            times = new int[station_num][station_num];
+            costs = new int[station_num][station_num];
+            for (int i = 0; i < station_num; i++) {
+                Arrays.fill(costs[i], 101*1000);
+                Arrays.fill(times[i], 101*1000);
+                costs[i][i] = 0;
+                times[i][i] = 0;
+            }
+            for (int i = 0; i < rail_num; i++) {
+                int a = sc.nextInt()-1;
+                int b = sc.nextInt()-1;
+                costs[a][b] = costs[b][a] = sc.nextInt();
+                times[a][b] = times[b][a] = sc.nextInt();
+            }
+
+            for (int z = 0; z < station_num; z++) {
+                for (int i = 0; i < station_num; i++) {
+                    for (int j = 0; j < station_num; j++) {
+                        if (i == j) continue;
+                        for (int k = 0; k < station_num; k++) {
+                            if (i==k || k==j) continue;
+                            times[i][j] = times[j][i] = Math.min(times[i][j], times[i][k]+times[k][j]);
+                            costs[i][j] = costs[j][i] = Math.min(costs[i][j], costs[i][k]+costs[k][j]);
+                        }
+                    }
+                }
+
+            }
+
+            int k = sc.nextInt();
+            for (int i = 0; i < k; i++) {
+                int p = sc.nextInt()-1;
+                int q = sc.nextInt()-1;
+                int r = sc.nextInt();
+                if (r == 0) {
+                    System.out.println(costs[p][q]);
+                } else {
+                    System.out.println(times[p][q]);
+                }
+            }
+
+        }
+        sc.close();
+    }
+}
+

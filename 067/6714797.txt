@@ -1,0 +1,82 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+)
+
+func main() {
+	sc := bufio.NewScanner(os.Stdin)
+	sc.Split(bufio.ScanWords)
+
+	sc.Scan()
+	n, _ := strconv.Atoi(sc.Text())
+
+	v := make([][]int, n)
+	for i := 0; i < n; i++ {
+
+		for j := 0; j < n; j++ {
+			sc.Scan()
+			s, _ := strconv.Atoi(sc.Text())
+
+			v[i] = append(v[i], s)
+		}
+	}
+
+	done = append(done, 0)
+	minimum(v, 0)
+
+	fmt.Println(ans)
+}
+
+var done []int
+var ans int
+
+func isDone(value int) bool {
+	for _, v := range done {
+		if v == value {
+			return true
+		}
+	}
+	return false
+}
+
+func minimum(v [][]int, s int) {
+
+	var min int = 9999
+	var next int = 9999
+
+	for _, d := range done {
+		for index, value := range v[d] {
+			if value == -1 {
+				continue
+			}
+
+			if min > value && !isDone(index) {
+				min = value
+				next = index
+			}
+		}
+	}
+
+	for index, value := range v[s] {
+		if value == -1 {
+			continue
+		}
+
+		if min > value && !isDone(index) {
+			min = value
+			next = index
+		}
+	}
+
+	if next != 9999 {
+		done = append(done, next)
+		ans += min
+
+		minimum(v, next)
+	}
+}
+

@@ -1,0 +1,108 @@
+/**
+ * @file ALDS1_5_D.cpp
+ * @author skawaguc
+ * @brief
+ * https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_5_D&lang=jp
+ * @version 0.1
+ * @date 2022-06-19
+ *
+ * @copyright Copyright (c) 2022
+ *
+ */
+#define NDEBUG
+#include <algorithm>
+#include <cassert>
+#include <iostream>
+#include <vector>
+
+using namespace std;
+#define rep2(i, a, b) for (int i = (int)(a); i < (int)(b); i++)
+#define rep(i, b) rep2(i, 0, b)
+#define rrep2(i, b, a) for (int i = (int)(b); i >= (int)(a); i--)
+#define rrep(i, b) rrep2(i, b, 0)
+typedef long long ll;
+
+int n;
+vector<int> a;
+
+void get_input();
+void solve();
+
+vector<ll> bit;
+ll sum(int i);
+void add(int i, ll x);
+
+/**
+ * @brief メイン処理.
+ *
+ * @return int 0
+ */
+int main() {
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+
+  // 標準入力を取得
+  get_input();
+
+  // 求解処理
+  solve();
+
+  return 0;
+}
+
+/**
+ * @brief 標準入力を取得する.
+ *
+ */
+void get_input() {
+  cin >> n;
+  a.resize(n);
+  rep(i, n) cin >> a[i];
+}
+
+/**
+ * @brief 求解処理.
+ *
+ */
+void solve() {
+  vector<int> b = a;
+  sort(b.begin(), b.end());
+  rep(i, n) a[i] = lower_bound(b.begin(), b.end(), a[i]) - b.begin() + 1;
+
+  bit.resize(n + 1);
+  ll ans = 0;
+  rep(i, n) {
+    ans += i - sum(a[i]);
+    add(a[i], 1);
+  }
+  cout << ans << endl;
+}
+
+/**
+ * @brief iまでの和を求める.（O(log(n))）
+ *
+ * @param i 要素番号
+ * @return ll iまでの和
+ */
+ll sum(int i) {
+  int s = 0;
+  while (i > 0) {
+    s += bit[i];
+    i -= i & -i;
+  }
+  return s;
+}
+
+/**
+ * @brief iの値にxを加える.（O(log(n))）
+ *
+ * @param i 要素番号
+ * @param x 値
+ */
+void add(int i, ll x) {
+  while (i <= n) {
+    bit[i] += x;
+    i += i & -i;
+  }
+}
+

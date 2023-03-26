@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define llint int64_t
+#define INF 10000000000
+int merge(vector<llint> &S, llint left, llint mid, llint right, llint &cnt){
+    llint n1 = mid - left, n2 = right - mid;
+    vector<llint> L(n1 + 1);
+    vector<llint> R(n2 + 1);
+    for(llint i = 0;i < n1;i++) L.at(i) = S.at(left + i);
+    for(llint i = 0;i < n2;i++) R.at(i) = S.at(mid + i);
+    L.at(n1) = INF;
+    R.at(n2) = INF;
+    llint i = 0, j = 0;
+    for(llint k = left;k < right;k++){
+        if(L.at(i) <= R.at(j)){
+            S.at(k) = L.at(i);
+            i++;
+            cnt++;
+        } else {
+            S.at(k) = R.at(j);
+            j++;
+            cnt++;
+        }
+    }
+    return 0;
+}
+int mergeSort(vector<llint> &S, llint left, llint right, llint &cnt){
+    if(left + 1 < right){
+        llint mid = (left + right) / 2;
+        mergeSort(S, left, mid, cnt);
+        mergeSort(S, mid, right, cnt);
+        merge (S, left, mid, right, cnt);
+    }
+    return 0;
+}
+int main(){
+    llint n, cnt = 0;
+    cin >> n;
+    vector<llint> S(n);
+    for(llint i = 0;i < n;i++) cin >> S.at(i);
+    mergeSort(S, 0, n, cnt);
+    for(llint i = 0;i < n - 1;i++){
+        cout << S.at(i) << " ";
+    }
+    cout << S.at(n - 1) << endl;
+    cout << cnt << endl;
+    return 0;
+}

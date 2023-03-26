@@ -1,0 +1,32 @@
+def dfs(pos):
+  global order
+  first_order[pos] = order
+  order += 1
+  
+  seen[pos] = True
+  for next in G[pos]:
+    if seen[next]:
+      continue
+    dfs(next)
+  
+  last_order[pos] = order
+  order += 1
+
+N = int(input())
+G = [list() for _ in range(N)]
+for i in range(N):
+  line = list(map(int, input().split()))
+  u = line[0]; k = line[1]; V = line[2:]
+  V = [v-1 for v in V]
+  G[u-1] += V
+
+seen = [False]*N
+first_order = [0]*N
+last_order = [0]*N
+global order
+order = 1
+
+dfs(0)
+
+for i in range(N):
+  print("%d %d %d" %(i+1, first_order[i], last_order[i]))

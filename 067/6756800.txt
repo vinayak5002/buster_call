@@ -1,0 +1,143 @@
+import sys
+sys.setrecursionlimit(500500)
+
+while 1:
+    S = input()
+    if S == "-1":
+        break
+    ind = [0]
+    tot = 0
+    n = 0
+    for i, s in enumerate(S, 1):
+        if s == "(":
+            tot += 1
+        elif s == ")":
+            tot -= 1
+        else:
+            n += 1
+            if tot == 0 and s in "+-":
+                ind.append(i)
+                ss = s
+    ind.append(len(S) + 1)
+    n -= 1
+    ind_ = 1
+    A = [0] * n
+    if ss == "+":
+        A[0] = -1
+    else:
+        A[0] = -2
+
+    edges = [[] for _ in range(n)]
+    for i in range(3):
+        num = [[]]
+        ope = [[]]
+        for j in range(ind[i], ind[i + 1] - 1):
+            if S[j] == "(":
+                num.append([])
+                ope.append([])
+            elif S[j] == ")":
+                nn = num.pop()
+                oo = ope.pop()
+                o = oo[0]
+                if ope[-1]:
+                    num[-1].append(o)
+                    edges[o].append(ope[-1][0])
+                    edges[ope[-1][0]].append(o)
+                else:
+                    num[-1].append(o)
+            elif S[j].isnumeric():
+                s = int(S[j])
+                A[ind_] = s
+                if ope[-1]:
+                    num[-1].append(ind_)
+                    edges[ind_].append(ope[-1][0])
+                    edges[ope[-1][0]].append(ind_)
+                else:
+                    num[-1].append(ind_)
+                ind_ += 1
+            elif S[j] == "+":
+                A[ind_] = -1
+                ope[-1].append(ind_)
+                edges[num[-1][0]].append(ind_)
+                edges[ind_].append(num[-1][0])
+                ind_ += 1
+            else:
+                A[ind_] = -2
+                ope[-1].append(ind_)
+                edges[num[-1][0]].append(ind_)
+                edges[ind_].append(num[-1][0])
+                ind_ += 1
+        edges[0].append(num[0][0])
+        edges[num[0][0]].append(0)
+    
+    max_ = [-1] * n
+    min_ = [-1] * n
+    def dfs(pos, bpos):
+        if A[pos] >= 0:
+            max_[pos] = A[pos]
+            min_[pos] = A[pos]
+            return
+        ma = []
+        mi = []
+        for npos in edges[pos]:
+            if npos == bpos:
+                continue
+            dfs(npos, pos)
+            ma.append(max_[npos])
+            mi.append(min_[npos])
+        if A[pos] == -1:
+            max_[pos] = sum(ma)
+            min_[pos] = sum(mi)
+        else:
+            max_[pos] = max(a + i for a, i in zip(ma, mi)) - sum(mi)
+            min_[pos] = min(a + i for a, i in zip(ma, mi)) - sum(ma)
+    dfs(0, -1)
+    ans = -1 << 30
+
+    def dfs2(pos, bpos):
+        if A[pos] >= 0:
+            return
+        ma = []
+        mi = []
+        for npos in edges[pos]:
+            ma.append(max_[npos])
+            mi.append(min_[npos])
+        
+        if A[pos] == -1:
+            max_[pos] = sum(ma)
+            min_[pos] = sum(mi)
+        else:
+            max_[pos] = max(a + i for a, i in zip(ma, mi)) - sum(mi)
+            min_[pos] = min(a + i for a, i in zip(ma, mi)) - sum(ma)
+        global ans
+        ans = max(ans, max_[pos])
+        
+        for i, npos in enumerate(edges[pos]):
+            if npos == bpos:
+                continue
+            if i == 0:
+                ma1 = ma[1]
+                ma2 = ma[2]
+                mi1 = mi[1]
+                mi2 = mi[2]
+            elif i == 1:
+                ma1 = ma[0]
+                ma2 = ma[2]
+                mi1 = mi[0]
+                mi2 = mi[2]
+            else:
+                ma1 = ma[1]
+                ma2 = ma[0]
+                mi1 = mi[1]
+                mi2 = mi[0]
+            if A[pos] == -1:
+                max_[pos] = ma1 + ma2
+                min_[pos] = mi1 + mi2
+            else:
+                max_[pos] = max(ma1 - mi2, ma2 - mi1)
+                min_[pos] = min(mi1 - ma2, mi2 - ma1)
+            dfs2(npos, pos)
+    
+    dfs2(0, -1)
+    print(ans)
+

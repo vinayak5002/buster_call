@@ -1,0 +1,62 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+
+//AOJ0117 A reward for a Carpenter
+//https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0117&lang=jp
+
+int N, M, A, B, C, D, s, g, V, P;
+const int inf = 1001001001;
+int K[29][29];
+
+//今回は，Floyd-Warshall法を用いる．
+
+int main(){
+    scanf("%d%d", &N, &M);
+    for(int i=1; i<=N; i++){
+        for(int j=1; j<=N; j++){
+            K[i][j] = inf;
+        }
+    }
+
+    for(int i=0; i<M; i++){
+        scanf("%d, %d, %d, %d", &A, &B, &C, &D);//","で仕切られた入力の場合は，scanf関数を使うと良い！
+        K[A][B] = C;
+        K[B][A] = D;
+    }
+/*
+    for(int i=1; i<=N; i++){
+        for(int j=1; j<=N; j++){
+            cout << K[i][j] << ' ';
+        }
+        cout << endl;
+
+    }
+*/
+
+    for (int k=1; k<=N; k++){
+        for(int i=1; i<=N; i++){
+            for(int j=1; j<=N; j++){
+                if (K[i][j] > K[i][k] + K[k][j]){
+                    K[i][j] = K[i][k] + K[k][j];
+                }
+            }
+        }
+        /*
+        cout << " k = " << k << endl;
+        for(int i=1; i<=N; i++){
+            for(int j=1; j<=N; j++){
+                cout << K[i][j] << ' ';
+            }
+            cout << endl;
+
+        }
+        */
+        
+    }
+
+    scanf("%d, %d, %d, %d", &s, &g, &V, &P);
+    cout << V - P - K[s][g] - K[g][s] << endl;
+
+    
+}

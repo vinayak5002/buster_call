@@ -1,0 +1,431 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+template<typename key_t, typename val_t, class Compair = less<key_t>>
+struct FibonacciHeap{
+  struct Node;
+  using Np = Node *;
+  
+  struct Node{
+    key_t key;
+    val_t val;
+    Node() = default;
+    Node(const key_t &key, const val_t &val): key(key), val(val) {}
+
+    Np p = nullptr, child = nullptr, left = this, right = this;
+
+    size_t degree = 0;  
+    bool mark = false;
+  };
+private:
+
+  Np root;
+  size_t sz;
+  Compair cmp;
+
+  void insert(Np &p1, Np &p2){
+    Np rr = p1->right;
+    p1->right = p2; p2->left = p1;
+    p2->right = rr; rr->left = p2;
+  }
+
+  void merge(Np &p1, Np &p2){
+    Np r1 = p1->right, r2 = p2->left;
+    p1->right = p2; p2->left = p1;
+    r2->right = r1; r1->left = r2;
+  }
+
+  vector<Np> get_Np_list(Np r){
+    assert(!!r);
+    vector<Np> nps;
+    Np w = r;
+    do{
+      nps.push_back(w);
+      w = w->right;
+    }while(w != r);
+    return nps;
+  }
+
+  void consolidate(){
+    vector<Np> a, nps = get_Np_list(root);
+
+    for(Np w : nps){
+      Np x = w;
+      size_t d = x->degree;
+      
+      while(d < a.size() && !!a[d]){
+        Np y = a[d];
+        if(cmp(y->key, x->key)) swap(x, y);
+        heap_link(y, x);
+        a[d] = nullptr;
+        ++d;
+      }
+
+      if(a.size() <= d) a.resize(d + 1, nullptr);
+      a[d] = x;
+    }
+    root = nullptr;
+    for(Np x : a){
+      if(!x) continue;
+      if(!root){
+        x->left = x->right = x;
+        root = x;
+      }else{
+        insert(root, x);
+        if(cmp(x->key, root->key)) root = x;
+      }
+    }
+    assert(!!root);
+  }
+
+  void heap_link(Np &y, Np &x){
+    if(y->right != y) delete_node(y);
+    if(!x->child) x->child = y;
+    else insert(x->child, y);
+    y->p = x;
+    x->degree += 1;
+    y->mark = false;
+  }
+
+  void cascading_cut(Np &y){
+    Np z = y->p;
+    if(!!z){
+      if(!y->mark) y->mark = true;
+      else{
+        cut(y, z);
+        cascading_cut(z);
+      }
+    }
+  }
+
+  void erase(Np &x, const key_t &linf){
+    decrease(x, linf);
+    pop();
+  }
+
+  void delete_node(Np &x){
+    Np l = x->left, r = x->right;
+    l->right = r; r->left = l;
+    x->left = x->right = x;
+  }
+
+  void cut(Np &x, Np &y){
+    if(x->right == x){
+      y->child = nullptr;
+    }else{
+      y->child = x->right;
+      delete_node(x);
+    }
+    y->degree -= 1;
+    insert(root, x);
+    x->p = nullptr;
+    x->mark = false;
+  }
+
+public:
+  FibonacciHeap(const Compair &cmp = Compair{}): root(nullptr), sz(0), cmp(cmp) {}
+  FibonacciHeap(const FibonacciHeap&) = default;
+  FibonacciHeap(FibonacciHeap&&) = default;
+
+  FibonacciHeap &operator=(const FibonacciHeap&) = default;
+  FibonacciHeap &operator=(FibonacciHeap&&) = default;
+
+  size_t size() const { return sz; }
+  bool empty() const { return !sz; }
+
+  pair<key_t, val_t> top() const {
+    assert(!!root);
+    return {root->key, root->val};
+  }
+
+  Np push(const key_t &key, const val_t &val){
+    Np x = new Node(key, val);
+
+    if(!root){
+      root = x;
+    }else{
+      insert(root, x);
+      if(cmp(key, root->key)) root = x;
+    }
+
+    ++sz;
+    return x;
+  }
+
+  void merge(FibonacciHeap &h2){
+    if(!h2.root) return;
+    sz += h2.sz;
+
+    if(!root){
+      root = h2.root;
+      h2.root = nullptr;
+      h2.sz = 0;
+      return;
+    }
+    merge(root, h2.root);
+    if(cmp(h2.root->key, root->key)) root = h2.root;
+    h2.root = nullptr;
+    h2.sz = 0;
+  }
+
+  pair<key_t, val_t> pop(){
+    assert(("can't pop" ,!!root));
+    pair<key_t, val_t> res = {root->key, root->val};
+
+    Np c = root->child;
+
+    if(!!c){
+      vector<Np> nps = get_Np_list(c);
+      for(Np x : nps){
+        insert(root, x);
+        x->p = nullptr;
+      }
+    }
+
+    if(root->right == root){
+      delete root;
+      root = nullptr;
+    }else{
+      Np z = root;
+      root = root->right;
+      delete_node(z);
+      delete z;
+      consolidate();
+    }
+    --sz;
+
+    return res;
+  }
+
+  void decrease(Np &x, const key_t &key){
+    assert(!!x);
+    assert(!cmp(x->key, key));
+    x->key = key;
+    Np y = x->p;
+    if(!!y && cmp(x->key, y->key)){
+      cut(x, y);
+      cascading_cut(y);
+    }
+    if(cmp(x->key, root->key)) root = x;
+  }
+
+  static Np get_np() { return nullptr; }
+};
+
+template<typename T = int>
+struct Edge{
+  int src, to; T cost; int idx;
+  Edge(){}
+  Edge(int src, int to, T cost = -1, int idx = -1): src(src), to(to), cost(cost), idx(idx) {}
+  operator int() const { return to; }
+};
+template<typename T> using Edges = vector<Edge<T>>;
+
+template<typename T = bool>
+struct Graph {
+  vector<vector<Edge<T>>> g;
+  size_t es;
+  Graph() {};
+  Graph(size_t n): g(n), es(0) {}
+  size_t size() const { return g.size(); }
+  int deg(int v) const { return int(g[v].size()); }
+
+  vector<Edge<T>> &operator[](int k) { return g.at(k); }
+  const vector<Edge<T>> &operator[](int k) const { return g.at(k); }
+  vector<Edge<T>> &at(int k) { return g.at(k); }
+  const vector<Edge<T>> &at(int k) const { return g.at(k); }
+
+  void add_edge(int src, int to, T cost = 1){
+    g[src].emplace_back(src, to, cost, es);
+    g[to].emplace_back(to, src, cost, es++);
+  }
+  void add_directed_edge(int src, int to, T cost = 1){
+    g[src].emplace_back(src, to, cost, es++);
+  }
+
+  void read(int m, int base = 1, bool weighted = false, bool directed = false, const T &id = 1){
+    for (int i = 0; i < m; i++){
+      int u, v; cin >> u >> v; u -= base; v -= base;
+      T c = id;
+      if(weighted) cin >> c;
+      if(directed) add_directed_edge(u, v, c);
+      else add_edge(u, v, c);
+    }
+  }
+  
+  vector<int> topological_order() const {
+    int n = int(g.size());
+    vector<int> vs, ind(n); vs.reserve(n);
+    for(int v = 0; v < n; ++v){
+      for(const auto&e : g[v]) ++ind[e];
+    }
+    queue<int> qu;
+    for(int v = 0; v < n; ++v){
+      if(ind[v] == 0) qu.push(v);
+    }
+    while(!qu.empty()){
+      int v = qu.front(); qu.pop();
+      vs.push_back(v);
+      for(auto e : g[v]){
+        if(--ind[e] == 0) qu.push(e);
+      }
+    }
+    return vs;
+  }
+};
+
+template <typename T = int>
+struct PotentializedUF {
+  
+  vector<int> data;
+  vector<T> diff_weight;
+  
+  PotentializedUF() {}
+  
+  PotentializedUF(int n):data(n, -1), diff_weight(n) { }
+  
+  void init(int n) { 
+    data.assign(n, -1);
+    diff_weight.assign(n,0);
+  }
+  
+  
+  int find(int x) {
+    if(data[x] < 0) return x;
+    int r = find(data[x]);
+    diff_weight[x] += diff_weight[data[x]];
+    return data[x] = r;
+    
+  }
+
+  bool unite(int x, int y, T w){
+    w += weight(x); w -= weight(y);
+    x = find(x); y = find(y);
+    if(x == y) return false;
+
+    // if(data[x] > data[y]){ swap(x,y); w = -w; }
+    data[x] += data[y];
+    data[y] = x;
+    diff_weight[y] = w;
+    return true;
+  }
+
+  T weight(int x){
+    find(x);
+    return diff_weight[x];
+  }
+
+  T diff(int x, int y){
+    if(same(x,y)){
+      return weight(y) - weight(x);
+    }
+    return T(0);
+  }
+
+  bool same(int x, int y){
+    return find(x) == find(y);
+  }
+  
+  int size(int x){
+    return -data[find(x)];
+  }
+
+};
+
+
+template<typename T>
+pair<Edges<T>, T> DirectedMST(int n, Edges<T> es, int root){
+  PotentializedUF<T> uf(n * 2);
+
+  auto cal_cost = [&](const Edge<T> &e) -> T{
+    return e.cost - uf.weight(e.to);
+  };
+  auto cmp = [&](const Edge<T> &e1, const Edge<T> &e2) -> bool{
+    return cal_cost(e1) < cal_cost(e2);
+  };
+  vector<FibonacciHeap<Edge<T>, int, decltype(cmp)>> heaps(n*2, {cmp});
+
+  for(int v = 0; v < n; ++v){
+    if(v != root) es.emplace_back(v, root, 0);
+  }
+  for(auto&&e : es) heaps[e.to].push(e, e.src);
+
+
+  vector<bool> used(n * 2);
+  stack<Edge<T>> path;
+  stack<pair<Edge<T>, int>> st;
+  vector<int> vs;
+  T cost = 0;
+  auto track_back = [&](int v) -> int{
+    while(!heaps[v].empty()){ 
+      auto[e, u] = heaps[v].pop();
+      if(uf.same(u, v)) continue;
+      //cout << e.src << " " << e.to << " " << e.cost << " " << cal_cost(e) << endl;
+      st.emplace(e, v);
+      cost += cal_cost(e);
+      path.push(e);
+      vs.push_back(u);
+      return uf.find(u);
+    }
+    return v;
+  };
+  
+  vs.push_back(0);
+  vector<int> par(n * 2, -1);
+  int v = 0;
+  for(int sv = n ; !heaps[v].empty(); ++sv){
+    
+    for(; !used[v]; v = track_back(v)) used[v] = 1;
+    
+    //for(auto&&e : vs) cout << e << " ";
+    //cout << "vs\n";
+    int pos = vs.back(); vs.pop_back();
+    int len = 0;
+    while(!vs.empty() && !uf.same(pos, vs.back())) ++len, vs.pop_back();
+    // cout << len << endl;
+    if(len) ++len;
+    while(len--){
+      assert(!path.empty());
+      auto e = path.top(); path.pop();
+      assert(!uf.same(e.src, e.to));
+      int u = uf.find(e.to);
+      par[u] = sv;
+      used[u] = 0;
+      uf.unite(sv, u, e.cost);
+      assert(uf.find(sv) == sv);
+      heaps[sv].merge(heaps[u]);
+    }
+    v = uf.find(sv);
+    if(v != sv) heaps[v].merge(heaps[sv]);
+  }
+
+  Edges<T> res;
+  
+
+  fill(begin(used), end(used), false);
+  for(int r = root; r != -1; r = par[r]) used[r] = true;
+
+  while(!st.empty()){
+    auto[e, p] = st.top(); st.pop();
+    if(used[p]) continue;
+    res.push_back(e); // cost += e.cost;
+    //cout << e.src << " " << e.to << endl;
+    for(int v = e.to; v != -1; v = par[v]) used[v] = true;
+  }
+
+  if(int(res.size()) != n-1) return {{}, 0};
+  return {res, cost};
+}
+
+int main() {
+  int n, m, r; cin >> n >> m >> r;
+  Edges<int> es;
+  while(m--){
+    int s, t, w; cin >> s >> t >> w;
+    es.emplace_back(s, t, w);
+  }
+
+  cout << DirectedMST(n, es, r).second << "\n";
+}
+
+

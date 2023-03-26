@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+class UnionFind {
+public:
+    UnionFind() = default;
+    explicit UnionFind(int n) : data(n, -1) {}
+
+    int find(int x) {
+        if (data[x] < 0) return x;
+        return data[x] = find(data[x]);
+    }
+
+    void unite(int x, int y) {
+        x = find(x);
+        y = find(y);
+        if (x == y) return;
+        if (data[x] > data[y]) std::swap(x, y);
+        data[x] += data[y];
+        data[y] = x;
+    }
+
+    bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+
+    int size(int x) {
+        return -data[find(x)];
+    }
+
+private:
+    std::vector<int> data;
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int n, m;
+        cin >> n >> m;
+        if (n == 0) break;
+        vector<tuple<int, int, int>> edges;
+        rep(i,0,m) {
+            int a, b, w;
+            cin >> a >> b >> w;
+            --a, --b;
+            edges.push_back({w, a, b});
+        }
+        sort(all(edges));
+        int ans = 1e9;
+        rep(i,0,m) {
+            UnionFind uf(n);
+            int mi = get<0>(edges[i]);
+            int ma = 0;
+            rep(j,i,m) {
+                auto [w, a, b] = edges[j];
+                if (!uf.same(a, b)) {
+                    uf.unite(a, b);
+                    chmax(ma, w);
+                }
+            }
+            if (uf.size(0) == n) chmin(ans, ma-mi);
+        }
+        cout << (ans < 1e9 ? ans : -1) << endl;
+    }
+}

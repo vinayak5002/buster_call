@@ -1,0 +1,354 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+bool is_digit(char c) {
+    return '0' <= c and c <= '9';
+}
+bool is_lowercase_alphabet(char c) {
+    return 'a' <= c and c <= 'z';
+}
+bool is_uppercase_alphabet(char c) {
+    return 'A' <= c and c <= 'Z';
+}
+bool is_alphabet(char c) {
+    return is_lowercase_alphabet(c) or is_uppercase_alphabet(c);
+}
+
+std::pair<std::string, int> parse_digits(const std::string& s, int i) {
+    int j = i;
+    while (is_digit(s[j])) ++j;
+    return { s.substr(i, j - i), j };
+}
+template <typename T>
+std::pair<T, int> parse_nonnegative_integer(const std::string& s, int i) {
+    auto [sub, ni] = parse_digits(s, i);
+    T res = 0;
+    for (char c : sub) res = res * 10 + (c - '0');
+    return { res, ni };
+}
+template <typename T>
+std::pair<T, int> parse_integer(const std::string& s, int i) {
+    if (s[i] == '-') {
+        auto res = parse_nonnegative_integer<T>(s, i + 1);
+        return { -res.first, res.second };
+    }
+    return parse_nonnegative_integer<T>(s, i);
+}
+
+int mod(int x) {
+    x %= (1 << 15);
+    if (x < 0) return x + (1 << 15);
+    return x;
+}
+
+using Mat = vector<vector<int>>;
+
+Mat concat_v(Mat A, const Mat& B) {
+    if (A.empty()) return B;
+    if (B.empty()) return A;
+    int col_size = A[0].size();
+    for (const auto& ro : B) {
+        assert(int(ro.size()) == col_size);
+        A.push_back(ro);
+    }
+    return A;
+}
+Mat concat_h(Mat A, const Mat& B) {
+    if (A.empty()) return B;
+    if (B.empty()) return A;
+    int row_size = A.size();
+    assert(int(B.size()) == row_size);
+    for (int i = 0; i < row_size; ++i) {
+        for (auto v : B[i]) A[i].push_back(v);
+    }
+    return A;
+}
+
+Mat operator*(const Mat& A, const Mat& B) {
+    int n = A.size(), m = A[0].size(), l = B[0].size();
+    if (B.size() == 1 and B[0].size() == 1) {
+        auto C = A;
+        for (int i = 0; i < n; ++i) for (int j = 0; j < m; ++j) {
+            C[i][j] = mod(C[i][j] * B[0][0]);
+        }
+        return C;
+    }
+    if (n == 1 and m == 1) return B * A;
+
+    assert(int(B.size()) == m);
+    Mat C(n, vector<int>(l));
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            for (int k = 0; k < l; ++k) {
+                C[i][k] += A[i][j] * B[j][k];
+                C[i][k] = mod(C[i][k]);
+            }
+        }
+    }
+    return C;
+}
+Mat operator+(Mat A, const Mat& B) {
+    int n = A.size();
+    int m = A[0].size();
+    assert(int(B.size()) == n);
+    for (int i = 0; i < n; ++i) {
+        assert(int(B[i].size()) == m);
+        for (int j = 0; j < m; ++j) {
+            A[i][j] += B[i][j];
+            A[i][j] = mod(A[i][j]);
+        }
+    }
+    return A;
+}
+Mat operator-(Mat A, const Mat& B) {
+    int n = A.size();
+    int m = A[0].size();
+    assert(int(B.size()) == n);
+    for (int i = 0; i < n; ++i) {
+        assert(int(B[i].size()) == m);
+        for (int j = 0; j < m; ++j) {
+            A[i][j] -= B[i][j];
+            A[i][j] = mod(A[i][j]);
+        }
+    }
+    return A;
+}
+
+Mat transpose(Mat A) {
+    int n = A.size(), m = A[0].size();
+    Mat B(m, vector<int>(n));
+    for (int i = 0; i < n; ++i) for (int j = 0; j < m; ++j) {
+        B[j][i] = A[i][j];
+    }
+    return B;
+}
+
+map<char, Mat> mp;
+
+void assignment(const string& s, int i); // done
+pair<Mat, int> expr(const string& s, int i); // done
+Mat factor(const string& s, int i, int j); // done
+Mat primary(const string& s, int i, int j); // done
+pair<Mat, int> matrix(const string& s, int i); // done
+Mat row_seq(const string& s, int i, int j); // done
+Mat row(const string& s, int i, int j); // done
+pair<Mat, int> inum(const string& s, int i); // done
+
+void assignment(const string& s, int i) {
+    char var_name = s[0];
+    assert(is_uppercase_alphabet(var_name));
+    assert(s[1] == '=');
+    auto [A, ni] = expr(s, 2);
+    assert(ni == int(s.size()) - 1);
+    assert(s[ni] == '.');
+    mp[var_name] = A;
+}
+
+pair<Mat, int> expr(const string& s, int i) {
+    int r = -1;
+    int lev = 0;
+    vector<pair<int, char>> op{ { i - 1, '\0' } };
+    for (int j = i;; ++j) {
+        if (s[j] == '(') {
+            ++lev;
+        } else if (s[j] == '[') {
+            ++lev;
+        } else if (s[j] == ')') {
+            --lev;
+        } else if (s[j] == ']') {
+            --lev;
+        }
+        if (lev == 0) {
+            if (s[j] == '+' or s[j] == '-' or s[j] == '*') {
+                if (j == i or s[j - 1] == '+' or s[j - 1] == '-' or s[j - 1] == '*') {
+                    assert(s[j] == '-');
+                } else {
+                    op.emplace_back(j, s[j]);
+                }
+            }
+        }
+        if (lev < 0 or (lev == 0 and (s[j] == ';' or s[j] == ',' or s[j] == '.' or s[j] == ' '))) {
+            r = j;
+            break;
+        }
+    }
+    op.emplace_back(r, '\0');
+    int len = op.size() - 1;
+    vector<Mat> ms;
+    for (int x = 0; x < len; ++x) {
+        ms.push_back(factor(s, op[x].first + 1, op[x + 1].first));
+    }
+    for (int x = 1; x < int(op.size()) - 1;) {
+        while (x < int(op.size()) - 1 and op[x].second != '*') ++x;
+        if (x == int(op.size()) - 1) break;
+        ms[x - 1] = ms[x - 1] * ms[x];
+        ms.erase(ms.begin() + x);
+        op.erase(op.begin() + x);
+    }
+    Mat res = ms[0];
+    for (int x = 1; x < int(op.size()) - 1; ++x) {
+        if (op[x].second == '+') {
+            res = res + ms[x];
+        } else {
+            res = res - ms[x];
+        }
+    }
+    return { res, r };
+}
+Mat factor(const string& s, int i, int j) {
+    // cerr << "factor [" << i << ", " << j << ") : " << s.substr(i, j - i) << endl;
+    bool neg = false;
+    while (s[i] == '-') {
+        neg = not neg;
+        ++i;
+        assert(i != j);
+    }
+    Mat res = primary(s, i, j);
+    if (neg) {
+        for (auto& ro : res) for (auto& el : ro) el = mod(-el);
+    }
+    // cerr << "factor [" << i << ", " << j << ") : " << s.substr(i, j - i) << " : done " << endl;
+    return res;
+}
+
+Mat primary(const string& s, int i, int j) {
+    if (s[j - 1] == '\'') return transpose(primary(s, i, j - 1));
+
+    if (s[j - 1] == ')') {
+        int md = -1;
+        int lev = 1;
+        for (int k = j - 2; k >= i; --k) {
+            if (s[k] == ')') {
+                ++lev;
+            } else if (s[k] == '(') {
+                --lev;
+            } else if (lev == 1 and s[k] == ',') {
+                md = k;
+            }
+            if (lev == 0) {
+                if (md >= 0) {
+                    Mat A = primary(s, i, k);
+                    Mat rs = primary(s, k + 1, md);
+                    Mat cs = primary(s, md + 1, j - 1);
+                    assert(rs.size() == 1 and cs.size() == 1);
+                    int n = rs[0].size(), m = cs[0].size();
+                    Mat B(n, vector<int>(m));
+                    for (int r = 0; r < n; ++r) for (int c = 0; c < m; ++c) {
+                        B[r][c] = A[rs[0][r] - 1][cs[0][c] - 1];
+                    }
+                    return B;
+                } else {
+                    assert(k == i);
+                    auto [res, nj] = expr(s, i + 1);
+                    assert(nj == j - 1);
+                    return res;
+                }
+            }
+        }
+    }
+
+    if (is_digit(s[i])) {
+        auto [res, j2] = inum(s, i);
+        assert(j2 == j);
+        return res;
+    }
+    if (is_uppercase_alphabet(s[i])) {
+        return mp.at(s[i]);
+    }
+    if (s[i] == '[') {
+        // cerr << "matrix [" << i << ", " << j << ")" << endl;
+        auto [res, j2] = matrix(s, i);
+        assert(j2 == j);
+        return res;
+    }
+    assert(false);
+}
+
+pair<Mat, int> matrix(const string& s, int i) {
+    assert(s[i] == '[');
+    int r = -1;
+    int lev = 1;
+    for (int j = i + 1;; ++j) {
+        if (s[j] == '[') {
+            ++lev;
+        } else if (s[j] == ']') {
+            --lev;
+        }
+        if (lev == 0) {
+            r = j;
+            break;
+        }
+    }
+    assert(r >= 0);
+    auto mat = row_seq(s, i + 1, r);
+    return { mat, r + 1 };
+}
+Mat row_seq(const string& s, int i, int j) {
+    // cerr << "row_seq [" << i << ", " << j << ")" << endl;
+    int lev = 0;
+    vector<int> sep{ i - 1 };
+    for (int k = i; k < j; ++k) {
+        if (s[k] == '(' or s[k] == '[') {
+            ++lev;
+        } else if (s[k] == ')' or s[k] == ']') {
+            --lev;
+        }
+        if (lev == 0 and s[k] == ';') sep.push_back(k);
+    }
+    sep.push_back(j);
+    int len = sep.size();
+    Mat res;
+    for (int i = 0; i < len - 1; ++i) {
+        Mat elm = row(s, sep[i] + 1, sep[i + 1]);
+        res = concat_v(res, elm);
+    }
+    return res;
+}
+Mat row(const string& s, int i, int j) {
+    // cerr << "row [" << i << ", " << j << ")" << endl;
+    Mat res;
+    while (i != j) {
+        auto [A, ni] = expr(s, i);
+        if (s[ni] != ' ') {
+            res = concat_h(res, A);
+            assert(ni == j);
+            break;
+        } else {
+            res = concat_h(res, A);
+            i = ni + 1;
+        }
+    }
+    return res;
+}
+pair<Mat, int> inum(const string& s, int i) {
+    auto [v, j] = parse_integer<int>(s, i);
+    return { Mat { { mod(v) } }, j };
+}
+
+
+int main() {
+    while (true) {
+        mp.clear();
+
+        string line;
+        getline(cin, line);
+        int n = stoi(line);
+        if (n == 0) break;
+        vector<string> lines(n);
+        for (int i = 0; i < n; ++i) {
+            getline(cin, lines[i]);
+            if (lines[i].back() == '\n') lines[i].pop_back();
+            assignment(lines[i], 0);
+
+            Mat ans = mp[lines[i][0]];
+            int x = ans.size(), y = ans[0].size();
+            for (int i = 0; i < x; ++i) {
+                for (int j = 0; j < y; ++j) {
+                    cout << ans[i][j] << " \n"[j == y - 1];
+                }
+            }
+        }
+        cout << "----" << endl;
+    }
+}

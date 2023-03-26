@@ -1,0 +1,116 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <set>
+#include <deque>
+#define TEST cout << "TEST" << endl
+#define IINF 2147483647
+#define LLINF 9223372036854775807
+#define AMARI 998244353
+using namespace std;
+
+//強連結成分分解(SCC)周りを行うクラス
+//再帰関数周りでグローバル変数使ったりが多いのでクラスで
+class ococo_scc {
+private:
+    void dfs(int a) {
+        checked[a] = true;
+        for (int i = 0; i < g[a].size(); i++) {
+            if (!checked[g[a][i]]) {
+                dfs(g[a][i]);
+            }
+        }
+        junban[nj] = a;
+        nj++;
+    }
+    void dfs2(int a) {
+        vector<int> ans;
+        checked[a] = true;
+        kari.push_back(a);
+        //cout << a << endl;
+        for (int i = 0; i < g2[a].size(); i++) {
+            if (!checked[g2[a][i]]) {
+                dfs2(g2[a][i]);
+            }
+        }
+    }
+public:
+    vector<vector<int>> g;
+    vector<vector<int>> g2;
+    vector<bool> checked;
+    vector<int> junban;
+    int nj;
+    int gsize;
+
+    //N個のノードに初期化する O(N)
+    void syokica(int n) {
+        nj = 0;
+        gsize = n;
+        g.resize(n);
+        g2.resize(n);
+        checked.resize(n);
+        junban.resize(n);
+        for (int i = 0; i < n; i++) {
+            g[i].resize(0);
+            g2[i].resize(0);
+            checked[i] = false;
+        }
+    }
+
+    //a→bに向かう有向辺を追加する O(1)
+    void einsert(int a, int b) {
+        g[a].push_back(b);
+        g2[b].push_back(a);
+    }
+
+    //具体的な有向ループを求めるためのDFSを行う O(V+E)
+    //「あるループの成分が全て入ったvector」のvector が返り値
+    vector<int> kari;
+    vector<vector<int>> loop_kettei(void) {
+        for (int i = 0; i < gsize; i++) {
+            if (!checked[i])dfs(i);
+        }
+        for (int i = 0; i < gsize; i++)checked[i] = false;
+        vector<vector<int>> ans(0);
+        for (int i = gsize - 1; i >= 0; i--) {
+            if (!checked[junban[i]]) {
+                kari.resize(0);
+                dfs2(junban[i]);
+                ans.push_back(kari);
+            }
+        }
+        return ans;
+    }
+};
+
+int main(void) {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    int v, e;
+    cin >> v >> e;
+    ococo_scc oscc;
+    oscc.syokica(v);
+    while (e--) {
+        int s, t;
+        cin >> s >> t;
+        oscc.einsert(s, t);
+    }
+    vector<vector<int>> rmemo = oscc.loop_kettei();
+    vector<int> ans(v);
+    for (int i = 0; i < rmemo.size(); i++) {
+        for (int j = 0; j < rmemo[i].size(); j++) {
+            ans[rmemo[i][j]] = i;
+        }
+    }
+    int q;
+    cin >> q;
+    while (q--) {
+        int a, b;
+        cin >> a >> b;
+        if (ans[a] == ans[b])cout << 1 << endl;
+        else cout << 0 << endl;
+    }
+    return 0;
+}

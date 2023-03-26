@@ -1,0 +1,67 @@
+#include <algorithm>
+#include <climits>
+#include <iostream>
+#include <vector>
+
+#define max(x, y) ((x) > (y) ? (x) : (y))
+#define min(x, y) ((x) < (y) ? (x) : (y))
+#define all(x) begin(x), end(x)
+
+using namespace std;
+
+int main() {
+    while (1) {
+        int d, w;
+        cin >> d >> w;
+        if (d == 0 && w == 0) {
+            break;
+        }
+        vector<vector<int>> e(d, vector<int>(w));
+        for (int i = 0; i < d; i++) {
+            for (int j = 0; j < w; j++) {
+                cin >> e[i][j];
+            }
+        }
+
+        int ans = 0;
+        for (int i1 = 0; i1 < d - 2; i1++) {
+            for (int j1 = 0; j1 < w - 2; j1++) {
+                for (int i2 = i1 + 2; i2 < d; i2++) {
+                    for (int j2 = j1 + 2; j2 < w; j2++) {
+                        int min = INT_MAX;
+                        for (int i = i1; i <= i2; i++) {
+                            if (min > e[i][j1]) {
+                                min = e[i][j1];
+                            }
+                            if (min > e[i][j2]) {
+                                min = e[i][j2];
+                            }
+                        }
+                        for (int i = j1; i <= j2; i++) {
+                            if (min > e[i1][i]) {
+                                min = e[i1][i];
+                            }
+                            if (min > e[i2][i]) {
+                                min = e[i2][i];
+                            }
+                        }
+                        int sum = 0;
+                        for (int i = i1 + 1; i < i2; i++) {
+                            for (int j = j1 + 1; j < j2; j++) {
+                                if (min <= e[i][j]) {
+                                    goto L1;
+                                }
+                                sum += min - e[i][j];
+                            }
+                        }
+                        ans = max(ans, sum);
+
+                    L1:;
+                    }
+                }
+            }
+        }
+
+        cout << ans << "\n";
+    }
+}

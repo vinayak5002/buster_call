@@ -1,0 +1,23 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define rep2(i, s, n) for (int i = (s); i < (int)(n); i++)
+
+void swap(int &x, int &y){
+    int tmp = x;
+    x = y;
+    y = tmp;
+    return;
+}
+
+int calcGcd(int x, int y){
+    if(y == 0) return x;
+    else return calcGcd(y, x%y);
+}
+
+int main(){
+    int x, y;
+    cin >> x >> y;
+    if(x < y) swap(x, y);
+    cout << calcGcd(x, y) << endl;
+}

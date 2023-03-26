@@ -1,0 +1,81 @@
+#include<stdio.h>
+#define N 100
+static const int infty = (1<<21); /*1を21ビット左シフト（なぜ）*/
+
+int n, sort[N][N], Q[10000];
+int dist[N], head, tail;
+
+int pop()
+{
+    int x;
+    x=Q[head]; /*headを取得してheadを+1する*/
+    head=(head+1)%10000;
+    return x;
+}
+
+void push(int x)
+{
+    Q[tail]=x; /*tailにxを代入してtail+1する*/
+    tail=(tail+1)%10000;
+}
+
+void yet(int point)
+{
+    int x;
+
+    push(point); /*キューにプッシュ*/
+    for(int i=0;i<n;i++)
+    {
+        dist[i]=infty; /*初期化*/
+    }
+    dist[point]=0; /*訪れた個所を0にする*/
+    while(head!=tail) /*キューが空でないとき*/
+    {
+        x=pop(); /*キューをプッシュ(探索開始)*/
+        for(int j=0;j<n;j++)
+        {
+            if(sort[x][j]==0)
+            {
+                continue; /*辺がない箇所はスルー*/
+            }
+            if(dist[j]!=infty)
+            {
+                continue; /*すでに訪れた個所はスルー*/
+            }
+            dist[j]=dist[x]+1; /*各頂点の距離をpushされた頂点の距離+1*/
+            push(j); /*訪れた個所をプッシュする*/
+        }
+    }
+    for(int i=0;i<n;i++)
+    {
+        printf("%d %d\n", i+1, (dist[i]==infty) ? (-1) : dist[i]); /*回ることができなかった個所は-1,それ以外はその地点の距離を出力*/
+    }
+}
+
+int main(void)
+{
+    int i, j, x, y, z;
+
+    scanf("%d", &n);
+    head=1;
+    tail=n+1;
+    for(i=0;i<n;i++)
+    {
+        for(j=0;j<n;j++)
+        {
+            sort[i][j]=0; /*初期化*/
+        }
+    }
+    for(i=0;i<n;i++)
+    {
+        scanf("%d %d", &x, &y);
+        for(j=0;j<y;j++)
+        {
+            scanf("%d", &z);
+            sort[x-1][z-1]=1;/*0から始まることを考慮*/
+        }
+    }
+    yet(0); /*0頂点から関数へ入れる*/
+
+    return 0;
+}

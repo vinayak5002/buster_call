@@ -1,0 +1,150 @@
+#include <bits/stdc++.h>
+#include <chrono>
+#include <thread>
+////#include <atcoder/all>
+
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using vvvb = vector<vvb>;
+using vd = vector<double>;
+using vvd = vector<vd>;
+using vvvd = vector<vvd>;
+#define all(A) A.begin(),A.end()
+#define ALL(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q) {
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+template<class T>
+bool chmin(T& p, T q) {
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+ll gcd(ll(a), ll(b)) {
+    if (b == 0)return a;
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+vector<ll> fact, factinv, inv;
+ll mod = 998244353;
+void prenCkModp(ll n) {
+    fact.resize(n + 5);
+    factinv.resize(n + 5);
+    inv.resize(n + 5);
+    fact.at(0) = fact.at(1) = 1;
+    factinv.at(0) = factinv.at(1) = 1;
+    inv.at(1) = 1;
+    for (ll i = 2; i < n + 5; i++) {
+        fact.at(i) = (fact.at(i - 1) * i) % mod;
+        inv.at(i) = mod - (inv.at(mod % i) * (mod / i)) % mod;
+        factinv.at(i) = (factinv.at(i - 1) * inv.at(i)) % mod;
+    }
+
+}
+ll nCk(ll n, ll k) {
+    if (k < 0)return 0;
+    if (n < k) return 0;
+    return fact.at(n) * (factinv.at(k) * factinv.at(n - k) % mod) % mod;
+}
+
+ll gr(ll A) {
+    return 1
+        ;
+}
+vector<ll> AN;
+vector<vector<pair<ll, ll>>> G;
+vector<bool> seen;
+
+void dfs(ll n) {
+    seen[n] = 1;
+    for (auto v : G[n]) {
+        if (seen[v.first]) {
+            AN[v.second] = 1;
+        }
+        else {
+            AN[v.second] = 0;
+            dfs(v.first);
+        }
+    }
+}
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    while (1) {
+        ll RA, N;
+        cin >> RA >> N;
+        RA *= 2;
+        if (RA == 0)return 0;
+        vll D(120, 0);
+        rep(i, N) {
+            ll L, R, H;
+            cin >> L >> R >> H;
+            for (ll l = 2 * L; l < 2 * R; l++) {
+                chmax(D[l + 50], 2*H);
+            }
+        }
+        double L = 0.0, R = 100.0;
+        double EPS = 1e-8;
+        while (R - L > EPS) {
+            double mid = (R + L) / 2.0;
+            bool OK = 1;
+            rep(j, 50) {
+                double x = j + 1;
+                double h = D[j];
+                if (double(50 - x) > RA-EPS)continue;
+                double tp = sqrt(RA*RA-double(50 - x) * double(50 - x)+EPS);
+                if (x == 50) {
+
+                }
+                if (tp + mid-double(RA) > h)OK = 0;
+            }
+            for (ll x = 50; x < 100; x++) {
+                double h = D[x];
+                if (double(x-50) > RA - EPS)continue;
+                double tp = sqrt(RA * RA - double(x-50) * double(x-50) + EPS);
+                if (tp + mid-double(RA) > h)OK = 0;
+            }
+
+
+
+
+
+            if (OK)L = mid;
+            else R = mid;
+        }
+        cout << fixed << setprecision(16);
+        cout << L/2.0 << endl;
+
+    }
+
+}

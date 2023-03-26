@@ -1,0 +1,93 @@
+//  2_C:安定なソート
+
+#include <stdio.h>
+
+struct card{
+    char mark;
+    int value;
+};
+
+void BubbleSort(struct card C[],int N){
+    for (int i=0; i<N; i++) {
+        for (int j=N-1; j>i; j--) {
+            if(C[j].value < C[j-1].value){
+                struct card t;
+                t=C[j-1]; C[j-1]=C[j];C[j]=t;
+            }
+        }
+    }
+}
+
+void SelectionSort(struct card C[],int N){
+    for (int i=0; i<N; i++) {
+        int minj = i;
+        for (int j=i; j<N; j++) {
+            if (C[j].value < C[minj].value)
+                minj = j;
+        }
+        struct card t;
+        t=C[minj]; C[minj]=C[i];C[i]=t;
+    }
+}
+
+int isStable(struct card in[],struct card out[],int N){
+    for (int i=0; i<N; i++) {
+        for (int j=i+1; j<N; j++) {
+            for (int a=0; a<N; a++) {
+                for (int b=a+1; b<N; b++) {
+                    if (in[i].value==in[j].value &&
+                        in[i].mark==out[b].mark &&
+                        in[j].mark==out[a].mark &&
+                        in[i].value==out[b].value &&
+                        in[j].value==out[a].value) {
+                        return 0;
+                    }
+                }
+            }
+        }
+    }
+    return 1;
+}
+
+int main() {
+    struct card C,BC[36],SC[36],in[36];
+    int N;
+    
+    scanf("%d",&N);
+    for(int i=0;i<N;i++){
+       
+        scanf(" %c%d",&C.mark,&C.value);
+        
+        in[i]=C;
+        BC[i]=C;
+        SC[i]=C;
+    }
+    
+    BubbleSort(BC, N);
+    SelectionSort(SC, N);
+    
+    //配列を表示
+    for(int i=0;i<N-1;i++)
+        printf("%c%d ",BC[i].mark,BC[i].value);
+    printf("%c%d\n",BC[N-1].mark,BC[N-1].value);
+
+    if(isStable(in, BC, N))
+        puts("Stable");
+    else
+        puts("Not stable");
+
+    
+    for(int i=0;i<N-1;i++)
+        printf("%c%d ",SC[i].mark,SC[i].value);
+    printf("%c%d\n",SC[N-1].mark,SC[N-1].value);
+
+    if(isStable(in, SC, N))
+        puts("Stable");
+    else
+        puts("Not stable");
+    
+
+    return 0;
+}
+
+

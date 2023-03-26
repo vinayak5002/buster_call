@@ -1,0 +1,41 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+using vs = vector<string>;
+
+#define rep(i, n) for (int i = 0; i < n; i++)
+
+
+void dfs(int y, int x, int W, int H, vs &tile, int &ans){
+    if(0<=y && y<H && 0<=x && x<W){
+        if(tile[y][x] == '#') return; 
+        ans++;
+        tile[y][x] = '#';
+        dfs(y+1,x,W,H,tile,ans);
+        dfs(y-1,x,W,H,tile,ans);
+        dfs(y,x+1,W,H,tile,ans);
+        dfs(y,x-1,W,H,tile,ans);
+    }
+}
+
+int main(){
+    while(true){
+    int W,H; cin >> W >> H;
+    if(W == 0 && H == 0) return 0;
+    vs tile(H);
+    pair<int,int> start; 
+    rep(i,H) {
+        cin >> tile[i];
+        rep(j,W){
+            if(tile[i][j] == '@') start = make_pair(i,j);
+        }
+    }
+
+    int ans = 0;
+    dfs(start.first, start.second, W, H, tile, ans);
+
+    cout << ans << endl;
+    }
+}

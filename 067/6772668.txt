@@ -1,0 +1,43 @@
+class Node:
+    def __init__(self):
+        self.parent = -1
+        self.children = []
+
+
+def caliculateTreeDepth(nodeID, d=0):
+    Tree[nodeID].depth = d
+    for child in Tree[nodeID].children:
+        caliculateTreeDepth(child, d + 1)
+
+
+N = int(input())
+Tree = [Node() for _ in range(N)]
+
+
+for _ in range(N):
+    # id, 子供の数k, c_0~c_k
+    treeInfo = list(map(int, input().split()))
+    nodeID = treeInfo[0]
+    numberOfChildren = treeInfo[1]
+    if numberOfChildren > 0:
+        children = treeInfo[2:]
+        Tree[nodeID].children = children
+        Tree[nodeID].type = "internal node"
+    else:
+        Tree[nodeID].type = "leaf"
+
+    for child in Tree[nodeID].children:
+        Tree[child].parent = nodeID
+
+root_id = [i for i, t in enumerate(Tree) if t.parent == -1][0]
+Tree[root_id].type = "root"
+caliculateTreeDepth(root_id)
+
+
+for i, t in enumerate(Tree):
+    print(
+        "node {}: parent = {}, depth = {}, {}, {}".format(
+            i, t.parent, t.depth, t.type, t.children
+        )
+    )
+

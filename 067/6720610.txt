@@ -1,0 +1,93 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.Double;
+import java.lang.Integer;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class Main {
+
+    // 两点间距离
+    static public double distance(Circle circle1, Circle circle2) {
+
+        return Math.sqrt(Math
+                .pow(Double.valueOf(circle1.getCoordinates().get(0).toString())
+                        - Double.valueOf(circle2.getCoordinates().get(0).toString()), 2)
+
+                + Math.pow(Double.valueOf(circle1.getCoordinates().get(1).toString())
+                        - Double.valueOf(circle2.getCoordinates().get(1).toString()), 2));
+    }
+
+    static public int judge(Circle circle1, Circle circle2) {
+        double distance = distance(circle1, circle2);
+
+        if (distance == circle1.getR() || distance == circle2.getR()) {
+            // 内切
+            return 1;
+
+        } else if (distance == circle1.getR() + circle2.getR()) {
+            // 外接
+            return 3;
+        } else if (distance > circle1.getR() + circle2.getR()) {
+            // 不相交
+            return 4;
+        } else if (distance < circle1.getR() + circle2.getR()) {
+            // 相交
+            return 2;
+        } else {
+            return 0;
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        Scanner sc = new Scanner(System.in);
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        int count = 0;
+
+        ArrayList arrayList = new ArrayList<>();
+
+        while (count < 2) {
+
+            ArrayList<Integer> positionList = new ArrayList<>();
+
+            Circle circle = new Circle();
+
+            String test = br.readLine();
+
+            String[] list = test.split(" ");
+
+            circle.setR(Integer.valueOf(list[2]));
+            positionList.add(Integer.valueOf(list[0]));
+            positionList.add(Integer.valueOf(list[1]));
+            circle.setCoordinates(positionList);
+            arrayList.add(circle);
+            count++;
+        }
+
+        System.out.println(judge((Circle) arrayList.get(0), (Circle) arrayList.get(1)));
+
+    }
+}
+
+class Circle {
+    private int r;
+    private ArrayList<Integer> coordinates;
+
+    public ArrayList getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(ArrayList<Integer> coordinates) {
+        this.coordinates = coordinates;
+    }
+
+    public int getR() {
+        return r;
+    }
+
+    public void setR(int r) {
+        this.r = r;
+    }
+}

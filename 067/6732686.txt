@@ -1,0 +1,233 @@
+#include<bits/stdc++.h> 
+using namespace std;
+typedef long long ll;
+#define all(x) (x).begin(),(x).end()
+template<typename T1,typename T2> bool chmin(T1 &a,T2 b){if(a<=b)return 0; a=b; return 1;}
+template<typename T1,typename T2> bool chmax(T1 &a,T2 b){if(a>=b)return 0; a=b; return 1;}
+int dx[4]={0,1,0,-1}, dy[4]={1,0,-1,0};
+long double eps = 1e-9;
+long double pi = acos(-1);
+
+template< typename T >
+istream &operator>>(istream &is, vector< T > &v) {
+    for(T &in : v) is >> in;
+    return is;
+}
+
+template< typename T >
+ostream &operator<<(ostream &os, const vector< T > &v) {
+    for(int i = 0; i < (int) v.size(); i++) {
+        os << v[i] << (i + 1 != (int) v.size() ? " " : "");
+    }
+    return os;
+}
+
+class Dijkstra {
+public:
+
+    vector<ll> beki;
+    struct edge { int x, y; ll dist; };
+
+    struct state {
+        int x, y; ll cost, cnt;
+        bool operator>(const state s) const {
+            if(cnt != s.cnt) return cnt > s.cnt;
+            return cost > s.cost; 
+        }
+    };
+
+    const ll INF = (1LL << 60);
+    int N,M;
+    const int MOD = 1e9+7;
+    vector<vector< vector<edge> >> E;
+
+    Dijkstra(int n, int m): N(n), M(m) {
+        E = vector<vector<vector<edge>>>(N,vector<vector<edge>>(M));
+    }
+
+    //無向グラフの時はこっち。双方向に距離dで結ぶ
+    void add_undirected_edge(int x, int y, int u, int v, ll d) {
+        E[x][y].push_back((edge) { u, v, d});
+        E[u][v].push_back((edge) { x, y, d});
+    }
+
+    void add_directed_edge(int x, int y, int u, int v, ll d) {
+        E[x][y].push_back((edge) { u, v, d});
+    }
+
+    //(x,y)を始点として、他の頂点への最短経路を探す
+    vector<vector<array<ll,2>>> shortest_path(int sx, int sy) {
+        vector<vector<array<ll,2>>> dp(N, vector<array<ll,2>>(M, {INF,INF}));
+        priority_queue<state, vector<state>, greater<state> > q;
+        q.push((state) { sx, sy, 0 , 0});
+        while(!q.empty()) {
+            int x = q.top().x, y = q.top().y;
+            ll cost = q.top().cost;
+            ll cnt = q.top().cnt;
+
+            q.pop();
+            // if(dp[x][y] <= cost) continue;
+            if(dp[x][y][0] < cnt) continue;
+            if(dp[x][y][0] == cnt && dp[x][y][1] < cost) continue;
+            // dp[x][y] = {cnt, cost};
+            for(int i=0;i < E[x][y].size() ; i++) {
+                int nx = E[x][y][i].x, ny = E[x][y][i].y;
+                ll ncost = cost + E[x][y][i].dist;
+                ll ncnt = cnt;
+                if(y == 0 and ny == 1) ncnt++;
+                if(dp[nx][ny][0] > ncnt){
+                    dp[nx][ny] = {ncnt, ncost};
+                    q.push((state) { nx, ny, ncost, ncnt });
+                }
+                else if(dp[nx][ny][0] == ncnt && dp[nx][ny][1] > ncost){
+                    dp[nx][ny] = {ncnt, ncost};
+                    q.push((state) { nx, ny, ncost, ncnt });
+                }
+            }
+        }
+        return dp;
+    }
+
+};
+
+class Dijkstra2 {
+public:
+    struct edge { int x, y; ll dist; };
+
+    struct state {
+        int x, y; ll cost, cnt;
+        bool operator>(const state s) const { return cost > s.cost; }
+    };
+
+    const ll INF = (1LL << 60);
+    int N,M;
+    const int MOD = 1e9+7;
+    vector<ll> beki;
+    vector<vector< vector<edge> >> E;
+
+    Dijkstra2(int n, int m): N(n), M(m) {
+        E = vector<vector<vector<edge>>>(N,vector<vector<edge>>(M));
+        beki.resize(55);
+        beki[0] = 1;
+        for(int i=1;i<55;i++){
+            beki[i] = beki[i-1] * 2LL;
+            // beki[i] %= MOD; 
+        }
+    }
+
+
+    //無向グラフの時はこっち。双方向に距離dで結ぶ
+    void add_undirected_edge(int x, int y, int u, int v, ll d) {
+        E[x][y].push_back((edge) { u, v, d });
+        E[u][v].push_back((edge) { x, y, d });
+    }
+
+    void add_directed_edge(int x, int y, int u, int v, ll d) {
+        E[x][y].push_back((edge) { u, v, d});
+    }
+
+    //(x,y)を始点として、他の頂点への最短経路を探す
+    vector<vector<vector<ll>>> shortest_path(int sx, int sy) {
+        vector<vector<vector<ll>>> dp(N, vector<vector<ll>>(50, vector<ll>(2, INF)));
+        // for(int i=0;i<N;i++)for(int j=0;j<50;j++)for(int k=0;k<2;k++){
+        //     dp[i][j][k] = INF;
+        // }
+        priority_queue<state, vector<state>, greater<state> > q;
+        q.push((state) { sx, sy, 0 , 0});
+        while(!q.empty()) {
+            int x = q.top().x, y = q.top().y;
+            ll cost = q.top().cost;
+            ll cnt = q.top().cnt;
+            // cerr << cost << endl;
+            q.pop();
+            if(dp[x][cnt][y] <= cost) continue;
+            dp[x][cnt][y] = cost;
+            for(int i=0;i < E[x][y].size() ; i++) {
+                int nx = E[x][y][i].x, ny = E[x][y][i].y;
+                ll ncost = cost + E[x][y][i].dist;
+                ll ncnt = cnt;
+                if(y == 0 and ny == 1){
+                    if(ncnt + 1 >= 50) continue;
+                    ncost += beki[ncnt];
+                    ncnt++;
+                }
+                if(dp[nx][ncnt][ny] > ncost) q.push((state) { nx, ny, ncost, ncnt});
+            }
+        }
+        return dp;
+    }
+};
+
+const int mod = 1e9 + 7;
+
+signed main(){
+    // ifstream cin("E");
+    // ofstream cout("out.txt");
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout << fixed << setprecision(20);
+
+    int n,mw,mt;
+    while(cin>>n>>mw>>mt, n){
+        Dijkstra bfs(n, 2);
+        Dijkstra2 d(n, 2);
+        for(int i=0;i<mw;i++){
+            int a,b,c;
+            cin>>a>>b>>c;
+            a--,b--;
+            bfs.add_undirected_edge(a, 0, b, 0, c);
+            bfs.add_directed_edge(a, 0, b, 1, c);
+            bfs.add_directed_edge(b, 0, a, 1, c);
+
+            d.add_undirected_edge(a, 0, b, 0, c);
+            d.add_directed_edge(a, 0, b, 1, c);
+            d.add_directed_edge(b, 0, a, 1, c);
+        }
+        for(int i=0;i<mt;i++){
+            int a,b,c;
+            cin>>a>>b>>c;
+            a--,b--;
+            bfs.add_directed_edge(a, 1, b, 0, c);
+            bfs.add_directed_edge(b, 1, a, 0, c);
+            bfs.add_undirected_edge(a, 1, b, 1, c);
+
+            d.add_directed_edge(a, 1, b, 0, c);
+            d.add_directed_edge(b, 1, a, 0, c);
+            d.add_undirected_edge(a, 1, b, 1, c);
+        }
+        bfs.add_directed_edge(0,0,0,1,0);
+        d.add_directed_edge(0,0,0,1,0);
+        array<ll,2> dist = bfs.shortest_path(0, 0)[n-1][0];
+        if(dist[0] >= n + 100){
+            cout << -1 << "\n";
+            continue;
+        }
+        if(dist[0] <= 40){
+            // 普通に距離を最小化, あとからmod
+            // cout << "HERE" << "\n";
+            // ll ans = d.shortest_path(0)[n-1];
+            vector<vector<vector<ll>>> v = d.shortest_path(0, 0);
+            // v[n-1][i][0],[1] no min
+            ll ans = 1e18;
+            for(int i=0;i<50;i++){
+                for(int j=0;j<2;j++){
+                    chmin(ans, v[n-1][i][j]);
+                    // cerr << v[n-1][i][j] << endl;
+                }
+            }
+            cout << ans % mod << "\n";
+        }
+        else{
+            // 回数最小化、かつなるべく距離も最小化
+            ll ans = dist[1];
+            ll now = 1;
+            for(int i=0;i<dist[0];i++){
+                ans += now;
+                now *= 2LL;
+                ans %= mod;
+                now %= mod;
+            }
+            cout << ans << "\n";
+        }
+    }
+}   

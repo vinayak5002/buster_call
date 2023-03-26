@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < n; ++i)
+typedef long long ll;
+using namespace std;
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+
+    string S;
+    cin >> S;
+    int N = S.size();
+
+    vector dp(N + 1, vector<int>(N + 1, -1));
+    auto is_cat = [&](auto &&self, int l, int r) -> int {
+        if (dp[l][r] != -1) return dp[l][r];
+        if (l == r) return dp[l][r] = 1;
+
+        if (S[l] != 'm') return dp[l][r] = 0;
+        if (S[r - 1] != 'w') return dp[l][r] = 0;
+
+        for (int m = l + 1; m < r - 1; ++m) {
+            if (self(self, l + 1, m) && S[m] == 'e' && self(self, m + 1, r - 1))
+                return dp[l][r] = 1;
+        }
+        return dp[l][r] = 0;
+    };
+
+    cout << (is_cat(is_cat, 0, N) ? "Cat" : "Rabbit") << "\n";
+
+    return 0;
+}
+

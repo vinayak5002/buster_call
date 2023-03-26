@@ -1,0 +1,64 @@
+import itertools
+import sys
+import math
+import heapq
+from collections import deque, Counter, defaultdict
+from sys import stdin
+import copy
+import bisect
+from decimal import Decimal, ROUND_HALF_UP
+
+# from atcoder.dsu import DSU
+
+MOD = 10 ** 9 + 7
+int1 = lambda x: int(x) - 1
+stinput = lambda: stdin.readline()[:-1]
+ii = lambda: int(stinput())  # int input
+mi = lambda: map(int, stdin.readline().split())  # map input (int)
+li = lambda: list(mi())  # list input (int)
+mi1 = lambda: map(int1, stdin.readline().split())  # map input (int)-1
+li1 = lambda: list(mi1())  # list input (int)-1
+mis = lambda: map(str, stdin.readline().split())  # map input (string)
+lis = lambda: list(mis())  # list input (string)
+
+while True:
+    N = ii()
+    if N == 0:
+        break
+    L = li()
+    che = L
+    div = 0
+    ans = 10**10
+    tmp = [1000 for _ in range(4)]
+    money = [500,100,50,10]
+    
+    for i in range(L[3]+1,-1,-1):
+        for j in range(L[2]+1,-1,-1):
+            for k in range(L[1]+1,-1,-1):
+                for z in range(L[0]+1,-1,-1):
+                    cnt = money[0]*i + money[1]*j + money[2]*k + money[3]*z
+                    if cnt < N:
+                        flag = False
+                        break
+                    if cnt >= N:
+                        tmp = [i,j,k,z]
+                        div = cnt - N
+                        che_tmp = copy.copy(tmp)
+                        for v in range(4):
+                            if div >= money[v]:
+                                tmp[v] += div//money[v]
+                                div -= money[v]*(div//money[v])
+                    if sum(tmp) <= ans and cnt >= N:
+                        ans = sum(tmp)
+                        ans_tmp = che_tmp
+                if not flag:
+                    break
+            if not flag:
+                break
+        if not flag:
+            break
+    for i in range(3,-1,-1):
+        if ans_tmp[i] == 0:
+            continue
+        print(f'{money[i]} {ans_tmp[i]}')
+

@@ -1,0 +1,119 @@
+#include<bits/stdc++.h>
+#define int ll
+#define rep(i, N) for(int i = 0; i < (int)N; ++i)
+#define rep1(i, N) for(int i = 1; i <= (int)N; ++i)
+#define per(i, N) for(int i = N-1; i >= 0; --i)
+#define all(v) (v).begin(), (v).end()
+#define rall(v) (v).rbegin(), (v).rend()
+#define bit(n, k) ((n) >> k)
+#define pcnt(n) (__builtin_popcount(n))
+#define TakAo(ans) ans ? cout << "Takahashi\n" : cout << "Aoki\n"
+#define YesNo(ans) ans ? cout << "Yes\n" : cout << "No\n"
+#define endl '\n'
+#define fi first
+#define se second
+#define mkpr make_pair
+#define mktpl make_tuple
+#define eb emplace_back
+
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+using point = struct{ ll x, y; };
+template<class T> using max_heap = priority_queue<T>;
+template<class T> using min_heap = priority_queue<T, vector<T>, greater<T>>;
+template<class T> using vec = vector<T>;
+template<class T> using vvec = vec<vec<T>>;
+template<class T> using vvvec = vec<vvec<T>>;
+template<class T> using vvvvec = vvec<vvec<T>>;
+
+constexpr ld EPS = 1e-10;
+constexpr int INF = 1001001001;
+constexpr ll LINF = 1001001001001001001ll;
+constexpr ll MOD = (0) ? 998244353 : 1e9+7;
+constexpr int NIL = -1;
+constexpr int pm[2] = {1, -1};
+constexpr int dy[4] = {0, 1, 0, -1};
+constexpr int dx[4] = {1, 0, -1, 0};
+
+ll cel(ll a, ll b){ return (a + b - 1) / b;}
+ll Gcd(ll a, ll b){ return b ? Gcd(b, a % b) : abs(a);}
+template<class T> T powi(T x, ll exp){
+    return exp > 0 ? (exp & 1 ? x : 1) * powi(x * x, exp >> 1) : 1;
+}
+ll modpow(ll x, ll exp, ll mod){
+    x %= mod;
+    return exp > 0 ? (exp & 1 ? x : 1) * modpow(x * x, exp >> 1, mod) % mod : 1;
+}
+template<class T> bool chmin(T &a, T b){ return a > b ? (a = b, true) : 0;}
+template<class T>bool chmax(T &a, T b){ return a < b ? (a = b, true) : 0;}
+
+using Pair = pair<int, int>;
+using Tpl = tuple<int, int, int>;
+
+int H, W, s;
+int smin, smax;
+vvec<int> Sum;
+vvvvec<Pair> dp;
+
+int getSum(int h1, int h2, int w1, int w2){
+    return Sum[h2 + 1][w2 + 1] - Sum[h1][w2 + 1] - Sum[h2 + 1][w1] + Sum[h1][w1];
+}
+
+Pair rec(int h1, int h2, int w1, int w2){
+    if(dp[h1][h2][w1][w2] != Pair(NIL, NIL)) return dp[h1][h2][w1][w2];
+    if(getSum(h1, h2, w1, w2) < smin){
+        return mkpr(-INF, -INF);
+    }
+    if(h1 == h2 && w1 == w2){
+        return mkpr(0, getSum(h1, h2, w1, w2) - smin);
+    }
+
+    Pair maxVal = {0, getSum(h1, h2, w1, w2) - smin};
+    if(maxVal.se < 0) maxVal = {-INF, -INF};
+    for(int i = h1; i < h2; i++){
+        Pair l = rec(h1, i, w1, w2);
+        Pair r = rec(i + 1, h2, w1, w2);
+        chmax(maxVal, Pair(l.fi + r.fi + 1, min(l.se, r.se)));
+    }
+    for(int i = w1; i < w2; i++){
+        Pair l = rec(h1, h2, w1, i);
+        Pair r = rec(h1, h2, i + 1, w2);
+        chmax(maxVal, Pair(l.fi + r.fi + 1, min(l.se, r.se)));
+    }
+    return dp[h1][h2][w1][w2] = maxVal;
+}
+
+void Main(){
+    while(1){
+        cin >> H >> W >> s;
+        if(H == 0) break;
+
+        vvec<int> sum(H + 1, vec<int>(W + 1, 0));
+        rep(i, H)rep(j, W){
+            cin >> sum[i + 1][j + 1];
+            sum[i + 1][j + 1] += sum[i + 1][j] + sum[i][j + 1] - sum[i][j];
+        }
+        Sum = sum;
+        smin = sum[H][W] - s;
+        smax = s;
+
+        vvvvec<Pair> dpp(H, vvvec<Pair>(H, vvec<Pair>(W, vec<Pair>(W, mkpr(NIL, NIL)))));
+        dp = dpp;
+
+        Pair ans = rec(0, H - 1, 0, W - 1);
+
+        if(ans.se < 0) cout << "1 " << s << endl;
+        else cout << ans.fi + 1 << " " << ans.se << endl;
+    }
+}
+ 
+signed main(){
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    cout << fixed << setprecision(10);
+    Main();
+    return 0;
+}
+

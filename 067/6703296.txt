@@ -1,0 +1,209 @@
+#include<stdio.h>
+
+#define e -1
+#define M_MAX 500000
+
+int num[M_MAX]; //数値を入れる配列
+int left[M_MAX]; //左の"番号"を入れる配列(番号はnumの位置)
+int right[M_MAX]; //右の番号を入れる配列
+int parent[M_MAX]; //親の番号を入れる配列(deleteで使用)
+
+void insert(int n,int i)
+{
+	int j=0;
+	num[i] = n;
+	while(1){
+		if(n < num[j]){ //二分木の左側
+			if(left[j] == e){
+				left[j] = i;
+				parent[i] = j;
+				break;
+			}else{
+				j = left[j];
+			}
+		}else if(num[j] < n){ //二分木の右側
+			if(right[j] == e){
+				right[j] = i;
+				parent[i] = j;
+				break;
+			}else{
+				j = right[j];
+			}
+		}else{break;} //例外：初回のみ通る
+	}
+}
+
+void find(int n) //nは調べる値
+{
+	int i=0;
+	while(1){
+		if(left[i] == e && right[i] == e){ //子が存在しない
+			if(num[i] != n){ //nが二分木上に存在しない
+				printf("no\n");
+				break;
+			}else{ //num[i]がnに等しい
+				printf("yes\n");
+				break;
+			}
+		}else{ //左か右の子少なくとも片方が存在する
+			if(num[i] == n){
+				printf("yes\n");
+				break;
+			}
+			//左/右の子が存在せず、nがnum[i]より小さい/大きい
+			if((left[i] == e && n < num[i])||(right[i] == e && num[i] < n)){
+				printf("no\n");
+				break;
+			}else{ //まだ探索可能
+				if(n < num[i]){ //二分木の左側
+					i = left[i];
+				}else{ //二分木の右側
+					i = right[i];
+				}
+			}
+		}
+	}
+}
+
+void delete_n(int n) //nは調べる値
+{
+	int i=0;
+	int tmp_l; //tmp_lは消す節点が子を二つ持つ場合に使用(ある節点番号を入れる変数)
+	
+	while(1){
+		if(left[i] == e && right[i] == e){ //子が存在しない
+			if(num[i] != n){ //nが二分木上に存在しない
+				break;
+			}else{ //num[i]がnに等しい
+				//num[i]を二分木から繋がらないようにする
+				if(num[i] < num[parent[i]]){ //num[i]の親がnum[i]より大きい
+					left[parent[i]] = e;
+				}else{
+					right[parent[i]] = e;
+				}
+				break;
+			}
+		}else{ //左か右の子少なくとも片方が存在する
+			if(num[i] == n && left[i] != e && right[i] != e){ //両方の子を持つ
+				//中間順巡回での次の節点を探す
+				tmp_l = right[i];
+				//左の子が存在する限り
+				while(left[tmp_l] != e){
+					tmp_l = left[tmp_l];
+				}
+				//見つけた節点と消す節点の親を繋ぐ
+				if(num[i] < num[parent[i]]){ //num[i]の親がnum[i]より大きい
+					left[parent[i]] = tmp_l;
+				}else{ //num[i]の親がnum[i]より小さい
+					right[parent[i]] = tmp_l;
+				}
+				parent[tmp_l] = parent[i];
+				//見つけた節点と消す節点の両方の子を繋ぐ
+				//左の子
+				left[tmp_l] = left[i];
+				parent[left[i]] = tmp_l;
+				//右の子
+				right[tmp_l] = right[i];
+				parent[right[i]] = tmp_l;
+				break;
+			}else if(num[i] == n){ //片方の子のみを持つ
+				//子を親の親と繋げる
+				if(num[i] < num[parent[i]]){ //num[i]の親がnum[i]より大きい
+					if(left[i] != e){ //子が左側
+						left[parent[i]] = left[i];
+						parent[left[i]] = parent[i];
+					}else{ //子が右側
+						left[parent[i]] = right[i];
+						parent[right[i]] = parent[i];
+					}
+				}else{ //num[i]の親がnum[i]より小さい
+					if(left[i] != e){ //子が左側
+						right[parent[i]] = left[i];
+						parent[left[i]] = parent[i];
+					}else{ //子が右側
+						right[parent[i]] = right[i];
+						parent[right[i]] = parent[i];
+					}
+				}
+				break;
+			}
+			//左/右の子が存在せず、nがnum[i]より小さい/大きい
+			if((left[i] == e && n < num[i])||(right[i] == e && num[i] < n)){
+				break;
+			}else{ //まだ探索可能
+				if(n < num[i]){ //二分木の左側
+					i = left[i];
+				}else{ //二分木の右側
+					i = right[i];
+				}
+			}
+		}
+	}
+}
+
+void print_mid(int i)
+{
+	if(left[i] != e){ //左の子が存在
+		print_mid(left[i]);
+	}
+	printf(" %d", num[i]);
+	if(right[i] != e){ //右の子が存在
+		print_mid(right[i]);
+	}
+}
+
+void print_first(int i)
+{
+	printf(" %d", num[i]);
+	if(left[i] != e){ //左の子が存在
+		print_first(left[i]);
+	}
+	if(right[i] != e){ //右の子が存在
+		print_first(right[i]);
+	}
+}
+
+int main(void)
+{
+	int m; //命令数
+	char com[8]; //命令
+	int n; //入力されたキー値
+	char str[20];
+	
+	int i;
+	
+	fgets(str, sizeof(str)-1, stdin);
+	sscanf(str, "%d", &m);
+	
+	//命令数分の初期化
+	for(i=0; i<m; i++){
+		num[i] = e;
+		left[i] = e;
+		right[i] = e;
+		parent[i] = e;
+	}
+	
+	for(i=0; i<m; i++){
+		fgets(str, sizeof(str)-1, stdin);
+		sscanf(str, "%s%d", com, &n);
+		if(com[0] == 'i'){ //insert命令
+			insert(n, i);
+		}else if(com[0] == 'f'){ //find命令
+			find(n);
+		}else if(com[0] == 'd'){ //delete命令
+			delete_n(n);
+		}else{ //print命令
+			//中間順巡回アルゴリズム
+			print_mid(0);
+			printf("\n");
+			//先行順巡回アルゴリズム
+			print_first(0);
+			printf("\n");
+		}
+	}
+	/*for(i=0; i<m; i++){
+		printf("num[%d]=%d, left=num[%d], right=num[%d], parent=num[%d]\n", i, num[i], left[i], right[i], parent[i]);
+	}*/
+	
+	return 0;
+}

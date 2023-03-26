@@ -1,0 +1,79 @@
+#pragma region
+
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <set>
+#include <map>
+#include <algorithm>
+#include <functional>
+#include <utility>
+#include <bitset>
+#include <cmath>
+#include <numeric> // gcd, lcm
+#include <cstdlib>
+#include <ctime>
+#include <cstdio>
+#include <cassert>
+#include <iomanip>
+using namespace std;
+
+using ull = unsigned long long;
+using ll = long long;
+using vi = vector<int>;
+using vll = vector<ll>;
+using vvi = vector<vi>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using pii = pair<int,int>;
+using vpii = vector<pii>;
+
+#pragma endregion
+
+struct BIT{
+    int N;
+    vi d, e;
+
+    BIT(int sz){
+        N = sz;
+        d.assign(N+2, 0); e.assign(N+2, 0);
+    }
+    // 1-indexed, [l,r)
+    void add(int l, int r, int x){
+        for(int i=l; i<=N; i += i & -i){ d[i] += x; e[i] -= l*x; }
+        for(int i=r; i<=N; i += i & -i){ d[i] -= x; e[i] += r*x; }
+    }
+
+    int sum(int i){
+        int ans = 0;
+        for(int j=i; j>0; j -= j & -j) ans += d[j];
+        ans *= i+1;
+        for(int j=i; j>0; j -= j & -j) ans -= e[j];
+        return ans;
+    }
+};
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+
+    int n, q; cin >> n >> q;
+    BIT b(n);
+    while(q--){
+        int c, s, t; cin >> c >> s >> t;
+        if(c==0){
+            int x; cin >> x;
+            b.add(s, t+1, x);
+        }
+        else{
+            cout << b.sum(t) - b.sum(s-1) << endl;
+        }
+    }
+
+    return 0;
+}

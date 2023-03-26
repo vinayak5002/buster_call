@@ -1,0 +1,101 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <cstdio>
+#include <iostream>
+#include <stack>
+#include <queue>
+#include <algorithm>
+#include <functional>
+#include <set>
+#include <map>
+#include <string>
+#include <vector>
+#include <cmath>
+#include<sstream>
+#include<list>
+#include<iomanip>
+#include <cstdlib>
+#include <cstring>
+#include <stack>
+#include <bitset>
+#include <cassert>
+#include <stdlib.h>
+#include <stdio.h>
+using namespace std;
+const int INF = 100000000;
+const long long LINF = 3e18 + 7;
+const int MAX_N = 600010;
+const int MAX_W = 10002;
+const int MAX_ARRAYK = 100000;
+double PI = 3.14159265358979323846;
+//using ll = long long;
+
+
+int dat[2 * MAX_N - 1];
+
+int N;
+
+void init(int n_) {
+	N = 1;
+	while (N < n_) {
+		N *= 2;
+	}
+
+	for (int i = 0; i < 2 * N - 1; i++) {
+		dat[i] = 2147483647;
+	}
+
+}
+
+void update(int k, int a) {
+	k += N - 1;
+	dat[k] = a;
+	while (k > 0) {
+		k = (k - 1) / 2;
+		dat[k] = min(dat[2 * k + 1], dat[2 * k + 2]);
+	}
+}
+
+
+int query(int a, int b, int k, int l, int r) {
+
+	if (r <= a || b <= l) {
+		return 2147483647;
+	}
+
+	if (a <= l && r <= b) {
+		return dat[k];
+	}
+	else {
+		int vl = query(a, b, 2 * k + 1, l, (l + r) / 2);
+		int vr = query(a, b, 2 * k + 2, (l + r) / 2, r);
+		return min(vl, vr);
+	}
+
+}
+
+int Q;
+
+int main() {
+
+	cin >> N >> Q;
+
+	init(N);
+
+	for (int i = 0; i < Q; i++) {
+		int q;
+		cin >> q;
+		if (q == 0) {
+			int x, y;
+			cin >> x >> y;
+			update(x, y);
+		}
+		else {
+			int x, y;
+			cin >> x >> y;
+			cout << query(x, y + 1, 0, 0, N) << endl;
+
+		}
+	}
+
+	return 0;
+}

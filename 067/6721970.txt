@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 19999
+#define NIL -200000002
+#define INF 200000002
+#define MAXN 50
+int n, q ;
+int t = 0;
+
+struct root {
+    int from;
+    int to;
+    int dist;
+};
+
+root R[MAX];
+int A[120][120];
+
+bool ShortestPath(){
+    for (int k=0 ; k<n ; k++ ) {
+        for (int i=0; i<n ; i++) {
+            for (int j=0; j<n ; j++) {
+                if (A[i][k] == INF || A[k][j] == INF) {
+                    //INF同士の計算は何もしない
+                } else {A[i][j] = min(A[i][j], A[i][k]+A[k][j]); }
+                if ( i == j && A[i][i] < 0 ) {return false;}
+            }
+        }
+    }
+    return true ;
+}
+
+void A_init(){
+    for (int i=0; i<n ; i++) {
+        for (int j=0; j<n ; j++) {
+            if ( i == j ) {A[i][j] = 0; } else { A[i][j] = INF ; }
+        }
+    }
+}
+
+int main(){
+    cin >> n >> q ;
+    A_init() ;
+    for (int j=0; j<q ; j++ ){
+        int from, to, dis ;
+        cin >> from >> to >> dis ;
+        R[j].from = from;
+        R[j].to = to;
+        R[j].dist = dis;
+        A[from][to] = dis; 
+    }
+    
+    if ( ! ShortestPath() ) { 
+        printf("NEGATIVE CYCLE\n");
+        exit(0) ;
+    }
+
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<n; j++) {
+            if (j>0) { printf(" "); }
+            if (A[i][j]==INF) {printf("INF");} else {printf("%d",A[i][j]); }
+        }
+        printf("\n");
+    }
+    return 0;
+}

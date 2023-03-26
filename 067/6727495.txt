@@ -1,0 +1,119 @@
+#include<iostream>
+#include<algorithm>
+#include<map>
+#include<queue>
+#include<stack>
+#include<set>
+#include<bitset>
+#include<vector>
+#include<string>
+
+#define rep(i,n) for(int i=0;i<(n);i++)
+using namespace std;
+using ll=long long;
+using P=pair<int,int>;
+using P_S=pair<int,string>;
+
+int Non=-2000000001;
+
+struct Node{
+    int id,key,parent_key,left_key,right_key;
+
+    Node()
+    {   
+        key=left_key=right_key=parent_key=Non;
+    }
+};
+
+struct Heap{
+    Node heap[2000000];
+    int size=0;
+    int N;
+    void input(int num){
+        heap[size+1].key=num;
+        heap[size+1].id=size+1;
+        size++;
+        N=size;
+    }
+
+    void construct_tree()
+    {
+        for(int i=1;i<=N;i++){
+            heap[i].parent_key=heap[i/2].key;
+            if(2*i<=N) heap[i].left_key=heap[2*i].key;
+            if(2*i+1<=N) heap[i].right_key=heap[2*i+1].key;          
+        }
+    }
+
+    void maxHeapify(int i){
+        int largest = i;
+        if(i*2<=N&&heap[i*2].key>heap[largest].key) largest=i*2;
+        if(i*2+1<=N&&heap[i*2+1].key>heap[largest].key) largest=i*2+1;
+
+        if(largest!=i){
+            swap(heap[i].key,heap[largest].key);
+            maxHeapify(largest);
+        }
+
+    }
+
+    void buildMaxHeap(){
+        for(int i=N/2;i>0;i--){
+            //cout<<"key : "<<heap[i].key<<endl;
+            maxHeapify(i);
+            /*for(int i=1;i<=N;i++) cout<<heap[i].key<<" ";
+            cout<<endl;*/
+        }
+        /*for(int i=1;i<=N;i++){
+            cout<<" "<<heap[i].key;
+        }
+        cout<<endl;*/
+    }
+
+    void extract(){
+        swap(heap[1].key,heap[size].key);
+        heap[size].key=Non;
+        size--;
+    }
+
+    void print_root_key(){
+        cout<<heap[1].key<<endl;
+    }
+
+    void print_info()
+    {
+        for(int i=1;i<=N;i++){
+            string info;
+            info+="node "+to_string(heap[i].id)+":";
+            info+=" key = "+to_string(heap[i].key)+",";
+            if(heap[i].parent_key!=Non) info+=" parent key = "+to_string(heap[i].parent_key)+",";
+            if(heap[i].left_key!=Non) info+=" left key = "+to_string(heap[i].left_key)+",";
+            if(heap[i].right_key!=Non) info+=" right key = "+to_string(heap[i].right_key)+",";     
+            info+=" ";
+            cout<<info<<endl;     
+        }
+    }
+};
+
+int main()
+{
+    Heap h;
+    while(1){
+        string ord;
+        cin>>ord;
+        if(ord[0]=='i'){
+            int num;
+            cin>>num;
+            h.input(num);
+        }
+        else{
+            if(ord[1]=='x'){
+                h.construct_tree();
+                h.buildMaxHeap();
+                h.print_root_key();
+                h.extract();
+            }
+            else break;
+        }
+    }
+}

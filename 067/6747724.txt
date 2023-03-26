@@ -1,0 +1,118 @@
+#include<stdio.h>
+#define N 100
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+
+typedef struct queue {              // キュー
+	int Q[N];
+	int head;
+	int tail;
+}queue;
+
+int G[N][N], n;              // 隣接行列，行数
+int d[N], color[N];          // 距離，色
+
+void create_q(queue *K)            // キューを作成
+{
+	K->head = N*2;                 // 何も入ってない状態
+	K->tail = N*2;
+}
+
+void enqueue(queue *K, int u)      // 要素uをキューに追加
+{
+	if(K->head == N*2)             // 最初に要素を入れるとき
+	{
+		K->head = 0;
+		K->tail = 0;
+		K->Q[0] = u;
+	}
+	else
+	{
+		K->tail++;
+		K->Q[K->tail] = u;
+	}
+}
+
+int dequeue(queue *K)      // 先頭要素をキューから取り出す
+{
+	int v;
+	v = K->Q[K->head];
+	K->head++;
+	
+	return v;
+}
+
+void bfs(queue *K, int u)                         // すべての頂点を探索
+{
+	int i, s;
+	
+	for(i = 0; i < n; i++)         // 初期化
+	{
+		color[i] = WHITE;
+	}
+
+	for(i = 0; i < n; i++)
+	{
+		d[i] = -1;
+	}
+
+	color[u] = GRAY;               // 訪問開始
+	d[u] = 0;                      // 自分自身からの距離は0
+	enqueue(K, u);
+
+	while(K->head <= K->tail)
+	{
+		s = dequeue(K);
+		for(i = 0; i < n; i++)
+		{
+			if(G[s][i] == 1 && color[i] == WHITE)
+			{
+				color[i] = GRAY;
+				d[i] = d[s] + 1;
+				enqueue(K, i);
+			}
+		}
+		color[s] = BLACK;
+	}
+	
+}
+
+int main(void)
+{
+	int u, k, v;
+	int i, j;
+	queue QQ;
+
+	scanf("%d", &n);               // 行数(頂点数)
+	for(i = 0; i < n; i++)
+	{
+		for(j = 0; j < n; j++)
+		{
+			G[i][j] = 0;
+		}
+	}
+	
+	for(i = 0; i < n; i++)         // n行に隣接リストが与えられる
+	{
+		scanf("%d", &u);           // 頂点番号
+		scanf("%d", &k);           // 隣接する頂点の数
+		
+		for(j = 0; j < k; j++)
+		{
+			scanf("%d", &v);       // u-1に隣接している頂点番号
+			G[u-1][v-1] = 1;       // 行列は0オリジンだが，入力は1からなので，u-1
+		}
+	}
+	
+	create_q(&QQ);                 // キューを作成
+	
+	bfs(&QQ, 0);                      // 幅優先探索
+	
+	for(i = 0; i < n; i++)
+	{
+		printf("%d %d\n", i+1, d[i]);
+	}
+	
+	return 0;
+}

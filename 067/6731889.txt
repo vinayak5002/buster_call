@@ -1,0 +1,58 @@
+#include<bits/stdc++.h>
+// #include<atcoder/all>
+// #include<boost/multiprecision/cpp_int.hpp>
+
+using namespace std;
+// using namespace atcoder;
+// using bint = boost::multiprecision::cpp_int;
+using ll = long long;
+using ull = unsigned long long;
+using P = pair<int,int>;
+#define rep(i,n) for(ll i = 0;i < (ll)n;i++)
+#define ALL(x) (x).begin(),(x).end()
+#define MOD 1000000007
+// #define MOD 998244353
+
+
+int main(){
+  
+  while(1){
+    int n,m;
+    cin >> n >> m;
+    if(n == 0 && m == 0)break;
+    int res = 0;
+    if(n <= 23){
+      vector<bitset<500>> v(n);
+      rep(i,n){
+        string s;cin >> s;
+        rep(j,m)if(s[j] == '1')v[i] |= (bitset<500>(1) << j);
+      }
+      for(int bit = 1;bit < 1 << n;bit++){
+        bitset<500> msk(0);
+        rep(i,n)if(bit >> i & 1)msk ^= v[i];
+        if(msk.none())res = max(res,(int)__builtin_popcount(bit));
+      }
+    }else{
+      vector<int> v(n);
+      rep(i,n){
+        string s;cin >> s;
+        rep(j,m)if(s[j] == '1')v[i] |= (1 << j);
+      }
+      vector<short> dp(1 << m,-1000);
+      dp[0] = 0;
+      rep(i,n){
+        vector<short> DP(1 << m,-1000);
+        for(int bit = 0;bit < 1 << m;bit++){
+          DP[bit^v[i]] = max<short>(DP[bit^v[i]],dp[bit] + 1);
+          DP[bit] = max<short>(DP[bit],dp[bit]);
+        }
+        swap(dp,DP);
+      }
+      res = dp[0];
+    }
+    cout << res << "\n";
+  }
+  
+
+  return 0;
+}

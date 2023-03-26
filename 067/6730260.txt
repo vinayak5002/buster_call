@@ -1,0 +1,133 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+/*
+int parentof[10002];
+int Rank[10002];
+int findRoot(int x) {
+	if (x != parentof[x] ) parentof[x] = findRoot(parentof[x]);
+	return parentof[x];
+}
+void unite(int x, int y) {
+	int rx = findRoot(x);
+	int ry = findRoot(y);
+	if (Rank[rx] > Rank[ry]) {
+		parentof[ry] = rx;
+	}
+	else {
+		parentof[rx] = ry;
+		if (Rank[rx] == Rank[ry])Rank[ry] ++;
+	}
+}
+bool same(int x, int y) {
+	return findRoot(x) == findRoot(y);
+}
+int main() {
+	int n, q;
+	cin >> n >> q;
+	for (int i = 0; i < n; i++) { 
+		parentof[i] = i; 
+		Rank[i] = 1;
+	}
+	for (int i = 0; i < q; i++) {
+		int c;
+		int x, y;
+		cin >> c >> x >> y;
+		if (!c) {
+			unite(x, y);
+		}
+		else{
+			if (same(x, y))cout << 1 << endl;
+			else cout << 0 << endl;
+		}
+	}
+}
+*/
+#define max 100000
+class unionfindtree {
+private:
+	int* parentof;
+	int* rank;
+	int* size;
+public:
+	unionfindtree();
+	unionfindtree(int x);
+
+	~unionfindtree();
+	void unite(int x, int y);
+	bool same(int x, int y);
+	void makeTree(int x);
+	int findRoot(int x);
+
+
+};
+
+unionfindtree::unionfindtree() {
+	parentof = new int[max];
+	rank = new int[max];
+	size = new int[max];
+}
+unionfindtree::unionfindtree(int s) {
+	parentof = new int[s];
+	rank = new int[s];
+	size = new int[s];
+}
+
+unionfindtree::~unionfindtree() {
+	delete[] parentof;
+	delete[] rank;
+	delete[] size;
+}
+int unionfindtree::findRoot(int x) {
+	if (x != parentof[x])parentof[x] = findRoot(parentof[x]);
+	return parentof[x];
+}
+void unionfindtree::makeTree(int x) {
+	parentof[x] = x;
+	rank[x] = 1;
+	size[x] = 1;
+}
+
+void unionfindtree::unite(int x, int y) {
+	int px = findRoot(x);
+	int py = findRoot(y);
+	if (px == py)return;
+	if (rank[px] < rank[py]) {
+		parentof[px] = py;
+	}
+	else {
+		parentof[py] = px;
+		if (rank[py] == rank[px])rank[px]++;
+	}
+}
+bool unionfindtree::same(int x, int y) {
+	return findRoot(x) == findRoot(y);
+}
+
+int main() {
+	int n;
+	cin >> n;
+	unionfindtree uft(n);
+	for (int i = 0; i < n; i++) {
+		uft.makeTree(i);
+	}
+	int q;
+	cin >> q;
+	for (int i = 0; i < q; i++) {
+		int com;
+		cin >> com;
+		int x, y;
+		cin >> x >> y;
+		if (!com) {
+			uft.unite(x, y);
+		}
+		else {
+			if (uft.same(x, y))cout << 1 << endl;
+			else cout << 0 << endl;
+		}
+	}
+	return 0;
+}
+
+
+

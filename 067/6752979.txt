@@ -1,0 +1,72 @@
+from collections import Counter, deque, defaultdict
+from itertools import permutations, combinations, accumulate, product, chain
+from functools import lru_cache
+from bisect import bisect, bisect_left, insort, insort_left
+from heapq import heapify, heappush, heappop
+from array import array
+from decimal import Decimal
+from copy import deepcopy
+from pprint import pprint
+from string import ascii_uppercase, ascii_lowercase, ascii_letters
+from math import factorial, floor, ceil, sqrt, log, log2, log10
+import math
+import sys
+sys.setrecursionlimit(1<<30)
+
+read = sys.stdin.read
+readline = sys.stdin.readline
+readlines = sys.stdin.readlines
+
+class UnionFind():
+
+    def __init__(self, n):
+        self.n = n
+        self.parents = [-1] * n
+
+    def find(self, x):
+        if self.parents[x] < 0:
+            return x
+        else:
+            self.parents[x] = self.find(self.parents[x])
+            return self.parents[x]
+
+    def union(self, x, y):
+        xp = self.find(x)
+        yp = self.find(y)
+
+        if xp == yp:
+            return False
+
+        if self.parents[xp] > self.parents[yp]:
+            xp, yp = yp, xp
+
+        self.parents[xp] += self.parents[yp]
+        self.parents[yp] = xp
+
+        return True
+
+if __name__ == '__main__':
+
+    while True:
+        N = int(readline())
+        if N == 0:
+            break
+        P = [list(map(float, readline().split())) for _ in range(N)]
+        que = list()
+        for i in range(N):
+            x1, y1, z1, r1 = P[i]
+            for j in range(i+1, N):
+                x2, y2, z2, r2 = P[j]
+                tmp = max(0, sqrt((x1-x2)**2+(y1-y2)**2+(z1-z2)**2) - (r1+r2))
+                heappush(que, [tmp, i, j])
+        ans = 0
+        uf = UnionFind(N)
+        while que:
+            cst, s, g = heappop(que)
+            if uf.union(s, g):
+                ans += cst
+        if ans == 0:
+            print('0.000')
+        else:
+            print(round(ans,4))
+

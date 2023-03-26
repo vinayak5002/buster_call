@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+using namespace std;
+#if __has_include(<atcoder/all>)
+    #include <atcoder/all>
+using namespace atcoder;
+#endif
+typedef long long ll;
+typedef pair<ll, ll> P;
+typedef tuple<ll, ll, ll> T;
+#define rep(i, n) for(ll i = 0; i < n; i++)
+
+int main(){
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+    while(true){
+        int n; cin >> n;
+        if(n == 0)break;
+        vector<int> a(n);
+        rep(i,n)cin >> a[i];
+        vector<vector<ll>> dp(n,vector<ll>(n,0));
+
+        map<P,bool> ok;
+        rep(i,n-1){
+            if(abs(a[i]-a[i+1]) <= 1){
+                ok[P(i,i+1)] = true;
+                dp[i][i+1] = 2;
+            }
+        }
+        for(int bread=3;bread<n;bread++){
+            for(int left=0;left<n;left++){
+                if(bread+left >= n)continue;
+                //取り除ける区間を全て探す
+                if(ok[P(left+1,left+bread-1)] && abs(a[left]-a[left+bread]) <= 1){
+                    ok[P(left,left+bread)] = true;
+                    dp[left][left+bread] = bread+1;
+                }
+                else{
+                    for(int k=left;k<left+bread;k++){
+                        if(ok[P(left,k)] && ok[P(k+1,left+bread)]){
+                            ok[P(left,left+bread)] = true;
+                            dp[left][left+bread] = bread+1;
+                        }
+                    }
+                }
+            }
+        }
+        // for(auto [b,f]:ok)if(f)cout << b.first << " " << b.second << endl;
+        for(int bread=3;bread<n;bread++){
+            for(int left=0;left<n;left++){
+                if(bread+left >= n)continue;
+                
+                for(int k=left;k<left+bread;k++){
+                    dp[left][left+bread] = max(dp[left][left+bread],dp[left][k]+dp[k][left+bread]);
+                }
+            }
+        }
+
+        // rep(i,n){
+        //     rep(j,n){
+        //         cout << dp[i][j] << " ";
+        //     }
+        //     cout << endl;
+        // }
+        cout << dp[0][n-1] << endl;
+    }
+    
+    return 0;
+}

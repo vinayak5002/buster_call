@@ -1,0 +1,49 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+void solve(int N,int M){
+    int r;cin>>r;
+    vector<int> A[M];
+    vector<int> B(M,0);
+    for(int i = 0; r > i; i++){
+        int t,n,m,s;cin>>t>>n>>m>>s;--m;
+        if(B[m] == 0){
+            A[m].push_back(t);
+            B[m]++;
+            continue;
+        }
+        if(s)B[m]++;
+        else B[m]--;
+        if(B[m] == 0){
+            A[m].push_back(t);
+        }
+    }
+
+    int q;cin>>q;
+    for(int i = 0; q > i; i++){
+        int s,e,m;cin>>s>>e>>m;m--;
+        int ans = 0;
+        for(int j = 0; A[m].size() > j; j+=2){
+            if(s <= A[m][j] && A[m][j+1] <= e){
+                ans += A[m][j+1]-A[m][j];
+            }else if(A[m][j+1] <= e){
+                ans += max(0,A[m][j+1]-s);
+            }else if(s <= A[m][j]){
+                ans += max(0,e-A[m][j]);
+            }else{
+                ans += e-s;
+            }
+            //cout << A[m][j] << " " << A[m][j+1] << endl;
+        }
+        cout << ans << endl;
+    }
+}
+
+int main(){
+    int n,m;
+    while(cin>>n>>m,n){
+        solve(n,m);
+    }
+}
+

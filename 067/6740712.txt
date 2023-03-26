@@ -1,0 +1,49 @@
+#include<bits/stdc++.h>
+//#include<atcoder/all>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+//using namespace atcoder;
+typedef long long ll;
+const ll INF = 1e18;
+//typedef modint1000000007 mint;
+//
+
+int main(){
+	int n;
+	cin >> n;
+	string s;
+	cin >> s;
+	//dp[i][j] : i日目の最後で, jが鍵を持っている
+	vector<vector<ll>> dp(n+1, vector<ll>(8));
+	dp[0][1] = 1;
+	char c;
+	int tmp;
+	int mod = 10007;
+	for (int num=0; num<n; num++){
+		c = s[num];
+		if (c == 'J') tmp = 0;
+		else if (c == 'O') tmp = 1;
+		else tmp = 2;
+		//tmpは必ず出席
+		//iは全体の集合 jは鍵を持つもの,
+		for (int i=0; i<8; i++){
+			if (!(i>>tmp&1)) continue;
+			for (int j=0; j<8; j++){
+				bool mode = false;
+				for (int k=0; k<3; k++){
+					if ((i>>k&1) && (j>>k)&1){
+						mode = true;
+					}
+				}
+				if (mode){
+					dp[num+1][i] = (dp[num+1][i] + dp[num][j]) % mod;
+				}
+			}
+		}
+	}
+	ll ans = 0;
+	for (int i=0; i<8; i++){
+		ans = (ans + dp[n][i]) % mod;
+	}
+	cout << ans << endl;
+}

@@ -1,0 +1,165 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    int key;
+    Node *right, *left, *parent;
+};
+
+Node *root, *NIL;
+
+void insert(int key);
+void inorder(Node *u);
+void preorder(Node *u);
+Node *find(Node *u, int key);
+Node *minimumNode(Node *u);
+Node *nextNode(Node *current_node);
+void deleteNode(Node *key_to_be_deleted);
+
+int main() {
+    int n, key;
+    string command;
+
+    cin >> n;
+
+    for (int i = 0; i < n; i++) {
+        cin >> command;
+        if (command == "insert") {
+            cin >> key;
+            insert(key);
+        } else if (command == "print") {
+            inorder(root);
+            cout << endl;
+            preorder(root);
+            cout << endl;
+        } else if (command == "find") {
+            cin >> key;
+            if (find(root, key) == NIL) {
+                cout << "no" << endl;
+            } else {
+                cout << "yes" << endl;
+            }
+        } else if (command == "delete") {
+            cin >> key;
+            deleteNode(find(root, key));
+        }
+    }
+}
+
+void insert(int key) {
+    Node *parent_node = NIL;
+    Node *child_node = root;
+    Node *new_node;
+
+    // new_node = (Node *)malloc(sizeof(Node));
+    new_node = new Node;
+    new_node->key = key;
+    new_node->left = NIL;
+    new_node->right = NIL;
+
+    while (child_node != NIL) {
+        parent_node = child_node;
+        if (new_node->key < parent_node->key) {
+            child_node = parent_node->left;
+        } else {
+            child_node = parent_node->right;
+        }
+    }
+    new_node->parent = parent_node;
+
+    if (parent_node == NIL) {
+        root = new_node;
+    } else {
+        if (new_node->key < parent_node->key) {
+            parent_node->left = new_node;
+        } else {
+            parent_node->right = new_node;
+        }
+    }
+    return;
+}
+
+void inorder(Node *u) {
+    if (u == NIL) {
+        return;
+    }
+    inorder(u->left);
+    cout << " " << u->key;
+    inorder(u->right);
+}
+void preorder(Node *u) {
+    if (u == NIL) {
+        return;
+    }
+    cout << " " << u->key;
+    preorder(u->left);
+    preorder(u->right);
+}
+
+Node *find(Node *u, int key) {
+    while (u != NIL && key != u->key) {
+        if (key < u->key) {
+            u = u->left;
+        } else {
+            u = u->right;
+        }
+    }
+    return u;
+}
+
+Node *minimumNode(Node *u) {
+    while (u->left != NIL) {
+        u = u->left;
+    }
+    return u;
+}
+
+Node *nextNode(Node *current_node) {
+    if (current_node->right != NIL) {
+        return minimumNode(current_node->right);
+    }
+    Node *next_node = current_node->parent;
+    while (next_node != NIL && current_node == next_node->right) {
+        current_node = next_node;
+        next_node = next_node->parent;
+    }
+    return next_node;
+}
+
+void deleteNode(Node *key_to_be_deleted) {
+    Node *node_to_be_deleted;
+    Node *node_to_be_changed;
+
+    if (key_to_be_deleted->left == NIL || key_to_be_deleted->right == NIL) {
+        node_to_be_deleted = key_to_be_deleted;
+    } else {
+        node_to_be_deleted = nextNode(key_to_be_deleted);
+    }
+
+    if (node_to_be_deleted->left != NIL) {
+        node_to_be_changed = node_to_be_deleted->left;
+    } else {
+        node_to_be_changed = node_to_be_deleted->right;
+    }
+
+    if (node_to_be_changed != NIL) {
+        node_to_be_changed->parent = node_to_be_deleted->parent;
+    }
+
+    if (node_to_be_deleted->parent == NIL) {
+        root = node_to_be_changed;
+    } else {
+        if (node_to_be_deleted == node_to_be_deleted->parent->left) {
+            node_to_be_deleted->parent->left = node_to_be_changed;
+        } else {
+            node_to_be_deleted->parent->right = node_to_be_changed;
+        }
+    }
+
+    if (node_to_be_deleted != key_to_be_deleted) {
+        key_to_be_deleted->key = node_to_be_deleted->key;
+    }
+
+    // free(node_to_be_deleted);
+    delete node_to_be_deleted;
+}

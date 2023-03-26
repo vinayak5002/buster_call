@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+bool is_digit(char c) {
+    return '0' <= c and c <= '9';
+}
+
+pair<int, int> read_int(const string &s, int i) {
+    int j = i;
+    while (is_digit(s[j])) ++j;
+    while (s[i] == '0' and j - i > 1) ++i;
+    return { stoi(s.substr(i, j - i)), j };
+}
+
+constexpr int M = 1000000;
+
+int main() {
+    while (true) {
+        string s;
+        cin >> s;
+        int n = s.size();
+
+        vector<int> rp(n, -1);
+        {
+            vector<int> st;
+            for (int pos = 0; pos < n; ++pos) {
+                if (s[pos] == '(') {
+                    st.push_back(pos);
+                } else if (s[pos] == ')') {
+                    rp[st.back()] = pos;
+                    st.pop_back();
+                }
+            }
+        }
+
+        map<pair<int, int>, int> memo_len;
+        auto get_length = [&](auto get_length, int l, int r) -> int {
+            const pair<int, int> key { l, r };
+            if (auto it = memo_len.find(key); it != memo_len.end()) return it->second;
+            int res = 0;
+            for (int i = l; i < r;) {
+                int c = 1;
+                if (is_digit(s[i])) tie(c, i) = read_int(s, i);
+                if (s[i] == '(') {
+                    int j = rp[i];
+                    auto l = get_length(get_length, i + 1, j);
+                    res += min((long long) M, (long long) c * l);
+                    i = j + 1;
+                } else {
+                    assert('A' <= s[i] and s[i] <= 'Z');
+                    res += c;
+                    i = i + 1;
+                }
+            }
+            return memo_len[key] = min(M, res);
+        };
+
+        auto scan = [&](auto scan, int l, int r, int k) -> bool {
+            for (int i = l; i < r;) {
+                int c = 1;
+                if (is_digit(s[i])) tie(c, i) = read_int(s, i);
+                
+                if (s[i] == '(') {
+                    int j = rp[i];
+                    long long len = get_length(get_length, i + 1, j);
+                    if (k < c * len) {
+                        assert(scan(scan, i + 1, j, k % len));
+                        return true;
+                    } else {
+                        k -= c * len;
+                        i = j + 1;
+                    }
+                } else {
+                    assert('A' <= s[i] and s[i] <= 'Z');
+                    if (k < c) {
+                        cout << s[i] << endl;
+                        return true;
+                    } else {
+                        k -= c;
+                        i = i + 1;
+                    }
+                }
+            }
+            return false;
+        };
+
+        int i;
+        cin >> i;
+        if (s[0] == '0') break;
+        if (not scan(scan, 0, n, i)) {
+            cout << 0 << endl;
+        }
+    }
+}

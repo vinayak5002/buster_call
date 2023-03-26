@@ -1,0 +1,64 @@
+import java.util.Scanner;
+class PriorityQueue {
+    private int[] heap;
+    private int size = 0;
+    PriorityQueue() {
+        heap = new int[2000001];
+        size = 0;
+    }
+    public void insert(int k) {
+        int idx = size;
+        while (idx != 0 && k > heap[(idx - 1) / 2]) {
+            heap[idx] = heap[(idx - 1) / 2];
+            idx = (idx - 1) / 2;
+        }
+        heap[idx] = k;
+        size++;
+    }
+    public int extractMax() {
+        if (size > 0) {
+            int k = heap[0];
+            heap[0] = heap[size - 1];
+            size--;
+
+            if (size != 0)
+                heapify(0);
+            return k;
+    }
+     return -1;
+    }
+    private void heapify(int idx) {
+        int max = idx;
+        if (idx * 2 + 1 < size && heap[idx * 2 + 1] > heap[idx]) {
+            max = idx * 2 + 1;
+        }
+        if (idx * 2 + 2 < size && heap[2 * 2 + 2] > heap[max]) {
+            max = idx * 2 + 2;
+        }
+        if (max != idx) {
+            int aux = heap[idx];
+            heap[idx] = heap[max];
+            heap[max] = aux;
+            heapify(max);
+        }
+    }
+}
+public class Main
+{
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        PriorityQueue queue = new PriorityQueue();
+        String operation = sc.next();
+        while (!operation.equals("end")) {
+            if (operation.equals("insert")) {
+                int k = sc.nextInt();
+                queue.insert(k);
+            } else {
+                int max = queue.extractMax();
+                if (max != -1) System.out.println(max);
+                else operation = "end";
+            }
+            operation = sc.next();
+        }
+    }
+}

@@ -1,0 +1,124 @@
+#include <iostream>
+#include <random>
+#include <regex>
+using namespace std;
+
+pair<int, int> solve(const int n, const vector<int>& p) {
+    constexpr int INF = 1e9;
+    vector dp(n + 1, vector(n + 1, vector<int>(1000, -INF)));
+    dp[0][0][0] = 0;
+    for (int i = 0; i < n; ++i) {
+        int q = p[i] / 1000, r = p[i] % 1000;
+        if (r == 0) { --q; r += 1000; }
+
+        for (int k = n; k >= 0; --k) {
+            for (int c = 0; c < dp[0][0].size(); ++c) {
+                if (dp[i][k][c] == -INF) continue;
+                dp[i + 1][k][c] = max(dp[i + 1][k][c], dp[i][k][c]);
+                if (1 <= r && r <= 500) {
+                    auto &d = dp[i + 1][k + 1][c + q + 1];
+                    d = max(d, dp[i][k][c] + 500 - r);
+                } else if (dp[i][k][c] >= r - 500) {
+                    auto &d = dp[i + 1][k + 1][c + q + 1];
+                    d = max(d, dp[i][k][c] + 500 - r);
+                } else {
+                    auto &d = dp[i + 1][k][c + q + 1];
+                    d = max(d, dp[i][k][c] + 1000 - r);
+                }
+            }
+        }
+        for (int k = 0; k <= min(n, 10); ++k) {
+            for (int c = 0; c <= min(5*n+1, 10); ++c) {
+                cerr << (dp[i + 1][k][c] >= 0 ? dp[i + 1][k][c] : -1) << " \n"[c == min(5*n+1,10)];
+            }
+        }
+        cerr << endl;
+    }
+    for (int k = n; k >= 0; --k) {
+        int res = INF;
+        for (int c = 0; c < dp[0][0].size(); ++c) {
+            if (dp[n][k][c] == -INF) continue;
+            res = min(res, c * 1000 - k * 500 - dp[n][k][c]);
+        }
+        if (res < INF) {
+            // cout << k << ' ' << res << endl;
+            return make_pair(k, res);
+        }
+    }
+    return make_pair(-1, -1);
+}
+
+pair<int, int> maximum_coin(const int n, const vector<int>& p) {
+    int coins = 0, charge = 0, satsu = 0;
+    for (const int &x : p) {
+        int q = x / 1000, r = x % 1000;
+        if (r == 0) { --q; r = 1000; }
+
+        if (1 <= r && r <= 500) {
+            ++coins;
+            satsu += q + 1;
+            charge += 500 - r;
+        } else if (charge >= r - 500) {
+            ++coins;
+            satsu += q + 1;
+            charge += 500 - r;
+        } else {
+            satsu += q + 1;
+            charge += 1000 - r;
+        }
+    }
+    return make_pair(coins, satsu * 1000 - coins * 500 - charge);
+}
+
+pair<int, int> solve_expt(const int n, const vector<int>& p) {
+    // return maximum_coin(n, p);
+    int k = -1, res = 0;
+    for (int bit = 1; bit < 1 << n; ++bit) {
+        int m = __builtin_popcount(bit);
+        vector<int> q;
+        for (int i = 0; i < n; ++i) {
+            if (bit >> i & 1) q.push_back(p[i]);
+        }
+        auto [k_tmp, res_tmp] = maximum_coin(m, q);
+        if (k_tmp > k) {
+            k = k_tmp;
+            res = res_tmp;
+        } else if (k_tmp == k) {
+            res = min(res, res_tmp);
+        }
+    }
+}
+
+void fuzzing() {
+    while (true) {
+        int n = rand() % 20 + 1;
+        vector<int> p(n);
+        for (auto &x : p) x = rand() % 2000 + 1;
+        int n100_c = 0, nfalse_c = 0;
+        const auto [k_act, res_act] = solve(n, p);
+        const auto [k_exp, res_exp] = maximum_coin(n, p);
+        cerr << "N= " << n << endl;
+        cerr << "P= ";
+        for (int x : p) cerr << x << ' ';
+        cerr << endl;
+        if (k_act != k_exp ) {
+            cerr << "solve: (" << k_act << ' ' << res_act << ')' << endl;
+            cerr << "expected: (" << k_exp << ' ' << res_exp << ')' << endl;
+            assert(false);
+        }
+    }
+}
+
+int main(void) {
+    // fuzzing();
+    int n;
+    while (true) {
+        cin >> n;
+        if (n == 0) break;
+        vector<int> p(n);
+        for (auto &e : p) cin >> e;
+        const auto [k, res] = solve(n, p);
+        cout << k << ' ' << res << endl;
+    }
+    return 0;
+}

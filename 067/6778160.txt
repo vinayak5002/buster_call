@@ -1,0 +1,92 @@
+import java.util.Scanner
+import scala.annotation.tailrec
+
+object Main extends App {
+  class Node(val key:Int, var left:NodeRef = None, var right:NodeRef = None)
+  type NodeRef = Option[Node]
+
+  val sc = new Scanner(System.in)
+  val N  = sc.nextInt()
+  var root:NodeRef = None
+
+  def input():List[String] = {
+    @tailrec
+    def iterate(n:Int, ac:List[String]):List[String] = {
+      if (n > 0) sc.next() match {
+        case "insert" => iterate(n-1, sc.next()::"insert"::ac)
+        case "find" => iterate(n-1, sc.next()::"find"::ac)
+        case s => iterate(n-1, s::ac)
+      } else ac.reverse
+    }
+    iterate(N, Nil)
+  }
+
+  def insert(key:Int): NodeRef = {
+    def iterate(tree:NodeRef): NodeRef = tree match {
+      case None => Some(new Node(key))
+      case Some(n) =>
+        if (n.key > key) n.left = iterate(n.left) else n.right = iterate(n.right)
+        tree
+    }
+    iterate(root)
+  }
+
+  def find(key:Int): Boolean = {
+    @tailrec
+    def iterate(nodeRef: NodeRef):Boolean = nodeRef match {
+      case None => false
+      case Some(n) => n.key match {
+        case k if key < k => iterate(n.left)
+        case k if key > k => iterate(n.right)
+        case _ => true
+      }
+    }
+    iterate(root)
+  }
+
+  object Order extends Enumeration {
+    type Order = Value
+    val preorder, inorder, postorder = Value
+  }
+
+  import Order._
+  def traverse(order: Order):List[Int] = {
+    def iterate(tree:NodeRef, ac:List[Int]):List[Int] = tree match {
+      case None => ac
+      case Some(n) =>
+        order match {
+          case Order.preorder =>
+            val lac = iterate(n.left, n.key::ac)
+            iterate(n.right, lac)
+          case Order.inorder =>
+            val lac = iterate(n.left, ac)
+            iterate(n.right, n.key::lac)
+          case Order.postorder =>
+            val lac = iterate(n.left, ac)
+            n.key::iterate(n.right, lac)
+        }
+    }
+    iterate(root, Nil).reverse
+  }
+
+  @tailrec
+  def solver(commands:List[String]):Unit = {
+    if (commands.nonEmpty) commands.head match {
+        case "insert" =>
+          root = insert(commands.tail.head.toInt)
+          solver(commands.tail.tail)
+        case "find" =>
+          val findResult = if (find(commands.tail.head.toInt)) "yes" else "no"
+          println(findResult)
+          solver(commands.tail.tail)
+        case _ =>
+          println(s" ${traverse(Order.inorder).mkString(" ")}")
+          println(s" ${traverse(Order.preorder).mkString(" ")}")
+//          println(s" ${traverse(Order.postorder).mkString(" ")}")
+          solver(commands.tail)
+      }
+  }
+
+  solver(input())
+
+}

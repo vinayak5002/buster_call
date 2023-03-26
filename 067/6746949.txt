@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// clang-format off
+template <typename T> inline bool chmax(T &a, const T &b) {if (a < b) {a = b; return true;} return false;}
+template <typename T> inline bool chmin(T &a, const T &b) {if (a > b) {a = b; return true;} return false;}
+// clang-format on
+
+namespace {
+    vector<vector<int>> grid;
+}
+
+int getLargestRectangle(int h, int w);
+
+int main() {
+    int h, w;
+    cin >> h >> w;
+    grid = vector<vector<int>>(h, vector<int>(w));
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            cin >> grid.at(i).at(j);
+        }
+    }
+
+    cout << getLargestRectangle(h, w) << endl;
+}
+
+int getLargestRectangle(int h, int w) {
+    int max_square = 0;
+    vector<vector<int>> histogram(h, vector<int>(w, 1));
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            if (grid.at(i).at(j)) {
+                histogram.at(i).at(j) = 0;
+            } else if (i) {
+                histogram.at(i).at(j) = histogram.at(i - 1).at(j) + 1;
+            }
+        }
+    }
+
+    int max_area = 0;
+    stack<pair<int, int>> s;
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            // pair<int, int> = (height, position)
+            pair<int, int> rect(histogram.at(i).at(j), j);
+            if (s.empty()) {
+                s.push(rect);
+            } else if (s.top().first < rect.first) {
+                s.push(rect);
+            } else if (s.top().first > rect.first) {
+                int position = j;
+                while (!s.empty() && s.top().first > rect.first) {
+                    auto pre_rect = s.top();
+                    s.pop();
+                    int area = pre_rect.first * (j - pre_rect.second);
+                    chmax(max_area, area);
+                    position = pre_rect.second;
+                }
+                rect.second = position;
+                s.push(rect);
+            }
+        }
+    }
+    return max_area;
+}

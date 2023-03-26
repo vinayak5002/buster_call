@@ -1,0 +1,53 @@
+#include<iostream>
+using namespace std;
+typedef long long Int;
+#define rep(i, n) for (int i=0; i<(int)(n); i++)
+
+pair<Int, Int> seg[1 << 20];
+
+void update(Int ql, Int qr, Int val, Int time, int sl=0, int sr=1<<19, int pos=1){
+  if(qr <= sl || sr <= ql) return;
+  if(ql <= sl && sr <= qr){
+    seg[pos] = make_pair(val, time);
+    return;
+  }
+
+  Int sm = (sl + sr) /2;
+  update(ql, qr, val, time, sl, sm, pos*2);
+  update(ql, qr, val, time, sm, sr, pos*2+1);
+}
+
+Int find(Int pos){
+  pos += 1 << 19;
+  Int time = 0;
+  Int val = 0;
+  if(time < seg[pos].second){
+    val = seg[pos].first;
+    time = seg[pos].second;
+  }
+  while((pos /= 2) > 0){
+    if(time < seg[pos].second){
+      val = seg[pos].first;
+      time = seg[pos].second;
+    }
+  }
+  return val;
+}
+
+int main(){
+  Int n,q,s,t,x,ind,com;
+  cin >> n >> q;
+  rep(i, 1<<20) seg[i] = make_pair(0, -1);
+  rep(i, q){
+    cin >> com;
+    if(com == 0){
+      // update
+      cin >> s >> t >> x;
+      update(s, t+1, x, i+1);
+    }else{
+      // find
+      cin >> ind;
+      cout << find(ind) << endl;
+    }
+  }
+}

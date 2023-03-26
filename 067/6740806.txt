@@ -1,0 +1,119 @@
+#include <bits/stdc++.h>
+#define ll long long
+#define INF 1000000005
+#define MOD 1000000007
+#define EPS 1e-10
+#define rep(i,n) for(int i=0;i<(int)(n);++i)
+#define rrep(i,n) for(int i=(int)(n)-1;i>=0;--i)
+#define srep(i,s,t) for(int i=(int)(s);i<(int)(t);++i)
+#define each(a,b) for(auto& (a): (b))
+#define all(v) (v).begin(),(v).end()
+#define len(v) (int)(v).size()
+#define zip(v) sort(all(v)),v.erase(unique(all(v)),v.end())
+#define cmx(x,y) x=max(x,y)
+#define cmn(x,y) x=min(x,y)
+#define fi first
+#define se second
+#define pb push_back
+#define show(x) cout<<#x<<" = "<<(x)<<endl
+#define sar(a,n) cout<<#a<<":";rep(pachico,n)cout<<" "<<a[pachico];cout<<endl
+
+using namespace std;
+
+template<typename S,typename T>auto&operator<<(ostream&o,pair<S,T>p){return o<<"{"<<p.fi<<","<<p.se<<"}";}
+template<typename T>auto&operator<<(ostream&o,set<T>s){for(auto&e:s)o<<e<<" ";return o;}
+template<typename S,typename T,typename U>
+auto&operator<<(ostream&o,priority_queue<S,T,U>q){while(!q.empty())o<<q.top()<<" ",q.pop();return o;}
+template<typename K,typename T>auto&operator<<(ostream&o,map<K,T>m){for(auto&e:m)o<<e<<" ";return o;}
+template<typename T>auto&operator<<(ostream&o,vector<T>v){for(auto&e:v)o<<e<<" ";return o;}
+void ashow(){cout<<endl;}template<typename T,typename...A>void ashow(T t,A...a){cout<<t<<" ";ashow(a...);}
+
+typedef pair<int,int> P;
+typedef pair<ll,ll> pll;
+typedef vector<int> vi;
+typedef vector<ll> vl;
+typedef vector<vi> vvi;
+typedef vector<vl> vvl;
+typedef vector<P> vp;
+typedef vector<double> vd;
+typedef vector<string> vs;
+
+
+struct Edge {
+    int from, to;
+};
+typedef vector<vector<Edge>> Graph;
+int main()
+{
+    int n,k;
+    cin >>n >> k;
+
+    vector<int> rs(n), cs(n);
+    for(int i = 0; n > i; i++) {
+        cin >> cs[i] >> rs[i];
+    }
+
+
+    Graph g(n);
+    for(int i = 0; k > i; i++) {
+        int f, t;
+        cin >> f >> t;
+        f--,t--;
+
+        g[f].push_back({f,t});
+        g[t].push_back({t,f});
+    }
+
+    vector<int> maxRad(n, -1), minCost(n, INF), started(n, 0);
+
+    priority_queue<pair<int, int>> pq;
+    pq.push(make_pair(0,0));
+    minCost[0] = 0;
+    while(minCost[n-1] == INF) {
+
+        pair<int,int> Min = make_pair(INF, -1);
+        for(int i = 0; n > i; i++) {
+            if(started[i] == 1 || minCost[i] == INF) continue;
+
+            Min = min(Min, make_pair(minCost[i] + cs[i], i)); 
+        }
+
+
+        int nexCost = Min.first;
+        int curPos = Min.second;
+        started[curPos] = 1;
+
+        if(maxRad[curPos] >= rs[curPos]) {
+            continue;
+        }
+
+        // BFS
+        queue<pair<int,int>> que;
+        que.push(make_pair(rs[curPos], curPos));
+        
+        while(que.size()) {
+            auto qc = que.front();
+            que.pop();
+            int qCP = qc.second;
+            int restRad = qc.first;
+
+            if(maxRad[qCP] >= restRad) continue;
+            maxRad[qCP] = restRad;
+            if(minCost[qCP] > nexCost) {
+                assert(minCost[qCP] == INF);
+                minCost[qCP] =nexCost;
+            }
+
+            if(restRad >= 1)
+            for(auto nex: g[qCP]) {
+                que.push(make_pair(restRad - 1, nex.to));
+            }
+        }
+
+        //
+    }
+    
+    cout << minCost[n-1] << endl;
+    return 0;
+}
+

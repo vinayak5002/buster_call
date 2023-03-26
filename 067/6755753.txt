@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+vector<pair<int, int>> bfs01(vector<vector<pair<int, int>>>& G, int s) {
+    const int n = G.size();
+    vector<pair<int, int>> dist(n, {1e9, -1});
+    dist[s] = {0, s};
+    deque<pair<pair<int, int>, int>> dq;
+    dq.push_back({{0, s}, s});
+    while (!dq.empty()) {
+        auto [d, v] = dq.front();
+        dq.pop_front();
+        for (auto [u, w] : G[v]) {
+            pair<int, int> nd(d.first + w, min(d.second, u));
+            if (dist[u] > nd) {
+                dist[u] = nd;
+                if (w == 0) dq.push_front({nd, u});
+                else dq.push_back({nd, u});
+            }
+        }
+    }
+    return dist;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    int N;
+    cin >> N;
+    vector<int> S(3);
+    for (auto& x : S) cin >> x;
+    int m = N;
+    vector<vector<pair<int, int>>> G(N+3);
+    rep(k,0,3) {
+        rep(_,0,S[k]) {
+            int i;
+            cin >> i;
+            --i;
+            chmin(m, i);
+            G[i].push_back({N+k, 0});
+            G[N+k].push_back({i, 0});
+        }
+    }
+    int M;
+    cin >> M;
+    rep(_,0,M) {
+        int x, y;
+        cin >> x >> y;
+        --x, --y;
+        G[x].push_back({y, 1});
+        G[y].push_back({x, 1});
+    }
+    vector<vector<pair<int, int>>> dist(3);
+    rep(k,0,3) dist[k] = bfs01(G, N+k);
+    pair<int, int> ans(1e9, 0);
+    rep(i,0,N) {
+        // cout << dist[0][i]+dist[1][i]+dist[2][i] << endl;
+        int d = dist[0][i].first + dist[1][i].first + dist[2][i].first;
+        int v = min({m, dist[0][i].second, dist[1][i].second, dist[2][i].second}) + 1;
+        chmin(ans, {d, v});
+    }
+    cout << ans.first << " " << ans.second << endl;
+}

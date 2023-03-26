@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for (long long i = 0; i < (n); ++i)
+using ll = long long;
+using P = pair<ll,ll>;
+using vec = vector<ll>;
+using vecp = vector<P>;
+using mat = vector<vec>;
+using matp = vector<vecp>;
+const ll MOD = 998244353;
+const ll INF = 1e18;
+#define all(v) v.begin(), v.end()
+
+int main(){
+    while(true){
+        ll N,M;
+        cin >> N >> M;
+        if(N==0&&M==0) return 0;
+        vec A(N+1,0),B(N+1,0);
+        rep(i,N) cin >> A.at(i+1);
+        rep(i,N) cin >> B.at(i+1);
+        mat dp(N+1,vec(2,INF));
+        dp.at(0).at(0)=0;
+        dp.at(0).at(1)=M;
+        rep(i,N){
+            ll X=(B.at(i)+M-A.at(i))%M,Y=(B.at(i+1)+M-A.at(i+1))%M;
+            if(X<Y){
+                dp.at(i+1).at(0)=min(dp.at(i+1).at(0),min(dp.at(i).at(0)+Y-X,dp.at(i).at(1)));
+                dp.at(i+1).at(1)=min(dp.at(i+1).at(1),min(dp.at(i).at(1)+Y-X,dp.at(i).at(0)+Y-X+M));
+            }else{
+                dp.at(i+1).at(0)=min(dp.at(i+1).at(0),min(dp.at(i).at(0),dp.at(i).at(1)));
+                dp.at(i+1).at(1)=min(dp.at(i+1).at(1),min(dp.at(i).at(1),dp.at(i).at(0)+M+Y-X));
+            }
+        }
+        cout << min(dp.at(N).at(0),dp.at(N).at(1)) << endl;
+    }
+}

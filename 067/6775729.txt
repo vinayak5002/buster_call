@@ -1,0 +1,100 @@
+#include <iostream>
+
+using namespace std;
+
+pair<pair<long long,long long>,char> alp(string s,long long n,long long nw,long long multi){
+  string ret = "";
+  while('A' <= s[n] && s[n] <= 'Z'){
+    ret.push_back(s[n]);
+    n++;
+  }
+  //cout << multi << endl;
+  //cout << ret.size()*multi << " " << nw << endl;
+  if(ret.size()*multi >= nw){
+   // cout << "!!" << endl;
+    return {{0,n},ret[(nw-1+ret.size())%ret.size()]};
+  }else{
+    return {{nw-ret.size()*multi,n},'0'};
+  }
+}
+
+pair<pair<long long,long long>,char> number(string s,long long n,long long nw,long long multiple){
+  //cout << s[n] << " " << multiple << endl;
+  long long ret = multiple;
+  while(s.size() > n){
+    long long tmp = 0;
+    while('0' <= s[n] && s[n] <= '9'){
+      tmp = tmp*10+s[n]-'0';
+      n++;
+    }
+    if(s[n] == '(' && '0' <= s[n+1] && s[n+1] <= '9'){
+     auto x = number(s,n+1,nw,min(ret*tmp,nw+1));
+     //auto x = number(s,n+1,nw,ret*tmp);
+      if(x.first.first == 0){
+        return x;
+      }else{
+        n = x.first.second+1;
+        nw = x.first.first;
+      }
+    }else if((s[n] == '(' && 'A' <= s[n+1] && s[n+1] <= 'Z') || ('A' <= s[n] && s[n] <= 'Z')){
+      bool brac = false;
+      if(s[n] == '(')n++,brac = true;
+      auto x = alp(s,n,nw,min(ret*tmp,nw+1));
+      if(x.first.first == 0){
+        return x;
+      }else{
+        n = x.first.second;
+        if(brac)n++;
+        nw = x.first.first;
+      }
+      //cout << "!!" << endl;
+      if(s[n] == ')'){
+        //cout << "!>" << endl;
+        x.first.second++;
+        return x;
+      }
+    }else{
+      //cout << tmp << " " << n << endl;
+    }
+  }
+  return {{ret,n},'0'};
+}
+
+char exec(string s,long long n,long long nw){
+  while(true){
+    //cout << s.size() << " " << n << endl;
+    if(s.size() == n){
+      return '0';
+    }
+    if('A' <= s[n] && s[n] <= 'Z'){
+      auto z = alp(s,n,nw,1);
+      if(z.first.first == 0){
+        return z.second;
+      }
+      n = z.first.second;
+      nw = z.first.first;
+    }else{
+      auto z = number(s,n,nw,1);
+      if(z.first.first == 0){
+        return z.second;
+      }
+      n = z.first.second;
+      nw = z.first.first;
+    }
+  }
+}
+
+void solve(string s){
+  long long x;cin>>x;x++;
+  long long nw = 0;
+  char z = exec(s,nw,x);
+  cout << z << endl;
+  
+}
+
+int main(){
+  string s;
+  while(cin>>s,s!="0"){
+    solve(s);
+  }
+}

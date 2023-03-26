@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+
+#define rep(i,a,b) for(int i=a;i<b;i++)
+#define rrep(i,a,b) for(int i=a;i>=b;i--)
+#define fore(i,a) for(auto &i:a)
+#define all(x) (x).begin(),(x).end()
+typedef long long ll; const int inf = INT_MAX / 2; const ll infl = 1LL << 60;
+
+using namespace std;
+// vector<vector<int> > dp;
+vector<int> dp;
+
+//個数制限なしナップサック問題と同義（蟻本：p.58）
+//解説：https://kakedashi-engineer.appspot.com/2020/05/14/dpl1a/
+//https://kira924age.hatenadiary.com/entry/2018/02/28/154521
+
+int main(void)
+{   
+    int n=0,m=0;
+    vector<int> c;
+
+    cin >> n >> m;
+    c.resize(m);
+    //↓：コインの種類（m）、→値段（~n円）
+    //dpテーブルの値：その値段を払うのに必要な最小のコイン枚数
+    // dp.assign(m+1,vector<int>(n+1,inf));
+    dp.assign(n+1,inf);
+
+    rep(i,0,m) cin >> c[i];
+    sort(c.begin(),c.end());
+
+    rep(i,0,m){
+        dp[0]=0;
+        rep(j,0,n+1){
+            // if(i==0){
+            //     dp[i][j]=j/c[i]+dp[i][j%c[i]];
+            //     if(dp[i][j]>inf) dp[i][j]=inf;
+            // }
+            // else{
+            //     dp[i][j]=dp[i-1][j];
+            //     dp[i][j]=min(dp[i][j],j/c[i]+dp[i][j%c[i]]);
+            //     if(dp[i][j]>inf) dp[i][j]=inf;
+            // }
+            if(j+c[i]<=n){
+                dp[j+c[i]]=min(dp[j+c[i]],dp[j]+1);
+            }
+        }
+    }
+    cout << dp[n] << endl;
+    return 0;
+}       

@@ -1,0 +1,36 @@
+#!/usr/bin/env pypy3
+import sys
+
+readline = sys.stdin.readline
+
+    
+def main():
+    while True:
+        N, M = map(int, readline().split())
+        if N == M == 0:
+            break
+        C = [int(readline()) for _ in range(M)]
+        INF = 1 << 30
+        dp = [INF] * 256
+        dp[128] = 0
+
+        for x in [int(readline()) for _ in range(N)]:
+            tmp = dp[:]
+            dp = [INF] * 256
+            for c in C:
+                if c < 0:
+                    for i in range(-1*c, 256):
+                        y = i + c
+                        if dp[y] > tmp[i]+(x-y)**2:
+                            dp[y] = tmp[i]+(x-y)**2
+                else:
+                    for i in range(256-c):
+                        y = i + c
+                        if dp[y] > tmp[i]+(x-y)**2:
+                            dp[y] = tmp[i]+(x-y)**2
+
+        print(min(dp))
+
+if __name__ == '__main__':
+    main()
+

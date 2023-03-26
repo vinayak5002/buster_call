@@ -1,0 +1,49 @@
+import java.util.Scanner
+import scala.annotation.tailrec
+
+object Main extends App {
+  val sc = new Scanner(System.in)
+  val N = sc.nextInt()
+  val arr = (for (_ <- 0 until N) yield sc.nextInt()).toArray
+  var count = 0
+  val Sentinel = 1000000001
+
+  def marge(left:Int, middle:Int, right:Int):Unit = {
+    val ll = middle - left
+    val rl = right - middle
+    val l = Array.ofDim[Int](ll+1)
+    val r = Array.ofDim[Int](rl+1)
+    for (i <- 0 until ll) l(i) =arr(i+left)
+    for (i <- 0 until rl) r(i) =arr(i+middle)
+    l(ll) = Sentinel
+    r(rl) = Sentinel
+
+    @tailrec
+    def iterate(k:Int, i:Int, j:Int):Unit = {
+      if (k < right) {
+          count = count +1
+        if (l(i) < r(j)) {
+            arr(k) = l(i)
+            iterate(k+1, i+1, j)
+        }
+        else {
+            arr(k) = r(j)
+            iterate(k+1, i, j+1)
+        }
+      }
+    }
+    iterate(left, 0, 0)
+  }
+  def margeSort(left:Int, right:Int):Unit = right - left match {
+    case d if d > 1 =>
+      val middle = (left + right) >> 1
+      margeSort(left, middle)
+      margeSort(middle, right)
+      marge(left, middle, right)
+    case _ => ()
+  }
+
+  margeSort(0, right = N)
+  println(s"${arr.mkString(" ")}")
+  println(s"$count")
+}

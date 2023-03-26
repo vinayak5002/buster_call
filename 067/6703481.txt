@@ -1,0 +1,107 @@
+#include <stdio.h>
+#define MAXN 300 // ブロックの最大個数
+// ブロック x と y の重みの差が１以下(同時に落とせる)かどうかを判定するマクロ
+#define CONNECTED(x,y) (((w[x]>w[y])?w[x]-w[y]:w[y]-w[x]) <= 1)
+typedef struct {
+ int from;
+ int to;
+} area; // 連続ブロック領域を表す構造体
+int w[MAXN]; // 各ブロックの重み
+area queue[MAXN*MAXN/2]; // 連続ブロック領域のキュー
+int qtop, qlast, qcount;
+int n; // ブロックの個数
+char ca[MAXN][MAXN]; // 領域[i,j]のブロックを全て落とせる時 ca[i][j]=1
+int max[MAXN][MAXN]; // 領域[i,j]で落とすことができるブロック数の最大値
+// 領域[from,to]内で落とすことができるブロック数の最大値を求める
+int findmax(int from, int to)
+{
+ int i, j;
+ int ret = 0;
+ int val;
+ if(to <= from) return 0; // 領域内にブロックが無いので０を返す
+ if(max[from][to]>=0) // すでに最大値が求まっているので
+ return max[from][to]; // その値を返す（メモ化再帰）
+// printf("%d:%d-%d;\n", level, from, to);
+
+ for(i=from; i<to; i++){
+ for(j=to; j>i; j--){
+ if(ca[i][j]){ // [i,j]は[from,to]内のブロックを落とせる連続領域
+ if(i==from && j==to){ // [i,j]=[from,to]なら最大値なので
+ max[from][to] = to - from + 1; // 最大値を記憶して
+ return max[from][to]; // その値を返す
+ }
+ // 左右の領域の最大値の和と[i,j]のブロック数の和を求める
+ val = findmax(from, i-1) + (j - i + 1) + findmax(j+1, to);
+ // それが現時点での最大値 ret を超えるなら ret を更新
+ if(val > ret) ret = val;
+ }
+ }
+ }
+ max[from][to] = ret; // メモ化再帰のために求まった結果を保存
+ return ret;
+}
+// 初めての領域[from,to]をキューに入れる
+int enqueue(int from, int to)
+{
+ area new;
+ if(ca[from][to]==0){ // 過去にキューに入れたことが無いなら
+ ca[from][to] = 1; // 連続領域として登録
+ max[from][to] = to - from + 1; // [from,to]のブロックは全て落とせる
+ new.from = from; // キューへの登録データを作成し
+ new.to = to;
+ queue[qlast++] = new; 
+ qcount++;
+// printf("%d-%d;\n", from, to);
+ return 1;
+ }
+ return 0;
+}
+int main(void)
+{
+ int i, j;
+ area old;
+ while(1){
+ scanf("%d", &n); // n の入力
+ if(n==0) break; // n が 0 なら終了
+ for(i=0; i<n; i++)
+ scanf("%d", &w[i]); // 各ブロックの重みの入力
+ for(i=0;i<n; i++)
+ for(j=0; j<n; j++){
+ ca[i][j] = 0; // 落とせる連続領域なしと初期化
+ max[i][j] = -1; // 領域[i,j]の落とせるブロック数未定と初期化
+ }
+ qtop = qlast = qcount = 0; // キューの初期化
+ // 隣接するブロックが同時に落とせるならキューに入れる
+ for(i=0; i<n-1;i++){
+ if(CONNECTED(i, i+1)){ // ブロック i と i+1 は同時に落とせる
+ enqueue(i, i+1); // 領域[i, i+1]をキューに入れる
+ }
+ }
+ while(qcount){ // キューが空でない間繰り返す
+ old = queue[qtop++]; // キューから一つ領域を取り出し old とする
+ qcount--;
+ if(old.from > 0 && old.to < n-1){ // old の前後にブロックがあり
+ if(CONNECTED(old.from - 1, old.to + 1)){ // それを同時に落とせる
+ enqueue(old.from-1, old.to+1); // 前後に広げた領域をキューに
+ }
+ }
+ if(old.from >= 2){ // 前(左)に２個以上のブロックがあるなら
+ for(i=0; i<old.from-1; i++){ // 全ての
+ if(ca[i][old.from-1]){ // 左隣接連続領域を連接して
+ enqueue(i, old.to); // キューに入れる
+ }
+ }
+ }
+ if(old.to < n-2){ // 後(右)に２個以上のブロックがあるなら
+ for(i=n-1; i>old.to+1; i--){ // 全ての
+ if(ca[old.to+1][i]){ // 右隣接連続領域を連接して
+ enqueue(old.from, i); // キューに入れる
+ }
+ }
+ }
+ }
+ // 求まった連続領域を用いて全体で落とせるブロック数の最大値を求める
+ printf("%d\n", findmax(0, n-1));
+ }
+ return 0;
+}

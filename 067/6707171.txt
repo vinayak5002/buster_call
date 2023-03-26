@@ -1,0 +1,67 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for (int i=0; i < (n); i++)
+
+/* 基本要素 */
+
+typedef double D;      // 座標値の型。doubleかlong doubleを想定
+typedef complex<D> P;  // Point
+typedef pair<P, P> L;  // Line
+typedef vector<P> VP;
+const D EPS = 1e-9;    // 許容誤差。問題によって変える
+#define X real()
+#define Y imag()
+#define LE(n,m) ((n) < (m) + EPS)
+#define GE(n,m) ((n) + EPS > (m))
+#define EQ(n,m) (abs((n)-(m)) < EPS)
+
+// 内積　dot(a,b) = |a||b|cosθ
+D dot(P a, P b) {
+  return (conj(a)*b).X;
+}
+// 外積　cross(a,b) = |a||b|sinθ
+D cross(P a, P b) {
+  return (conj(a)*b).Y;
+}
+
+/* 多角形 */
+
+// 頂点の順序（sortやmax_elementに必要）
+namespace std {
+  bool operator<(const P a, const P b) {
+    return a.X != b.X ? a.X < b.X : a.Y < b.Y;
+  }
+}
+
+// 多角形の内部判定
+// 点が領域内部なら1、境界上なら2、外部なら0を返す
+int inPolygon(const VP& ps, P p) {
+  int n = ps.size();
+  bool in = false;
+  rep (i, n) {
+    P a = ps[i] - p;
+    P b = ps[(i + 1) % n] - p;
+    if (EQ(cross(a,b), 0) && LE(dot(a,b), 0)) return 2;
+    if (a.Y > b.Y) swap(a,b);
+    if ((a.Y*b.Y < 0 || (a.Y*b.Y < EPS && b.Y > EPS)) && LE(cross(a, b), 0)) in = !in;
+  }
+  return in;
+}
+
+int main(){
+  for(;;){
+    long double x1=1000,y1,x2,y2,x3,y3,xp,yp;
+    cin >> x1 >> y1 >> x2 >> y2 >> x3 >> y3 >> xp >> yp;
+    if(x1 == 1000) break;
+    VP ps(3);
+    complex<D> a(x1,y1);
+    complex<D> b(x2,y2);
+    complex<D> c(x3,y3);
+    ps[0] = a;
+    ps[1] = b;
+    ps[2] = c;
+    complex<D> d(xp,yp);
+    if(inCcwConvex(ps,d) == 1) cout << "YES" << endl;
+    else cout << "NO" << endl;
+  }
+}

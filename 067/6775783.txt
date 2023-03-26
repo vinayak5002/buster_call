@@ -1,0 +1,112 @@
+#include <stdio.h>
+#include <limits.h>
+#include <string.h>
+#define WHITE 0 //未訪問
+#define GRAY 1  //訪問している
+#define BLACK 2 //削除されている
+#define MAX 100
+#define INFTY INT_MAX
+
+int n, M[MAX][MAX];
+// M[u][v]はuからvへの辺の重みを記録
+
+void dijkstra()
+{
+  int minv, i, v, u;
+  int d[MAX];     // d[v]には始点からvまでの最短距離
+  int color[MAX]; // color[v]にはvの訪問状態
+
+  //初期化
+  for (i = 0; i < n; i++)
+  {
+    d[i] = INFTY;
+    color[i] = WHITE;
+  }
+
+  //頂点0からスタート
+  d[0] = 0;
+  color[0] = GRAY;
+
+  while (1)
+  {
+    //初期化
+    minv = INFTY;
+    u = -1;
+
+    //探索できるものの中から最初の重みであるものを選ぶ
+    for (i = 0; i < n; i++)
+    {
+      if (minv > d[i] && color[i] != BLACK)
+      {
+        u = i;
+        minv = d[i];
+      }
+    }
+
+    //経路がなくなったら終了
+    if (u == -1)
+    {
+      break;
+    }
+
+    color[u] = BLACK;
+
+    for (v = 0; v < n; v++)
+    {
+      // uとvの間に辺があり、vがBLACK出ないとき
+      if (color[v] != BLACK && M[u][v] != INFTY)
+      {
+        //始点からvまでのコストよりも小さいものが見つかれば更新
+        if (d[v] > d[u] + M[u][v])
+        {
+          d[v] = d[u] + M[u][v];
+          color[v] = GRAY;
+        }
+      }
+    }
+  }
+
+  //出力
+  for (i = 0; i < n; i++)
+  {
+    printf("%d ", i);
+    if (d[i] == INFTY)
+    {
+      printf("%d\n", -1);
+    }
+    else
+    {
+      printf("%d\n", d[i]);
+    }
+  }
+}
+
+int main(void)
+{
+  int i, j, k, c, u, v;
+
+  scanf("%d", &n);
+
+  //初期化
+  for (i = 0; i < n; i++)
+  {
+    for (j = 0; j < n; j++)
+    {
+      M[i][j] = INFTY;
+    }
+  }
+
+  for (i = 0; i < n; i++)
+  {
+    scanf("%d %d", &u, &k);
+    for (j = 0; j < k; j++)
+    {
+      scanf("%d %d", &v, &c);
+      M[u][v] = c;
+    }
+  }
+
+  dijkstra(); //ダイクストラのアルゴリズム
+
+  return 0;
+}

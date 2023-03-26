@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 2000000002
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 123456
+#define M 1000000007
+typedef long long int ll;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+#define REP(i,n) for(int i=0; i<(int)n; i++)
+
+int partition(vector<int> &A,vector<char> &C, int lf, int rt){
+    // [l,r]のパーティション整理を行う。閉区間
+    int border = lf;
+    int cur = lf;
+    while( cur < rt ){
+        if ( A[cur] <= A[rt] ) {
+            swap(A[border],A[cur]);
+            swap(C[border],C[cur]);
+            cur++; 
+            border++;
+        } else {
+            cur++;
+        }
+    }
+    swap(A[border],A[rt]);
+    swap(C[border],C[rt]);
+    return border;
+}
+int Qsort(vector<int> &A,vector<char> &C, int s, int g){
+    // [l,r]のパーティション整理を行う。閉区間
+    if (g-s>0){
+        int q = partition(A,C,s,g);
+        Qsort(A,C,s,q-1);
+        Qsort(A,C,q+1,g);
+    }
+    return 0;
+}
+
+int main() {
+    int n ;
+    int maxA = -1;
+    vector<int> A;
+    vector<int> B;
+    vector<int> C;
+    C.resize(10001);
+    REP(i,C.size()){C[i]=0;}
+    scanf ("%d",&n);
+    REP(i,n){ 
+        int tmp;
+        maxA = max(maxA,tmp);
+        scanf("%d",&tmp);
+        A.push_back(tmp);
+        C[tmp]++;
+    }
+    B.resize(n) ;
+    REP(i,n){
+        if (i>=1) {C[i] += C[i-1]; }
+    }
+    int cur = n-1;
+    while (cur>=0) {
+        int key = A[cur];
+        C[key]--;
+        B[C[key]]= key;
+        cur--;
+    }
+    REP(i,n) {
+        printf ("%d",B[i]);
+        if (i <n-1) {printf(" ");} else {printf("\n"); }
+    }
+
+
+
+}
+

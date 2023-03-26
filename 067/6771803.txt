@@ -1,0 +1,79 @@
+#include <stdio.h>
+#define N 100
+#define NIL 0
+#define F 1
+#define L 2
+static const int infty = (1<<21); /*1の21ビット左シフト*/
+
+int n, list[N][N];
+
+int pr()
+{
+    int i, j, point, min, sum;
+    int parent[N], status[N], omomi[N];
+
+    for(i=0;i<n;i++) /*初期化*/
+    {
+        omomi[i]=infty;
+        parent[i]=-1;
+        status[i]=NIL;
+    }
+    omomi[0]=0; /*まだ辺のつながりがないので0*/
+
+    for(;;)
+    {
+        min=infty; /*初期化、最小値を大きな値にする*/
+        point=-1; /*初期化*/
+        for(i=0;i<n;i++)
+        {
+            if(min>omomi[i] && status[i]!=L) /*まだ訪れてない点で、最小の重みがあるとき*/
+            {
+                point=i; /*頂点iに移動*/
+                min=omomi[i]; /*最小値更新*/
+            }
+        }
+        if(point==-1) break; /*移動する頂点がない時、抜ける*/
+        status[point]=L; /*状態を訪問済みにする*/
+        for(j=0;j<n;j++)
+        {
+            if(status[j]!= L && list[point][j]!=infty) /*まだ訪れてない点で、今の頂点から任意の頂点で訪れてない点があるとき*/
+            {
+                if(omomi[j]>list[point][j]) /*最小重みより少ない重みがあるとき*/
+                {
+                    omomi[j]=list[point][j]; 
+                    parent[j]=point;
+                    status[j]=F; 
+                } /* 値をそれぞれ更新*/
+            }
+        }
+    }
+    sum=0;
+    for(i=0;i<n;i++)
+    {
+        if(parent[i]!=-1) /*頂点iに対して親が存在するとき*/
+        {
+            sum+=list[i][parent[i]]; /*iとその親を結ぶ辺の重みを加算*/
+        }
+    }
+    return sum;
+}
+
+int main(void)
+{
+    int i, j, x;
+
+    scanf("%d", &n);
+
+    for(i=0;i<n;i++)
+    {
+        for(j=0;j<n;j++)
+        {
+            scanf("%d", &x);
+            if(x==-1) list[i][j]=infty;
+            else list[i][j]=x;
+        }
+    }
+    printf("%d\n", pr());
+
+    return 0;
+}

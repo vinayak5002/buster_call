@@ -1,0 +1,449 @@
+#line 1 "solve/main.cpp"
+#include <algorithm>
+#include <array>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <chrono>
+#include <cmath>
+#include <complex>
+#include <cstdint>
+#include <cstdlib>
+#include <deque>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <random>
+#include <set>
+#include <stack>
+#include <string>
+#include <type_traits>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+/* template start */
+
+#line 2 "lib/utility/type_alias.hpp"
+
+#line 4 "lib/utility/type_alias.hpp"
+
+using u64 = std::uint64_t;
+using u32 = std::uint32_t;
+using u16 = std::uint16_t;
+using u8 = std::uint8_t;
+
+using i64 = std::int64_t;
+using i32 = std::int32_t;
+using i16 = std::int16_t;
+using i8 = std::int8_t;
+
+using usize = std::size_t;
+using isize = std::ptrdiff_t;
+
+constexpr i64 operator"" _i64(unsigned long long num) { return i64(num); }
+
+constexpr u64 operator"" _u64(unsigned long long num) { return u64(num); }
+#line 33 "solve/main.cpp"
+
+#define rep(i, a, b) for (i64 i = (a); (i) < (b); (i)++)
+#define all(i) i.begin(), i.end()
+
+#ifdef LOCAL
+#define debug(...)                                                    \
+  std::cerr << "LINE: " << __LINE__ << "  [" << #__VA_ARGS__ << "]:", \
+      debug_out(__VA_ARGS__)
+#else
+#define debug(...)
+#endif
+
+void debug_out() { std::cerr << std::endl; }
+
+template <typename Head, typename... Tail>
+void debug_out(Head h, Tail... t) {
+  std::cerr << " " << h;
+  if (sizeof...(t) > 0) std::cerr << " :";
+  debug_out(t...);
+}
+
+template <typename T1, typename T2>
+std::ostream& operator<<(std::ostream& os, std::pair<T1, T2> pa) {
+  return os << pa.first << " " << pa.second;
+}
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, std::vector<T> vec) {
+  for (std::size_t i = 0; i < vec.size(); i++)
+    os << vec[i] << (i + 1 == vec.size() ? "" : " ");
+  return os;
+}
+
+template <typename T1, typename T2>
+inline bool chmax(T1& a, T2 b) {
+  return a < b && (a = b, true);
+}
+
+template <typename T1, typename T2>
+inline bool chmin(T1& a, T2 b) {
+  return a > b && (a = b, true);
+}
+
+template <typename Num, typename Func = std::multiplies<Num>>
+constexpr Num mypow(Num a, u64 b, Num id = 1, Func mul = Func()) {
+  if (b == 0) return id;
+  Num x = id;
+  while (b > 0) {
+    if (b & 1) x = mul(x, a);
+    a = mul(a, a);
+    b >>= 1;
+  }
+  return x;
+}
+
+/* template end */
+
+
+#include <algorithm>
+#include <cassert>
+#include <limits>
+#include <queue>
+#include <vector>
+
+namespace atcoder {
+
+template <class Cap, class Cost> struct mcf_graph {
+  public:
+    mcf_graph() {}
+    mcf_graph(int n) : _n(n), g(n) {}
+
+    int add_edge(int from, int to, Cap cap, Cost cost) {
+        assert(0 <= from && from < _n);
+        assert(0 <= to && to < _n);
+        assert(0 <= cap);
+        assert(0 <= cost);
+        int m = int(pos.size());
+        pos.push_back({from, int(g[from].size())});
+        int from_id = int(g[from].size());
+        int to_id = int(g[to].size());
+        if (from == to) to_id++;
+        g[from].push_back(_edge{to, to_id, cap, cost});
+        g[to].push_back(_edge{from, from_id, 0, -cost});
+        return m;
+    }
+
+    struct edge {
+        int from, to;
+        Cap cap, flow;
+        Cost cost;
+    };
+
+    edge get_edge(int i) {
+        int m = int(pos.size());
+        assert(0 <= i && i < m);
+        auto _e = g[pos[i].first][pos[i].second];
+        auto _re = g[_e.to][_e.rev];
+        return edge{
+            pos[i].first, _e.to, _e.cap + _re.cap, _re.cap, _e.cost,
+        };
+    }
+    std::vector<edge> edges() {
+        int m = int(pos.size());
+        std::vector<edge> result(m);
+        for (int i = 0; i < m; i++) {
+            result[i] = get_edge(i);
+        }
+        return result;
+    }
+
+    std::pair<Cap, Cost> flow(int s, int t) {
+        return flow(s, t, std::numeric_limits<Cap>::max());
+    }
+    std::pair<Cap, Cost> flow(int s, int t, Cap flow_limit) {
+        return slope(s, t, flow_limit).back();
+    }
+    std::vector<std::pair<Cap, Cost>> slope(int s, int t) {
+        return slope(s, t, std::numeric_limits<Cap>::max());
+    }
+    std::vector<std::pair<Cap, Cost>> slope(int s, int t, Cap flow_limit) {
+        assert(0 <= s && s < _n);
+        assert(0 <= t && t < _n);
+        assert(s != t);
+        std::vector<Cost> dual(_n, 0), dist(_n);
+        std::vector<int> pv(_n), pe(_n);
+        std::vector<bool> vis(_n);
+        auto dual_ref = [&]() {
+            std::fill(dist.begin(), dist.end(),
+                      std::numeric_limits<Cost>::max());
+            std::fill(pv.begin(), pv.end(), -1);
+            std::fill(pe.begin(), pe.end(), -1);
+            std::fill(vis.begin(), vis.end(), false);
+            struct Q {
+                Cost key;
+                int to;
+                bool operator<(Q r) const { return key > r.key; }
+            };
+            std::priority_queue<Q> que;
+            dist[s] = 0;
+            que.push(Q{0, s});
+            while (!que.empty()) {
+                int v = que.top().to;
+                que.pop();
+                if (vis[v]) continue;
+                vis[v] = true;
+                if (v == t) break;
+                for (int i = 0; i < int(g[v].size()); i++) {
+                    auto e = g[v][i];
+                    if (vis[e.to] || !e.cap) continue;
+                    Cost cost = e.cost - dual[e.to] + dual[v];
+                    if (dist[e.to] - dist[v] > cost) {
+                        dist[e.to] = dist[v] + cost;
+                        pv[e.to] = v;
+                        pe[e.to] = i;
+                        que.push(Q{dist[e.to], e.to});
+                    }
+                }
+            }
+            if (!vis[t]) {
+                return false;
+            }
+
+            for (int v = 0; v < _n; v++) {
+                if (!vis[v]) continue;
+                dual[v] -= dist[t] - dist[v];
+            }
+            return true;
+        };
+        Cap flow = 0;
+        Cost cost = 0, prev_cost_per_flow = -1;
+        std::vector<std::pair<Cap, Cost>> result;
+        result.push_back({flow, cost});
+        while (flow < flow_limit) {
+            if (!dual_ref()) break;
+            Cap c = flow_limit - flow;
+            for (int v = t; v != s; v = pv[v]) {
+                c = std::min(c, g[pv[v]][pe[v]].cap);
+            }
+            for (int v = t; v != s; v = pv[v]) {
+                auto& e = g[pv[v]][pe[v]];
+                e.cap -= c;
+                g[v][e.rev].cap += c;
+            }
+            Cost d = -dual[s];
+            flow += c;
+            cost += c * d;
+            if (prev_cost_per_flow == d) {
+                result.pop_back();
+            }
+            result.push_back({flow, cost});
+            prev_cost_per_flow = d;
+        }
+        return result;
+    }
+
+  private:
+    int _n;
+
+    struct _edge {
+        int to, rev;
+        Cap cap;
+        Cost cost;
+    };
+
+    std::vector<std::pair<int, int>> pos;
+    std::vector<std::vector<_edge>> g;
+};
+
+}  // namespace atcoder
+
+
+namespace ebi {
+
+struct random_number_generator_64 {
+private:
+    using u64 = std::uint64_t;
+    std::random_device rnd;
+    std::mt19937_64 mt;
+public:
+    random_number_generator_64() : mt(rnd()) { }
+
+    u64 get(u64 a, u64 b) {
+        std::uniform_int_distribution<u64> dist(a, b-1);
+        return dist(mt);
+    }
+};
+
+}
+
+namespace ebi {
+
+template <int n>
+struct rolling_hash {
+ private:
+  using u64 = std::uint64_t;
+  const u64 mod = (1UL << 61) - 1;
+  const u64 MASK31 = (1UL << 31) - 1;
+  const u64 MASK30 = (1UL << 30) - 1;
+  const u64 h = 100;
+  const u64 buffer = mod * 4;
+
+  u64 safe_mul(const u64& a, const u64& b) const {
+    u64 au = a >> 31, ad = a & MASK31;
+    u64 bu = b >> 31, bd = b & MASK31;
+    u64 mid = ad * bu + au * bd;
+    u64 midu = mid >> 30;
+    u64 midd = mid & MASK30;
+    return (au * bu * 2 + midu + (midd << 31) + ad * bd);
+  }
+
+  u64 safe_mod(const u64& a) const {
+    u64 au = a >> 61;
+    u64 ad = a & mod;
+    u64 res = au + ad;
+    if (res >= mod) res -= mod;
+    return res;
+  }
+
+ public:
+  rolling_hash(const std::string& s) : sz(s.size()) {
+    assert(int(base.size()) == n && n > 0);
+    base_pow.resize(n);
+    hash.resize(n);
+    for (int i = 0; i < n; ++i) {
+      base_pow[i].reserve(sz + 1);
+      base_pow[i].emplace_back(1);
+      hash[i].reserve(sz + 1);
+      hash[i].emplace_back(0);
+      for (const auto& c : s) {
+        hash[i].emplace_back(
+            safe_mod(safe_mul(hash[i].back(), base[i]) + c + h));
+        base_pow[i].emplace_back(
+            safe_mod(safe_mul(base_pow[i].back(), base[i])));
+      }
+    }
+  }
+
+  // [l, r)
+
+  std::vector<u64> get_hash(int l, int r) const {
+    std::vector<u64> ret(n);
+    for (int i = 0; i < n; ++i) {
+      ret[i] = safe_mod(hash[i][r] + buffer -
+                        safe_mul(hash[i][l], base_pow[i][r - l]));
+    }
+    return ret;
+  }
+
+  std::vector<u64> get_hash(const std::string& str, int l = 0,
+                            int r = -1) const {
+    if (r < 0) r = int(str.size());
+    std::vector<u64> res(n, 0);
+    for (int i = 0; i < n; ++i) {
+      for (int j = l; j < r; ++j) {
+        res[i] = safe_mod(safe_mul(res[i], base[i]) + str[i] + h);
+      }
+    }
+    return res;
+  }
+
+  static void set_base() {
+    random_number_generator_64 rnd;
+    base.resize(n);
+    for (int i = 0; i < n; ++i) {
+      base[i] = rnd.get(0, (1UL << 61) - 1);
+    }
+  }
+
+ private:
+  size_t sz;
+  std::vector<std::vector<u64>> base_pow;
+  std::vector<std::vector<u64>> hash;
+
+ public:
+  static std::vector<u64> base;
+};
+
+template <int n>
+std::vector<std::uint64_t> rolling_hash<n>::base{};
+
+}  // namespace ebi
+
+int main() {
+  std::cin.tie(nullptr);
+  std::ios::sync_with_stdio(false);
+
+  int n;
+  std::cin >> n;
+  std::vector<std::string> s(n);
+  for (int i = 0; i < n; i++) {
+    std::cin >> s[i];
+  }
+  ebi::rolling_hash<2>::set_base();
+  std::vector<ebi::rolling_hash<2>> rhs;
+  for (int i = 0; i < n; i++) {
+    rhs.emplace_back(ebi::rolling_hash<2>(s[i]));
+  }
+  std::vector table(n, std::vector<int>(n, 0));
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      if (i == j) {
+        int sz = s[i].size();
+        for (int k = sz - 1; k >= 1; k--) {
+          int w = sz - k;
+          if ((int)s[j].size() < w) break;
+          if (rhs[i].get_hash(k, sz) == rhs[j].get_hash(0, w)) {
+            table[i][j] = std::max(table[i][j], w);
+          }
+        }
+        continue;
+      }
+      int sz = s[i].size();
+      for (int k = sz - 1; k >= 0; k--) {
+        int w = sz - k;
+        if ((int)s[j].size() < w) break;
+        if (rhs[i].get_hash(k, sz) == rhs[j].get_hash(0, w)) {
+          table[i][j] = std::max(table[i][j], w);
+        }
+      }
+    }
+  }
+
+  rep(i,0,n)rep(j,0,n)debug(table[i][j]);
+
+  atcoder::mcf_graph<int,long long> graph(2*n+2);
+
+  const int START = 0;
+  const int GOAL = 2*n+1;
+
+  const long long TEMP = 1234;
+
+  rep(i,0,n){
+    graph.add_edge(START,1+i,1,0);
+  }
+
+  rep(i,0,n){
+    rep(j,0,n){
+      graph.add_edge(1+i,1+n+j,1,TEMP - table[i][j]);
+    }
+  }
+
+  rep(i,0,n){
+    graph.add_edge(1+n+i,GOAL,1,0);
+  }
+
+  auto ret = graph.flow(START,GOAL);
+
+  long long ans = 0;
+
+  rep(i,0,n)ans += s[i].size();
+  ans -= TEMP * n - ret.second;
+
+  std::cout<<ans<<"\n";
+
+  return 0;
+}

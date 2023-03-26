@@ -1,0 +1,33 @@
+require 'set'
+x,y,z,n,m,s,t=gets.split.map(&:to_i)
+s-=1
+t-=1
+g=Array.new(3) {|i| Array.new([x,y,z][i]) {Set.new}}
+abcd=[]
+(n+m).times do |i|
+  a=gets.split.map {|j| j.to_i-1}
+  abcd << a
+  d=(i<n ? 0 : 1)
+  2.times {|j| g[j+d][a[j]] << i}
+end
+dist=Array.new(n+m,Float::INFINITY)
+dist[s]=0
+q=[s]
+catch do |tag|
+  while u=q.pop do
+    d=(u<n ? 0 : 1)
+    puts u
+    2.times do |i|
+      g[i+d][abcd[u][i]].each do |v|
+        if dist[v]>dist[u]+1 then
+          dist[v]=dist[u]+1
+          throw tag if v==n+t
+          q.unshift(v)
+          dv=(v<n ? 0 : 1)
+          2.times {|k| g[k+dv][abcd[v][k]].delete(v)}
+        end
+      end
+    end
+  end
+end
+puts dist[n+t]!=Float::INFINITY ? dist[n+t] : -1

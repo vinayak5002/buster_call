@@ -1,0 +1,204 @@
+#include <algorithm>
+#include <bitset>
+//#include <cmath>
+//#include <complex>
+#include <cctype>
+#include <cstdio>
+#include <cstdint>
+#include <deque>
+#include <iomanip>
+#include <iostream>
+#include <iterator>
+#include <climits>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <utility>
+#include <valarray>
+#include <vector>
+#include <unordered_set>
+#include <unordered_map>
+
+using namespace std;
+int64_t INF = LLONG_MAX;
+
+template <typename T>
+void print1(T &target, bool one_line_flag = false)
+{
+    if (one_line_flag)
+    {
+        for (auto itr = target.begin(); itr != target.end(); itr++)
+        {
+            if (itr != target.begin())
+                cout << " ";
+            cout << *itr;
+        }
+        cout << endl;
+    }
+    else
+    {
+        for (auto tmp : target)
+        {
+            cout << tmp << endl;
+        }
+    }
+}
+template <typename T>
+void print1(pair<T, T> &target, bool one_line_flag = false)
+{
+    if (one_line_flag)
+    {
+        cout << target.first << " " << target.second << endl;
+    }
+    else
+    {
+        cout << target.first << endl;
+        cout << target.second << endl;
+    }
+}
+
+template <typename T>
+void print2(T target)
+{
+    for (auto itr = target.begin(); itr != target.end(); itr++)
+    {
+        print1(*itr, true);
+    }
+}
+
+template <typename T>
+void print_map1(T target)
+{
+    for (auto itr = target.begin(); itr != target.end(); itr++)
+    {
+        cout << "[" << itr->first << "] " << itr->second << endl;
+    }
+}
+
+template <typename T>
+void print_map2(T target)
+{
+    for (auto itr = target.begin(); itr != target.end(); itr++)
+    {
+        cout << "[" << itr->first << "] ";
+        print1(itr->second, true);
+    }
+}
+
+void make_psinsu(vector<vector<int>> &vec, int p, int depth, vector<int> currentvec = vector<int>())
+{
+    if (depth == 0)
+    {
+        vec.push_back(currentvec);
+        return;
+    }
+
+    for (int i = 0; i < p; i++)
+    {
+        vector<int> tmp = currentvec;
+        tmp.push_back(i);
+        make_psinsu(vec, p, depth - 1, tmp);
+    }
+}
+
+int main()
+{
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    while (1)
+    {
+        int n, m;
+        cin >> n >> m;
+
+        if (n == 0 && m == 0)
+            break;
+
+        vector<int> yakuhin(n), hundou(m);
+
+        for (int i = 0; i < n; i++)
+            cin >> yakuhin[i];
+
+        for (int i = 0; i < m; i++)
+            cin >> hundou[i];
+
+        vector<vector<int>> res;
+        make_psinsu(res, 3, m);
+
+        set<int> can;
+        for (auto tmp : res)
+        {
+            int left = 0;
+            int right = 0;
+
+            for (int i = 0; i < m; i++)
+            {
+                if (tmp.at(i) == 0)
+                {
+                    left += hundou.at(i);
+                }
+                else if (tmp.at(i) == 1)
+                {
+                    right += hundou.at(i);
+                }
+            }
+
+            if (right - left > 1)
+            {
+                can.insert(right - left);
+            }
+        }
+
+        // print1(can, true);
+
+        set<int>
+            ans;
+        for (int i = 0; i < n; i++)
+        {
+            set<int> next;
+
+            bool flag = false;
+            for (auto c : can)
+            {
+                if (i == 0)
+                {
+                    ans.insert(abs(c - yakuhin.at(i)));
+                    ans.insert(abs(c + yakuhin.at(i)));
+                }
+                else
+                {
+                    if (ans.find(abs(c - yakuhin.at(i))) != ans.end())
+                        next.insert(abs(c - yakuhin.at(i)));
+                    if (ans.find(abs(c + yakuhin.at(i))) != ans.end())
+                        next.insert(abs(c + yakuhin.at(i)));
+
+                    if (c - yakuhin.at(i) == 0)
+                        flag = true;
+                }
+            }
+
+            if (i != 0 and !flag)
+            {
+                ans = next;
+            }
+
+            // print1(ans, true);
+        }
+
+        if (ans.size() == 0)
+        {
+            cout << -1 << endl;
+        }
+        else
+        {
+            cout << *ans.begin() << endl;
+        }
+    }
+
+    return 0;
+}
+

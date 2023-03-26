@@ -1,0 +1,53 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+
+vector<vector<int> > s_t;
+vector<bool> flag;
+vector<int> dir;
+
+void result(int v){
+	for (int i = 0; i < v; i++)
+			if (dir[i] != 0)
+			{
+				cout << 1 << endl;
+				return;
+			}
+
+	cout << 0 << endl;
+}
+
+void dfs(int v){
+    flag[v] = true;
+    for (int i = 0; i < s_t[v].size(); i++){
+        dir[s_t[v][i]]--;
+        if(!flag[s_t[v][i]] && dir[s_t[v][i]] == 0)
+        dfs(s_t[v][i]);
+		}
+}
+
+int main(){
+    int v, e;
+    cin >> v >> e;
+		s_t.resize(v);
+		dir.resize(v);
+		flag.resize(v);
+
+    for (int i = 0; i < e; i++){
+        int n, m;
+        cin >> n >> m;
+        s_t[n].push_back(m);
+    }
+
+    for (int i = 0; i < v; i++)
+		    for (int j = 0; j < s_t[i].size(); j++)
+					   dir[s_t[i][j]]++;
+
+    for (int i = 0; i < v; i++)
+         if(!flag[i] && dir[i] == 0)
+         	dfs(i);
+
+		result(v);
+
+}
+

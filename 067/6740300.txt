@@ -1,0 +1,140 @@
+#include<bits/stdc++.h>
+//#include<atcoder/all>
+using namespace std;
+//using namespace atcoder;
+
+//typedef modint998244353 mint;
+typedef int64_t ll;
+typedef long double ld;
+const ll MOD=1000000007;
+const ll MODA=998244353;
+ll vx[4]={0,1,0,-1};
+ll vy[4]={1,0,-1,0};
+#define rep(i,n) for(ll i=0;i<(ll)(n);i++)
+
+ll pow(ll N,ll P,ll M){
+    if(P==0)return 1;
+    else if(P%2==0){
+        ll t=pow(N,P/2,M);
+        return t*t%M;
+    }
+    else return N*pow(N,P-1,M)%M;
+}
+ll pow(ll N,ll P){
+    if(P==0)return 1;
+    else if(P%2==0){
+        ll t=pow(N,P/2);
+        return t*t;
+    }
+    else return N*pow(N,P-1);
+}
+
+vector<ll> fac;
+vector<ll> finv;
+vector<ll> inv;
+void COMinit(ll N,ll P){
+    rep(i,N+1){
+        if(i==0){
+            fac.push_back(1);
+            finv.push_back(1);
+            inv.push_back(1);
+        }
+        else if(i==1){
+            fac.push_back(1);
+            finv.push_back(1);
+            inv.push_back(1);
+        }
+        else{
+            fac.push_back(fac.at(i-1)*i%P);
+            inv.push_back(P-inv.at(P%i)*(P/i)%P);
+            finv.push_back(finv.at(i-1)*inv.at(i)%P);
+        }
+    }
+}
+
+ll COM(ll n,ll k,ll P){
+    if(n<k)return 0;
+    if(n<0||k<0)return 0;
+    return fac.at(n)*(finv.at(k)*finv.at(n-k)%P)%P;
+}
+
+
+struct UnionFind {
+    vector<ll> par;
+    
+    UnionFind(ll N) : par(N) { 
+        for(ll i = 0; i < N; i++) par[i] = i;
+    }
+
+    ll root(ll x) {
+        if (par[x] == x) return x;
+        return par[x] = root(par[x]);
+    }
+
+    void unite(ll x, ll y) {
+        ll rx = root(x);
+        ll ry = root(y);
+        if (rx == ry) return;
+        par[rx] = ry;
+    }
+
+    bool same(ll x, ll y) {
+        ll rx = root(x);
+        ll ry = root(y);
+        return rx == ry;
+    }
+};
+
+ll A,B,C,D;
+
+bool isin(ll x, ll y){
+    return ((A<=x&&x<=C)&&(B<=y&&y<=D));
+}
+
+ll dist(ll x,ll y){
+    ll dx=0;
+    ll dy=0;
+    if(x<A)dx=A-x;
+    if(x>C)dx=x-C;
+    if(y<B)dy=B-y;
+    if(y>D)dy=y-D;
+    return dx+dy;
+}
+
+int main(){
+    vector<ll> Ans;
+    while(true){
+        ll N;
+        cin>>N;
+        if(N==0)break;
+        cin>>A>>B>>C>>D;
+        ll ans=0;
+        ll x,y;
+        cin>>x>>y;
+        rep(i,N){
+            ll nx,ny;
+            cin>>nx>>ny;
+            if(isin(x,y)&&isin(nx,ny)){
+                x=nx;
+                y=ny;
+            }
+            else if(!isin(x,y)&&isin(nx,ny)){
+                ans+=dist(x,y)-1;
+                x=nx;
+                y=ny;
+            }
+            else if(isin(x,y)&&!isin(nx,ny)){
+                ans+=dist(nx,ny);
+                x=nx;
+                y=ny;
+            }
+            else{
+                ans+=min(dist(x,y)+dist(nx,ny)-1,abs(x-nx)+abs(y-ny));
+                x=nx;
+                y=ny;
+            }
+        }
+        Ans.push_back(ans);
+    }
+    for(ll x:Ans)cout<<x<<endl;
+}

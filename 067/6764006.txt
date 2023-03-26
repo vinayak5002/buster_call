@@ -1,0 +1,48 @@
+#include <iostream>
+#include <set>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+
+int main() {
+	int n, r;
+	cin >> n >> r;
+	vector<int> rs(n - 1);
+	for(int i = 0; n-1 > i; i++) {
+		cin >> rs[i];
+	}
+	
+	sort(rs.begin(), rs.end());
+	
+	
+	set<int> kujis;
+	for(int i = 1; n >= i; i++)  kujis.insert(i);
+	
+	int ans = 10000000;
+	
+	for(int kuji = 1; n >= kuji; kuji++) {
+		int base = kuji * r;
+		
+		set<int> rest = kujis;
+		rest.erase(kuji);
+		
+		int lowersCount = 0;
+		
+		for(auto cr : rs) {
+			auto m = rest.lower_bound((base + cr - 1) / cr);
+			if(m == rest.end()) {
+				int Min = *rest.lower_bound(-1);
+				rest.erase(Min);
+				lowersCount++;
+			} else {
+				rest.erase(m);
+			}
+		}
+		
+		ans = min(ans, lowersCount + 1);
+	}
+	
+	cout << ans << endl;
+	return 0;
+}

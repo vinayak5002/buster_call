@@ -1,0 +1,48 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <set>
+#include <tuple>
+
+using namespace std;
+
+int Kruskal(priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, greater<tuple<int, int, int>>> edgeset, int n);
+
+int main()
+{
+    priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, greater<tuple<int, int, int>>> edgeset;
+    int v, e;
+    cin >> v >> e;
+    for (int i = 0; i < e; i++)
+    {
+        int s, t, w;
+        cin >> s >> t >> w;
+        edgeset.emplace(w, s, t);
+    }
+    cout << Kruskal(edgeset, v) << endl;
+    return 0;
+}
+
+int Kruskal(priority_queue<tuple<int, int, int>, vector<tuple<int, int, int>>, greater<tuple<int, int, int>>> edgeset, int v)
+{
+    set<int> selected;
+    vector<tuple<int, int, int>> ans;
+    for (int i = 0; i < v - 1; i++)
+    {
+        tuple<int, int, int> edge;
+        do
+        {
+            edge = edgeset.top();
+            edgeset.pop();
+        } while (!selected.empty() && selected.find(get<1>(edge)) == selected.end() && selected.find(get<2>(edge)) == selected.end());
+        selected.insert(get<1>(edge));
+        selected.insert(get<2>(edge));
+        ans.push_back(edge);
+    }
+    int sum = 0;
+    for (auto e : ans)
+    {
+        sum += get<0>(e);
+    }
+    return sum;
+}

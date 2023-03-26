@@ -1,0 +1,124 @@
+#pragma GCC target("avx2")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+#include<bits/stdc++.h>
+#define rep(i,s,n) for(int i = s; i < n; ++i)
+#define rrep(i,s,n) for(int i = s; i >= n; --i)
+#define fi first
+#define se second
+#define all(a) a.begin(),a.end()
+#define rall(a) a.rbegin(),a.rend()
+#define SUM(a) accumulate(all(a),0LL)
+#define MAX(a) *max_element(all(a))
+#define MIN(a) *min_element(all(a))
+#define fi first
+#define se second
+#define len(x) (int)(x).size()
+#define dup(x,y) (((x)+(y)-1)/(y))
+#define pb push_back
+#define eb emplace_back
+#define em emplace
+#define pq(T) priority_queue<T,vector<T>,greater<T>>
+using namespace std;
+template <class T> inline vector<vector<T>> vector2(const size_t &i, const size_t &j, const T &init = T()) {
+  return vector<vector<T>>(i, vector<T>(j, init));
+}
+template <class T> inline vector<vector<vector<T>>> vector3(const size_t &i, const size_t &j, const int &k, const T &init = T()) {
+  return vector<vector<vector<T>>>(i, vector<vector<T>>(j, vector<T>(k, init)));
+}
+template <class T> inline vector<vector<vector<vector<T>>>> vector4(const size_t &i, const size_t &j, const size_t &k, const size_t &l, const T &init = T()) {
+  return vector<vector<vector<vector<T>>>>(i, vector<vector<vector<T>>>(j, vector<vector<T>>(k, vector<T>(l, init))));
+}
+template<class T,class U>bool chmax(T &a,const U &b){return ((a<b) ? (a=b, true) : false);}
+template<class T,class U>bool chmin(T &a,const U &b){return ((a>b) ? (a=b, true) : false);}
+using ll = long long;
+using P = pair<int,int>;
+using PP = pair<P, P>;
+using Pint = pair<P, int>;
+using intP = pair<int, P>;
+// ================= ここまでテンプレ =================
+
+
+template <typename T>
+struct BIT {
+  int n;             // 要素数
+  vector<T> bit[2];  // データの格納先
+  BIT(int n_) { init(n_); }
+  void init(int n_) {
+    n = n_ + 1;
+    for (int p = 0; p < 2; p++) bit[p].assign(n, 0);
+  }
+  void add_sub(int p,int i, T x) {
+    for (int idx = i; idx < n; idx += (idx & -idx)) {
+      bit[p][idx] += x;
+    }
+  }
+  void add_range(T l, T r, T x) {  // [l,r) に加算
+    add_sub(0, l, -x * (l - 1));
+    add_sub(0, r, x * (r - 1));
+    add_sub(1, l, x);
+    add_sub(1, r, -x);
+  }
+  void add(T l, T x) {
+    add_sub(0, l, -x * (l - 1));
+    add_sub(0, l, x * l);
+    add_sub(1, l, x);
+    add_sub(1, l, -x);
+  }
+  T sum_sub(int p, int i) {
+    T s(0);
+    for (int idx = i; idx > 0; idx -= (idx & -idx)) {
+      s += bit[p][idx];
+    }
+    return s;
+  }
+  T sum(int i) { return sum_sub(0, i) + sum_sub(1, i) * i; }
+  T query(int l, int r) { return sum(r - 1) - sum(l - 1); }
+  T lower_bound(T w) { // a_1 + a_2 + ... + a_x >= w となるような最小の x を求める(ただし a_i >= 0)
+    if (w <= 0) {
+      return 0;
+    } else {
+      T x = 0, r = 1;
+      while (r < n) r = r << 1;
+      for (int len = r; len > 0; len = len >> 1) { // 長さlenは1段下るごとに半分に
+        if (x + len < n && bit[0][x + len]+bit[1][x + len]*(x + len) < w) { // 採用するとき
+          w -= bit[0][x + len]+bit[1][x + len]*(x + len);
+          x += len;
+        }
+      }
+      return x + 1;
+    }
+  }
+  ll cnt_tentou(vector<ll> &a){
+    ll ret = 0;
+    for(long long i = 0;i < len(a);++i){
+      ret += i-sum(a[i]);
+      add(a[i],1);
+    }
+    return ret;
+  }
+};
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+
+  int n,q;
+  cin >> n >> q;
+  BIT<int> bit(n);
+  rep(i,0,q){
+    int p;
+    cin >> p;
+    if (p == 0){
+      int s,t,x;
+      cin >> s >> t >> x;
+      bit.add_range(s,t+1,x);
+    }else{
+      int a;
+      cin >> a;
+      cout << bit.query(a,a+1) << endl;
+    }
+  }
+
+  return 0;
+}

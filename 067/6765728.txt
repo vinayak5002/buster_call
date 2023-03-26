@@ -1,0 +1,86 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+
+public class Main {
+
+	static int[][] graph;
+	static int[] distance;
+	static int tail;
+	static StringBuilder sb = new StringBuilder();
+	static final int NULL = -1;
+
+	public static void main(String[] args) throws IOException{
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		PrintWriter out = new PrintWriter(System.out);
+
+		int n = Integer.parseInt(br.readLine());
+
+		graph = new int[n][n];
+		distance = new int[n];
+
+		String[] num;
+		String input;
+
+		for(int i=0; i<n; i++) {
+
+			distance[i] = NULL;
+
+			for(int j=0; j<n; j++)
+				graph[i][j] = NULL;
+		}
+
+
+		for(int i=0; i<n; i++) {
+
+			//入力&格納
+			input = br.readLine();
+			num = input.split(" ");
+
+			int u = Integer.parseInt(num[0]);
+			int Uk = 2;
+
+			while(Uk != num.length) {
+
+				graph[u-1][Integer.parseInt(num[Uk])-1] = Integer.parseInt(num[Uk])-1;
+
+				Uk++;
+			}
+		}
+
+		distance[0] = 0;
+
+		BFS(0,  0, n);
+
+		//出力
+		for(int i=0; i<n; i++) {
+
+			int a = i + 1;
+			out.println(a + " " + distance[i]);
+		}
+
+		out.flush();
+	}
+
+	static void BFS(int u, int d, int n) {
+
+		int tail = ++d;
+
+		for(int i=0; i<n; i++){
+
+			if(graph[u][i] == NULL)
+				continue;
+
+			if(d<n) {
+
+				if(distance[i] == NULL || distance[i] > tail) {
+					distance[i] = tail;
+					BFS(i, d, n);
+				}
+			}
+		}
+	}
+}
+

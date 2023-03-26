@@ -1,0 +1,136 @@
+#define PROBLEM "https://onlinejudge.u-aizu.ac.jp/courses/library/5/GRL/1/GRL_1_C"
+#include <bits/stdc++.h>
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+constexpr ll MOD = 1e9 + 7;
+constexpr ll INF = 1e+18;
+constexpr ld EPS = 1e-12L;
+constexpr ld PI = 3.14159265358979323846L;
+
+// グラフ(隣接行列)
+template<class Cost = ll>
+class GraphM {
+  int n, m;
+  vector<vector<Cost>> mat;
+  vector<vector<Cost>> shortest_path_dist;
+  vector<vector<int>> shortest_path_parent;
+  bool has_negative_cycle = false;
+
+public:
+  static const Cost UNREACHABLE = numeric_limits<Cost>::max() >> 2;
+
+  GraphM(int n_): n(n_), m(0), mat(n_, vector<Cost>(n_, GraphM::UNREACHABLE)) {
+    for(int i = 0; i < n; ++i) {
+      mat[i][i] = 0;
+    }
+  }
+
+  void add_edge(int from, int to, Cost cost = 1) {
+    mat[from][to] = cost;
+    m++;
+  }
+
+  // 最短距離
+  void warshallFloyd();
+  Cost getDist(int from, int to) { return shortest_path_dist[from][to]; }
+  vector<int> getShortestPath(int from, int to) {
+    vector<int> path;
+    for(int cur = to; cur != from; cur = shortest_path_parent[from][cur]) {
+      path.emplace_back(cur);
+      if(cur == -1) {
+        return vector<int>();
+      }
+    }
+    path.emplace_back(from);
+    reverse(path.begin(), path.end());
+    return path;
+  }
+  bool hasNegativeCycle() const { return has_negative_cycle; }
+
+  template<class T>
+  friend std::ostream &operator<<(std::ostream &, const GraphM<T> &);
+};
+
+template<class T>
+ostream &operator<<(ostream &os, const GraphM<T> &graph) {
+  os << "N = " << graph.n << ", M = " << graph.m << '\n';
+  for(int i = 0; i < graph.n; ++i) {
+    for(int j = 0; j < graph.n; ++j) {
+      os << graph.mat[i][j] << " \n"[j == graph.n - 1];
+    }
+  }
+  return os;
+}
+
+/**
+ * ワーシャルフロイド法
+ * 有向グラフの全点対最短経路 O(V^3)
+ * 到達不能：max
+ * https://algo-logic.info/warshall-floyd/
+ */
+template<class Cost>
+void GraphM<Cost>::warshallFloyd() {
+  if(shortest_path_dist.size()) {
+    return;
+  }
+  shortest_path_dist = mat;
+  shortest_path_parent = vector<vector<int>>(n, vector<int>(n, -1));
+  for(int i = 0; i < n; ++i) {
+    shortest_path_parent[i][i] = i;
+  }
+  for(int k = 0; k < n; ++k) {
+    for(int i = 0; i < n; ++i) {
+      for(int j = 0; j < n; ++j) {
+        if(shortest_path_dist[i][k] + shortest_path_dist[k][j] < shortest_path_dist[i][j]) {
+          shortest_path_dist[i][j] = shortest_path_dist[i][k] + shortest_path_dist[k][j];
+          shortest_path_parent[i][j] = shortest_path_parent[k][j];
+        }
+      }
+    }
+  }
+  for(int i = 0; i < n; ++i) {
+    for(int j = 0; j < n; ++j) {
+      if(shortest_path_dist[i][j] > GraphM<Cost>::UNREACHABLE / 2) {
+        shortest_path_dist[i][j] = GraphM<Cost>::UNREACHABLE;
+      }
+    }
+  }
+  for(int i = 0; i < n; ++i) {
+    if(shortest_path_dist[i][i] < 0) {
+      has_negative_cycle = true;
+      break;
+    }
+  }
+}
+
+int main() {
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  int V, E;
+  cin >> V >> E;
+  GraphM g(V);
+  for(int i = 0; i < E; ++i) {
+    int s, t;
+    ll d;
+    cin >> s >> t >> d;
+    g.add_edge(s, t, d);
+  }
+  g.warshallFloyd();
+  if(g.hasNegativeCycle()) {
+    cout << "NEGATIVE CYCLE\n";
+  } else {
+    for(int i = 0; i < V; ++i) {
+      for(int j = 0; j < V; ++j) {
+        if(g.getDist(i, j) >= GraphM<>::UNREACHABLE) {
+          cout << "INF";
+        } else {
+          cout << g.getDist(i, j);
+        }
+        cout << " \n"[j == V - 1];
+      }
+    }
+  }
+}
+

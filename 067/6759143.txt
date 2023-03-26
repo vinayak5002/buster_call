@@ -1,0 +1,98 @@
+#include<iostream>
+#include<algorithm>
+#include<vector>
+#include<set>
+#include<map>
+
+
+using namespace std;
+
+//閉路判定の為にUnion-Find Treeを用いる
+struct UnionFind {
+    vector<int> rank, parents;
+
+    UnionFind(int n) {
+        rank.resize(n, 0);
+        parents.resize(n, 0);
+        for (int i = 0; i < n; i++) {
+            makeTree(i);
+        }
+    }
+
+    //xを根とする木を作る
+    void makeTree(int x) {
+        parents[x] = x;
+        rank[x] = 0;
+    }
+
+    //xとyが同じ集合にいるかどうか
+    bool isSame(int x, int y) { return findRoot(x) == findRoot(y); }
+
+    //xとyを同じ集合にする
+    bool unite(int x, int y) {
+        x = findRoot(x);
+        y = findRoot(y);
+        if (x == y) return false;
+        if (rank[x] > rank[y]) {
+            parents[y] = x;
+        } else {
+            parents[x] = y;
+            if (rank[x] == rank[y]) {
+                rank[y]++;
+            }
+        }
+        return true;
+    }
+
+    // 代表点を返す
+    int findRoot(int x) {
+        if (x != parents[x]) {
+            parents[x] = findRoot(parents[x]);
+        }
+        return parents[x];
+    }
+};
+
+//辺の定義
+struct EDGE{
+    int s;
+    int t;
+    int wgt;
+};
+
+//辺の重みの比較
+bool comparE(const EDGE edge1, const EDGE edge2){
+    return edge1.wgt < edge2.wgt;
+}
+
+int main(){
+    int result = 0;
+
+    int V, E;
+    cin >> V >> E;
+    UnionFind U(V);
+
+    vector<EDGE> edges(E);
+
+    for (int i=0; i<E; i++){
+        int a, b, c;
+        cin >> a >> b >> c;
+        edges[i].s = a;
+        edges[i].t = b;
+        edges[i].wgt = c;
+    }
+
+    sort(edges.begin(), edges.end(), comparE);
+
+    for (auto e : edges){
+        if(!U.isSame(e.s, e.t)){
+            U.unite(e.s, e.t);
+            result += e.wgt;
+        }
+    }
+    
+
+    printf("%d\n",result);
+
+    return 0;
+}

@@ -1,0 +1,147 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return true; } return false; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return true; } return false; }
+#define all(x) (x).begin(),(x).end()
+#define fi first
+#define se second
+#define mp make_pair
+#define si(x) int(x.size())
+const int mod=998244353,MAX=300005;
+const ll INF=1LL<<62;
+
+bool dp[16][64][4][16][64][4][2];
+bool can[16][64][4][2];
+pair<int,int> to[16][64][4];
+
+vector<int> dh={0,1,0,-1},dw={1,0,-1,0};
+
+int main(){
+    
+    std::ifstream in("text.txt");
+    std::cin.rdbuf(in.rdbuf());
+    cin.tie(0);
+    ios::sync_with_stdio(false);
+    
+    while(1){
+        int H,W;cin>>W>>H;
+        if(H==0) break;
+        vector<string> S(H);
+        for(int i=0;i<H;i++) cin>>S[i];
+        int sh=-1,sw=-1,sd=-1,gh=-1,gw=-1,gd=-1;
+        for(int i=0;i<H;i++){
+            for(int j=0;j<W;j++){
+                if(S[i][j]=='K'){
+                    sh=i;
+                    sw=j;
+                    for(int k=0;k<4;k++){
+                        if(S[i+dh[k]][j+dw[k]]!='#'){
+                            //cout<<i+dh[k]<<" "<<j+dw[k]<<" "<<S[i+dh[k]][j+dw[k]]<<" "<<k<<endl;
+                            sd=k;
+                        }
+                    }
+                }
+                if(S[i][j]=='M'){
+                    gh=i;
+                    gw=j;
+                    for(int k=0;k<4;k++){
+                        if(S[i+dh[k]][j+dw[k]]!='#') gd=k;
+                    }
+                }
+            }
+        }
+        for(int a=0;a<H;a++) for(int b=0;b<W;b++) for(int c=0;c<4;c++) for(int d=0;d<H;d++) for(int e=0;e<W;e++) for(int f=0;f<4;f++) for(int g=0;g<2;g++) dp[a][b][c][d][e][f][g]=false;
+        
+        //cout<<sh<<" "<<sw<<" "<<sd<<" "<<gh<<" "<<gw<<" "<<gd<<endl;
+        
+        for(int i=0;i<H;i++){
+            for(int j=0;j<W;j++){
+                if(S[i][j]=='#') continue;
+                for(int k=0;k<4;k++){
+                    int toh1=i,tow1=j;
+                    while(S[toh1+dh[k]][tow1+dw[k]]!='#'){
+                        toh1+=dh[k];
+                        tow1+=dw[k];
+                    }
+                    to[i][j][k]=mp(toh1,tow1);
+                }
+            }
+        }
+        
+        queue<tuple<int,int,int,int,int,int,int>> Q;
+        for(int k=0;k<4;k++){
+            if(k!=sd){
+                dp[sh][sw][sd][sh][sw][k][0]=true;
+                Q.push({sh,sw,sd,sh,sw,k,0});
+            }
+        }
+        while(!Q.empty()){
+            auto [h1,w1,d1,h2,w2,d2,f]=Q.front();Q.pop();
+            if(f==0){
+                assert(S[h2+dh[d2]][w2+dw[d2]]=='#');
+                auto [toh1,tow1]=to[h1][w1][d1];
+                int toh2=h2,tow2=w2;
+                while(1){
+                    if(!dp[toh1][tow1][d1][toh2][tow2][d2][1]){
+                        dp[toh1][tow1][d1][toh2][tow2][d2][1]=true;
+                        Q.push({toh1,tow1,d1,toh2,tow2,d2,1});
+                    }
+                    toh2-=dh[d2];
+                    tow2-=dw[d2];
+                    
+                    if(S[toh2][tow2]=='#') break;
+                }
+            }else{
+                assert(S[h1+dh[d1]][w1+dw[d1]]=='#');
+                for(int k=1;k<4;k+=2){
+                    int tod1=(d1+k)%4,tod2=(d2+k)%4;
+                    if(S[h2+dh[tod2]][w2+dw[tod2]]!='#') continue;
+                    if(!dp[h1][w1][tod1][h2][w2][tod2][0]){
+                        dp[h1][w1][tod1][h2][w2][tod2][0]=true;
+                        Q.push({h1,w1,tod1,h2,w2,tod2,0});
+                    }
+                }
+            }
+        }
+        
+        bool f=false;
+        
+        for(int k=0;k<4;k++){
+            if(gd==k) continue;
+            f|=dp[gh][gw][k][gh][gw][gd][1];
+        }
+        
+        if(f){
+            cout<<"He can accomplish his mission.\n";
+            continue;
+        }
+        
+        for(int a=0;a<H;a++) for(int b=0;b<W;b++) for(int c=0;c<4;c++) for(int g=0;g<2;g++) can[a][b][c][g]=false;
+        
+        queue<tuple<int,int,int,int>> QQ;
+        QQ.push({sh,sw,sd,0});
+        while(!QQ.empty()){
+            auto [h,w,d,f]=QQ.front();QQ.pop();
+            if(f==0){
+                auto [toh,tow]=to[h][w][d];
+                if(!can[toh][tow][d][1]){
+                    can[toh][tow][d][1]=true;
+                    QQ.push({toh,tow,d,1});
+                }
+            }else{
+                for(int k=1;k<4;k+=2){
+                    int tod=(d+k)%4;
+                    if(!can[h][w][tod][0]){
+                        can[h][w][tod][0]=true;
+                        QQ.push({h,w,tod,0});
+                    }
+                }
+            }
+        }
+        
+        if(can[gh][gw][gd^2][1]) cout<<"He cannot return to the kitchen.\n";
+        else cout<<"He cannot bring tea to his master.\n";
+    }
+}
+

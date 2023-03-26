@@ -1,0 +1,112 @@
+#include<stdio.h>
+#include<ctype.h>
+
+struct Dice{
+	int number[6];
+};
+
+int main(){
+	char buf[256] = {};
+	struct Dice a,b;//サイコロa
+	int flag = 0;//正否判定flag(0:false,1:true)
+	int memo_dice[6] = {},inst,count = 0;//ダイスBのコピーmemo_dice,代入用変数inst,正否カウントcount
+
+	fgets(buf, sizeof(buf) - 1, stdin);
+	char* p = buf;
+
+	for (int i = 0; i < 6; i++){
+		sscanf(p, "%d", &a.number[i]);//サイコロaの数を入力
+
+		while (isdigit(*p)){
+			p++;
+		}
+		while (isspace(*p)){
+			p++;
+		}
+	}
+
+	fgets(buf, sizeof(buf) - 1, stdin);
+	p = buf;
+
+	for (int i = 0; i < 6; i++){
+		sscanf(p, "%d", &b.number[i]);//サイコロbの数を入力
+
+		while (isdigit(*p)){
+			p++;
+		}
+		while (isspace(*p)){
+			p++;
+		}
+	}
+	
+
+	for (int i = 0; i < 6; i++){
+		for (int reset = 0; reset < 6; reset++)memo_dice[reset] = b.number[reset];//メモをダイスBで初期化
+		if (i < 4){
+			for (int ver = 0; ver < i; ver++){
+				inst = memo_dice[0];
+				memo_dice[0] = memo_dice[1];
+				memo_dice[1] = memo_dice[5];
+				memo_dice[5] = memo_dice[4];
+				memo_dice[4] = inst;
+			}
+		}
+		else{
+			if (i == 4){
+				inst = memo_dice[0];
+				memo_dice[0] = memo_dice[3];
+				memo_dice[3] = memo_dice[5];
+				memo_dice[5] = memo_dice[2];
+				memo_dice[2] = inst;
+				inst = memo_dice[0];
+				memo_dice[0] = memo_dice[1];
+				memo_dice[1] = memo_dice[5];
+				memo_dice[5] = memo_dice[4];
+				memo_dice[4] = inst;
+			}
+			else{
+				inst = memo_dice[0];
+				memo_dice[0] = memo_dice[2];
+				memo_dice[2] = memo_dice[5];
+				memo_dice[5] = memo_dice[3];
+				memo_dice[3] = inst;
+				inst = memo_dice[0];
+				memo_dice[0] = memo_dice[1];
+				memo_dice[1] = memo_dice[5];
+				memo_dice[5] = memo_dice[4];
+				memo_dice[4] = inst;
+			}
+		}
+		for (int j = 0; j < 4; j++){
+			for (int hor = 0; hor < j; hor++){
+				inst = memo_dice[0];
+				memo_dice[0] = memo_dice[3];
+				memo_dice[3] = memo_dice[5];
+				memo_dice[5] = memo_dice[2];
+				memo_dice[2] = inst;
+			}
+			for (int i = 0; i < 6; i++){
+				if (a.number[i] == memo_dice[i])count++;
+			}
+			if (count == 6){
+				flag = 1;
+				break;
+			}
+			else{
+				count = 0;
+			}
+		}
+		if (count == 6)break;
+		
+	}
+
+	if (flag == 0){
+		printf("No\n");
+	}
+	else{
+		printf("Yes\n");
+	}
+
+	getchar();
+	return 0;
+}

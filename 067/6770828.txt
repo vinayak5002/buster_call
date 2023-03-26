@@ -1,0 +1,261 @@
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <complex>
+#include <deque>
+#include <exception>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <iosfwd>
+#include <iostream>
+#include <istream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <locale>
+#include <map>
+#include <memory>
+#include <new>
+#include <numeric>
+#include <ostream>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <stdexcept>
+#include <streambuf>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+const long long INF = 1e9;
+const long long MOD = 1e9 + 7;
+// const long long MOD = 998244353;
+const long long LINF = 1e18;
+using namespace std;
+
+#define YES(n) cout << ((n) ? "YES" : "NO") << endl
+#define Yes(n) cout << ((n) ? "Yes" : "No") << endl
+#define POSSIBLE(n) cout << ((n) ? "POSSIBLE" : "IMPOSSIBLE") << endl
+#define Possible(n) cout << ((n) ? "Possible" : "Impossible") << endl
+#define dump(x) cout << #x << " = " << (x) << endl
+#define FOR(i, a, b) for (int i = (a); i < (b); ++i)
+#define REP(i, n) for (int i = 0; i < (n); ++i)
+#define REPR(i, n) for (int i = n; i >= 0; i--)
+#define COUT(x) cout << (x) << endl
+#define SCOUT(x) cout << (x) << " "
+#define VECCOUT(x)                              \
+  for (auto &youso_ : (x))                      \
+    cout << right << setw(10) << youso_ << " "; \
+  cout << endl
+#define ENDL cout << endl
+#define CIN(...)   \
+  int __VA_ARGS__; \
+  CINT(__VA_ARGS__)
+#define LCIN(...)        \
+  long long __VA_ARGS__; \
+  CINT(__VA_ARGS__)
+#define SCIN(...)     \
+  string __VA_ARGS__; \
+  CINT(__VA_ARGS__)
+#define VECCIN(x)          \
+  for (auto &youso_ : (x)) \
+  cin >> youso_
+#define mp make_pair
+#define PQ priority_queue<long long>
+#define PQG priority_queue<long long, V, greater<long long>>
+
+typedef long long ll;
+typedef vector<long long> vl;
+typedef vector<long long> vi;
+typedef vector<bool> vb;
+typedef vector<char> vc;
+typedef vector<vl> vvl;
+typedef vector<vi> vvi;
+typedef vector<vb> vvb;
+typedef vector<vc> vvc;
+typedef pair<long long, long long> pll;
+
+#define COUT(x) cout << (x) << endl
+void CINT()
+{
+}
+template <class Head, class... Tail>
+void CINT(Head &&head, Tail &&...tail)
+{
+  cin >> head;
+  CINT(move(tail)...);
+}
+template <class T>
+void mod(T &x)
+{
+  x %= MOD;
+  x += MOD;
+  x %= MOD;
+}
+
+ll GCD(ll a, ll b)
+{
+  if (b == 0)
+    return a;
+  else
+    return GCD(b, a % b);
+}
+
+struct COMB
+{
+  vl fact, fact_inv, inv;
+  void init_nCk(long long SIZE)
+  {
+    fact.resize(SIZE + 5);
+    fact_inv.resize(SIZE + 5);
+    inv.resize(SIZE + 5);
+    fact.at(0) = fact.at(1) = fact_inv.at(0) = fact_inv.at(1) = inv.at(1) = 1;
+    for (long long i = 2; i < SIZE + 5; i++)
+    {
+      fact.at(i) = fact.at(i - 1) * i % MOD;
+      inv.at(i) = MOD - inv.at(MOD % i) * (MOD / i) % MOD;
+      fact_inv.at(i) = fact_inv.at(i - 1) * inv.at(i) % MOD;
+    }
+  }
+  long long nCk(long long n, long long k)
+  {
+    assert(!(n < k));
+    assert(!(n < 0 || k < 0));
+    return fact.at(n) * (fact_inv.at(k) * fact_inv.at(n - k) % MOD) % MOD;
+  }
+};
+ll extGCD(ll a, ll b, ll &x, ll &y)
+{
+  if (b == 0)
+  {
+    x = 1;
+    y = 0;
+    return a;
+  }
+  ll d = extGCD(b, a % b, y, x);
+  y -= a / b * x;
+  return d;
+}
+
+void Main()
+{
+  ll N;
+  while (cin >> N && N != 0)
+  {
+    ll ans1;
+    // finish, start, nedan
+    vector<pair<ll, pair<ll, pair<ll, ll>>>> A(N);
+    vector<pair<ll, pair<ll, pair<ll, ll>>>> B(N);
+    {
+      for (ll i = 0; i < N; i++)
+      {
+        LCIN(s, t, c);
+        A.at(i) = mp(t - 1, mp(-s + 1, mp(c, i)));
+      }
+      sort(A.begin(), A.end());
+      vl dp(366, 0);
+      vl last(366, -1);
+      vl last_id(366, -1);
+      for (ll i = 0; i < N; i++)
+      {
+        ll end = A.at(i).first;
+        ll start = -A.at(i).second.first;
+        ll cost = A.at(i).second.second.first;
+        ll id = A.at(i).second.second.second;
+        // dump("_-_-_-");
+        // cout << start + 1 << ' ' << end + 1 << endl;
+        // VECCOUT(dp);
+        ll max_cost = 0;
+        ll last_st = -1;
+        for (ll i = 0; i < start; i++)
+        {
+          if (max_cost < dp.at(i))
+          {
+            max_cost = max(max_cost, dp.at(i));
+            last_st = i;
+          }
+        }
+        if (dp.at(end) < max_cost + cost)
+        {
+          dp.at(end) = max(dp.at(end), max_cost + cost);
+          last.at(end) = last_st;
+          last_id.at(end) = id;
+        }
+      }
+      ans1 = *max_element(dp.begin(), dp.end());
+      ll ind = max_element(dp.begin(), dp.end()) - dp.begin();
+      set<int> s;
+      // dump(ind);
+      while (true)
+      {
+        s.insert(last_id.at(ind));
+        // dump(last_id.at(ind));
+        ind = last.at(ind);
+        // dump(ind);
+        if (ind == -1)
+          break;
+      }
+      for (int i = 0; i < N; i++)
+      {
+        if (s.count(A.at(i).second.second.second) == false)
+        {
+          B.push_back(A.at(i));
+        }
+      }
+      // dump(B.size());
+      // dump(ans1);
+    }
+    {
+      N = B.size();
+      // for (ll i = 0; i < N; i++)
+      // {
+      //   LCIN(s, t, c);
+      //   B.at(i) = mp(t, mp(s - 1, mp(c, i)));
+      // }
+      sort(B.begin(), B.end());
+      vl dp(366, 0);
+      vl last(366, -1);
+      vl last_id(366, -1);
+      for (ll i = 0; i < N; i++)
+      {
+        ll end = B.at(i).first;
+        ll start = -B.at(i).second.first;
+        ll cost = B.at(i).second.second.first;
+        ll id = B.at(i).second.second.second;
+        // dump("_-_-_-");
+        // cout << start + 1 << ' ' << end + 1 << endl;
+        // VECCOUT(dp);
+        ll max_cost = 0;
+        ll last_st = -1;
+        for (ll i = 0; i <= start; i++)
+        {
+          if (max_cost < dp.at(i))
+          {
+            max_cost = max(max_cost, dp.at(i));
+            last_st = i;
+          }
+        }
+        if (dp.at(end) < max_cost + cost)
+        {
+          dp.at(end) = max(dp.at(end), max_cost + cost);
+          last.at(end) = last_st;
+          last_id.at(end) = id;
+        }
+      }
+      ll ans2 = *max_element(dp.begin(), dp.end());
+      cout << (ans1 + ans2) << endl;
+    }
+  }
+}
+
+int main()
+{
+  cout << fixed << setprecision(15);
+  Main();
+  return 0;
+}

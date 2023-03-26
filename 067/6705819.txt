@@ -1,0 +1,65 @@
+#include <stdio.h>
+
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+
+int color[100];
+int d[100];
+int f[100];
+int M[100][100];
+int time = 0;
+int n;
+
+void dfs(int u)
+{
+    color[u] = GRAY;
+    d[u] = ++time;
+    for (int v = 0; v < n; v++)
+    {
+        if (M[u][v] && color[v] == WHITE)
+        {
+            dfs(v);
+        }
+    }
+    color[u] = BLACK;
+    f[u] = ++time;
+}
+
+void dfs_init()
+{
+    for (int i = 0; i < n; i++)
+    {
+        color[i] = WHITE;
+    }
+    dfs(0);
+}
+
+int main()
+{
+    int a[100][100], i, j, k, u, v;
+
+    for (i = 0; i < 100; i++)
+    {
+        for (j = 0; j < 100; j++)
+        {
+            M[i][j] = 0;
+        }
+    }
+    scanf("%d", &n);
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d %d", &u, &k);
+        for (j = 0; j < k; j++)
+        {
+            scanf("%d", &v);
+            M[u - 1][v - 1] = 1;
+        }
+    }
+    dfs_init();
+    for (i = 0; i < n; i++)
+    {
+        printf("%d %d %d\n", i + 1, d[i], f[i]);
+    }
+    return 0;
+}

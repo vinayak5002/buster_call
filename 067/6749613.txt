@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+
+#define rep(x, y) for (int x = 0; x < y; x++)
+#define rrep(x, y) for (int x = y - 1; x >= 0; x--)
+#define orep(x, y) for (int x = 1; x <= y; x++)
+#define ll long long
+template <class T>
+bool chmax(T &a, const T &b) {
+  return a < b ? (a = b, 1) : 0;
+}
+template <class T>
+bool chmin(T &a, const T &b) {
+  return b < a ? (a = b, 1) : 0;
+}
+using namespace std;
+using P = pair<int, int>;
+struct Building {
+  bool building[30][60] = {};
+  bool &get_block(int x, int y) { return building[y][x + 30]; }
+  bool get_point(int x, int y) {
+    if (building[y][x + 30] && building[y][x + 30 - 1]) {
+      return true;
+    }
+    return false;
+  }
+};
+bool func() {
+  int r, n;
+  cin >> r >> n;
+  if (r == 0 && n == 0) return false;
+  Building building;
+  rep(i_, n) {
+    int a, b, h;
+    cin >> a >> b >> h;
+    rep(hi, h) {
+      for (int wi = a; wi < b; wi++) {
+        building.get_block(wi, hi) = true;
+      }
+    }
+  }
+
+  double mi = 1e9;
+  rep(hi, 25) {
+    for (int wi = -r + 1; wi <= r - 1; wi++) {
+      if (building.get_point(wi, hi) == false) {
+        // (hi - X)^2 + wi^2 = r^2
+        // ans = X + r
+        double X = hi - sqrt(r * r - wi * wi);
+        double s_ans = X + r;
+        chmin(mi, s_ans);
+      }
+    }
+  }
+  printf("%.15lf\n", mi);
+  return true;
+}
+
+int main() {
+  while (func()) {
+  }
+}
+/**
+ * ....
+ * ....
+ * ....
+ * ....
+ * ....
+ * ####
+ *
+ */

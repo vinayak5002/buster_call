@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Node {
+    int key;
+    Node *right, *left, *parent;
+};
+
+Node *root, *NIL;
+
+void insert(int key);
+void inorder(Node *u);
+void preorder(Node *u);
+
+int main() {
+    int n, key;
+    string command;
+
+    cin >> n;
+
+    for (int i = 0; i < n; i++) {
+        cin >> command;
+        if (command == "insert") {
+            cin >> key;
+            insert(key);
+        } else if (command == "print") {
+            inorder(root);
+            cout << endl;
+            preorder(root);
+            cout << endl;
+        }
+    }
+}
+
+void insert(int key) {
+    Node *parent_node = NIL;
+    Node *child_node = root;
+    Node *new_node;
+
+    // new_node = (Node *)malloc(sizeof(Node));
+    new_node = new Node;
+    new_node->key = key;
+    new_node->left = NIL;
+    new_node->right = NIL;
+
+    while (child_node != NIL) {
+        parent_node = child_node;
+        if (new_node->key < parent_node->key) {
+            child_node = parent_node->left;
+        } else {
+            child_node = parent_node->right;
+        }
+    }
+    new_node->parent = parent_node;
+
+    if (parent_node == NIL) {
+        root = new_node;
+    } else {
+        if (new_node->key < parent_node->key) {
+            parent_node->left = new_node;
+        } else {
+            parent_node->right = new_node;
+        }
+    }
+    return;
+}
+
+void inorder(Node *u) {
+    if (u == NIL) {
+        return;
+    }
+    inorder(u->left);
+    cout << " " << u->key;
+    inorder(u->right);
+}
+void preorder(Node *u) {
+    if (u == NIL) {
+        return;
+    }
+    cout << " " << u->key;
+    preorder(u->left);
+    preorder(u->right);
+}

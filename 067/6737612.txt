@@ -1,0 +1,65 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+namespace {
+    const int INF = (1 << 21);
+    const int WHITE = 0;
+    const int GRAY = 1;
+    const int BLACK = 2;
+
+    int n;
+    vector<vector<int>> m;
+}  // namespace
+
+void dijkstra();
+
+int main() {
+    cin >> n;
+    m = vector<vector<int>>(n, vector<int>(n, INF));
+
+    int u, k, c, v;
+    for (int i = 0; i < n; i++) {
+        cin >> u >> k;
+        while (k--) {
+            cin >> v >> c;
+            m.at(u).at(v) = c;
+        }
+    }
+
+    dijkstra();
+}
+
+void dijkstra() {
+    int u, min_cost;
+    vector<int> d(n, INF);
+    vector<int> color(n, WHITE);
+
+    d.at(0) = 0;
+    color.at(0) = GRAY;
+    while (1) {
+        min_cost = INF;
+        u = -1;
+        for (int i = 0; i < n; i++) {
+            if (min_cost > d.at(i) && color.at(i) != BLACK) {
+                u = i;
+                min_cost = d.at(i);
+            }
+        }
+        if (u == -1) {
+            break;
+        }
+        color.at(u) = BLACK;
+        for (int v = 0; v < n; v++) {
+            if (color.at(v) != BLACK && m.at(u).at(v) != INF) {
+                if (d.at(v) > d.at(u) + m.at(u).at(v)) {
+                    d.at(v) = d.at(u) + m.at(u).at(v);
+                    color.at(v) = GRAY;
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        cout << i << " " << (d.at(i) == INF ? -1 : d.at(i)) << endl;
+    }
+}

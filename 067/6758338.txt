@@ -1,0 +1,90 @@
+from collections import defaultdict
+
+class UnionFind():
+    def __init__(self, n):
+        self.n = n
+        self.parents = [-1] * n
+
+    def find(self, x):
+        if self.parents[x] < 0:
+            return x
+        else:
+            self.parents[x] = self.find(self.parents[x])
+            return self.parents[x]
+
+    def union(self, x, y):
+        x = self.find(x)
+        y = self.find(y)
+
+        if x == y:
+            return
+
+        if self.parents[x] > self.parents[y]:
+            x, y = y, x
+
+        self.parents[x] += self.parents[y]
+        self.parents[y] = x
+
+    def size(self, x):
+        return -self.parents[self.find(x)]
+
+    def same(self, x, y):
+        return self.find(x) == self.find(y)
+
+    def members(self, x):
+        root = self.find(x)
+        return [i for i in range(self.n) if self.find(i) == root]
+
+    def roots(self):
+        return [i for i, x in enumerate(self.parents) if x < 0]
+
+    def group_count(self):
+        return len(self.roots())
+
+    def all_group_members(self):
+        group_members = defaultdict(list)
+        for member in range(self.n):
+            group_members[self.find(member)].append(member)
+        return group_members
+
+    def __str__(self):
+        return '\n'.join(f'{r}: {m}' for r, m in self.all_group_members().items())
+
+
+while True:
+    N = int(input())
+    if N == 0:
+        exit()
+    P = [list(map(float, input().split())) for _ in range(N)]
+
+    E = []
+    for i in range(N):
+        x1, y1, z1, r1 = P[i]
+        for j in range(i+1, N):
+            x2, y2, z2, r2 = P[j]
+
+            d = ((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)**0.5
+            E.append((i, j, max(0, d - r1 - r2)))
+
+    E.sort(key=lambda x:x[2])
+    uf = UnionFind(N)
+    ans = 0
+    for a, b, c in E:
+        if not uf.same(a, b):
+            ans += c
+            uf.union(a, b)
+    print('{:.03f}'.format(ans))
+
+
+
+
+
+
+
+
+
+
+
+
+
+

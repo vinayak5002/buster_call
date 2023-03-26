@@ -1,0 +1,37 @@
+#include <stdio.h>
+#define MAX 10000000
+
+int main (void){
+	int n, l, i, k, j, min;
+	scanf("%d", &n);
+	
+	//p[0]は行列M_1の行数、p[1]は行列M_1の列数を格納
+	//m[i][j]には行列M_iからM_jまでを計算する時の最小の計算回数を格納
+	int p[n + 1], m[n + 1][n + 1];
+	
+	for(i = 1; i <= n; i++){
+		scanf("%d", &p[i - 1]);
+		scanf("%d", &p[i]);
+	}
+	
+	for(i = 1; i <= n; i++){
+		m[i][i] = 0;
+	}
+	
+	for(l = 2; l <= n; l++){
+		for(i = 1; i <= n - l + 1; i++){
+			j = i + l - 1;
+			m[i][j] = MAX;
+			for(k = i; k < j; k++){
+				min = m[i][k] + m[k + 1][j] + p[i - 1] * p[k] * p[j];
+				if(min < m[i][j]){
+					m[i][j] = min;
+				}
+			}
+		}
+	}
+	
+	printf("%d\n", m[1][n]);
+	
+	return 0;
+}

@@ -1,0 +1,68 @@
+#include<iostream>
+#include<algorithm>
+#include<vector>
+#include<set>
+
+
+using namespace std;
+
+int main(){
+    
+    int INF =1000000000;
+    int V, E, r;
+    cin >> V >> E >> r;
+
+    set<int> L;
+    std::vector<int> mini(V,INF);
+    //隣接行列を作成
+    std::vector< vector<int> > C(V,vector<int>(V,INF));
+
+    for (int i=0; i<E; i++){
+        int s, t, d;
+        cin >> s >> t >> d;
+        C[s][t] = d;
+    }
+
+    for (int i=0; i<V; i++){
+        C[i][i]=0;
+        L.insert(i);
+    }
+    
+    L.erase(r);
+
+    for (int i=0; i<V; i++){
+        mini[i] = std::min(mini[i],C[r][i]);
+    }
+
+    while (!L.empty()){
+        std::vector<int> M;
+        for (int i : L){
+            M.push_back(mini[i]);
+        }
+        int MM = *std::min_element(M.begin(),M.end());
+
+        for (int i : L){
+            if (MM == mini[i]){
+                L.erase(i);
+                for (int j=0; j<V; j++){
+                    mini[j] = std::min(mini[j],mini[i]+C[i][j]);
+                }
+
+                break;
+            }
+
+        }
+        
+
+    }
+    
+    for (int i=0; i<V; i++){
+        if(mini[i] != INF){
+            printf("%d\n",mini[i]);
+        }else{
+            printf("INF\n");
+        }
+    }
+
+    return 0;
+}

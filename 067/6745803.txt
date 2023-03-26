@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for(int i=0; i<(n); ++i)
+#define ALL(v) (v).begin(), (v).end()
+template<class T> inline bool chmax(T& a, T b) { if (a < b) { a = b; return 1; } return 0; }
+template<class T> inline bool chmin(T& a, T b) { if (a > b) { a = b; return 1; } return 0; }
+
+using namespace std;
+typedef long long ll;
+
+const int INTINF = INT_MAX >> 1;
+
+int w,h;
+vector<int> x(300),y(300),n(300);
+vector<vector<int>> m;
+vector<int> up(300), l(300);
+bool input(){
+    cin >> w >> h;
+    if(w==0 && h==0) return false;
+    x.resize(w);
+    y.resize(h);
+    m.resize(h);
+    rep(i,h) m[i].resize(w);
+    rep(i, w+h-1){
+        cin >> x[i] >> y[i] >> n[i];
+        m[y[i]][x[i]] = 1;
+    }
+    return true; 
+}
+
+void search(string s, int num){
+    if(s=="vertical"){
+        rep(i, h){
+            if(m[num][i]==1 && l[i]!=1){
+                l[i] = 1;
+                search("horizontal", i);
+            }
+        }
+    }else if(s=="horizontal"){
+        rep(i, up.size()){
+            if(m[i][num]==1 && up[i]!=1){
+                up[i] = 1;
+                search("vertical", i);
+            }
+        }
+    }
+}
+
+int main(){
+    while(input()){
+        up.resize(w);
+        l.resize(h);
+        rep(i, w) up[i]= -1;
+        rep(i, h) l[i]= -1;
+        up[0] = 1;
+        search("vertical", 0);
+
+        int sumup=0, sumleft=0;
+        rep(i,w) sumup += up[i];
+        rep(i,h) sumleft += l[i];
+        if(sumup==w && sumleft==h){
+            cout << "Yes" << endl;
+        }else{
+            cout << "No" << endl;
+        }
+    } 
+    return 0;
+}
+

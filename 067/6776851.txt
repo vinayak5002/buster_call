@@ -1,0 +1,57 @@
+from collections import deque
+def function(_w, _h, _c):
+    w, h = _w, _h
+    c = _c
+    stack = deque()
+    island_count = 0
+    for i in range(h):
+        for j in range(w):
+            if c[i][j] == 1:
+                stack.append([i, j])
+                while stack:
+                    x = stack.pop()
+                    if x[1] - 1 >= 0:                            # 左
+                        if c[x[0]][x[1] - 1] == 1:
+                            stack.append([x[0], x[1] - 1])
+                            c[x[0]][x[1] - 1] = 0
+                    if x[0] - 1 >= 0 and x[1] - 1 >= 0:          # 左上
+                        if c[x[0] - 1][x[1] - 1] == 1:
+                            stack.append([x[0] - 1, x[1] - 1])
+                            c[x[0] - 1][x[1] - 1] = 0
+                    if x[0] - 1 >= 0:                            # 上
+                        if c[x[0] - 1][x[1]] == 1:
+                            stack.append([x[0] - 1, x[1]])
+                            c[x[0] - 1][x[1]] = 0
+                    if x[0] - 1 >= 0 and x[1] + 1 < w:           # 右上
+                        if c[x[0] - 1][x[1] + 1] == 1:
+                            stack.append([x[0] - 1, x[1] + 1])
+                            c[x[0] - 1][x[1] + 1] = 0
+                    if x[1] + 1 < w:                             # 右
+                        if c[x[0]][x[1] + 1] == 1:
+                            stack.append([x[0], x[1] + 1])
+                            c[x[0]][x[1] + 1] = 0
+                    if x[0] + 1 < h and x[1] + 1 < w:            # 右下
+                        if c[x[0] + 1][x[1] + 1] == 1:
+                            stack.append([x[0] + 1, x[1] + 1])
+                            c[x[0] + 1][x[1] + 1] = 0
+                    if x[0] + 1 < h:                             # 下
+                        if c[x[0] + 1][x[1]] == 1:
+                            stack.append([x[0] + 1, x[1]])
+                            c[x[0] + 1][x[1]] = 0
+                    if x[0] + 1 < h and x[1] - 1 >= 0:           # 左下
+                        if c[x[0] + 1][x[1] - 1] == 1:
+                            stack.append([x[0] + 1, x[1] - 1])
+                            c[x[0] + 1][x[1] - 1] = 0
+                island_count += 1
+    return island_count            
+
+_w, _h = map(int, input().split())
+_c = [list(map(int, input().split())) for _ in range(_h)]
+ans = []
+while _w != 0 and _h != 0:
+    ans.append(function(_w, _h, _c))
+    _w, _h = map(int, input().split())
+    _c = [list(map(int, input().split())) for _ in range(_h)]
+
+for i in range(len(ans)):
+    print(ans[i])

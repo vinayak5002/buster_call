@@ -1,0 +1,100 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 2000000002
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 123456
+#define M 1000000007
+typedef long long int ll;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+#define REP(i,n) for(int i=0; i<(int)n; i++)
+
+// const int M = 1e9+7 のようにかく。
+//998,244,353がよく使われるのか。
+/*組み合わせの数の計算の問題では稀に高速フーリエ変換を用いて計算量を削減する問題が出ます。
+通常の高速フーリエ変換では複素数をうまく用いるのですが、ある性質を持つ素数を複素数の代わりに使い
+剰余環上で高速フーリエ変換を可能にした高速剰余変換(FMT)というものが存在します。
+FMTを想定解にすることで高速フーリエ変換をしてかつ余りを取るといったタイプの問題が出題できるようになります。
+性質の良い素数として1+a*2^nの形を取りかつnができるだけ大きい素数が挙げられて
+(そのような形の素数を使うと長さ2^nの列に対するFMTができる)、
+具体的にな質の良い整数の代表例として998244353=1+119×2^23が挙げられます。*/
+
+int n;
+
+int carry (int *A, int m, int p) {
+    // m台, 積載量pで何個目の荷物まで運べるか
+    int p_now = p ; //いまのトラック
+    int i = 0 ;
+    int k = 1 ; 
+    while (A[i] != NIL) {
+        if ( p_now - A[i] > 0) {
+            p_now -= A[i]; 
+            i++;
+        } else if ( p_now - A[i] == 0 ) {
+            i++;
+            k++; //次のトラックへ
+            p_now = p;
+        } else { 
+            k++; //次のトラックへ
+            p_now = p;
+        }
+        if (k > m) {break;}
+    }
+    return i;
+}
+
+int binary(int *A, int m,  int l, int r){
+    //binary(A,key,l,r+1);
+    // [l,r)が範囲のとき、midより大きいか小さいかを判断して
+    // r-l=1になったら要素が1だから終了
+    
+    //printf("START binary l=%d, r=%d \n",l,r);
+    int mid = (l+r)/2;
+    int ca = carry(A, m , mid);
+    int res = -1;
+    if (r-l >1) {
+        if ( ca == n ) {
+            res = binary(A,m,l,mid);
+        } else{
+            res = binary(A,m,mid,r);
+        }
+    } else {
+        if ( ca == n ) { res = l; }
+        else { res = r ;}
+    }
+    return res;
+}
+
+int solve (int *A, int m) {
+    return binary(A, m, 1, 100000*10000);
+
+}
+
+//ポインタ渡しと参照渡し
+// 参照渡しはC++で追加された
+// ポインタ渡しは　通常は&で渡して、*で受ける。（受けたのはポインタ）
+// 参照渡しはそのまま渡して、&で受ける。（受けたのは値を参照した値）
+// 結果は同じような感じ。
+
+//「配列渡し」は「ポインタ渡し」の一種でポインタ変数を引数として使うことは同じですが
+//、呼び出し元の実引数が変数ではなくて配列であるという違いがあります。
+// 要するに&をつけない？
+
+int main() {
+    int m ;
+    int A[100001];
+    REP(i,100001) {A[i] = NIL;}
+    scanf ("%d%d",&n,&m);
+    REP(i,n){ 
+        scanf("%d",&A[i]);
+    }
+    
+    // REP(i,15) { printf("%d\n", carry(A, m, i));}
+    
+    printf("%d\n", solve(A, m));
+
+    return 0;
+}
+
+

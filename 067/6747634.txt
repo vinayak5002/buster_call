@@ -1,0 +1,79 @@
+#include <stdio.h>
+#define MAX 100
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+
+int M[MAX][MAX];
+int color[MAX], sta[MAX], fin[MAX], t, n;
+
+void dfs_visit(u)
+{
+  int v;
+
+  color[u] = GRAY;
+  sta[u] = ++t;
+  for (v = 0; v < n; v++)
+  {
+    if (M[u][v] != 0)
+    {
+      if (color[v] == WHITE)
+      {
+        dfs_visit(v);
+      }
+      color[u] = BLACK;
+      fin[u] = ++t;
+    }
+  }
+}
+
+void dfs()
+{
+  int u;
+
+  for (u = 0; u < n; u++)
+    color[u] = WHITE;
+  t = 0;
+
+  for (u = 0; u < n; u++)
+  {
+    if (color[u] == WHITE)
+      dfs_visit(u);
+  }
+  for (u = 0; u < n; u++)
+  {
+    printf("%d %d %d\n", u, sta[u], fin[u]);
+  }
+}
+
+int main(void)
+{
+  int i, j, k, x, y;
+
+  scanf("%d", &n);
+
+  for (i = 0; i < n; i++)
+  {
+    for (j = 0; j < n; j++)
+    {
+      M[i][j] = 0;
+    }
+  }
+
+  for (i = 0; i < n; i++)
+  {
+    scanf("%d %d", &x, &k);
+    x--;
+    for (j = 0; j < k; j++)
+    {
+      scanf("%d", &y);
+      y--;
+      M[x][y] = 1;
+    }
+  }
+
+  dfs();
+
+  return 0;
+}
+

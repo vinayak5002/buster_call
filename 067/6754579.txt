@@ -1,0 +1,70 @@
+#include<iostream>
+
+using namespace std;
+int p[10000];
+int pRank[10000];
+void makeSet(int x)
+{
+    p[x] = x;
+    pRank[x] = 0;
+}
+
+int findSet(int x)
+{
+    if(x != p[x])
+        p[x] = findSet(p[x]);
+    return p[x];
+}
+
+void link(int x, int y)
+{
+    if(pRank[x] > pRank[y])
+        p[y] = x;
+    else
+    {
+        p[x] = y;
+        if(pRank[x] == pRank[y])
+            pRank[y] = pRank[y] + 1;
+    }
+}
+
+void uni(int x, int y)
+{
+    link(findSet(x), findSet(y));
+}
+
+int same(int x, int y)
+{
+    if(p[x] == p[y])
+        return 1;
+    else
+    {
+        return 0;
+    }
+    
+}
+
+
+int main()
+{
+    int n, q, com, x, y;
+
+    cin >> n;
+    cin >> q;
+
+    for(int i = 0; i < n; i++)
+    {
+        makeSet(i);
+    }
+
+    for(int i = 0; i < q; i++)
+    {
+        cin >> com >> x >> y;
+        if(com == 0)
+            uni(x, y);
+        else
+            cout << same(x, y) << endl;
+    }
+
+
+}

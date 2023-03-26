@@ -1,0 +1,56 @@
+#include <iostream>
+#include <vector>
+
+#define N 40
+
+int n;
+int *pre, *in;
+
+std::vector<int> buf;
+ 
+int search(int arr[], int x, int n)
+{
+    for (int i = 0; i < n; i++)
+        if (arr[i] == x)
+            return i;
+    return -1;
+}
+ 
+void printPostOrder(int in[], int pre[], int n)
+{
+    int root = search(in, pre[0], n);
+ 
+    if (root != 0)
+        printPostOrder(in, pre + 1, root);
+ 
+    if (root != n - 1)
+        printPostOrder(in + root + 1, pre + root + 1, n - root - 1);
+ 
+    buf.push_back(pre[0]);
+}
+ 
+int main()
+{
+    std::cin >> n;
+
+    pre = new int[n];
+    in = new int[n];
+
+    for(int i = 0; i < n; ++i) {
+      std::cin >> pre[i];
+    }
+
+    for(int i = 0; i < n; ++i) {
+      std::cin >> in[i];
+    }
+    printPostOrder(in, pre, n);
+    for(int i = 0; i < n; ++i) {
+      if(i != 0)
+        std::cout << " ";
+      std::cout << buf[i];
+    }
+    std::cout << "\n";
+
+    return 0;
+}
+

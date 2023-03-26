@@ -1,0 +1,53 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+//2次元累積和
+template< class T > struct CumulativeSum2D{
+    vector<vector<T>> data;
+    CumulativeSum2D(int H, int W) : data(H + 1, vector<T>(W + 1, 0)) {}
+    void add(int y, int x, int z){
+        y++, x++;
+        if(y>=data.size()||x>=data[0].size())return;
+        data[y][x]+=z;
+    }
+    void build(){
+        for(int i=1;i<data.size();i++) {
+            for(int j=1;j<data[i].size();j++) {
+                data[i][j]+=data[i][j-1]+data[i-1][j]-data[i-1][j-1];
+            }
+        }
+    }
+    T query(int sy,int sx,int gy, int gx){
+        return (data[gy][gx]-data[sy][gx]-data[gy][sx]+data[sy][sx]);
+    }
+};
+
+int main(){
+    int n, m;
+    cin >> n >> m;
+    vector<int> x(n), y(n), X, Y;
+    for(int i = 0; i < n; i++){
+        cin >> x[i] >> y[i];
+    }
+    X = x, Y = y;
+    sort(X.begin(), X.end());
+    sort(Y.begin(), Y.end());
+    X.erase(unique(X.begin(), X.end()), X.end());
+    Y.erase(unique(Y.begin(), Y.end()), Y.end());
+    CumulativeSum2D<int> S(X.size(), Y.size());
+    for(int i = 0; i < n; i++){
+        x[i] = lower_bound(X.begin(), X.end(), x[i]) - X.begin();
+        y[i] = lower_bound(Y.begin(), Y.end(), y[i]) - Y.begin();
+        S.add(x[i], y[i], 1);
+    }
+    S.build();
+    for(int i = 0; i < m; i++){
+        int lx, ly, rx, ry;
+        cin >> lx >> ly >> rx >> ry;
+        lx = lower_bound(X.begin(), X.end(), lx) - X.begin();
+        ly = lower_bound(Y.begin(), Y.end(), ly) - Y.begin();
+        rx = lower_bound(X.begin(), X.end(), rx + 1) - X.begin();
+        ry = lower_bound(Y.begin(), Y.end(), ry + 1) - Y.begin();
+        cout << S.query(lx, ly, rx, ry) << '\n';
+    }
+}

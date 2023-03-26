@@ -1,0 +1,66 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+
+#define NOT_VISITED 0
+#define VISITED 1
+#define FINISHED 2
+
+class Graph{
+private:
+	vector<vector<int>> graph;
+	vector<int> visited;
+	bool cycle;
+public:
+	Graph(){
+		int v, e;
+		cin >> v >> e;
+		graph.resize(v);
+		visited.resize(v);
+		for(int i=0; i<visited.size(); i++){
+			visited[i] = NOT_VISITED;
+		}
+
+		for(int i=0; i<e; i++){
+			int s, t;
+			cin >> s >> t;
+			graph[s].push_back(t);
+		}
+
+		cycle = false;
+	}
+
+	int checkCycle(){
+		for(int i=0; i<graph.size(); i++){
+			if(cycle) break;
+			if(visited[i] == FINISHED) continue;
+			dfs(i);
+		}
+		return cycle ? 1 : 0;
+	}
+
+	void dfs(int node){
+		if(cycle) return;
+
+		visited[node] = VISITED;
+		for(int i=0; i<graph[node].size(); i++){
+			if(visited[node]==FINISHED) continue;
+			
+			int next_node = graph[node][i];
+			if(visited[next_node]==VISITED){
+				cycle = true;
+				return;
+			}
+
+			dfs(next_node);
+		}
+
+		visited[node] = FINISHED;
+	}
+};
+
+int main(){
+	Graph g = Graph();
+	cout << g.checkCycle() << endl;
+	return 0;
+}

@@ -1,0 +1,56 @@
+#include<bits/stdc++.h>
+using namespace std;
+const int MAXN=2000000+10;
+int a[MAXN];
+int h=0;
+void insert(int n)
+{
+	int i=h++;
+	a[i]=n;
+	while(i && a[(i-1)/2] < a[i])
+	{
+		swap(a[i],a[(i-1)/2]);
+		i=(i-1)/2;
+	}
+}
+void maxHeapify(int i)
+{
+	int l=i*2+1,r=i*2+2;
+	int largest;
+	if(l<h && a[l] > a[i]) largest=l;
+	else largest=i;
+	if(r<h && a[r] > a[largest]) largest=r;
+	if(largest != i)
+	{
+		swap(a[i],a[largest]);
+		maxHeapify(largest);
+	}
+}
+int extractMax()
+{
+    int out=a[0];
+	h--;
+	a[0]=a[h];
+	maxHeapify(0);
+    return out;
+}
+int main()
+{
+	string s;
+	int i=0,n;
+	while(1)
+	{
+		cin>>s;
+		if(s=="end") break;
+		if(s=="insert")
+		{
+		    cin>>n;
+			insert(n);
+		}
+		if(s=="extract")
+		{
+			cout<<extractMax()<<endl;
+		}
+	}
+	return 0;
+}

@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+using namespace std;
+#if __has_include(<atcoder/all>)
+    #include <atcoder/all>
+using namespace atcoder;
+#endif
+typedef long long ll;
+typedef pair<ll, ll> P;
+typedef tuple<ll, ll, ll> T;
+#define rep(i, n) for(ll i = 0; i < n; i++)
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+    
+    while(true){
+        int d,w,ans = 0; cin >> d >> w;
+        if(d == 0 && w == 0)break;
+        vector<vector<int>> field(d,vector<int>(w));
+        rep(i,d)rep(j,w)cin >> field[i][j];
+        for(int i=1;i<d-1;i++){
+            for(int j=1;j<w-1;j++){
+                for(int k=i;k<d-1;k++){
+                    for(int l=j;l<w-1;l++){
+                        
+                        int mini = INT_MAX;
+                        
+                        for(int m=j-1;m<=l+1;m++){
+                            mini = min(mini,field[i-1][m]);
+                            mini = min(mini,field[k+1][m]);
+                        }
+                        for(int m=i-1;m<=k+1;m++){
+                            mini = min(mini,field[m][j-1]);
+                            mini = min(mini,field[m][l+1]);
+                        }
+                    
+                        int v = 0;
+                        bool flag = false;
+                        for(int m=i;m<=k;m++){
+                            for(int n=j;n<=l;n++){
+                                if(field[m][n] >= mini)flag = true;
+                                v += mini-field[m][n];
+
+                                if(flag)break;
+                            }
+                            if(flag)break;
+                        }
+
+                        if(!flag)ans = max(ans,v);
+
+                    }
+                }        
+            }
+        }   
+        cout << ans << endl;
+    }
+
+    return 0;
+}

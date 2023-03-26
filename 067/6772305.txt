@@ -1,0 +1,70 @@
+#include <iostream>
+
+#define EXPECTED_MAX 10000
+
+using namespace std;
+
+void printArray( int arr[], int size );
+void countingSort( int arr[], int size, int k );
+
+int main()
+{
+	int size;
+	cin >> size;
+	int* arr = new int[size];
+
+	for( int i = 0; i < size; i++ )
+	{
+		cin >> arr[i];
+	}
+
+	countingSort( arr, size, EXPECTED_MAX );
+
+	printArray( arr, size );
+
+	delete[] arr;
+
+	return 0;
+}
+
+void printArray( int arr[], int size )
+{
+	if( size == 0 ) return;
+
+	for( int i = 0; i < size - 1; i++ )
+	{
+		cout << arr[i] << ' ';
+	}
+	cout << arr[size - 1] << std::endl;
+}
+
+void countingSort( int arr[], int size, int k )
+{
+	int* arr2 = new int[size]; // Final array
+	int* arr3 = new int[++k](); // From zero to k (inclusive)
+
+	for( int i = 0; i < size; i++ )
+	{
+		arr3[arr[i]]++;
+	}
+
+	for( int i = 1; i < k; i++ )
+	{
+		arr3[i] += arr3[i - 1];
+	}
+
+	for( int i = size - 1; i >= 0; i-- )
+	{
+		arr2[arr3[arr[i]] - 1] = arr[i];
+		arr3[arr[i]]--;
+	}
+
+	for( int i = 0; i < size; i++ )
+	{
+		arr[i] = arr2[i];
+	}
+
+	delete[] arr2;
+	delete[] arr3;
+}
+

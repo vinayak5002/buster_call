@@ -1,0 +1,60 @@
+import java.util.Scanner;
+
+class valueFoundException extends Exception{  
+    public valueFoundException (String str){    
+        super(str);
+    }  
+}  
+
+class Search{
+    void calc(int[] arr1, int[] arr2){
+        for (int i = 0; i < arr2.length; i++){
+            try{
+                solve(arr2[i], 0, arr1);
+                System.out.println("no");
+            } catch (valueFoundException e){
+                System.out.println(e.getMessage());
+            }
+        }
+    }
+
+    void solve(int sum, int index, int[] arr1) throws valueFoundException{
+        if (index < (arr1.length)){
+            if ( sum == arr1[index] || sum == 0) {
+                throw new valueFoundException("yes");
+            } 
+            solve(sum, index + 1, arr1);
+            if (sum > arr1[index]) solve(sum - arr1[index], index + 1, arr1);  
+        }
+    }
+}
+
+class Main{
+
+    public static void main(String args[]){
+
+        Scanner scan = new Scanner(System.in);
+
+        int n1 = Integer.parseInt(scan.nextLine());
+        int[] arr1 = new int[n1];
+        String str = scan.nextLine();
+        String[] splitted = str.split(" ");
+
+        for (int i = 0; i < n1; i++){
+            arr1[i] = Integer.parseInt(splitted[i]);
+        }
+
+        int n2 = Integer.parseInt(scan.nextLine());
+        int[] arr2 = new int[n2];
+        str = scan.nextLine();
+        splitted = str.split(" ");
+
+        for (int i = 0; i < n2; i++){
+            arr2[i] = Integer.parseInt(splitted[i]);
+        }
+
+        Search obj = new Search();
+
+        obj.calc(arr1, arr2);
+    }
+}

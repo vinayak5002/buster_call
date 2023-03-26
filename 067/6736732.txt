@@ -1,0 +1,36 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+	int n, m;
+	cin >> n >> m;
+	// cost[a][b]は、点aからbまでのコスト inf=100000としておく
+	vector<vector<int>>cost(n, vector<int>(n, 100000));
+	for (int i = 0; i < m; i++)
+	{
+		int a, b, c, d;
+		scanf_s("%d,%d,%d,%d", &a, &b, &c, &d);
+		a--;
+		b--;
+		cost[a][b] = c;
+		cost[b][a] = d;
+	}
+	int s, g, V, P;
+	scanf_s("%d,%d,%d,%d", &s, &g, &V, &P);
+	s--;
+	g--;
+	// Floyd-Warshallで、各パスのコストを更新していく
+	for (int a = 0; a < n; a++)
+	{
+		for (int b = 0; b < n; b++)
+		{
+			for (int c = 0; c < n; c++)
+			{
+				if (cost[b][c] > cost[b][a] + cost[a][c])
+					cost[b][c] = cost[b][a] + cost[a][c];
+			}
+		}
+	}
+	int ans = V - (cost[s][g] + cost[g][s]) - P;
+	cout << ans << endl;
+}

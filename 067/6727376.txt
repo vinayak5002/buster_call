@@ -1,0 +1,75 @@
+#include<stdio.h>
+#define N 100
+#define WH 0
+#define GR 1
+#define BL 2
+
+int color[N], found[N], finish[N];
+int matrix[N][N], n;
+int time = 0;
+
+void dfs_Visit(int x)
+{
+    int col;//colomn in matrix
+    color[x] = GR;
+    found[x] = ++time;
+    for(col = 0; col < n; col++)
+    {
+        if(matrix[x][col] == 0) continue;
+        if(color[col] == WH)    dfs_Visit(col);
+        color[x] = BL;
+        finish[x] = ++time;
+    }
+}
+
+void dfs()
+{
+    int i;
+    for(i = 0; i < n; i++)
+    {
+        color[i] = 0;
+    }
+
+    for(i = 0; i < n; i++)
+    {
+        if(color[i] == 0)   dfs_Visit(i);
+    }
+}
+
+
+
+int main(void)
+{
+    int i,j,n;//i,j for loop 、 nは点の数
+    int index1, index2, n_adj;//index1は行、index2は列、 n_adjは今の点が隣接する点の個数
+    scanf("%d",&n);//nを読み取る
+
+    for(i = 0; i < n ; i++)
+    {
+        for(j = 0 ; j < n; j++)
+        {
+            matrix[i][j] = 0;//行列の初期化
+        }
+    }
+
+    for(i = 0; i < n ; i++)//入力を読み取る
+    {
+        scanf("%d %d",&index1, &n_adj);//各行に対して、一つ目の数は今の点の番号(行列の行)、二つ目は今の点が隣接する点の個数
+        index1--;//実はindex1の値はiと同じである
+        for(j = 0; j < n_adj; j++)//今の点が隣接する点を読み取る
+        {
+            scanf("%d",&index2);
+            index2--;
+            matrix[index1][index2] = 1;//該当するところを1にする
+        }
+    }//index1, index2から１を減らすのは入力が1から始まり、行列は0から始まるからである
+
+    dfs();
+
+    for(i = 0; i < n ; i++)
+    {
+        printf("%d %d %d\n", i + 1, found[i], finish[i]);
+    }
+
+    return 0;
+}

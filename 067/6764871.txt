@@ -1,0 +1,46 @@
+import sys
+input = lambda: sys.stdin.readline().rstrip()
+
+sys.setrecursionlimit(10**6)
+def get_articulation_points(G: list, s: int=0) -> list:
+  "Return articulation points. / O(|V|+|E|)"
+  n = len(G)
+  order = [None] * n
+  res = []
+  cnt = 0
+  def dfs(v, pre):
+    nonlocal cnt
+    r_min = order[v] = cnt
+    fcnt = 0
+    p_art = 0
+    cnt += 1
+    for w in G[v]:
+      if w == pre:
+        continue
+      if order[w] == None:
+        ret = dfs(w, v)
+        p_art |= (order[v] <= ret)
+        r_min = min(r_min, ret)
+        fcnt += 1
+      else:
+        r_min = min(r_min, order[w])
+    p_art |= (r_min == order[v] and len(G[v]) > 1)
+    if (pre == -1 and fcnt > 1) or (pre != -1 and p_art):
+      res.append(v)
+    return r_min
+  dfs(s, -1)
+  return res
+
+#  -----------------------  #
+
+v, e = map(int, input().split())
+G = [[] for _ in range(v)]
+for _ in range(e):
+  s, t = map(int, input().split())
+  G[s].append(t)
+  G[t].append(s)
+
+ans = get_articulation_points(G)
+for a in sorted(ans):
+  print(a)
+

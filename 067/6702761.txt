@@ -1,0 +1,78 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define double long double
+const double eps=0.0000000001;
+class point{
+	public:
+		double x,y;
+		point(double x=0,double y=0):x(x),y(y){}
+		point operator +(point _){return point(x+_.x,y+_.y);}
+		point operator -(point _){return point(x-_.x,y-_.y);}
+		point operator *(double _){return point(x*_,y*_);}
+		point operator /(double _){return point(x/_,y/_);}
+		double norm(){return x*x+y*y;}
+		double ABS(){return sqrt(norm());}
+		bool operator <(const point &_)const{return x==_.x?y<_.y:x<_.x;}
+		bool operator ==(const point &_)const{return fabs(x-_.x)<=eps&&fabs(y-_.y)<=eps;}
+};
+typedef point vec;
+struct seg{point A,B;};
+double dot(point A,point B){return A.x*B.x+A.y*B.y;}
+double cross(point A,point B){return A.x*B.y-A.y*B.x;}
+//------------------------------------------------------------------------------
+point a[800003],h[800003];
+long long n,t=1,c=1,e,i;
+double sum,ans;
+//------------------------------------------------------------------------------
+bool cmp(point A,point B){
+	double p=cross(A-a[1],B-a[1]);
+	if(p>0||(p==0&&((a[0]-A).ABS()<(a[0]-B).ABS())))  return true;
+	return false;
+}
+int main(){
+	for(scanf("%lld",&n),a[0].x=a[0].y=0,i=1;i<=n;i++){
+		scanf("%Lf%Lf",&a[i].x,&a[i].y);
+		if(a[i].y<a[e].y||(a[i].y==a[e].y&&a[i].x<a[e].x))  e=i;
+	}
+	for(swap(a[e],a[1]),sort(a+2,a+n+1,cmp),h[1]=a[1],i=2;i<=n;i++){
+		while(t>1&&cross(h[t]-h[t-1],a[i]-h[t])<=0)  t--;
+		h[++t]=a[i];
+	}
+	if(t==2)  return printf("%lld",(long long)(h[2]-h[1]).ABS()),0;
+	for(h[++t]=h[1],i=1;i<t;i++){
+		while(cross(h[i+1]-h[i],h[c]-h[i])<cross(h[i+1]-h[i],h[c+1]-h[i]))  c=c%t+1;
+		ans=max(ans,max((h[i]-h[c]).ABS(),(h[i+1]-h[c]).ABS()));
+	}
+    return printf("%.10Lf",ans),0;
+}
+/*We’re no strangers to love
+You know the rules and so do I
+A full commitment’s what I’m thinking of
+You wouldn’t get this from any other guy
+I just wanna tell you how I’m feeling
+Gotta make you understand
+Never gonna give you up
+Never gonna let you down
+Never gonna run around and desert you
+Never gonna make you cry
+Never gonna say goodbye
+Never gonna tell a lie and hurt you
+We’ve known each other for so long
+Your heart’s been aching but
+You’re too shy to say it
+Inside we both know what’s been going on
+We know the game and we’re gonna play it
+And if you ask me how I’m feeling
+Don’t tell me you’re too blind to see
+Never gonna give you up
+Never gonna let you down
+Never gonna run around and desert you
+Never gonna make you cry
+Never gonna say goodbye
+Never gonna tell a lie and hurt you
+Never gonna give you up
+Never gonna let you down
+Never gonna run around and desert you
+Never gonna make you cry
+Never gonna say goodbye
+Never gonna tell a lie and hurt you*/

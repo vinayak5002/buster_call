@@ -1,0 +1,125 @@
+#include<bits/stdc++.h>
+#define rep(i,l,r) for(ll i=l;i<=r;i++)
+static const int WH = 0;
+static const int GR = 1;
+static const int BL = 2;
+using namespace std;
+using ll = long long;
+using ull = unsigned long long;
+static const ll MOD =  998244353;
+void chmin(ll &a, ll b){ a = min(a,b); }
+
+template<typename T>
+struct lazy_segment_tree{
+    vector<T> tree;
+    vector<T> lazy;
+    int tree_h;
+    int tree_size;
+    int el_num;
+    int index_start;
+    ll INF = ((ll)1 << 31) - 1;
+    ll NINF = - 1e18;
+
+    lazy_segment_tree(int arg_size){
+        el_num = 1;
+        tree_h = 1;
+        tree_size = 2;
+        arg_size--;
+        while(arg_size){
+            arg_size /= 2;
+            tree_h++;
+            tree_size *= 2;
+            el_num *= 2;
+        }
+        index_start = tree_size / 2 - 1;
+        tree.resize(tree_size,INF);
+        lazy.resize(tree_size,INF);
+    }
+
+    void update(int l, int r, T x){
+        update_sub(l,r,1,1,el_num,x);
+        return;
+    }
+
+    void update_sub(int l, int r, int id, int l_end, int r_end, T x){
+        eval(id);
+        if((r_end < l) || (r < l_end)) return;
+
+        if((l <= l_end) && (r_end <= r)){
+            lazy[id] = x;
+            eval(id);
+        } else {
+            update_sub(l,r, id * 2, l_end, (r_end + l_end)/2,x);
+            update_sub(l,r, id * 2 + 1, (r_end + l_end)/2 + 1, r_end,x);
+            tree[id] = min(tree[id * 2],tree[id * 2 + 1]);
+        }
+    }
+
+    void eval(int u){
+        if(lazy[u] == INF) return;
+        if(u < (tree_size - 1)){
+            lazy[2 * u] = lazy[u];
+            lazy[2 * u + 1] = lazy[u];
+        }
+        tree[u] = lazy[u];
+        lazy[u] = INF;
+    }
+
+    void change_value(int u, T v){
+        tree[index_start + u] = v;
+        update((index_start + u)/2);
+    }
+
+    void add_value(int u, T v){
+        tree[index_start + u] += v;
+        update((index_start + u)/2);
+    }
+
+    T get_value(int l, int r){
+        return get_value_sub(l,r, 1, 1, el_num);
+    }
+
+    T get_value_sub(int arg_l, int arg_r, int id, int l_end, int r_end){
+        eval(id);
+        if((l_end > arg_r) || (r_end < arg_l)){
+            return INF; //INFを定義
+        } else if((arg_l <= l_end) && (arg_r >= r_end)){
+            return tree[id];
+        } else {
+            T vl = get_value_sub(arg_l,arg_r, id * 2, l_end, (l_end + r_end)/2);
+            T vr = get_value_sub(arg_l,arg_r, id * 2 + 1, (l_end + r_end)/2 + 1, r_end);
+            return min(vl,vr);
+        } 
+    }
+
+};
+
+int main(){
+    int n,q; cin >> n >> q;
+    lazy_segment_tree<ll> lsgt(n);
+
+    vector<ll> ans;
+//cout << endl;
+    rep(i,0,q-1){
+        int k; cin >> k;
+        if(k == 0){
+            int s,t;
+            ll x; 
+            cin >> s >> t >> x;
+
+            lsgt.update(s + 1,t + 1,x);
+            //lsgt.list_up();
+
+        } else {
+            int s,t;
+            cin >> s >> t;
+            ans.push_back(lsgt.get_value(s+1,t+1));
+        }
+    }
+
+    for(ll x:ans){
+        cout << x << endl;
+    }
+
+    return 0;
+}

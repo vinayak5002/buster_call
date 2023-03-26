@@ -1,0 +1,96 @@
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <numeric>
+#include <iomanip>
+#include <string>
+#include <regex>
+#include <array>
+#include <vector>
+#include <map>
+#include <set>
+#include <bitset>
+#include <queue>
+using namespace std;
+#define rep(x,to) for(int x=0;x<to;++x)
+#define rep2(x,from,to) for(int x=from;x<=to;++x)
+typedef long long ll;
+typedef unsigned long long ull;
+
+struct Rect {
+  int x, y;
+  bool operator<(const Rect& r) { 
+    return x * y < r.x * r.y; 
+  }
+};
+
+void add(vector<Rect> &v, Rect ra, Rect rb, bool vertical) {
+  if(vertical) {
+    if(ra.x < rb.x) {
+      v.push_back(ra);
+      v.push_back(rb);
+    } else {
+      v.push_back(rb);
+      v.push_back(ra);
+    }
+  } else {
+    if(ra.y < rb.y) {
+      v.push_back(ra);
+      v.push_back(rb);
+    } else {
+      v.push_back(rb);
+      v.push_back(ra);
+    }
+  }
+}
+
+int main() {
+  int n, w, d, p, s;
+  while(true) {
+    cin >> n >> w >> d;
+    if(n == 0 && w == 0 && d == 0) break;
+    vector<Rect> v;
+    Rect r;
+    r.x = w;
+    r.y = d;
+    v.push_back(r);
+    rep(i,n) {
+      cin >> p >> s;
+      Rect r = v[p-1];
+      v.erase(v.begin()+p-1);
+      Rect ra;
+      Rect rb;
+      s %= 2 * (r.x + r.y);
+      if(0 < s && s < r.x) {
+        ra.x = s;
+        ra.y = r.y;
+        rb.x = r.x - s;
+        rb.y = r.y;
+        add(v, ra, rb, true);
+      } else if(r.x < s && s < (r.x + r.y)) {
+        ra.x = r.x;
+        ra.y = s - r.x;
+        rb.x = r.x;
+        rb.y = (r.x + r.y) - s;
+        add(v, ra, rb, false);
+      } else if((r.x + r.y) < s && s < (2 * r.x + r.y)) {
+        ra.x = (r.x + r.y) - s;
+        ra.y = r.y;
+        rb.x = (2 * r.x + r.y) - s;
+        rb.y = r.y;
+        add(v, ra, rb, true);
+      } else {
+        ra.x = r.x;
+        ra.y = s - (2 * r.x + r.y);
+        rb.x = r.x;
+        rb.y = 2 * (r.x + r.y) - s;
+        add(v, ra, rb, false);
+      }
+    }
+    sort(v.begin(), v.end());
+    rep(i,n) {
+      cout << v[i].x * v[i].y << " ";
+    }
+    cout << v[n].x * v[n].y << endl;
+  }
+}

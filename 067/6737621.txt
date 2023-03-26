@@ -1,0 +1,74 @@
+#include<stdio.h>
+
+#define MAX 2000
+#define X 200
+#define Y 200
+
+int n, A[MAX];
+int d[X][Y];
+
+int sum(int j, int m)
+{	
+	if(d[j][m] == 0 || d[j][m] == 1)
+	{
+		return d[j][m];
+	}
+	if(m == 0)
+	{
+		d[j][m] = 1;
+	}
+	else if(j >= n)
+	{
+		d[j][m] = 0;
+	}
+	else if(sum(j+1, m))
+	{
+		d[j][m] = 1;
+	}
+	else if(sum(j+1, m-A[j]))
+	{
+		d[j][m] = 1;
+	}
+	else
+	{
+		d[j][m] = 0;
+	}
+	
+	return d[j][m];
+}
+
+void Initialization(int m)
+{
+	int i, j;
+	for(i=0; i<=n; i++)
+	{
+		for(j=0; j<=m; j++)
+		{
+			d[i][j] = 10;
+		}
+	}
+}
+
+int main(void)
+{
+	int i, q, m, x;
+	
+	scanf("%d", &n);
+	for(i=0; i<n; i++)
+	{
+		scanf("%d", &A[i]);
+	}
+	scanf("%d", &q);
+	
+	for(i=1; i<=q; i++)
+	{
+		scanf("%d", &m);
+		Initialization(m);
+		x = sum(0, m);
+		if(x == 1) printf("yes\n");
+	    else printf("no\n");
+	}
+	
+	return 0;
+}
+

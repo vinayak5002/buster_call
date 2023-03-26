@@ -1,0 +1,221 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
+import java.util.Stack;
+import java.util.concurrent.SynchronousQueue;
+
+public class djikstra {
+
+    public static void main(String[] args) throws InterruptedException{
+        Scanner scan = new Scanner(System.in);
+
+        int v = scan.nextInt();
+
+        graph g = new graph(v);
+
+        int e = scan.nextInt();
+
+        for(int i = 0; i<e; i++)
+        {
+            int src = scan.nextInt();
+            int dest = scan.nextInt();
+            int weight = scan.nextInt();
+
+            g.addEdge(src, dest, weight);
+        }
+
+        // shortestPathInDAG(g);
+        mst(g);
+
+        scan.close();
+    }
+
+    public static void shortestPathInDAG(graph g)
+    {
+        Scanner scan = new Scanner(System.in);
+        System.out.print("Source: ");
+        int src = scan.nextInt();
+        System.out.println();
+        System.out.print("Dest: ");
+        int dest = scan.nextInt();
+
+        Stack<Integer> st = topoSortUtil(g);
+
+        // System.out.println(Arrays.toString(topoSort));
+
+        int dist[] = new int[g.v];
+        for(int i = 0; i<dist.length; i++)
+            dist[i] = Integer.MAX_VALUE;
+        
+        dist[src] = 0;
+
+        while(!st.isEmpty())
+        {
+            int cur = st.pop();
+
+            if(dist[cur] != Integer.MAX_VALUE)
+            {
+                for(edge e: g.lst.get(cur))
+                {
+                    if(dist[cur] + g.getEdgeWeight(cur, e.dest) < dist[e.dest])
+                    {
+                        dist[e.dest] = dist[cur] + g.getEdgeWeight(cur, e.dest);
+                    }
+                }
+            }
+        }
+
+        System.out.println(dist[dest]);
+
+        scan.close();
+    }
+
+    public static Stack<Integer> topoSortUtil(graph g)
+    {
+        ArrayList<ArrayList<edge>> lst = g.lst;
+        Stack<Integer> st = new Stack<>();
+        int visited[] = new int[lst.size()];
+        int topo[] = new int[lst.size()];
+
+        for(int i = 0; i<lst.size()-1; i++)
+        {
+            if(visited[i] == 0)
+                topoSort(i, visited, st, lst);
+        }
+
+        return st;
+    }
+
+    public static void topoSort(int i, int visited[], Stack<Integer> st, ArrayList<ArrayList<edge>> lst)
+    {
+        visited[i] = 1;
+        for(edge e: lst.get(i))
+        {
+            int x = e.dest;
+            if(visited[x] == 0)
+                topoSort(x, visited, st, lst);
+        }
+
+        st.push(i);
+    }
+
+    public static void mst(graph g) throws InterruptedException
+    {
+        int n = g.lst.size();
+
+        int key[] = new int[n];
+        Arrays.fill(key, Integer.MAX_VALUE);
+        key[0] = 0;
+
+        boolean mst[] = new boolean[n];
+
+        int parent[] = new int[n];
+        Arrays.fill(parent, -1);
+
+        int sumWeight = 0;
+
+        while(!allVisited(mst))
+        {
+            int node = minKeyNotInMST(key, mst);
+            // System.out.println(node + " " + parent[node] + " " + g.getEdgeWeight(node, parent[node]));
+            sumWeight += g.getEdgeWeight(node, parent[node]);
+            mst[node] = true;
+            for(edge e: g.lst.get(node))
+            {
+                int dest = e.dest;
+                if(mst[dest] == true)
+                    continue;
+                int cur_weight = g.getEdgeWeight(node, dest);
+                if(cur_weight < key[dest])
+                {
+                    key[dest] = cur_weight;
+                    parent[dest] = node;
+                }                
+            }
+        }   
+
+        System.out.println(sumWeight);
+    }
+
+    public static boolean allVisited(boolean mst[])
+    {
+        for(int i = 0; i<mst.length; i++)
+        {
+            if(mst[i] == false)
+                return false;
+        }
+        return true;
+    }
+    public static int minKeyNotInMST(int key[], boolean mst[])
+    {
+        int ans = Integer.MAX_VALUE;
+        int min = Integer.MAX_VALUE;
+
+        for(int i = 0; i<key.length; i++)
+        {
+            if(key[i] < min && mst[i] == false)
+            {
+                min = key[i]; 
+                ans = i;
+            }      
+        }
+
+        return ans;
+    }
+}
+
+class edge
+{
+    int src, dest, weight;
+
+    edge(int s, int d, int w)
+    {
+        src = s;
+        dest = d;
+        weight = w;
+    }
+}
+
+class graph
+{
+    int v;
+
+    ArrayList<ArrayList<edge>> lst = new ArrayList<>();
+
+    graph(int v)
+    {
+        this.v = v;
+        for(int i = 0; i<v; i++)
+        {
+            lst.add(new ArrayList<edge>());
+        }
+    }
+
+    public void addEdge(int src, int dest, int weight)
+    {
+        edge e1 = new edge(src, dest, weight);
+        lst.get(src).add(e1);
+
+        // For undirected
+        edge e2 = new edge(dest, src, weight);
+        lst.get(dest).add(e2);
+    }
+
+    public int getEdgeWeight(int src, int dest)
+    {
+        if(dest == -1)
+            return 0;
+        ArrayList<edge> list = lst.get(src);
+
+        for(edge e: list)
+        {
+            if(e.dest == dest)
+                return e.weight;
+        }
+
+        return 0;
+    }
+}
+
+
+

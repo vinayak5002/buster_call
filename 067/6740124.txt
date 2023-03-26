@@ -1,0 +1,292 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <deque>
+#include <queue>
+#include <string>
+#include <iomanip>
+#include <set>
+#include <unordered_set>
+#include <map>
+#include <unordered_map>
+#include <utility>
+#include <stack>
+#include <random>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+#include <assert.h>
+#if __has_include(<atcoder/all>)
+#include <atcoder/all>
+using namespace atcoder;
+#endif
+using namespace std;
+using ll=long long;
+#define read(x) cin>>(x);
+#define readll(x) ll (x);cin>>(x);
+#define readS(x) string (x);cin>>(x);
+#define readvll(x,N) vector<ll> (x)((N));for(int i=0;i<(N);i++){cin>>(x)[i];}
+#define rep(i,N) for(ll (i)=0;(i)<(N);(i)++)
+#define rep2d(i,j,H,W) for(ll (i)=0;(i)<(H);(i)++)for(ll (j)=0;(j)<(W);j++)
+#define is_in(x,y) (0<=(x) && (x)<H && 0<=(y) && (y)<W)
+#define yn {cout<<"Yes"<<endl;}else{cout<<"No"<<endl;}
+inline ll powll(ll x,ll n){ll r=1;while(n>0){if(n&1){r*=x;};x*=x;n>>=1;};return r;}
+
+const ll M=200;
+
+struct Dice{
+  ll top,front,bottom,back,left,right;
+  Dice(){
+    top=1;
+    front=3;
+    bottom=6;
+    back=4;
+    left=2;
+    right=5;
+  }
+};
+
+void debug(Dice x){
+  cerr<<x.top<<" "<<x.front<<" "<<x.bottom<<" "<<x.back<<" "<<x.left<<" "<<x.right<<endl;
+}
+
+Dice roll_right(Dice x){
+  Dice res;
+  res.top=x.left;
+  res.front=x.front;
+  res.bottom=x.right;
+  res.back=x.back;
+  res.left=x.bottom;
+  res.right=x.top;
+  return res;
+}
+
+Dice roll_left(Dice x){
+  Dice res;
+  res.top=x.right;
+  res.front=x.front;
+  res.bottom=x.left;
+  res.back=x.back;
+  res.left=x.top;
+  res.right=x.bottom;
+  return res;
+}
+
+Dice roll_front(Dice x){
+  Dice res;
+  res.top=x.back;
+  res.front=x.top;
+  res.bottom=x.front;
+  res.back=x.bottom;
+  res.left=x.left;
+  res.right=x.right;
+  return res;
+}
+
+Dice roll_back(Dice x){
+  Dice res;
+  res.top=x.front;
+  res.front=x.bottom;
+  res.bottom=x.back;
+  res.back=x.top;
+  res.left=x.left;
+  res.right=x.right;
+  return res;
+}
+
+Dice spin_right(Dice x){
+  Dice res;
+  res.top=x.top;
+  res.front=x.right;
+  res.bottom=x.bottom;
+  res.back=x.left;
+  res.left=x.front;
+  res.right=x.back;
+  return res;
+}
+
+Dice spin_left(Dice x){
+  Dice res;
+  res.top=x.top;
+  res.front=x.left;
+  res.bottom=x.bottom;
+  res.back=x.right;
+  res.left=x.back;
+  res.right=x.front;
+  return res;
+}
+
+Dice getDice(ll t,ll f){
+  Dice res;
+  if(t==1){
+    if(f==2){
+      res=spin_left(res);
+      return res;
+    }else if(f==3){
+      return res;
+    }else if(f==4){
+      res=spin_left(res);
+      res=spin_left(res);
+      return res;
+    }else if(f==5){
+      res=spin_right(res);
+      return res;
+    }else{
+      exit(1);
+    }
+  }else if(t==2){
+    res=roll_right(res);
+    if(f==1){
+      res=spin_right(res);
+      return res;
+    }else if(f==3){
+      return res;
+    }else if(f==4){
+      res=spin_right(res);
+      res=spin_right(res);
+      return res;
+    }else if(f==6){
+      res=spin_left(res);
+      return res;
+    }else{
+      exit(1);
+    }
+  }else if(t==3){
+    res=roll_back(res);
+    if(f==1){
+      res=spin_left(res);
+      res=spin_left(res);
+      return res;
+    }else if(f==2){
+      res=spin_left(res);
+      return res;
+    }else if(f==5){
+      res=spin_right(res);
+      return res;
+    }else if(f==6){
+      return res;
+    }else{
+      exit(1);
+    }
+  }else if(t==4){
+    res=roll_front(res);
+    if(f==1){
+      return res;
+    }else if(f==2){
+      res=spin_left(res);
+      return res;
+    }else if(f==5){
+      res=spin_right(res);
+    }else if(f==6){
+      res=spin_left(res);
+      res=spin_left(res);
+      return res;
+    }else{
+      exit(1);
+    }
+  }else if(t==5){
+    res=roll_left(res);
+    if(f==1){
+      res=spin_left(res);
+      return res;
+    }else if(f==3){
+      return res;
+    }else if(f==4){
+      res=spin_left(res);
+      res=spin_left(res);
+      return res;
+    }else if(f==6){
+      res=spin_right(res);
+      return res;
+    }else{
+      exit(1);
+    }
+  }else{
+    res=roll_left(res);
+    res=roll_left(res);
+    if(f==2){
+      res=spin_left(res);
+      res=spin_left(res);
+      return res;
+    }else if(f==3){
+      res=spin_right(res);
+      return res;
+    }else if(f==4){
+      res=spin_left(res);
+      return res;
+    }else if(f==5){
+      return res;
+    }else{
+      exit(1);
+    }
+  }
+  exit(1);
+}
+
+
+void solve(ll n){
+  ll t,f;
+  vector<vector<pair<ll,ll>>> d(2*M+1,vector<pair<ll,ll>>(2*M+1,make_pair(0,0)));// 高さ、数
+  vector<ll> ans(7);
+  for(ll i=0;i<n;i++){
+    cin>>t>>f;
+    //cerr<<endl<<t<<" "<<f<<endl;
+    Dice di=getDice(t,f);
+    //debug(di);
+    ll x=M,y=M;
+    ll dx,dy;
+    while(1){
+      vector<pair<ll,pair<ll,ll>>> tmp;
+      if(d[x][y].first>d[x+1][y].first && di.right>=4){
+        tmp.push_back(make_pair(di.right,make_pair(1,0)));
+      }
+      if(d[x][y].first>d[x][y+1].first && di.back>=4){
+        tmp.push_back(make_pair(di.back,make_pair(0,1)));
+      }
+      if(d[x][y].first>d[x-1][y].first && di.left>=4){
+        tmp.push_back(make_pair(di.left,make_pair(-1,0)));
+      }
+      if(d[x][y].first>d[x][y-1].first && di.front>=4){
+        tmp.push_back(make_pair(di.front,make_pair(0,-1)));
+      }
+      sort(tmp.rbegin(),tmp.rend());
+      if(tmp.empty()){
+        ans[d[x][y].second]--;
+        ans[di.top]++;
+        d[x][y].first++;
+        d[x][y].second=di.top;
+        break;
+      }
+      dx=tmp[0].second.first;
+      dy=tmp[0].second.second;
+      //cerr<<dx<<" "<<dy<<endl;
+      if(dx==1 && dy==0){
+        di=roll_right(di);
+      }else if(dx==0 && dy==1){
+        di=roll_back(di);
+      }else if(dx==-1 && dy==0){
+        di=roll_left(di);
+      }else if(dx==0 && dy==-1){
+        di=roll_front(di);
+      }else{
+        exit(1);
+      }
+      x+=dx;
+      y+=dy;
+    }
+  }
+  cout<<ans[1]<<" "<<ans[2]<<" "<<ans[3]<<" "<<ans[4]<<" "<<ans[5]<<" "<<ans[6]<<endl;
+}
+
+int main(){
+  ll n;
+  while(1){
+    cin>>n;
+    if(n==0){
+      break;
+    }
+    solve(n);
+  }
+}
+

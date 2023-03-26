@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+#define ll long long
+using namespace std;
+
+int board[65][65];
+
+void init_board(int n, int m) {
+    for (int i = 0; i < 2 * n; i++) {
+        for (int j = 0; j < 2 * m; j++) {
+            if (i < n && j < m) board[i][j] = 1;
+            else board[i][j] = 0;
+        }
+    }
+}
+
+int main(){
+    vector<int> ans;
+    while (1) {
+        int n, m, t, p;
+        cin >> n >> m >> t >> p;
+        if (n * m * t * p == 0) break;
+        init_board(n, m);
+
+        int o_i = 0, o_j = 0;
+        while (t--) {
+            int d, c;
+            cin >> d >> c;
+            if (d == 1) {
+                for (int i = o_i; i < c + o_i; i++) {
+                    for (int j = o_j; j < 2 * m; j++) {
+                        board[2 * c - 1 - i + 2 * o_i][j] += board[i][j];
+                        board[i][j] = 0;
+                    }
+                }
+                o_i += c;
+            } else {
+                for (int j = o_j; j < c + o_j; j++) {
+                    for (int i = o_i; i < 2 * n; i++) {
+                        board[i][2 * c - 1 - j + 2 * o_j] += board[i][j];
+                        board[i][j] = 0;
+                    }
+                }
+                o_j += c;
+            }
+            
+            /*for (int i = 0; i < 2 * n; i++) {
+                for (int j = 0; j < 2 * m; j++) {
+                    cout << board[i][j] << " ";
+                }
+                cout << endl;
+            }
+            printf(" (%d, %d)\n", o_i, o_j);*/
+        }
+        while (p--) {
+            int x, y;
+            cin >> x >> y;
+            ans.push_back(board[x + o_i][y + o_j]);
+        }
+    }
+    for (auto a: ans) cout << a << endl;
+}

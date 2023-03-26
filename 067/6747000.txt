@@ -1,0 +1,34 @@
+import sys
+import re
+
+for line in sys.stdin:
+    val = line.strip()
+    res = re.search('[1-9][0-9]{4}', val)
+    if res is not None:
+        print('overflow')
+        continue
+    val = val.replace('i', 'j')
+    val = re.sub('0{2,}', '', val)
+    val = re.sub('(?<![0-9])j', '1j', val)
+    val = str(eval(val))
+
+    # if r or i overflow
+    v = str(val)
+    res = re.search('[1-9][0-9]{4}', v)
+    if res is not None:
+        print('overflow')
+        continue
+
+    val = complex(val)
+    r = val.real
+    i = val.imag
+
+    if i == 0.0:
+        print(int(r))
+    else:
+        if v[0] == '(':
+            v = v[1:]
+        if v[-1] == ')':
+            v = v[:-1]
+        print(v.replace('j', 'i'))
+

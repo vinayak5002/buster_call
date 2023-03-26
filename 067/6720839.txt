@@ -1,0 +1,175 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 100001
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 50
+int n;
+int t = 0;
+
+
+const long long int infty = (1LL<<31) - 1;
+long long int A[MAX];
+
+struct Node 
+{
+    int idx_begin = -1;
+    int idx_end = -1;
+    long long int sum = 0 ;
+    Node* left;
+    Node* right;
+    Node* parent;
+    /* data */
+};
+Node *root;
+vector<Node> ND ;
+
+struct Tree
+{
+    Tree(int n) {
+        // constructor
+        for (int i=0 ; i< MAX ; i++) {
+            Node* newnd;
+            newnd = new Node;
+            newnd->left= nullptr; newnd->right=nullptr; 
+            newnd->parent =nullptr ; 
+            ND.push_back(*newnd);
+            delete(newnd);
+        }
+    }
+    Tree(){
+        // constrctor
+    }
+
+    Node * maketree(int u, int v, Node * par) {
+        int tcopy = t ; t++;
+        int mid = (u+v)/2;
+  
+        if (u > v) {return nullptr;}
+        //Node * newnode;
+        //newnode = new Node;
+        ND[tcopy].left=nullptr;    ND[tcopy].right=nullptr; 
+        ND[tcopy].idx_begin = u;    ND[tcopy].idx_end = v; 
+        ND[tcopy].parent=par;
+        // printf("u %d v:%d  mid %d  tcopy %d \n", u, v, mid,tcopy ) ; 
+        if ( u==v ) { 
+            //newnode->sum += A[u];
+        } else {
+            ND[tcopy].left  =maketree(u,mid,&ND[tcopy]);
+            ND[tcopy].right = maketree(mid+1,v,&ND[tcopy]);
+            //if (newnode->left != nullptr) { newnode->sum += newnode->left->sum ; }
+            //if (newnode->right != nullptr ) { newnode->sum += newnode->right->sum ;} 
+            //newnode->sum += A[mid];
+        }
+
+        //ND[tcopy] = *newnode;
+        //delete(newnode);
+        return &ND[tcopy]; 
+    }
+};
+
+Node * findone (int u, Node * N){
+    // Nからスタートしてbegin, endがuのNodeを返す。
+    Node * tar ;
+    tar = new Node(); tar->sum=0;
+    if (N->idx_begin <=u && u<= N->idx_end) {
+        //中に入っていく。
+        if (N->idx_begin == u && u == N->idx_end) { return N; }
+        else if ( u <= N->left->idx_end ) {return findone(u, N->left);}
+        else if ( N->right->idx_begin <= u) {return findone(u, N->right);}
+    }
+    return tar;
+    
+
+}
+
+void add (int idx, int val) {
+    //まずfindする。(begin=end=idの集合)
+    Node* tar = findone(idx, &ND[0] );
+    tar->sum += val;
+    while (tar->parent) {
+        tar = tar->parent;
+        tar->sum += val; 
+    }
+
+}
+
+bool findRange (int u, int v,Node * N){
+    // Nからスタートして[u,v]が完全に含まれるNodeを返す。
+    if (u<= N->idx_begin  &&  N->idx_end <= v ) { 
+        //printf("%d <= %d && %d <= %d is TRUE" ,u, N->idx_begin ,N->idx_end, v); 
+        return true; }
+    else {
+        //printf("%d <= %d && %d <= %d is False" ,u, N->idx_begin ,N->idx_end, v); 
+        return false ; }
+}
+
+long long int getSum(int u, int v, Node * N){
+    long long int ans = 0;
+    if (findRange(u,v,N) ){ //printf("u=%d  v=%d get \n",u,v); 
+        return N->sum; }
+    if ( u <= N->left->idx_end ) { //printf("u=%d  v=%d lefr \n",u,v); 
+        ans += getSum(u,v, N->left);}
+    if ( N->right->idx_begin <= v) { //printf("u=%d  v=%d right \n",u,v);
+        ans += getSum(u,v, N->right);}
+    return ans;  
+}
+
+long long int sumQuery(int a, int b){
+    // [a,b]が完全に含まれるものを探す。
+    Node * tar = &ND[0];
+    return getSum(a, b, tar) ; 
+}
+
+int main() {
+    int q = 0;
+    cin >> n >> q ;
+    for (int i=0 ; i<n ; i++) { A[i]=0; }
+    Tree D(n);
+
+    D.maketree(1, n, root);
+
+    // nは登場人物の人数、qはクエリ（命令）の個数
+    // この時点でn個のノードが成立している。
+    for (int i = 0 ; i < q ; i++ ) {
+        int a , b, c ,com ;
+        cin >> com ;
+
+        if (com == 0) { 
+            cin >> a >> b  ; 
+            A[a] += b; 
+            add(a,b);
+        } else if (com == 1)  {
+            cin >> a >> b  ;
+            printf("%lld\n", sumQuery(a, b));
+        }
+    }    
+
+
+    /*for (int j= 0; j<ND.size(); j++) {
+        if (ND[j].idx_begin < 0){break;}
+        if (ND[j].parent) {
+            printf ("%d : b=%d , e=%d, sum=%lld ,parent b=%d  e=%d \n",j, ND[j].idx_begin, ND[j].idx_end, ND[j].sum, \
+            ND[j].parent->idx_begin,  ND[j].parent->idx_end );
+        } else {
+            printf ("%d : b=%d , e=%d, sum=%lld   \n",j, ND[j].idx_begin, ND[j].idx_end, ND[j].sum);
+        }
+    }*/
+	return 0 ;
+}
+
+/*long long int findQuery(int a, int b){
+    long long int minimum = infty;
+    for (int j=a; j<=b ; j++) {
+        if (A[j] < minimum) {minimum =A[j];}
+    }
+    return minimum;
+}
+
+long long int sumQuery(int a, int b){
+    long long int sum = 0;
+    for (int j=a; j<=b ; j++) {
+        if ( A[j] != infty) { sum += A[j] ;  }
+    }
+    return sum ;
+}*/

@@ -1,0 +1,85 @@
+class Dice:
+    def __init__(self,u,w,s,e,n,d):
+        self.u=u
+        self.w=w
+        self.s=s
+        self.e=e
+        self.n=n
+        self.d=d
+    
+    def roll(self,way):
+        if(way=='W'): # 西
+            c=self.u
+            self.u=self.e
+            self.e=self.d
+            self.d=self.w
+            self.w=c
+        elif way=='S': # 南
+            c=self.u
+            self.u=self.n
+            self.n=self.d
+            self.d=self.s
+            self.s=c
+        elif way=='E': # 東
+            c=self.u
+            self.u=self.w
+            self.w=self.d
+            self.d=self.e
+            self.e=c
+        elif way=='N': # 北
+            c=self.u
+            self.u=self.s
+            self.s=self.d
+            self.d=self.n
+            self.n=c
+
+    def rot(self,way):
+        if way=='R': # 右に回転
+            c=self.s
+            self.s=self.w
+            self.w=self.n
+            self.n=self.e
+            self.e=c
+        elif way=='L': #　左に回転
+            c=self.s
+            self.s=self.e
+            self.e=self.n
+            self.n=self.w
+            self.w=c
+    
+    def search_us(self,n):
+        for j in range(4): # 上面を見つけるまでサイコロを北に転がす
+            if dice_b.u == n[0]:break
+            dice_b.roll('N')
+
+        if dice_b.u != n[0]: # 北に転がして上面が見つからなかった場合の処理
+            if dice_b.e == n[0]: # 右面にある場合、左にサイコロを転がす
+                dice_b.roll('W')
+            else:
+                dice_b.roll('E') # 左面にある場合、右にサイコロを転がす
+
+        for j in range(4): # サイコロを回転させて前面を見つける
+            if dice_b.s == n[1]:break
+            dice_b.rot('R')
+
+    def print_all(self):
+        print(self.u,self.s,self.e,self.w,self.n,self.d)
+
+    def print_east(self):
+        print(self.e)
+
+u,s,e,w,n,d=map(int,input().split()) #各面の整数を取得
+dice_a=Dice(u,w,s,e,n,d) # 取得した値でサイコロを作成
+
+u,s,e,w,n,d=map(int,input().split()) #各面の整数を取得
+dice_b=Dice(u,w,s,e,n,d) # 取得した値でサイコロを作成
+
+n = [dice_a.u,dice_a.s]
+
+dice_b.search_us(n)
+dice_b.print_all()
+
+if dice_a.u == dice_b.u and dice_a.s == dice_b.s and dice_a.e == dice_b.e and dice_a.w == dice_b.w and dice_a.n == dice_b.n and dice_a.d == dice_b.d:
+    print('Yes')
+else:
+    print('No')

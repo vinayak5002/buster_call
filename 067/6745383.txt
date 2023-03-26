@@ -1,0 +1,53 @@
+#include <stdio.h>
+
+int main(){
+	char buf[300];
+	char *p;
+	char tmp[201];
+	char in[201]; // 最後に改行文字付き
+	int in_len = 0;
+	int m = 0; // シャッフル回数
+	int h = 0;
+
+	while (1){
+		// 標準入力
+		fgets(buf, sizeof(buf) - 1, stdin);
+		p = buf;
+		in_len = 0;
+		while (*p){
+			sscanf(p, "%c", &in[in_len]);
+			in_len++;
+			p++;
+		}
+		in_len -= 1; // 改行文字分ひく
+		// 終了
+		if (in[0] == '-') break;
+		// m
+		fgets(buf, sizeof(buf) - 1, stdin);
+		sscanf(buf, "%d", &m);
+		// 処理
+		for (int i = 0; i < m; i++){
+			// h
+			fgets(buf, sizeof(buf) - 1, stdin);
+			sscanf(buf, "%d", &h);
+			// 入れ替え
+			for (int j = 0; j < h; j++){
+				tmp[j] = in[j];
+			}
+			for (int j = 0; j < in_len - h; j++){
+				in[j] = in[h + j];
+			}
+			for (int j = 0; j < h; j++){
+				in[in_len - h + j] = tmp[j];
+			}
+		}
+		// 画面表示
+		for (int i = 0; i < in_len; i++){
+			printf("%c", in[i]);
+		}
+		putchar('\n');
+	}
+
+
+	return 0;
+}

@@ -1,0 +1,90 @@
+#include <bits/stdc++.h>
+typedef long long int ll;
+using namespace std;
+const int MOD = 1000000007;
+typedef pair<ll, ll> P;
+const double pi = 3.1415926536;
+const int MAX = 2000003;
+long long fac[MAX], finv[MAX], inv[MAX];
+template<typename T> using min_priority_queue = priority_queue<T, vector<T>, greater<T>>;
+void COMinit() {
+    fac[0] = fac[1] = 1;
+    finv[0] = finv[1] = 1;
+    inv[1] = 1;
+    for (int i = 2; i < MAX; i++){
+        fac[i] = fac[i - 1] * i % MOD;
+        inv[i] = MOD - inv[MOD%i] * (MOD / i) % MOD;
+        finv[i] = finv[i - 1] * inv[i] % MOD;
+    }
+}
+// 二項係数計算
+long long COM(int n, int k){
+    if (n < k) return 0;
+    if (n < 0 || k < 0) return 0;
+    return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
+}
+ll gcd(ll x, ll y) {
+   if (y == 0) return x;
+   else if (y > x) {
+       return gcd (y, x); 
+   }
+   else return gcd(x % y, y);
+}
+
+ll pow_mod(ll x, ll n) {
+    if (n == 0) {
+        return 1;
+    }
+    if (n % 2) return pow_mod(x, n - 1) * x % MOD;
+    else {
+        ll tmp = pow_mod(x, n / 2);
+        return tmp * tmp % MOD;
+    }
+}
+
+ll ceil(ll n, ll m) {
+    // n / mのceil
+    if (n % m) {
+        return n / m + 1;
+    }
+    else {
+        return n / m;
+    }
+}
+
+
+int main() {
+    vector<int> ret;
+    while (true) {
+        int a[4];
+        for (int i = 0; i < 4; i++) cin >> a[i];
+        if ((a[0] == 0) && (a[1] == 0) && (a[2] == 0) && (a[3] == 0)) break;
+        int m;
+        while (true) {
+            m = 101;
+            int m_id;
+            int cnt = 0;
+            for (int i = 0; i < 4; i++) {
+                if ((m > a[i]) && (a[i])) {
+                    m = a[i];
+                    m_id = i;
+                }
+                if (a[i]) cnt++;
+                // cout << a[i] << ' ';
+            }
+            // cout << m << endl;
+            // if (m == -2) break;
+            if (cnt <= 1) break;
+            for (int i = 0; i < 4; i++) {
+                if (i == m_id) continue;
+                if (a[i] == 0) continue;
+                a[i] -= m;
+            }
+        }
+        ret.push_back(m);
+    }
+    for (auto x : ret) {
+        cout << x << endl;
+    }
+    return 0;
+}

@@ -1,0 +1,61 @@
+#include <iostream>
+using namespace std;
+
+#define INFTY 2001
+#define MAX 100
+int M[MAX][MAX];
+int color[MAX];
+int d[MAX];
+int p[MAX];
+
+int prim(int n){
+    while(true){
+        int minv = INFTY;
+        int u = -1;
+        for(int i=0;i<n;i++){
+            if(d[i]<minv && color[i]!=2){
+                minv = d[i];
+                u = i;
+            }
+        }
+        if(u==-1) break;
+        color[u] = 2;
+        for(int v=0;v<n;v++){
+            if(M[u][v]!=INFTY && color[v]!=2){
+                if(d[v]>M[u][v]){
+                    d[v] = M[u][v];
+                    p[v] = u;
+                    color[v] = 1;
+                }
+            }
+        }
+    }
+    int sum = 0;
+    for(int i=0;i<n;i++){
+        if(p[i]!=-1) sum+=M[i][p[i]];
+    }
+
+    return sum;
+}
+
+int main(){
+    int n;
+    cin >> n;
+
+    for(int i=0;i<n;i++){
+        for(int j=0;j<n;j++){
+            int k;
+            cin >> k;
+            if(k==-1) M[i][j] = INFTY;
+            else M[i][j] = k;
+        }
+        color[i] = 0;
+        d[i] = INFTY;
+        p[i] = -1;
+    }
+    d[0] = 0;
+
+    cout << prim(n) << endl;
+
+    return 0;
+}

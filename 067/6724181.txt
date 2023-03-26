@@ -1,0 +1,59 @@
+from itertools import accumulate
+import itertools
+from mimetypes import init
+import sys
+import math
+import heapq
+from collections import deque, Counter, defaultdict
+from sys import stdin
+import copy
+import bisect
+from decimal import Decimal, ROUND_HALF_UP
+# from atcoder.dsu import DSU
+
+MOD = 10 ** 9 + 7
+int1 = lambda x: int(x) - 1
+stinput = lambda: stdin.readline()[:-1]
+ii = lambda: int(stinput())  # int input
+mi = lambda: map(int, stdin.readline().split())  # map input (int)
+li = lambda: list(mi())  # list input (int)
+mi1 = lambda: map(int1, stdin.readline().split())  # map input (int)-1
+li1 = lambda: list(mi1())  # list input (int)-1
+mis = lambda: map(str, stdin.readline().split())  # map input (string)
+lis = lambda: list(mis())  # list input (string)
+
+while True:
+    N, M = mi()
+    if N == 0 and M == 0:
+        break
+    h_li = []
+    w_li = []
+    dic = defaultdict(int)
+    ans = 0
+    cnt = 0
+    for i in range(N):
+        h = ii()
+        h_li.append(h)
+    for i in range(M):
+        w = ii()
+        w_li.append(w)
+    acc_h = list(itertools.accumulate(h_li))
+    acc_w = list(itertools.accumulate(w_li))
+    se = set()
+    for i in range(N):
+        dic[acc_h[i]] += 1
+        se.add(acc_h[i])
+        if i == N-1:
+            break
+        for j in range(i+1,N):
+            dic[acc_h[j]-acc_h[i]] += 1
+            se.add(acc_h[j]-acc_h[i])
+    for i in range(M):
+        if acc_w[i] in se:
+            ans += dic[acc_w[i]]
+        if i == M-1:
+            break
+        for j in range(i+1,M):
+            if acc_w[j]-acc_w[i] in se:
+                ans += dic[acc_w[j]-acc_w[i]]
+    print(ans)

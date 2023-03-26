@@ -1,0 +1,51 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include<stdio.h>
+#include<string.h>
+#include<ctype.h>
+
+
+int main(void){
+	char end[12] = "END_OF_TEXT";
+	char buf[1001];
+	char w[11], t[1001];
+	char* ptr;
+
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%s", w);
+
+	int i = 0;
+	int j;
+	int cnt = 0;
+
+
+	while (1){
+		fgets(buf, sizeof(buf) - 1, stdin);
+		sscanf(buf, "%[^\n]%s", t);
+
+		if (strcmp(t, end) == 0) break;
+		for (j = 0; j < strlen(t); j++){
+			if (isupper(t[j])){
+				t[j] = tolower(t[j]);
+			}
+
+			//1回目
+			ptr = strtok(t, " ");
+			if (strcmp(ptr, w) == 0) cnt++;
+
+			//2回目以降
+			while (ptr != NULL) {
+				ptr = strtok(NULL, " ");
+
+				// ptrがNULLの場合エラーが発生するので対処
+				if (ptr != NULL) {
+					if (strcmp(ptr, w) == 0) cnt++;
+				}
+			}
+
+		}
+	}
+	
+	printf("%d", cnt);
+
+	return 0;
+}

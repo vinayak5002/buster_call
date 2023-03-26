@@ -1,0 +1,164 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return true; } return false; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return true; } return false; }
+#define all(x) (x).begin(),(x).end()
+#define fi first
+#define se second
+#define mp make_pair
+#define si(x) int(x.size())
+const int mod=998244353,MAX=65;
+const ll INF=1LL<<62;
+
+vector<string> S,T,use;
+vector<int> syuS,syuT;
+vector<int> pos[MAX];
+vector<string> now,ans;
+map<char,char> dic;
+bool two=false;
+
+void solve(int u){
+    if(two) return;
+    
+    if(u==si(S)){
+        for(auto a:now){
+            if(si(a)==0) return;
+        }
+        if(si(ans)){
+            two=true;
+        }else{
+            ans=now;
+        }
+        
+        return;
+    }
+    
+    for(int j=0;j<si(T);j++){
+        if(syuT[j]>syuS[u]&&si(now[j])==0) return;
+    }
+    
+    for(int i=0;i<si(use);i++){
+        if(si(S[u])!=si(use[i])) continue;
+        if(syuS[u]!=syuT[i]) continue;
+        if(si(now[pos[i][0]])) continue;
+        map<char,char> MA;
+        bool ok=true;
+        for(int j=0;j<si(S[u]);j++){
+            if(MA.count(S[u][j])){
+                if(MA[S[u][j]]!=use[i][j]) ok=false;
+            }
+            if(dic.count(S[u][j])){
+                if(dic[S[u][j]]!=use[i][j]) ok=false;
+            }else{
+                MA[S[u][j]]=use[i][j];
+            }
+            
+            if(MA.count(use[i][j])){
+                if(MA[use[i][j]]!=S[u][j]) ok=false;
+            }
+            if(dic.count(use[i][j])){
+                if(dic[use[i][j]]!=S[u][j]) ok=false;
+            }else{
+                MA[use[i][j]]=S[u][j];
+            }
+            
+            if(!ok) break;
+        }
+        if(!ok) continue;
+        
+        for(auto x:MA){
+            dic[x.fi]=x.se;
+        }
+        
+        for(int k:pos[i]){
+            now[k]=S[u];
+        }
+        
+        solve(u+1);
+        
+        for(int k:pos[i]){
+            now[k]="";
+        }
+        
+        for(auto x:MA){
+            dic.erase(x.fi);
+        }
+    }
+    
+    solve(u+1);
+}
+
+int main(){
+    
+    std::ifstream in("text.txt");
+    std::cin.rdbuf(in.rdbuf());
+    cin.tie(0);
+    ios::sync_with_stdio(false);
+    
+    while(1){
+        int N;cin>>N;
+        if(N==0) break;
+        S.clear();S.resize(N);
+        for(int i=0;i<N;i++) cin>>S[i];
+        cin.ignore();
+        string U;
+        getline(cin,U);
+        T.clear();T.push_back("");
+        for(char c:U){
+            if(c==' '){
+                T.push_back("");
+            }else if('A'<=c&&c<='Z'){
+                T.back()+=c;
+            }
+        }
+        
+        use=T;
+        sort(all(use));
+        use.erase(unique(all(use)),use.end());
+        
+        for(int i=0;i<MAX;i++) pos[i].clear();
+        for(int i=0;i<si(T);i++){
+            for(int j=0;j<si(use);j++){
+                if(T[i]==use[j]) pos[j].push_back(i);
+            }
+        }
+        
+        sort(all(S),[](auto a,auto b){
+            set<char> c1,c2;
+            for(char c:a) c1.insert(c);
+            for(char c:b) c2.insert(c);
+            return si(c1)>si(c2);
+        });
+        
+        two=false;
+        ans.clear();
+        now.clear();now.resize(si(T));
+        dic.clear();
+        
+        syuS.clear();
+        syuT.clear();
+        for(int i=0;i<si(S);i++){
+            set<char> c1;
+            for(char c:S[i]) c1.insert(c);
+            syuS.push_back(si(c1));
+        }
+        for(int i=0;i<si(T);i++){
+            set<char> c1;
+            for(char c:T[i]) c1.insert(c);
+            syuT.push_back(si(c1));
+        }
+        
+        solve(0);
+        
+        if(two) cout<<"-.\n";
+        else{
+            for(int i=0;i<si(ans);i++){
+                if(i) cout<<" ";
+                cout<<ans[i];
+            }
+            cout<<".\n";
+        }
+    }
+}
+

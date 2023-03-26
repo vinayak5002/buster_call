@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+#include <cmath>
+using namespace std;
+#define rep(i,n) for(int i=0;i<(n);i++)
+
+int rui(int a){
+    int ans=1;
+    rep(i,a){
+        ans*=2;
+    }
+    return ans;
+}
+
+int main() {
+    while(true){
+       int n,m,t,p;
+       cin>>n>>m>>t>>p;
+       if(n==0&&m==0) break;
+       int d[t+1],c[t+1],x[p+1],y[p+1];
+       for(int i=1;i<=t;i++) cin>>d[i]>>c[i];
+       for(int i=1;i<=p;i++) cin>>x[i]>>y[i];
+       int dp[m][n]={1};
+
+       for(int i=1;i<=t;i++){
+           if(d[i]==1){
+               for(int j=1;j<=m;j++){
+                   for(int k=1;k<=c[i];k++){
+                       dp[j][k]=dp[j][k]+dp[j][(c[i]-k)*2+1];
+                   }
+               }
+           }else{
+               for(int j=1;j<=c[i];j++){
+                   for(int k=1;k<=n;k++){
+                       dp[j][k]=dp[j][k]+dp[(c[i]-j)*2+1][k];
+                   }
+               }
+
+           }
+       }
+       int ans=0;
+       for(int i=1;i<=p;i++){
+           ans+=rui(dp[y[i]][x[i]]-1);
+       }
+       cout<<ans<<endl;
+
+    }
+    return 0;
+}

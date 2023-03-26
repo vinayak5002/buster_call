@@ -1,0 +1,69 @@
+# 深さ優先探索　連結成分の個数問題
+
+# 再帰上限を増やす
+import sys
+
+from sqlalchemy import true
+sys.setrecursionlimit(1000000)
+
+# 8方向(（縦横斜め）ベクトルの定義
+dx = [1, 1, 0, -1, -1, -1, 0, 1, 0]
+dy = [0, 1, 1, 1, 0, -1, -1, -1, 0]
+
+seen = []
+field = []
+
+
+# つなっがている頂点がすべて訪問済みになっていたら、つまり最後のIF文がすべてcontinueしたらこの関数は終了する（そうでなければ再帰関数を実行）
+def dfs(h, w):
+    seen[h][w] = True
+
+    for dir in range(9):
+        # 次の座標を取り出す
+        nh = h + dx[dir]
+        nw = w + dy[dir]
+
+        # 壁や場外かどうか（≧はh、wが０から始まっているから必要）
+        if nh >= H or nh < 0 or nw >= W or nw < 0:
+            continue
+
+        if field[nh][nw] == 0:
+            continue
+
+        # つなっがている頂点が訪問済みかどうか（Trueなら訪問済み）
+        if seen[nh][nw] is True:
+            continue
+
+        # 再帰で一つの要素に対してとにかく突き進む
+        dfs(nh, nw)
+
+
+if __name__ == "__main__":
+
+    while (true):
+        W, H = map(int, input().split())
+
+        # グラフの作成（グリッドグラフ）
+        # 座標を表す２次元配列
+        for i in range(H):
+            field_w = list(map(int, input().split()))
+            field.append(field_w)
+
+        # seenリストを初期化
+        # 最初はseenリストのすべての要素をFalseにする
+        # 座標を表す2次元配列
+        for h in range(H):
+            seen.append([])
+            for w in range(W):
+                seen[h].append(False)
+
+        # 深さ優先探索を実行
+        count = 0
+        for i in range(H):
+            for j in range(W):
+                if field[i][j] == 1 and seen[i][j] is False:
+                    dfs(i, j)
+                    count += 1
+
+        print(count)
+

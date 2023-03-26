@@ -1,0 +1,68 @@
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+const int MAX_N = 40;
+const int MAX_WORD_LEN = 10;
+
+class Judge
+{
+public:
+	Judge( int inum ) : num( inum ) {}
+	int create( char words[][MAX_WORD_LEN + 1], int index )
+	{
+		int count = 0;
+		int result = index;
+
+		while ( count < num )
+		{
+			count += strlen( words[result++] );
+		}
+
+		if ( count == num ) return result;
+
+		return -1;
+	}
+private:
+	int num;
+};
+
+int solve( char words[][MAX_WORD_LEN + 1], int n )
+{
+	Judge judges[] = { Judge( 5 ), Judge( 7 ), Judge( 5 ), Judge( 7 ), Judge( 7 ) };
+	
+	for ( int i = 0; i < n - 5; i++ )
+	{
+		int index = i;
+		for ( int j = 0; j < 5; j++ )
+		{
+			index = judges[j].create( words, index );
+			if ( index == -1 ) break;
+		}
+
+		if ( index != -1 ) return i + 1;
+	}
+
+	return -2;
+}
+
+int main()
+{
+	int n;
+	char words[MAX_N][MAX_WORD_LEN + 1];
+
+	while ( 1 )
+	{
+		cin >> n;
+		if ( !n ) break;
+
+		for ( int i = 0; i < n; i++ )
+		{
+			cin >> words[i];
+		}
+
+		cout << solve( words, n ) << endl;
+	}
+
+	return 0;
+}

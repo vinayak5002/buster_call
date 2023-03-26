@@ -1,0 +1,116 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+typedef vector<ll> vl;
+typedef vector<vector<ll>> vvl;
+
+typedef pair<ll, ll> pll;
+typedef vector<pll> vpll;
+
+#define FOR(i, a, b) for(ll i=(a); i<(b); ++i)
+#define REP(i, n) FOR(i, 0, n)
+#define NREP(i, n) FOR(i, 1, n+1)
+
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return 1; } return 0; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return 1; } return 0; }
+
+using SimpleGraph = vector<vector<ll>>;
+struct Edge{
+    ll to, cost;
+    Edge(ll t, ll c) : to(t), cost(c) { }
+};
+using Graph = vector<vector<Edge>>;
+struct Edge3{
+    ll from, to, cost;
+    Edge3(ll f, ll t, ll c) : from(f), to(t), cost(c) { }
+};
+using EdgeGraph = vector<vector<Edge3>>;
+
+const ll INF = 1e9;
+ll isfin = 0;
+
+ll H, W;
+ll dx[4] = {1, 0, -1, 0};
+ll dy[4] = {0, 1, 0, -1};
+
+ll bert(ll i, ll j) {
+    return (i * W + j);
+}
+
+bool isvalid(ll i, ll j) {
+    return (0 <= i && i < H && 0 <= j && j < W);
+}
+
+void solve() {
+    cin >> W >> H;
+    
+    if(H == 0 && W == 0) {
+        isfin = 1;
+        return;
+    }
+    
+    vvl maze(2*H-1, vl(2*W-1, 0));
+    for(ll i = 0; i < 2*H-1; ++i) {
+        for(ll j = 0; j < 2*W-1; ++j) {
+            if((i + j) % 2 == 0) {continue;}
+            ll n; cin >> n;
+            maze[i][j] = n;
+        }
+    }
+    
+    SimpleGraph G(H*W);
+    for(ll i = 0; i < H; ++i) {
+        for(ll j = 0; j < W; ++j) {
+            ll v = bert(i, j);
+            for(ll d = 0; d < 4; ++d) {
+                ll ni = i + dx[d], nj = j + dy[d];
+                if(!isvalid(ni, nj)) {continue;}
+                
+                ll pi = 2*i+dx[d], pj = 2*j+dy[d];
+                if(maze[pi][pj]) {continue;}
+                
+                ll nv = bert(ni, nj);
+                G[v].push_back(nv);
+            }
+        }
+    }
+    
+    queue<ll> que;
+    vl dist(H*W, INF);
+    vl seen(H*W, 0);
+    que.push(0);
+    dist[0] = 0;
+    
+    while(que.size() > 0) {
+        ll v = que.front();
+        que.pop();
+        
+        for(auto nv:G[v]) {
+            if(seen[nv]) {continue;}
+            seen[nv] = 1;
+            dist[nv] = dist[v] + 1;
+            que.push(nv);
+        }
+    }
+    
+    ll res = dist[H*W-1];
+    if(res == INF) {res = 0;}
+    else {res++;}
+    
+    cout << res << endl;
+    
+    return;
+}
+
+int main(void) {
+    while(1) {
+        solve();
+        if(isfin) {break;}
+    }
+
+
+    return 0;
+}

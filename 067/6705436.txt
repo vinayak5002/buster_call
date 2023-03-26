@@ -1,0 +1,135 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long double ld;
+const ld eps = 1e-9;
+struct pt {
+    ld x, y;
+    pt() {x = 0; y = 0;}
+    pt(ld xx, ld yy) {
+        x = xx; y = yy;
+    }
+    pt operator+(pt o) {
+        return pt(x + o.x, y + o.y);
+    }
+    pt operator-(pt o) {
+        return pt(x - o.x, y - o.y);
+    }
+    pt operator*(ld val) {
+        return pt(x*val, y*val);
+    }
+    pt operator/(ld val) {
+        return pt(x/val, y/val);
+    }
+    friend ostream& operator<<(ostream &os, pt p) {
+        return os << "(" << p.x << ", " << p.y << ")";
+    }
+};
+ld cross(pt a, pt b) {
+    return a.x*b.y - a.y*b.x;
+}
+ld ar(pt a, pt b, pt c) {
+    return 0.5*abs(cross(c - a, b - a));
+}
+ld dist(pt a, pt b) {
+    pt vec = b - a;
+    return sqrt(vec.x*vec.x + vec.y*vec.y);
+}
+
+int n;
+ld polyar = 0;
+vector<pt> poly;
+void initpoly() {
+    cin >> n;
+    poly.resize(n);
+    ld x, y;
+    for (int i = 0; i < n; ++i) {
+        cin >> x >> y;
+        poly[i] = pt(x, y);
+    }
+
+    for (int i = 2; i < n; ++i)
+        polyar += ar(poly[0], poly[i - 1], poly[i]);
+}
+
+// side i is point i to i + 1
+// p is pt, s is the index of the side where p is located on poly
+pair<int, pt> findarbisect(pt p, int s) {
+    int i = (s + 1) % n;
+    ld runar = ar(p, poly[i], poly[(i + 1)%n]);
+    while (runar - 0.5*polyar <= eps) {
+        i = (i + 1) % n;
+        runar += ar(p, poly[i], poly[(i + 1)%n]);
+    }
+    
+    // area bisector cuts the side (i, i + 1)
+    ld lar = runar - 0.5*polyar;
+    runar -= ar(p, poly[i], poly[(i + 1)%n]);
+    ld rar = 0.5*polyar - runar;
+    pt arbisect = (poly[i]*lar + poly[(i + 1)%n]*rar)/(lar + rar);
+    return {i, arbisect};
+}
+
+ld shortestarbisect() {
+    unordered_set<int> processed;
+    for (int i = 0; i < n; ++i)
+        processed.insert(i);
+
+    ld shortest = 4e+7;
+    while (!processed.empty()) {
+        int i = *processed.begin();
+        
+        pt dir = poly[(i + 1)%n] - poly[i];
+        ld lambda = 0, mu;
+        while (1 - lambda > eps) {
+            pair<int, pt> u = findarbisect(poly[i] + dir*lambda, i);
+            pair<int, pt> v = findarbisect(poly[(u.first + 1)%n], u.first);
+            if (v.first != i)
+                mu = 1;
+            else {
+                if (abs(dir.x) <= eps)
+                    mu = (v.second - poly[i]).y/dir.y;
+                else mu = (v.second - poly[i]).x/dir.x;
+                processed.erase(u.first);
+            }
+            
+            ld lo = lambda, hi = mu;
+            while (hi - lo > eps) {
+                ld l1 = lo + (hi - lo)/3;
+                ld l2 = lo + 2*(hi - lo)/3;
+                pt p1 = poly[i] + dir*l1;
+                pt p2 = poly[i] + dir*l2;
+                ld d1 = dist(p1, findarbisect(p1, i).second);
+                ld d2 = dist(p2, findarbisect(p2, i).second);
+                if (d1 - d2 > eps)
+                    lo = l1;
+                else hi = l2;
+            }
+
+            pt optpt = poly[i] + dir*lo;
+            shortest = min(shortest, dist(optpt, findarbisect(optpt, i).second));
+
+            lambda = mu;
+        }
+
+        processed.erase(i);
+    }
+
+    return shortest;
+}
+
+ld longestarbisect() {
+    ld longest = 0;
+    for (int i = 0; i < n; ++i)
+        longest = max(longest, dist(poly[i], findarbisect(poly[i], i).second));
+    return longest;
+}
+
+int main() {
+    cin.tie(0)->sync_with_stdio(0);
+    cin.exceptions(cin.failbit);
+    initpoly();
+    cout << setprecision(6) << fixed;
+    cout << shortestarbisect() << "\n";
+    cout << longestarbisect() << "\n";
+    return 0;
+}

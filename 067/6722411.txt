@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+vector<string> input(int h) {
+    vector<string> res(h);
+    for (auto& s : res) cin >> s;
+    return res;
+}
+
+pair<int, int> fst(vector<string> g) {
+    pair<int, int> res;
+    for (int y = 0 ; y < g.size() ; y++) if (g[y].find("@") != string::npos) res = {y, g[y].find("@")};
+    return res;
+}
+
+int solve(int h, int w) {
+    auto g = input(h);
+    auto [sy, sx] = fst(g);
+
+    vector<vector<int>> used(h, vector<int>(w)); used[sy][sx] = 1;
+    queue<pair<int, int>> que; que.emplace(sy, sx);
+    int res = 0; 
+
+    vector<int> d = {-1, 1};
+
+    while(que.size()) {
+        auto [y, x] = que.front(); que.pop();
+        res++;
+        for (auto dx : d) if (0 <= x + dx and x + dx < w) if (g[y][x + dx] == '.' and !used[y][x + dx]) {
+            que.emplace(y, x + dx);
+            used[y][x + dx] = 1;
+        }
+
+        for (auto dy : d) if (0 <= y + dy and y + dy < h) if (g[y + dy][x] == '.' and !used[y + dy][x]) {
+            que.emplace(y + dy, x);
+            used[y + dy][x] = 1;
+        }
+    }
+
+    return res;
+
+}
+
+int main() {
+    while(1) {
+        int w, h; cin >> w >> h;
+        if (!w) break;
+        cout << solve(h, w) << endl;
+    }
+}
+

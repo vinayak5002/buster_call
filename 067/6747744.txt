@@ -1,0 +1,64 @@
+#include<stdio.h>
+#include<string.h>
+#define MAX 100002
+
+typedef struct {
+    char name[10];
+    int time;
+} Data;
+
+Data queue[MAX];
+int head, tail, n;
+
+void enqueue(Data x) 
+{
+    queue[tail] = x;
+    if (tail == n)
+        tail = 0;
+    else
+        tail += 1;
+}
+
+Data dequeue() 
+{
+    Data temp = queue[head];
+    if (head == n)
+        head = 0;
+    else
+        head += 1;
+    return temp;
+}
+
+int main() {
+    int q;
+    int tot = 0;
+    scanf("%d %d", &n, &q);
+    
+    for (int i = 1; i <= n; i++) 
+    {
+        scanf("%s %d", queue[i].name, &queue[i].time);
+    }
+
+    head = 1;
+    tail = 0;
+    Data x;
+    
+	while(head != tail)
+	{
+	    x = dequeue();
+		if(x.time <= q)
+		{
+		    tot += x.time;
+			printf("%s %d\n", x.name, tot);
+		}
+		else
+		{
+		    x.time -= q;
+			tot += q;
+			enqueue(x);
+		}
+	}
+
+    return 0;
+}
+

@@ -1,0 +1,78 @@
+#pragma region
+
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <set>
+#include <map>
+#include <algorithm>
+#include <functional>
+#include <utility>
+#include <bitset>
+#include <cmath>
+#include <numeric> // gcd, lcm
+#include <cstdlib>
+#include <ctime>
+#include <cstdio>
+#include <cassert>
+#include <iomanip>
+using namespace std;
+
+using ull = unsigned long long;
+using ll = long long;
+using vi = vector<int>;
+using vll = vector<ll>;
+using vvi = vector<vi>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using pii = pair<int,int>;
+using vpii = vector<pii>;
+
+#pragma endregion
+
+struct BIT{
+    int N;
+    vi node;
+
+    BIT(int sz_data){
+        N = sz_data;
+        node.assign(N+2, 0);
+    }
+
+    void add(int l, int r, int x){
+        for(int i=l; i<=N; i += i & -i) node[i] += x;
+        for(int i=r; i<=N; i += i & -i) node[i] -= x;
+    }
+
+    int get(int i){
+        int ans = 0;
+        for(int j=i; j>0; j -= j & -j) ans += node[j];
+        return ans;
+    }
+};
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+
+    int n, q; cin >> n >> q;
+    BIT b(n);
+    while(q--){
+        int c; cin >> c;
+        if(c==0){
+            int l, r, x; cin >> l >> r >> x;
+            b.add(l, r+1, x);
+        }
+        else{
+            int i; cin >> i;
+            cout << b.get(i) << endl;
+        }
+    }
+
+    return 0;
+}

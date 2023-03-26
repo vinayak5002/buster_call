@@ -1,0 +1,49 @@
+import java.util.Scanner
+import scala.annotation.tailrec
+import scala.math.{Pi, cos, sin}
+
+case class Point(x:Double, y:Double) {
+  def add(p:Point):Point = Point(x+p.x, y+p.y)
+  def subtract(p:Point):Point = Point(x-p.x, y-p.y)
+  def scalarMulti(k:Double):Point = Point(k*x, k*y)
+  def rotate(th:Double):Point = Point(cos(th)*x-sin(th)*y, sin(th)*x+cos(th)*y)
+  override def toString: String = f"$x%1.8f $y%1.8f"
+}
+
+object Main extends App {
+  val sc = new Scanner(System.in)
+  val N = sc.nextInt()
+  val oneThird = 1.0 / 3.0
+  val twoThird = 2.0 / 3.0
+  val piThird  = Pi / 3.0
+
+  def koch(p:Point, q:Point):List[Point] = {
+    def dividePoint(p:Point, q:Point, k:Double):Point = {
+      val s = q.subtract(p)
+      val t = s.scalarMulti(k)
+      p.add(t)
+    }
+    val a = dividePoint(p, q, oneThird)
+    val b = dividePoint(p, q, twoThird)
+    val t = a.add(b.subtract(a).rotate(piThird))
+    List(b, t, a, p)
+  }
+
+  @tailrec
+  def solver(n:Int, ps:List[Point]):List[Point] = {
+    @tailrec
+    def iterate(ps:List[Point], ac:List[Point]):List[Point] = ps match {
+      case p::Nil => (p::ac).reverse
+      case p::q::xs =>
+        val pl = koch(p, q)
+        iterate(q::xs, pl.appendedAll(ac))
+      case _ => throw new RuntimeException("Error")
+    }
+    if (n > 0) {
+      solver(n-1, iterate(ps, Nil))
+    } else ps
+  }
+
+  val result = solver(N, List(Point(0,0),Point(100,0)))
+  print(s"${result.mkString("\n")}")
+}

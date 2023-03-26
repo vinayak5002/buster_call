@@ -1,0 +1,26 @@
+d, n = map(int, input().split())
+t = []
+# 着れる服の最大最小派手さ
+h = [[100, 0] for i in range(61)]
+
+for i in range(d):
+    t.append(int(input()))
+
+for i in range(n):
+    a, b, c = map(int, input().split())
+    for j in range(a, b+1):
+        h[j][0] = min(h[j][0], c)
+        h[j][1] = max(h[j][1], c)
+
+ans_from_max = 0
+ans_from_min = 0
+
+s_from_max = h[t[0]][1]
+s_from_min = h[t[0]][0]
+
+dp = [[0, 0] for i in range(len(t))]
+for i in range(1, len(t)):
+    dp[i][0] = max(dp[i - 1][0] + abs(h[t[i]][0] - h[t[i - 1]][0]), dp[i - 1][1] + abs(h[t[i]][0] - h[t[i - 1]][1]))
+    dp[i][1] = max(dp[i - 1][0] + abs(h[t[i]][1] - h[t[i - 1]][0]), dp[i - 1][1] + abs(h[t[i]][1] - h[t[i - 1]][1]))
+
+print(max(dp[-1][0],dp[-1][1]))

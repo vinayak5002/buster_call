@@ -1,0 +1,46 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int preindex;
+vector<int> in_order, pre_order, post_order;
+
+void reconstruct(vector<int>::const_iterator left, vector<int>::const_iterator right)
+{
+    if (left >= right) return;
+    
+    vector<int>::const_iterator subroot = find(left, right, pre_order[preindex++]);
+    reconstruct(left, subroot);
+    reconstruct(subroot+1, right);
+    post_order.push_back(*subroot);
+}
+
+int main()
+{
+    int n;
+    cin >> n;
+
+    int node;
+    for (int i = 0; i < n; i++) {
+        cin >> node; 
+        pre_order.push_back(node);
+    }
+    for (int i = 0; i < n; i++) {
+        cin >> node; 
+        in_order.push_back(node);
+    }
+    
+    reconstruct(in_order.cbegin(), in_order.cend());
+
+    for (int i = 0; i < n; i++)
+    {
+        if (i) cout << " ";
+        cout << post_order[i];
+    }
+    cout << endl;
+    
+    return 0;
+}
+

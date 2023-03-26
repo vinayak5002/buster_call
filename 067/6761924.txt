@@ -1,0 +1,77 @@
+#include <iostream>
+#include <stdio.h>
+
+#define cos60 0.5
+#define sin60 0.86602540378
+
+using namespace std;
+
+class Vec
+{
+public:
+	Vec( double x, double y )
+		:
+		x( x ),
+		y( y )
+	{}
+public:
+	Vec operator+( const Vec& rhs ) const
+	{
+		return Vec( x + rhs.x, y + rhs.y );
+	}
+	Vec operator-( const Vec& rhs ) const
+	{
+		return Vec( x - rhs.x, y - rhs.y );
+	}
+	Vec operator/( double rhs ) const
+	{
+		return Vec( x / rhs, y / rhs );
+	}
+	Vec operator*( double rhs ) const
+	{
+		return Vec( x * rhs, y * rhs );
+	}
+	void print() const
+	{
+		printf( "%.8f %.8f\n", x, y );
+	}
+public:
+	double x;
+	double y;
+};
+
+void koch( int n, const Vec& v, const Vec& right );
+
+int main()
+{
+	int n;
+	cin >> n;
+
+	Vec left( 0.0, 0.0 );
+	Vec right( 100.0, 0.0 );
+
+	koch( n, left, right );
+	right.print();
+
+	return 0;
+}
+
+void koch( int n, const Vec& left, const Vec& right )
+{
+	if( n < 1 )
+	{
+		left.print();
+	}
+	else
+	{
+		Vec s = (right - left) / 3.0 + left;
+		Vec u = (right - left) * 2.0 / 3.0 + left;
+		Vec t = Vec( (u.x - s.x) * cos60 - (u.y - s.y) * sin60,
+					 (u.x - s.x) * sin60 + (u.y - s.y) * cos60 ) + s; // Formula for rotating vector
+
+		koch( n - 1, left, s );
+		koch( n - 1, s, t );
+		koch( n - 1, t, u );
+		koch( n - 1, u, right );
+	}
+}

@@ -1,0 +1,86 @@
+#include<stdio.h>
+
+#define N 100
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+
+int n, M[N][N];
+int color[N],d[N],f[N],tt;
+
+void dfs_visit(int u)
+{
+	int v;
+	color[u]=GRAY;
+	d[u]=++tt;//発見時刻の増加
+	for(v=0;v<n;v++)
+	{
+		if(M[u][v]==0)
+		{
+			continue;
+		}
+		
+		if(color[v]==WHITE)//color[v]が0なら再帰
+		{
+			dfs_visit(v);
+		}
+	}
+	
+	color[u]=BLACK;
+	f[u]=++tt;//完了時刻の増加
+}
+
+void dfs()
+{
+	int u;
+	for(u=0;u<n;u++)
+	{
+		color[u]=WHITE;//color[N]の初期化
+	}
+	
+	tt=0;
+	
+	for(u=0;u<n;u++)
+	{
+		if(color[u]==WHITE)//color[N]が0のとき探索
+		{
+			dfs_visit(u);
+		}
+	}
+	
+	for(u=0;u<n;u++)
+	{
+		printf("%d %d %d\n", u+1,d[u],f[u]);
+		//d[u]=vを最初に発見した発見時刻,f[u]=vの隣接リストを調べ終えた完了時刻
+	}
+}
+
+int main(void)
+{
+	int i,j,k,u,v;
+	
+	scanf("%d",&n);//頂点数
+	for(i=0;i<n;i++)
+	{
+		for(j=0;j<n;j++)
+		{
+			M[i][j]=0;//M[N][N]の初期化
+		}
+	}
+	
+	for(i=0;i<n;i++)
+	{
+		scanf("%d %d",&u,&k);//u=頂点の番号,k=u  の出次数
+		u--;
+		for(j=0;j<k;j++)
+		{
+			scanf("%d",&v);//uに隣接する頂点の番号
+			v--;
+			M[u][v]=1;
+		}
+	}
+	
+	dfs();
+	return 0;
+}
+			

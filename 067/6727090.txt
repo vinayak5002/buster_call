@@ -1,0 +1,56 @@
+#include<stdio.h>
+#define MAX 2000000
+
+int x, Tree[MAX+1];
+
+void max_h(int a)
+{
+    int left, right, max;
+
+    left=2*a;
+    right=2*a+1;
+
+    if(left<=x && Tree[left]>Tree[a]) /*左の子の値が最大の時に最大値に設定*/
+    {
+        max=left;
+    }
+    else /*そうでないならここが最大値*/
+    {
+        max=a;
+    }
+
+    if(right<=x && Tree[right]>Tree[max]) /*最大点より右の値が大きい時、最大値更新*/
+    {
+        max=right;
+    }
+    if(max!=a) /*この点が最大点でないとき再帰的に呼び出し*/
+    {
+        int y;
+        y=Tree[max];
+        Tree[max]=Tree[a];
+        Tree[a]=y;  /*最大点とこの点を交換*/
+        max_h(max);
+    }
+}
+
+int main(void)
+{
+    int i;
+
+    scanf("%d", &x);
+    for(i=1;i<=x;i++)
+    {
+        scanf("%d", &Tree[i]);
+    }
+    for(i=x/2;i>=1;i--) /*左下の子がxになるようにparentをx/2にしておく*/
+    {
+        max_h(i);
+    }
+    for(i=1;i<x;i++)
+    {
+        printf("%d ", Tree[i]);
+    }
+    printf("%d\n", Tree[i]);
+
+    return 0;
+}

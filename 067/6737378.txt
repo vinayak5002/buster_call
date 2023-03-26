@@ -1,0 +1,51 @@
+#include<bits/stdc++.h>
+using namespace std;
+#pragma GCC target("avx2")
+#pragma GCC optimize("O3")
+using ll = long long;
+using pii = pair<ll, ll>;
+vector<vector<int>> g;
+int n, tim = 1;
+vector<int> fnd, done;
+
+void dfs(int t){
+	tim++;
+	for (int x : g[t]){
+		if (fnd[x]) continue;
+
+		fnd[x] = tim;
+		dfs(x);
+	}
+	done[t] = tim++;
+	return;
+}
+
+int main(){
+ios::sync_with_stdio(false);
+std::cin.tie(nullptr);
+	cin >> n;
+	g.resize(n);
+	fnd.resize(n);
+	done.resize(n);
+	for (int i = 0; i < n; i++){
+		int u, k;
+		cin >> u >> k;
+		for (int j = 0; j < k; j++){
+			int t;
+			cin >> t;
+			g[i].push_back(--t);
+		}
+	}
+	
+	for (auto &v : g) sort(v.begin(), v.end());
+
+	for (int i = 0; i < n; i++){
+		if (fnd[i]) continue;
+    	fnd[i] = tim;
+		dfs(i);
+	}
+
+	for (int i = 0; i < n; i++){
+		cout << i + 1 << ' ' << fnd[i] << ' ' << done[i] << endl;
+	}
+}

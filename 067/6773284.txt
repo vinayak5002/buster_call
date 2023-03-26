@@ -1,0 +1,120 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define rep(i,n) for(int (i)=0;(i)<(n);(i)++)
+#define rrep(i,n) for(int (i)=(n)-1;(i)>=0;(i)--)
+#define rrep2(i,n,k) for(int (i)=(n)-1;(i)>=(n)-(k);(i)--)
+#define vll(n,i) vector<long long>(n,i)
+#define v2ll(n,m,i) vector<vector<long long>>(n,vll(m,i))
+#define v3ll(n,m,k,i) vector<vector<vector<long long>>>(n,v2ll(m,k,i))
+#define v4ll(n,m,k,l,i) vector<vector<vector<vector<long long>>>>(n,v3ll(m,k,l,i))
+#define all(v) v.begin(),v.end()
+#define chmin(k,m) k = min(k,m)
+#define chmax(k,m) k = max(k,m)
+#define Pr pair<ll,ll>
+#define Tp tuple<ll,ll,ll>
+#define riano_ std::ios::sync_with_stdio(false);std::cin.tie(nullptr)
+#pragma GCC optimize("Ofast,no-stack-protector,unroll-loops,fast-math")
+
+//vector output
+template <typename T>
+void out(vector<T> &v){
+    for(T x:v) cout << x << " ";
+    cout << "\n"; return;
+}
+//Graph
+struct graph {
+    long long N;
+	vector<vector<tuple<long long,long long,int>>> G;
+    vector<long long> par_v;
+    vector<long long> par_e;
+    int edge_count = 0;
+    
+	graph(long long n) {
+        N = n;
+		G = vector<vector<tuple<long long,long long,int>>>(N);
+        par_v = vector<long long>(N,-1);
+        par_e = vector<long long>(N,-1);
+	}
+
+    graph(long long n,long long m,bool weighted = false,bool directed = false) {
+        N = n;
+		G = vector<vector<tuple<long long,long long,int>>>(N);
+        par_v = vector<long long>(N,-1);
+        par_e = vector<long long>(N,-1);
+        for(int i=0;i<m;i++){
+            long long a,b,c; cin >> a >> b;
+            if(weighted) cin >> c;
+            else c = 1;
+            unite(a,b,c,directed);
+        }
+	}
+
+    void unite(long long a,long long b,long long cost = 1,bool directed = false){
+        G[a].emplace_back(b,cost,edge_count);
+        if(!directed) G[b].emplace_back(a,cost,edge_count);
+        edge_count++;
+    }
+};
+//map add
+template <typename T>
+void add(map<T,ll> &cnt,T a,ll n = 1){
+    if(cnt.count(a)) cnt[a] += n;
+    else cnt[a] = n;
+}  
+
+const ll mod = 998244353;
+
+
+//Tree diameter
+int e1 = 1,e2 = 1,center = -1; //両端と中心
+vector<ll> bfs_diameter(graph &g,int s){
+    int N = g.G.size();
+    queue<int> go;
+    ll x,y,a,t,l; ll inf = 2e18;
+    vector<ll> dist(N,inf);
+    go.push(s); dist[s] = 0;
+    while(!go.empty()){
+        int s = go.front(); go.pop();
+        for(auto q:g.G[s]){
+            ll x = get<0>(q); ll cost = get<1>(q);
+            if(dist[x]<=dist[s]+cost) continue;
+            dist[x] = dist[s] + cost;
+            go.push(x);
+        }
+    }
+    return dist;
+}
+long long diameter(graph &g){
+    int N = g.G.size();
+    auto from_e2 = bfs_diameter(g,e2);
+    long long mx = -1;
+    for(int i=0;i<N;i++){
+        if(from_e2[i]>mx&&from_e2[i]!=2e18){
+            e1 = i; mx = from_e2[i];
+        }
+    }
+    auto from_e1 = bfs_diameter(g,e1);
+    mx = -1;
+    for(int i=0;i<N;i++){
+        if(from_e1[i]>mx&&from_e1[i]!=2e18){
+            e2 = i; mx = from_e1[i];
+        }
+    }
+    from_e2 = bfs_diameter(g,e2);
+    for(int i=0;i<N;i++){
+        if(from_e1[i]==from_e2[i]&&from_e2[i]*2LL==mx){
+            center = i; break;
+        }
+    }
+    return mx;
+}
+
+int main(){
+	riano_; ll ans = 0;
+    ll N; cin >> N;
+    graph G(N+1,N-1,true,false);
+    ans = diameter(G);
+    cout << ans << endl;
+}
+

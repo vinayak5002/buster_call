@@ -1,0 +1,43 @@
+import java.util.*;
+
+public class Main{
+    static List<List<Integer>> map;
+    static Deque<Integer> q;
+    static boolean[] used;
+    static int[] cnt;
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        map = new ArrayList<>();
+        int n = sc.nextInt();
+        for(int i=0;i<n;i++)map.add(new ArrayList<>());
+        for(int i=0;i<n;i++){
+            int u = sc.nextInt()-1, k = sc.nextInt();
+            for(int j=0;j<k;j++){
+                map.get(u).add(sc.nextInt()-1);
+            }
+        }
+        sc.close();
+        used = new boolean[n];
+        cnt = new int[n];
+        Arrays.fill(cnt, -1);
+        bfs();
+        for(int i=0;i<n;i++)System.out.println((i+1)+" "+cnt[i]);
+    }
+    static void bfs() {
+        q = new ArrayDeque<>();
+        q.add(0);
+        used[0] = true;cnt[0] = 0;
+        while(!q.isEmpty()) {
+            int p = q.poll();
+            for(int j=0;j<map.get(p).size();j++){
+                int next = map.get(p).get(j);
+                if(!used[next]){
+                    used[next] = true;
+                    cnt[next] = cnt[p]+1;
+                    q.add(next);
+                }
+            }
+        }
+    }
+}
+

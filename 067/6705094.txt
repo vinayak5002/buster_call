@@ -1,0 +1,161 @@
+#include <algorithm>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+#include <random>
+#include <complex>
+#include <bitset>
+#include <iomanip>
+#include <memory>
+#include <functional>
+
+#define rep(i, n, s) for (int i = (s); i < int(n); i++)
+#define per(i, n, s) for (int i = (n) - 1; i >= int(s); i--)
+#define MM << " " <<
+#define all(x) begin(x), end(x)
+#define rall(x) rbegin(x), rend(x)
+
+template <class T>
+using MinHeap = std::priority_queue<T, std::vector<T>, std::greater<T>>;
+template <class T>
+using MaxHeap = std::priority_queue<T>;
+
+using ll = long long;
+using Pii = std::pair<int, int>;
+using Pll = std::pair<ll, ll>;
+using Pdd = std::pair<double, double>;
+
+template <class T>
+bool chmin(T &a, const T b) {
+    if (b < a) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <class T>
+bool chmax(T &a, const T b) {
+    if (a < b) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <class T>
+void vdeb(const std::vector<T> &da) {
+    auto n = da.size();
+    for (size_t i = 0; i < n; i++) {
+        if (i == n - 1)
+            std::cout << da[i];
+        else
+            std::cout << da[i] << " ";
+    }
+    std::cout << std::endl;
+}
+template<class T>
+void vdeb(const std::vector<std::vector<T>> &da) {
+    auto n = da.size();
+    for (size_t i = 0; i < n; i++) {
+        // std::cout << i << " : ";
+        vdeb(da[i]);
+    }
+    std::cout << std::endl;
+}
+
+using namespace std;
+
+int n;
+
+int solve() {
+    map<string, int> mp;
+    vector<int> b(n);
+    vector<vector<string>> d(n, vector<string>(0));
+    rep(i,n,0) {
+        string a; cin >> a;
+        mp[a] = i;
+        cin >> b[i];
+        int c; cin >> c;
+        rep(j,c,0) {
+            string s; cin >> s;
+            d[i].emplace_back(move(s));
+        }
+    }
+    vector<vector<int>> da(n, vector<int>(0));
+    rep(i,n,0) {
+        for(auto &j : d[i]) {
+            da[i].emplace_back(mp[j]);
+        }
+    }
+    int m1 = n/2;
+    vector<int> dp1(1<<m1,-1);
+    dp1[0] = 0;
+    rep(i,1<<m1,1) {
+        int k = 0;
+        while(((i>>k)&1) == 0) {
+            ++k;
+        }
+        bool flg = false;
+        for(auto &j : da[k]) {
+            if(j < m1 && (i>>j)&1) flg = true;
+        }
+        if(!flg) dp1[i] = dp1[i^(1<<k)] + b[k];
+    }
+    rep(i,1<<m1,0) if(i%2 == 0) dp1[i] = -1;
+    rep(i,1<<m1,0) {
+        rep(j,m1,0) {
+            if((i>>j)&1) chmax(dp1[i], dp1[i^(1<<j)]);
+        }
+    }
+    int m2 = n - m1;
+    vector<int> dp2(1<<m2,-1);
+    vector<int> mask(1<<m2, 0);
+    dp2[0] = 0;
+    rep(i,1<<m2,1) {
+        int k = 0;
+        while(((i>>k)&1) == 0) {
+            ++k;
+        }
+        mask[i] = mask[i^(1<<k)];
+        bool flg = false;
+        for(auto &j : da[k+m1]) {
+            if(m1 <= j && (i>>(j-m1))&1) flg = true;
+            if(m1 > j) mask[i] |= 1<<j;
+        }
+        if(!flg) dp2[i] = dp2[i^(1<<k)] + b[k+m1];
+    }
+    int ans = 0;
+    // vdeb(dp1);
+    // vdeb(dp2);
+    // vdeb(mask);
+    const int kk = (1<<m1)-1;
+    rep(i,1<<m2,0) {
+        int j = mask[i]^kk;
+        if(dp2[i] != -1 && dp1[j] != -1) {
+            chmax(ans, dp2[i] + dp1[j]);
+        }
+    }
+    return ans;
+}
+
+int main() {
+    vector<int> ans;
+    while(1) {
+        cin >> n;
+        if(n == 0) break;
+        ans.emplace_back(solve());
+    }
+    for(auto &i : ans) cout << i << endl;
+}

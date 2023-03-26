@@ -1,0 +1,45 @@
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <numeric>
+#include <iomanip>
+#include <string>
+#include <regex>
+#include <array>
+#include <vector>
+#include <map>
+#include <set>
+#include <bitset>
+#include <queue>
+using namespace std;
+#define rep(x,to) for(int x=0;x<to;++x)
+#define rep2(x,from,to) for(int x=from;x<to;++x)
+typedef long long ll;
+typedef unsigned long long ull;
+const int INF = 1e9;
+
+int main(void) {
+    int n, m, s, t, d;
+    cin >> n >> m;
+    int cost[16][16] = {};
+    rep(i,16) rep(j,16) cost[i][j] = INF;
+    rep(i,m) {
+        cin >>s >> t >> d;
+        cost[s][t] = d;
+    }
+    int dp[1<<16][16] = {};
+    rep(i,1<<n) rep(j,n) dp[i][j] = INF;
+    dp[0][0] = 0;
+    rep(i,1<<n) {
+        rep(s,n) {
+            rep(t,n) {
+                if(!(i&(1<<t))) {
+                    if(s!=t) dp[i|(1<<t)][t] = min(dp[i|(1<<t)][t], dp[i][s] + cost[s][t]);
+                }
+                
+            }
+        }
+    }
+    if(dp[(1<<n)-1][0] != INF) cout << dp[(1<<n)-1][0] << endl;
+    else cout << -1 << endl;
+}

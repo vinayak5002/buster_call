@@ -1,0 +1,72 @@
+use std::io;
+
+fn str_replace(source_str: String, target_str: String, start: i32, end: i32) -> String {
+    let source_vec: Vec<char> = source_str.chars().collect();
+    let target_vec: Vec<char> = target_str.chars().collect();
+
+    let mut work_vec: Vec<char> = source_vec.clone();
+    let mut target_index = 0;
+    for i in 0..source_vec.len() as i32 {
+        if i >= start && i <= end {
+            work_vec[i as usize] = target_vec[target_index as usize];
+            target_index += 1;
+        } else {
+            work_vec[i as usize] = source_vec[i as usize];
+        }
+    }
+    String::from_iter(work_vec)
+}
+
+fn str_reverse(source_str: String, start_index: i32, end_index: i32) -> String {
+    let mut source_str_vec: Vec<_> = source_str.chars().collect();
+
+    let swap = source_str_vec[start_index as usize];
+    source_str_vec[end_index as usize] = source_str_vec[start_index as usize];
+    source_str_vec[start_index as usize] = swap;
+    String::from_iter(source_str_vec)
+}
+
+fn str_print(target_str: &str, start_index: i32, end_index: i32) {
+    let target_str_vec: Vec<char> = target_str.chars().collect();
+
+    for i in start_index..end_index + 1 {
+        print!("{}", target_str_vec[i as usize]);
+    }
+    println!();
+}
+
+fn parse_and_run(command: String, str: String) -> String {
+    let command_params: Vec<_> = command.split_whitespace().collect();
+    if command_params[0] == "replace" {
+        str_replace(str, command_params[3].to_string(), command_params[1].parse().unwrap_or(0), command_params[2].parse().unwrap_or(0))
+    } else if command_params[0] == "reverse" {
+        str_reverse(str, command_params[1].parse().unwrap_or(0), command_params[2].parse().unwrap_or(0))
+    } else {
+        str_print(&str, command_params[1].parse().unwrap_or(0), command_params[2].parse().unwrap_or(0) );
+        str.clone()
+    }
+}
+
+fn main() {
+    let mut s = String::new();
+    io::stdin().read_line(&mut s).expect("Error");
+
+    let str = s.trim();
+
+    let mut s = String::new();
+    io::stdin().read_line(&mut s).expect("Error");
+    let len = s.trim().parse().unwrap_or(0);
+
+    let mut commands: Vec<String> = vec![];
+    for i in 0..len {
+        let mut s = String::new();
+        io::stdin().read_line(&mut s).expect("Error");
+        commands.push(s.trim().to_string());
+    }
+
+    let mut result = str.clone().to_string();
+    for command in commands {
+        result = parse_and_run(command, result);
+    }
+}
+

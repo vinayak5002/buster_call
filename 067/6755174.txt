@@ -1,0 +1,114 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class UnionFind {
+public :
+    UnionFind() = default;
+
+    explicit UnionFind(size_t n): m_parents(n),m_diffWeights(n) { //point
+        iota(m_parents.begin(),m_parents.end(),0);
+    } 
+
+    int find(int i) {
+        if(m_parents[i]==i) return i;
+        
+        const int root = find(m_parents[i]);
+        m_diffWeights[i] += m_diffWeights[m_parents[i]]; //point
+        return (m_parents[i]=root);
+    }
+
+    int weight(int i) {
+        find(i); //point
+        return m_diffWeights[i];
+    }
+
+    int diff(int a,int b) { //point
+        return (weight(b)-weight(a));
+    }
+
+    void merge(int a,int b,int w) {
+        w += weight(a);
+        w -= weight(b);
+        a = find(a);
+        b = find(b);
+
+        if(a!=b) {  
+            m_parents[b] = a;
+            m_diffWeights[b] = w;
+        }
+    }
+
+    bool connected(int a,int b) {
+        return (find(a)==find(b));
+    }
+
+private:
+    vector<int> m_parents;
+    vector<int> m_diffWeights; //point
+};
+
+struct Data{
+    int unit1;
+    int diff;
+    int unit2;
+};
+
+int main() {
+
+    for(;;) {
+        int N;
+        cin >> N;
+
+        if(N==0) {
+            return 0;
+        }
+
+        vector<Data> inputs(N);
+        map<string,int> unitToIndex;
+
+        for(int i = 0; i < N; i++) {
+            int one,ten,diff;
+            string unit1,unit2;
+            char eq,c;
+            cin >> one >> unit1 >> eq >> ten >> c >> inputs[i].diff >> unit2; 
+
+            if(!unitToIndex.count(unit1)) {
+                int index = unitToIndex.size();
+                unitToIndex[unit1] = index;
+            }
+            if(!unitToIndex.count(unit2)) {
+                int index = unitToIndex.size();
+                unitToIndex[unit2] = index;
+            }
+
+            inputs[i].unit1 = unitToIndex[unit1];
+            inputs[i].unit2 = unitToIndex[unit2];
+        }
+
+        UnionFind uf(unitToIndex.size());
+        bool ok = true;
+
+        for(const auto& input : inputs) {
+            const int unit1 = input.unit1;
+            const int unit2 = input.unit2;
+            const int diff = input.diff;
+
+            if(!uf.connected(unit1,unit2)) {
+                uf.merge(unit1,unit2,diff);
+            }
+            else {
+                if(uf.diff(unit1,unit2)!=diff) {
+                    ok = false;
+                    break;
+                }
+            }
+        }
+
+        if(ok) {
+            cout << "Yes\n";
+        }
+        else {
+            cout << "No\n";
+        }
+    }
+}

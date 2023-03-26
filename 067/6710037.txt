@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using VI = vector<int>;
+using VVI = vector<VI>;
+
+const int MAX = 10000001;
+
+void upd_route(VVI& r, const int c, const int d, const int e) {
+    for (int i = 1; i < (int)r.size(); ++i) {
+        for (int j = 1; j < (int)r[i].size(); ++j) {
+            int x = r[i][c] + e + r[d][j];
+            int y = r[i][d] + e + r[c][j];
+            int z = r[i][j];
+            r[i][j] = min({x, y, z});
+        }
+    }
+}
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+    while (true) {
+        int n, k;
+        cin >> n >> k;
+        if (n == 0 && k == 0) break;
+        
+        VVI route(n + 1, VI(n + 1, MAX));
+
+        for (int i = 0; i < k; ++i) {
+            int x, a, b, c, d, e;
+            cin >> x;
+            if (x == 0) {
+                cin >> a >> b;
+                if (route[a][b] == MAX)
+                    cout << -1 << endl;
+                else
+                    cout << route[a][b] << endl;
+            } else {
+                cin >> c >> d >> e;
+                route[c][c] = 0;
+                route[d][d] = 0;
+                upd_route(route, c, d, e);
+            }
+        }
+    }
+    return 0;
+}

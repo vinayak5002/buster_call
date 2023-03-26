@@ -1,0 +1,90 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000
+#define NIL -2000000002
+int n;
+vector<int> hp; 
+
+int get_key (int id) {
+    return hp[id];
+}
+
+int get_parent(int id){
+    int id_p = id / 2 ; //何も書かないでもfloorになる。
+    if ( id_p > 0 ) {return get_key(id_p);} 
+    else {return NIL;}
+}
+
+int get_left(int id){
+    int id_p = id * 2 ; //何も書かないでもfloorになる。
+    if ( id_p < hp.size() ) {return get_key(id_p);} 
+    else {return NIL;}
+}
+
+int get_right(int id){
+    int id_p = id * 2 + 1 ; //何も書かないでもfloorになる。
+    if ( id_p < hp.size() ) {return get_key(id_p);} 
+    else {return NIL;}
+}
+
+int calcmax(int k, int l, int r){
+    int max = k ;
+    if ( l > max ){max = l;}
+    if ( r > max ){max = r;}
+    return max;
+}
+
+int maxHeapify(int id){
+    //id番の数をMAXヒープを満たすまで移し替える。
+    //自分、左子、右子のうち最大を選ぶ
+    int k = get_key(id);
+    int l = get_left(id);
+    int r = get_right(id);
+    int m = calcmax(k,l,r) ;
+    if ( m == l ) { 
+        hp.at(id)=l; hp.at(id *2)=k; 
+        maxHeapify(id*2); }
+    else if ( m == r ) {  
+        hp.at(id)=r; hp.at(id *2 +1)=k; 
+        maxHeapify(id*2 + 1); }
+    return 0;
+}
+
+int main() {
+    int c;
+	scanf("%d",&n);
+	hp.push_back(NIL); //0番にNILを入れておく。
+	for (int i=0; i < n ; i++ ) {
+		cin >> c ;
+        hp.push_back(c);
+    }	
+    for (int i=n; i >= 1 ; i-- ) {
+        //これを下から実行していく
+        maxHeapify(i);
+    }
+    /*
+	for (int i=1; i <= n ; i++ ) {
+        int k = get_key(i);
+        int p = get_parent(i);
+        int l = get_left(i);
+        int r = get_right(i);
+        cout << "node " << i << ": key = " << k << ", " ;
+        if ( p != NIL) {
+            cout << "parent key = " << p << ", " ;
+        }
+        if ( l != NIL) {
+            cout << "left key = " << l << ", " ;
+        }
+        if ( r != NIL) {
+            cout << "right key = " << r << ", " ;
+        }
+        cout << endl;
+    }	*/
+
+    for (int i=1; i <= n ; i++ ) {
+        if ( i==n ) {  cout << hp.at(i)  << endl; }
+        else {  cout << hp.at(i) << " " ;}
+    }
+	return 0 ;
+}
+

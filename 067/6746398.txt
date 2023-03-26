@@ -1,0 +1,95 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef pair<ll, ll> pint;
+#define rep(i, n) for(ll i = 0; i < (ll)n; i++)
+#define ALL(v) (v).begin(), (v).end()
+
+
+ll TOI(string S) {
+  ll ans = 0;
+  rep(i, S.size()) {
+    ans *= 10;
+    ans += S[i] - '0';
+  }
+  return ans;
+}
+
+int main() {
+  map<string, ll> mp;
+  while(1) {
+    string S; cin >> S;
+    if(S == "END_OF_FIRST_PART") break;
+    ll value; cin >> value;
+    mp[S] = value;
+  }
+  while(1) {
+    string S; cin >> S;
+    if(S == "0") break;
+    vector<string> V;
+    rep(i, S.size()) {
+      if(S[i] == '(') {
+        V.push_back("(");
+      }else if(S[i] == ')') {
+        V.push_back(")");
+      }else if('A' <= S[i] && S[i] <= 'Z') {
+        ll start = i;
+        while(i+1 < (ll)S.size()) {
+          if(('0' <= S[i+1] && S[i+1] <= '9') || ('A' <= S[i+1] && S[i+1] <= 'Z') || S[i+1] == '(' || S[i+1] == ')') {
+            V.push_back(S.substr(start, i-start+1));
+            break;
+          }else {
+            i++;
+          }
+        }
+        if(i+1 >= S.size()) {
+          V.push_back(S.substr(start, i-start+1));
+        }
+      }else if('0' <= S[i] && S[i] <= '9') {
+        ll start = i;
+        while(i+1 < (ll)S.size()) {
+          if(('a' <= S[i+1] && S[i+1] <= 'z') || ('A' <= S[i+1] && S[i+1] <= 'Z') || S[i+1] == '(' || S[i+1] == ')') {
+            V.push_back(S.substr(start, i-start+1));
+            break;
+          }else {
+            i++;
+          }
+        }
+        if(i+1 >= S.size()) {
+          V.push_back(S.substr(start, i-start+1));
+        }
+      }
+    }
+    
+    ll N = V.size();
+    bool flag = false;
+    ll ans = 0;
+    
+    vector<ll> memo(110, 0);
+    ll depth = 0;
+    
+    rep(i, N) {
+      if(V[i][0] != '(' && V[i][0] != ')' && ('0' <= V[i][0] && V[i][0] <= '9') == false && mp[V[i]] == 0) {
+        flag = true;
+        break;
+      }
+      if(V[i][0] == '(') {
+        depth++;
+      }else if(V[i][0] == ')') {
+        depth--;
+        if(i+1 < N && '0' <= V[i+1][0] && V[i+1][0] <= '9') memo[depth] += memo[depth+1]*TOI(V[i+1]), i++;
+      }else if('A' <= V[i][0] && V[i][0] <= 'Z' && mp[V[i]] != 0) {
+        if(i+1 < N && '0' <= V[i+1][0] && V[i+1][0] <= '9') memo[depth] += mp[V[i]]*TOI(V[i+1]), i++;
+        else memo[depth] += mp[V[i]];
+      }
+      
+    }
+    
+    if(flag) {
+      cout << "UNKNOWN" << endl;
+    }else {
+      cout << memo[0] << endl;
+    }
+    
+  }
+}

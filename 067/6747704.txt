@@ -1,0 +1,76 @@
+#include <stdio.h>
+
+int main(){
+	char buf[300];
+	char *p;
+	char str[201];
+	int str_len = 0;
+	int q = 0; // 命令数
+	char code[100]; // 命令
+	short int x;
+	short int y;
+	char p_str[100];
+	int p_len = 0;
+
+	// str
+	fgets(buf, sizeof(buf) - 1, stdin);
+	p = buf;
+	while (*p){
+		sscanf(p, "%c", &str[str_len]);
+		str_len++;
+		p++;
+	}
+	str_len -= 1; // 改行分引く
+	/*for (int i = 0; i < str_len; i++){
+		printf("%c", str[i]);
+	}*/
+	// q
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d", &q);
+	//printf("%d", q);
+	for (int j = 0; j < q; j++){
+		// code x y
+		fgets(buf, sizeof(buf) - 1, stdin);
+		p = buf;
+		int code_len = 0;
+		while (*p != ' '){
+			sscanf(p, "%c", &code[code_len]);
+			code_len++;
+			p++;
+		}
+		sscanf(p, "%d", &x);
+		p += 2;
+		sscanf(p, "%d", &y);
+		//printf("%d %d\n", x, y);
+		// code 判定
+		switch (code[2]){
+		case 'p':
+			p += 3;
+			while (*p){
+				sscanf(p, "%c", &p_str[p_len]);
+				p_len++;
+				p++;
+			}
+			p_len -= 1; // 改行分引く
+			for (int i = 0; i < p_len; i++){
+				str[x + i] = p_str[i];
+			}
+			break;
+		case 'v':
+			char tmp;
+			tmp = str[x];
+			str[x] = str[y];
+			str[y] = tmp;
+			break;
+		case 'i':
+			for (int i = x; i <= y; i++){
+				printf("%c", str[i]);
+			}
+			putchar('\n');
+			break;
+		defaults:;
+		}
+	}
+
+	return 0;
+}

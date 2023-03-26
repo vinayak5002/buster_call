@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+using namespace std;
+#if __has_include(<atcoder/all>)
+    #include <atcoder/all>
+using namespace atcoder;
+#endif
+typedef long long ll;
+typedef pair<ll, ll> P;
+typedef tuple<ll, ll, ll> T;
+#define rep(i, n) for(ll i = 0; i < n; i++)
+
+int main(){
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+    while(true){
+        int n; cin >> n;
+        if(n == 0)break;
+        vector<int> a(n);
+        rep(i,n)cin >> a[i];
+
+        vector<vector<bool>> ok(n,vector<bool>(n,false));
+        rep(i,n-1){
+            if(abs(a[i]-a[i+1]) <= 1){
+                ok[i][i+1] = true;
+            }
+        }
+
+        for(int b=3;b<n;b++){
+            for(int l=0;l<n;l++){
+                if(b+l >= n)continue;
+                //取り除ける区間を全て探す
+                if(ok[l+1][l+b-1] && abs(a[l]-a[l+b]) <= 1){
+                    ok[l][l+b] = true;
+                }
+                else{
+                    for(int k=l;k<l+b;k++){
+                        if(ok[l][k] && ok[k+1][l+b]){
+                            ok[l][l+b] = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        //区間dp
+        vector<vector<ll>> dp(n,vector<ll>(n,0));
+        rep(i,n)for(int j=i+1;j<n;j++)if(ok[i][j])dp[i][j] = j-i+1;
+        for(int b=1;b<n;b++){
+            for(int l=0;l<n;l++){
+                if(b+l >= n)continue;
+                for(int k=l;k<l+b;k++){
+                    dp[l][l+b] = max(dp[l][l+b],dp[l][k]+dp[k+1][l+b]);
+                }
+            }
+        }
+
+        cout << dp[0][n-1] << endl;
+    }
+    
+    return 0;
+}

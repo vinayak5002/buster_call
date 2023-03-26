@@ -1,0 +1,103 @@
+#include <bits/stdc++.h>
+using namespace std;
+using vi = vector<int64_t>;
+using vii = vector<vi>;
+using pii = pair<int64_t, int64_t>;
+
+#define rep(i, n) for (int64_t i = 0; i < (int64_t)(n); i++)
+#define all(v) v.begin(), v.end()
+
+const int64_t inf = numeric_limits<int64_t>::max();
+
+// 以下可変
+struct UNION_FIND
+{
+    vi prt; // prt[i] = j のとき、i の親は j
+    int64_t Nnode;
+    vi now_root;
+    int64_t Nroot;
+
+    UNION_FIND(int64_t N) : prt(N)
+    { // 全部自分が根（node N 個 edge 0 の森）
+        Nnode = N;
+        Nroot = Nnode;
+        rep(i, N)
+        {
+            prt[i] = i;
+        }
+    }
+
+    int64_t root(int64_t chl)
+    {
+        if (prt[chl] != chl)
+        {
+            prt[chl] = root(prt[chl]);
+        };
+        return prt[chl];
+    }
+
+    bool same(int64_t x, int64_t y)
+    {
+        if (root(x) == root(y))
+        {
+            return true;
+        }
+        return false;
+    }
+
+    void unite(int64_t x, int64_t y)
+    {
+        if (root(x) == root(y))
+        {
+            return;
+        }
+        prt[root(x)] = root(y);
+        Nroot--;
+    }
+};
+
+template <typename T>
+void upgrade(T &LEFT, const T &RIGHT)
+{
+    if (LEFT < RIGHT)
+        LEFT = RIGHT;
+
+    return;
+}
+
+template <typename T>
+void downgrade(T &LEFT, const T &RIGHT)
+{
+    if (LEFT > RIGHT)
+        LEFT = RIGHT;
+
+    return;
+}
+/////////////////////////////////////////////////////////////
+int main()
+{
+    while(true){
+    int64_t N, K;
+    cin >> N >> K;
+    if(N == 0 && K == 0){
+        break;
+    }
+
+    vi Csum(N + 1, 0);
+
+    rep(i,N)
+    {
+        int64_t ai;
+        cin >> ai;
+        Csum[i + 1] = Csum[i] + ai;
+    }
+    // [left, right) = Csum[right] - Csum[left]
+
+    int64_t ans = -inf;
+    for (int64_t now = 0; now + K <= N; now++){
+        upgrade(ans, Csum[now + K] - Csum[now]);
+    }
+    cout << ans << endl;}
+    return 0;
+}
+

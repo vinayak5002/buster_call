@@ -1,0 +1,213 @@
+using S = System;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace _220619
+{
+public class ProblemD
+{
+  public class Panels
+  {
+    public int rst;
+    public int[] panels;
+    public int this[int i]
+    {
+      set => this.panels[i] = value;
+      get => panels[i];
+    }
+
+    public Panels(int[] panels)
+    {
+      this.panels = panels;
+      for (int i = 0; i < 16; i++)
+      {
+        if (this.panels[i] == 0) rst = i;
+      }
+    }
+  }
+
+  public static int GetRow(int st) => st/4;
+  public static int GetColumn(int st) => st%4;
+
+  public static Panels ReadInput()
+  {
+    return new Panels(
+      new [] {
+        S.Console.ReadLine(),
+        S.Console.ReadLine(),
+        S.Console.ReadLine(),
+        S.Console.ReadLine(), }
+        .SelectMany(
+          line => line.Split(' ').Select(s => int.Parse(s)))
+        .ToArray() );
+  }
+
+  public static void Slide(Panels panels, int dst)
+  {
+    var rv = panels[panels.rst];
+    var dv = panels[dst];
+    panels[panels.rst] = dv;
+    panels[dst] = rv;
+    panels.rst = dst;
+  }
+
+  public static void WritePanels(Panels panels)
+  {
+    for (int i = 0; i < 4; i++)
+    {
+      var str = Enumerable.Range(0, 4)
+        .Select(j => panels[i*4+j])
+        .Aggregate("", (s, v) => $"{s} {v}")
+        .Remove(0, 1);
+      S.Console.WriteLine(str);
+    }
+  }
+
+  public static int h(Panels panels)
+  {
+    var cost = 0;
+    for (int i = 0; i < 16; i++)
+    {
+      var r = GetRow(i);
+      var c = GetColumn(i);
+      var v = panels[i];
+      v = v == 0 ? 16 : v;
+      cost += S.Math.Abs((v-1)%4-i%4);
+      cost += S.Math.Abs((v-1)/4-i/4);
+    }
+    return cost;
+  }
+
+  public struct Panels16
+  {
+    int n0, n1, n2, n3;
+    int n4, n5, n6, n7;
+    int n8, n9, n10, n11;
+    int n12, n13, n14, n15;
+    public Panels16(int[] panels)
+    {
+      this.n0 = panels[0];
+      this.n1 = panels[1];
+      this.n2 = panels[2];
+      this.n3 = panels[3];
+      this.n4 = panels[4];
+      this.n5 = panels[5];
+      this.n6 = panels[6];
+      this.n7 = panels[7];
+      this.n8 = panels[8];
+      this.n9 = panels[9];
+      this.n10 = panels[10];
+      this.n11 = panels[11];
+      this.n12 = panels[12];
+      this.n13 = panels[13];
+      this.n14 = panels[14];
+      this.n15 = panels[15];
+    }
+  }
+
+  public struct Node
+  {
+    public int rst;
+    public Dictionary<int, bool> check;
+    public Node(int rst)
+    {
+      this.rst = rst;
+      this.check = new Dictionary<int, bool>();
+    }
+  }
+
+  public static bool Search(Panels panels, Node rnode, out int cost)
+  {
+    cost = 1;
+    var reached = new HashSet<Panels16>();
+    reached.Add(new Panels16(panels.panels));
+    while (true)
+    {
+      var rst = panels.rst;
+      var up = (GetRow(rst)-1, GetColumn(rst));
+      var down = (GetRow(rst)+1, GetColumn(rst));
+      var left = (GetRow(rst), GetColumn(rst)-1);
+      var right = (GetRow(rst), GetColumn(rst)+1);
+      S.Func<(int, int), int> getc = i => {
+        if (i.Item1 < 0 || i.Item1 >= 4 || i.Item2 < 0 || i.Item2 >= 4) return int.MaxValue;
+        bool b;
+        if (rnode.check.TryGetValue(i.Item1*4+i.Item2, out b) && b) return int.MaxValue;
+        Slide(panels, i.Item1*4+i.Item2);
+        b = reached.Contains(new Panels16(panels.panels));
+        var hval = h(panels);
+        Slide(panels, rst);
+        if (b) return int.MaxValue;
+        return hval;
+      };
+      var dst = new [] { up, down, left, right }
+        .Select(i => (i, getc(i)))
+        .Aggregate((v1, v2) => v1.Item2 < v2.Item2 ? v1 : v2);
+      if (dst.Item2 == int.MaxValue) return false;
+      Slide(panels, dst.Item1.Item1*4+dst.Item1.Item2);
+      if (h(panels) == 0) return true;
+      var p16 = new Panels16(panels.panels);
+      reached.Add(p16);
+      cost++;
+    }
+  }
+  public static bool Search_Before(Panels panels, Dictionary<Panels16, int> dict, out int cost)
+  {
+    cost = 1;
+    var reached = new HashSet<Panels16>();
+    reached.Add(new Panels16(panels.panels));
+    while (true)
+    {
+      var rst = panels.rst;
+      var up = (GetRow(rst)-1, GetColumn(rst));
+      var down = (GetRow(rst)+1, GetColumn(rst));
+      var left = (GetRow(rst), GetColumn(rst)-1);
+      var right = (GetRow(rst), GetColumn(rst)+1);
+      S.Func<(int, int), int> getc = i => {
+        if (i.Item1 < 0 || i.Item1 >= 4 || i.Item2 < 0 || i.Item2 >= 4) return int.MaxValue;
+        bool b;
+        Slide(panels, i.Item1*4+i.Item2);
+        b = reached.Contains(new Panels16(panels.panels));
+        var hval = h(panels);
+        int dval;
+        if (dict.TryGetValue(new Panels16(panels.panels), out dval)) hval += dval;
+        Slide(panels, rst);
+        if (b) return int.MaxValue;
+        return hval;
+      };
+      var dst = new [] { up, down, left, right }
+        .Select(i => (i, getc(i)))
+        .Aggregate((v1, v2) => v1.Item2 < v2.Item2 ? v1 : v2);
+      if (dst.Item2 == int.MaxValue) return false;
+      Slide(panels, dst.Item1.Item1*4+dst.Item1.Item2);
+      if (h(panels) == 0) return true;
+      var p16 = new Panels16(panels.panels);
+      reached.Add(p16);
+      cost++;
+      if (!dict.ContainsKey(p16) || cost < dict[p16] ) dict[p16] = cost;
+    }
+  }
+
+  public static void Main(string[] args)
+  {
+    var panels = ReadInput();
+    var reached = new HashSet<Panels16>();
+    reached.Add(new Panels16(panels.panels));
+    var dict = new Dictionary<Panels16, int>();
+    var rnode = new Node(panels.rst);
+    while (true)
+    {
+      int c;
+      var b = Search_Before(panels, dict, out c);
+      S.Console.WriteLine(c);
+      if (b)
+      {
+        break;
+      }
+    }
+  }
+}
+}
+
+
+

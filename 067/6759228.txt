@@ -1,0 +1,137 @@
+#include <iostream>
+#include <string>
+using namespace std;
+  
+  
+class node{
+    public:
+    node* prev;
+    int data;
+    node* next;
+      
+      
+    node(int value){ 
+        prev = NULL;      
+        data = value;  
+        next = NULL;    
+    }
+};
+  
+  
+void insert(node* &head, int value){
+      
+    node* n = new node(value);
+    n->next = head; // next of n is head since 
+  
+    if(head != NULL){
+        head->prev=n; //if head is not empty -> prev of head is n
+    }
+      
+    head = n; //make n the new head
+}
+
+void deleteNode(node* &head, node* &del){
+    
+    if(head == NULL || del == NULL) return;
+    if (head == del) head = del->next; 
+    if (del->next != NULL) del->next->prev = del->prev;
+    if (del->prev != NULL) del->prev->next = del->next;
+
+    delete(del); 
+    return;
+}
+
+void deleteValue(node* &head, int n)
+{
+    if (head == NULL || n <= 0)
+        return;
+ 
+    node* current = head;
+
+    while(current != NULL){
+        if(current->data != n) {current = current->next;}
+        else {
+            deleteNode(head, current);
+            break;
+        }
+    }
+}
+
+void deleteFirst(node* &head)
+{
+    if (head == NULL)
+        return;
+ 
+    node* current = head;
+    deleteNode(head, current);
+}
+
+void deleteLast(node* &head)
+{
+    if (head == NULL)
+        return;
+ 
+    node* current = head;
+
+    while(current != NULL){
+        if(current->next == NULL){
+            deleteNode(head, current);
+            break;
+        } 
+        else current = current->next;
+    }
+
+}
+  
+    
+void display(node* head){
+    node* temp = head;
+    while(temp != NULL){
+        if (temp->next == NULL){
+            cout << temp->data << "\n";
+            break;}
+        else {
+            cout << temp->data << " ";
+            temp=temp->next;
+        }
+    }
+
+}
+
+string convertToString(char* a)
+{
+    string s(a);
+    return s;
+}  
+  
+int main()
+{
+    node* head = NULL;    
+    
+    int numCmd;
+    scanf("%d", &numCmd);
+
+    char char_arr[11];
+    string cmd;
+    int value;
+
+    for(size_t i = 0; i < numCmd; ++i){
+        scanf("%s", char_arr);
+        cmd = convertToString(char_arr);
+
+        if(cmd == "insert") {
+            scanf("%d", &value);
+            insert(head, value);
+        }
+        else if (cmd == "delete") {
+            scanf("%d", &value);
+            deleteValue(head, value);
+        }
+        else if (cmd == "deleteFirst") {deleteFirst(head);}
+        else if (cmd == "deleteLast") {deleteLast(head);}
+    }
+
+    display(head);
+
+    return 0;
+}

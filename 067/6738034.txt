@@ -1,0 +1,98 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define MOD 1000000007
+//#define MOD 998244353
+#define INF 1e18 + 10
+#define EPS 1e-9
+#define F first
+#define S second
+
+#define debug(x) cout<<x<<endl;
+#define repi(i,x,n) for(int i=x;i<n;i++)
+#define rep(i,n) repi(i,0,n)
+#define lp(i,n) repi(i,0,n)
+#define repn(i,n) for(int i=n;i>=0;i--)
+#define int long long
+#define endl "\n"
+
+typedef pair<int,int> PII;
+typedef pair<int,string> PIS;
+typedef pair<string,int> PSI;
+
+template <typename T>
+bool chmax(T &a, const T& b) {
+  if (a < b) {
+    a = b; 
+    return true;
+  }
+  return false;
+}
+
+template <typename T>
+bool chmin(T &a, const T& b) {
+  if (a > b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+struct BipartiteMatching{
+  vector<vector<int> > graph;
+  vector<int> match,alive,used;
+  int time;
+  BipartiteMatching(int n) : graph(n), alive(n, 1), used(n, 0), match(n, -1), time(0) {}
+  
+  void addEdge(int a,int b){
+    graph[a].push_back(b);
+    graph[b].push_back(a);
+  }
+
+  bool dfs(int idx){
+    used[idx]=time;
+    for(auto &to : graph[idx]){
+      int to_match=match[to];
+      if(alive[to]==0) continue;
+      if(to_match == -1 || (used[to_match] != time && dfs(to_match))){
+	match[idx]=to;
+	match[to]=idx;
+	return true;
+      }
+    }
+    return false;
+  }
+
+  int bipartite_matching(){
+    int ret=0;
+    rep(i,graph.size() ){
+      if(alive[i]==0) continue;
+      if(match[i]== -1){
+	++time;
+	ret+=dfs(i);
+      }
+    }
+    return ret;
+  }
+
+  void output(){
+    
+  }
+      
+};
+
+signed main(){
+  cin.tie(0);	
+  ios::sync_with_stdio(false);
+  int x,y,e;
+  cin>>x>>y>>e;
+ BipartiteMatching bm(x + y);
+  rep(i,e){
+    int a,b;
+    cin>>a>>b;
+    bm.addEdge(a,x+b);
+  }
+  cout<<bm.bipartite_matching()<<endl;
+
+  return 0;
+}
+

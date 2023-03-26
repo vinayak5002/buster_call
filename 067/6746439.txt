@@ -1,0 +1,45 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <cmath>
+#include <numeric>
+#include <iomanip>
+#include <map>
+#include <set>
+#define rep(i, a, b) for (int i = a; i < b; ++i)
+using namespace std;
+
+const int MOD = 998244353;
+
+// const long long INF = 1LL << 60;
+
+template<class T> bool chmin(T& a, T b) { if (a > b) { a = b; return true; } else return false; }
+template<class T> bool chmax(T& a, T b) { if (a < b) { a = b; return true; } else return false; }
+
+const int INF = 1 << 30;
+
+int main() {
+    string s1, s2; cin >> s1 >> s2;
+    vector<vector<int>> dp(s1.size()+1, vector<int>(s2.size()+1, INF));
+
+    dp[0][0] = 0;
+
+    rep(i, 0, s1.size()+1) {
+        rep(j, 0, s2.size()+1) {
+            if (i > 0 && j > 0) {
+                if (s1[i-1] == s2[j-1]) chmin(dp[i][j], dp[i-1][j-1]);
+                else chmin(dp[i][j], dp[i-1][j-1] + 1);
+            }
+            if (i > 0) {
+                chmin(dp[i][j], dp[i-1][j] + 1);
+            }
+            if (j > 0) {
+                chmin(dp[i][j], dp[i][j-1] + 1);
+            }
+        }
+    }
+
+    cout << dp[s1.size()][s2.size()] << endl;
+    return 0;
+}

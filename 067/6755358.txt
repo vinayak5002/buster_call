@@ -1,0 +1,63 @@
+// C program for parameter calulation
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+int pointer(char *str)
+  {
+    int NUM1 = 0;
+    for(int i = 0; i < strlen(str); i++)
+      {
+        NUM1 = (str[i] - '0') + 10 * NUM1 ;
+      }
+    return NUM1;
+  }  
+
+int main()
+  {
+    //scan fget
+    int RPN[1000] = {0};
+    int flag,flag1 = 0;
+    int top = 0;
+    char standby_Array[1000],parameter[10000];
+    fgets(parameter,10000,stdin);
+    //stacking
+    memset(standby_Array,'\0',sizeof(standby_Array));
+    for(int i =0; parameter[i] != '\0'; i++)
+      {
+        if(parameter[i] >= '0' && parameter[i] <= '9')
+          {
+            standby_Array[flag++] = parameter[i];
+            if (parameter[i+1] == ' ') 
+              {
+                RPN[++top] = pointer(standby_Array);
+              }
+          }
+        else if (parameter[i] == ' ')
+          {
+            flag = 0;
+            memset(standby_Array,'\0',sizeof(standby_Array));
+          }
+        else
+          {
+            flag1 = RPN[top--];
+            if(parameter[i] == '*')
+              {
+                RPN[top] = RPN[top] * flag1;
+              }
+            else if(parameter[i] == '+')
+              {
+                RPN[top] = RPN[top] + flag1;
+              }
+            else if(parameter[i] == '-')
+              {
+                RPN[top] = RPN[top] - flag1; 
+              }
+          }
+      
+      }
+    printf("%d",RPN[1]);
+    printf("\n");
+    return EXIT_SUCCESS;
+  }
+

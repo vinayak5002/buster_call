@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for(int (i)=0;(i)<(n);(i)++)
+#define ll long long
+#define pp pair<ll,ll>
+#define ld long double
+#define all(a) (a).begin(),(a).end()
+#define mk make_pair
+#define difine define
+constexpr int inf=1000000000;
+constexpr ll INF=2e18;
+constexpr ll mod=1000000007;
+constexpr ll MOD=998244353;
+int dx[4]={0,0,-1,1},dy[4]={-1,1,0,0};
+int dx1[8]={0,0,-1,1,1,1,-1,-1},dy1[8]={-1,1,0,0,1,-1,1,-1};
+
+ 
+// #include <atcoder/all>
+// typedef atcoder::modint998244353 mint;
+// typedef atcoder::modint1000000007 mint;
+
+
+int main() {
+  while(true){
+    int n;
+    cin >> n;
+    if (n==0) break;
+    vector<int> a(n);
+    rep(i,n) cin >> a[i];
+    vector<vector<pair<int,int>>> dp(n+1,vector<pair<int,int>>(100*1001,{0,inf}));
+    dp[0][0]={0,0};
+    rep(i,n){
+      int u=a[i]%1000;
+      int uu=500-u;
+      rep(j,100*1001) dp[i+1][j]=dp[i][j];
+      if (u!=0 && u<=500){
+        rep(j,100*1001){
+          if (uu+j>=100*1001) continue;
+          if (dp[i][j].second==inf) continue;
+          if ((dp[i+1][j+uu].first<dp[i][j].first+1) || (dp[i+1][j+uu].first==dp[i][j].first+1 && dp[i+1][j+uu].second>dp[i][j].second+a[i])){
+            dp[i+1][j+uu]={dp[i][j].first+1,dp[i][j].second+a[i]};
+            // cout << i << " " << dp[i][j].first+1 << " " << dp[i][j].second+a[i] << " " << j+uu << endl;
+          }
+        }
+      } else {
+        if (u!=0) uu=1000-u;
+        else uu=0;
+        rep(j,100*1001){
+          if (uu+j>=100*1001) continue;
+          if (dp[i][j].second==inf) continue;
+          if ((dp[i+1][j+uu].first<dp[i][j].first) || (dp[i+1][j+uu].first==dp[i][j].first && dp[i+1][j+uu].second>dp[i][j].second+a[i])){
+            dp[i+1][j+uu]={dp[i][j].first,dp[i][j].second+a[i]};
+          }
+        }
+        if (u==0) uu=500;
+        else uu=u-500;
+        rep(j,100*1001){
+          if (j-uu<0) continue;
+          if (dp[i][j].second==inf) continue;
+          if ((dp[i+1][j-uu].first<dp[i][j].first+1) || (dp[i+1][j-uu].first==dp[i][j].first+1 && dp[i+1][j-uu].second>dp[i][j].second+a[i])){
+            dp[i+1][j-uu]={dp[i][j].first+1,dp[i][j].second+a[i]};
+            // cout << i << " " << dp[i][j].first+1 << " " << dp[i][j].second+a[i] << " " << j-uu << endl;
+          }
+        }
+      }
+    }
+    pair<int,int> ans={0,inf};
+    rep(i,100*1001){
+      if (dp[n][i].first>ans.first || (dp[n][i].first==ans.first && dp[n][i].second<ans.second)){
+        ans=dp[n][i];
+      }
+    }
+    cout << ans.first << " " << ans.second << endl;
+  }
+}
+
+

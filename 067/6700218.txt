@@ -1,0 +1,174 @@
+#ifndef _GLIBCXX_NO_ASSERT
+#include <cassert>
+#endif
+#include <cctype>
+#include <cerrno>
+#include <cfloat>
+#include <ciso646>
+#include <climits>
+#include <clocale>
+#include <cmath>
+#include <csetjmp>
+#include <csignal>
+#include <cstdarg>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+
+#if __cplusplus >= 201103L
+#include <ccomplex>
+#include <cfenv>
+#include <cinttypes>
+#include <cstdbool>
+#include <cstdint>
+#include <ctgmath>
+#include <cwchar>
+#include <cwctype>
+#endif
+
+// C++
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <deque>
+#include <exception>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <iosfwd>
+#include <iostream>
+#include <istream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <locale>
+#include <map>
+#include <memory>
+#include <new>
+#include <numeric>
+#include <ostream>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <stdexcept>
+#include <streambuf>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+#if __cplusplus >= 201103L
+#include <array>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <forward_list>
+#include <future>
+#include <initializer_list>
+#include <mutex>
+#include <random>
+#include <ratio>
+#include <regex>
+#include <scoped_allocator>
+#include <system_error>
+#include <thread>
+#include <tuple>
+#include <typeindex>
+#include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
+#endif
+
+/*
+ 
+ パソコン甲子園2020予選
+ 
+ 問題５　 テトラへドロン
+
+ アイヅ塗装の職人は、独特な方法で壁に色を塗ります。壁は次の図のような三角形の座標系で区画されています。
+
+ 各表面に十分な塗料を染み込ませた四面体があります。
+ 彼らは、ローラーの代わりに、この四面体を転がします。
+ 四面体の各表面には、次の図のように４つの色R, G, B, Y の塗料がそれぞれ染み込ませてあり、
+ 表面が接した区画を塗ることができます。
+
+ 職人は区画(0,0)から始めて、
+ 四面体の１辺を軸として転がしながら壁を塗っていきます。
+ 作業が終わるまで四面体を壁から離したり、壁の上を滑らせたりすることはしません。
+ 例えば、四面体を適当に転がすと、壁には次の図のような模様ができます。
+
+ この方法で色を塗ると、最初の区画(0,0)と２番目に通る区画(1,0)の色を決めれば、
+ その後どのような転がし方をしても、全ての区画の色が一通りに決まります。
+
+ 最初と２番目に通る区画の色が与えられ、さらに、色を求めたい区画が1つ以上与えられたとき、指定された各区画の色を求めるプログラムを作成せよ。
+ 入力
+
+ 入力は以下の形式で与えられる。
+ c1  c2
+ N
+ x1  y1
+ x2  y2
+ :
+ xN  yN
+
+ １行目に最初と２番目に通る区画の色c1とc2 (‘R’,‘G’,‘B’または‘Y’) が与えられる。
+ ただし、c1≠c2である。２行目に色を求めたい区画の数N (1 ≤ N ≤ 100)が与えられる。
+ 続くN行に、色を求めたい区画の座標xi, yi (0 ≤ xi, yi ≤ 100 )が与えられる。
+ 
+ 出力
+ 出力はN行である。色を求めたいi番目の区画の色を表す文字１つをi 行目に出力する。
+
+ 入出力例
+ 入力例
+ B R
+ 2
+ 8 3
+ 1 1
+ 
+ 出力例
+ Y
+ G
+ 
+*/
+void fil(char C[4][2]){
+    if (C[0][0] == 'B' && C[1][0] == 'R') { C[2][0]='G';  C[3][0]='Y'; }
+    if (C[0][0] == 'B' && C[1][0] == 'G') { C[2][0]='Y';  C[3][0]='R'; }
+    if (C[0][0] == 'B' && C[1][0] == 'Y') { C[2][0]='R';  C[3][0]='G'; }
+    if (C[0][0] == 'R' && C[1][0] == 'B') { C[2][0]='Y';  C[3][0]='G'; }
+    if (C[0][0] == 'R' && C[1][0] == 'Y') { C[2][0]='G';  C[3][0]='B'; }
+    if (C[0][0] == 'R' && C[1][0] == 'G') { C[2][0]='B';  C[3][0]='Y'; }
+    if (C[0][0] == 'G' && C[1][0] == 'Y') { C[2][0]='B';  C[3][0]='R'; }
+    if (C[0][0] == 'G' && C[1][0] == 'B') { C[2][0]='R';  C[3][0]='Y'; }
+    if (C[0][0] == 'G' && C[1][0] == 'R') { C[2][0]='Y';  C[3][0]='B'; }
+    if (C[0][0] == 'Y' && C[1][0] == 'G') { C[2][0]='R';  C[3][0]='B'; }
+    if (C[0][0] == 'Y' && C[1][0] == 'R') { C[2][0]='B';  C[3][0]='G'; }
+    if (C[0][0] == 'Y' && C[1][0] == 'B') { C[2][0]='G';  C[3][0]='R'; }
+    
+    C[3][1] = C[0][0];
+    C[2][1] = C[1][0];
+    C[1][1] = C[2][0];
+    C[0][1] = C[3][0];
+}
+
+using namespace std;
+
+int main(){
+    char c[4][2];
+    cin >> c[0][0];
+    cin >> c[1][0];
+    fil(c);
+    
+    int N;
+    cin >> N;
+    for (int i = 0; i < N; i++){
+        int x,y;
+        cin >> x >> y;
+        cout << c[x%4][y%2] << endl;
+    }
+}
+

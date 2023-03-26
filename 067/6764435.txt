@@ -1,0 +1,137 @@
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <numeric>
+#include <set>
+#include <map>
+#include <queue>
+#include <deque>
+using namespace std;
+
+using lint = long long;
+using ulint = unsigned long long;
+template<class T> using vec = vector<T>;
+
+#define rep(i,n) for(int i = 0; i < n; i++)
+#define repr(i,n) for(int i = n - 1; i >= 0; i--)
+#define repi(i,ini,n) for(int i = ini; i < n; i++)
+#define repir(i,ini,n) for(int i = n - 1; i >= ini; i--)
+#define repb(i,mn,mx) for(int i = mn; i <= mx; i++)
+#define repbr(i,mn,mx) for(int i = mx; i >= mn; i--)
+#define all(a) begin(a),end(a)
+#define rall(a) rbegin(a),rend(a)
+
+template<class T> auto chmax(T& a, const T b) { return a = max(a, b); }
+template<class T> auto chmin(T& a, const T b) { return a = min(a, b); }
+
+template<class It>
+auto acc(It begin, It end) -> decltype(*begin) { return accumulate(begin, end, 0); }
+
+constexpr lint inf = 1100100100100100100ll;
+constexpr int infi = 1100100100;
+
+constexpr int mod = 1'000'000'007;
+
+template<class T>
+auto div2(T a, T b) {
+	return (a + b - 1) / b;
+}
+
+struct xy {
+	int x, y;
+};
+
+int bd[1010][1010];
+int bs[1010][1010];
+
+int mlen_t[1010][1010], mlen_b[1010][1010], mlen_l[1010][1010], mlen_r[1010][1010];
+int mlen_ts[1010][1010], mlen_bs[1010][1010], mlen_ls[1010][1010], mlen_rs[1010][1010];
+
+void solve() {
+	int h, w, r, c;
+	cin >> h >> w >> r >> c;
+
+	int n;
+	cin >> n;
+
+	vec<xy> b(n);
+	rep(i, n)
+		cin >> b[i].y >> b[i].x;
+
+	vec<vec<int>> xs(w+2), ys(h+2);
+	for (auto& ss : xs) {
+		ss.push_back(0);
+		ss.push_back(h + 1);
+	}
+	for (auto& ss : ys) {
+		ss.push_back(0);
+		ss.push_back(w + 1);
+	}
+
+	rep(i, n) {
+		xs[b[i].x].push_back(b[i].y);
+		ys[b[i].y].push_back(b[i].x);
+		bd[b[i].y][b[i].x]++;
+	}
+
+	for (auto& ss : xs)
+		sort(all(ss));
+	for (auto& ss : ys)
+		sort(all(ss));
+
+	rep(y, 1005)
+		rep(x, 1005) {
+		bs[y + 1][x + 1] = bs[y + 1][x] + bs[y][x + 1] - bs[y][x] + bd[y][x];
+	}
+
+	repb(y, 0, h + 1)
+		repb(x, 0, w + 1) {
+		mlen_t[y][x] = y - *lower_bound(rall(xs[x]), y, greater<int>());
+		mlen_b[y][x] = *lower_bound(all(xs[x]), y) - y;
+		mlen_l[y][x] = x - *lower_bound(rall(ys[y]), x, greater<int>());
+		mlen_r[y][x] = *lower_bound(all(ys[y]), x) - x;
+	}
+
+	repb(y, 0, h + 1)
+		repb(x, 0, w + 1) {
+		mlen_ts[y][x + 1] = mlen_ts[y][x] + mlen_t[y][x];
+		mlen_bs[y][x + 1] = mlen_bs[y][x] + mlen_b[y][x];
+		mlen_ls[y + 1][x] = mlen_ls[y][x] + mlen_l[y][x];
+		mlen_rs[y + 1][x] = mlen_rs[y][x] + mlen_r[y][x];
+	}
+
+	int ans = 0;
+
+	repb(y, 1, h - r + 1)
+		repb(x, 1, w - c + 1) {
+		if (bs[y + r][x + c] - bs[y][x + c] - bs[y + r][x] + bs[y][x] > 0)
+			continue;
+
+		int sc = 0;
+
+		//repb(xx, x, x + c - 1) {
+		//	sc += mlen_t[y - 1][xx];
+		//	sc += mlen_b[y + r][xx];
+		//}
+		//repb(yy, y, y + r - 1) {
+		//	sc += mlen_l[yy][x - 1];
+		//	sc += mlen_r[yy][x + c];
+		//}
+		sc += mlen_ts[y - 1][x + c] - mlen_ts[y - 1][x];
+		sc += mlen_bs[y + r][x + c] - mlen_bs[y + r][x];
+
+		sc += mlen_ls[y + r][x - 1] - mlen_ls[y][x - 1];
+		sc += mlen_rs[y + r][x + c] - mlen_rs[y][x + c];
+
+		chmax(ans, sc);
+	}
+
+	cout << ans << endl;
+}
+
+int main() {
+	{
+		solve();
+	}
+}
+

@@ -1,0 +1,55 @@
+import sys
+input= sys.stdin.readline
+
+
+
+def show():
+  s = []
+  c = l["next"]
+  while(c != l):
+    s.append(c["key"])
+    c = c["next"]
+  print(*s)
+
+def insert(key):
+  x = {}
+  x["key"] = key
+  x["next"] = l["next"]
+  l["next"]["prev"] = x
+  l["next"]=x
+  x["prev"]=l
+
+def delete(key):
+  c = l["next"]
+  while (c != l and c["key"] != key):
+    c = c["next"]
+  if c != l:
+    c["prev"]["next"] = c["next"]
+    c["next"]["prev"] = c["prev"]
+
+def deleteFirst():
+  c = l["next"]
+  c["prev"]["next"] = c["next"]
+  c["next"]["prev"] = c["prev"]
+
+def deleteLast():
+  c = l["prev"]
+  c["prev"]["next"] = c["next"]
+  c["next"]["prev"] = c["prev"]
+l = {}
+l["next"] = l
+l["prev"] = l
+for i in range(int(input())):
+  cmd = input()
+  if "F" in cmd:
+    deleteFirst()
+  elif "L" in cmd:
+    deleteLast()
+  else:
+    cmd2 = cmd.split(" ")
+    if "i" in cmd:
+      insert(cmd2[1])
+    else:
+      delete(cmd2[1])
+    
+show()

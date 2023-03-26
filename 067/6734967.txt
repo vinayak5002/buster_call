@@ -1,0 +1,32 @@
+class TreeNode:
+    def __init__(self, x):
+        self.val = x
+        self.left = None
+        self.right = None
+class Solution:
+
+    def reConstructBinaryTree(self, pre, tin):
+
+        if len(pre) == 0:
+            return None
+        root = TreeNode(pre[0])
+        TinIndex = tin.index(pre[0])
+        root.left = self.reConstructBinaryTree(pre[1:TinIndex+1], tin[0:TinIndex])
+        root.right = self.reConstructBinaryTree(pre[TinIndex+1:], tin[TinIndex+1:])
+        return root
+    def PostTraversal(self,root):
+        if root != None:
+            self.PostTraversal(root.left)
+            self.PostTraversal(root.right)
+            print(root.val, end=" ")
+
+if __name__ == "__main__":
+    n = input()
+    for i in range(2):
+        if i == 0:
+            pre = list(map(int, input().strip().split()))
+        if i == 1:
+            tin = list(map(int, input().strip().split()))
+    S = Solution()
+    root = S.reConstructBinaryTree(pre, tin)
+    S.PostTraversal(root)

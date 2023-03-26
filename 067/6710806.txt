@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define all(v) (v).begin(), (v).end()
+using ll = long long;
+using P = pair<ll, ll>;
+constexpr ll INF = 1e18;
+
+int main() {
+    while(true) {
+        string s;
+        cin >> s;
+        if(s == ".")
+            break;
+        string ans;
+        int t = 0;
+        for(int i = 0; i < s.size(); i++) {
+            char c = s.at(i);
+            if(c == '+') {
+                t++;
+            } else if(c == '-') {
+                t--;
+            } else if('A' <= (int)c && (int)c <= 'Z') {
+                int ch = c + t;
+                if('A' <= ch && ch <= 'Z') {
+                    ans.push_back(ch);
+                } else {
+                    int tmp = c - 'A';
+                    ch = (tmp + t) % 26;
+                    if(ch < 0)
+                        ch += 26;
+                    ch += 'A';
+                    ans.push_back(ch);
+                }
+                t = 0;
+            } else if(c == '?') {
+                ans.push_back('A');
+                t = 0;
+            } else {
+                stack<char> sta;
+                sta.push('[');
+                while(!sta.empty()) {
+                    i++;
+                    if(i>=s.size())break;
+                    if(s.at(i) != ']') {
+                        sta.push(s.at(i));
+                    } else {
+                        string tmp;
+                        while(sta.top() != '[') {
+                            tmp.push_back(sta.top());
+                            sta.pop();
+                        }
+                        // sta.pop();// [を捨てる
+                        reverse(all(tmp));
+                        for(int i = 0; i < tmp.size(); i++) {
+                            sta.push(tmp.at(i));
+                        }
+                    }
+                }
+                int size=sta.size();
+                for(int i = 0; i < size-1; i++){ans.push_back(sta.top());sta.pop();}
+            }
+        }
+        string trueans;
+        for(int i = 0; i < ans.size(); i++){
+            if(ans.at(i)=='?'){
+                trueans.push_back('A');
+            }else if(ans.at(i)!=']' || ans.at(i)!='['){
+                trueans.push_back(ans.at(i));
+            }
+        }
+        cout << ans << endl;
+    }
+    return 0;
+}

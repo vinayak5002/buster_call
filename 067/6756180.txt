@@ -1,0 +1,71 @@
+
+import scala.io.StdIn
+
+object Main {
+
+  def bubbleSort(A: Array[Int]): Int = {
+    var count = 0
+    for (i <- A.indices) {
+      for (j <- Range(A.length - 1, i, -1)) {
+        if (A(j) < A(j - 1)){
+          val temp = A(j)
+          A(j) = A(j - 1)
+          A(j - 1) = temp
+          count += 1
+        }
+      }
+    }
+    count
+  }
+  
+  def mergeA(A: Array[Int], left: Int, mid: Int, right: Int): Long = {
+    val n1 = mid - left
+    val n2 = right - mid
+
+    val l = new Array[Int](n1 + 1)
+    val r = new Array[Int](n2 + 1)
+
+    Array.copy(A, left, l, 0, l.length - 1)
+    Array.copy(A, mid, r, 0, r.length - 1)
+
+    l(n1) = Int.MaxValue
+    r(n2) = Int.MaxValue
+
+    var i = 0
+    var j = 0
+    var count = 0L
+
+    for (k <- left until right) {
+//      num += 1
+      if (l(i) <= r(j)) {
+        A(k) = l(i)
+        i += 1
+      } else {
+        A(k) = r(j)
+        j += 1
+        count += 1
+      }
+    }
+    count
+
+  }
+
+  def mergeSortA(A: Array[Int], left: Int, right: Int): Long = {
+    if (left + 1 < right) {
+      val mid = (left + right) / 2
+      val count1 = mergeSortA(A, left, mid)
+      val count2 = mergeSortA(A, mid, right)
+      val count3 = mergeA(A, left, mid, right)
+      count1 + count2 + count3 - 1
+    } else 0
+  }
+
+  def main(args: Array[String]): Unit = {
+    val n = StdIn.readInt()
+    val A = StdIn.readLine().split(" ").map(_.toInt)
+
+    // println(bubbleSort(A))
+    println(mergeeSortA(A, 0, A.length))
+  }
+}
+

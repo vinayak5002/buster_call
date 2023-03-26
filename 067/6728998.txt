@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+
+using std::cout, std::cin, std::endl;
+using lint = long long;
+
+lint n, m;
+std::vector<std::vector<lint>> e;
+std::vector<bool> seen, b;
+
+bool dfs(lint i){
+	for(lint next : e[i]){
+		if(seen[next]){
+			if(b[i] == b[next]) return false;
+		}else{
+			seen[next] = true;
+			b[next] = !b[i];
+			if(!dfs(next)) return false;
+		}
+	}
+	return true;
+}
+
+int main(){
+	while(cin >> n >> m, n && m){
+		e = std::vector(n, std::vector<lint>());
+		seen = b = std::vector(n, false);
+		for(lint i = 0; i < m; ++i){
+			lint u, v;
+			cin >> u >> v;
+			--u;
+			--v;
+			e[u].push_back(v);
+			e[v].push_back(u);
+		}
+		seen[0] = true;
+		if(dfs(0)){
+			lint count = 0;
+			for(lint i = 0; i < n; ++i){
+				count += b[i];
+			}
+			std::set<lint> ans;
+			if(count % 2 == 0) ans.insert(count / 2);
+			count = n - count;
+			if(count % 2 == 0) ans.insert(count / 2);
+			cout << ans.size() << endl;
+			for(lint t : ans) cout << t << endl;
+		}else{
+			cout << 0 << endl;
+		}
+	}
+}
+

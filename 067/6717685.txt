@@ -1,0 +1,59 @@
+#include<iostream>
+#include<vector>
+#include<algorithm>
+using namespace std;
+
+class Graph{
+private:
+	vector< vector<int> > graph;	// directed graph
+	bool cycle;	// cycle existence flag
+	vector<int> visited;	// list of visited nodes
+
+public:
+	Graph(){
+		int v, e;
+		cin >> v >> e;
+		graph.resize(v);
+
+		for(int i=0; i<e; i++){
+			int s, t;
+			cin >> s >> t;
+			graph[s].push_back(t);
+		}
+
+		cycle = false;
+	}
+
+	int checkCycle(){
+		// visit all not visited nodes
+		for(int i=0; i<graph.size(); i++){
+			visited.clear();
+			dfs(i);
+			if(cycle) break;
+//cout << endl;
+		}
+		return cycle ? 1 : 0;
+	}
+
+	void dfs(int node){
+		if(cycle) return;
+
+		visited.push_back(node);
+		for(int i=0; i<graph[node].size(); i++){
+			int next_node = graph[node][i];
+			if(find(visited.begin(), visited.end(), next_node)!=visited.end()){
+				cycle = true;
+				return;
+			}
+			dfs(next_node);
+		}
+
+		visited.pop_back();
+	}
+};
+
+int main(){
+	Graph g = Graph();
+	cout << g.checkCycle() << endl;
+	return 0;
+}

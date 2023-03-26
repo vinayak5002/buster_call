@@ -1,0 +1,65 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <functional>
+using namespace std;
+
+int main() {
+	bool t;
+	int w, h, i, j, k, n, x, y, count;
+
+	while (1) {
+		int array[101][101] = { 0 };
+		int cx[101] = { 0 };
+		int cy[101] = { 0 };
+
+		t = true;
+		cin >> w >> h;
+		if (w == 0 && h == 0) break;
+
+		for (i = 0; i < w + h - 1; i++) {
+			cin >> x >> y >> n;
+			array[y - 1][x - 1] = 1;
+			cx[x - 1] = 1;
+			cy[y - 1] = 1;
+		}
+		//条件１
+		if (cx[0] == 0) t = false;
+
+		//条件２
+		for (i = 0; i < w; i++) {
+			if (cx[i] == 0) t = false;
+		}
+		for (i = 0; i < h; i++) {
+			if (cy[i] == 0) t = false;
+		}
+
+		//条件３
+		for (i = 0; i < h; i++) {
+			for (j = 0; j < w; j++) {
+				if (array[i][j] == 1) {
+					count = 0;
+					for (k = 0; k < w; k++) {
+						if (array[i][k] == 1) count++;
+					}
+					for (k = 0; k < h; k++) {
+						if (array[k][j] == 1) count++;
+					}
+					if (count == 2) {
+						t = false;
+						i = j = 100;
+						break;
+					}
+				}
+			}
+		}
+
+		if (t) {
+			cout << "YES" << endl;
+		}
+		else {
+			cout << "NO" << endl;
+		}
+	}
+	return 0;
+}

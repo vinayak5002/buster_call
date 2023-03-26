@@ -1,0 +1,137 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+struct yuri {
+    ll num,den;
+    yuri() : num(0),den(1) {}
+    yuri(ll a) : num(a),den(1){}
+    yuri(ll a,ll b) : num(a),den(b){safe();}
+    void safe(){
+        if(den<0)den*=-1,num*=-1;
+        ll v=__gcd(abs(num),den);
+        num/=v,den/=v;
+    }
+    yuri& operator++() {num+=den;return *this;}
+    yuri& operator--() {num-=den;return *this;}
+    yuri& operator+=(const yuri& rhs) {
+        num=num*rhs.den+den*rhs.num;
+        den=den*rhs.den;
+        safe();
+        return *this;
+    }
+    yuri& operator-=(const yuri& rhs) {
+        num=num*rhs.den-den*rhs.num;
+        den=den*rhs.den;
+        safe();
+        return *this;
+    }
+    yuri& operator*=(const yuri& rhs) {
+        num=num*rhs.num;
+        den=den*rhs.den;
+        safe();
+        return *this;
+    }
+    yuri& operator/=(const yuri& rhs) {
+        num=num*rhs.den;
+        den=den*rhs.num;
+        safe();
+        return *this ; 
+    }
+    yuri operator+() const { return *this; }
+    yuri operator-() const { return yuri() - *this; }
+    friend yuri operator+(const yuri& lhs, const yuri& rhs) {
+        return yuri(lhs) += rhs;
+    }
+    friend yuri operator-(const yuri& lhs, const yuri& rhs) {
+        return yuri(lhs) -= rhs;
+    }
+    friend yuri operator*(const yuri& lhs, const yuri& rhs) {
+        return yuri(lhs) *= rhs;
+    }
+    friend yuri operator/(const yuri& lhs, const yuri& rhs) {
+        return yuri(lhs) /= rhs;
+    }
+    friend bool operator==(const yuri& lhs, const yuri& rhs) {
+        return (lhs.num==rhs.num&&lhs.den==rhs.den);
+    }
+    friend bool operator!=(const yuri& lhs, const yuri& rhs) {
+        return (lhs.num!=rhs.num||lhs.den!=rhs.den);
+    }
+    friend bool operator<(const yuri& lhs, const yuri& rhs) {
+        return (lhs.num*rhs.den<lhs.den*rhs.num);
+    }
+    friend bool operator<=(const yuri& lhs, const yuri& rhs) {
+        return (lhs.num*rhs.den<=lhs.den*rhs.num);
+    }
+    friend bool operator>(const yuri& lhs, const yuri& rhs) {
+        return (lhs.num*rhs.den>lhs.den*rhs.num);
+    }
+    friend bool operator>=(const yuri& lhs, const yuri& rhs) {
+        return (lhs.num*rhs.den>=lhs.den*rhs.num);
+    }
+    friend ostream& operator << (ostream &os, const yuri& rhs) noexcept {
+        if(rhs.den==1)return os << rhs.num;
+        return os << rhs.num << '/' << rhs.den;
+    }
+};
+
+int main(){
+    int p, q;
+    while(cin >> p >> q, p){
+        vector<string> A(p), B(q);
+        string O = "({[", C = ")}]";
+        array<int,4> a{};
+        vector<array<int,4>> b, c;
+        for(auto &&s:A){
+            cin >> s;
+            int cnt = 0;
+            while(cnt < s.size() && s[cnt] == '.')cnt++;
+            a[3] = cnt;
+            b.push_back(a);
+            for(int i = 0; i < s.size(); i++){
+                for(int j = 0; j < 3; j++){
+                    if(s[i] == O[j])a[j]++;
+                    if(s[i] == C[j])a[j]--;
+                }
+            }
+        }
+        fill(a.begin(), a.end(), 0);
+        for(auto &&s:B){
+            cin >> s;
+            c.push_back(a);
+            for(int i = 0; i < s.size(); i++){
+                for(int j = 0; j < 3; j++){
+                    if(s[i] == O[j])a[j]++;
+                    if(s[i] == C[j])a[j]--;
+                }
+            }
+        }
+        vector<vector<int>> ans(q);
+        for(int i1 = 1; i1 <= 20; i1++){
+            for(int i2 = 1; i2 <= 20; i2++){
+                for(int i3 = 1; i3 <= 20; i3++){
+                    bool flag = false;
+                    for(int i = 0; i < p; i++){
+                        if(i1 * b[i][0] + i2 * b[i][1] + i3 * b[i][2] != b[i][3]){
+                            flag = true;
+                            break;
+                        }
+                    }
+                    if(flag)continue;
+                    for(int i = 0; i < q; i++){
+                        ans[i].push_back(i1 * c[i][0] + i2 * c[i][1] + i3 * c[i][2]);
+                    }
+                }
+            }
+        }
+        for(int i = 0; i < q; i++){
+            sort(ans[i].begin(), ans[i].end());
+            ans[i].erase(unique(ans[i].begin(), ans[i].end()), ans[i].end());
+            if(i)cout << " ";
+            if(ans[i].size() == 1)cout << ans[i][0];
+            else cout << -1;
+        }
+        cout << '\n';
+    }
+}

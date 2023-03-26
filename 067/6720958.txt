@@ -1,0 +1,103 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#pragma GCC target("avx")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+
+using ull = unsigned long long;
+using ll = long long;
+using vi = vector<int>;
+using vl = vector<long>;
+using vll = vector<long long>;
+using vvi = vector<vi>;
+using vvl = vector<vl>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using pii = pair<int, int>;
+
+#define all(obj) (obj).begin(), (obj).end()
+#define reps(i, a, n) for (ll i = (a); i < (ll)(n); ++i)
+#define rep(i, n) reps(i, 0, n)
+#define rrep(i, n) reps(i, 1, n + 1)
+#define repd(i, n) for (ll i = n - 1; i >= 0; i--)
+#define rrepd(i, n) for (ll i = n; i >= 1; i--)
+#define debug(x)                                                    \
+    cerr << "\033[33m(line:" << __LINE__ << ") " << #x << ": " << x \
+         << "\033[m"                                                \
+         << "\n";
+template <typename T>
+inline void print(const vector<T>& v, string s = " ") {
+    rep(i, v.size()) cout << v[i] << (i != (ll)v.size() - 1 ? s : "\n");
+}
+template <typename T, typename S>
+inline void print(const pair<T, S>& p) {
+    cout << p.first << " " << p.second << "\n";
+}
+template <typename T>
+inline void print(const T& x) {
+    cout << x << "\n";
+}
+
+#define INF -1000000
+
+ll w, h;
+ll xi, yi, ni;
+ll a[110][110];
+ll x[110], y[110];
+bool solve() {
+    rep(i, w + h - 1) {
+        cin >> xi >> yi >> ni;
+        a[yi - 1][xi - 1] = ni;
+    }
+    queue<pair<ll, ll>> q;
+    q.push(pair<ll, ll>(0, 0));
+    while (!q.empty()) {
+        pair<ll, ll> tmp = q.front();
+        q.pop();
+        if (tmp.first == 0) {
+            rep(i, w) {
+                if (x[i] == INF) continue;
+                rep(j, h) {
+                    if (a[j][i] != INF && y[j] == INF) {
+                        y[j] = a[j][i] - x[i];
+                        q.push(pair<ll, ll>(1, i));
+                    }
+                }
+            }
+        } else {
+            rep(i, h) {
+                if (y[i] == INF) continue;
+                rep(j, w) {
+                    if (a[i][j] != INF && x[j] == INF) {
+                        x[j] = a[i][j] - y[i];
+                        q.push(pair<ll, ll>(0, i));
+                    }
+                }
+            }
+        }
+    }
+    rep(i, w) if (x[i] == INF) return false;
+    rep(i, h) if (y[i] == INF) return false;
+    return true;
+}
+void reset() {
+    rep(i, 110) {
+        rep(j, 110) a[i][j] = INF;
+        x[i] = INF;
+        y[i] = INF;
+    }
+    x[0] = 0;
+}
+
+int main(void) {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(0);
+    while (1) {
+        cin >> w >> h;
+        if (w == 0 && h == 0) break;
+        reset();
+        print(solve() ? "YES" : "NO");
+    }
+    return 0;
+}

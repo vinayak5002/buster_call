@@ -1,0 +1,89 @@
+#include<bits/stdc++.h>
+#define rep(i,n) for(int i=0; i< (n); i++)
+using namespace std;
+typedef long long ll;
+typedef pair<ll, ll> P;
+const ll inf = (1ll<<60);
+//const int mod = 998244353;
+const int mod = 1000000007;
+
+int main(){
+    while(1){
+        int n;
+        cin>>n;
+        if(n==0) break;
+        map<P,ll> seg;
+
+        map<ll,map<ll,ll>> ele;
+        rep(y,n){
+            char c; cin>>c;
+            seg.insert(make_pair(make_pair(-1,-1),-1));
+            if(c=='W'){
+                ll a,b;cin>>a>>b;
+                ll le=0;
+                ll ri=b-1;
+                auto it=seg.begin();
+                while(ri>-1){
+                    if(le > 1000000000){
+                        break;
+                    }
+                    if(it== seg.end()){
+                        ll g=min(le+ri,ll(1000000000));
+
+                        seg.insert(make_pair(make_pair(le,g),a));
+                        ele[a].insert(make_pair(le,g));
+                        ri=-1;
+
+                    }else if(le <= it->first.first-1){
+
+                        int g; g=min(ri,(it->first.first-1)-le);
+                        //cout<<"G "<<g<<endl;
+                        ri-=g+1;
+                        seg.insert(make_pair(make_pair(le,le+g),a));
+                        ele[a].insert(make_pair(le,le+g));
+                    }
+                    //cout<<le<<" "<<ri<<endl;
+
+                    le=it->first.second+1;
+                    it++;
+                    //cout<<"next"<<le<<endl;;
+                }
+                //cout<<"W"<<endl;
+
+            }else if(c=='D'){
+
+                int a; cin>>a;
+                for(auto k : ele[a]){
+                    seg.erase(make_pair(k.first,k.second));
+                    //cout<<k.first<<" "<<k.second<<endl;
+                }
+                ele.erase(a);
+                //cout<<"D"<<endl;
+            }else{
+                ll a;cin>>a; a--;
+                auto it = seg.upper_bound(make_pair(a+1,0));
+                it--;
+                //cout<<"a"<<" ";
+                if(it != seg.end() && it->first.first <=a && a<= it->first.second){
+                    cout<<it->second<<endl;
+                }else{
+                    cout<<-1<<endl;
+                }
+
+            }
+            /*cout<<"seg"<<endl;
+            for(auto a:seg){
+                cout<<(a.first.first)<<" "<<(a.first.second)<<" "<<a.second<<endl;
+            }
+            cout<<"ele"<<endl;
+            for(auto a:ele){
+                cout<<a.first<<endl;
+                for(auto k : a.second){
+                   cout<<(k.first)<<" "<<k.second<<endl;
+                }
+            }*/
+
+        }
+        cout<<endl;
+    }
+}

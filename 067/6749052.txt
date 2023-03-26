@@ -1,0 +1,67 @@
+
+"""
+
+dp[i][a][b] = i番目まで見て、最少がa,次がbの時がありうるか
+
+dp[i][a] = [b1,b2,...]
+i番目まで見て、最少がaの時にありうるbの一覧
+
+とすれば後は簡単
+
+"""
+
+import sys
+from sys import stdin
+
+ANS = []
+
+while True:
+
+    n = int(stdin.readline())
+    if n == 0:
+        break
+    
+    b = list(map(int,stdin.readline().split()))
+
+    dp = [ [] for i in range(2501) ]
+    dp[0].append(0)
+
+    nsum = 0
+    
+    for v in b:
+
+        ndp = [ [] for i in range(2501) ]
+        
+
+        for lasta in range(2501):
+            for lastb in dp[lasta]:
+
+                lastc = nsum - (lasta + lastb)
+
+                #add a
+                newa,newb,newc = sorted([lasta + v,lastb,lastc])
+                ndp[newa].append(newb)
+
+                #add b
+                newa,newb,newc = sorted([lasta,lastb + v,lastc])
+                ndp[newa].append(newb)
+
+                #add c
+                newa,newb,newc = sorted([lasta,lastb,lastc + v])
+                ndp[newa].append(newb)
+                
+        nsum += v
+        dp = ndp
+
+        #print (ndp)
+
+
+    ans = 0
+    for i in range(2501):
+        if dp[i]:
+            ans = max(ans , i)
+
+    ANS.append(str(ans))
+
+print ("\n".join(ANS))
+

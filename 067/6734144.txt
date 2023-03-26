@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+//#include<atcoder/all>
+using namespace std;
+//using namespace atcoder;
+#define rep(i,n) for (int i=0;i<(n);i++)
+using ll = long long;
+using P = pair<int, int>;
+using C = complex<double>;
+using Graph = vector<vector<int>>;
+//using mint = modint998244353;
+template<class T> inline bool chmin(T& a, T b) { if (a > b) { a = b; return true; } return false; }
+template<class T> inline bool chmax(T& a, T b) { if (a < b) { a = b; return true; } return false; }
+
+
+int main(){
+    int n, k;
+    ll l, r;
+    cin>>n>>k>>l>>r;
+    vector<ll> a(n);
+    rep(i,n) cin>>a[i];
+
+    vector<vector<ll>> b(21);
+    rep(i,(1<<n/2)){
+        int cnt=0;
+        ll sum=0;
+        rep(j,n/2){
+            if(i&(1<<j)){
+                cnt++;
+                sum+=a[j];
+            }
+        }
+        b[cnt].push_back(sum);
+    }
+
+    vector<vector<ll>> c(21);
+    rep(i,(1<<(n-n/2))){
+        int cnt=0;
+        ll sum=0;
+        rep(j,(n-n/2)){
+            if(i&(1<<j)){
+                cnt++;
+                sum+=a[n/2+j];
+            }
+        }
+        c[cnt].push_back(sum);
+    }
+
+    rep(i,21){
+        sort(c[i].begin(), c[i].end());
+    }
+
+    int ans=0;
+    rep(i,21){
+        for(auto x: b[i]){
+            if(k-i<0 || k-i>n) continue;
+            int pos1=lower_bound(c[k-i].begin(), c[k-i].end(),l-x)-c[k-i].begin();
+            int pos2=upper_bound(c[k-i].begin(), c[k-i].end(),r-x)-c[k-i].begin();
+            if(pos1<=pos2) ans+=pos2-pos1;
+        }
+    }
+    cout<<ans<<endl;
+    return 0;
+}

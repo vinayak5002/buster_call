@@ -1,0 +1,173 @@
+#include<cstdio>
+#include<cctype>
+#include<queue>
+
+#define maxn 111
+#define maxm 1111
+
+const int INF=1e9;
+
+template<class T>
+
+inline T read(){
+	T r=0,f=0;
+	char c;
+	while(!isdigit(c=getchar()))f|=(c=='-');
+	while(isdigit(c))r=(r<<1)+(r<<3)+(c^48),c=getchar();
+	return f?-r:r;
+}
+
+template<class T>
+
+inline T min(T a,T b){
+	return a<b?a:b;
+}
+
+template<class T>
+
+inline T max(T a,T b){
+	return a>b?a:b;
+}
+
+template<int MAXN,int MAXM,int MOD>
+
+struct MCMF{
+
+	struct E{
+		int v,c,w,nxt;
+		E() {}
+		E(int v,int c,int w,int nxt):v(v),c(c),w(w),nxt(nxt) {}
+	}e[MAXM<<1];
+
+	int n,s,t,s_e,head[MAXN],h[MAXN],dis[MAXN];
+
+	bool in[MAXN],vis[MAXN],used[MAXN];
+
+	int hd,tl,que[MOD];
+
+	inline void init(int N,int S,int T){
+		n=N,s=S,t=T,s_e=1;
+		for(int i=1;i<=n;i++)
+			head[i]=h[i]=0;
+	}
+
+	inline void a_e(int u,int v,int c,int w){
+		e[++s_e]=E(v,c,w,head[u]);
+		head[u]=s_e;
+	}
+
+	inline void add(int u,int v,int c,int w){
+		a_e(u,v,c,w),a_e(v,u,0,-w);
+	}
+
+	inline bool SPFA(){
+		for(int i=1;i<=n;i++)
+			dis[i]=INF,vis[i]=0;
+		hd=tl=0,que[tl++]=s,dis[s]=0,in[s]=1;
+		while(hd^tl){
+			int u=que[hd++];
+			hd&=MOD-1;
+			for(int i=head[u];i;i=e[i].nxt){
+				int v=e[i].v,w=e[i].w;
+				if(!e[i].c||dis[v]<=dis[u]+w)
+					continue;
+				dis[v]=dis[u]+w;
+				if(!in[v]){
+					que[tl++]=v;
+					in[v]=1,tl&=MOD-1;
+				}
+			}
+			in[u]=0;
+		}
+		return dis[t]<1e9;
+	}
+
+	inline int cost(int i){
+		return h[e[i^1].v]-h[e[i].v]+e[i].w;
+	}
+
+	std::priority_queue<std::pair<int,int> > q;
+
+	inline bool Dij(){
+		q.push({dis[s]=0,s});
+		while(!q.empty()){
+			int u=q.top().second;
+			q.pop();
+			if(used[u])continue;
+			used[u]=1;
+			for(int i=head[u];i;i=e[i].nxt){
+				int v=e[i].v;
+				if(e[i].c&&dis[v]>dis[u]+cost(i)){
+					dis[v]=dis[u]+cost(i);
+					q.push({-dis[v],v});
+				}
+			}
+		}
+		return used[t];
+	}
+
+	int dfs(int u,int f){
+		if(u==t)return f;
+		vis[u]=1;
+		int d=0,used=0;
+		for(int i=head[u];i;i=e[i].nxt){
+			int v=e[i].v;
+			if(vis[v]||!e[i].c||dis[u]+cost(i)!=dis[v])continue;
+			if(!(d=dfs(v,min(e[i].c,f-used))))continue;
+			e[i].c-=d,e[i^1].c+=d,used+=d;
+			if(used==f)break;
+		}
+		vis[u]=!used;
+		return used;
+	}
+
+	inline void Init(){
+		for(int i=1;i<=n;i++)
+			h[i]+=dis[i],dis[i]=INF,vis[i]=used[i]=0;
+	}
+
+	inline int solve(){
+		int ans=0;
+		if(!SPFA())return 0;
+		ans+=dfs(s,INF)*dis[t],Init();
+		while(Dij())
+			ans+=dfs(s,INF)*(dis[t]+h[t]-h[s]),Init();
+		return ans;
+	}
+
+};
+
+int n,m,d[maxn],f[maxn][maxn];
+
+MCMF<maxn,maxm,1<<18> mcmf;
+
+int main(){
+	n=read<int>();
+	m=read<int>();
+	int s=n+1,t=s+1;
+	mcmf.init(t,s,t);
+	for(int i=1;i<=n;i++)
+		for(int j=1;j<=n;j++)
+			f[i][j]=-1e9;
+	int sum=0;
+	for(int i=1;i<=m;i++){
+		int u=read<int>()+1;
+		int v=read<int>()+1;
+		int w=read<int>();
+		d[u]++,d[v]--;
+		f[u][v]=w,sum+=w;
+		mcmf.add(v,u,INF,-w);
+	}
+	for(int i=1;i<=n;i++){
+		f[i][i]=0;
+		if(d[i]>0)mcmf.add(s,i,d[i],0);
+		else mcmf.add(i,t,-d[i],0);
+	}
+	for(int k=1;k<=n;k++)
+		for(int i=1;i<=n;i++)
+			for(int j=1;j<=n;j++)
+				f[i][j]=max(f[i][j],f[i][k]+f[k][j]);
+	mcmf.add(1,n,INF,f[1][n]);
+	printf("%d\n",mcmf.solve()-sum);
+	return 0;
+}

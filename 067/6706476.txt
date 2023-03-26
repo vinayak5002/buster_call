@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    int N, E, T;
+    cin >> N >> E >> T;
+    --T;
+    vector<int> W(N);
+    for (auto& x : W) cin >> x;
+    vector<vector<int>> S(E);
+    vector<int> G(E);
+    rep(i,0,E) {
+        int C;
+        cin >> G[i] >> C;
+        --G[i];
+        S[i].resize(C);
+        for (auto& x : S[i]) cin >> x, --x;
+    }
+    vector<int> dist(N, 1e9);
+    using P = pair<int, int>;
+    priority_queue<P, vector<P>, greater<>> pq;
+    rep(i,0,N) if (W[i]) {
+        dist[i] = 1;
+        pq.push({i, 1});
+    }
+    vector<bool> visited(N);
+    while (!pq.empty()) {
+        int d, i;
+        tie(d, i) = pq.top();
+        pq.pop();
+        if (d > dist[i]) continue;
+        rep(j,0,E) {
+            if (visited[G[j]]) continue;
+            vector<int> cost;
+            for (int k : S[j]) cost.push_back(dist[k]);
+            sort(all(cost));
+            reverse(all(cost));
+            int m = 0;
+            rep(k,0,cost.size()) chmax(m, k+cost[k]);
+            if (m < dist[G[j]]) {
+                dist[G[j]] = m;
+                pq.push({m, G[j]});
+            }
+        }
+    }
+    cout << (dist[T] < 1e9 ? dist[T] : -1) << endl;
+}

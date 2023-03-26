@@ -1,0 +1,63 @@
+use std::io;
+use std::iter::zip;
+
+fn main() {
+
+    let mut str_list: Vec<_> = vec![];
+    let mut h_list: Vec<_> = vec![];
+
+    loop {
+        let mut s = String::new();
+        io::stdin().read_line(&mut s).expect("Error");
+        let str = s.trim().to_string();
+
+        if str == "-" {
+            break;
+        } else {
+
+            str_list.push(str);
+
+            let mut sm = String::new();
+            io::stdin().read_line(&mut sm).expect("Error");
+            let m = sm.trim().parse().unwrap_or(0);
+
+            let mut h_vec: Vec<i32> = vec![];
+
+            for i in 0..m as usize {
+
+                let mut sh = String::new();
+                io::stdin().read_line(&mut sh).expect("Error");
+                h_vec.push(sh.trim().parse().unwrap_or(0))
+            }
+            h_list.push(h_vec);
+        }
+    }
+
+    let mut result_list: Vec<_> = vec![];
+
+    for (target_str, shuffle_counts) in zip(str_list, h_list) {
+        // let target_str_vec: Vec<_> = target_str.chars().collect();
+        let mut shuffle_vec = vec![];
+        for (index, shuffle_num) in shuffle_counts.iter().enumerate() {
+            if index == 0 {
+                shuffle_vec = target_str.chars().collect();
+            }
+            for x in 0..*shuffle_num {
+                let s = shuffle_vec.split_first().unwrap();
+                let mut base_vec = s.1.to_vec();
+                let cons = *s.0 as char;
+                base_vec.push(cons);
+                shuffle_vec = base_vec;
+            }
+        }
+        result_list.push(shuffle_vec);
+    }
+
+    for i in result_list {
+        for j in i {
+            print!("{}", j)
+        }
+        println!()
+    }
+}
+

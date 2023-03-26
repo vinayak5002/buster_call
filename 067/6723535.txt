@@ -1,0 +1,43 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    int N, M, L, K, A, H, u, v, t, c, d, INF = 1 << 30;
+    while(cin >> N >> M >> L >> K >> A >> H, N){
+        vector<bool> R(N);
+        vector<vector<pair<int,int>>> g(N);
+        vector<vector<int>> dp(N, vector<int>(M + 1, INF));
+        for(int i = 0; i < L; i++){
+            cin >> v;
+            R[v] = true;
+        }
+        for(int i = 0; i < K; i++){
+            cin >> u >> v >> t;
+            g[u].emplace_back(v, t);
+            g[v].emplace_back(u, t);
+        }
+        priority_queue<tuple<int,int,int>, vector<tuple<int,int,int>>, greater<tuple<int,int,int>>> pq;
+        dp[A][0] = 0;
+        pq.push(make_tuple(0, A, 0));
+        while(!pq.empty()){
+            tie(d, v, t) = pq.top();
+            pq.pop();
+            if(d > dp[v][t])continue;
+            if(t >= 1 && R[v] && d + 1 < dp[v][t - 1]){
+                dp[v][t - 1] = d + 1;
+                pq.push(make_tuple(d + 1, v, t - 1));
+            }
+            for(auto &&p:g[v]){
+                tie(u, c) = p;
+                if(c + t > M)continue;
+                if(d + c >= dp[u][t + c])continue;
+                dp[u][t + c] = d + c;
+                pq.push(make_tuple(d + c, u, t + c));
+            }
+        }
+        int ans = INF;
+        for(int i = 0; i <= M; i++)ans = min(ans, dp[H][i]);
+        if(ans == INF)cout << "Help!" << '\n';
+        else cout << ans << '\n';
+    }
+}

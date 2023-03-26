@@ -1,0 +1,73 @@
+#include<bits/stdc++.h>
+#define ll long long
+#define NUL -1
+using namespace std;
+
+int n, q;
+
+int inf = pow(2, 31) - 1;
+
+vector<int> D(300005, inf);
+vector<int> lazy(300005, NUL);
+
+void lazy_evaluate(int k) {
+    if (lazy.at(k) == NUL) return;
+    D.at(k) = lazy.at(k);
+    if (k < n - 1) {
+        lazy.at(k * 2 + 1) = lazy.at(k);
+        lazy.at(k * 2 + 2) = lazy.at(k);
+    }
+    lazy.at(k) = NUL;
+    return;
+}
+
+void update (int a, int b, int k, int l, int r, int x) {
+    if (r <= a || b <= l) return;
+    if (a <= l && r <= b) {
+        lazy.at(k) = x;
+        lazy_evaluate(k);
+    }
+    else {
+        update(a, b, k * 2 + 1, l, (l + r) / 2, x);
+        update(a, b, k * 2 + 2, (l + r) / 2, r, x);
+    }
+    return;
+}
+
+int query(int a, int b, int k, int l, int r) {
+    lazy_evaluate(k);
+    if (r <= a || b <= l) return inf;
+    if (a <= l && r <= b) return D.at(k);
+    else {
+        int vl = query(a, b, k * 2 + 1, l, (l + r) / 2);
+        int vr = query(a, b, k * 2 + 2, (l + r) / 2, r);
+        return min (vl, vr);
+    }
+
+}
+
+int find (int a, int b) {
+    return query(a, b + 1, 0, 0, n);
+}
+
+int main() {
+    cin >> n >> q;
+
+    int nn = 1;
+    while (n > nn) {
+        nn *= 2;
+    }
+
+    n = nn;
+
+    for (int i = 0; i < q; i++) {
+        int com, s, t;
+        cin >> com >> s >> t;
+        if (com == 0) {
+            int x;
+            cin >> x;
+            update(s, t + 1, 0, 0, n, x);
+        }
+        else if (com == 1) cout << find(s, t) << endl;
+    }
+}

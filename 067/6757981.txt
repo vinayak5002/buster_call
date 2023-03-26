@@ -1,0 +1,37 @@
+def c(z1, z2):
+    x = (z1 + z2) / 2
+    y = (z2 - z1) * 1j * (1 - (abs(z1 - z2) / 2) ** 2) ** 0.5 / abs(z1 - z2)
+    return x + y, x - y
+
+def slv(N, X, Y):
+    if N == 1:
+        print(1)
+        return
+    ans = 1
+    for i in range(N - 1):
+        for j in range(i + 1, N):
+            z1, z2 = complex(X[i], Y[i]), complex(X[j], Y[j])
+            if abs(z1 - z2) <= 2:
+                p1, p2 = c(z1, z2)
+                res = 0
+                for k in range(N):
+                    if abs(p1 - complex(X[k], Y[k])) <= 1:
+                        res += 1
+                ans = max(ans, res)
+                res = 0
+                for k in range(N):
+                    if abs(p2 - complex(X[k], Y[k])) <= 1:
+                        res += 1
+                ans = max(ans, res)
+    print(ans)
+                
+while True:
+    N = int(input())
+    if N == 0:
+        exit()
+    X, Y = [], []
+    for _ in range(N):
+        x, y = map(float, input().split())
+        X.append(x)
+        Y.append(y)
+    slv(N, X, Y)

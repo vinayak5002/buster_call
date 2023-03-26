@@ -1,0 +1,108 @@
+#include <iostream>
+#include <vector>
+
+struct Card
+{
+    char mark;
+    int number;
+    bool operator==(const Card &rhv) const //中身が変わらないですよ～のconst
+    {
+        return this->mark == rhv.mark && this->number == rhv.number;
+    }
+    bool operator<=(const Card &rhv) const //中身が変わらないですよ～のconst
+    {
+        return this->number <= rhv.number;
+    }
+    bool operator<(const Card &rhv) const //中身が変わらないですよ～のconst
+    {
+        return this->number < rhv.number;
+    }
+};
+
+void bubbleSort(std::vector<Card> &C)
+{
+    for (size_t i = 0; i < C.size(); i++)
+    {
+        for (size_t j = C.size() - 1; j > i; j--)
+        {
+            if (C[j] < C[j - 1])
+            {
+                std::swap(C[j], C[j - 1]);
+            }
+        }
+    }
+}
+
+int partition(std::vector<Card> &A, int p, int r)
+{
+    // if (p > r)
+    // {
+    //     return p;
+    // }
+
+    Card x = A[r];
+    int i = p - 1;
+    for (int j = p; j < r; j++)
+    {
+        if (A[j] <= x)
+        {
+            i++;
+            std::swap(A[i], A[j]);
+        }
+    }
+
+    std::swap(A[i + 1], A[r]);
+    return i + 1;
+}
+
+void quickSort(std::vector<Card> &A, int p, int r)
+{
+    if (p < r)
+    {
+        int q = partition(A, p, r);
+        partition(A, p, q - 1);
+        partition(A, q + 1, r);
+    }
+}
+
+bool isStable(std::vector<Card> &A, std::vector<Card> &B)
+{
+    for (size_t i = 0; i < A.size(); i++)
+    {
+        if (A[i].mark != B[i].mark)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+int main()
+{
+    int n;
+    std::cin >> n;
+    std::vector<Card> A(n);
+    for (int i = 0; i < n; i++)
+    {
+        std::cin >> A[i].mark >> A[i].number;
+    }
+
+    std::vector<Card> Bubble = A;
+
+    bubbleSort(Bubble);
+    quickSort(A, 0, n - 1);
+
+    std::cout << (isStable(A, Bubble) ? "Stable" : "Not stable") << std::endl;
+
+    for (size_t j = 0; j < A.size(); j++)
+    {
+        std::cout << A[j].mark << " " << A[j].number << std::endl;
+    }
+
+    return 0;
+}
+
+// 2
+// S 1
+// H 1
+//の時「H 1」が変な数字になる（消える）

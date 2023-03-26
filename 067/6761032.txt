@@ -1,0 +1,69 @@
+import java.util.Scanner
+import scala.annotation.tailrec
+
+object Main extends App {
+  class Node(val id:Int = -1, var parent:Int = -1, var left:Int = -1, var right:Int = -1)
+  object IdOrdering extends Ordering[Node] {
+    def compare(x: Node, y: Node): Int = x.id compare y.id
+  }
+  val sc = new Scanner(System.in)
+  val N = sc.nextInt()
+  var nodes = (for ( _ <- 0 until N)
+    yield new Node(id = sc.nextInt(),-1,left=sc.nextInt(), right=sc.nextInt())).toArray.sorted(IdOrdering)
+
+  def findById(id:Int):Option[Int] = {
+    @tailrec
+    def iterate(l:Int, r:Int): Option[Int] = {
+      if (l <= r) {
+        val m = (l + r) >> 1
+        nodes(m).id match {
+          case x if x < id => iterate(m+1, r)
+          case x if x > id => iterate(l, m-1)
+          case _ => Some(m)
+        }
+      } else None
+    }
+    if (id < 0) None
+    else iterate(0, N)
+  }
+
+  def rootIndex:Int = {
+    @tailrec
+    def iterate(i:Int):Int = {
+      if (nodes(i).parent < 0) i
+      else iterate(findById(nodes(i).parent).get)
+    }
+    iterate(0)
+  }
+
+  def traverse(order:String):List[Int] = {
+    def iterate(optIdx:Option[Int], ac:List[Int]):List[Int] = optIdx match {
+      case None => ac
+      case Some(i) =>
+        val id = nodes(i).id
+        val optL = findById(nodes(i).left)
+        val optR = findById(nodes(i).right)
+        order match {
+          case "Preorder" =>
+            val bc = iterate(optL, id::ac)
+            iterate(optR, bc)
+          case "Inorder" =>
+            val bc = iterate(optL, ac)
+            iterate(optR, id::bc)
+          case _ =>
+            val bc = iterate(optL, ac)
+            id::iterate(optR, bc)
+        }
+    }
+    iterate(Some(rootIndex), Nil).reverse
+  }
+
+  for (n <- nodes) {
+    findById(n.left).foreach(nodes(_).parent = n.id)
+    findById(n.right).foreach(nodes(_).parent = n.id)
+  }
+  for (order <- List("Preorder", "Inorder", "Postorder")) {
+    println(order)
+    println(s" ${traverse(order).mkString(" ")}")
+  }
+}

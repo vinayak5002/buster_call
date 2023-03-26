@@ -1,0 +1,33 @@
+from collections import deque
+dx = [-1, 0, 1, 0]
+dy = [0, -1, 0, 1]
+is_wall = [
+        (lambda x,y: right[y][x-1]),
+        (lambda x,y: bottom[y-1][x]),
+        (lambda x,y: right[y][x]),
+        (lambda x,y: bottom[y][x]),
+        ]
+while 1:
+    w, h = map(int, raw_input().split())
+    if w==h==0: break
+    bottom = []
+    right = []
+    for i in xrange(2*h-1):
+        walls = map(int, raw_input().split()) + [1]
+        (bottom if i%2 else right).append(walls)
+    bottom.append([1] * w)
+
+    dist = [[0]*w for i in xrange(h)]
+    deq = deque()
+    deq.append((1, 0, 0))
+    dist[0][0] = 1
+    while deq:
+        co, x, y = deq.popleft()
+        for k in xrange(4):
+            if is_wall[k](x, y): continue
+            nx = x + dx[k]; ny = y + dy[k]
+            if dist[ny][nx]: continue
+            dist[ny][nx] = co+1
+            deq.append((co+1, nx, ny))
+    print dist[h-1][w-1]
+

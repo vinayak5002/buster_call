@@ -1,0 +1,58 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+vector<int> topological_sort(vector<vector<int> > &G, vector<int> &indegree, int V) {
+
+    vector<int> sorted_vertices;
+
+    // 入次数が0の頂点を発見したら、処理待ち頂点としてキューに追加する
+    queue<int> que;
+    for (int i = 0; i < V; i++) {
+        if (indegree[i] == 0) {
+            que.push(i);
+        }
+    }
+
+    while (que.empty() == false) {
+        // キューの先頭の頂点を取り出す
+        int v = que.front();
+        que.pop();
+
+        // その頂点と隣接している頂点の入次数を減らし、0になればキューに追加
+        for (int i = 0; i < G[v].size(); i++) {
+            int u = G[v][i];
+            indegree[u] -= 1;
+            if (indegree[u] == 0) que.push(u);
+        }
+        // 頂点vを配列の末尾に追加する 
+        sorted_vertices.push_back(v);
+    }
+
+    return sorted_vertices;
+}
+
+int main() {
+    int V, E;
+    cin >> V >> E;
+    vector<vector<int> > G(V);
+    vector<int> indegree(V);
+    for (int i = 0; i < E; i++) {
+        int u, v;
+        cin >> u >> v;
+        G[u].push_back(v);
+        indegree[v] += 1;
+    }
+
+    vector<int> sorted_vertices = topological_sort(G, indegree, V);
+
+    // BFSで実装されたトポロジカルソートの場合、ソートされたDAGはグラフの頂点の数が等しい
+    if(G.size() == sorted_vertices.size()){
+        cout << 0 << endl;
+    }else{
+        cout << 1 << endl;
+    }
+
+    return 0;
+}

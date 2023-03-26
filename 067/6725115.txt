@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+using namespace std;
+#if __has_include(<atcoder/all>)
+    #include <atcoder/all>
+using namespace atcoder;
+#endif
+typedef long long ll;
+typedef pair<ll, ll> P;
+typedef tuple<ll, ll, ll> T;
+#define rep(i, n) for(ll i = 0; i < n; i++)
+
+int main() {
+    
+    while(true){
+        int n,m,t,p; cin >> n >> m >> t >> p;
+        if(n == 0 && m == 0 && t == 0 && p == 0)break;
+        vector<vector<int>> field(m*t,vector<int>(n*t,0));
+        rep(i,m)rep(j,n)field[i][j] = 1;
+
+        int x = 0,y = 0;
+        while(t--){
+            int d,c; cin >> d >> c;
+            if(d == 1){
+                y += c;
+                rep(i,m){
+                    rep(j,c){
+                        field[x+i][y+j] += field[x+i][y-j-1];
+                    }
+                }
+            }
+            else{
+                x += c;
+                rep(i,c){
+                    rep(j,n){
+                        field[x+i][y+j] += field[x-i-1][y+j];
+                    }
+                }
+            }
+        }
+        while(p--){
+            int dx,dy; cin >> dy >> dx;
+            cout <<  field[x+dx][y+dy] << endl;
+        }
+    }
+    return 0;
+}

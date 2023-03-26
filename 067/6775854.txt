@@ -1,0 +1,181 @@
+えんだーど君へ！
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+
+#ifndef UNION_FIND_HPP
+#define UNION_FIND_HPP
+
+#include <utility>
+#include <vector>
+
+//===
+struct UnionFind {
+  std::vector<int> parent;
+
+  UnionFind() = default;
+  UnionFind(int nmemb) { init(nmemb); };
+
+  void init(int nmemb) {
+    parent.clear();
+    parent.resize(nmemb, -1);
+  };
+
+  int represent(int x) {
+    if (parent[x] < 0) return x;
+    return parent[x] = represent(parent[x]);
+  };
+
+  void unite(int x, int y) {
+    x = represent(x);
+    y = represent(y);
+
+    if (x == y) return;
+
+    if (parent[y] < parent[x]) std::swap(x, y);
+
+    parent[x] += parent[y];
+    parent[y] = x;
+
+    return;
+  };
+
+  bool same(int x, int y) { return represent(x) == represent(y); };
+  int size(int x) { return -(parent[represent(x)]); };
+};
+//===
+
+#endif
+
+#include <bits/stdc++.h>
+
+#define _overload(_1, _2, _3, _4, name, ...) name
+#define _rep1(Itr, N) _rep3(Itr, 0, N, 1)
+#define _rep2(Itr, a, b) _rep3(Itr, a, b, 1)
+#define _rep3(Itr, a, b, step) for (i64 Itr = a; Itr < b; Itr += step)
+#define repeat(...) _overload(__VA_ARGS__, _rep3, _rep2, _rep1)(__VA_ARGS__)
+#define rep(...) repeat(__VA_ARGS__)
+
+#define ALL(X) begin(X), end(X)
+
+using namespace std;
+using i64 = int64_t;
+using u64 = uint64_t;
+
+double solve_(vector<i64> left_wall, vector<i64> right_wall, vector<i64> f,
+              vector<i64> a, i64 x, i64 t) {
+  UnionFind uf(100);
+  vector<i64> area(100, 30);
+  vector<i64> cap(100);
+  rep(i, 100) cap[i] = area[i] * min(left_wall[i], right_wall[i]);
+  vector<i64> amnt(100);
+  vector<i64> left_pos(100);
+  rep(i, 100) left_pos[i] = i;
+  vector<i64> right_pos(100);
+  rep(i, 100) right_pos[i] = i;
+
+  // unite x, x + 1
+  auto unite_to_next = [&](i64 x) {
+    i64 lw = left_wall[uf.represent(x)];
+    i64 rw = right_wall[uf.represent(x + 1)];
+    i64 lp = left_pos[uf.represent(x)];
+    i64 rp = right_pos[uf.represent(x + 1)];
+    i64 a = area[uf.represent(x)] + area[uf.represent(x + 1)];
+    i64 c = amnt[uf.represent(x)] + amnt[uf.represent(x + 1)];
+
+    uf.unite(x, x + 1);
+    x = uf.represent(x);
+    left_wall[x] = lw;
+    right_wall[x] = rw;
+    left_pos[x] = lp;
+    right_pos[x] = rp;
+    area[x] = a;
+    amnt[x] = c;
+    cap[x] = area[x] * min(right_wall[x], left_wall[x]);
+  };
+
+  auto pour = [&](i64 x, i64 am, auto &&pour) -> void {
+    x = uf.represent(x);
+    if (cap[x] < amnt[x] + am) {
+      i64 rem = amnt[x] + am - cap[x];
+      amnt[x] = cap[x];
+      if (left_wall[x] < right_wall[x]) {
+        i64 p = left_pos[x] - 1;
+        if (p >= 0 && cap[p] >= amnt[p] + rem) {
+          pour(p, rem, pour);
+        } else if (p >= 0) {
+          unite_to_next(p);
+          pour(p, rem, pour);
+        }
+      } else {
+        i64 p = right_pos[x] + 1;
+        if (p < 100 && cap[p] >= amnt[p] + rem) {
+          pour(p, rem, pour);
+        } else if (p < 100) {
+          unite_to_next(p - 1);
+          pour(p, rem, pour);
+        }
+      }
+    } else {
+      amnt[x] += am;
+    }
+  };
+
+  rep(i, 100) {
+    if (right_wall[i] == 0) unite_to_next(i);
+  }
+
+  rep(i, 100) {
+    if (i == uf.represent(i)) {
+      cout << "===" << endl;
+      cout << i << endl;
+      cout << left_wall[i] << ' ' << right_wall[i] << endl;
+      cout << uf.size(i) << ' ' << area[i] << ' ' << cap[i] << endl;
+      cout << left_pos[i] << ' ' << right_pos[i] << endl;
+    }
+  }
+
+  rep(i, f.size()) pour(f[i], a[i] * t, pour);
+
+  return double(amnt[uf.represent(x)]) / double(area[uf.represent(x)]);
+}
+
+void solve() {
+  i64 n;
+  cin >> n;
+  vector<i64> left_wall(100);
+  vector<i64> right_wall(100);
+  rep(i, n) {
+    i64 b, h;
+    cin >> b >> h;
+    left_wall[b] = h;
+    right_wall[b - 1] = h;
+  }
+  left_wall[0] = 50;
+  right_wall[99] = 50;
+
+  i64 m;
+  cin >> m;
+  vector<i64> f(m);
+  vector<i64> a(m);
+  rep(i, m) cin >> f[i] >> a[i];
+
+  i64 l;
+  cin >> l;
+  rep(_, l) {
+    i64 x, t;
+    cin >> x >> t;
+    printf("%.5lf\n", solve_(left_wall, right_wall, f, a, x, t));
+  }
+}
+
+int main() {
+  cin.tie(nullptr);
+  ios::sync_with_stdio(false);
+
+  i64 d;
+  cin >> d;
+
+  rep(_, d) solve();
+
+  return 0;
+}

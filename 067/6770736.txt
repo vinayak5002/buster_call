@@ -1,0 +1,45 @@
+// report 6/28 20D8102008K 山岸涼
+
+#include <stdio.h>
+#include <stdbool.h>
+
+int st[101], en[101], cnt = 0, n;
+bool went[101], graph[101][101];
+
+void dfs(int x){
+    if(went[x]) return;
+    went[x] = true;
+    cnt++;
+    st[x] = cnt;
+    for(int i = 1;i <= n; i++){
+      if(graph[x][i]){
+        dfs(i);
+      }
+    }
+    cnt++;
+    en[x] = cnt;
+}
+
+int main(){
+    int m, tmp, a;
+    scanf("%d", &n);
+    for(int i = 0; i < 101; i++){
+        for(int j = 0;j < 101; j++){
+          graph[i][j] = false;
+        }
+        went[i] = false;
+    }
+    for(int i = 0; i < n; i++){
+        scanf("%d%d", &a, &m);
+        for(int j = 0;j < m; j++){
+            scanf("%d", &tmp);
+            graph[a][tmp] = true;
+        }
+    }
+    for(int i = 1;i <= n; i++){
+      dfs(i);
+    }
+    for(int i = 1; i <= n; i++){
+      printf("%d %d %d\n", i, st[i], en[i]);
+    }
+}

@@ -1,0 +1,45 @@
+import sys
+
+readline = sys.stdin.readline
+
+def f(x):
+    return x * (x + 1) * (x + 2) // 6
+
+def main(): 
+    odds, evens = [list() for _ in range(2)]
+    for i in range(1, 201):
+        tmp = f(i)
+        evens.append(tmp)
+        if tmp % 2:
+            odds.append(tmp)
+
+    INF = 1 << 30
+    odd_dp = [INF] * (10**6+1)
+    odd_dp[0] = 1
+
+    for odd in odds:
+        for i in range(10**6+1):
+            if i-odd >= 0:
+                odd_dp[i] = min(odd_dp[i], odd_dp[i-odd]+1)
+
+    even_dp = [INF] * (10**6+1)
+    even_dp[0] = 1
+
+    for even in evens:
+        for i in range(10**6+1):
+            if i - even >= 0:
+                even_dp[i] = min(even_dp[i], even_dp[i-even]+1)
+
+    while True:
+        N = int(readline())
+        if N == 0:
+            break
+        print(even_dp[N], odd_dp[N])
+
+
+
+
+
+if __name__ == '__main__':
+    main()
+

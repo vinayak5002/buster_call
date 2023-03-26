@@ -1,0 +1,142 @@
+using System;
+using System.Linq;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace _220626
+{
+class ProblemB
+{
+  public class DisjointSet<T>
+  {
+    public class Vertex
+    {
+      public T value;
+      public int n;
+      public Vertex parent;
+      public Vertex(T value)
+      {
+        this.value = value;
+        this.n = 1;
+        this.parent = this;
+      }
+    }
+    public Dictionary<T, Vertex> vertices;
+    public DisjointSet(IEnumerable<T> values)
+    {
+      vertices = values
+        .Select(v => new Vertex(v))
+        .ToDictionary(v => v.value, v => v);
+    }
+
+    public Vertex Root(Vertex v)
+    {
+      if (v.parent == v) return v;
+      return v.parent = Root(v.parent);
+    }
+
+    public Vertex Root(T v)
+    {
+      return Root(vertices[v]);
+    }
+
+    public bool Same(T v0, T v1)
+    {
+      return Root(v0) == Root(v1);
+    }
+    
+    public Vertex Unite(T v0, T v1)
+    {
+      var r0 = Root(v0);
+      var r1 = Root(v1);
+      var r = r0.n >= r1.n ? r0 : r1;
+      var c = r0.n >= r1.n ? r1 : r0;
+      r.n += c.n;
+      c.parent = r;
+      return r;
+    }
+  }
+
+  public class Graph<T>
+  {
+    public struct Edge
+    {
+      public T from;
+      public T to;
+      public int weight;
+    }
+    public List<Edge> edges = new List<Edge>();
+    public Dictionary<T, HashSet<Edge>> fromTo = new Dictionary<T, HashSet<Edge>>();
+    public Graph(IEnumerable<T> vertices)
+    {
+      foreach (var v in vertices)
+        fromTo[v] = new HashSet<Edge>();
+    }
+
+    public void Connect(T v0, T v1, int weight)
+    {
+      var e0 = new Edge{ from = v0, to = v1, weight = weight };
+      var e1 = new Edge{ from = v1, to = v0, weight = weight };
+      edges.Add(e0);
+      edges.Add(e1);
+      fromTo[v0].Add(e0);
+      fromTo[v1].Add(e1);
+    }
+  }
+
+  public struct Input
+  {
+    public int vn;
+    public int en;
+    public List<int[]> edges;
+  }
+
+  public static Input ReadInput()
+  {
+    var arr = Console.ReadLine().Split(' ').Select(s => int.Parse(s)).ToArray();
+    var vn = arr[0];
+    var en = arr[1];
+    var edges = new List<int[]>();
+    for (int i = 0; i < en; i++)
+    {
+      edges.Add(Console.ReadLine().Split(' ').Select(s => int.Parse(s)).ToArray());
+    }
+    return new Input { vn = vn, en = en, edges = edges };
+  }
+
+  public static Graph<int> MakeGraph(Input input)
+  {
+    var graph = new Graph<int>(Enumerable.Range(0, input.vn));
+    foreach (var e in input.edges)
+    {
+      graph.Connect(e[0], e[1], e[2]);
+    }
+    return graph;
+  }
+
+  public static IEnumerable<Graph<T>.Edge> Kruskal<T>(Graph<T> g)
+  {
+    var edges = g.edges
+      .OrderBy(e => e.weight);
+    var ds = new DisjointSet<T>(g.fromTo.Keys);
+    foreach (var e in edges)
+    {
+      if (!ds.Same(e.from, e.to))
+      {
+        ds.Unite(e.from, e.to);
+        yield return e;
+      }
+    }
+  }
+
+  public static void Main(string[] args)
+  {
+    var input = ReadInput();
+    var graph = MakeGraph(input);
+    var mst = Kruskal(graph);
+    Console.WriteLine(mst.Sum(e => e.weight));
+  }
+}
+}
+
+

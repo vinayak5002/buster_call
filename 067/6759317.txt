@@ -1,0 +1,128 @@
+// 回転(11_A)させて上面を一致させ、11_Bに投げて判定する
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include <math.h>
+
+typedef struct{
+	int suf[7]; // suf[0]は使わない
+	// N   5
+	// W 4 1 3 6 E
+	// S   2
+}dice;
+
+void dice_turn(dice a, char code);
+
+int main(){
+	int pattern[7][7] =
+	{ { 0 },
+	{ 0, 0, 3, 5, 2, 4, 0 },
+	{ 0, 4, 0, 1, 6, 0, 3 },
+	{ 0, 2, 6, 0, 0, 1, 5 },
+	{ 0, 5, 1, 0, 0, 6, 2 },
+	{ 0, 3, 0, 6, 1, 0, 4 },
+	{ 0, 0, 4, 2, 5, 3, 0 } };
+	char buf[4000];
+	char *p;
+	int dice_tmp[7];
+	dice a, b;
+	int top, front;
+	char code;
+	
+	// dice a
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d %d %d %d %d %d", &dice_tmp[1], &dice_tmp[2], &dice_tmp[3],
+		&dice_tmp[4], &dice_tmp[5], &dice_tmp[6]);
+	for (int i = 1; i <= 7; i++){
+		a.suf[i] = dice_tmp[i];
+	}
+	// dice b
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d %d %d %d %d %d", &dice_tmp[1], &dice_tmp[2], &dice_tmp[3],
+		&dice_tmp[4], &dice_tmp[5], &dice_tmp[6]);
+	for (int i = 1; i <= 7; i++){
+		b.suf[i] = dice_tmp[i];
+	}
+	// a[1]がbのどこにあるか
+	int a1 = 0;
+	for (int i = 1; i <= 7; i++){
+		if (b.suf[i] == a.suf[1]){
+			a1 = i;
+		}
+	}
+	// b回転
+	if (a1 == 1){
+		; // nothing
+	}
+	else if (a1 == 2){
+		dice_turn(b, 'N');
+	}
+	if (a1 == 3){
+		dice_turn(b, 'W');
+	}
+	else if(a1 == 4){
+		dice_turn(b, 'E');
+	}
+	else if (a1 == 5){
+		dice_turn(b, 'S');
+	}
+	else if(a1 == 6){
+		dice_turn(b, 'W');
+		dice_turn(b, 'W');
+	}
+	top = b.suf[1];
+	front = b.suf[2];
+
+	// dice aの右側面(11_B) 
+	for (int j = 1; j <= 6; j++){
+		if (top == a.suf[j]) top = j;
+		if (front == a.suf[j]) front = j;
+	}
+	//printf("%d %d\n", top, front);
+	//printf("%d\n", a.suf[pattern[top][front]]);
+
+	// 処理
+	if (b.suf[3] == a.suf[pattern[top][front]]){
+		printf("Yes\n");
+	}
+	else {
+		printf("No\n");
+	}
+
+	return 0;
+}
+
+void dice_turn(dice a, char code){
+	int tmp;
+	switch (code){
+	case 'N':
+		tmp = a.suf[1];
+		a.suf[1] = a.suf[2];
+		a.suf[2] = a.suf[6];
+		a.suf[6] = a.suf[5];
+		a.suf[5] = tmp;
+		break;
+	case 'E':
+		tmp = a.suf[1];
+		a.suf[1] = a.suf[4];
+		a.suf[4] = a.suf[6];
+		a.suf[6] = a.suf[3];
+		a.suf[3] = tmp;
+		break;
+	case 'W':
+		tmp = a.suf[1];
+		a.suf[1] = a.suf[3];
+		a.suf[3] = a.suf[6];
+		a.suf[6] = a.suf[4];
+		a.suf[4] = tmp;
+		break;
+	case 'S':
+		tmp = a.suf[1];
+		a.suf[1] = a.suf[5];
+		a.suf[5] = a.suf[6];
+		a.suf[6] = a.suf[2];
+		a.suf[2] = tmp;
+		break;
+	defaults:; // nothing
+	}
+}

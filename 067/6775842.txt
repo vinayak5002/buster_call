@@ -1,0 +1,96 @@
+N, Q = map(int, input().split())
+
+inf = 2**31-1
+Len=(N-1).bit_length()
+NO = 2**Len
+tree = [inf]*(2*NO)
+lazy = [None]*(2*NO)
+
+
+def gindex(l,r):
+    L = (l+NO)>>1
+    R = (r+NO)>>1
+    
+    if l & 1 :
+         lc = 0 
+    else:
+        lc=(L&-L).bit_length()
+
+    if r & 1:
+        rc = 0 
+    else:
+        rc=(R&-R).bit_length()
+
+    for i in range(Len):
+        if rc <= i:
+            yield R
+            
+        if L < R and lc <= i:
+            yield L
+        L >>= 1
+        R >>= 1
+
+
+def propagates(ids):
+    for i in reversed(ids):
+        v = lazy[i]
+        if v is None:
+            continue
+        
+        lazy[2*i]=tree[2*i]=lazy[2*i+1]=tree[2*i+1]=v
+        lazy[i]=None
+
+
+def update(l,r,x):
+    *ids, = gindex(l, r)
+    propagates(ids)
+    
+    L = NO+l
+    R = NO+r
+    
+    while L<R:
+        if R&1:
+            R -= 1
+            lazy[R]=tree[R]=x
+        if L&1:
+            lazy[L]=tree[L]=x
+            L+=1
+        L>>=1;R>>=1
+        
+    for i in ids:
+        if 2*i+1<NO*2:
+            tree[i]=min(tree[i*2],tree[i*2+1])
+
+
+def query(l, r):
+    *ids, = gindex(l, r)
+    propagates(ids)
+    L = NO + l
+    R = NO + r
+    s = inf
+    
+    while L<R:
+        if R&1:
+            R-=1
+            s = min(s,tree[R])
+        if L&1:
+            s = min(s,tree[L])
+            L+=1
+        L>>=1
+        R>>=1
+    return s
+
+
+ans = []
+
+for i in range(Q):
+    t, *cmd = map(int, input().split())
+    if t:
+        s,t=cmd
+        ans.append(str(query(cmd[0],cmd[1]+1)))
+    else:
+        s, t, x = cmd
+        update(s, t+1, x)
+
+        
+print("\n".join(ans))

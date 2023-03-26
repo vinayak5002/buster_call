@@ -1,0 +1,66 @@
+#include <iostream>
+#include <vector>
+#include <utility>
+#include <algorithm>
+using namespace std;
+struct UnionFind {
+    vector<int> par;
+    
+    UnionFind(int N) : par(N+1) {
+        for(int i = 1; i <= N; i++){
+            par[i] = i;
+        }
+    }
+
+    int root(int x) {
+        if (par[x] == x) return x;
+        return par[x] = root(par[x]);
+    }
+
+    void unite(int x, int y) {
+        int rx = root(x);
+        int ry = root(y);
+        if (rx == ry) return;
+        par[rx] = ry;
+    }
+
+    void decom(int x){
+        if(par[x]!=x){
+            par[x]=x;
+        }
+    }
+
+    bool same(int x, int y) {
+        int rx = root(x);
+        int ry = root(y);
+        return rx == ry;
+    }
+};
+struct edge{
+    int s;
+    int t;
+    int w;
+};
+int main(){
+    int n,m,sum=0;
+    cin>>n>>m;
+    edge input;
+    vector<edge> edges;
+    for(int i=0;i<m;++i){
+        cin>>input.s>>input.t>>input.w;
+        edges.push_back(input);
+        
+    }
+    sort(begin(edges),end(edges),[](const edge& x,const edge& y){
+        return x.w<y.w;
+    });
+    UnionFind tree(n);
+    for(int i=0;i<m;++i){
+        if(!tree.same(edges[i].s,edges[i].t)){
+            tree.unite(edges[i].s,edges[i].t);
+            sum+=edges[i].w;
+        }
+    }
+    cout<<sum<<endl;
+}
+

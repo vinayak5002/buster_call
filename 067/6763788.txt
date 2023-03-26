@@ -1,0 +1,87 @@
+#include<stdio.h>
+#define MAX 500000
+#define INFTY 1000000000
+
+int count=0; //比較回数
+int L[MAX/2+2]; //前半部分
+int R[MAX/2+2]; //後半部分
+
+void merge(int S[], int left, int mid, int right)//ソート済みの部分配列を統合する
+{
+	int k;
+	int i=0;
+	int j=0;
+	int n1 = mid - left;
+	int n2 = right - mid;
+	
+	for(k = 0; k < n1; k++)
+	{
+		L[k] = S[left + k];
+	}
+	for(k = 0; k < n2; k++)
+	{
+		R[k] = S[mid + k];
+	}
+	
+	L[n1] = INFTY;
+	R[n2] = INFTY;
+	
+	for(k = left; k < right; k++)
+	{
+		count++;
+		
+		if(L[i] <= R[j])
+		{
+			S[k] = L[i];
+			i++;
+		}
+		else
+		{
+			A[k] = R[j];
+			j++;
+		}
+	}
+}
+
+void mergeSort(int S[], int left, int right)//2つの部分配列に分割
+{
+	int mid;
+	
+	if(left + 1 < right)
+	{
+		mid = (left + right) / 2;
+		mergeSort(S, left, mid);
+		mergeSort(S, mid, right);
+		merge(A, left, mid, right);
+	}
+}
+
+int main(void)
+{
+	int S[MAX], n, i;
+	
+	scanf("%d", &n);
+	
+	for(i = 0; i < n; i++)
+	{
+		scanf("%d", &S[i]);
+	}
+	
+	mergeSort(A, 0, n);
+	
+	for(i = 0; i < n; i++)
+	{
+		if(i == 0)
+		{
+			printf("%d", S[i]);
+		}
+		else
+		{
+			printf(" %d", S[i]);
+		}
+	}
+	printf("\n");
+	printf("%d\n", count);
+	
+	return 0;
+}

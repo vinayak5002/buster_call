@@ -1,0 +1,35 @@
+#include <iostream>
+#include <random>
+#include <regex>
+#include <map>
+using namespace std;
+
+int main(void) {
+    int n;
+    while (true) {
+        cin >> n;
+        if (n == 0) break;
+
+        int max_vote = 0, dic;
+        char top;
+        bool tie = true;
+        vector<int> cnt(CHAR_MAX + 1);
+        for (int i = 1; i <= n; ++i) {
+            char c; cin >> c;
+            ++cnt[c];
+            if (max_vote < cnt[c]) max_vote = cnt[c];
+            int rest = 0, rem = n - i;
+            for (int j = 0; j <= CHAR_MAX; ++j) {
+                if (cnt[j] + rem >= max_vote) ++rest;
+            }
+            if (tie && rest == 1) {
+                dic = i;
+                top = c;
+                tie = false;
+            }
+        }
+        if (tie) cout << "TIE" << endl;
+        else cout << top << ' ' << dic << endl;
+    }
+    return 0;
+}

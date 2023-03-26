@@ -1,0 +1,177 @@
+#include<stdio.h>
+#include<stdlib.h>
+#define N 20
+
+struct node{
+    int key;
+    struct node *r,*l,*p;
+};
+
+typedef struct node *Node;
+
+Node root;
+
+Node Min(Node e){
+    while(e->l !=NULL){
+        e=e->l;
+    }
+    return e;
+}
+
+Node Search(Node e ,int k){
+    
+
+    if(e== NULL||k==e->key){
+        return e;
+    }
+    if(k<e->key){
+        return Search(e->l,k);
+    }
+    else{
+        return Search(e->r,k);
+    }
+}
+
+Node Success(Node e){
+    Node y;
+    if(e->r != NULL){
+        return Min(e->r);
+    }
+    y=e->p;
+    while(y!=NULL && e==y->r){
+        e=y;
+        y=y->p;
+    }
+    return y;
+}
+
+void Delete(Node u){
+    Node x,y;
+    if(u->l==NULL || u->r==NULL){
+        y=u;
+    }
+    else{
+        y=Success(u);
+    }
+    if(y->l!=NULL){
+        x=y->l;
+    }
+    else{
+        x=y->r;
+    }
+    if(x!=NULL){
+        x->p=y->p;
+    }
+    if(y->p==NULL){
+        root=x;
+    }
+    else if(y==y->p->l){
+        y->p->l=x;
+    }
+    else{
+        y->p->r=x;
+    }
+    if(y!=u){
+        u->key=y->key;
+    }
+}
+
+
+void insert (int a){
+    Node x=root;
+    Node y=NULL;
+    Node z;
+    z=malloc(sizeof(struct node));
+    z->key=a;
+    z->l=NULL;
+    z->r=NULL;
+    z->p=NULL;
+    while(x!=NULL){
+        y=x;
+        if(z->key < x->key){
+            x=x->l;
+        }
+        else{
+            x=x->r;
+        }
+    }
+    //z->p=y;
+    if(y==NULL){
+        root=z;
+    }
+    else if(z->key < y->key){
+        y->l=z;
+    }
+    else{
+        y->r=z;
+    }
+}
+
+void od1(Node b){
+    if(b==NULL){
+        return;
+    }
+    od1(b->l);
+    printf(" %d",b->key);
+    od1(b->r);
+}
+
+void od2(Node c){
+    if(c==NULL){
+        return;
+    }
+    printf(" %d",c->key);
+    od2(c->l);
+    od2(c->r);
+}
+
+Node find(int d){
+    Node x=root;
+    while(x!=NULL){
+        if(d==x->key){
+            return x;
+        }
+        else if(d < x->key){
+            x=x->l;
+        }
+        else{
+            x=x->r;
+        }
+    }
+    return x;
+
+}
+
+int main (void){
+    int n,a;
+    char b[N];
+    scanf("%d",&n);
+    for(int i=0;i<n;i++){
+        scanf("%s",b);
+        if(b[0]=='f'){
+            scanf("%d",&a);
+            Node t=Search(root,a);
+            if(t!=NULL){
+                printf("yes\n");
+            }
+            else{
+                printf("no\n");
+            }
+        }
+        else if(b[0]=='i'){
+            scanf("%d",&a);
+            insert(a);
+        }
+        else if(b[0]=='p'){
+            od1(root);
+            printf("\n");
+            od2(root);
+            printf("\n");
+        }
+        else{
+           scanf("%d",&a);
+           Delete(Search(root,a));
+        }
+    }
+    return 0;
+}

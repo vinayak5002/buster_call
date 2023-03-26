@@ -1,0 +1,139 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+#include <functional>
+#include <vector>
+#include <cstring>
+#include <iomanip>
+#include <numeric>
+#include <cmath>
+#include <cassert>
+#include <queue>
+#include <map>
+#include <set>
+using namespace std;
+using Int = int64_t;
+const Int INF = 1 << 30;
+const Int MOD = (Int)1e9 + 7;
+const Int MAX_N = (Int)1e5 + 5;
+#define debug(x) cout << #x << ": " << x << endl
+#define debug2(x, y) cout << #x << ": " << x << ", " << #y << ": " << y << endl;
+template <typename T1, typename T2>
+ostream &operator<<(ostream &os, const pair<T1, T2> &p)
+{
+    os << p.first << " " << p.second;
+    return os;
+}
+template <typename T>
+ostream &operator<<(ostream &os, const vector<T> &v)
+{
+    for (int i = 0; i < (int)v.size(); i++)
+        os << v[i] << (i + 1 != v.size() ? " " : "");
+    return os;
+}
+
+using P = pair<int, int>;
+
+class WeightedUnionFind
+{
+public:
+    vector<int> parent;
+    vector<int> root_diff;
+    vector<int> rank;
+
+    WeightedUnionFind(int size) : parent(size), root_diff(size), rank(size)
+    {
+        for (int i = 0; i < size; i++)
+        {
+            parent[i] = i;
+            rank[i] = 0;
+            root_diff[i] = 0;
+        }
+    }
+
+    int root(int x)
+    {
+        // debug(x);
+        int parent_x = parent[x];
+        if (parent_x == x)
+            return x;
+        else
+        {
+            int root_x = root(parent_x);
+            root_diff[x] += root_diff[parent_x];
+            return parent[x] = root_x;
+        }
+    }
+
+    int weight(int x)
+    {
+        root(x);
+        return root_diff[x];
+    }
+
+    void relate(int x, int y, int z)
+    {
+        int root_x = root(x);
+        int root_y = root(y);
+
+        if (root_x == root_y)
+            return;
+
+        // a_y - a_x = z
+        z += root_diff[x];
+        z -= root_diff[y];
+
+        // if (rank[root_x] < rank[root_y])
+        // {
+        //     swap(root_x, root_y);
+        //     z = -z;
+        // }
+
+        // if (rank[root_x] == rank[root_y])
+        //     rank[root_x]++;
+
+        parent[root_y] = root_x;
+        root_diff[root_y] = z;
+    }
+
+    int diff(int x, int y) { return weight(y) - weight(x); }
+
+    bool is_same(int x, int y) { return root(x) == root(y); }
+};
+
+void solve()
+{
+    int N, Q;
+    cin >> N >> Q;
+
+    WeightedUnionFind uf(N);
+    for (int i = 0; i < Q; i++)
+    {
+        int query;
+        cin >> query;
+        if (query)
+        {
+            int x, y;
+            cin >> x >> y;
+            if (uf.is_same(x, y))
+                cout << uf.diff(x, y) << endl;
+            else
+                cout << "?" << endl;
+        }
+        else
+        {
+            int x, y, z;
+            cin >> x >> y >> z;
+            uf.relate(x, y, z);
+        }
+    }
+}
+
+signed main()
+{
+    cin.tie(0);
+    ios::sync_with_stdio(false);
+    solve();
+    return 0;
+}
+

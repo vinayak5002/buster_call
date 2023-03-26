@@ -1,0 +1,64 @@
+#include<bits/stdc++.h>
+// #include<atcoder/modint>
+using namespace std;
+// using namespace atcoder;
+char G[4][4];
+int n;
+int dist[1 << 17];
+int bi[20];
+void solve(){
+	cin >> n;
+	vector<pair<int, int>> hw(n);
+	for(int i = 0; i < n; i++) cin >> hw[i].first >> hw[i].second;
+	for(int i = 0; i < (1 << 16); i++) dist[i] = -1;
+	for(int i = 0; i < 4; i++){
+		for(int j = 0; j < 4; j++){
+			cin >> G[i][j];
+		}
+	}
+	for(int i = 0; i < 20; i++) bi[i] = 1 << i;
+	
+	dist[0] = 0;
+	queue<int> que;
+	que.push(0);
+	while(!que.empty()){
+		int bit = que.front();
+		que.pop();
+		string rgb = "RGB";
+		for(auto &[h, w]: hw){
+			for(auto c:rgb){				
+				for(int i = -h + 1; i <= 3; i++){
+					for(int j = -w + 1; j <= 3; j++){
+						int nbit = bit;
+						for(int ii = i; ii < i + h; ii++){
+							for(int jj = j; jj < j + w; jj++){
+								if(0 <= ii && ii < 4 && 0 <= jj && jj < 4){
+									int ij = ii * 4 + jj;
+									if(G[ii][jj] == c) nbit |= bi[ij];
+									else if(bit & (1 << ij)) nbit ^= bi[ij];
+								}
+							}
+						}
+						if(dist[nbit] == -1){
+							dist[nbit] = dist[bit] + 1;
+							que.push(nbit);
+						}
+					}
+				}
+			}
+		}
+	}
+	cout << dist[(1 << 16) - 1] << "\n";
+
+
+}
+
+int main(){
+    cin.tie(0)->sync_with_stdio(0);
+    int t;
+    t = 1;
+    // cin >> t;
+    while(t--) solve();
+}
+    
+    

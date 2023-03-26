@@ -1,0 +1,75 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#pragma GCC target("avx")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+
+int ary[1000000];
+
+void insert(const int code) {
+  int num = code;
+  while (true) {
+    const int hash_value = num % 1000000;
+    if (ary[hash_value] < 0) {
+      ary[hash_value] = code;
+      break;
+    }
+    num = (num + 1) % 1000000;
+  }
+}
+
+bool find(const int code) {
+  int num = code;
+  while (true) {
+    const int hash_value = num % 1000000;
+    if (ary[hash_value] < 0) {
+      return false;
+    } else if (ary[hash_value] == code) {
+      return true;
+    }
+    num = 1 + num % (1000000 - 1);
+  }
+}
+
+int main() {
+  memset(ary, -1, 1000000);
+  int n;
+  scanf("%d", &n);
+  for (int i = 0; i < n; i++) {
+    char word[14], command[14];
+    scanf("%s %s", command, word);
+
+    const int size = strlen(word);
+    int code = strlen(word);
+    for (int i = 0; i < size; i++) {
+      switch (word[i]) {
+      case 'A':
+        code = code << 2 | 0;
+        break;
+      case 'C':
+        code = code << 2 | 1;
+        break;
+      case 'G':
+        code = code << 2 | 2;
+        break;
+      case 'T':
+        code = code << 2 | 3;
+        break;
+      }
+    }
+
+    if (command[0] == 'i') {
+      insert(code);
+    } else {
+      if (find(code)) {
+        printf("yes\n");
+      } else {
+        printf("no\n");
+      }
+    }
+  }
+
+  return 0;
+}
+

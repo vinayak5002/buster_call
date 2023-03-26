@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+struct edge {
+    long to;
+    long cost;
+};
+using Graph = vector<vector<edge>>;
+constexpr ll inf = (1LL << 62);
+ll prim(ll v_size, Graph& G)
+{
+    vector<ll> mincost(v_size);
+    //vector<bool> used(v_size);
+    using P = pair<ll, ll>;
+    priority_queue<P, vector<P>, greater<P>> que;
+    for (ll i = 0; i < v_size; ++i) {
+        mincost[i] = inf;
+        //used[i] = false;
+    }
+    mincost[0] = 0;
+    ll res = 0;
+    que.push(P(0, 0));
+
+    while (que.size() > 0) {
+        /*
+        ll v = -1;
+        for (ll u = 0; u < v_size; u++) {
+            if (!used[u] && (v == -1 || mincost[u] < mincost[v])) {  //最小コストの頂点を探す
+                v = u;
+            }
+        }
+        if (v == -1)
+            break;
+        used[v] = true;
+        res += mincost[v];
+        for (ll u = 0; u < v_size; ++u) {
+            mincost[u] = min(mincost[u], cost[v][u]);
+        }
+        */
+        P p = que.top();
+        que.pop();
+        int v = p.second;
+        if (mincost[v] < p.first)
+            continue;
+        res += mincost[v];
+        for (auto& e : G[v]) {
+            if (mincost[e.to] > e.cost) {
+                mincost[e.to] = e.cost;
+                que.push(P(mincost[e.to], e.to));
+            }
+        }
+    }
+    return res;
+}
+
+int main()
+{
+    ll V, E;
+    cin >> V >> E;
+    vector<ll> s(E), t(E), w(E);
+    //vector<vector<ll>> cost(V, vector<ll>(V, inf));
+    vector<vector<edge>> g(E);
+    for (ll i = 0; i < E; ++i) {
+        cin >> s[i] >> t[i] >> w[i];
+        g[s[i]].push_back(edge{t[i], w[i]});
+        g[t[i]].push_back(edge{s[i], w[i]});
+        //cost[s[i]][t[i]] = w[i];
+        //cost[t[i]][s[i]] = w[i];
+    }
+    cout << prim(V, g) << endl;
+}

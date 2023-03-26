@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+int solve2(V<string>& T) {
+    const int INF = 1 << 30;
+    int N = T.size();
+    int N2 = 1 << N;
+    V<V<int>> cost(N, V<int>(N, INF));
+    rep(las, N) {
+        rep(nex, N) {
+            if (las == nex) continue;
+            int l2 = T[nex].size();
+            for (int sz = l2 - 1; sz >= 0; sz--) {
+                // S[nex].substr(0, sz)
+                if (T[las].size() < sz) continue;
+                if (T[las].substr(T[las].size() - sz) == T[nex].substr(0, sz)) {
+                    cost[las][nex] = l2 - sz;
+                    break;
+                }
+            }
+        }
+    }
+    V<V<int>> dp(N2, V<int>(N, INF));
+    rep(i, N) dp[1 << i][i] = T[i].size();
+    for (int s = 1; s < N2; s++) {
+        for (int las = 0; las < N; las++) {
+            if ((s >> las & 1) == 0) continue;
+            if (dp[s][las] == INF) continue;
+            for (int nex = 0; nex < N; nex++) {
+                if (s >> nex & 1) continue;
+                dp[s | (1 << nex)][nex] = min(dp[s | (1 << nex)][nex], dp[s][las] + cost[las][nex]);
+            }
+        }
+    }
+    int ans = *min_element(dp[N2 - 1].begin(), dp[N2 - 1].end());
+    return ans;
+}
+
+void solve(int N) {
+    V<string> S(N);
+    rep(i, N) cin >> S[i];
+    V<int> cont(N, 0);
+    rep(i, N) {
+        // check S[i] in S[j]
+        int lsi = S[i].size();
+        rep(j, N) {
+            if (i == j) continue;
+            int lsj = S[j].size();
+            if (lsi > lsj) continue;
+            rep(k, lsj - lsi + 1) {
+                if (S[i] == S[j].substr(k, lsi)) {
+                    cont[i] = 1;
+                    break;
+                }
+            }
+            if (cont[i]) break;
+        }
+    }
+    V<string> T;
+    rep(i, N) if (cont[i] == 0) T.push_back(S[i]);
+    cout << solve2(T) << '\n';
+    return;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N;
+    while (cin >> N, N != 0) solve(N);
+    return 0;
+}
+

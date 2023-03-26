@@ -1,0 +1,101 @@
+#pragma region
+
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <set>
+#include <map>
+#include <algorithm>
+#include <functional>
+#include <utility>
+#include <bitset>
+#include <cmath>
+#include <numeric> // gcd, lcm
+#include <cstdlib>
+#include <ctime>
+#include <cstdio>
+#include <cassert>
+#include <iomanip>
+using namespace std;
+
+using ull = unsigned long long;
+using ll = long long;
+using vi = vector<int>;
+using vll = vector<ll>;
+using vvi = vector<vi>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using pii = pair<int,int>;
+using vpii = vector<pii>;
+
+#pragma endregion
+
+const int INF = (1ll << 31) - 1;
+
+struct SegmentTree{
+    int N;
+    vi node, lazy;
+
+    SegmentTree(int sz){
+        N = 1;
+        while(N < sz) N <<= 1;
+        node.assign(2*N, 0); lazy.assign(2*N, 0);
+    }
+
+    void eval(int v){
+        if(lazy[v] == 0) return;
+        if(v < N-1){
+            lazy[2*v+1] = lazy[v];
+            lazy[2*v+2] = lazy[v];
+        }
+        node[v] += lazy[v];
+        lazy[v] = 0;
+    }
+
+    void add(int l, int r, int x, int v, int i, int j){
+        eval(v);
+        if(j <= l or r <= i) return;
+        if(l <= i and j <= r){ lazy[v] = x; eval(v); return; }
+
+        add(l, r, x, 2*v+1, i, (i+j)/2);
+        add(l, r, x, 2*v+2, (i+j)/2, j);
+        node[v] = min(node[2*v+1], node[2*v+2]);
+    }
+    void add(int l, int r, int x){ add(l, r, x, 0, 0, N); }
+
+    int getMin(int l, int r, int v, int i, int j){
+        eval(v);
+        if(j <= l or r <= i) return INF;
+        if(l <= i and j <= r) return node[v];
+
+        int mini = getMin(l, r, 2*v+1, i, (i+j)/2);
+        int minj = getMin(l, r, 2*v+2, (i+j)/2, j);
+        return min(mini, minj);
+    }
+    int getMin(int l, int r){ return getMin(l, r, 0, 0, N); }
+};
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+
+    int n, q; cin >> n >> q;
+    SegmentTree seg(n);
+    while(q--){
+        int c, l, r; cin >> c >> l >> r;
+        if(c==0){
+            int x; cin >> x;
+            seg.add(l,r,x);
+        }
+        else{
+            cout << seg.getMin(l,r) << endl;
+        }
+    }
+
+    return 0;
+}

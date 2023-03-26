@@ -1,0 +1,36 @@
+import sys
+sys.setrecursionlimit(1<<30)
+
+readline = sys.stdin.readline
+
+def DFS(x):
+    global d, f, cnt
+    
+    cnt += 1
+    d[x] = cnt
+
+    for r in R[x]:
+        if not d[r]:
+            DFS(r)
+
+    cnt += 1
+    f[x] = cnt
+
+if __name__ == '__main__':
+    N = int(readline())
+    R = [None for _ in range(N)]
+
+    for _ in range(N):
+        u, k, *v = map(lambda x: int(x)-1, readline().split())
+        R[u] = v
+
+    d, f = [[0] * N for _ in range(2)]
+    cnt = 0
+
+    for i in range(N):
+        if not d[i]:
+            DFS(i)
+
+    for i in range(N):
+        print(i+1, d[i], f[i])
+

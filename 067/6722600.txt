@@ -1,0 +1,31 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+vector<int> sieve(int n) {
+    vector<int> res(n + 1, 1);
+    res[0] = res[1] = 0;
+    for (int i = 2 ; i < res.size() ; i++) if (res[i]) {
+        for (int j = i + i ; j < res.size() ; j += i) res[j] = 0;
+    }
+
+    return res;
+}
+
+vector<int> prs(int n) {
+    auto siv = sieve(n);
+    vector<int> res;
+    for (int i = 0 ; i < siv.size() ; i++) if (siv[i]) res.emplace_back(i);
+    return res;
+}
+
+int main() {
+    auto p = prs(123456 * 2 + 1000);
+    while(1) {
+        int n; cin >> n;
+        if (!n) break;
+        int up = upper_bound(p.begin(), p.end(), 2*n) - p.begin();
+        int dn = upper_bound(p.begin(), p.end(), n) - p.begin();
+        cout << up - dn << endl;
+    }
+}
+

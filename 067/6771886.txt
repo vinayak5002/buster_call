@@ -1,0 +1,98 @@
+#include<stdio.h>
+
+#define MAX 100
+
+int n,A[MAX][MAX];
+
+int que[MAX];
+int head = 0;
+int tail = 0;
+
+int d[MAX], id[MAX];
+
+void enque(int v){
+    que[tail] = v;
+    tail = tail + 1;
+
+    if(tail == MAX){
+         tail = 0;
+    }
+}
+
+int deque(){
+    if(head == tail){
+        return 1;
+    }
+
+    int data;
+    data = que[head];
+    head = head + 1;
+
+    if(head == MAX){
+        head = 0;
+    }
+
+    return data;
+}
+
+void bfs(){
+    int i,j;
+
+    enque(0);
+    id[0] = 1;
+    d[0] = 0;
+
+    for(i=1;i<n;i++){
+        id[i] = 0;
+        d[i] = -1;
+    }
+
+    int dequev;
+
+    while(head != tail){
+        dequev = deque();
+        for(j=0;j<n;j++){
+            if(A[dequev][j]==1 && id[j]==0){
+                id[j] = 1;
+                d[j] = d[dequev] + 1;
+                enque(j);
+            }
+        }
+        id[dequev] = 2;
+    }
+
+}
+
+int main(void){
+    int i, j, a, b, c;
+
+    scanf("%d", &n);
+
+    for(i=0; i<n; i++){  //初期化
+        for(j=0; j<n; j++){
+            A[i][j] = 0;
+        }
+    }
+
+    for(i=0; i<n; i++){
+        scanf("%d %d", &a, &b);
+        for(j=0; j<b; j++){  //bが隣接する頂点の個数なのでj(=1にするマス)の繰り返しはb個までにする
+            scanf("%d", &c);
+            A[a-1][c-1] = 1; //要素aに接する頂点(a,c)のマスを1にする(配列は0からなので-1する)
+        }
+    }
+
+    for(i=0; i<n; i++){ //初期化
+        id[i] = 0;
+    }
+
+    bfs();
+
+
+    for(i=0; i<n; i++){ //表示
+            printf("%d %d\n", i+1, d[i]);
+        }
+
+    return 0;
+
+}

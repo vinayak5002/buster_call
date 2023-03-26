@@ -1,0 +1,73 @@
+from collections import defaultdict
+
+
+def read_wgraph(inp=None, gitGraph=True):
+    if inp is not None:
+        V, E, r = inp[:6].split()
+        G = defaultdict(list)
+        W = {}
+        for i in inp[6:].split('\n'):
+            if i:
+                s, t, w = map(int, i.split())
+                if gitGraph:
+                    G[s].append((t, w))
+                else:
+                    G[s].append(t)
+                    W[(s, t)] = w
+                if t not in G:
+                    G[t] = []
+
+    else:
+        V, E, r = [int(v) for v in input().split()]
+        G = defaultdict(list)
+        W = {}
+        for i in range(V):
+            G[i]
+        for e in range(E):
+            s, t, w = [int(v) for v in input().split()]
+            G[s].append(t)
+            if t not in G:
+                G[t] = []
+            W[(s, t)] = w
+    return G, W, r
+
+from collections import defaultdict
+import sys
+
+
+def print_to_stdout(*a):
+    print(*a, file=sys.stdout)
+
+def print_dist(dist):
+    a = ''
+    for v in sorted(dist):
+        if dist[v] == 1e9:
+            a += "INF\n"
+            #print("INF")
+        else:
+            a += str(dist[v]) + '\n'
+            #print(dist[v])
+    print_to_stdout(a[:-1])
+
+from collections import deque
+
+def dfsw(G, W, s):
+    dist=defaultdict(lambda: 1e9)
+    for v in G:
+        dist[v]
+    dist[s] = 0
+    Q = deque()
+    Q.append(s)
+    while Q:
+        u = Q.popleft()
+        #print(u, Q)
+        for ch in G[u]:
+          #print(dist[ch], dist[u])
+            if dist[ch] > dist[u] + W[(u, ch)]:
+                dist[ch] = dist[u] + W[(u, ch)]
+                Q.append(ch)
+            #print(dist)
+    return dist
+
+G, W, r = read_wgraph(gitGraph=False)
+print_dist(dfsw(G, W, r))

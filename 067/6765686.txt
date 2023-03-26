@@ -1,0 +1,88 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define N 100
+
+char graph[N][2*N];
+
+int main(void)
+{
+	char str[16];
+	char tmp[8];
+	int n;
+	int u, k; //uは一番目、kは二番目の入力(毎行)
+	int i; //行数
+	int j; //strの位置
+	int l; //tmpの位置
+	int m; //確認済みの頂点の数
+	int p; //atoi(tmp)
+	
+	int end;
+	
+	fgets(str, sizeof(str)-1, stdin);
+	sscanf(str, "%d", &n);
+	
+	for(i=0; i<n; i++){
+		//'0'と' 'で埋める
+		for(j=0; j<n; j++){
+			graph[i][2*j] = '0';
+			graph[i][2*j+1] = ' ';
+		}
+		//最後にヌル文字を入れる
+		graph[i][2*n-1] = '\0';
+		
+		l = sizeof(tmp)-1;
+		while(0 < l){
+			tmp[l--] = '\0';
+		}
+		
+		u = -1;
+		k = -1;
+		end=1;
+		
+		while(end){
+			j=sizeof(str)-1;
+			while(0 < j){
+				str[j--] = '\0';
+			}
+			fgets(str, sizeof(str)-1, stdin);
+			if(str[0] == 0x0d || str[0] == 0x0a || str[1] == 0x0d || str[1] == 0x0a){ //改行のみが残っている場合
+				fgets(str, sizeof(str)-1, stdin);
+			}
+			while(j < sizeof(str)-1){
+				//printf("str[%d] = %x\n", j, str[j]);
+				if(47 < str[j] && str[j] < 58){ //str[j]が数字
+					tmp[l++] = str[j];
+				}else if(tmp[0] != '\0'){ //tmpに何か入っている
+					p = atoi(tmp);
+					//printf("p = %d\n", p);
+					if(u == -1){ //uが入っていない
+						u = p;
+					}else if(k == -1){ //kが入っていない
+						k = p;
+						if(k == 0){ //確認する要素が0
+							end=0;
+							break;
+						}
+					}else{
+						graph[i][2*(p-1)] = '1';
+						//printf("graph[%d][%d] = '1'\n", i, 2*(p-1));
+						m++;
+						if(m >= k){
+							m=0;
+							end=0;
+							break;
+						}
+					}
+					while(0 < l){
+						tmp[l--] = '\0';
+					}
+				}
+				j++;
+			}
+		}
+		printf("%s\n", graph[i]);
+	}
+	
+	return 0;
+}

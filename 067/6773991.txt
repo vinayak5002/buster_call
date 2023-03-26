@@ -1,0 +1,45 @@
+#include<bits/stdc++.h>
+using namespace std;
+#pragma GCC target("avx2")
+#pragma GCC optimize("O3")
+using ll = long long;
+using pii = pair<ll, ll>;
+map<list<int>, int> memo;
+
+int solve(int n, list<int> a){
+	if (memo.count(a)) return memo[a];
+	if (a.size() < 2) return 0;
+
+	int pos = 0;
+	for (auto it = a.begin(); ; it++){
+		int u = *it++, v;
+		if (it == a.end()) break;
+		v = *it--;
+
+		if (abs(u - v) <= 1){
+			it = a.erase(it);
+			it = a.erase(it);
+			pos = max(pos, solve(n, a) + 2);
+			it = a.insert(it, v);
+			it = a.insert(it, u);
+		}
+	}
+	return memo[a] = pos;
+}
+
+int main(){
+ios::sync_with_stdio(false);
+std::cin.tie(nullptr);
+	while (1){
+		int n;
+		cin >> n;
+		if (n == 0) return 0;
+		memo.clear();
+
+		list<int> a(n);
+		for_each(a.begin(), a.end(), [](int &x){cin >> x;});
+
+		int ans = solve(n, a);
+		cout << ans << endl;
+	}
+}

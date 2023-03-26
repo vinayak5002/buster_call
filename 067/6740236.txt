@@ -1,0 +1,149 @@
+#include<bits/stdc++.h>
+typedef long long int ll;
+typedef unsigned long long int ull;
+#define BIG_NUM 2000000000
+#define HUGE_NUM 4000000000000000000 //オーバーフローに注意
+#define MOD 1000000007
+#define EPS 0.000000001
+using namespace std;
+
+
+
+#define SIZE 100005
+#define NUM 2147483647
+
+struct NA{
+	NA(){
+
+		value = 0;
+	}
+	NA(ll arg_value,ll arg_len){
+
+		value = arg_value;
+	}
+
+	ll value;
+};
+
+struct Info{ //★★更新情報★★
+	void set(int arg_update_left,int arg_update_right,ll arg_value){
+		update_left = arg_update_left;
+		update_right = arg_update_right;
+		value = arg_value;
+	}
+	int update_left,update_right;
+	ll value;
+	bool FLG;
+};
+
+int N = 1;
+Info info[6*SIZE];
+NA ans[6*SIZE];
+
+
+void init(int first_N){
+	while(N < first_N)N *= 2;
+}
+
+//★★情報の伝達は子までにしないとTLEする★★
+void update_info(int node_id,int node_left,int node_right){
+
+	if(!info[node_id].FLG)return;
+
+	if(node_right-node_left+1 >= 2){
+		//子に更新情報伝達
+		int L_child = 2*node_id+1;
+		info[L_child] = info[node_id];
+
+		int R_child = 2*node_id+2;
+		info[R_child] = info[node_id];
+	}
+
+	//自分を更新
+	if(info[node_id].update_left <= node_left && info[node_id].update_right >= node_right){
+
+		ans[node_id].value = info[node_id].value;
+	}
+
+	info[node_id].FLG = false;
+}
+
+
+void update(int update_left,int update_right,ll new_value,int node_id,int node_left,int node_right){
+
+	update_info(node_id,node_left,node_right); //旧情報を処理(子に自分の情報を伝える)
+
+	if(update_right < node_left || update_left > node_right)return;
+
+	if(update_left <= node_left && update_right >= node_right){
+
+		info[node_id].FLG = true;
+		info[node_id].set(update_left,update_right,new_value);
+		update_info(node_id,node_left,node_right); //新情報を処理
+
+		return;
+
+	}else{
+
+		ans[node_id].value = -1;
+
+		update(update_left,update_right,new_value,2*node_id+1,node_left,(node_left+node_right)/2);
+		update(update_left,update_right,new_value,2*node_id+2,(node_left+node_right)/2+1,node_right);
+	}
+}
+
+int query(int search_left,int search_right,int node_id,int node_left,int node_right){
+
+	update_info(node_id,node_left,node_right); //旧情報を処理(子に自分の情報を伝える)
+
+	if(search_right < node_left || search_left > node_right){
+
+		return NUM;
+
+	}
+
+	if(ans[node_id].value != -1){ //区間の一部が重なり、かつ担当範囲のデータが生きている場合
+
+		return ans[node_id].value;
+	}else{
+		int left = query(search_left,search_right,2*node_id+1,node_left,(node_left+node_right)/2);
+		int right = query(search_left,search_right,2*node_id+2,(node_left+node_right)/2+1,node_right);
+		return min(left,right);
+	}
+}
+
+
+int main(){
+
+	int first_N,Q;
+	scanf("%d %d",&first_N,&Q);
+
+	init(first_N);
+
+	for(int i = 0; i <= 2*N-2; i++){
+		info[i].FLG = false;
+		ans[i].value = NUM;
+	}
+
+	int command;
+	int s,t,x;
+
+	for(int i = 0; i < Q; i++){
+
+		scanf("%d",&command);
+
+		if(command == 0){
+
+			scanf("%d %d %d",&s,&t,&x);
+			update(s,t,x,0,0,N-1);
+
+		}else{
+
+			scanf("%d %d",&s,&t);
+			printf("%d\n",query(s,t,0,0,N-1));
+		}
+	}
+
+	return 0;
+}
+

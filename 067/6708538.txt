@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+#ifdef MY_DEBUG
+  #include "dprint.cpp"
+  # define dprint(a, ...);\
+      do {\
+          printf("line : %d, func : %s\n",\
+                __LINE__, __func__);\
+          dprint(#a,a,##__VA_ARGS__ );\
+      } while (0)
+#else
+  #define dprint(a,...) 
+#endif
+using namespace std;
+int solve2(int d,int w,vector<vector<int>>& vec,int i,int j,int i2,int j2){
+int ret=0;
+int hei_min=INT_MAX;
+
+for (int z = j; z <= j2; z++){
+  hei_min=min(hei_min,vec[i][z]);//上
+  hei_min=min(hei_min,vec[i2][z]);//下
+}
+
+for (int z = i; z <= i2; z++){
+  hei_min=min(hei_min,vec[z][j]);//左
+  hei_min=min(hei_min,vec[z][j2]);//右
+}
+
+for (int zx = i+1; zx <=i2-1 ; zx++){
+  for (int zy = j+1; zy <= j2-1; zy++){
+    if(vec[zx][zy]>=hei_min)return -1;//池にならない
+    ret+=hei_min-vec[zx][zy];
+  }
+  
+}
+
+return ret;
+}
+int solve(int d,int w,vector<vector<int>>& vec){
+int res=0;
+for (int i = 0; i < d-2; i++){
+  for (int j = 0; j < w-2; j++){
+    for (int i2 = i+2; i2 < d; i2++){
+      for (int j2 = j+2; j2 < w; j2++){
+        int ret=solve2(d,w,vec,i,j,i2,j2);
+        res=max(res,ret);
+      }
+    }
+
+  }
+}
+
+return res;
+}
+int main() {
+
+while (true){
+  int d,w;
+  cin >>d>>w;
+  if(d==0&&w==0)break;
+  vector<vector<int>> vec(d, vector<int>(w));
+  for (int i = 0; i < d; i++){
+    for(int j=0;j<w;j++){
+      cin >> vec[i][j];
+    }
+  }
+  cout << solve(d,w,vec) << endl; 
+}
+
+
+
+return 0;
+}

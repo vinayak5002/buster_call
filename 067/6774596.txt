@@ -1,0 +1,60 @@
+class Node:
+    def __init__(self):
+        self.parent = -1
+
+def treeWalk(nodeID, answerDictionary):
+    preParse(nodeID, answerDictionary)
+    inParse(nodeID, answerDictionary)
+    postParse(nodeID,answerDictionary)
+
+def preParse(nodeID, answerDictionary):
+    if nodeID == -1:
+        return
+    answerDictionary["Preorder"].append(str(nodeID))
+    preParse(Tree[nodeID].left, answerDictionary)
+    preParse(Tree[nodeID].right, answerDictionary)
+    
+def inParse(nodeID, answerDictionary):
+    if nodeID == -1:
+        return
+    inParse(Tree[nodeID].left, answerDictionary)
+    answerDictionary["Inorder"].append(str(nodeID))
+    inParse(Tree[nodeID].right, answerDictionary)
+
+def postParse(nodeID, answerDictionary):
+    if nodeID == -1:
+        return
+    postParse(Tree[nodeID].left, answerDictionary)
+    postParse(Tree[nodeID].right, answerDictionary)
+    answerDictionary["Postorder"].append(str(nodeID))
+    
+
+N = int(input())
+Tree = [Node() for _ in range(N)]
+
+
+for _ in range(N):
+    #id, left, right
+    treeInfo = list(map(int, input().split()))
+    nodeID = treeInfo[0]
+    left = treeInfo[1]
+    right = treeInfo[2]
+    #自身の子をセット
+    Tree[nodeID].left = left
+    Tree[nodeID].right = right
+    #子からみた親をセット
+    if left != -1:
+        Tree[left].parent = nodeID
+    if right != -1:
+        Tree[right].parent = nodeID
+
+        
+
+rootID =[i for i,t in enumerate(Tree) if t.parent == -1][0]
+answerDictionary = {"Preorder":[], "Inorder":[], "Postorder":[]}
+treeWalk(rootID, answerDictionary)
+
+
+for i in answerDictionary:
+    print(i)
+    print(" "+" ".join(answerDictionary[i]))

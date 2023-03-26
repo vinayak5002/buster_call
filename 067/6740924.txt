@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i,n) for (int i = 0; i < n; i++)
+#define rrep(i,n) for (int i = n-1; i >= 0; i--)
+#define rep2(i,a,b) for (int i = a; i < b; i++)
+#define rrep2(i,a,b) for (int i = a-1; i >= b; i--)
+#define rep3(i,a,b,c) for (int i = a; i < b; i+=c)
+#define rrep3(i,a,b,c) for (int i = a-1; i >= b; i-=c)
+#define all(v) v.begin(),v.end()
+#define rall(v) v.rbegin(),v.rend()
+template<class T> bool chmax(T &a, T b){if (a < b){a = b;return true;} else return false;}
+template<class T> bool chmin(T &a, T b){if (a > b){a = b;return true;} else return false;}
+
+#define int ll
+
+template <class T>
+struct Dijkstra{
+    T inf = 1LL<<60;
+    vector<vector<pair<T,int>>> G;
+    Dijkstra(int n) : G(n) {}
+    void set(int a, int b, T c){
+        G[a].push_back(make_pair(b,c));
+    }
+    vector<T> path(int s){
+        vector<T> d(G.size(),inf);
+        priority_queue<pair<T,int>,vector<pair<T,int>>,greater<pair<T,int>>> pq;
+        pq.push(make_pair(0,s));
+        d[s] = 0;
+        while (pq.size()){
+            auto [c,v] = pq.top(); pq.pop();
+            if (d[v] < c) continue;
+            for (auto p:G[v]){
+                if (d[p.first] <= c + p.second) continue;
+                d[p.first] = c + p.second;
+                pq.push(make_pair(d[p.first],p.first));
+            }
+        }
+        return d;
+    }
+};
+
+int n,k,R[5000];
+ll C[5000];
+vector<int>g[5000];
+vector<pair<int,ll>>g2[5000];
+signed main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cin>>n>>k;
+    rep(i,n)cin>>C[i]>>R[i];
+    rep(i,k){
+        int a,b;cin>>a>>b;--a;--b;
+        g[a].push_back(b);
+        g[b].push_back(a);
+    }
+    vector<vector<ll>>D;
+    rep(i,n){
+        Dijkstra<ll>G(n);
+        rep(x,n){
+            for(auto j:g[x])
+            G.set(x,j,1);
+        }
+        vector<ll>d=G.path(i);
+        D.push_back(d);
+    }
+    rep(i,n){
+        rep(j,n){
+            if(D[i][j]<=R[i]){
+                g2[i].push_back(make_pair(j,C[i]));
+            }
+        }
+    }
+    vector<ll>A(n,1LL<<60);
+    A[0]=0;
+    priority_queue<pair<ll,int>,vector<pair<ll,int>>,greater<pair<ll,int>>>pq;
+    pq.push(make_pair(0,0));
+    while(pq.size()){
+        auto[c,x]=pq.top();pq.pop();
+        if(x==n-1){
+            cout<<c<<"\n";
+            return 0;
+        }
+        if(A[x]<c)continue;
+        for(auto [i,e]:g2[x]){
+            if(chmin(A[i],A[x]+e)){
+                pq.push(make_pair(A[i],i));
+            }
+        }
+    }
+}

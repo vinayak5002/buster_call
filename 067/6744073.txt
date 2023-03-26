@@ -1,0 +1,86 @@
+#include<bits/stdc++.h>
+#define fi first
+#define se second
+#define pb push_back
+using namespace std;
+typedef long long LL;
+typedef double db;
+struct Point{
+	db x,y;
+	Point(){}
+	Point(db _x,db _y){
+		x = _x;
+		y = _y;
+	}
+	Point operator -(const Point &b)const{
+		return Point(x-b.x,y-b.y);
+	}
+	Point operator +(const Point &b)const{
+		return Point(x+b.x,y+b.y);
+	}
+	db operator ^(const Point &b)const{
+		return x*b.y-y*b.x;
+	}
+	db operator *(const Point &b)const{
+		return x*b.x+y*b.y;
+	}
+	Point operator *(const db &k)const{
+		return Point(x*k,y*k);
+	}
+	Point operator /(const db &k)const{
+		return Point(x/k,y/k);
+	}
+	db len(){
+		return hypot(x,y);
+	}
+	db len2(){
+		return x*x+y*y;
+	}
+};
+
+struct Line{
+	Point s,e;
+	Line(){}
+	Line(Point _s,Point _e){
+		s = _s;
+		e = _e;
+	}
+	Point lineprog(Point p){
+		return s+(((e-s)*((e-s)*(p-s)))/((e-s).len2()));
+	}
+	Point symmetrypoint(Point p){
+		Point q=lineprog(p);
+		return Point(2*q.x-p.x,2*q.y-p.y);
+	}
+};
+
+int main()
+{
+	db x1,y1,x2,y2;
+	scanf("%lf%lf%lf%lf",&x1,&y1,&x2,&y2);
+	Point p1=Point(x1,y1),p2=Point(x2,y2);
+	Line l=Line(p1,p2);
+	int q;
+	scanf("%d",&q);
+	while(q--)
+	{
+		db x,y;
+		scanf("%lf%lf",&x,&y);
+		Point p=Point(x,y);
+		Point t1=p2-p1,t2=p-p1;
+		if((t1^t2)>0) puts("COUNTER_CLOCKWISE");
+		else if((t1^t2)<0) puts("CLOCKWISE");
+		else
+		{
+			if(t1*t2<0) puts("ONLINE_BACK");
+			else
+			{
+				if(t2.x>=t1.x) puts("ONLINE_FRONT");
+				else puts("ON_SEGMENT");
+			}
+		}
+	}
+	return 0;
+}
+
+

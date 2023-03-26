@@ -1,0 +1,70 @@
+class Node:
+    def __init__(self):
+        self.parent = -1
+        self.degree = 0
+        self.sibling = -1
+
+
+def caliculateDepth(nodeID, d=0):
+    Tree[nodeID].depth = d
+    if Tree[nodeID].left != -1:
+        caliculateDepth(Tree[nodeID].left, d + 1)
+    if Tree[nodeID].right != -1:
+        caliculateDepth(Tree[nodeID].right, d + 1)
+
+
+def caliculateHeight(nodeID):
+    leftHeight = 0
+    rightHeight = 0
+    if Tree[nodeID].left != -1:
+        leftHeight = caliculateHeight(Tree[nodeID].left) + 1
+    if Tree[nodeID].right != -1:
+        rightHeight = caliculateHeight(Tree[nodeID].right) + 1
+    Tree[nodeID].height = max(leftHeight, rightHeight)
+    return max(leftHeight, rightHeight)
+
+
+N = int(input())
+Tree = [Node() for _ in range(N)]
+
+
+for _ in range(N):
+    # id, left, right
+    treeInfo = list(map(int, input().split()))
+    nodeID = treeInfo[0]
+    left = treeInfo[1]
+    right = treeInfo[2]
+    # 自身の子をセット
+    Tree[nodeID].left = left
+    Tree[nodeID].right = right
+    # 子からみた親をセット
+    if left != -1:
+        Tree[left].parent = nodeID
+    if right != -1:
+        Tree[right].parent = nodeID
+    # ノードのタイプをセット
+    if left == -1 and right == -1:
+        Tree[nodeID].type = "leaf"
+    elif left == -1 or right == -1:
+        Tree[nodeID].degree = 1
+        Tree[nodeID].type = "internal node"
+    else:
+        # 兄弟をセット
+        Tree[right].sibling = left
+        Tree[left].sibling = right
+        Tree[nodeID].degree = 2
+        Tree[nodeID].type = "internal node"
+
+
+root_id = [i for i, t in enumerate(Tree) if t.parent == -1][0]
+Tree[root_id].type = "root"
+caliculateDepth(root_id)
+caliculateHeight(root_id)
+
+
+for i, t in enumerate(Tree):
+    print(
+        "node {}: parent = {}, sibling = {}, degree = {}, depth = {}, height = {}, {}".format(
+            i, t.parent, t.sibling, t.degree, t.depth, t.height, t.type
+        )
+    )

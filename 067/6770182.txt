@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+
+const ll MOD = 1000000007;
+
+ll expr(const string&, size_t&);
+ll term(const string&, size_t&);
+ll number(const string& s, size_t&);
+
+ll shift(ll x, ll y) {
+    if (y > 30) return 0;
+    return x >> y;
+}
+
+ll expr(const string& s, size_t& i) {
+    ll res = term(s, i);
+    while (i < s.size()) {
+        if (s[i] == 'x' and s[i + 1] == 'x') {
+            i += 2;
+            res = shift(res, term(s, i));
+        } else
+            break;
+    }
+    return res;
+}
+
+ll term(const string& s, size_t& i) {
+    if (isdigit(s[i]))
+        return number(s, i);
+    else if (s[i] == 'S') {
+        i++;
+        assert(s[i++] == '<');
+        ll res = expr(s, i);
+        assert(s[i++] == '>');
+        return res * res % MOD;
+    } else
+        assert(false);
+}
+
+ll number(const string& s, size_t& i) {
+    ll res = 0;
+    while (i < s.size() and isdigit(s[i])) res = res * 10 + (s[i++] - '0');
+    return res;
+}
+
+void solve(string S) {
+    string T = "";
+    for (char& c : S) {
+        if (c != ' ') {
+            T += c;
+        }
+    }
+    swap(S, T);
+    for (size_t i = 0; i + 1 < S.size(); i++) {
+        if (S[i] != '>') continue;
+        if (!(isdigit(S[i + 1]) or S[i + 1] == 'S')) continue;
+        assert(S[i - 1] == '>');
+        S[i - 1] = S[i] = 'x';
+    }
+    size_t i = 0;
+    cout << expr(S, i) << '\n';
+}
+
+int main() {
+    cin.tie(0);
+    ios::sync_with_stdio(false);
+    string S;
+    while (getline(cin, S), S != "#") solve(S);
+    return 0;
+}

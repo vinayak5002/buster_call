@@ -1,0 +1,45 @@
+#define BUF_SIZE 1024
+
+#include <stdio.h>
+#include <string.h>
+
+void shuffle(char str[], int num) {
+	char tmp[BUF_SIZE];
+	int i;
+	int boundary = strlen(str) - num;
+	memset(tmp, 0, sizeof(tmp));
+	strncpy(tmp, str, strlen(str));
+	for (i = 0; i < (int)strlen(str); i++) {
+		if (i < boundary) {
+			str[i] = tmp[num+i];
+		}
+		else {
+			str[i] = tmp[i - boundary];
+		}
+	}
+
+}
+
+int main(void) {
+	char buf[BUF_SIZE];
+	char str[BUF_SIZE];
+	int shuffle_num, num, i;
+	
+	while (1) {
+		fgets(str, sizeof(str) - 1, stdin);
+		if (strchr(str, '\n')) {
+			*strchr(str, '\n') = '\0';
+		}
+		if (strcmp(str, "-") == 0) {
+			break;
+		}
+		fgets(buf, sizeof(buf) - 1, stdin);
+		sscanf(buf, "%d", &shuffle_num);
+		for (i = 0; i < shuffle_num; i++) {
+			fgets(buf, sizeof(buf) - 1, stdin);
+			sscanf(buf, "%d", &num);
+			shuffle(str, num);
+		}
+		printf("%s\n",str);
+	}
+}

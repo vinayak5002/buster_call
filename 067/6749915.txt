@@ -1,0 +1,61 @@
+import java.util.Scanner
+import scala.annotation.tailrec
+
+object Main extends App {
+  class Node(var parent:NodeRef = None, var child:NodeRef = None, var sibling:NodeRef = None)
+  type NodeRef = Option[Int]
+  
+  val sc = new Scanner(System.in)
+  val N = sc.nextInt()
+  var nodes = Array.fill[Node](N)(new Node)
+
+  for (_ <- 0 until N) {
+    val id = sc.nextInt()
+    val K = sc.nextInt()
+    if (K > 0) {
+      val c = sc.nextInt()
+      nodes(id).child = Some(c)
+      setChildren(K-1, c, id)
+    }
+  }
+
+  @tailrec
+  def setChildren(k:Int, s:Int, p:Int):Unit = {
+    nodes(s).parent = Some(p)
+    if (k > 0) {
+      val next = sc.nextInt()
+      nodes(s).sibling = Some(next)
+      setChildren(k-1, next, p)
+    }
+  }
+
+  @tailrec
+  def getDepth(idx:Int, ad:Int):Int = {
+    val p = nodes(idx).parent
+    if (p.isDefined) getDepth(p.get, ad+1) else ad
+  }
+
+  @tailrec
+  def getChildren(ref: NodeRef, ac:List[Int]):List[Int] = ref match {
+    case Some(idx) =>
+      val n = nodes(idx)
+      n.sibling match {
+        case None => idx::ac
+        case s => getChildren(s, idx::ac)
+      }
+    case None => ac
+  }
+
+  for (i <- 0 until N) {
+    val n = nodes(i)
+    val parent = if (n.parent.isDefined) n.parent.get else -1
+    val depth = getDepth(i, 0)
+    val nodeType = (n.parent.isDefined, n.child.isDefined) match {
+      case (true, true) => "internal node"
+      case (true, false) => "leaf"
+      case _ => "root"
+    }
+    val children = getChildren(n.child, Nil).reverse.toArray
+    println(s"node $i: parent = $parent, depth = $depth, $nodeType, [${children.mkString(", ")}]")
+  }
+}

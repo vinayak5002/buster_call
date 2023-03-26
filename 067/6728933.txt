@@ -1,0 +1,47 @@
+#include <iostream>
+#include <cmath>
+#include <vector>
+// #include <string>
+// #include <list>
+#include <iterator>
+#include <algorithm>
+
+int pos;
+
+void search(int count, int d, std::vector<int>& preorder, std::vector<int>& inorder, std::vector<int>& postorder){
+    int root, distance;
+    if(count - d >= 0) return;
+
+    root = preorder[pos++];
+    // ++pos;
+    distance = std::distance(inorder.begin(), std::find(inorder.begin(), inorder.end(), root));
+    search(count, distance, preorder, inorder, postorder);
+    search(distance+1, d, preorder, inorder, postorder);
+    postorder.push_back(root);
+}
+
+int main(){
+    int n, node;
+    std::vector<int> preorder, inorder, postorder;
+    std::cin >> n;
+
+    for(int i = 0 ; i < n ; i++){
+        std::cin >> node;
+        preorder.push_back(node);
+    }
+    for(int i = 0 ; i < n ; i++){
+        std::cin >> node;
+        inorder.push_back(node);
+    }
+
+    // search(0, preorder.size());
+    search(0, n, preorder, inorder, postorder);
+
+    std::cout << postorder[0];
+    for(int i = 1 ; i < n ; i++){
+        std::cout << " " << postorder[i];
+    }
+    std::cout << "\n";
+
+    return 0;
+}

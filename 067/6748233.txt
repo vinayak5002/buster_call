@@ -1,0 +1,76 @@
+#include<stdio.h>
+
+#define MAX 100
+
+int Findmin( int );
+
+int n,g;
+int G[MAX][MAX];
+
+int main(void){
+	
+	int ST[MAX],V[MAX];
+	int sum=0,i,j,s,submin,min=2000,ming,c,flag;
+	
+	scanf("%d",&n);
+	
+	for(i=0;i<n;i++){
+		for(j=0;j<n;j++){
+			scanf("%d",&G[i][j]);
+		}
+	}
+	
+	for(i=0;i<n;i++){
+		ST[i]=-1;
+	}
+	
+	ST[0]=0;
+	c=0;
+	V[0]=1;
+	
+	while(flag != n){
+		i=0;
+		ming=-1;
+		j=-1;
+		min=2000;
+		flag=0;
+		while( ST[i] != -1){
+			submin=Findmin(ST[i]);
+			/*printf("%d %d\n",submin,ST[i]);*/
+			if(submin<min){
+				min=submin;
+				ming=g;
+				j=ST[i];
+			}
+			i++;
+		}
+		c++;
+		V[ming]=1;
+		ST[c]=ming;
+		sum=sum+min;
+		/*printf("a %d %d\n",sum,min);*/
+		G[j][ming]=-1;
+		G[ming][j]=-1;
+		for(s=0;s<n;s++){
+			if(V[s]==1){
+				flag++;
+			}
+		}
+	}
+	
+	printf("%d\n",sum);
+	
+	return 0;
+}
+
+int Findmin( int x ){
+	int i,min=2000;
+	for(i=0;i<n;i++){
+		if(G[x][i] != -1 && G[x][i]<min){
+			min=G[x][i];
+			g=i;
+		}
+	}
+	
+	return min;
+}

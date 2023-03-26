@@ -1,0 +1,45 @@
+import sys
+from functools import lru_cache
+sys.setrecursionlimit(1<<30)
+readline = sys.stdin.readline
+
+@lru_cache(maxsize=100000)
+def DFS(S, start, goal):
+
+    global dp
+
+    if dp[S][start] != -1:
+        return dp[S][start]
+
+    if S == 0 and start == goal:
+        return 0
+
+    res = INF
+
+    for i in range(V):
+        if S & (1 <<i):
+            res = min(res, dist[start][i] + DFS(S & ~(1 << i), i, goal))
+
+
+    dp[S][start] = res
+
+    return res
+
+if __name__ == '__main__':
+
+    V, E = map(int, readline().split())
+    INF = 1 << 30
+    dist = [[INF] * V for _ in range(V)]
+
+    for _ in range(E):
+        s, t, d = map(int, readline().split())
+        dist[s][t] = d
+
+    dp = [[-1] * V for _ in range(1 << V)]
+
+    ans = DFS((1<<V)-1, 0, 0)
+    if ans >= INF:
+        ans = -1
+
+    print(ans)
+

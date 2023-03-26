@@ -1,0 +1,54 @@
+def find_rt(t):
+
+    if p_nd[t] == t:
+        return t
+
+    tmp = find_rt(p_nd[t])
+    wht[t] += wht[p_nd[t]]
+    p_nd[t] = tmp
+
+
+    return p_nd[t]
+
+
+
+def unite(x, y, w):
+
+    rt_x = find_rt(x)
+    rt_y = find_rt(y)
+
+
+    if rnk[rt_x] == rk[rt_y]:
+        p_nd[rt_y] = rt_x
+        rk[rt_x] += 1
+        wht[rt_y] = wht[x] + w - wht[y]
+
+    elif rnk[rt_x] < rnk[rt_y]:
+        p_nd[rt_x] = rt_y
+        wht[rt_x] = wht[y] - w - wht[x]
+
+    else:
+        p_nd[rt_y] = rt_x
+        wht[rt_y] = wht[x] + w - wht[y]
+
+
+
+#main
+n,q = map(int,input().split())
+p_nd = [i for i in range(n)]
+wht = [0] * n
+rnk = [0] * n
+
+
+for _ in range(q):
+
+    qry = list(map(int, input().split()))
+
+    if qry[0] == 0:
+        unite(*qry[1:4])
+    else:
+        if find_rt(qry[1]) == find_rt(qry[2]):
+            print(wht[qry[2]] - wht[qry[1]])
+        else:
+            print("?")
+

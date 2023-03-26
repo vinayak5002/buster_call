@@ -1,0 +1,121 @@
+#include<bits/stdc++.h>
+#define int ll
+#define rep(i, N) for(int i = 0; i < (int)(N); ++i)
+#define rep1(i, N) for(int i = 1; i <= (int)(N); ++i)
+#define per(i, N) for(int i = (N)-1; i >= 0; --i)
+#define all(v) (v).begin(), (v).end()
+#define rall(v) (v).rbegin(), (v).rend()
+#define bit(n, k) ((n) >> (k))
+#define pcnt(n) (__builtin_popcount(n))
+#define TakAo(ans) ans ? cout << "Takahashi\n" : cout << "Aoki\n"
+#define YesNo(ans) ans ? cout << "Yes\n" : cout << "No\n"
+#define endl '\n'
+#define fi first
+#define se second
+#define mkpr make_pair
+#define mktpl make_tuple
+#define eb emplace_back
+
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+using point = struct{ ll x, y; };
+using pointld = struct{ ld x, y; };
+using State = string::const_iterator;
+template<class T> using max_heap = priority_queue<T>;
+template<class T> using min_heap = priority_queue<T, vector<T>, greater<T>>;
+template<class T> using vec = vector<T>;
+template<class T> using vvec = vec<vec<T>>;
+template<class T> using vvvec = vec<vvec<T>>;
+template<class T> using vvvvec = vvec<vvec<T>>;
+
+constexpr ld EPS = 1e-10;
+constexpr int INF = 1001001001;
+constexpr ll LINF = 1001001001001001001ll;
+constexpr ll MOD = (0) ? 998244353 : 1e9+7;
+constexpr int NIL = -1;
+constexpr int pm[2] = {1, -1};
+constexpr int dy[4] = {0, 1, 0, -1};
+constexpr int dx[4] = {1, 0, -1, 0};
+
+ll cel(ll a, ll b){ return (a + b - 1) / b;}
+ll Gcd(ll a, ll b){ return b ? Gcd(b, a % b) : abs(a);}
+template<class T> T powi(T x, ll exp){
+    return exp > 0 ? (exp & 1 ? x : 1) * powi(x * x, exp >> 1) : x / x;
+}
+ll modpow(ll x, ll exp, ll mod){
+    x %= mod;
+    return exp > 0 ? (exp & 1 ? x : 1) * modpow(x * x, exp >> 1, mod) % mod : 1;
+}
+template<class T> bool chmin(T &a, T b){ return a > b ? (a = b, true) : 0;}
+template<class T> bool chmax(T &a, T b){ return a < b ? (a = b, true) : 0;}
+
+using Pair = pair<ll, ll>;
+using Tpl = tuple<int, int, int>;
+
+void Main(){
+    int N; cin >> N;
+    vec<int> H(N), W(N);
+    rep(i, N) cin >> H[i] >> W[i];
+
+    vvec<char> G(4, vec<char>(4));
+    rep(i, 4)rep(j, 4) cin >> G[i][j];
+
+    const int goal = (1 << 16) - 1;
+    queue<Pair> que;
+    vec<bool> used(1 << 16, 0);
+    que.push(mkpr(0, 0));
+    used[0] = 1;
+    char col[3] = {'R', 'G', 'B'};
+
+    while(!que.empty()){
+        Pair p = que.front();
+        que.pop();
+        int num = p.fi, cst = p.se;
+        
+        rep(i, N){
+            for(int j = -H[i] + 1; j < 4; j++){
+                for(int k = -W[i] + 1; k < 4; k++){
+                    for(int l = 0; l < 3; l++){
+                        int tmp = num;
+
+                        for(int a = max(j, ll(0)); a < min(j + H[i], ll(4)); a++){
+                            for(int b = max(k, ll(0)); b < min(k + W[i], ll(4)); b++){
+                                if(col[l] == G[a][b]){
+                                    tmp |= (1 << (4 * a + b));
+                                }
+                                else{
+                                    //cout << bitset<16>(tmp) << endl;
+                                    tmp &= ~(1 << (4 * a + b));
+                                    //cout << bitset<16>(tmp) << endl;
+                                }
+                            }
+                        }
+
+                        if(tmp == goal){
+                            cout << cst + 1 << endl;
+                            return;
+                        }
+                        else{
+                            if(!used[tmp]){
+                                used[tmp] = 1;
+                                que.push(mkpr(tmp, cst + 1));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    cout << -1 << endl;
+}
+ 
+signed main(){
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    cout << fixed << setprecision(10);
+    Main();
+    return 0;
+}

@@ -1,0 +1,71 @@
+class Dice:
+    def __init__(self, num_lst):
+        self.top = num_lst[0]
+        self.s = num_lst[1]
+        self.e = num_lst[2]
+        self.w = num_lst[3]
+        self.n = num_lst[4]
+        self.bot = num_lst[5]
+
+
+    def roll(self, cmd):
+        tmp = self.top
+
+        if cmd == 'S':
+            self.top = self.n
+            self.n = self.bot
+            self.bot = self.s
+            self.s = tmp
+
+        elif cmd == 'N':
+            self.top = self.s
+            self.s = self.bot
+            self.bot = self.n
+            self.n = tmp
+
+        elif cmd == 'E':
+            self.top = self.w
+            self.w = self.bot
+            self.bot = self.e
+            self.e = tmp
+
+        else:
+            self.top = self.e
+            self.e = self.bot
+            self.bot = self.w
+            self.w = tmp
+
+    def getnum(self):
+        return self.top
+
+d = Dice(list(map(int, input().split())))
+n = int(input())
+for i in range(n):
+    a, b = map(int, input().split())
+
+    if d.n == b:
+        d.roll('S')
+        d.roll('S')
+
+    elif d.top == b:
+        d.roll('S')
+
+    elif d.bot == b:
+        d.roll('N')
+
+    elif d.e == b:
+        d.roll('E')
+        d.roll('N')
+
+    elif d.w == b:
+        d.roll('W')
+        d.roll('N')
+
+    while d.top != a:
+        d.roll('W')
+
+    ans = d.e
+    print(ans)
+
+
+

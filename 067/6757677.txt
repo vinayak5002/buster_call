@@ -1,0 +1,82 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+struct WeightedDisjointSet {
+    vector<int> rank, parent, weight;
+
+    WeightedDisjointSet() {}
+    WeightedDisjointSet(int size) {
+        rank.resize(size, 0);
+        parent.resize(size, 0);
+        weight.resize(size, 0);
+        for (int i = 0; i < size; i++) makeSet(i);
+    }
+
+    void makeSet(int x) {
+        rank[x] = 0;
+        parent[x] = x;
+        weight[x] = 0;
+    }
+
+
+    pair<int, int> findSet(int x) {
+        pair <int, int> p;
+        if (x != parent[x]) {
+            p = findSet(parent[x]);
+            parent[x] = p.first;
+            weight[x] += p.second;
+        }
+        p = pair<int, int>(parent[x], weight[x]);
+        return p;
+    }
+
+    void relate(int x, int y, int w) {
+        int a = findSet(x).first;
+        int b = findSet(y).first;
+        link(a, b, w - weight[x] + weight[y]);
+    }
+
+    void link(int x, int y, int w) {
+        if (rank[x] > rank[y]) {
+            parent[y] = x;
+            weight[y] = -w;
+        } else {
+            parent[x] = y;
+            weight[x] = w;
+            if (rank[x] == rank[y]) rank[y]++;
+        }
+    }
+
+    bool same(int x, int y) {
+        return findSet(x).first == findSet(y).first;
+    }
+
+    void diff_print(int x, int y) {
+        if (!same(x, y)) cout << "?" << endl;
+        else cout << weight[x] - weight[y] << endl;
+    }
+};
+
+int main() {
+    int size, q;
+    int com, x, y, w;
+
+    cin >> size >> q;
+    WeightedDisjointSet wds(size);
+
+    for (int i = 0; i < q; i++) {
+        cin >> com;
+        if (com == 0)   // relate
+        {
+            cin >> x >> y >> w;
+            wds.relate(x, y, w);
+        } else if (com == 1)    // diff
+        {
+            cin >> x >> y;
+            wds.diff_print(x, y);
+        }
+    }
+
+    return 0;
+}

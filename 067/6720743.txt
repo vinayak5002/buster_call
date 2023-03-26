@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    while (true) {
+        int M, T, P, R;
+        cin >> M >> T >> P >> R;
+
+        if (M == 0 && T == 0 && P == 0 && R == 0)
+            break;
+        vector<tuple<int, int, int, int>> v;
+        for (int i = 0; i < R; i++) {
+            int m, t, p, r;
+            cin >> m >> t >> p >> r;
+            v.push_back(make_tuple(m, t - 1, p, r));
+        }
+
+        // 解いた数，時間，ペナルティ
+        vector<int> slv(T, 0), tim(T, 0), pen(T, 0);
+        for (int i = 0; i < R; i++) {
+            if (get<3>(v[i]) == 0) {
+                int team = get<1>(v[i]);
+                int prob = get<2>(v[i]);
+                slv[team]++;
+                tim[team] += get<0>(v[i]);
+                for (int j = 0; j < i; j++)
+                    if (get<2>(v[j]) == prob && get<3>(v[j]) == 1)
+                        pen[team] += 20;
+            }
+        }
+
+        //チーム番号，問題，時間
+        vector<tuple<int, int, int_fast16_t>> tb(T);
+        for (int i = 0; i < T; i++)
+            tb[i] = make_tuple(i + 1, slv[i], tim[i] + pen[i]);
+
+        //解いた数 > 時間
+        sort(tb.begin(), tb.end(),
+             [](tuple<int, int, int> t1, tuple<int, int, int> t2) -> bool {
+                 if (get<1>(t1) > get<1>(t2))
+                     return true;
+                 else if (get<1>(t1) < get<1>(t2))
+                     return false;
+                 else {
+                     if (get<2>(t1) < get<2>(t2))
+                         return true;
+                     else if (get<2>(t1) > get<2>(t2))
+                         return false;
+                     else {
+                         return get<0>(t1) > get<0>(t2);
+                     }
+                 }
+             });
+
+        cout << get<0>(tb[0]);
+        for (int i = 1; i < T; i++) {
+            if (get<1>(tb[i - 1]) == get<1>(tb[i]) &&
+                get<2>(tb[i - 1]) == get<2>(tb[i]))
+                cout << '=';
+            else
+                cout << ',';
+            cout << get<0>(tb[i]);
+        }
+        cout << endl;
+    }
+    
+    return 0;
+}

@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+
+struct Node {
+    int key;
+    Node *prev, *next;
+};
+
+Node *nil;
+
+Node* listSearch(int key) {
+    Node *cur = nil -> next;
+    while (cur != nil && cur -> key != key) {
+        cur = cur -> next;
+    }
+    return cur;
+}
+
+void init() {
+    nil = (Node *)malloc(sizeof(Node));
+    nil -> next = nil;
+    nil -> prev = nil;
+}
+
+void insert(int key) {
+    Node *x = (Node *)malloc(sizeof(Node));
+    x -> key = key;
+    x -> next = nil -> next;
+    nil -> next -> prev = x;
+    nil -> next = x;
+    x -> prev = nil;
+}
+
+void deleteNode(Node *x) {
+    if (x == nil) return;
+    x -> prev -> next = x -> next;
+    x -> next -> prev = x -> prev;
+    free(x);
+}
+
+void deleteKey(int key) {
+    deleteNode(listSearch(key));
+}
+
+void deleteFirst() {
+    deleteNode(nil -> next);
+}
+
+void deleteLast() {
+    deleteNode(nil -> prev);
+}
+
+int main() {
+    int key, n, i;
+    string command;
+    init();
+    cin>>n;
+    for (i = 0; i < n; i++) {
+        cin>>command;
+        if (command == "insert") {
+            cin>>key;
+            insert(key);
+        }else if (command == "delete") {
+            cin>>key;
+            deleteKey(key);
+        } else if (command == "deleteFirst") {
+            deleteFirst();
+        } else if (command == "deleteLast") {
+            deleteLast();
+        }
+    }
+
+    Node *cur = nil -> next;
+    int isf = 0;
+    while (1) {
+        if (cur == nil) {
+            break;
+        }
+        if (isf++ > 0) {
+            printf(" ");
+        }
+        printf("%d", cur -> key);
+        cur = cur -> next;
+    }
+    printf("\n");
+
+    return 0;
+}

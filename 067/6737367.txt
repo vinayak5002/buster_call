@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int solve(int N, int M, vector<int> &C, vector<int> &x)
+{
+  int const INF = numeric_limits<int>::max() / 2;
+  vector<vector<int>> y(N + 1, vector<int>(M + 1));
+  vector<vector<int>> dp(N + 1, vector<int>(M + 1, INF));
+  for (int j = 1; j <= M; j++) {
+    y.at(0).at(j) = 128;
+    dp.at(0).at(j) = 0;
+  }
+  for (int n = 1; n <= N; n++) {
+    for (int j = 1; j <= M; j++) {
+      for (int k = 1; k <= M; k++) {
+        int yy = max(0, min(255, y.at(n - 1).at(j) + C.at(k)));
+        if (dp.at(n).at(k) > dp.at(n - 1).at(j) + pow(x.at(n) - yy, 2)) {
+          dp.at(n).at(k) = dp.at(n - 1).at(j) + pow(x.at(n) - yy, 2);
+          y.at(n).at(k) = yy;
+        }
+      }
+    }
+  }
+  return *min_element(dp.at(N).begin(), dp.at(N).end());
+}
+
+int main()
+{
+  int N, M;
+  while (true) {
+    cin >> N >> M;
+    if (N == 0 && M == 0)
+      break;
+    vector<int> C(M + 1), x(N + 1);
+    for (int j = 1; j <= M; j++) cin >> C.at(j);
+    for (int n = 1; n <= N; n++) cin >> x.at(n);
+    cout << solve(N, M, C, x) << '\n';
+  }
+}
+

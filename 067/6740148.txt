@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+using namespace std;
+using pii = pair<int, int>;
+
+pii add(pii a, pii b) {
+    return {a.first + b.first, a.second + b.second};
+}
+
+pii diff(pii a, pii b) {
+    return {a.first - b.first, a.second - b.second};
+}
+
+int dot(pii a) {
+    return a.first*a.first + a.second*a.second;
+}
+
+bool judge(pii a) {
+    int x = a.first, y = a.second;
+    bool res = true;
+    if ((x + y) & 1) res = false;
+    if (abs(x - y) & 1) res = false;
+    if (abs(-x + y) & 1) res = false;
+    return res;
+}
+
+void out(pii a) {
+    cout << a.first << ' ' << a.second << endl;
+}
+
+int solve(int n) {
+    vector<int> xs(n), ys(n);
+    for (int i = 0 ; i < n ; i++) cin >> xs[i] >> ys[i];
+    set<pii> st;
+    for (int i = 0 ; i < n ; i++) st.emplace(xs[i], ys[i]);
+
+    int res = 0;
+    for (int i = 0 ; i < n ; i++) for (int j = 0 ; j < n ; j++) {
+        if (i == j) continue;
+        int vecx = xs[j] - xs[i], vecy = ys[j] - ys[i];
+        if (!judge({vecx, vecy})) continue;
+        pii a = add(make_pair(xs[i], ys[i]), {(vecx + vecy)/2, (-vecx + vecy)/2});
+        pii b = add(make_pair(xs[i], ys[i]), {(vecx - vecy)/2, (vecx + vecy)/2});
+        if (st.count(a) and st.count(b)) {
+            int s = dot(diff(make_pair(xs[i], ys[i]), a));
+            if (s > res) res = s;
+        }
+    }
+    
+    return res;
+}
+
+int main() {
+    while(1) {
+        int n; cin >> n;
+        if (!n) break;
+        cout << solve(n) << endl;
+    }
+}
+

@@ -1,0 +1,127 @@
+// #define _GLIBCXX_DEBUG
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+using namespace std;
+//using namespace atcoder;
+
+#define int long long
+#define all(x) (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+#define rep(i, n) for (int i = 0; i < n; ++i)
+#define REP(i, n) for (int i = 0; i < n; ++i)
+#define range(i,a,b) ((a)<=(i) && (i)<(b))
+#define debug(x) cout << #x << " = " << (x) << endl;
+#define fs first
+#define sc second
+#define pb push_back
+#define eb emplace_back
+#define SP << " " <<
+
+typedef long long ll;
+typedef pair<int, int> P;
+typedef tuple<int, int, int> T;
+typedef vector<int> vec;
+typedef vector<P> pvec;
+typedef vector<vector<int>> vvec;
+typedef vector<vector<P>> pvvec;
+typedef priority_queue<int> PQI;
+typedef priority_queue<P> PQP;
+typedef priority_queue<int,vector<int>,greater<int>> PQIG;
+typedef priority_queue<P,vector<P>,greater<P>> PQPG;
+
+const vector<int> DX = {0, -1, 0, 1, 1, 1, -1, -1};
+const vector<int> DY = {1, 0, -1, 0, 1, -1, 1, -1};
+constexpr int MOD = (1000000007);
+// const int MOD = (998244353);
+// const int INF = (1 << 30); // 1073741824
+const ll INF = (1LL << 60); // 1152921504606846976
+const double PI = (3.141592653589794);
+const double EPS = (0.0000000001); // 10^(-10)
+
+template<class T> inline bool chmin(T& a, T b) {if (a > b) {a = b; return 1;} return 0;}
+template<class T> inline bool chmax(T& a, T b) {if (a < b) {a = b; return 1;} return 0;}
+template<class T> inline T ceil(T a, T b) {return T((a + b - 1) / b);}
+template<class T> inline T round(T a, T b) {return T(a / b);}
+template< typename T1, typename T2 > istream &operator>>(istream &is, pair< T1, T2 > &p) { is >> p.first >> p.second; return is; }
+template <class T> inline void out(T &a) { bool flag=true; for(auto&x:a){if(flag) {flag=false;} else{ cout << ' '; } cout<<x; } cout << endl; }
+
+
+
+//----------------------------------------------------------------
+int nmax=200000; // 2*(10^5)
+vvec G(nmax);
+
+P dfs(pvvec graph,int now, int par){
+  P ret = P(now,0);
+  for(auto Next:graph[now]){
+    int next = Next.fs;
+    int cost = Next.sc;
+    if(next==par) continue;
+    P result = dfs(graph, next, now);
+    result.sc+=cost;
+    if(ret.sc<result.sc) ret = result;
+  }
+  return ret;
+}
+
+void solve4ts()
+{
+  
+  int n;
+  cin>>n;
+  int start=0;
+  if(n==0) exit(0);
+  vector<vector<int>> memo(n-1);
+  vec count(n);
+  int ans=0;
+  rep(i,n-1){
+    memo[i].pb(i+1);
+    int p; cin>>p; p--;
+    memo[i].pb(p);
+  }
+  rep(i,n-1){
+    int cost; cin>>cost;
+    memo[i].pb(cost);
+    ans+=cost;
+    // cout<<memo[i][0]<<" "<<memo[i][1]<<" "<<cost<<endl;
+  }
+//     cout<<ans<<endl;
+  rep(i,n-1){
+    count[memo[i][0]]++;
+    count[memo[i][1]]++;
+  }
+  int st;
+  rep(i,n){
+    if(count[i]>1) st=i;
+  }
+  pvvec graph(n);
+  rep(i,n-1){  
+    if(count[memo[i][0]]>1 && count[memo[i][1]]>1){
+      graph[memo[i][0]].eb(memo[i][1],memo[i][2]);
+      graph[memo[i][1]].eb(memo[i][0],memo[i][2]);
+      ans+=2*memo[i][2];
+    }
+  }
+  // cout<<ans<<endl;
+  auto tmp = dfs(graph,st,-1);
+  tmp = dfs(graph,tmp.fs,-1);
+  cout<<ans-tmp.sc<<endl;
+  // cout<<"============="<<endl;
+}
+//-----------------------------------------------------------------
+
+signed main(){ ios::sync_with_stdio(false); cin.tie(0); cout << fixed << setprecision(15);
+  int repeat = INF;
+  // cin >> repeat;
+  while(repeat--) solve4ts();
+}
+
+/*
+
+g++ -std=c++1z code.cpp
+
+./a.out
+
+python3 expander.py code.cpp
+
+*/

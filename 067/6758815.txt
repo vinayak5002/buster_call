@@ -1,0 +1,56 @@
+#include<iostream>
+#include<string>
+#include<map>
+#include<set>
+#include<queue>
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+#include<vector>
+#include<cmath>
+using namespace std;
+//#define int long long
+#define INF 0x3f3f3f3f
+map<string,int> dp;
+int dirt[4]={4,-4,1,-1};
+void bfs()
+{
+    string s="01234567";
+    queue<string> que;
+    que.push(s);
+    dp[s]=1;
+    while(!que.empty())
+    {
+        string str=que.front();
+        que.pop();
+        int idx=str.find('0');
+        for(int i=0;i<4;i++)
+        {
+            int tx=idx+dirt[i];
+            if(tx<0||tx>7||(idx==3&&tx==4)||(idx==4&&tx==3)) continue;
+            string st=str;
+            swap(st[tx],st[idx]);
+            if(dp[st]==0)
+            {
+                que.push(st);
+                dp[st]=dp[str]+1;
+            }
+        }
+    }
+}
+int main()
+{
+    bfs();
+    char ch;
+    while(cin>>ch)
+    {
+        string str;
+        str+=ch;
+        for(int i=0;i<7;i++)
+        {
+            cin>>ch;
+            str+=ch;
+        }
+        cout<<dp[str]-1<<endl;
+    }
+}

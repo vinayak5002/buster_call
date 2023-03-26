@@ -1,0 +1,89 @@
+# import random
+
+
+class Heap:
+    def __init__(self, array):
+        self.size = len(array)
+        self.node_dict = {}
+        for i in range(self.size):
+            self.node_dict[i] = Node(i, array[i])
+
+    def size(self):
+        return self.size
+
+    def list(self):
+        return [self.node_dict[i].value for i in range(self.size)]
+
+    def node(self, key):
+        return self.node_dict[key]
+
+    def swap(self, key1, key2):
+        value1 = self.node_dict[key1].value
+        self.node_dict[key1].put(self.node_dict[key2].value)
+        self.node_dict[key2].put(value1)
+
+
+class Node:
+    def __init__(self, key, value):
+        self.key = key
+        self.value = value
+        self.left = 2 * key + 1
+        self.right = 2 * key + 2
+        self.parent = key - 1 // 2
+
+    def put(self, value):
+        self.value = value
+
+    def key(self):
+        return self.key
+
+    def value(self):
+        return self.value
+
+    def left(self):
+        return self.left
+
+    def right(self):
+        return self.right
+
+    def parent(self):
+        return self.parent
+
+
+def construct_heap(array):
+    heap = Heap(array)
+    for i in range(heap.size // 2, -1, -1):
+        max_heapify(heap, i)
+    return heap.list()
+
+
+def max_heapify(heap, i):
+    l = heap.node(i).left
+    r = heap.node(i).right
+    if l < heap.size and heap.node(l).value > heap.node(i).value:
+        largest = l
+    else:
+        largest = i
+    if r < heap.size and heap.node(r).value > heap.node(largest).value:
+        largest = r
+
+    if i != largest:
+        heap.swap(i, largest)
+        max_heapify(heap, largest)
+
+
+# array_size = 100
+# value_range = 300
+# array = [random.randrange(value_range) for _ in range(array_size)]
+num = input()
+array = list(map(int, input().split()))
+
+# print(array)
+
+heap_list = construct_heap(array)
+
+for i in range(len(array)):
+    print(heap_list[i], end="")
+    if i != len(array) - 1:
+        print(" ", end="")
+

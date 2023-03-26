@@ -1,0 +1,116 @@
+#include<bits/stdc++.h>
+//#include<atcoder/dsu>
+using namespace std;
+//using namespace atcoder;
+
+void solve(){
+    long long fact[17];
+    fact[0] = 1;
+    for(int i = 1; i <= 16; i++) fact[i] = fact[i - 1] * i;
+    while(1){
+    	int n;
+        cin >> n;
+        if(n == 0) break;
+        vector<char> A(n);
+        for(int i = 0; i < n; i++) cin >> A[i];
+        string S, T;
+        cin >> S >> T;
+        long long ans = 0;
+        for(int i = 0; i < n; i++){
+            map<char, int> mp;
+            mp[A[i]] = 1;
+            for(int bit = 0; bit < (1 << (n - 1)); bit++){
+                for(int j = 0; j < n - 1; j++){
+                    if(j < i) mp[A[j]] = 2 * ((bit >> j) & 1);
+                    else mp[A[j + 1]] = 2 * ((bit >> j) & 1);
+                }
+                stack<int> num;
+                stack<int> ope;
+                num.push(0);
+                ope.push(0);
+                for(auto s:S){
+                    if(s == '('){
+                        num.push(0);
+                        ope.push(0);
+                    }
+                    else if(s == ')'){
+                        int a = num.top();
+                        num.pop();
+                        int b = num.top();
+                        num.pop();
+                        int c = ope.top();
+                        ope.pop();
+                        if(c == 0) num.push(max(a, b));
+                        else num.push(min(a, b));
+                    }
+                    else if(s == '>'){
+                        ope.push(0);
+                    }
+                    else if(s == '<'){
+                        ope.push(1);
+                    }
+                    else{
+                        int a = mp[s];
+                        int b = num.top();
+                        num.pop();
+                        int c = ope.top();
+                        ope.pop();
+                        if(c == 0) num.push(max(a, b));
+                        else num.push(min(a, b));
+                    }
+                }
+                if(num.top() != 1) continue;
+                
+                num.pop();
+                num.push(0);
+                ope.push(0);
+                for(auto s:T){
+                    if(s == '('){
+                        num.push(0);
+                        ope.push(0);
+                    }
+                    else if(s == ')'){
+                        int a = num.top();
+                        num.pop();
+                        int b = num.top();
+                        num.pop();
+                        int c = ope.top();
+                        ope.pop();
+                        if(c == 0) num.push(max(a, b));
+                        else num.push(min(a, b));
+                    }
+                    else if(s == '>'){
+                        ope.push(0);
+                    }
+                    else if(s == '<'){
+                        ope.push(1);
+                    }
+                    else{
+                        int a = mp[s];
+                        int b = num.top();
+                        num.pop();
+                        int c = ope.top();
+                        ope.pop();
+                        if(c == 0) num.push(max(a, b));
+                        else num.push(min(a, b));
+                    }
+                }
+                if(num.top() != 1) continue;
+                int pc = __builtin_popcount(bit);
+                ans += fact[pc] * fact[n - 1 - pc];
+            }
+        }
+        cout << ans << "\n";
+    }
+}
+
+int main(){	
+	cin.tie(0)->sync_with_stdio(0);
+    int t;
+    t = 1;
+    // cin >> t;
+    while(t--) solve();
+}
+    
+    
+	

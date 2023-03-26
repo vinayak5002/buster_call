@@ -1,0 +1,49 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long int ll;
+#define chmin(x,y) x = min(x,y)
+#define chmax(x,y) x = max(x,y)
+#define all(a)  (a).begin(),(a).end()
+#define rep(i,n) for(int i=0;i<n;i++)
+#define fill1(arr,num) fill(arr,arr+sizeof(arr)/sizeof(*arr),num);
+#define fill2(arr,num) fill(*arr,*arr+sizeof(arr)/sizeof(**arr),num);
+#define fill3(arr,num) fill(**arr,**arr+sizeof(arr)/sizeof(***arr),num);
+#define BIG_NUM 2000000000
+#define HUGE_NUM 4000000000000000000
+#define MOD 1000000007
+// using P=pair<int,int>;
+
+
+int main(){
+    int N,M;
+    cin>>N>>M;
+    int dis[105][105];
+    fill2(dis,BIG_NUM);
+    rep(i,N)dis[i][i]=0;
+    rep(i,M){
+        int a,b,c;
+        cin>>a>>b>>c;
+        dis[a][b]=c;
+    }
+    rep(k,N)rep(i,N)rep(j,N){
+        if(dis[i][k]==BIG_NUM||dis[k][j]==BIG_NUM)continue;
+        chmin(dis[i][j],dis[i][k]+dis[k][j]);  
+    }
+    rep(k,N)rep(i,N)rep(j,N){
+        if(dis[i][k]==BIG_NUM||dis[k][j]==BIG_NUM)continue;
+        if(dis[i][j]>dis[i][k]+dis[k][j]){
+            cout<<"NEGATIVE CYCLE"<<endl;
+            return 0;
+        }
+    }
+    rep(i,N){
+        rep(j,N){
+            int d=dis[i][j];
+            if(d==BIG_NUM)cout<<"INF";
+            else cout<<d;
+            if(j!=N-1)cout<<' ';
+        }
+        cout<<endl;
+    }
+}

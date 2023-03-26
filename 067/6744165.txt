@@ -1,0 +1,63 @@
+#include <algorithm>
+// #include <atcoder/all>
+// #include <boost/multiprecision/cpp_int.hpp>
+// #include <boost/numeric/ublas/io.hpp>
+// #include <boost/numeric/ublas/matrix.hpp>
+#include <cstring>
+#include <iomanip>
+#include <iostream>
+#include <vector>
+
+// #include <ext/rope>
+#pragma GCC optimize("O3")
+using namespace std;
+using ll = long long;
+// using namespace atcoder;
+// using namespace boost::numeric::ublas;
+// using mint = modint1000000007;
+// using namespace boost::multiprecision;
+// using namespace __gnu_cxx;
+
+// rep-------------------------------------------------------------------
+#define overload4(_1, _2, _3, _4, name, ...) name
+#define overload3(_1, _2, _3, name, ...) name
+#define rep1(i, n) for (ll i = 0; i < n; ++i)
+#define rep2(i, a, b) for (ll i = a; i < b; ++i)
+#define rep3(i, a, b, c) for (ll i = a, _bb = b; (c > 0 && i < _bb) || (c < 0 && i > _bb); i += c)
+#define rep(...) overload4(__VA_ARGS__, rep3, rep2, rep1)(__VA_ARGS__)
+#define each1(i, a) for (auto &&i : a)
+#define each2(x, y, a) for (auto &&[x, y] : a)
+#define each3(x, y, z, a) for (auto &&[x, y, z] : a)
+#define each(...) overload4(__VA_ARGS__, each3, each2, each1)(__VA_ARGS__)
+// ----------------------------------------------------------------------
+constexpr int INF = 1e9;
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    while (true) {
+        int n;
+        cin >> n;
+        if (n == 0)
+            break;
+        vector t(n, vector<int>(n + 1));
+        rep(i, n) rep(j, n + 1) cin >> t[i][j];
+
+        vector dp(1 << n, INF);
+        rep(i, n) dp[1 << i] = t[i][0];
+
+        rep(S, 1, 1 << n) {
+            rep(u, n) {
+                if ((S >> u) & 1)
+                    continue;
+                int k = t[u][0];
+                rep(i, n) {
+                    if ((S >> i) & 1)
+                        k = min(k, t[u][i + 1]);
+                }
+                dp[S | (1 << u)] = min(dp[S | (1 << u)], dp[S] + k);
+            }
+        }
+        cout << dp[(1 << n) - 1] << "\n";
+    }
+}

@@ -1,0 +1,52 @@
+// 给出直线 p1p2 求点 p 在直线上的投影
+#include <cstdio>
+#include <algorithm>
+#include <cmath>
+using namespace std;
+const double EPS = 1e-14;
+inline int sgn(double x) {
+    if(fabs(x) < EPS) return 0;
+    return x > 0 ? 1 : -1;
+}
+struct Point {
+    double x, y;
+    Point(double a = 0, double b = 0): x(a), y(b) {}
+    Point operator + (const Point &B) const {
+        return Point(x + B.x, y + B.y);
+    }
+    Point operator - (const Point &B) const {
+        return Point(x - B.x, y - B.y);
+    }
+    Point operator * (const double &v) const {
+        return Point(x * v, y * v);
+    }
+    double dot(const Point &B) const {
+        return x * B.x + y * B.y;
+    }
+    double dis2() {
+        return x * x + y * y;
+    }
+    double dis() {
+        return sqrt(x * x + y * y);
+    }
+};
+struct Line {
+    Point A, B;
+    Line(Point a = Point(), Point b = Point()): A(a), B(b) {}
+    Point Projection(const Point &P) const {
+        Point l = B - A, x = P - A;
+        return A + (l * (l.dot(x) / l.dis2()));
+    }
+};
+int main() {
+    double x1, y1, x2, y2;
+    scanf("%lf%lf%lf%lf", &x1, &y1, &x2, &y2);
+    Line l(Point(x1, y1), Point(x2, y2));
+    int q; scanf("%d", &q);
+    while(q--) {
+        double x, y; scanf("%lf%lf", &x, &y);
+        Point pro = l.Projection(Point(x, y));
+        printf("%.10lf %.10lf\n", pro.x, pro.y);
+    }    
+    return 0;
+}

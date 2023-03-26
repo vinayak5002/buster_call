@@ -1,0 +1,178 @@
+#include <bits/stdc++.h>
+using namespace std;
+/*
+#include <atcoder/all>
+using namespace atcoder;
+using mint = modint998244353;
+//using mint = modint1000000007;
+//*/
+using ll = long long;
+using ld = long double;
+using pll = pair<ll, ll>;
+using tlll = tuple<ll, ll, ll>;
+constexpr ll INF = 1LL << 60;
+template<class T> bool chmin(T& a, T b) {if (a > b) {a = b; return true;} return false;}
+template<class T> bool chmax(T& a, T b) {if (a < b) {a = b; return true;} return false;}
+ll safemod(ll A, ll M) {ll res = A % M; if (res < 0) res += M; return res;}
+ll divfloor(ll A, ll B) {if (B < 0) {return divfloor(-A, -B);} return (A - safemod(A, B)) / B;}
+ll divceil(ll A, ll B) {if (B < 0) {return divceil(-A, -B);} return divfloor(A + B - 1, B);}
+ll mypowl(ll A, ll B) {ll res = 1; for (int i = 0; i < B; i++) {res *= A;} return res;}
+template<class T> void unique(vector<T> &V) {V.erase(unique(V.begin(), V.end()), V.end());}
+template<class T> void sortunique(vector<T> &V) {sort(V.begin(), V.end()); V.erase(unique(V.begin(), V.end()), V.end());}
+#define FINALANS(A) do {cout << (A) << '\n'; exit(0);} while (false)
+template<class T> void printvec(const vector<T> &V) {int _n = V.size(); for (int i = 0; i < _n; i++) cout << V[i] << (i == _n - 1 ? "" : " ");cout << '\n';}
+template<class T> void printvect(const vector<T> &V) {for (auto v : V) cout << v << '\n';}
+template<class T> void printvec2(const vector<vector<T>> &V) {for (auto &v : V) printvec(v);}
+
+template <typename Cost>
+struct Edge
+{
+  int from, to;
+  Cost cost;
+  Edge(int s, int t, Cost c = 1) : from(s), to(t), cost(c) {}
+  operator int() const { return to; }
+};
+template <typename Cost>
+struct Graph : vector<vector<Edge<Cost>>>
+{
+  Graph(int n) : vector<vector<Edge<Cost>>>(n) {}
+  void add_edge(int s, int t, Cost c = 1) { (*this)[s].emplace_back(s, t, c); }
+  void add_edge2(int s, int t, Cost c = 1) { add_edge(s, t, c), add_edge(t, s, c); }
+};
+
+template<typename Cost>
+struct LowestCommonAncestor : Graph<Cost>
+{
+  vector<vector<int>> par;
+  vector<int> dep;
+  vector<Cost> dists;
+
+  LowestCommonAncestor(int n) : Graph<Cost>::Graph(n) {}
+
+  void run(const int root = 0)
+  {
+    par.resize(log2((*this).size()) + 2);
+    for (int i = 0; i < (int)par.size(); i++)
+      par[i].resize((*this).size());
+    dep.resize((*this).size()), dists.resize((*this).size());
+    par[0][root] = -1, dep[root] = 0, dists[root] = 0;
+    dfs(root, -1);
+    doubling();
+  }
+
+  void dfs(int v, int pv)
+  {
+    /* bfs
+    queue<pair<int, int>> que;
+    que.emplace(make_pair(v, pv));
+    while (!que.empty())
+    {
+      v = que.front().first, pv = que.front().second;
+      que.pop();
+      for (auto nv : (*this)[v])
+      {
+        if (nv == pv)
+          continue;
+        par[0][nv] = v;
+        dep[nv] = dep[v] + 1;
+        dists[nv] = dists[v] + nv.cost;
+        que.emplace(make_pair(nv, v));
+      }
+    }
+    //*/
+    //*
+    for (auto nv : (*this)[v])
+    {
+      if (nv == pv)
+        continue;
+      par[0][nv] = v;
+      dep[nv] = dep[v] + 1;
+      dists[nv] = dists[v] + nv.cost;
+      dfs(nv, v);
+    }
+    //*/
+  }
+
+  void doubling()
+  {
+    for (int i = 1; i < (int)par.size(); i++)
+    {
+      for (int v = 0; v < (int)(*this).size(); v++)
+      {
+        if (par[i - 1][v] == -1)
+          par[i][v] = -1;
+        else
+          par[i][v] = par[i - 1][par[i - 1][v]];
+      }
+    }
+  }
+
+  int query_ancestor(int v, int k)
+  {
+    for (int i = (int)par.size() - 1; i >= 0; i--)
+    {
+      if (k & (1 << i))
+        v = par[i][v];
+      if (v == -1)
+        return -1;
+    }
+    return v;
+  }
+
+  int query_lca(int u, int v)
+  {
+    if (dep[u] < dep[v])
+      swap(u, v);
+    
+    u = query_ancestor(u, dep[u] - dep[v]);
+    if (u == v)
+      return u;
+    for (int i = (int)par.size() - 1; i >= 0; i--)
+    {
+      if (par[i][u] != par[i][v])
+        u = par[i][u], v = par[i][v];
+    }
+    return par[0][u];
+  }
+
+  int query_dist1(int u, int v)
+  {
+    return dep[u] + dep[v] - 2 * dep[query_lca(u, v)];
+  }
+  Cost query_dist(int u, int v)
+  {
+    return dists[u] + dists[v] - 2 * dists[query_lca(u, v)];
+  }
+};
+
+int main()
+{
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+
+  int N;
+  cin >> N;
+  LowestCommonAncestor<int> lca(N);
+  for (int i = 0; i < N; i++)
+  {
+    int K;
+    cin >> K;
+    for (int j = 0; j < K; j++)
+    {
+      int c;
+      cin >> c;
+      lca.add_edge2(i, c);
+    }
+  }
+
+  lca.run();
+
+  int Q;
+  cin >> Q;
+  while (Q--)
+  {
+    int u, v;
+    cin >> u >> v;
+    cout << lca.query_lca(u, v) << '\n';
+  }
+}

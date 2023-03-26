@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000
+#define NIL -2000000002
+int n;
+vector<int> hp; 
+
+int get_key (int id) {
+    return hp[id];
+}
+
+int get_parent(int id){
+    int id_p = id / 2 ; //何も書かないでもfloorになる。
+    if ( id_p > 0 ) {return get_key(id_p);} 
+    else {return NIL;}
+}
+
+int get_left(int id){
+    int id_p = id * 2 ; //何も書かないでもfloorになる。
+    if ( id_p < hp.size() ) {return get_key(id_p);} 
+    else {return NIL;}
+}
+
+int get_right(int id){
+    int id_p = id * 2 + 1 ; //何も書かないでもfloorになる。
+    if ( id_p < hp.size() ) {return get_key(id_p);} 
+    else {return NIL;}
+}
+
+int calcmax(int k, int l, int r){
+    int max = k ;
+    if ( l > max ){max = l;}
+    if ( r > max ){max = r;}
+    return max;
+}
+
+int maxHeapify(int id){
+    //id番の数をMAXヒープを満たすまで移し替える。
+    //自分、左子、右子のうち最大を選ぶ
+    int k = get_key(id);
+    int l = get_left(id);
+    int r = get_right(id);
+    int m = calcmax(k,l,r) ;
+    if ( m == l ) { 
+        hp.at(id)=l; hp.at(id *2)=k; 
+        maxHeapify(id*2); }
+    else if ( m == r ) {  
+        hp.at(id)=r; hp.at(id *2 +1)=k; 
+        maxHeapify(id*2 + 1); }
+    return 0;
+}
+
+int main() {
+    int c;
+    string com;
+
+	hp.push_back(NIL); //0番にNILを入れておく。
+    while (cin) {
+        cin >> com ;
+        if (com == "end") {break; }
+        else if (com == "insert"){ 
+            cin >> c;
+            // cout << "Insert " << c << endl;
+            hp.push_back(c);
+        }
+        else if (com == "extract") {
+            //最大のものを取り除く。
+            // Maxヒープ化して、topを取る処理にする。
+            for (int j=hp.size()-1 ; j >= 1 ; j--) {
+                 maxHeapify(j); }
+            int m = hp.at(1);
+            hp.at(1) = hp.at(hp.size() -1); //末尾の値をTOPへ
+            hp.pop_back();
+            
+            /* 単純にやるとこうだけど低速すぎる
+            int m, m_idx ;
+            m = NIL;
+            for (int j=1 ; j < hp.size() ; j++) {
+                if ( hp.at(j) > m ) { m = hp.at(j);  m_idx = j ;}
+            }
+            hp.erase( hp.begin() + m_idx) ;  */
+            cout << m << endl ; 
+        }
+    }
+    //for (int i=1; i < hp.size() ; i++ ) {
+    //    cout << hp.at(i) << " " << endl ; 
+    //}
+
+	return 0 ;
+}
+

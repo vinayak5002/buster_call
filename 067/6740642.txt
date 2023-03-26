@@ -1,0 +1,45 @@
+#include<bits/stdc++.h>
+//#include<atcoder/all>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+//using namespace atcoder;
+typedef long long ll;
+const ll INF = 1e18;
+//typedef modint1000000007 mint;
+//
+
+int main(){
+	int d,n;
+	cin >> d >> n;
+	//DP
+	vector<int> temp(d);
+	for (int i=0; i<d; i++){
+		cin >> temp[i];
+	}
+	vector<int> maxt(n);
+	vector<int> mint(n);
+	vector<int> v(n);
+	for (int i=0; i<n; i++){
+		cin >> mint[i] >> maxt[i] >> v[i]; 
+	}
+	//DP[i][j] : i日目までで, j番の服を最後にきたときの最大値
+	vector<vector<int>> dp(d+1, vector<int>(n, -100000000));
+	for (int i=0; i<n; i++){
+		if (mint[i] > temp[0] || maxt[i] < temp[0]) continue;
+		dp[1][i] = 0;
+	}
+	for (int num=1; num<d; num++){
+		//i:切る服 j:最後にきたふく
+		for (int i=0; i<n; i++){
+			if (mint[i] > temp[num] || maxt[i] < temp[num]) continue;
+			for (int j=0; j<n; j++){
+				dp[num+1][i] = max(dp[num+1][i], dp[num][j] + abs(v[i] - v[j]));
+			}
+		}
+	}
+	int ans = 0;
+	for (int i=0; i<n; i++){
+		ans = max(dp[d][i], ans);
+	}
+	cout << ans << endl;
+}

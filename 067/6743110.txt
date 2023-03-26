@@ -1,0 +1,32 @@
+def solve(n, Y, M, D):
+    normal_year = 20 * 5 + 19 * 5
+    uru_year = 20 * 10
+    def f(y, m, d):
+        ret = 0
+        # [1/1/1, y/1/1)縺ｾ縺ｧ譌･謨ｰ
+        ret += (y - 1) // 3 * uru_year + ((y-1) - (y-1) // 3) * normal_year
+        # [y/1/1, y/m/1)縺ｾ縺ｧ譌･謨ｰ
+        if y % 3 == 0:
+            ret += (m-1) * 20
+        else:
+            ret += (m-1) // 2 * 19 + ((m-1) - (m-1) //2) * 20
+        # [y/m/1, y/m/d]縺ｾ縺ｧ譌･謨ｰ
+        ret += d
+        return ret
+
+    anses = []
+    for i in range(n):
+        y, m, d = Y[i], M[i], D[i]
+        ans = f(1000, 1, 1) - f(y, m, d)
+        anses.append(ans)
+    return anses
+        
+    
+if __name__ == '__main__':
+    n = int(input())
+    YMD = [map(int, input().split()) for _ in range(n)]
+    Y, M, D  = [list(i) for i in zip(*YMD)]
+    anses = solve(n, Y, M, D)
+    for ans in anses:
+        print(ans)
+

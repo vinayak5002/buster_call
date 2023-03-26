@@ -1,0 +1,72 @@
+import math
+
+class CompleteBinaryTree:
+    def __init__(self,list):
+        self.list = []
+        for l in list:
+            self.list.append(Node(value = l))
+        self.root = self.list[0]
+        self.length = len(self.list)
+        
+        self.ConfigureTree()
+
+    def ConfigureTree(self):
+        n = self.length+1
+        for i in range(1,n):
+            if(i >= 2): self.list[i-1].parent = self.list[math.floor((i/2))-1]
+            if(2*i < n): self.list[i-1].left = self.list[2*i - 1]
+            if(2*i + 1 < n): self.list[i-1].right = self.list[2*i]
+
+    def DisplayStatus(self):
+        i = 1
+        for l in self.list:
+            print("node "+str(i)+": ",end="")
+            print("key = "+str(l.value)+", ",end="")
+            if(l.parent != None): print("parent key = "+str(l.parent.value)+", ",end="")
+            if(l.left != None): print("left key = "+str(l.left.value)+", ",end="")
+            if(l.right != None): print("right key = "+str(l.right.value)+", ",end="")
+            print(end="\n")
+            i += 1
+
+    def DisplayList(self):
+        for i in range(0,self.length):
+            print(" "+str(self.list[i].value),end="")
+        print(end="\n")
+
+    def maxHeapify(self,node):
+        root = node
+        if(root == None): return
+        
+        l = root.left
+        r = root.right
+        if(l != None and l.value > root.value):
+            largest = l
+        else:
+            largest = root
+        if(r != None and r.value > largest.value):
+            largest = r
+
+        if(largest != root):
+            root.value,largest.value = largest.value,root.value
+            self.maxHeapify(largest)
+
+    def buildMaxHeap(self):
+        for i in range(int(self.length/2),-1,-1):
+            self.maxHeapify(self.list[i])
+
+            
+
+class Node:
+    def __init__(self,value=0,parent=None,left=None,right = None):
+        self.value = value
+        self.parent = parent
+        self.left = left
+        self.right = right
+
+n = int(input())
+list = list(map(int,input().split()))
+tree = CompleteBinaryTree(list)
+tree.buildMaxHeap()
+tree.DisplayList()
+
+

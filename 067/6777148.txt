@@ -1,0 +1,46 @@
+import java.util.Scanner
+
+object Main extends App {
+  class Node(val key:Int, var left:NodeRef = None, var right:NodeRef = None)
+  type NodeRef = Option[Node]
+
+  val sc = new Scanner(System.in)
+  val N  = sc.nextInt()
+  var root:NodeRef = None
+
+  def insert(key:Int): NodeRef = {
+    def iterate(tree:NodeRef): NodeRef = tree match {
+      case None => Some(new Node(key))
+      case Some(n) =>
+        if (n.key < key) n.left = iterate(n.left) else n.right = iterate(n.right)
+        tree
+    }
+    iterate(root)
+  }
+  object Order extends Enumeration {
+    type Order = Value
+    val preorder, inorder, postorder = Value
+  }
+
+  import Order._
+  def traverse(order: Order, tree:NodeRef, ac:List[Int]):List[Int] = tree match {
+    case None => ac
+    case Some(n) =>
+      val lac = traverse(order, n.left, ac)
+      order match {
+        case Order.inorder =>
+          traverse(order, n.right, n.key::lac)
+        case Order.postorder =>
+          n.key::traverse(order, n.right, lac)
+      }
+  }
+
+  for (_ <- 0 until N) {
+    sc.next() match {
+      case "insert" => root = insert(sc.nextInt())
+      case _ =>
+        println(s" ${traverse(Order.inorder, root, Nil).mkString(" ")}")
+        println(s" ${traverse(Order.postorder, root, Nil).mkString(" ")}")
+    }
+  }
+}

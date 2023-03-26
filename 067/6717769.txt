@@ -1,0 +1,162 @@
+#include<stdio.h>
+
+main(){
+    char sq[256][256];
+    int length, wide, size, delta, dt[2000], num=0, n=0;
+    int h=0, hM=0;
+    int v=0, vM=0;
+    int sr=0, srM=0;
+    int sl=0, slM=0;
+    
+    while(1){
+    	scanf(" %d", &size);
+    	if(size<=1){
+    		break;
+		}
+		num++;
+		dt[num]=0;
+		for(length=0;length<size;length++){
+			scanf(" %s", &sq[length][0]);
+		}
+		/*Get Array.*/
+		
+		for(length=0;length<size;length++){
+			for(wide=0;wide<size;wide++){
+				if(sq[length][wide]=='1'){
+					h+=1;
+				}
+				if(sq[length][wide]=='0'){
+					if(h>hM){
+						hM=h;
+					}
+					h=0;
+				}
+			}
+			if(h>hM){
+				hM=h;
+			}
+			h=0;
+		}
+		/*printf("horizental max = %d\n", hM);*/
+		/*Count the horizental max continuous.*/
+		
+		for(wide=0;wide<size;wide++){
+			for(length=0;length<size;length++){
+				if(sq[length][wide]=='1'){
+					v++;
+				}
+				if(sq[length][wide]=='0'){
+					if(v>vM){
+						vM=v;
+					}
+					v=0;
+				}
+			}
+			if(v>vM){
+				vM=v;
+			}
+			v=0;
+		}
+		/*printf("vertical max = %d\n", vM);*/
+		/*Count the vertical max continuous.*/
+		
+		for(delta=0;delta<size;delta++){
+			for(wide=0;wide<(size-delta);wide++){
+				if(sq[wide][wide+delta]=='1'){
+					sr++;
+				}
+				if(sq[wide][wide+delta]=='0'){
+					if(sr>srM){
+						srM=sr;
+					}
+					sr=0;
+				}
+			}
+			if(sr>srM){
+				srM=sr;
+			}
+			sr=0;
+		}
+		for(delta=1;delta<size;delta++){
+			for(length=0;length<(size-delta);length++){
+				if(sq[length+delta][length]=='1'){
+					sr++;
+				}
+				if(sq[length+delta][length]=='0'){
+					if(sr>srM){
+						srM=sr;
+					}
+					sr=0;
+				}
+			}
+			if(sr>srM){
+				srM=sr;
+			}
+			sr=0;
+		}
+		/*printf("slope toward right max = %d\n", srM);*/
+		/*Count the slope toward right max continuous.*/
+		
+		for(delta=(size-1);delta>=0;delta--){
+			for(wide=0;wide<=delta;wide++){
+				if(sq[wide][delta-wide]=='1'){
+					sl++;
+				}
+				if(sq[wide][delta-wide]=='0'){
+					if(sl>slM){
+						slM=sl;
+					}
+					sl=0;
+				}
+			}
+			if(sl>slM){
+				slM=sl;
+			}
+			sl=0;
+		}
+		delta=0;
+		length=0;
+		n=0;
+		for(delta=size;delta<=(2*(size-1));delta++){
+			n+=1;
+			for(length=n;length<size;length++){
+				if(sq[length][delta-length]=='1'){
+					sl++;
+				}
+				if(sq[length][delta-length]=='0'){
+					if(sl>slM){
+						slM=sl;
+					}
+					sl=0;
+				}
+			}
+			if(sl>slM){
+				slM=sl;
+			}
+			sl=0;
+		}
+		/*printf("slope toward left max = %d\n", slM);*/
+		/*Count the slope toward left max continuous.*/
+		
+		if(vM>dt[num]){
+			dt[num]=vM;
+		}
+		if(hM>dt[num]){
+			dt[num]=hM;
+		}
+		if(srM>dt[num]){
+			dt[num]=srM;
+		}
+		if(slM>dt[num]){
+			dt[num]=slM;
+		}
+		vM=0;
+		hM=0;
+		srM=0;
+		slM=0;
+		
+	}
+	for(n=1;n<=num;n++){
+		printf("%d\n", dt[n]);
+	}
+}

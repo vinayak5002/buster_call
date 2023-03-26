@@ -1,0 +1,148 @@
+#define _CRT_SECURE_NO_WARNINGS
+#define _USE_MATH_DEFINES
+#include<stdio.h>
+#include<string.h>
+#include<math.h>
+
+//判定
+int judge(int a[6], int b[6]){
+	int i;
+	int yesFlg = 0;
+
+	for (i = 0; i < 6; i++){
+		if (a[i] != b[i]) break;
+		if (i == 5) yesFlg = 1;
+	}
+
+	return yesFlg;
+}
+
+//北に90°回転
+void north(int b[6]){
+	int tmp;
+
+	tmp = b[0];
+	b[0] = b[1];
+	b[1] = b[5];
+	b[5] = b[4];
+	b[4] = tmp;
+
+}
+
+//東に90°回転
+void east(int b[6]){
+	int tmp;
+
+	tmp = b[0];
+	b[0] = b[3];
+	b[3] = b[5];
+	b[5] = b[2];
+	b[2] = tmp;
+
+}
+
+//半時計まわりに90°回転
+void spin(int b[6]){
+	int tmp;
+
+	tmp = b[1];
+	b[1] = b[2];
+	b[2] = b[4];
+	b[4] = b[3];
+	b[3] = tmp;
+
+}
+
+
+int main(void){
+
+	char buf[10000];
+
+	struct Dice
+	{
+		int d[6];
+	};
+
+	struct Dice dice_a, dice_b;
+
+	int i, j, k, l;
+
+	//サイコロAの数字入力
+	fgets(buf, sizeof(buf) - 1, stdin);
+	for (i = 0; i < 6; i++)	sscanf(buf, "%d %[^\n]", &dice_a.d[i], &buf);
+
+	//サイコロBの数字入力
+	fgets(buf, sizeof(buf) - 1, stdin);
+	for (i = 0; i < 6; i++)	sscanf(buf, "%d %[^\n]", &dice_b.d[i], &buf);
+
+	int b_dice[6];
+	for (i = 0; i < 6; i++)	b_dice[i] = dice_b.d[i];
+
+	int yesFlg = 0;
+	int tmp; //入替用変数
+
+	int lc = 0; //ループカウント
+
+	while (lc < 6){
+		switch (lc)
+				{
+		case 0:
+			for (i = 0; i < 3; i++){
+				if (judge(dice_a.d, dice_b.d) == 1){
+					yesFlg = 1;
+					break;
+				}
+				spin(dice_b.d);
+			}
+			break;
+		case 1:
+			north(dice_b.d);
+			for (i = 0; i < 3; i++){
+				if (judge(dice_a.d, dice_b.d) == 1){
+					yesFlg = 1;
+					break;
+				}
+				spin(dice_b.d);
+			}
+			break;
+		case 2:
+			for (i = 0; i < 3; i++){
+				east(dice_b.d);
+				for (j = 0; j < 3; j++){
+					if (judge(dice_a.d, dice_b.d) == 1){
+						yesFlg = 1;
+						break;
+					}
+					spin(dice_b.d);
+				}
+				if (yesFlg == 1) break;
+				lc++;
+			}
+			break;
+		case 5:
+			north(dice_b.d);
+			for (i = 0; i < 3; i++){
+				if (judge(dice_a.d, dice_b.d) == 1){
+					yesFlg = 1;
+					break;
+				}
+				spin(dice_b.d);
+			}
+			break;
+		default:
+			break;
+		}
+		if (yesFlg == 1) break;
+		lc++;
+	}
+
+	if (yesFlg == 1){
+		printf("Yes\n");
+	}
+	else{
+		printf("No\n");
+	}
+	
+
+	return 0;
+}

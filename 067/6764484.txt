@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const ll MOD = 1000000007;
+using P=pair<ll,ll>;
+const ll inf = 1ll<<60;
+typedef struct Point_Coordinates {
+    double x, y;
+} point;
+
+// 線分ab, cdが交差する場合True
+// 端点が他方の線分上にある場合もTrue
+// 端点が他方の線分の延長線上にある場合もTrueを返すので注意
+int Judge(point &a, point &b, point &c, point &d) {
+    double s, t;
+    s = (a.x - b.x) * (c.y - a.y) - (a.y - b.y) * (c.x - a.x);
+    t = (a.x - b.x) * (d.y - a.y) - (a.y - b.y) * (d.x - a.x);
+    if (s * t > 0)
+        return false;
+
+    s = (c.x - d.x) * (a.y - c.y) - (c.y - d.y) * (a.x - c.x);
+    t = (c.x - d.x) * (b.y - c.y) - (c.y - d.y) * (b.x - c.x);
+    if (s * t > 0)
+        return false;
+    return true;
+}
+
+int main() {
+    vector<point>data(5);
+    for(ll i=0;i<5;i++){
+        cin >> data[i].x >> data[i].y;
+    }
+    vector<bool> ok(5);
+    ok[0]=Judge(data[0],data[1],data[2],data[3]);
+    ok[1]=Judge(data[0],data[1],data[3],data[4]);
+    ok[2]=Judge(data[0],data[4],data[2],data[3]);
+    ok[3]=Judge(data[0],data[4],data[1],data[2]);
+    ok[4]=Judge(data[1],data[2],data[3],data[4]);
+    bool ans=true;
+    for(ll i=0;i<5;i++){
+        if(!ok[i]){
+            ans=false;
+            break;
+        }
+    }
+    cout << ans << endl;
+}
+

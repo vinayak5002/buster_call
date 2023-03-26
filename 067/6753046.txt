@@ -1,0 +1,53 @@
+
+#include<iostream>
+#include<vector>
+
+
+int main(){
+	int n,df=1;
+	std::cin>>n;
+	std::vector<int> point(n);
+	std::vector<std::vector<int>> next_p(n+1);
+	std::vector<int> k(n+1);
+	std::vector<int> d(n+1);
+	std::vector<int> f(n+1);
+	std::vector<int> v={};
+	std::vector<int> flag(n+1);
+	flag[0]=1;
+	for(int i=0;i<n;i++){
+		std::cin>>point[i];
+		std::cin>>k[point[i]];
+		if(k[point[i]]!=0){
+			for(int j=0;j<k[point[i]];j++){
+				int a;
+				std::cin>>a;
+				next_p[point[i]].push_back(a);;
+			}
+		}
+	}
+	
+	d[point[0]]=df;
+	flag[point[0]]=1;
+	df++;
+	v.push_back(point[0]);
+	while(v.size()!=0){
+		int u=v[v.size()-1];
+		if(next_p[u].size()!=0){
+			int uu=next_p[u][0];
+			next_p[u].erase(next_p[u].begin());
+			if(flag[uu]==0){
+				d[uu]=df;
+				df++;
+				v.push_back(uu);
+				flag[uu]=1;
+			}
+		}else{
+			v.erase(v.end()-1);
+			f[u]=df;
+			df++;
+		}
+	}
+	for(int i=0;i<n;i++){
+		std::cout<<point[i]<<"　"<<d[point[i]]<<"　"<<f[point[i]]<<"\n";
+	}
+}

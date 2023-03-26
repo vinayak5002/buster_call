@@ -1,0 +1,111 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return true; } return false; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return true; } return false; }
+#define all(x) (x).begin(),(x).end()
+#define fi first
+#define se second
+#define mp make_pair
+#define si(x) int(x.size())
+const int mod=1000000007,MAX=300005,INF=1<<30;
+
+int main(){
+    
+    std::ifstream in("text.txt");
+    std::cin.rdbuf(in.rdbuf());
+    cin.tie(0);
+    ios::sync_with_stdio(false);
+    
+    int N;cin>>N;
+    vector<ll> X(N),Y(N);
+    vector<ll> A(N),B(N);
+    for(int i=0;i<N;i++){
+        cin>>X[i]>>Y[i];
+        X[i]*=2;
+        Y[i]*=2;
+        A[i]=X[i]-Y[i];
+        B[i]=X[i]+Y[i];
+    }
+    sort(all(A));
+    sort(all(B));
+    ll need=max(A.back()-A.front(),B.back()-B.front())/2;
+    ll mA=(A.front()+A.back())/2,mB=(B.front()+B.back())/2;
+    ll mX=(mA+mB)/2,mY=(mB-mA)/2;
+    
+    vector<pair<ll,ll>> miru;
+    
+    for(int a=-20;a<=20;a++){
+        for(int b=-20;b<=20;b++){
+            ll x=mX+a,y=mY+b;
+            bool f=false;
+            if(abs(x)%20==0) f=true;
+            if(abs(y)%20==0) f=true;
+            if(f) miru.push_back(mp(x,y));
+        }
+    }
+    
+    //cout<<mX<<" "<<mY<<endl;
+    //cout<<need<<endl;
+    
+    //for(auto a:miru) cout<<a.fi<<" "<<a.se<<endl;
+    
+    int M=si(miru);
+    
+    auto dd=[&](ll x1,ll y1,ll x2,ll y2){
+        x1+=600000000;
+        y1+=600000000;
+        x2+=600000000;
+        y2+=600000000;
+        
+        ll ans=1LL<<50;
+        
+        for(ll a=x1/20-1;a<=x1/20+1;a++){
+            for(ll b=y1/20-1;b<=y1/20+1;b++){
+                for(ll c=x2/20-1;c<=x2/20+1;c++){
+                    for(ll d=y2/20-1;d<=y2/20+1;d++){
+                        ll cost=0;
+                        cost+=abs(a*20-x1);
+                        cost+=abs(b*20-y1);
+                        cost+=abs(c*20-x2);
+                        cost+=abs(d*20-y2);
+                        cost+=abs(a-c)*20;
+                        cost+=abs(b-d)*20;
+                        chmin(ans,cost);
+                    }
+                }
+            }
+        }
+        
+        if(x1==x2&&x1%20==0) chmin(ans,abs(y2-y1));
+        if(y1==y2&&y1%20==0) chmin(ans,abs(x2-x1));
+        
+        return ans;
+    };
+    
+    auto check=[&](ll T){
+        vector<int> cn(M);
+        for(int i=0;i<N;i++){
+            for(int j=0;j<M;j++){
+                if(dd(X[i],Y[i],miru[j].fi,miru[j].se)<=T) cn[j]++;
+            }
+        }
+        
+        for(int j=0;j<M;j++){
+            if(cn[j]==N){
+                //cout<<miru[j].fi<<" "<<miru[j].se<<endl;
+                return true;
+            }
+        }
+        
+        return false;
+    };
+    
+    for(ll i=need;;i++){
+        if(check(i)){
+            cout<<fixed<<setprecision(25)<<(double)(i)/2<<"\n";
+            return 0;
+        }
+    }
+}
+

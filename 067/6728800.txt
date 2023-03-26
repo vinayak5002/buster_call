@@ -1,0 +1,45 @@
+#define BUF_SIZE 65536
+#define LINE_SIZE 1024
+#define TARGET_SIZE 16
+
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+int main(void) {
+	char buf[BUF_SIZE];
+	char line[LINE_SIZE];
+	char target[TARGET_SIZE];
+	int i, count;
+	char *cp;
+
+	memset(buf, 0, sizeof(buf));
+	buf[0] = ' ';
+	count = 0;
+
+	fgets(target + 1, sizeof(target) - 2, stdin);
+	*strchr(target, '\n') = ' ';
+	target[0] = ' ';
+	while (1) {
+		i = 0;
+		fgets(line, sizeof(line) - 1, stdin);
+		if (strcmp(line, "END_OF_TEXT\n") == 0) {
+			break;
+		}
+		//改行文字をスペースに変換
+		*strchr(line, '\n') = ' ';
+		while (line[i] != '\0') {
+			line[i] = tolower(line[i]);
+			i++;
+		}
+		strcat(buf, line);
+	}
+	cp = buf;
+	while ((cp = strstr(cp, target)) != NULL) {
+		cp += sizeof(target - 1);
+		count++;
+	}
+	printf("%d\n", count);
+	getchar();
+	return 0;
+}

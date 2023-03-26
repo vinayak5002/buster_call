@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+#define up(i,a,b) for (int i = (int)a; i <= (int)b; i++)
+#define down(i,a,b) for (int i = (int)a; i >= (int)b; i--)
+#define pii pair<double, double>
+#define x first
+#define y second
+#define ep emplace_back
+using namespace std;
+
+const int maxn = 1e5 + 10;
+pii p[maxn];
+int n;
+
+pii amp(int j, double d){
+    return make_pair(p[j].y + d, p[j].x);
+}
+
+double Closest_pair(){
+    set<pii> S;
+    int j = 1;
+    double best = 4e18;
+
+    up(i,1,n){
+        double d = sqrt(best);
+        while (p[i].x - p[j].x >= d && j <= n){
+            S.erase(amp(j, 0));
+            ++j;
+        }
+
+        auto it1 = S.lower_bound(amp(i, -d));
+        auto it2 = S.upper_bound(amp(i, d));
+
+        for (auto it = it1; it != it2; it++){
+            double dx = p[i].x - it->second;
+            double dy = p[i].y - it->first;
+            best = min(best, dx*dx + dy*dy);
+        }
+
+        S.insert(amp(i, 0));
+    }
+    return best;
+}
+
+signed main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    #define Task "A"
+    if (fopen(Task".inp", "r")){
+        freopen(Task".inp", "r", stdin);
+        freopen(Task".out", "w", stdout);
+    }
+
+    cin >> n;
+    up(i,1,n) cin >> p[i].x >> p[i].y;
+    sort(p+1, p+n+1);
+
+    cout << fixed << setprecision(3);
+    cout << sqrt(Closest_pair());
+}
+

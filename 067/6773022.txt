@@ -1,0 +1,41 @@
+import queue
+
+def bfs(m, w, h, start):
+    q = queue.Queue()              
+    q.put(start)                                          
+    while not q.empty():        
+        cur = q.get()                  
+        D0 = [1, 0, -1, 0, 1, 1, -1,-1]             
+        D1 = [0, -1, 0, 1, 1, -1, 1, -1]
+        for d in range(8):          
+            nc = [0, 0]                     
+            nc[0] = cur[0]+D0[d]           
+            nc[1] = cur[1]+D1[d]
+            if m[nc[0]][nc[1]] == 1:
+                m[nc[0]][nc[1]] = 0    
+                q.put([nc[0], nc[1]])        
+    return 
+
+def solve(w, h):
+    m = [[0 for i in range(w+2)] for j in range(h+2)]
+    count = 0
+    for i in range(h):
+        r = list(map(int, input().split()))
+        for j in range(w):
+            m[i+1][j+1] = r[j]
+
+    for i in range(h):
+        for j in range(w):
+            if m[i+1][j+1] == 1:
+                m[i+1][j+1] = 0  
+                bfs(m, w, h, [i+1, j+1])
+                count += 1; 
+
+    return count   
+
+while True:
+    w, h = map(int, input().split())
+    if w == 0 and h == 0:
+        break
+    print(solve(w,h))
+

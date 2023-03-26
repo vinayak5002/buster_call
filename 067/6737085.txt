@@ -1,0 +1,42 @@
+    while (1) {
+        int n;
+        cin >> n;
+        if (n == 0)break;
+        vector<int> p(n);
+        vector<int> o(n);
+        int psum = 0, osum = 0;
+        for (int i = 0; i < n; i++) {
+            cin >> p[i];
+            psum += p[i];
+            if (p[i] % 1000 != 0)o[i] = (1000 - (p[i] % 1000));
+            else o[i] = 0;
+            osum += o[i];
+        }
+        cout << osum / 500 << ' ';
+        if (osum / 500 == n) {
+            cout << psum << endl;
+        }
+        else {
+            vector<vector<int>> dp(n, vector<int>(osum % 500 + 1, 0));
+
+            for (int j = o[0]; j <= osum % 500; j++)dp[0][j] = p[0];
+
+            for (int i = 1; i < n; i++) {
+                for (int j = 0; j <= osum % 500; j++) {
+                    if (j - o[i] < 0)dp[i][j] = dp[i - 1][j];
+                    else dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - o[i]] + p[i]);
+                }
+            }
+            /*
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j <= osum % 500; j++) {
+                    cout << dp[i][j] << ' ';
+                }
+                cout << endl;
+            }
+            */
+            cout << psum - dp[n - 1][osum % 500] << endl;
+        }
+    }
+    
+    return 0;

@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class dsu {
+private:
+    vector<int> parent;
+    vector<int> rank;
+
+    int find(int x) {
+        if (parent[x] == x) return x;
+        else return parent[x] = find(parent[x]);
+    }
+
+public:
+    dsu(int n) {
+        parent = vector<int>(n);
+        rank = vector<int>(n, 0);
+        for (int i = 0 ; i < n ; i++) parent[i] = i;
+    }
+
+    void merge(int x, int y) {
+        x = find(x);
+        y = find(y);
+        if (x == y) return;
+
+        if (rank[x] < rank[y]) {
+            parent[x] = y;
+        }
+        else {
+            parent[y] = x;
+            if (rank[x] == rank[y]) rank[x]++;
+        }
+    } 
+
+    bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+};
+
+int main() {
+    int n, m; cin >> n >> m;
+    dsu uf(n);
+    for (int i = 0 ; i < m ; i++) {
+        int a, b; cin >> a >> b;
+        uf.merge(a, b);
+    }
+
+    int q; cin >> q;
+    for (int i = 0 ; i < q ; i++) {
+        int a, b; cin >> a >> b;
+        cout << (uf.same(a, b) ? "yes" : "no") << endl;
+    }
+}
+

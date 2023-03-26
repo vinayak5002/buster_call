@@ -1,0 +1,79 @@
+
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.Scanner;
+
+public class Main {
+    static int[][] sprinkler;
+    public static void main(String[] args) {
+    Scanner sc = new Scanner(System.in);
+        tc: while (true) {
+            int px = sc.nextInt();
+            int py = sc.nextInt();
+            if (px == 0 && py == 0) return;
+            int n = sc.nextInt();
+            sprinkler = new int[n][2];
+            for (int i = 0; i < n; i++) {
+                sprinkler[i][0] = sc.nextInt();
+                sprinkler[i][1] = sc.nextInt();
+            }
+            Queue<Pyonkichi> aliveList = new ArrayDeque<>();
+            aliveList.add(new Pyonkichi(px, py));
+            while (aliveList.size() > 0) {
+                Pyonkichi p = aliveList.poll();
+                for (Pyonkichi next :
+                        p.jump()) {
+                    if (next == null) continue;
+                    int day = next.day;
+                    if (day > n) {
+                        System.out.println("OK");
+                        continue tc;
+                    }
+                    if (isWater(day, next.getPosition())) {
+                        aliveList.add(next);
+                    }
+                }
+            }
+            System.out.println("NA");
+            System.gc();
+        }
+        
+    }
+    static boolean isWater (int day, int[] position) {
+        int[] sp = sprinkler[day-1];
+        if (Math.abs(position[0]-sp[0]) < 2 && Math.abs(position[1]-sp[1]) < 2) return true;
+        return false;
+    }
+}
+class Pyonkichi {
+    int x;
+    int y;
+    int day;
+
+    Pyonkichi (int x_, int y_) {
+        x = x_;
+        y = y_;
+        day = 0;
+    }
+    Pyonkichi (int x_, int y_, int day_) {
+        x = x_;
+        y = y_;
+        day = day_;
+    }
+
+    Pyonkichi[] jump() {
+        Pyonkichi[] list = new Pyonkichi[12];
+        for (int i = 0; i < 3; i++) {
+            if (x+2 < 10 && y-1+i >= 0 && y-1+i < 10) list[0+i] = new Pyonkichi(x+2, y-1+i, day+1);
+            if (x-2 >= 0 && y-1+i >= 0 && y-1+i < 10) list[3+i] = new Pyonkichi(x-2, y-1+i, day+1);
+            if (y+2 < 10 && x-1+i >= 0 && x-1+i < 10) list[6+i] = new Pyonkichi(x-1+i, y+2, day+1);
+            if (y-2 >= 0 && x-1+i >= 0 && x-1+i < 10) list[9+i] = new Pyonkichi(x-1+i, y-2, day+1);
+        }
+        return list;
+    }
+
+    int[] getPosition() {
+        return new int[]{x, y};
+    }
+}
+

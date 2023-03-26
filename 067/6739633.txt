@@ -1,0 +1,82 @@
+#include<iostream>
+#include<vector>
+#include<algorithm>
+
+struct input_pattern{
+    int id1;
+    int id2;
+    int w;
+};
+
+
+
+void makeSet(int);
+void Union(int,int);
+void link(int,int);
+int findSet(int);
+
+bool sort_func(const input_pattern& x,const input_pattern& y){
+    return x.w<y.w;
+}
+
+// std::vector<std::vector<int> > weights(10000,std::vector(10000));
+std::vector<int> rank(10000),p(10000);
+
+int main(){
+    int V,E,cost=0;
+    std::cin>>V>>E;
+
+    for(int i=0;i<V;i++){
+        makeSet(i);
+    }
+
+    std::vector< input_pattern > inputs;
+
+    for(int i =0;i<E;i++){
+        input_pattern tmp;
+        std::cin>>tmp.id1>>tmp.id2>>tmp.w;
+        inputs.push_back(tmp);
+    }
+
+    std::sort(inputs.begin(),inputs.end(),sort_func);
+
+    for(int i=0;i<E;i++){
+        int set_x = findSet(inputs[i].id1);
+        int set_y = findSet(inputs[i].id2);
+        if(set_x != set_y){
+            cost+=inputs[i].w;
+            link(set_x,set_y);
+        }
+    }
+    std::cout<<cost<<std::endl;
+    
+    return 0;
+}
+
+void makeSet(int x){
+    p[x]=x;
+    rank[x]=0;
+}
+
+void Union(int x,int y,int w){
+    link(findSet(x),findSet(y));
+}
+
+void link(int x,int y){
+    if(rank[x]> rank[y]){
+        p[y]=x;
+    }
+    else{
+        p[x] = y;
+        if(rank[x]==rank[y]){
+            rank[y] = rank[y] + 1;
+        }
+    }
+}
+
+int findSet(int x){
+    if (x != p[x]){
+        p[x]= findSet(p[x]);
+    }
+    return p[x];
+}

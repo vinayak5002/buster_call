@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define Pi 3.14159265358979
+int tr(float x, float y, float c, float s, float &ax, float &ay){
+    ax = x * c - y * s;
+    ay = x * s + y * c;
+    return 0;
+}
+int solve(vector< pair<float, float> > &X, int l, int r){
+    int lammda;
+    float x, y;
+    lammda = (r - l) / 4;
+    x = (X.at(r).first - X.at(l).first) / 3;
+    y = (X.at(r).second - X.at(l).second) / 3;
+    X.at(l + lammda) = make_pair(X.at(l).first + x, X.at(l).second + y);
+    X.at(l + 3 * lammda) = make_pair(X.at(l).first + 2 * x, X.at(l).second + 2 * y);
+    tr(X.at(l + 3 * lammda).first - X.at(l + lammda).first,
+        X.at(l + 3 * lammda).second - X.at(l + lammda).second,
+            cos(Pi/3), sin(Pi/3), x, y);
+    X.at(l + 2 * lammda).first = X.at(l + lammda).first + x;
+    X.at(l + 2 * lammda).second = X.at(l + lammda).second + y;
+    if(r - l > 4){
+        for(int i = 0;i < 4;i++){
+            solve(X, l + i * lammda, l + (i + 1) * lammda);
+        }
+    }
+    return 0;
+}
+int print(vector< pair<float, float> > &X, int n){
+    cout << fixed << setprecision(8);
+    for(int i = 0;i < n + 1;i++){
+        cout << (float)X.at(i).first << " " << (float)X.at(i).second << endl;
+    }
+    return 0;
+}
+int main(){
+    int n, r = 1;
+    cin >> n;
+    for(int i = 0;i < n;i++) r *= 4;
+    vector< pair<float, float> > X(r + 1);
+    X.at(r) = make_pair(100, 0);
+    X.at(0) = make_pair(0, 0);
+    if(n > 0) solve(X, 0, r);
+    print(X, r);
+    return 0;
+}
+

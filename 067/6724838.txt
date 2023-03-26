@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define REP(i,n) for(int i=0;i<int(n);i++)
+typedef long long ll;
+typedef pair<int,int> P;
+
+
+int dp[1410][1410],H,W;
+
+int mxrec(int i){
+
+	stack<P> s;
+	s.push(P(dp[i][1],1));
+	int x=dp[i][1];
+
+	int mx=0;
+	for(int j=2;j<=W+1;j++){
+
+		int h=dp[i][j];
+
+		if(h==x) continue;
+		else if(h>x){
+			s.push(P(h,j));
+			x=h;
+		}
+		else{
+
+			int k=0;
+			while(!s.empty()){
+			P p=s.top();
+			int q=p.first,r=p.second;
+
+			if(q<h) break;
+			mx=max(mx,q*(j-r));
+			s.pop();
+			k=r;
+
+			}
+
+			s.push(P(h,k));
+			x=h;
+		}
+	}
+
+	return mx;
+}
+
+
+
+int main(void){
+	int i,j;
+ 
+	cin.tie(0);  ios_base::sync_with_stdio(false);
+
+
+	cin >> H >> W;
+	for(i=1;i<=H;i++) for(j=1;j<=W;j++){
+		int a;
+		cin >> a;
+		a=1-a;
+		dp[i][j]=a;
+	}
+
+	for(j=1;j<=W;j++) for(i=1;i<=H;i++){
+		if(dp[i][j]==0) continue;
+		dp[i][j]+=dp[i-1][j];
+	}
+
+	int ans=0;
+	for(i=1;i<=H;i++) ans=max(ans,mxrec(i));
+
+	
+	cout << ans << endl;
+
+
+	return 0;
+}
+

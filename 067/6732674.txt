@@ -1,0 +1,33 @@
+from itertools import chain
+import sys
+sys.setrecursionlimit(1<<30)
+
+readline = sys.stdin.readline
+
+def DFS(cur):
+    global d, f, cnt
+    
+    cnt += 1
+    d[cur] = cnt
+
+    for v in V[cur]:
+        if not d[v]:
+            DFS(v)
+
+    cnt += 1
+    f[cur] = cnt
+
+if __name__ == '__main__':
+    N = int(readline())
+    V = list()
+    for _ in range(N):
+        u, k, *v = map(lambda x: int(x)-1, readline().split())
+        V.append(v)
+    d, f = [[0] * N for _ in range(2)]
+    cnt = 0
+    for i in range(N):
+        if not d[i]:
+            DFS(i)
+    for i in range(N):
+        print(i+1, d[i], f[i])
+

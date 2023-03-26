@@ -1,0 +1,42 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+int minimumSortCost(std::vector<int> W)
+{
+    int ret = 0;
+    for (size_t i = 0; i < W.size(); i++)
+    {
+        std::vector<int>::iterator itr = std::min_element(W.begin() + i, W.end());
+        if (W[i] == *itr)
+        {
+            continue; //その数字自身がMINなら移動しない
+        }
+        else
+        {
+            size_t index = std::distance(W.begin(), itr);
+            std::swap(W[i], W[index]);
+            ret += W[i] + W[index];
+        }
+    }
+    return ret;
+}
+
+//ソート済配列と比較して、正しい位置にいない要素とMINを入れ替え続ければコスト小？
+
+int main()
+{
+    int n;
+    std::cin >> n;
+    std::vector<int> W(n);
+    for (int i = 0; i < n; i++)
+    {
+        std::cin >> W[i]; //すべて異なる数字が入る
+    }
+
+    int count = minimumSortCost(W); //並び替えのコストをreturnする関数
+
+    std::cout << count << std::endl;
+
+    return 0;
+}

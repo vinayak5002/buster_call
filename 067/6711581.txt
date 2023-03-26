@@ -1,0 +1,161 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 50
+int n;
+int t = NIL;
+
+/* 二分探索木　union find木 */
+struct UnionFind {
+    //やっぱりツリー全体を1つのstructにするのは常識のようで。。
+    vector<int> par; // 親ノード
+    vector<int> rank; // ランク
+    vector<int> diff_weight ;  //  親ノードとの値の差分 
+
+    UnionFind(int n) {
+        init(n);
+    }
+
+    void init(int n) {
+        // cout << "init n= " << n << " \n" ;
+        par.resize(n); rank.resize(n); diff_weight.resize(n); 
+        for (int i = 0; i < n; i++) {
+            par[i] = i; rank[i] = 0; diff_weight[i]=0; }
+    }
+
+    int root(int x) {
+        if (par[x] == x) {
+            return x;
+        }
+        else {
+            int r = root(par[x]);
+            diff_weight[x] += diff_weight[par[x]];
+            return par[x] = r;
+        }
+    }
+
+    int relate (int x, int y, int c){ 
+        // mergeを調整して処理をかく。
+        int rx = root(x); int ry =root(y); //ここで経路圧縮
+        // つなぎかえたらweightの更新もしないとね。
+        //　weightは調整が必要
+        // xを親にするようにつなぐ。
+        if (rx == ry) return false;
+        if (rank[rx] < rank[ry]) {
+            //cout  << "  " << x << "  " << y << " " << c << endl;
+            swap(rx,ry); swap(x,y);
+            c = -c;
+        } else if (rank[rx] > rank[ry]) {
+            //cout  << "  " << x << "  " << y << " " << c << endl;
+        } else if (rank[rx] == rank[ry]) {
+            //cout  << "  " << x << "  " << y << " " << c << endl;
+            rank[rx]++;  // rankが大きい方は子供　親はxなので、yにweight
+        }
+
+        par[ry] = rx;
+        //　調整weightの計算
+        int c_adjust = c + diff_weight[x] - diff_weight[y] ; 
+        // cout << "x= " << x << ",  y= " << y ;
+        // cout << ",  dw+= " << c_adjust << ",  rooty= " << ry << endl ;
+        diff_weight[ry] += c_adjust;   
+ 
+        return 0;
+    }
+
+    int diff (int a, int b ) {
+        // aとbの差分を返す。
+        // 同じ親かつdiffが分かっていれば値を返す。
+        if ( root(a) == root(b) ) {
+            return diff_weight[b] - diff_weight[a] ; 
+        } else {return NIL;}
+    }
+
+};
+
+int main() {
+    int q = 0;
+    cin >> n >> q ;
+    // nは登場人物の人数、qはクエリ（命令）の個数
+    // この時点でn個のノードが成立している。
+    UnionFind tree(n);
+    for (int i = 0 ; i < q ; i++ ) {
+        int a , b, c ,com ;
+        cin >> com ;
+        //  com = 0 : X[b]-X[a]=c
+        //  com = 1 : get X[b] - X[a] 
+        //  cout << c << "  " << a << "  " << b << endl;
+        if (com == 0) { 
+            cin >> a >> b >> c ; 
+            // cout << com << "  " << a << "  " << b << " " << c << endl;
+            tree.relate(a,b,c);  
+        } else if (com == 1)  {
+            cin >> a >> b ; 
+            // cout << com << "  " << a << "  " << b <<  endl;
+            if (tree.diff(a,b) != NIL) {cout << tree.diff(a,b) << endl ; } 
+            else {cout << "?" << endl ; }
+        }
+    }    
+	return 0 ;
+}
+
+
+/*
+
+重みつき UnionFind 木の処理
+普通の UnionFind 木のサポートする処理は
+
+merge(x, y)	x を含むグループと y を含むグループをマージする
+issame(x, y)	x と y が同じグループにいるかどうかを判定する
+ですが、重みつきUnionFind木は少し発展させて、各ノード v に重み weight(v) を持たせ、ノード間の距離も管理するようなものになっています。
+
+merge(x, y, w)	weight(y) = weight(x) + w となるように x と y をマージする
+issame(x, y)	x と y が同じグループにいるかどうかを判定する
+diff(x, y)	x と y とが同じグループにいるとき、weight(y) - weight(x) をリターンする
+をサポートするものになります。
+
+x と y がすでに同じグループにいるときに merge(x, y, w) を呼ぶ
+x と y が同じグループにいないときに diff(x, y) を呼ぶ
+については未定義動作で、この場合の処理をどうするかはライブラリ作者の裁量に委ねられそうです。
+なお、通常の Union-Find 木の実装は以下を想定しています (このスライドを参照)。これに「重み」を付け加えることを考えます。
+
+struct UnionFind {
+    //やっぱりツリー全体を1つのstructにするのは常識のようで。。
+    vector<int> par; // 親ノード
+    vector<int> rank; // ランク
+
+    UnionFind(int n = 1) {
+        init(n);
+    }
+
+    void init(int n = 1) {
+        par.resize(n); rank.resize(n);
+        for (int i = 0; i < n; ++i) par[i] = i, rank[i] = 0;
+    }
+
+    int root(int x) {
+        if (par[x] == x) {
+            return x;
+        }
+        else {
+            int r = root(par[x]);
+            return par[x] = r;
+        }
+    }
+
+    bool issame(int x, int y) {
+        return root(x) == root(y);
+    }
+
+    bool merge(int x, int y) {
+        x = root(x); y = root(y);
+        if (x == y) return false;
+        if (rank[x] < rank[y]) swap(x, y);
+        if (rank[x] == rank[y]) ++rank[x];
+        par[y] = x;
+        return true;
+    }
+};
+*/
+

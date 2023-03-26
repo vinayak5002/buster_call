@@ -1,0 +1,129 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#define MAX 36
+#define true 1
+#define false 0
+
+typedef struct card{
+	char type;
+	int value;
+}n;
+
+void BubbleSort(struct card C[], int N)//バブルソート
+{
+	int i, j;
+	n tmp;
+	
+	for(i = 0; i < N; i++)
+	{
+		for(j = N - 1; j > i; j--)
+		{
+			if(C[j].value < C[j-1].value)
+			{
+				tmp = C[j];
+				C[j] = C[j-1];
+				C[j-1] = tmp;
+			}
+		}
+	}
+}
+
+void SelectionSort(struct card C[], int N)//選択ソート
+{
+	int i, j, min;
+	n tmp;
+	
+	for(i = 0; i < N; i++)
+	{
+		min = i;
+		
+		for(j = i; j < N; j++)
+		{
+			if(C[j].value < C[min].value)
+			{
+				min = j;
+			}
+		}
+		tmp = C[i];
+		C[i] = C[min];
+		C[min] = tmp;
+	}
+}
+
+void print(struct card C[], int N)//結果を表示
+{
+	int i;
+	
+	for(i = 0; i < N; i++)
+	{
+		if(i == 0)
+		{
+			printf("%c%d", C[i].type, C[i].value);
+		}
+		else
+		{
+			printf(" %c%d", C[i].type, C[i].value);
+		}
+	}
+	printf("\n");
+
+}
+
+int isStable(struct card C1[], struct card C2[], int N)//バブルソートと選択ソートの結果を比較
+{
+	int i;
+	
+	for(i = 0; i < N; i++)
+	{
+		if( C1[i].type != C2[i].type )//値が異なれば不安定(falseを返す)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+int main(void)
+{
+	int i, N;
+	n C[MAX];
+	n C1[MAX];
+	n C2[MAX];
+	char s[2];//入力から得られた文字を格納
+	
+	scanf("%d", &N);
+	
+	for(i = 0; i < N; i++)
+	{
+		scanf("%s", s);
+		C[i].type = s[0];
+		int t = atoi(s+1); //文字列を数値に変換
+		C[i].value = t;
+	}
+	
+	for(i = 0; i < N; i++)
+	{
+		C1[i] = C[i];
+		C2[i] = C[i];
+	}
+	
+	BubbleSort(C1, N);
+	SelectionSort(C2, N);
+	
+	print(C1, N);
+	printf("Stable\n");
+	
+	print(C2, N);
+	
+	if(isStable(C1, C2, N) != true)
+	{
+		printf("Not stable\n");
+	}
+	else
+	{
+		printf("Stable\n");
+	}
+	
+	return 0;
+}

@@ -1,0 +1,228 @@
+#line 1 "solve/main.cpp"
+#include <algorithm>
+#include <array>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <chrono>
+#include <cmath>
+#include <complex>
+#include <cstdint>
+#include <cstdlib>
+#include <deque>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <queue>
+#include <random>
+#include <set>
+#include <stack>
+#include <string>
+#include <type_traits>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+/* template start */
+
+#line 2 "lib/utility/type_alias.hpp"
+
+#line 4 "lib/utility/type_alias.hpp"
+
+using u64 = std::uint64_t;
+using u32 = std::uint32_t;
+using u16 = std::uint16_t;
+using u8 = std::uint8_t;
+
+using i64 = std::int64_t;
+using i32 = std::int32_t;
+using i16 = std::int16_t;
+using i8 = std::int8_t;
+
+using usize = std::size_t;
+using isize = std::ptrdiff_t;
+
+constexpr i64 operator"" _i64(unsigned long long num) { return i64(num); }
+
+constexpr u64 operator"" _u64(unsigned long long num) { return u64(num); }
+#line 33 "solve/main.cpp"
+
+#define rep(i, a, b) for (i64 i = (a); (i) < (b); (i)++)
+#define all(i) i.begin(), i.end()
+
+#ifdef LOCAL
+#define debug(...)                                                    \
+  std::cerr << "LINE: " << __LINE__ << "  [" << #__VA_ARGS__ << "]:", \
+      debug_out(__VA_ARGS__)
+#else
+#define debug(...)
+#endif
+
+void debug_out() { std::cerr << std::endl; }
+
+template <typename Head, typename... Tail>
+void debug_out(Head h, Tail... t) {
+  std::cerr << " " << h;
+  if (sizeof...(t) > 0) std::cerr << " :";
+  debug_out(t...);
+}
+
+template <typename T1, typename T2>
+std::ostream& operator<<(std::ostream& os, std::pair<T1, T2> pa) {
+  return os << pa.first << " " << pa.second;
+}
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, std::vector<T> vec) {
+  for (std::size_t i = 0; i < vec.size(); i++)
+    os << vec[i] << (i + 1 == vec.size() ? "" : " ");
+  return os;
+}
+
+template <typename T1, typename T2>
+inline bool chmax(T1& a, T2 b) {
+  return a < b && (a = b, true);
+}
+
+template <typename T1, typename T2>
+inline bool chmin(T1& a, T2 b) {
+  return a > b && (a = b, true);
+}
+
+template <typename Num, typename Func = std::multiplies<Num>>
+constexpr Num mypow(Num a, u64 b, Num id = 1, Func mul = Func()) {
+  if (b == 0) return id;
+  Num x = id;
+  while (b > 0) {
+    if (b & 1) x = mul(x, a);
+    a = mul(a, a);
+    b >>= 1;
+  }
+  return x;
+}
+
+/* template end */
+
+enum Color {
+  R,
+  G,
+  Y,
+};
+
+constexpr int INF = 5*1e8;
+
+int dp[210][210][210][3];
+
+int main() {
+  std::cin.tie(nullptr);
+  std::ios::sync_with_stdio(false);
+
+  i64 n;
+  std::cin >> n;
+
+  std::string s;
+  std::cin >> s;
+
+  i64 r_cnt = 0, g_cnt = 0, y_cnt = 0;
+  std::vector<i64> r_nth(1), g_nth(1), y_nth(1);
+
+  rep(i, 0, n) {
+    if (s[i] == 'R') {
+      r_cnt++;
+      r_nth.emplace_back(i);
+    }
+    if (s[i] == 'G') {
+      g_cnt++;
+      g_nth.emplace_back(i);
+    }
+    if (s[i] == 'Y') {
+      y_cnt++;
+      y_nth.emplace_back(i);
+    }
+  }
+
+  if(r_cnt > (n+1)/2 || g_cnt > (n+1)/2 || y_cnt > (n+1)/2){
+    std::cout<<-1<<"\n";
+    return 0;
+  }
+
+  std::vector<i64> r_sum(n + 1, 0), g_sum(n + 1, 0), y_sum(n + 1, 0);
+  rep(i, 0, n) {
+    r_sum[i + 1] = r_sum[i];
+    g_sum[i + 1] = g_sum[i];
+    y_sum[i + 1] = y_sum[i];
+    if (s[i] == 'R') {
+      r_sum[i + 1] = r_sum[i] + 1;
+    }
+    if (s[i] == 'G') {
+      g_sum[i + 1] = g_sum[i] + 1;
+    }
+    if (s[i] == 'Y') {
+      y_sum[i + 1] = y_sum[i] + 1;
+    }
+  }
+
+  rep(i, 0, 3) {
+    dp[1][0][0][i] = INF;
+    dp[0][1][0][i] = INF;
+    dp[0][0][1][i] = INF;
+  }
+
+  if (r_cnt > 0) dp[1][0][0][R] = g_sum[r_nth[1]] + y_sum[r_nth[1]];
+  if (g_cnt > 0) dp[0][1][0][G] = r_sum[g_nth[1]] + y_sum[g_nth[1]];
+  if (y_cnt > 0) dp[0][0][1][Y] = r_sum[y_nth[1]] + g_sum[y_nth[1]];
+
+  rep(sum, 2, n + 1) {
+    rep(r, 0, r_cnt + 1) {
+      if (r > sum) break;
+
+      rep(g, 0, g_cnt + 1) {
+        if (r + g > sum) break;
+
+        i64 y = sum - r - g;
+
+        if (y > y_cnt) continue;
+
+        rep(i, 0, 3) dp[r][g][y][i] = INF;
+
+        if (r > 0) {
+          dp[r][g][y][R] = std::min(dp[r - 1][g][y][G], dp[r - 1][g][y][Y]);
+          dp[r][g][y][R] += std::max(g_sum[r_nth[r]] - g, 0_i64);
+          dp[r][g][y][R] += std::max(y_sum[r_nth[r]] - y, 0_i64);
+        }
+
+        if (g > 0) {
+          dp[r][g][y][G] = std::min(dp[r][g - 1][y][R], dp[r][g - 1][y][Y]);
+          dp[r][g][y][G] += std::max(r_sum[g_nth[g]] - r, 0_i64);
+          dp[r][g][y][G] += std::max(y_sum[g_nth[g]] - y, 0_i64);
+        }
+
+        if (y > 0) {
+          dp[r][g][y][Y] = std::min(dp[r][g][y - 1][R], dp[r][g][y - 1][G]);
+          dp[r][g][y][Y] += std::max(r_sum[y_nth[y]] - r, 0_i64);
+          dp[r][g][y][Y] += std::max(g_sum[y_nth[y]] - g, 0_i64);
+        }
+
+        debug(r, g, y, dp[r][g][y][R]);
+        debug(r, g, y, dp[r][g][y][G]);
+        debug(r, g, y, dp[r][g][y][Y]);
+      }
+    }
+  }
+
+  i64 ans = INF;
+  rep(i, 0, 3) chmin(ans, dp[r_cnt][g_cnt][y_cnt][i]);
+
+  if (ans == INF)
+    std::cout << -1 << "\n";
+  else
+    std::cout << ans << "\n";
+
+  return 0;
+}
+

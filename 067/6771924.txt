@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define INF INT_MAX
+
+int cnt = 0;//グローバル変数
+
+void printArray(int *a,int len){
+    for(int i = 0;i < len-1;i++){
+        printf("%d ",a[i]);
+    }
+    printf("%d\n",a[len-1]);
+}
+
+int len(int *a){
+	return (int)(sizeof(a)/sizeof(int));
+}
+
+void marge(int *a,int left,int mid,int right){
+    int lenL = mid-left;
+    int lenR = right-mid;
+    int *L = malloc(sizeof(int)*(lenL+1));//L[mid-left+1]
+    int *R = malloc(sizeof(int)*(lenR+1));//R(right-mid+1)
+    for(int i = 0;i < lenL;i++) L[i] = a[left+i];
+    for(int i = 0;i < lenR;i++) R[i] = a[mid+i];
+    L[lenL] = INF;
+    R[lenR] = INF;
+    int i = 0;
+    int j = 0;
+    for(int k = left;k < right;k++){
+    	cnt++;
+        if(L[i] <= R[j]){
+            a[k] = L[i];
+            i++;
+        }else{
+            a[k] = R[j];
+            j++;
+        }
+    }
+    free(L);
+    free(R);
+}
+
+void margeSort(int *a,int left,int right){
+    if(left+1 < right){
+        int mid = (int)((double)(left+right)/2);
+        margeSort(a,left,mid);
+        margeSort(a,mid,right);
+        marge(a,left,mid,right);
+    }
+}
+ 
+int main(void){
+    int n;
+    scanf("%d",&n);
+    int *a;
+    a = malloc(sizeof(int)*(n-1));
+    for(int i = 0;i < n;i++) scanf("%d",&a[i]);
+ 
+    margeSort(a,0,n);
+    printArray(a,n);
+	printf("%d\n",cnt);
+    free(a);
+    return 0;
+}

@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+vector<int> preorder, inorder, postorder;
+int pre_root_idx = 0;
+
+void reconst(int l, int r) {
+    if(l >= r) return;
+    int root_elem, root_idx;
+
+    root_elem = preorder[pre_root_idx++];
+    for(int i = l; i < r; ++i) {
+        if(inorder[i] == root_elem) root_idx = i;
+    }
+
+    reconst(l, root_idx);
+    reconst(root_idx+1, r);
+
+    postorder.push_back(root_elem);
+}
+
+int main() {
+    int N;
+    cin >> N;
+    for(int i = 0; i < N; ++i) {
+        int pre;
+        cin >> pre;
+        preorder.push_back(pre);
+    }
+    for(int i = 0; i < N; ++i) {
+        int in;
+        cin >> in;
+        inorder.push_back(in);
+    }
+    reconst(0, N);
+    for(int i = 0; i < N; ++i) {
+        if(i > 0) cout << " ";
+        cout << postorder[i];
+    }
+    cout << endl;
+
+    return 0;
+}

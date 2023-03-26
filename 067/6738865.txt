@@ -1,0 +1,101 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+
+// each node of tree
+class Node{
+private:
+	int parent;
+	int rank;
+
+public:
+	Node(){
+		parent = 0;
+		rank = 0;
+	}
+
+	Node(int parent){
+		this->parent = parent;
+		rank = 0;
+	}
+
+	void setParent(int parent){
+		this->parent = parent;
+	}
+
+	int getParent(){
+		return parent;
+	}
+
+	void setRank(int rank){
+		this->rank = rank;
+	}
+
+	int getRank(){
+		return rank;
+	}
+};
+
+// disjoint set
+class Disjoint{
+private:
+	vector<Node> tree;
+
+public:
+	Disjoint(){
+		int n, q;
+		cin >> n >> q;
+
+		for(int i=0; i<n; i++){
+			tree.push_back(Node(i));
+		}
+
+		for(int i=0; i<q; i++){
+			int com, x, y;
+			cin >> com >> x >> y;
+
+			// unite
+			if(com==0){
+				unite(x, y);
+			}
+
+			// same
+			else if(com==1){
+				same(x, y);
+			}
+		}
+	}
+
+	void unite(int x, int y){
+		link(find(x), find(y));
+	}
+
+	void same(int x, int y){
+		cout << ((find(x) == find(y)) ? 1 : 0) << endl;
+	}
+
+	void link(int x, int y){
+		if(tree[x].getRank() > tree[y].getRank()){
+			tree[y].setParent(x);
+		}
+		else{
+			tree[x].setParent(y);
+
+			if(tree[x].getRank() == tree[y].getRank()){
+				tree[y].setRank(tree[y].getRank()+1);
+			}
+		}
+	}
+
+	int find(int x){
+		if(x != tree[x].getParent())
+			tree[x].setParent(find(tree[x].getParent()));
+		return tree[x].getParent();
+	}
+
+};
+
+int main(){
+	Disjoint d = Disjoint();
+	return 0;
+}

@@ -1,0 +1,180 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef unsigned long long ull;
+#define REP(i, n) for (ll i = 0; i < ll(n); i++)
+#define RREP(i, n) for (ll i = (ll)(n - 1); i >= 0; i--)
+#define REPE(i, l, n) for (ll i = l; i <= ll(n); i++)
+#define RREPE(i, l, n) for (ll i = ll(n); i >= l; i--)
+#define FORA(i, I) for (const auto &i : I)
+#define ALL(v) v.begin(), v.end()
+#define UQ(v) v.erase(unique(ALL(v)), v.end())
+#define ACM(v) accumulate(ALL(v), 0LL)
+#define C cin >>
+#define P(str) cout << str << endl
+#define PLL pair<ll, ll>
+#define PDBL pair<double, double>
+#define TULL tuple<ll, ll, ll>
+#define VPLL vector<PLL>
+#define VLL vector<ll>
+#define VVLL vector<VLL>
+#define VVVLL vector<VVLL>
+#define VDBL vector<double>
+#define DLL deque<ll>
+#define INCANT cin.tie(nullptr), ios::sync_with_stdio(false)
+#define INT(...)     \
+    int __VA_ARGS__; \
+    IN(__VA_ARGS__)
+#define LL(...)     \
+    ll __VA_ARGS__; \
+    IN(__VA_ARGS__)
+#define STR(...)        \
+    string __VA_ARGS__; \
+    IN(__VA_ARGS__)
+#define CHR(...)      \
+    char __VA_ARGS__; \
+    IN(__VA_ARGS__)
+#define DBL(...)        \
+    double __VA_ARGS__; \
+    IN(__VA_ARGS__)
+#define VEC(type, name, size) \
+    vector<type> name(size);  \
+    IN(name)
+#define VEC2(type, name1, name2, size)     \
+    vector<type> name1(size), name2(size); \
+    for (int i = 0; i < size; i++) IN(name1[i], name2[i])
+#define VEC3(type, name1, name2, name3, size)           \
+    vector<type> name1(size), name2(size), name3(size); \
+    for (int i = 0; i < size; i++) IN(name1[i], name2[i], name3[i])
+#define VV(type, name, h, w)                       \
+    vector<vector<type>> name(h, vector<type>(w)); \
+    IN(name)
+template <typename T>
+inline bool chmax(T &a, T b) {
+    return ((a < b) ? (a = b, true) : (false));
+}
+template <typename T>
+inline bool chmin(T &a, T b) {
+    return ((a > b) ? (a = b, true) : (false));
+}
+int scan() {
+    return getchar();
+}
+void scan(int &a) {
+    cin >> a;
+}
+void scan(long long &a) {
+    cin >> a;
+}
+void scan(char &a) {
+    cin >> a;
+}
+void scan(double &a) {
+    cin >> a;
+}
+void scan(string &a) {
+    cin >> a;
+}
+template <class T, class S>
+void scan(pair<T, S> &p) {
+    scan(p.first), scan(p.second);
+}
+template <class T>
+void scan(vector<T> &);
+template <class T>
+void scan(vector<T> &a) {
+    for (auto &i : a) scan(i);
+}
+template <class T>
+void scan(T &a) {
+    cin >> a;
+}
+void IN() {
+}
+template <class Head, class... Tail>
+void IN(Head &head, Tail &...tail) {
+    scan(head);
+    IN(tail...);
+}
+const long long INF = 1100000000000000000;
+
+class LCA {
+   private:
+    VLL dist;
+    VVLL v, parent;
+
+    void dfs(const VVLL &v, ll root, ll p, ll d) {
+        parent[0][root] = p;
+        dist[root] = d;
+        for (auto i : v[root]) {
+            if (i != p) dfs(v, i, root, d + 1);
+        }
+    }
+
+   public:
+    LCA(const VVLL &_v, ll root = 0) : v(_v) {
+        int n = v.size();
+        int k = 1;
+        while ((1 << k) < n) k++;
+        parent.assign(k, VLL(n, -1));
+        dist.assign(n, -1);
+        dfs(v, root, -1, 0);
+        REP(i, k - 1) {
+            REP(j, n) {
+                if (parent[i][j] < 0) {
+                    parent[i + 1][j] = -1;
+                } else {
+                    parent[i + 1][j] = parent[i][parent[i][j]];
+                }
+            }
+        }
+    }
+
+    ll get_lca(ll u, ll v) {
+        if (dist[u] < dist[v]) swap(u, v);  // u の方が深いとする
+        ll n = parent.size();
+        // LCA までの距離を同じにする
+        REP(i, n) {
+            if ((dist[u] - dist[v]) >> i & 1) {
+                u = parent[i][u];
+            }
+        }
+        // 二分探索で LCA を求める
+        if (u == v) return u;
+        for (ll i = n - 1; i >= 0; i--) {
+            if (parent[i][u] != parent[i][v]) {
+                u = parent[i][u];
+                v = parent[i][v];
+            }
+        }
+        return parent[0][u];
+    }
+};
+
+int main() {
+    //入力
+    INCANT;
+    LL(n);
+    VVLL v(n);
+    REP(i, n) {
+        LL(k);
+        while (k--) {
+            LL(x);
+            v[i].push_back(x);
+        }
+    }
+    LL(q);
+
+    //処理
+    VLL res;
+    LCA lca(v);
+    while (q--) {
+        LL(u, v);
+        res.push_back(lca.get_lca(u, v));
+    }
+
+    //出力
+    FORA(i, res) {
+        P(i);
+    }
+}

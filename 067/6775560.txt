@@ -1,0 +1,458 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long int ull;
+#define chmin(x,y) x = min(x,y)
+#define chmax(x,y) x = max(x,y)
+#define BIG_NUM 2000000000
+#define HUGE_NUM 4000000000000000000 //オーバーフローに注意
+#define MOD 1000000007
+#define EPS 0.000000001
+
+
+
+#define SIZE 105
+
+enum DIR{
+	yoko,
+	tate,
+};
+
+enum Type{
+	Green,
+	Red,
+};
+
+struct Edge{
+	Edge(int arg_to,int arg_dist,bool arg_is_yoko){
+		to = arg_to;
+		dist = arg_dist;
+		is_yoko = arg_is_yoko;
+	}
+
+	int to,dist;
+	bool is_yoko;
+};
+
+struct Info{
+
+	int a,b;
+	bool is_yoko;
+};
+
+struct State{
+
+	State(){
+		node = sum_dist = 0;
+		type = Green;
+		dir = yoko;
+		is_goal = false;
+	}
+
+	State(int arg_node,int arg_sum_dist,Type arg_type,DIR arg_dir,bool arg_is_goal){
+		node = arg_node;
+		sum_dist = arg_sum_dist;
+		type = arg_type;
+		dir = arg_dir;
+		is_goal = arg_is_goal;
+	}
+	bool operator<(const struct State& arg) const{
+
+		return sum_dist > arg.sum_dist; //昇順(PQ)
+	}
+	int node,sum_dist;
+	Type type;
+	DIR dir;
+	bool is_goal;
+};
+
+
+vector<Edge> G[SIZE*SIZE];
+
+int W,H;
+int D_yoko[SIZE],D_tate[SIZE];
+int NS[SIZE*SIZE],EW[SIZE*SIZE],S[SIZE*SIZE];
+int X[SIZE*SIZE],Y[SIZE*SIZE];
+
+int min_dist[SIZE*SIZE][2][2];
+
+
+int getInd(int row,int col){
+
+	return row*W + col;
+}
+
+//通りの計算
+Info calcPos(int x,int y){
+
+	Info ret;
+	ret.a = -1;
+	ret.b = -1;
+
+	int h = 0,w = 0;
+
+	//横方向の通り
+	for(int row = 0; row < H; row++){
+		if(y != h){
+
+			h += D_tate[row];
+			continue;
+		}
+
+		w = 0;
+		for(int col = 0; col < W; col++){
+			if(x > w && x < w+D_yoko[col]){
+
+				ret.a = getInd(row,col);
+				ret.b = getInd(row,col+1);
+				ret.is_yoko = true;
+				return ret;
+			}
+			w += D_yoko[col];
+		}
+		h += D_tate[row];
+	}
+
+	//縦方向の通り
+	w = 0;
+	for(int col = 0; col < W; col++){
+		if(x != w){
+
+			w += D_yoko[col];
+			continue;
+		}
+
+		h = 0;
+		for(int row = 0; row < H; row++){
+			if(y > h && y < h+D_tate[row]){
+
+				ret.a = getInd(row,col);
+				ret.b = getInd(row+1,col);
+				ret.is_yoko = false;
+				return ret;
+			}
+			h += D_tate[row];
+		}
+		w += D_yoko[col];
+	}
+
+	return ret; //バグ
+}
+
+//ある時刻における信号機の色を計算
+Type calcColor(int ind,int T,bool is_yoko){
+
+	int base = NS[ind]+EW[ind];
+
+	int mod = T%base;
+
+	if(S[ind] == 0){ //最初に南北方向の信号が緑
+
+		if(is_yoko){ //左右の移動
+
+			//■到着した瞬間に緑は待たなくてよい
+			if(mod < NS[ind]){
+
+				return Red;
+			}else{
+
+				return Green;
+			}
+
+		}else{ //南北の移動
+
+			//■到着した瞬間に赤は停止
+			if(mod < NS[ind]){
+
+				return Green;
+			}else{
+
+				return Red;
+			}
+		}
+
+	}else{ //最初に東西方向の信号が緑
+
+		if(is_yoko){ //東西の移動
+
+			//■到着した瞬間に赤は停止
+			if(mod < EW[ind]){
+
+				return Green;
+
+			}else{
+
+				return Red;
+			}
+
+		}else{ //南北の移動
+
+			//■到着した瞬間に緑は待たなくてよい
+			if(mod < EW[ind]){
+
+				return Red;
+
+			}else{
+
+				return Green;
+			}
+		}
+	}
+}
+
+void func(){
+
+	for(int i = 0; i < H*W; i++){
+		G[i].clear();
+	}
+
+	//区画幅(横)
+	for(int i = 0; i < W-1; i++){
+
+		scanf("%d",&D_yoko[i]);
+	}
+	//区画幅(縦)
+	for(int i = 0; i < H-1; i++){
+
+		scanf("%d",&D_tate[i]);
+	}
+
+	//H*W個の交差点の座標を計算
+	int h = 0;
+	for(int row = 0; row < H; row++){
+		int w = 0;
+		for(int col = 0; col < W; col++){
+			int ind = getInd(row,col);
+			X[ind] = w;
+			Y[ind] = h;
+			w += D_yoko[col];
+		}
+		h += D_tate[row];
+	}
+
+	for(int row = 0; row < H; row++){
+		for(int col = 0; col < W; col++){
+
+			int ind = getInd(row,col);
+
+			scanf("%d %d %d",&NS[ind],&EW[ind],&S[ind]);
+		}
+	}
+
+	int s_x,s_y;
+	scanf("%d %d",&s_x,&s_y);
+
+	Info s_pos = calcPos(s_x,s_y);
+
+	int t_x,t_y;
+	scanf("%d %d",&t_x,&t_y);
+
+	Info t_pos = calcPos(t_x,t_y);
+
+
+	//同じ通りにある
+	if(s_pos.a == t_pos.a && s_pos.b == t_pos.b){
+
+		if(s_x == t_x){
+
+			printf("%d\n",abs(s_y-t_y));
+			return;
+
+		}else{
+
+			printf("%d\n",abs(s_x-t_x));
+			return;
+		}
+	}
+
+	/*辺張り*/
+
+	//左右
+	for(int row = 0; row < H; row++){
+		for(int col = 0; col < W-1; col++){
+
+			int a = getInd(row,col);
+			int b = getInd(row,col+1);
+
+			G[a].push_back(Edge(b,D_yoko[col],true));
+			G[b].push_back(Edge(a,D_yoko[col],true));
+		}
+	}
+
+	//上下
+	for(int col = 0; col < W; col++){
+		for(int row = 0; row < H-1; row++){
+
+			int a = getInd(row,col);
+			int b = getInd(row+1,col);
+
+			G[a].push_back(Edge(b,D_tate[row],false));
+			G[b].push_back(Edge(a,D_tate[row],false));
+		}
+	}
+
+	for(int row = 0; row < H; row++){
+		for(int col = 0; col < W; col++){
+			for(int a = 0; a < 2 ; a++){
+
+				int ind = getInd(row,col);
+				min_dist[ind][Green][a] = BIG_NUM;
+				min_dist[ind][Red][a] = BIG_NUM;
+			}
+		}
+	}
+
+	priority_queue<State> Q;
+
+	/* とりあえず、スタートから最寄りの交差点に寄る */
+
+	if(s_pos.is_yoko){
+
+		//aへ
+		int T = abs(s_x - X[s_pos.a]);
+		Type type = calcColor(s_pos.a,T,true);
+
+		Q.push(State(s_pos.a,T,type,yoko,false));
+
+		//bへ
+		T = abs(s_x - X[s_pos.b]);
+		type = calcColor(s_pos.b,T,true);
+
+		Q.push(State(s_pos.b,T,type,yoko,false));
+
+	}else{ //startが縦の通りにある
+
+		//aへ
+		int T = abs(s_y - Y[s_pos.a]);
+		Type type = calcColor(s_pos.a,T,false);
+
+		Q.push(State(s_pos.a,T,type,tate,false));
+
+		//bへ
+		T = abs(s_y - Y[s_pos.b]);
+		type = calcColor(s_pos.b,T,false);
+
+		Q.push(State(s_pos.b,T,type,tate,false));
+	}
+
+	while(!Q.empty()){
+
+		State state = Q.top();
+		Q.pop();
+
+		if(state.is_goal){
+
+			printf("%d\n",state.sum_dist);
+			return;
+		}
+
+		if(state.sum_dist > min_dist[state.node][state.type][state.dir]){
+
+			continue;
+		}
+		if(state.type == Red){
+
+			bool is_yoko = (state.dir == yoko);
+
+			//青になるまで待つ
+			int add = 0;
+			int base = NS[state.node]+EW[state.node];
+			int now = state.sum_dist%base;
+
+			if(is_yoko){
+
+				if(S[state.node] == 0){ //最初に南北が青
+
+					add = NS[state.node]-now;
+
+				}else{ //最初に東西が青
+
+					add = base-now;
+
+				}
+
+			}else{  //南北の動き
+
+				if(S[state.node] == 0){ //最初に南北が青
+
+					add = base-now;
+
+				}else{ //最初に東西が青
+
+					add = EW[state.node]-now;
+				}
+			}
+
+
+			int next_node = state.node;
+			int next_dist = state.sum_dist+add;
+			DIR next_dir = state.dir;
+			Type next_type = Green;
+
+			if(min_dist[next_node][next_type][next_dir] > next_dist){
+
+				min_dist[next_node][next_type][next_dir] = next_dist;
+				Q.push(State(next_node,next_dist,next_type,next_dir,false));
+			}
+			continue;
+		}
+
+		for(int i = 0; i < G[state.node].size(); i++){
+
+			int next_node = G[state.node][i].to;
+			int next_dist = state.sum_dist + G[state.node][i].dist;
+
+
+			//途中にゴールがあるか
+			int a = min(state.node,next_node);
+			int b = max(state.node,next_node);
+
+			if(t_pos.a == a && t_pos.b == b){
+
+				int add = abs(X[state.node]-t_x)+abs(Y[state.node]-t_y);
+				int candidate = state.sum_dist+add;
+
+				Q.push(State(state.node,candidate,state.type,state.dir,true)); //■■■■■■■■■これが最短とは限らないので1回push■■■■■■■■■
+
+				continue;
+			}
+
+			Type next_type;
+			DIR next_dir;
+
+
+			if(G[state.node][i].is_yoko){ //左右
+
+				next_type = calcColor(next_node,next_dist,true);
+				next_dir = yoko;
+
+			}else{ //上下
+
+				next_type = calcColor(next_node,next_dist,false);
+				next_dir = tate;
+			}
+
+			if(min_dist[next_node][next_type][next_dir] > next_dist){
+
+				min_dist[next_node][next_type][next_dir] = next_dist;
+				Q.push(State(next_node,next_dist,next_type,next_dir,false));
+			}
+		}
+	}
+
+	printf("-1\n"); //バグ
+}
+
+
+int main(){
+
+	while(true){
+		scanf("%d %d",&W,&H);
+		if(W == 0 && H == 0)break;
+
+		func();
+	}
+
+	return 0;
+}
+

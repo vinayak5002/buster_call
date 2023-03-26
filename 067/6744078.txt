@@ -1,0 +1,82 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
+
+#define MAX 102
+
+int stack[MAX];
+int top = 0;
+
+int isFull() {
+	return top == MAX;
+}
+
+int isEmpty()
+{
+	return top == 0;
+}
+
+void push(int value) {
+	if (!isFull()) {
+		stack[top++] = value;
+	}
+}
+
+int pop() {
+	if (isEmpty())
+	{
+		printf("Not enough operands in expression\n");
+		exit(EXIT_FAILURE);
+	}
+	return stack[--top];
+}
+
+int add(int a, int b) {
+	return a + b;
+}
+
+int sub(int a, int b) {
+	return a - b;
+}
+
+int mul(int a, int b) {
+	return a * b;
+}
+
+int main()
+{
+	char c[10];
+	char space = '\0';
+
+	while (1)
+	{
+		scanf("%s", c);
+		scanf("%c", &space);
+
+		if (isdigit(c[0])) {
+			push(atoi(c));
+		}
+
+		switch (c[0])
+		{
+		case '+':
+			push(add(pop(), pop()));
+			break;
+		case '-':
+			push(sub(pop(), pop()));
+			break;
+		case '*':
+			push(mul(pop(), pop()));
+			break;
+		}
+
+		if (space == '\n')
+			break;
+
+	}
+	printf("%d\n", pop());
+
+	return 0;
+}
+
+

@@ -1,0 +1,52 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Scanner;
+
+
+public class Main {
+
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		int v = sc.nextInt();
+		int e = sc.nextInt();
+		int r = sc.nextInt();
+//		int dist[][] = new int[v][v];
+		ArrayList<ArrayList<ArrayList<Integer>>> rel = new ArrayList<ArrayList<ArrayList<Integer>>>();
+		for (int i = 0; i < v; i++) rel.add(new ArrayList<ArrayList<Integer>>());
+		for (int i = 0; i < e; i++) {
+			int s = sc.nextInt();
+			int t = sc.nextInt();
+			int d = sc.nextInt();
+//			dist[s][t] = d;
+			rel.get(s).add(new ArrayList<>(Arrays.asList(t, d)));
+		}
+		
+		int distToR[] = new int[v];
+		Arrays.fill(distToR, Integer.MAX_VALUE);
+		distToR[r] = 0;
+		boolean[] looked = new boolean[v];
+		Arrays.fill(looked, true);
+		
+		PriorityQueue<List<Integer>> queue = new PriorityQueue<>(new Comparator<List>() {
+			@Override
+			public int compare(List a, List b) {
+				return (int)a.get(0) > (int)b.get(0) ? 1 : a.get(0) == b.get(0) ? 0 : -1;
+			}
+		});
+		queue.add(List.of(0, r));
+		while (!queue.isEmpty()) {
+			List<Integer> now = queue.poll();
+			looked[now.get(1)] = false;
+			for (ArrayList<Integer> i : rel.get(now.get(1))) {
+				if (looked[i.get(0)]) {
+					distToR[i.get(0)] = Math.min(distToR[now.get(1)] + i.get(1), distToR[i.get(0)]);
+					queue.add(List.of(distToR[i.get(0)], i.get(0)));
+				}
+			}
+		}
+		for (int i : distToR) System.out.println(i == Integer.MAX_VALUE ? "INF" : i);
+	}
+}

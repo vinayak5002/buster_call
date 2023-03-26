@@ -1,0 +1,38 @@
+fn main() {
+    let mut input_list = Vec::new();
+    let mut result: Vec<String> = Vec::new();
+    loop {
+        let s: String = read();
+        if s == "-" {
+            break;
+        }
+        input_list.push(s);
+    }
+    let mut flg = false;
+    for e in input_list.iter() {
+        match e.parse::<usize>() {
+            Ok(n) => {
+                if flg {
+                    let t = result.pop().unwrap();
+                    result.push(format!("{}{}", &t[n..t.len()], &t[0..n]));
+                } else {
+                    flg = true;
+                }
+            }
+            Err(_) => {
+                result.push(e.clone());
+                flg = false;
+            }
+        }
+    }
+    for e in result.iter() {
+        println!("{}", e);
+    }
+}
+
+fn read<T: std::str::FromStr>() -> T {
+    let mut s = String::new();
+    std::io::stdin().read_line(&mut s).ok().unwrap();
+    s.trim().parse().ok().unwrap()
+}
+

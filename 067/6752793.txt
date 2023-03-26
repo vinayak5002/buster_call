@@ -1,0 +1,57 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+  for(;;){
+    int N,M,S,D;
+    cin >> N >> M >> S >> D;
+    if(N == 0) break;
+    M--;
+    S--;
+    vector<string> vec(D);
+    for(int i=0;i<D;i++) cin >> vec[i];
+    int direct = M;
+    for(int i=0;i<D;i++){
+      if(direct != 0){
+        if(vec[i][direct-1] == '1'){
+          direct--;
+          continue;
+        }
+      }
+      if(vec[i][direct] == '1') direct++;
+      
+    }
+    if(direct == S) cout << 0 << endl;
+    else{
+      bool OK = false;
+      for(int i=0;i<D;i++){
+        bool br = false;
+        for(int j=0;j<N-1;j++){
+          if(vec[i][j] == '1') continue;
+          if(j != 0 && vec[i][j-1] == '1') continue;
+          if(j != N-1 && vec[i][j+1] == '1') continue;
+          vec[i][j] = '1';
+          int d = M;
+          for(int k=0;k<D;k++){
+            if(d != 0){
+              if(vec[k][d-1] == '1'){
+                d--;
+                continue;
+              }
+            }
+            if(vec[k][d] == '1') d++;
+          }
+          if(d == S){
+            cout << i+1 << " " << j+1 << endl;
+            OK = true;
+            br = true;
+            break;
+          }
+          vec[i][j] = '0';
+        }
+        if(br) break;
+      }
+      if(!OK) cout << 1 << endl;
+    }
+  }
+}

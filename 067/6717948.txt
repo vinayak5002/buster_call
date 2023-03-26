@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+#define rep(i, n) for(int i = 0; i < n; i++)
+
+const int N = 1e2 + 9;
+vector<int> g[N];
+bool vis[N];
+int d[N],f[N];
+int cnt=1;
+
+void dfs(int u) {
+  d[u] = cnt;
+  cnt++;
+  vis[u] = true;
+  for (auto v: g[u]) {
+    if (! vis[v]) {
+      dfs(v); 
+    }
+  }
+ 
+  f[u] = cnt;
+  cnt++;
+}
+
+int main(){
+	
+  int n, row, num, col;
+  cin >> n;
+	
+  memset(f, 0, sizeof f);
+  
+  rep(i, n){
+    cin >> row >> num;
+    rep(k, num){
+      cin >> col;
+      g[row].push_back(col);
+    }
+  }
+  
+  rep(i, n) if(! vis[i+1]) dfs(i + 1);
+  
+  rep(i, n) printf("%d %d %d\n", i + 1, d[i+1], f[i+1]);
+}
+

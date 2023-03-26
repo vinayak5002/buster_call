@@ -1,0 +1,156 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using ld = long double;
+
+//only for atcoder
+#include<atcoder/all>
+using namespace atcoder;
+
+#define rep(i,l,r) for(ll i=(l); i<(r); i++)
+#define rrep(i,l,r) for(ll i=(r)-1; i>=(l); i--)
+#define ALL(c) (c).begin(), (c).end()
+#define RALL(c) (c).rbegin(), (c).rend()
+#define SORT(c) sort(ALL(c))
+#define RSORT(c) sort(RALL(c))
+#define MINV(c) *min_element(ALL(c))
+#define MAXV(c) *max_element(ALL(c))
+
+using VI = vector<int>;
+using VVI = vector<VI>;
+using VL = vector<ll>;
+using VVL = vector<VL>;
+using VS = vector<string>;
+using VVS = vector<VS>;
+using VB = vector<bool>;
+using VVB = vector<VB>;
+using VC = vector<char>;
+using VVC = vector<VC>;
+using VD = vector<ld>;
+using VVD = vector<VD>;
+//using P = pair<ll,ll>;
+//using VP = vector<P>;
+const ll LINF = 2e18;
+const int INF = 2e9;
+using T = tuple<int,int,int,int>;
+
+//dijkstra
+
+struct edge{
+  int to;
+  int cost;
+};
+
+using P = pair<int,int>;
+
+const int MAX_N = 101;
+vector<vector<edge>> G(MAX_N*MAX_N*4*6,vector<edge>(0));
+vector<int> dist(MAX_N*MAX_N*4*6,INF);
+bool ng[MAX_N*2][MAX_N*2];
+
+int conv(int x, int y, int t){
+  return t*MAX_N*MAX_N*4 + (x+MAX_N)*MAX_N*2 + (y+MAX_N);
+}
+
+void dijkstra(int s){
+  priority_queue<P,vector<P>,greater<P>> PQ;
+  dist[s] = 0;
+  PQ.push(P(0,s));
+  
+  while(PQ.size()){
+    P p = PQ.top();
+    PQ.pop();
+    int v = p.second; //from
+    if(dist[v] < p.first){ //現在わかっている距離が更新できない
+      continue;
+    }
+    for(int i=0; i<G[v].size(); i++){
+      edge e = G[v][i];
+      if(dist[e.to] > dist[v] + e.cost){
+        dist[e.to] = dist[v] + e.cost;
+        PQ.push(P(dist[e.to], e.to));
+      }
+    }
+  }
+}
+
+void solve(){
+  int sx, sy, gx, gy;
+  cin >> sx >> sy >> gx >> gy;
+  int N;
+  cin >> N;
+  rep(i,0,N){
+    int x, y;
+    cin >> x >> y;
+    ng[x+MAX_N][y+MAX_N] = true;
+  }
+  
+  VI dx = {0,1,1,0,-1,-1,0};
+  VI dy = {1,0,-1,-1,-1,0,0};
+  VI dy2 = {1,1,0,-1,0,1,0};
+  
+  int X, Y;
+  cin >> X >> Y;
+  rep(i,-X,X+1){
+    rep(j,-Y,Y+1){
+      if(ng[i+MAX_N][j+MAX_N]){
+        continue;
+      }
+      rep(k,0,6){
+        int s = conv(i,j,k);
+        rep(a,0,7){
+          int nx = i + dx[a];
+          int ny = j + dy[a];
+          if(abs(i)%2 == 1){
+            ny = j + dy2[a];
+          }
+          if(ng[nx+MAX_N][ny+MAX_N]){
+            continue;
+          }
+          if(abs(nx) > X || abs(ny) > Y){
+            continue;
+          }
+          edge add;
+          add.cost = 0;
+          add.to = conv(nx,ny, (k+1)%6);
+          if(abs(i*j*k)%6 != a){
+            add.cost = 1;
+          }
+          G[s].push_back(add);
+        }
+      }
+    }
+  }
+  int start = conv(sx,sy,0);
+  dijkstra(start);
+  int ans = INF;
+  rep(k,0,6){
+    ans = min(ans, dist[conv(gx,gy,k)]);
+  }
+  if(ans == INF){
+    cout << -1 << endl;
+  }
+  else{
+    cout << ans << endl;
+  }
+}
+
+int main(){
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  int T;
+  //cin >> T;
+  T = 1;
+  for(int i=0; i<T; i++){
+    solve();
+  }
+  
+  /*while(true){
+    int N, M;
+    cin >> N >> M;
+    if(N == 0){
+      return 0;
+    }
+    solve(N,M);
+  }*/
+}

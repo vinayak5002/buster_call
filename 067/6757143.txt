@@ -1,0 +1,38 @@
+use std::io;
+
+fn main() {
+    let mut n = String::new();
+    io::stdin().read_line(&mut n).ok();
+    let n = n.trim().parse().ok().unwrap();
+    let mut missing_card_flag = vec![true; 52];
+
+    for _ in 0..n {
+        let mut card = String::new();
+        io::stdin().read_line(&mut card).ok();
+        let suit_rank: Vec<&str> = card.trim().split_whitespace().collect();
+        let num: usize = suit_rank[1].parse().unwrap();
+        let card_num = match suit_rank[0] {
+            "S" => 0 * 13 + num - 1,
+            "H" => 1 * 13 + num - 1,
+            "C" => 2 * 13 + num - 1,
+            "D" => 3 * 13 + num - 1,
+            _ => 0,
+        };
+        missing_card_flag[card_num] = false;
+    }
+
+    for i in 0..52 {
+        if !missing_card_flag[i] {
+            continue;
+        }
+        let suit = match i / 13 {
+            0 => "S",
+            1 => "H",
+            2 => "C",
+            3 => "D",
+            _ => "Err"
+        };
+        println!("{} {}", suit, i % 13 + 1);
+    }
+}
+

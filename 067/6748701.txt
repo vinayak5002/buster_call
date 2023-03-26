@@ -1,0 +1,86 @@
+// https://algo-logic.info/union-find-tree/
+
+#include <iostream>
+#include <cmath>
+#include <vector>
+#include <iterator>
+#include <algorithm>
+
+class DisjointSet{
+    private:
+        std::vector<int> rank, root;
+    public:
+        DisjointSet(int size = 0){
+            rank.resize(size);
+            root.resize(size);
+            for(int i=0; i<size; i++) makeSet(i);
+        }
+        void makeSet(int x){
+            this->root[x] = x;
+            this->rank[x] = 0;
+        }
+        void unite(int x, int y){
+            link(findSet(x), findSet(y));
+        }
+        bool same(int x, int y){
+            return (findSet(x) == findSet(y));
+        }
+        void link(int x, int y){
+            if(this->rank[x] > this->rank[y]){
+                this->root[y] = x;
+            }else{
+                this->root[x] = y;
+                if(this->rank[x] == this->rank[y]){
+                    this->rank[y]++;
+                }
+            }
+        }
+        int findSet(int x){
+            if(x != this->root[x]){
+                this->root[x] = findSet(this->root[x]);
+            }
+            return this->root[x];
+        }
+};
+
+class Edge{
+    int s, t, w;
+    public:
+        Edge(int s, int t, int w) {
+            this->s = s;
+            this->t = t;
+            this->w = w;
+        }
+        int getSource(){return this->s;};
+        int getTarget(){return this->t;};
+        int getCost(){return this->w;};
+        bool operator < (const Edge &e) const{ return w < e.w;}
+};
+
+int kruskal(int V, int E, std::vector<Edge> edges){
+    int cost = 0;
+    sort(edges.begin(),edges.end());
+    DisjointSet ds = DisjointSet(V);
+    for(int i=0;i < E; ++i){
+        if(!ds.same(edges[i].getSource(), edges[i].getTarget())){
+            cost += edges[i].getCost();
+            ds.unite(edges[i].getSource(), edges[i].getTarget());
+        }
+    }
+    return cost;
+}
+
+int main(){
+    int V, E, s, t, w;
+    std::vector<Edge> edges;
+    std::cin >> V >> E;
+
+    for(int i = 0 ; i < E ; i++){
+        std::cin >> s >> t >> w;
+        edges.push_back(Edge(s, t, w));
+    }
+
+    std::cout << kruskal(V, E, edges) << std::endl;
+
+    return 0;
+}

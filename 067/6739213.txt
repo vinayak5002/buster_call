@@ -1,0 +1,56 @@
+class graph:
+    def __init__(self,V,E,edges):
+        self.V = V
+        self.E = E
+        self.edges = edges
+        self.djset = [i for i in range(V+1)]
+        self.rank = [0] * (V+1)
+    
+    def findSet(self,x):
+        if x != self.djset[x]:
+            self.djset[x] = self.findSet(self.djset[x])
+        return self.djset[x]
+    
+    def link(self,x,y):
+        if self.rank[x] > self.rank[y]:
+            self.djset[y] = x
+        else:
+            self.djset[x] = y
+            if self.rank[x] == self.rank[y]:
+                self.rank[y] = self.rank[y] + 1
+    
+    def unite(self,x,y):
+        self.link(self.findSet(x),self.findSet(y))
+
+    def kruskal(self):
+        ans = 0
+        
+        for edge in self.edges:
+            u = edge[0]
+            v = edge[1]
+
+
+            if self.findSet(u) != self.findSet(v):
+                self.unite(u,v)
+                ans += edge[2]
+
+        
+        return ans
+
+
+
+
+V,E = map(int,input().split())
+edges = []
+djset = [0] * (V+1)
+
+
+for i in range(E):
+    x,y,z = map(int,input().split())
+    edges.append([x,y,z])
+
+edges.sort(key=lambda x:x[2])
+
+g = graph(V,E,edges)
+print(g.kruskal())
+

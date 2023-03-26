@@ -1,0 +1,49 @@
+import math
+
+c60 = math.cos(math.radians(60))
+s60 = math.sin(math.radians(60))
+
+def koch(d, p1, p2):
+    """ Print the coordinates of the vertices of Koch Curve.
+    d is the depth of recursion.
+    p1, p2 are coordinates of end point of the initial state.
+    """
+    if d == 0:
+        return
+
+    sx = (2 * p1[0] + p2[0]) / 3
+    sy = (2 * p1[1] + p2[1]) / 3
+
+    tx = (p1[0] + 2 * p2[0]) / 3
+    ty = (p1[1] + 2 * p2[1]) / 3
+
+    dx = tx - sx
+    dy = ty - sy
+
+    ux = dx * c60 - dy * s60 + sx
+    uy = dx * s60 + dy * c60 + sy
+
+    koch(d - 1, p1, (sx, sy))
+    print("{0:.8f} {1:.8f}".format(sx, sy))
+
+    koch(d - 1, (sx, sy), (ux, uy))
+    print("{0:.8f} {1:.8f}".format(ux, uy))
+
+    koch(d - 1, (ux, uy), (tx, ty))
+    print("{0:.8f} {1:.8f}".format(tx, ty))
+
+    koch(d - 1, (tx, ty), p2)
+
+
+n = int(input())
+
+ax = 0
+ay = 0
+
+bx = 100
+by = 0
+
+print("{0:.8f} {1:.8f}".format(ax, ay))
+koch(n, (ax, ay), (bx, by))
+print("{0:.8f} {1:.8f}".format(bx, by))
+

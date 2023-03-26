@@ -1,0 +1,174 @@
+#include <algorithm>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+#include <random>
+#include <complex>
+#include <bitset>
+#include <iomanip>
+#include <memory>
+#include <functional>
+#include <stack>
+#include <limits>
+
+#define rep(i, n, s) for (int i = (s); i < int(n); i++)
+#define per(i, n, s) for (int i = (n) - 1; i >= int(s); i--)
+#define MM << " " <<
+#define all(x) begin(x), end(x)
+#define rall(x) rbegin(x), rend(x)
+
+template <class T>
+using MinHeap = std::priority_queue<T, std::vector<T>, std::greater<T>>;
+template <class T>
+using MaxHeap = std::priority_queue<T>;
+
+using ll = long long;
+using Pii = std::pair<int, int>;
+using Pll = std::pair<ll, ll>;
+using Pdd = std::pair<double, double>;
+
+template <class T>
+bool chmin(T &a, const T b) {
+    if (b < a) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <class T>
+bool chmax(T &a, const T b) {
+    if (a < b) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <class T>
+void vdeb(const std::vector<T> &da) {
+    auto n = da.size();
+    for (size_t i = 0; i < n; i++) {
+        if (i == n - 1)
+            std::cout << da[i];
+        else
+            std::cout << da[i] << " ";
+    }
+    std::cout << std::endl;
+}
+template<class T>
+void vdeb(const std::vector<std::vector<T>> &da) {
+    auto n = da.size();
+    for (size_t i = 0; i < n; i++) {
+        std::cout << i << " : ";
+        vdeb(da[i]);
+    }
+    std::cout << std::endl;
+}
+
+using namespace std;
+
+/*
+<Hash>   ::= <Letter> | '['<Op><Hash><Hash>']'
+<Op>     ::= '+' | '*' | '^'
+<Letter> ::= 'a'-'d'
+*/
+
+string s;
+string::const_iterator sitr;
+
+char peek() {
+    return *sitr;
+}
+
+char read() {
+    ++sitr;
+    return *sitr;
+}
+
+function<int(int*)> myhash();
+char op();
+function<int(int*)> letter();
+
+function<int(int*)> myhash() {
+    if(isalpha(peek())) {
+        return letter();
+    }
+    assert(peek() == '[');
+    read();
+    auto op_ = op();
+    auto l = myhash(), r = myhash();
+    assert(peek() == ']');
+    read();
+    if(op_ == '+') {
+        return [l, r](int* x) {
+            return l(x) | r(x);
+        };
+    } else if(op_ == '*') {
+        return [l, r](int* x) {
+            return l(x) & r(x);
+        };
+    } else if(op_ == '^') {
+        return [l, r](int* x) {
+            return l(x) ^ r(x);
+        };
+    } else {
+        assert(0);
+    }
+}
+
+char op() {
+    char ret = peek();
+    read();
+    assert(ret == '+' || ret == '*' || ret == '^');
+    return ret;
+}
+
+function<int(int*)> letter() {
+    char c = peek();
+    read();
+    int idx = c - 'a';
+    assert(0 <= idx && idx < 4);
+    return [idx](int* x) {
+        return x[idx];
+    };
+}
+
+Pii solve() {
+    sitr = cbegin(s);
+    auto f = myhash();
+    string t; cin >> t;
+    int x[4];
+    rep(i,4,0) x[i] = t[i] - '0';
+    int val = f(x);
+    int ans = 0;
+    rep(i1,10,0) rep(i2,10,0) rep(i3,10,0) rep(i4,10,0) {
+        x[0] = i1;
+        x[1] = i2;
+        x[2] = i3;
+        x[3] = i4;
+        if(f(x) == val) ++ans;
+    }
+    return {val, ans};
+}
+
+int main() {
+    vector<Pii> ans;
+    while(1) {
+        cin >> s;
+        if(s == ".") break;
+        ans.emplace_back(solve());
+    }
+    for(auto &i : ans) cout << i.first MM i.second << endl;
+}

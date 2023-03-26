@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for(int i = 0; i < (int)(n); i++)
+#define rrep(ri,n) for(int ri = (int)(n-1); ri >= 0; ri--)
+#define rep2(i,x,n) for(int i = (int)(x); i < (int)(n); i++)
+#define rrep2(ri,x,n) for(int ri = (int)(n-1); ri >= (int)(x); ri--)
+#define repit(itr,x) for(auto itr = x.begin(); itr != x.end(); itr++)
+#define rrepit(ritr,x) for(auto ritr = x.rbegin(); ritr != x.rend(); ritr++)
+#define ALL(x) x.begin(), x.end()
+using ll = long long;
+using namespace std;
+
+int main() {
+while(1) {
+  int n;
+  cin >> n;
+  if(n == 0) break;
+  vector<pair<double, double>> xy(n);
+  rep(i, n) {
+    double x, y;
+    cin >> x >> y;
+    xy.at(i) = {x, y};
+  }
+  int ans = 1;
+  const double eps = 1e-6;
+  rep(i1, n)rep2(i2, i1+1, n) {
+    auto [x1, y1] = xy.at(i1);
+    auto [x2, y2] = xy.at(i2);
+    double vx = x2-x1, vy = y2-y1;
+    double d = hypot(x1-x2, y1-y2);
+    vx /= d; vy /= d;
+    double theta = acos(d/2);
+    double nvx = vx*cos(theta) - vy*sin(theta);
+    double nvy = vx*sin(theta) + vy*cos(theta);
+    double cx = x1 + nvx, cy = y1 + nvy;
+    int add = 0;
+    for(auto [x, y] : xy) {
+      double dd = hypot(cx-x, cy-y);
+      if(dd < 1+eps) add++;
+    }
+    ans = max(ans, add);
+  }
+  cout << ans << endl;
+}
+  return 0;
+}

@@ -1,0 +1,151 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 123456
+#define MM 12345
+#define NIL -200000002
+#define INF 200000002
+#define MAXN 50
+int n, q ;
+int t;
+
+struct vertex {
+    vector<pair<int,int>> edge;  //firstが行き先(to),secondがweight
+    vector<int> children;
+    int parent = -1;
+    int ord = -1;
+    int con = 0 ;
+    int dist = INF;
+};
+
+vertex R[MAX];
+queue<int> Q;
+
+
+
+void bfs () {
+    // 訪問するたびにdistを記録していく。
+    while (Q.size()>0) {
+        int u = Q.front(); Q.pop();
+        R[u].ord=t++   ;
+        
+        for ( auto e : R[u].edge ) {
+            if (R[e.first].con == 0) {
+                R[e.first].con = 1; 
+                R[e.first].dist = R[u].dist + e.second;
+                Q.push(e.first);
+            }
+        }
+
+    }
+
+}
+
+void bfs_init(int s) {
+    for (int i=0; i<n ; i++) {
+        R[i].dist = INF;
+        R[i].con = 0; 
+        R[i].dist=0;
+        R[i].ord=-1 ;
+    }
+    t=0;
+    Q.push(s);
+    R[s].con = 1; 
+    R[s].dist=0;
+    bfs() ;
+}
+
+void solve() {
+    //0から一番遠い点を得る。
+    bfs_init(0);
+    int maxv=0;
+    int tgt=0;
+    for (int j=0; j<n; j++){
+        if (R[j].dist == INF) {continue;}
+        if (maxv < R[j].dist) {
+            maxv = R[j].dist ;
+            tgt = j;
+        }
+    }
+    /*
+    for (int i=0; i<n; i++) {
+        printf( "%d : %d \n" , i, R[i].dist ) ;
+    }
+    printf( " [%d] \n" , tgt ) ;
+    */
+    // tgtから一番遠い点との距離を求める。
+    bfs_init(tgt);
+    maxv=0;
+    for (int j=0; j<n; j++){
+        if (R[j].dist == INF) {continue;}
+        if (maxv < R[j].dist) {
+            maxv = R[j].dist ;
+            tgt = j;
+        }
+    }
+    printf("%d\n", maxv);
+
+}
+
+/*
+int next (int u) {
+    // uから次に訪問すべき頂点をgetする。
+
+    for (int i=0; i < R[u].to.size() ; i++ ) {
+        int v = R[u].to.at(i);
+        if ( R[v].con ==0) { return v ; } 
+    }
+    return NIL;
+}
+void dfs () {
+    // DFSの基本アイディア
+    // 訪問したらstackに積む。
+
+    while( Q.size() > 0 ) {
+        int u = Q.top(); 
+        res.push_back(u);  //printf("%d を訪問\n", u );
+
+        //自分のすべての行き先が訪問済みなら自分をstackから消す。
+        int v = next(u);
+        if ( v == NIL) {
+            R[u].con = 2;  //完了
+            Q.pop(); 
+        } else {
+            R[v].con=1;  Q.push(v);  //printf("%d をQ追加\n", v);
+            R[v].parent=u;
+            R[u].children.push_back(v);               
+            R[v].ord=t++ ; 
+        }
+    }
+}
+
+void dfs_init (int s) {
+    for (int j=0; j < 100001 ; j++) {
+        lowestV[j] = INF;
+    }
+
+    res.clear();
+    Q.push(s);  //printf("%d をQ追加\n", s);
+    // res.push_back(s);
+    R[s].con=1; // sを訪問済みにする。
+    // DFSでは完了になったときにpopする。
+    t=0;   R[s].ord=t++   ;
+    dfs() ;
+}*/
+
+int main(){
+    cin >> n ; //n:頂点
+    for (int j=0; j<n ; j++ ){
+        int from, to, weight;
+        cin >> from >> to >> weight;
+        R[from].edge.push_back(make_pair(to,weight));
+        R[to].edge.push_back(make_pair(from,weight));
+    }
+    solve();
+    /*
+    for (int i=0; i<n; i++) {
+        printf( "%d : %d \n" , i, R[i].dist ) ;
+    }*/
+
+    return 0;
+}
+

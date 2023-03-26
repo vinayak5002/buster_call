@@ -1,0 +1,96 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+template <typename T>
+struct Edge {
+    int from, to;
+    T weight;
+    Edge() = default;
+    Edge(int to, T weight) : from(-1), to(to), weight(weight) {}
+    Edge(int from, int to, T weight) : from(from), to(to), weight(weight) {}
+};
+
+
+template <typename T>
+std::vector<T> dijkstra(const std::vector<std::vector<Edge<T>>>& G, int s) {
+    std::vector<T> dist(G.size(), std::numeric_limits<T>::max());
+    dist[s] = 0;
+    using P = std::pair<T, int>;
+    std::priority_queue<P, std::vector<P>, std::greater<P>> pq;
+    pq.emplace(0, s);
+
+    while (!pq.empty()) {
+        T d;
+        int v;
+        std::tie(d, v) = pq.top();
+        pq.pop();
+        if (dist[v] < d) continue;
+        for (auto& e : G[v]) {
+            if (dist[e.to] > d + e.weight) {
+                dist[e.to] = d + e.weight;
+                pq.emplace(dist[e.to], e.to);
+            }
+        }
+    }
+
+    return dist;
+}
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int N, M, cap;
+        cin >> N >> M >> cap;
+        if (N == 0) break;
+        string src, dest;
+        cin >> src >> dest;
+        vector<vector<Edge<int>>> G(N);
+        map<string, int> idx;
+        rep(_,0,N) {
+            string su, sv;
+            int d;
+            cin >> su >> sv >> d;
+            int u, v;
+            if (idx.count(su)) u = idx[su];
+            else {
+                u = idx.size();
+                idx[su] = u;
+            }
+            if (idx.count(sv)) v = idx[sv];
+            else {
+                v = idx.size();
+                idx[sv] = v;
+            }
+            G[u].push_back({v, d});
+            G[v].push_back({u, d});
+        }
+        vector<int> stations;
+        rep(i,0,M) {
+            string s;
+            cin >> s;
+            stations.push_back(idx[s]);
+        }
+        stations.push_back(idx[src]);
+        stations.push_back(idx[dest]);
+        vector<vector<Edge<int>>> G2(N);
+        for (int s : stations) {
+            auto dist = dijkstra(G, s);
+            for (int t : stations) {
+                if (dist[t] <= cap * 10) G2[s].push_back({t, dist[t]});
+            }
+        }
+        auto dist = dijkstra(G2, idx[src]);
+        int ans = dist[idx[dest]];
+        cout << (ans < 1e9 ? ans : -1) << endl;
+    }
+}

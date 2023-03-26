@@ -1,0 +1,84 @@
+#include <stdio.h>
+#define white 0
+#define gray 1
+#define black 2
+#define MAX 100
+#define NIL -1
+#define INFTY 1<<21
+
+int n;
+int A[MAX][MAX];
+
+int prim(int n){
+	int u;
+	int minv;
+	int d[MAX];
+	int p[MAX];
+	int color[MAX];
+	
+	int i;
+	for(i=0;i<n;i++){
+		d[i]=INFTY;
+		p[i]=NIL;
+		color[i]=white;
+	}
+	
+	d[0]=0;
+	
+	while(1){
+		minv=INFTY;
+		u=NIL;
+		for(i=0;i<n;i++){
+			if(minv>d[i]&&color[i]!=black){
+				u=i;
+				minv=d[i];
+			}
+		}
+		if(u==NIL){
+			break;
+		}
+		color[u]=black;
+		int v;
+		for(v=0;v<n;v++){
+			if(color[v]!=black&&A[u][v]!=INFTY){
+				if(d[v]>A[u][v]){
+					d[v]=A[u][v];
+					p[v]=u;
+					color[v]=gray;
+				}
+			}
+		}
+	}
+	int sum=0;
+	for(int i=0;i<n;i++){
+		if(p[i]!=NIL){
+			sum=sum+A[i][p[i]];
+		}
+	}
+	return sum;
+}
+
+int main(void){
+	int n;
+	scanf("%d\n",&n);
+	
+	int i,j;
+	for(i=0;i<n;i++){
+		for(j=0;j<n;j++){
+			A[i][j]=0;
+		}
+	}
+	
+	for(i=0;i<n;i++){
+		for(j=0;j<n;j++){
+			scanf("%d",&A[i][j]);
+			if(A[i][j]==NIL){
+				A[i][j]=INFTY;
+			}
+		}
+	}
+	
+	printf("%d\n",prim(n));
+	
+	return 0;
+}

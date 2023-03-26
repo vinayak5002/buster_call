@@ -1,0 +1,33 @@
+INF = float("inf")
+mod = 10**9+7
+    
+#N = int(input())
+#S = input()
+#V,E = map(int,input().split())
+#w = list(map(int,input().split()))
+
+V,E = map(int,input().split())
+cost = [[INF]*V for _ in range(V)]
+for i in range(V):
+    cost[i][i] = 0
+for _ in range(E):
+    s,t,d = map(int,input().split())
+    cost[s][t] = d
+# cost[i][j]: 頂点v_iから頂点v_jへ到達するための辺コストの和
+for k in range(V):
+    for i in range(V):
+        for j in range(V):
+            if cost[i][k]!=INF and cost[k][j]!=INF:
+                cost[i][j] = min(cost[i][j], cost[i][k] + cost[k][j])
+# 負の閉路検出
+for i in range(V):
+    if cost[i][i] < 0:
+        print("NEGATIVE CYCLE")
+        exit()
+for i in range(V):
+    for j in range(V):
+        if cost[i][j] == INF:
+            print("INF",end=" ")
+        else:
+            print(cost[i][j],end=" ")
+    print()

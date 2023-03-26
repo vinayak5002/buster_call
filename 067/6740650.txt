@@ -1,0 +1,637 @@
+/**
+ *    author:  otera
+**/
+#include<bits/stdc++.h>
+using namespace std;
+
+// #define int long long
+
+// template<typename T, T (*id)(), T (*merge_func)(T, T)>
+// struct euler_tour_tree_lv{
+//   using lvtype = int;
+//   static constexpr lvtype LVINF = std::numeric_limits<lvtype>::max();
+//   using graph = std::vector<std::vector<int>>;
+
+//   struct node{
+//     node *l, *r, *p;
+//     int sz = 1, stock = 0, stock_subtree = 0;
+//     T val, sum;
+//     lvtype lv, lv_subtree;
+//     std::pair<int, int> label;
+//     node(const T &_val, lvtype _lv, std::pair<int, int> _label)
+//     : val(_val), sum(_val), lv(_lv), lv_subtree(_lv), label(_label){
+//       l = nullptr, r = nullptr, p = nullptr;
+//     }
+//   };
+
+//   static node* root(node *v){
+//     while(v->p) v = v->p;
+//     return v;
+//   }
+//   static int size(node *v){
+//     return !v ? 0 : v->sz;
+//   }
+//   static T get(node *v){
+//     return !v ? id() : v->sum;
+//   }
+//   static lvtype getlv(node *v){
+//     return !v ? LVINF : v->lv_subtree;
+//   }
+//   static int getstock(node *v){
+//     return !v ? 0 : v->stock_subtree;
+//   }
+//   static node* eval(node *v){
+//     if(!v) return v;
+//     v->sz = size(v->l) + 1 + size(v->r);
+//     v->sum = merge_func(get(v->l), merge_func(v->val, get(v->r)));
+//     v->lv_subtree = std::min({getlv(v->l), v->lv, getlv(v->r)});
+//     v->stock_subtree = getstock(v->l) + v->stock + getstock(v->r);
+//     return v;
+//   }
+//   static unsigned rnd(){
+//     static unsigned x = 123456789, y = 362436069, z = 521288629, w = 86675123;
+//     unsigned t = (x^(x<<11));
+//     x = y, y = z, z = w;
+//     return (w = (w^(w>>19))^(t^(t>>8)));
+//   }
+//   static void connect(node *p, node *c, bool is_right){
+//     assert(p);
+//     if(is_right) p->r = c;
+//     else p->l = c;
+//     if(c) c->p = p;
+//   }
+//   static node *build_tree(int l, int r, const std::vector<node*> &_v){
+//     int mid = (l + r) / 2;
+//     assert(l < r && mid < _v.size());
+//     if(l < mid) connect(_v[mid],  build_tree(l, mid, _v), 0);
+//     if(mid + 1 < r) connect(_v[mid], build_tree(mid + 1, r, _v), 1);
+//     return eval(_v[mid]);
+//   }
+//   static std::pair<node*, node*> split(node *v, int k){
+//     if(!v) return {nullptr, nullptr};
+//     if(k <= size(v->l)){
+//       auto ch = split(v->l, k);
+//       connect(v, ch.second, 0);
+//       return {ch.first, eval(v)};
+//     }else{
+//       auto ch = split(v->r, k - size(v->l) - 1);
+//       connect(v, ch.first, 1);
+//       return {eval(v), ch.second};
+//     }
+//   }
+//   static node* merge(node *a, node *b){
+//     if(!a || !b) return !a ? b : a;
+//     int S = size(a) + size(b);
+//     if(rnd() % S < size(a)){
+//       connect(a, merge(a->r, b), 1);
+//       return eval(a);
+//     }else{
+//       connect(b, merge(a, b->l), 0);
+//       return eval(b);
+//     }
+//   }
+//   static void lv_increment(node *v){
+//     if(!v || v->lv == LVINF) return;
+//     v->lv++;
+//     while(v){
+//       v->lv_subtree = std::min({getlv(v->l), v->lv, getlv(v->r)});
+//       v = v->p;
+//     }
+//   }
+//   static void stock_increment(node *v){
+//     if(!v) return;
+//     v->stock++;
+//     while(v){
+//       v->stock_subtree = getstock(v->l) + v->stock + getstock(v->r);
+//       v = v->p;
+//     }
+//   }
+//   static void stock_decrement(node *v){
+//     if(!v) return;
+//     v->stock--;
+//     while(v){
+//       v->stock_subtree = getstock(v->l) + v->stock + getstock(v->r);
+//       v = v->p;
+//     }
+//   }
+//   template<typename F>
+//   static void update(const F &f, node *v, T x){
+//     if(!v) return;
+//     v->val = f(v->val, x);
+//     while(v){
+//       v->sum = merge_func(get(v->l), merge_func(v->val, get(v->r)));
+//       v = v->p;
+//     }
+//   }
+//   static int countleft(node *v){
+//     int k = (v->l ? v->l->sz : 0);
+//     while(v->p){
+//       node * p = v->p;
+//       if(p->r == v) k += (p->l ? p->l->sz : 0) + 1;
+//       v = p;
+//     }
+//     return k;
+//   }
+
+//   int n;
+//   std::vector<node *> ptr;
+//   std::vector<std::map<int, std::pair<node*, node*>>> E;
+//   void build_vec(int v, const graph &G, const std::vector<T> &_v, std::vector<bool> &is_arrive, std::vector<node * > &V){
+//     if(is_arrive[v]) return;
+//     node * es = new node(_v[v], LVINF, {v, v});
+//     V.push_back(es);
+//     ptr[v] = es;
+//     is_arrive[v] = true;
+//     for(auto c: G[v]){
+//       if(is_arrive[c]) continue;
+//       node *ei = new node(id(), 0, {v, c});
+//       V.push_back(ei);
+//       build_vec(c, G, _v, is_arrive, V);
+//       node *eo = new node(id(), 0, {c, v});
+//       V.push_back(eo);
+//       E[std::min(v, c)].emplace(std::max(v, c), std::make_pair(ei, eo));
+//     }
+//   }
+//   euler_tour_tree_lv(){}
+//   euler_tour_tree_lv(const std::vector<T> &_v)
+//   :n(_v.size()), ptr(n, nullptr), E(n){
+//     for(int i = 0; i < n; i++){
+//       ptr[i] = new node(_v[i], LVINF, {i, i});
+//     }
+//   }
+//   euler_tour_tree_lv(const graph &G, const std::vector<T> &_v)
+//   : n(_v.size()), ptr(n, nullptr), E(n){
+//     assert(0 < n && G.size() == n);
+//     std::vector<bool> is_arrive(n, false);
+//     for(int i = 0; i < n; i++){
+//       if(is_arrive[i]) continue;
+//       std::vector<node*> V;
+//       build_vec(i, G, _v, is_arrive, V);
+//       build_tree(0, V.size(), V);
+//     }
+//   }
+//   int size(int a){
+//     assert(0 <= a && a < n);
+//     return (size(root(ptr[a])) + 2) / 3;
+//   }
+//   bool is_same(int a, int b){
+//     assert(0 <= a && a < n);
+//     assert(0 <= b && b < n);
+//     return root(ptr[a]) == root(ptr[b]);
+//   }
+//   std::pair<node*, node*> exist_edge(int a, int b){
+//     if(a > b) std::swap(a, b);
+//     auto itr = E[a].find(b);
+//     if(itr == E[a].end()) return {nullptr, nullptr};
+//     return itr->second;
+//   }
+//   void reroot(int a){
+//     assert(0 <= a && a < n);
+//     int k = countleft(ptr[a]);
+//     auto tmp = split(root(ptr[a]), k);
+//     node *r = merge(tmp.second, tmp.first);
+//     r->p = nullptr;
+//   }
+//   bool link(int a, int b, int lv){
+//     if(is_same(a, b)) return false;
+//     reroot(a);
+//     reroot(b);
+//     if(a > b) std::swap(a, b);
+//     node *ei = new node(id(), lv, {a, b});
+//     node *eo = new node(id(), lv, {b, a});
+//     E[a].emplace(b, std::make_pair(ei, eo));
+//     node * r = merge(root(ptr[a]), merge(ei, merge(root(ptr[b]), eo)));
+//     r->p = nullptr;
+//     return true;
+//   }
+//   bool cut(int a, int b){
+//     auto p = exist_edge(a, b);
+//     if(!p.first) return false;
+//     if(a > b) std::swap(a, b);
+//     E[a].erase(b);
+//     node * X = p.first;
+//     node * Y = p.second;
+//     int x = countleft(X), y = countleft(Y);
+//     if(x > y) std::swap(x, y), std::swap(X, Y);
+//     auto R = split(root(X), y);//[0, y), [y, n)
+//     auto L = split(R.first, x);//[0, x), [x, y)
+//     R = split(R.second, 1);//[y, y + 1), [y + 1, n)
+//     auto M = split(L.second, 1);//[x, x + 1), [x + 1, y)
+//     node * l = merge(L.first, R.second);
+//     l->p = M.second->p = nullptr;
+//     return true;
+//   }
+//   //tの連結成分のうち、lvがk以下の辺を列挙
+//   std::vector<node*> enumerate_edge(int t, int k){
+//     std::vector<node*> ret;
+//     auto dfs = [&](auto &&dfs, node * v)->void{
+//       if(!v) return;
+//       if(v->l && v->l->lv_subtree <= k) dfs(dfs, v->l);
+//       if(v->lv <= k && v->label.first < v->label.second) ret.push_back(v);
+//       if(v->r && v->r->lv_subtree <= k) dfs(dfs, v->r);
+//     };
+//     dfs(dfs, root(ptr[t]));
+//     return ret;
+//   }
+//   T query(int a){
+//     return get(root(ptr[a]));
+//   }
+// };
+
+// #include <set>
+// template<typename T, T (*id)(), T (*merge_func)(T, T)>
+// struct dynamic_connectivity{
+//   using ett = euler_tour_tree_lv<T, id, merge_func>;
+//   using graph = typename ett::graph;
+
+//   int n, lv;
+//   std::vector<ett> F;
+//   std::vector<std::vector<std::multiset<int>>> E;
+//   void make_new_lv(){
+//     std::vector<T> v(n, id());
+//     F.push_back(ett(v));
+//     E.push_back(std::vector<std::multiset<int>>(n));
+//     lv++;
+//   }
+//   dynamic_connectivity(const std::vector<T> &v)
+//   : n(v.size()), lv(1), E(lv, std::vector<std::multiset<int>>(n)){
+//     for(int i = 0; i < lv; i++) F.push_back(ett(v));
+//   }
+//   // はじめ森の場合
+//   dynamic_connectivity(const graph &G, const std::vector<T> &v)
+//   : n(v.size()), lv(1), E(lv, std::vector<std::multiset<int>>(n)){
+//     F.push_back(ett(G, v));
+//     for(int i = 1; i < lv; i++) F.push_back(ett(v));
+//   }
+//   // 辺(a, b)を張る
+//   bool link(int a, int b){
+//     if(F[0].is_same(a, b)){
+//       E[0][a].insert(b);
+//       E[0][b].insert(a);
+//       F[0].stock_increment(F[0].ptr[a]);
+//       F[0].stock_increment(F[0].ptr[b]);
+//       return false;
+//     }
+//     F[0].link(a, b, 0);
+//     return true;
+//   }
+//   // 辺(a, b)を切る 辺が無かった: 0, 辺が橋だった: 1, まだ連結: 2
+//   int cut(int a, int b){
+//     if(!F[0].is_same(a, b)){
+//       assert(false);
+//       return 0;
+//     }
+//     if(F[0].E[a].find(b) == F[0].E[a].end()){// Eのどこかから辺を消す
+//       for(int i = 0; i < lv; i++){
+//         auto itr = E[i][a].find(b);
+//         if(itr != E[i][a].end()){
+//           F[i].stock_decrement(F[i].ptr[a]);
+//           F[i].stock_decrement(F[i].ptr[b]);
+//           E[i][a].erase(E[i][a].find(b));
+//           E[i][b].erase(E[i][b].find(a));
+//           return 2;
+//         }
+//       }
+//       assert(false);
+//       return 0;
+//     }else{// Fから辺を消して再度繋げるか判定
+//       int k = -1;
+//       for(int i = lv - 1; i >= 0; i--){
+//         if(F[i].E[a].find(b) == F[i].E[a].end()) continue;
+//         if(k == -1) k = i;
+//         F[i].cut(a, b);
+//       }
+//       assert(k != -1);
+//       return replace(a, b, k) ? 2 : 1;
+//     }
+//   }
+//   // a, bを連結にできるか判定
+//   bool replace(int a, int b, int k){
+//     if(k == -1) return false;
+//     if(F[k].size(a) > F[k].size(b)) std::swap(a, b);
+//     auto e = F[k].enumerate_edge(a, k);
+//     for(int i = 0; i < e.size(); i++){
+//       assert(e[i]->lv == k);
+//       F[k].lv_increment(e[i]);
+//       if(k == lv - 1) make_new_lv();
+//       F[k + 1].link(e[i]->label.first, e[i]->label.second, k + 1);
+//     }
+//     // F_k上でaと連結かつ、E_kに辺がある頂点を確認
+//     auto dfs = [&](auto &&dfs, typename ett::node * v)->bool{
+//       if(!v) return false;
+//       if(v->l && v->l->stock_subtree && dfs(dfs, v->l)) return true;
+//       if(v->r && v->r->stock_subtree && dfs(dfs, v->r)) return true;
+//       if(v->stock){
+//         assert(v->label.first == v->label.second);
+//         int s = v->label.first;
+//         while(!E[k][s].empty()){
+//           int t = *E[k][s].begin();
+//           F[k].stock_decrement(F[k].ptr[s]);
+//           F[k].stock_decrement(F[k].ptr[t]);
+//           E[k][s].erase(E[k][s].find(t));
+//           E[k][t].erase(E[k][t].find(s));
+//           // (s, t)を張る
+//           if(!F[k].is_same(s, t)){
+//             for(int i = 0; i <= k; i++) F[i].link(s, t, k);
+//             return true;
+//           }
+//           if(k == lv - 1) make_new_lv();
+//           // (s, t)のレベルを上げる
+//           F[k + 1].stock_increment(F[k + 1].ptr[s]);
+//           F[k + 1].stock_increment(F[k + 1].ptr[t]);
+//           E[k + 1][s].insert(t);
+//           E[k + 1][t].insert(s);
+//         }
+//       }
+//       return false;
+//     };
+//     if(dfs(dfs, F[k].root(F[k].ptr[a]))) return true;
+//     return replace(a, b, k - 1);
+//   }
+//   bool is_same(int a, int b){
+//     return F[0].is_same(a, b);
+//   }
+//   int size(int a){
+//     return F[0].size(a);
+//   }
+//   template<typename H>
+//   void update(const H &f, int a, T x){
+//     F[0].update(f, F[0].ptr[a], x);
+//   }
+//   T query(int a){
+//     return F[0].query(a);
+//   }
+// };
+
+using ll = long long;
+using ld = long double;
+using ull = unsigned long long;
+using int128_t = __int128_t;
+#define repa(i, n) for(int i = 0; i < n; ++ i)
+#define repb(i, a, b) for(int i = a; i < b; ++ i)
+#define repc(i, a, b, c) for(int i = a; i < b; i += c)
+#define overload4(a, b, c, d, e, ...) e
+#define overload3(a, b, c, d, ...) d
+#define rep(...) overload4(__VA_ARGS__, repc, repb, repa)(__VA_ARGS__)
+#define rep1a(i, n) for(int i = 0; i <= n; ++ i)
+#define rep1b(i, a, b) for(int i = a; i <= b; ++ i)
+#define rep1c(i, a, b, c) for(int i = a; i <= b; i += c)
+#define rep1(...) overload4(__VA_ARGS__, rep1c, rep1b, rep1a)(__VA_ARGS__)
+#define rev_repa(i, n) for(int i=n-1;i>=0;i--)
+#define rev_repb(i, a, b) assert(a > b);for(int i=a;i>b;i--)
+#define rev_rep(...) overload3(__VA_ARGS__, rev_repb, rev_repa)(__VA_ARGS__)
+#define rev_rep1a(i, n) for(int i=n;i>=1;i--)
+#define rev_rep1b(i, a, b) assert(a >= b);for(int i=a;i>=b;i--)
+#define rev_rep1(...) overload3(__VA_ARGS__, rev_rep1b, rev_rep1a)(__VA_ARGS__)
+typedef pair<int, int> P;
+typedef pair<ll, ll> LP;
+#define pb push_back
+#define pf push_front
+#define ppb pop_back
+#define ppf pop_front
+#define eb emplace_back
+#define fr first
+#define sc second
+#define all(c) c.begin(),c.end()
+#define rall(c) c.rbegin(), c.rend()
+#define lb(c, x) distance((c).begin(), lower_bound(all(c), (x)))
+#define ub(c, x) distance((c).begin(), upper_bound(all(c), (x)))
+#define Sort(a) sort(all(a))
+#define Rev(a) reverse(all(a))
+#define Uniq(a) sort(all(a));a.erase(unique(all(a)),end(a))
+#define si(c) (int)(c).size()
+inline ll popcnt(ull a){ return __builtin_popcountll(a); }
+#define kth_bit(x, k) ((x>>k)&1)
+#define unless(A) if(!(A))
+ll intpow(ll a, ll b){ ll ans = 1; while(b){ if(b & 1) ans *= a; a *= a; b /= 2; } return ans; }
+ll intpow(ll a, ll b, ll m) {ll ans = 1; while(b){ if(b & 1) (ans *= a) %= m; (a *= a) %= m; b /= 2; } return ans; }
+template<class T> inline bool chmax(T& a, T b) { if (a < b) { a = b; return 1; } return 0; }
+template<class T> inline bool chmin(T& a, T b) { if (a > b) { a = b; return 1; } return 0; }
+#define INT(...) int __VA_ARGS__;in(__VA_ARGS__)
+#define LL(...) ll __VA_ARGS__;in(__VA_ARGS__)
+#define ULL(...) ull __VA_ARGS__;in(__VA_ARGS__)
+#define STR(...) string __VA_ARGS__;in(__VA_ARGS__)
+#define CHR(...) char __VA_ARGS__;in(__VA_ARGS__)
+#define DBL(...) double __VA_ARGS__;in(__VA_ARGS__)
+#define LD(...) ld __VA_ARGS__;in(__VA_ARGS__)
+#define vec(type,name,...) vector<type>name(__VA_ARGS__)
+#define VEC(type,name,size) vector<type>name(size);in(name)
+#define vv(type,name,h,...) vector<vector<type>>name(h,vector<type>(__VA_ARGS__))
+#define VV(type,name,h,w) vector<vector<type>>name(h,vector<type>(w));in(name)
+#define vvv(type,name,h,w,...) vector<vector<vector<type>>>name(h,vector<vector<type>>(w,vector<type>(__VA_ARGS__)))
+template <class T> using vc = vector<T>;
+template <class T> using vvc = vector<vc<T>>;
+template <class T> using vvvc = vector<vvc<T>>;
+template <class T> using vvvvc = vector<vvvc<T>>;
+template <class T> using pq = priority_queue<T>;
+template <class T> using pqg = priority_queue<T, vector<T>, greater<T>>;
+template <class T, class U> using umap = unordered_map<T, U>;
+template<class T> void scan(T& a){ cin >> a; }
+template<class T> void scan(vector<T>& a){ for(auto&& i : a) scan(i); }
+void in(){}
+template <class Head, class... Tail> void in(Head& head, Tail&... tail){ scan(head); in(tail...); }
+void print(){ cout << ' '; }
+template<class T> void print(const T& a){ cout << a; }
+template<class T> void print(const vector<T>& a){ if(a.empty()) return; print(a[0]); for(auto i = a.begin(); ++i != a.end(); ){ cout << ' '; print(*i); } }
+int out(){ cout << '\n'; return 0; }
+template<class T> int out(const T& t){ print(t); cout << '\n'; return 0; }
+template<class Head, class... Tail> int out(const Head& head, const Tail&... tail){ print(head); cout << ' '; out(tail...); return 0; }
+#define CHOOSE(a) CHOOSE2 a
+#define CHOOSE2(a0,a1,a2,a3,a4,x,...) x
+#define debug_1(x1) cout<<#x1<<": "<<x1<<endl
+#define debug_2(x1,x2) cout<<#x1<<": "<<x1<<", "#x2<<": "<<x2<<endl
+#define debug_3(x1,x2,x3) cout<<#x1<<": "<<x1<<", "#x2<<": "<<x2<<", "#x3<<": "<<x3<<endl
+#define debug_4(x1,x2,x3,x4) cout<<#x1<<": "<<x1<<", "#x2<<": "<<x2<<", "#x3<<": "<<x3<<", "#x4<<": "<<x4<<endl
+#define debug_5(x1,x2,x3,x4,x5) cout<<#x1<<": "<<x1<<", "#x2<<": "<<x2<<", "#x3<<": "<<x3<<", "#x4<<": "<<x4<<", "#x5<<": "<<x5<<endl
+#ifdef DEBUG
+#define debug(...) CHOOSE((__VA_ARGS__,debug_5,debug_4,debug_3,debug_2,debug_1,~))(__VA_ARGS__)
+#define dump(...) { print(#__VA_ARGS__); print(":"); out(__VA_ARGS__); }
+#else
+#define debug(...)
+#define dump(...)
+#endif
+
+struct io_setup {
+    io_setup(int precision = 20) {
+        ios::sync_with_stdio(false);
+        cin.tie(0);
+        cout << fixed << setprecision(precision);
+    }
+} io_setup_ {};
+
+namespace suisen {
+    struct LowLink {
+        LowLink() : LowLink(0) {}
+        LowLink(const int n) : _n(n), _m(0), _g(n), _pre_order(n, -1), _low_link(n), _built(false) {}
+        LowLink(const int n, const std::vector<std::pair<int, int>> &edges) : LowLink(n) {
+            for (const auto &[u, v] : edges) add_edge(u, v);
+            build();
+        }
+        
+        int add_edge(int u, int v) {
+            _built = false;
+            _edges.emplace_back(u, v);
+            _g[u].emplace_back(v, _m);
+            _g[v].emplace_back(u, _m);
+            return _m++;
+        }
+
+        void build() {
+            dfs_for_all_connected_components();
+            _built = true;
+        }
+
+        int vertex_num() const { return _n; }
+        int edge_num()   const { return _m; }
+
+        const std::pair<int, int>& edge(int edge_id) const { return _edges[edge_id]; }
+        const std::vector<std::pair<int, int>>& edges() const { return _edges; }
+        
+        int pre_order(int v) const {
+            assert(_built);
+            return _pre_order[v];
+        }
+        int low_link(int v) const {
+            assert(_built);
+            return _low_link[v];
+        }
+
+        const std::vector<int>& bridge_ids() const {
+            assert(_built);
+            return _bridges;
+        }
+        const std::vector<int>& articulation_points() const {
+            assert(_built);
+            return _articulation_points;
+        }
+
+    protected:
+        int _n, _m;
+        // list of edges
+        std::vector<std::pair<int, int>> _edges;
+        // vertex -> list of (adjacent vertex, edge id)
+        std::vector<std::vector<std::pair<int, int>>> _g;
+        // vertex -> pre order
+        std::vector<int> _pre_order;
+        std::vector<int> _low_link;
+        // list of ids of bridges
+        std::vector<int> _bridges;
+        std::vector<int> _articulation_points;
+
+        bool _built;
+
+    private:
+        void dfs(int u, int id, int& ord) {
+            bool is_root = id < 0;
+            bool is_articulation_point = false;
+            int ch_cnt = 0;
+            _pre_order[u] = _low_link[u] = ord++;
+            for (const auto& [v, id2] : _g[u]) {
+                if (id == id2) continue;
+                if (_pre_order[v] < 0) {
+                    ++ch_cnt;
+                    dfs(v, id2, ord);
+                    _low_link[u] = std::min(_low_link[u], _low_link[v]);
+                    if (_pre_order[u] <= _low_link[v]) {
+                        is_articulation_point = not is_root;
+                        if (_pre_order[u] != _low_link[v]) _bridges.push_back(id2);
+                    }
+                } else {
+                    _low_link[u] = std::min(_low_link[u], _pre_order[v]);
+                }
+            }
+            if (is_articulation_point or (is_root and ch_cnt > 1)) _articulation_points.push_back(u);
+        }
+
+        void dfs_for_all_connected_components() {
+            for (int i = 0, ord = 0; i < _n; ++i) {
+                if (_pre_order[i] < 0) dfs(i, -1, ord);
+            }
+        }
+    };
+} // namespace suisen
+
+using namespace suisen;
+
+const ll INF = 1LL<<60;
+
+void solve() {
+    INT(n, m);
+    vvc<LP> g(n);
+    vvc<LP> rg(n);
+    vc<LP> es(m);
+    vc<ll> cost(m);
+    rep(i, m) {
+        INT(a, b, c); -- a, -- b;
+        g[a].eb(b, c);
+        rg[b].eb(a, c);
+        es[i] = P{a, b};
+        cost[i] = c;
+    }
+    int s = 0, t = 1;
+    auto calc = [&](int st, vvc<LP> h) -> vc<ll> {
+        vc<ll> di(n, INF);
+        di[st] = 0;
+        pqg<LP> pque;
+        pque.push(LP{0, st});
+        while(pque.size()) {
+            auto [d, v] = pque.top(); pque.pop();
+            if(d > di[v]) continue;
+            for(auto [nv, c]: h[v]) {
+                if(chmin(di[nv], d + c)) {
+                    pque.push(LP{di[nv], nv});
+                }
+            } 
+        }
+        return di;
+    };
+    vc<int> check(m, 0);
+    auto ds = calc(s, g);
+    auto dt = calc(t, rg);
+    dump(ds);
+    dump(dt);
+    rep(i, m) {
+        auto [a, b] = es[i];
+        if(ds[a] + cost[i] == ds[b] && dt[b] + cost[i] == dt[a]) {
+            check[i] = 1;
+        }
+    }
+    ll cur = ds[t];
+    LowLink ll(n);
+    vc<int> ids(n);
+    int id = 0;
+    rep(i, m) {
+        auto [a, b] = es[i];
+        if(check[i]) {
+            ll.add_edge(a, b);
+            debug(a, b);
+            ids[id] = i; ++ id;
+        }
+    }
+    ll.build();
+    auto bid = ll.bridge_ids();
+    vc<int> ng(n, 0);
+    for(int id: bid) {
+        ng[ids[id]] = 1;
+    }
+    dump(ng);
+    rep(i, m) {
+        auto [a, b] = es[i];
+        if(ds[b] + dt[a] + cost[i] < cur) out("HAPPY");
+        else if(ds[b] + dt[a] + cost[i] == cur) out("SOSO"); 
+        else {
+            if(!check[i]) out("SOSO");
+            else {
+                if(ng[i]) out("SAD");
+                else out("SOSO");
+            }
+        }
+    }
+}
+
+signed main() {
+    int testcase = 1;
+    // in(testcase);
+    while(testcase--) solve();
+    return 0;
+}

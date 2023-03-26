@@ -1,0 +1,54 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for (int i=0;i<(int)(n);i++)
+#define all(v) v.begin(),v.end()
+using ll=long long;
+using pll=pair<ll,ll>;
+struct edge{
+	ll to;
+	ll cost;
+	edge(ll to,ll cost) : to(to),cost(cost) {};
+};
+template<class T> void chmin(T &a,T b){
+  if(a>b){
+    a=b;
+  }
+}
+template<class T> void chmax(T &a,T b){
+  if(a<b){
+    a=b;
+  }
+}
+int main(){
+	ll v,e,r;
+	cin >> v >> e >> r;
+	vector<vector<edge>> g(v+1);
+	rep(i,e){
+		ll s,t,d;
+		cin >> s >> t >> d;
+		g[s].push_back(edge(t,d));
+	}
+	vector<ll> dist(v,(1ll<<60));
+	priority_queue<pll> pq;
+	dist[r]=0;
+	pq.push({0,r});
+	while(!pq.empty()){
+		ll xd,xv;
+		tie(xd,xv)=pq.top();
+		pq.pop();
+		//if(dist[xv]<xd) continue;
+		for(auto e:g[xv]){
+			if(dist[xv]+e.cost<dist[e.to]){
+				dist[e.to]=dist[xv]+e.cost;
+				pq.push({dist[e.to],e.to});
+			}
+		}
+	}
+	rep(i,v){
+		if(dist[i]==(1ll<<60)){
+			cout << "INF" << endl;
+		}else{
+			cout << dist[i] << endl;
+		}
+	}
+}

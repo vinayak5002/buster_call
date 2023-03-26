@@ -1,0 +1,139 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 650000
+#define INF 2000000002
+#define MINF -2000000002
+#define MAXN 50
+int n;
+int np=0;
+int ct = 0;
+/*
+ C++では再帰関数を「ポインタ」でかかないとだめ
+ */
+
+struct node {
+    int left;
+    int right;
+    int location;
+};
+
+struct point {
+    pair<int,int> val; // メンバーを保管
+    int id ;
+    bool operator < (const point &p) {
+        return id < p.id ;
+    }
+};
+
+bool lessX(const point &p1, const point &p2) {return p1.val.first < p2.val.first;}
+bool lessY(const point &p1, const point &p2) {return p1.val.second < p2.val.second;}
+
+point PP[MAX];
+node NN[MAX];
+
+vector<point> res; //findの結果を保存
+
+struct TwoDtree {
+
+    TwoDtree() {
+        // constructor
+    }
+
+    int make2Dtree(int left, int right, int depth) { 
+        //printf ("[make] %d : %d <%d> \n", left, right, depth) ; 
+        //printf ("[make] %d : %d <%d> \n", left, right, depth) ; 
+        // 再帰関数は漸化式。一回固定値が与えられれば終わりになる。
+        // left,rightは P の中での順序
+        if (left > right) {return MINF;}
+
+    
+        if (depth % 2 == 0){ //奇数回目の操作ではx座標
+            sort ( PP+left, PP+right+1 ,lessX); // treeのmemberをxで並び替える必要がある。
+        } else {   //偶数回目の操作ではy座標
+            sort ( PP+left, PP+right+1 ,lessY); // treeのmemberをyで並び替える必要がある。
+        }
+        //for (int i=0 ; i < P.size() ; i++ ) {
+        //    printf("(%d, %d)", P.at(i).val.first,P.at(i).val.second);
+        //}
+        //printf( "\n");
+        // ソートのしかたは見直し　sort(member.begin(),member.end()); 
+        // tree * はメモリ番地を返す
+        // *(a) は メモリ番地aにある値（実態）を表す。
+        // &a は 変数aのメモリの番地
+        int mid = (left+right)/2; //切り捨てになる
+        int t=np; np++;
+        // npは登録するノードがNDの何番目かを保存している。    
+        NN[t].location = mid;
+        NN[t].left = make2Dtree(left,mid-1,depth+1);
+        NN[t].right = make2Dtree(mid+1,right,depth+1);
+        //printf("t=%d, left=%d, mid=%d, right=%d \n",t, left, mid, right );
+        //printf ("NN[t].left %d, NN[t].right %d \n", NN[t].left, NN[t].right) ;
+        return t;
+    }
+
+    void find (int v, int sx, int tx, int sy, int ty, int depth){     
+        int x = PP[NN[v].location].val.first;
+        int y = PP[NN[v].location].val.second ; 
+        //printf ( "[sx] [%d] [tx] [%d] [sy] [%d] [ty] [%d] \n" ,sx, tx, sy, ty ) ; 
+        //printf ( "[v] %d [x] [%d] [y] [%d] [left] %d [right] %d  \n" ,v,  x, y, \
+                    NN[v].left,NN[v].right ) ; 
+        if (sx <= x && x <= tx && sy <= y && y <= ty) {
+            //printf("depth: %d  FOUND:%d \n",depth,NN[v].location );
+            res.push_back( PP[ NN[v].location] ) ;
+        }
+
+        if (depth %2 == 0) {
+            if ( NN[v].left != MINF && sx <= x ){
+                //printf("depth: %d  PAT1: %d \n",depth, NN[v].left );
+                find ( NN[v].left, sx, tx, sy, ty, depth +1);
+            }
+            if ( NN[v].right != MINF && x <= tx ){
+//                printf("depth: %d  PAT2: %d \n",depth, v->right->location );
+                //printf("depth: %d  PAT2:  \n",depth);
+                find ( NN[v].right , sx, tx, sy, ty, depth+1);
+            }
+        } else {
+            if ( NN[v].left != MINF && sy <= y ){
+                //printf("depth: %d  PAT3: %d \n",depth, NN[v].left );
+                find ( NN[v].left, sx, tx, sy, ty, depth +1);
+            }
+            if ( NN[v].right != MINF && y <= ty ){
+                //printf("depth: %d  PAT4: %d \n",depth, NN[v].right);
+                find ( NN[v].right , sx, tx, sy, ty, depth+1);
+            }
+        }
+    }
+
+}; 
+
+int main(){
+    TwoDtree *D = 0;
+    D = new TwoDtree();
+    //入力をscanfで書き直す。
+    scanf("%d",&n);
+    for (int i=0 ; i<n ; i++) {
+        int a, b;
+        scanf ("%d %d", &a, &b);
+        //(a, b)をpairにしてとりあえず保管
+        PP[i].id = i; PP[i].val = make_pair(a,b);
+
+    }
+    D->make2Dtree(0, n-1, 0);
+    //for (int i=0; i<n; i++ ){ 
+    //    printf("(%d %d)",PP[i].val.first,PP[i].val.second); }
+    int c;
+    scanf("%d",&c);
+    for (int j=0; j<c ; j++) {
+        int sx, sy, tx, ty;
+        scanf("%d %d %d %d", &sx, &tx, &sy, &ty);
+        D->find( 0 , sx, tx, sy, ty, 0) ;
+        sort ( res.begin() , res.end() ); 
+        for (int k=0; k < res.size(); k++){ 
+            printf ("%d\n", res.at(k).id); }
+        printf ("\n");
+        res.clear();
+        res.shrink_to_fit();
+    }
+    delete D;
+    return 0;
+}

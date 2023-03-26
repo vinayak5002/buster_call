@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+using namespace std;
+using iter = string::const_iterator;
+typedef struct node* nodepointer;
+
+struct node {
+    int value;
+    nodepointer left;
+    nodepointer right;
+};
+
+int getnum(iter& p) {
+    int res = 0;
+    while(isdigit(*p)) {
+        res *= 10;
+        res += *p - '0';
+        p++;
+    }
+    return res;
+}
+
+nodepointer parse(iter& p) {
+    if (*p != '(') {
+        p++;
+        return NULL;
+    }
+    nodepointer res = (nodepointer)malloc(sizeof(struct node));
+    p++;
+    res->left = parse(p);
+    p++;
+    res->value = getnum(p);
+    p++; p++;
+    res->right = parse(p);
+    p++;
+    return res;
+}
+
+nodepointer make(nodepointer a, nodepointer b) {
+    nodepointer res = (nodepointer)malloc(sizeof(struct node));
+    res->value = a->value + b->value;
+    if (a->left != NULL and b->left != NULL) res->left = make(a->left, b->left);
+    if (a->right != NULL and b->right != NULL) res->right = make(a->right, b->right);
+    return res;
+}
+
+string encrypt(nodepointer p) {
+    string res = "(";
+    if (p->left != NULL) res += encrypt(p->left);
+    res += ")[";
+    res += to_string(p->value);
+    res += "](";
+    if (p->right != NULL) res += encrypt(p->right);
+    res += ")";
+    return res;
+}
+
+int main() {
+    string a; getline(cin, a);
+    string b; getline(cin, b);
+    iter aiter = a.begin();
+    iter biter = b.begin();
+    
+    nodepointer p = parse(aiter);
+    nodepointer q = parse(biter);
+
+    nodepointer ans = make(p, q);
+    cout << encrypt(ans) << endl;
+}
+
+

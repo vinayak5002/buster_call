@@ -1,0 +1,68 @@
+#include <iostream>
+#include <vector>
+#include <utility>
+
+using namespace std;
+using ll = long long;
+
+int dfs(vector< vector<char> >& field, const int H, const int W, int ci, int cj);
+
+int main(void) {
+	while (true) {
+		// load input width and height
+		int W, H;
+		cin >> W >> H;
+		if (W == 0 || H == 0) {
+			break;
+		}
+
+		// field
+		vector< vector<char> > field(H, vector<char>(W));
+		int i_start, j_start;
+		for (int i = 0; i < H; i++)
+			for (int j = 0; j < W; j++) {
+				cin >> field[i][j];
+				if (field[i][j] == '@') {
+					i_start= i; j_start = j;
+				}
+			}
+
+		/* Input Confirmation
+		cout << "input shape is " << W << ":" << H << endl;
+		for (int i = 0; i < H; i++) {
+			for (int j = 0; j < W; j++) {
+				cout << field[i][j];
+			}
+			cout << endl;
+		}
+		cout << endl << endl;
+		*/
+
+		field[i_start][j_start] = '.';
+		cout << dfs(field, H, W, i_start, j_start) << endl;
+	}
+
+	return 0;
+}
+
+int dfs(vector< vector<char> >& field, const int H, const int W, int ci, int cj) {
+	// count [ci][cj]'s '.'
+	int sum = 1;
+	field[ci][cj] = 'O';
+
+	// search up, right, down, left
+	int di[] = { -1, 0, 1, 0 }, dj[] = { 0, 1, 0, -1 };
+	for (int n = 0; n < 4; n++) {
+		// compute next position
+		int ni = ci + di[n], nj = cj + dj[n];
+		// only the condition when field[ni][nj] is black tile, recurse
+		if (ni < 0 || H <= ni || nj < 0 || W <= nj) continue;
+		char debug = field[ni][nj];
+		if (field[ni][nj] != '.') continue;
+		sum += dfs(field, H, W, ni, nj);
+	}
+
+	return sum;
+}
+
+

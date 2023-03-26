@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+const ll mod = 998244353;
+const int INF = (1 << 30);
+
+int main() {
+    int V, E;
+    cin >> V >> E;
+    vector<vector<int>> dp(V, vector<int>(V, INF));
+    for(int i = 0; i < V; i++) {
+        dp[i][i] = 0;
+    }
+    for(int i = 0; i < E; i++) {
+        int s, t, d;
+        cin >> s >> t >> d;
+        dp[s][t] = d;
+    }
+    for(int k = 0; k < V; k++) {
+        for(int i = 0; i < V; i++) {
+            for(int j = 0; j < V; j++) {
+                int rev = dp[i][k] + dp[k][j];
+                if(dp[i][k] == INF || dp[k][j] == INF) rev = INF;
+                dp[i][j] = min(rev, dp[i][j]);
+            }
+        }
+    }
+    for(int i = 0; i < V; i++) {
+        if(dp[i][i] < 0) {
+            cout << "NEGATIVE CYCLE" << endl;
+            return 0;
+        }
+    }
+    for(int i = 0; i < V; i++) {
+        for(int j = 0; j < V; j++) {
+            if(j != 0) cout << " ";
+            if(dp[i][j] != INF) cout << dp[i][j];
+            else cout << "INF";
+        }
+        cout << endl;
+    }
+    return 0;
+}
+
+/*
+
+
+
+
+
+
+
+
+                  .     ..+K`                                            QJ..    .,
+                .MN`  .HHH#!                                             .HHHm,  J#b
+               .MH#  +HHH"                                                 ?WMM_ (MHb
+               dHH%.(!`                                                        _-.MHH[
+           db  MH@(aJgga-,                                                 ?MHH#MNJMHF  k,
+          .HM. (SsWHHHM#"`                                                   ?T"""!?W! (HN.
+          WHM: J^  `                                                          .JJJ-..  JHM)
+         .MHM-dugMHH#'                            `  `                         (HHHHHm.JH#]
+      .N, WMbKHHHMB=                .MMMMr  dMMM#JMH#H#M)dMMN (MMM}               ?"""^(MM\ -L
+      dHN,.4H!  ..                  (H#WHN  (MHM!/B9(MHD (HHM (HHP`               (a..  y= (HN.
+      dHHb d~.gMM'                  MH@(MM;  MHN   .HMt   WHM (HH[                 vHHHm,_.HHN~
+      JHH@(mMHHB`                  .HHNHHHb  MHN  (HM^.., WHM (HH[                  ?MHHMsJHHN~
+      .MHNHMH"!                   (MH#`.MHM](MHMedHHMHHH] WHHNMHH\                    _TY6JMH#
+    N& .TK!  .g{                  .??!  7??'?777=_```````  ~????`                    JN,  ~dD` .J
+    MHh. Z .HH#`           ..... ....   ........    .........  ............          .MHN,.b  (H#
+    dHHb.bdHHM%          .MHHHHH[JMHHR..MHM<MHHM~   MHHH]dHHM, JHH#JHHHHHHN`          ?MHHrW (HHF
+    .MHMJHHH#^           JHH].MHF dHHHN,MMr ,MM}    .HHF .MHHMeJHN~ dHM_.""            ,MHNd(MH#`
+     .WMXX"! .)          JHH].MHF dHMHHMHMr ,MM}    .HHF .MHMHHHHN~ dHHMM\            Q,  7JdH#!
+  .,    ?{ .uM]          J#H].MHF.dH#.WHHMr ,MM},HM~.HHb .MH]?MHHN~ dHM_.gg.          dHx  J=!
+  (HMa. .{.HHM\          .MHHHHMtJHH#  WHMr.MHH#M#M~#HHM]MMM] (MHN~JMHH###N`          JHHb g   .dM!
+   VHHNx.LWHHF                                                                         WH#[d .MHM%
+    ?HHMpWMHD -                 (JJJ,.JJJ .JJJ.(JJJJJ-, .(JJJJ,.JJJJJJJ,             .p TMR#(HHMt
+     .TMNkf` (#|                TMHM"7MHM JHHB<TMM#YHHN(MH#"W#@,WHM#YHM)             +Mp  (NHMB'
+         (r .MHb                 HH#  HHM JHH) .MM[ HHN(HH].JJJ (HMh./`              dHM, d^!
+    ...   j.JHHF             ... HH#  HHM JHH) .MM[ HHN(HH](HH# (HM@"=               dHHb,!
+    ,MHHNJ.SdHM\.,           dHN.HH#  HHMJjHH\ .MMn.HHN(MHm.JH#.(HMh.MM)          .H (MH@}..gMM#
+     .WHHHHeWM% J#[          .T"""9^  ?WMMMH" .T"""""9^ T"""""5,MMMMMMM\         .HM- (B$JHHHH@`
+       (YMMMNS  dHN.                                                             (HH[ .SHHHMB^
+              O.dHM) (.                                                       .x dHM:.f`??`
+               TJHM: d#m.                                                   .HM\ dM5(%
+        (MHHHHMHJhZ  -MHN,                                                 .MH#` .gB+.&gmmgJ.
+          7WMHHHHMY>  WHHb                                                 HHM%.JMQHHHHHM#"
+              `!`      TH#                                                .MMQd9!  ?""7!
+                ..+HHHMNgJe..                                           ..jMMmJ(..
+               ,HMHHHHHM@`   ?77                                    ."7!   ?MHHHHHMN,
+                    ``                                                        _?THY"!
+
+
+
+
+
+
+
+*/

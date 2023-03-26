@@ -1,0 +1,84 @@
+import java.util.Arrays;
+import java.util.Scanner;
+
+class Main{
+    
+    static int[] insert(int arr[], int x)
+    {
+        int newarr[] = new int[arr.length + 1];
+
+        newarr[0] = x;
+        System.arraycopy(arr, 0, newarr, 1, arr.length);
+        
+        return newarr;
+    }
+
+    static int[] delete(int arr[], int x)
+    {
+        int n = arr.length;
+        int pos = Arrays.binarySearch(arr, x);
+
+        if (pos > 0){
+            int newarr[] = new int[n - 1];
+            for (int i = 0; i < n; i++){
+                if (i == pos) continue;
+                else if (i > pos) newarr[i-1] = arr[i]; 
+                else newarr[i] = arr[i];
+            }
+            return newarr;
+        }
+        return arr;
+    }
+
+    static int[] deleteFirst(int[] arr){
+        int n = arr.length;
+        int newarr[] = new int[n - 1];
+        System.arraycopy(arr, 1, newarr, 0, arr.length-1);
+
+        return newarr;
+    }
+
+    static int[] deleteLast(int[] arr){
+        int n = arr.length;
+        int newarr[] = new int[n - 1];
+        System.arraycopy(arr, 0, newarr, 0, arr.length-1);
+
+        return newarr;
+    }
+
+    public static void main(String args[])
+    {
+        Scanner scan = new Scanner(System.in);
+
+        scan.nextLine();
+        String in, cmd;
+        String[] split;
+        int value, i;
+        i = value = 0;
+        int[] arr = new int[0];
+         
+        while (scan.hasNextLine()){
+            in = scan.nextLine();
+            split = in.split("\\s+");
+            cmd = split[0];
+            if (split.length > 1) value = Integer.parseInt(split[1]);
+
+            switch (cmd) {
+                case "insert":
+                    arr = insert(arr, value);
+                    break;
+                case "delete":
+                    arr = delete(arr, value);
+                    break;
+                case "deleteFirst":
+                    arr = deleteFirst(arr);
+                    break;
+                case "deleteLast":
+                    arr = deleteLast(arr);
+            }
+        }
+
+        
+        System.out.println(Arrays.toString(arr).replaceAll("\\[", "").replaceAll("\\]","").replaceAll(",",""));
+    }
+}

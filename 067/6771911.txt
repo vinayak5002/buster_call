@@ -1,0 +1,89 @@
+#include<stdio.h>
+#define N 100
+#define INFTY 10000000
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+
+
+int G[N][N], n;                    // 隣接行列，頂点数
+
+void dijkstra()                    // 始点0
+{
+	int u, minc, i, j;
+	int d[N];                      // 始点から頂点uまでの最小重み
+	int color[N];                  // 訪問状況を表す
+	
+	for(i = 0; i < n; i++)
+	{
+		d[i] = INFTY;
+		color[i] = WHITE;
+	}
+	
+	d[0] = 0;                      // 最初に頂点0と繋がっているほかの頂点との間の辺の重みと比較するため初期化
+	color[0] = GRAY;               // 探索開始
+	
+	while(1)
+	{
+		minc = INFTY;
+		for(i = 0; i < n; i++)
+		{
+			if(color[i] != BLACK && d[i] < minc)
+			{
+				minc = d[i];       // 無限ループの一回目はd[0]のみ
+				u = i;
+			}
+		}
+		
+		if(minc == INFTY) break;   // 全頂点がBLACKのとき終了
+		
+		color[u] = BLACK;          // 訪問済み
+		
+		for(j = 0; j < n; j++)
+		{
+			if(color[j] != BLACK && G[u][j] != -1)
+			{
+				if(d[u]+G[u][j] < d[j])  // uの前の頂点からuへの最小重み + uからjへの重みがjのもつ重みより小さいとき
+				{
+					d[j] = d[u]+G[u][j];  //始点からの距離
+					color[j] = GRAY;
+				}
+			}
+		}
+	}
+	for(i = 0; i < n; i++)
+	{
+		printf("%d %d\n", i, d[i]);
+	}
+}
+
+int main(void)
+{
+	int i, j;
+	int u, k, v, c;
+	
+	scanf("%d", &n);
+	for( i = 0; i < n; i++ )
+	{
+		for( j = 0; j < n; j++ )
+		{
+			G[i][j] = INFTY;             // i行j列目の要素を初期化
+		}
+	}
+	
+	for(i = 0; i < n; i++)
+	{
+		scanf("%d", &u);
+		scanf("%d", &k);
+		for(j = 0; j < k; j++)
+		{
+			scanf("%d", &v);
+			scanf("%d", &c);
+			G[u][v] = c;
+		}
+	}
+	
+	dijkstra();
+	
+	return 0;
+}

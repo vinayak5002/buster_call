@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+template <typename T>
+ostream& operator<<(ostream& os, const vector<T>& v) {
+    for (int i = 0; i < (int) v.size(); ++i) os << v[i] << " ";
+    return os;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int n, m;
+        cin >> n >> m;
+        if (n == 0) break;
+        vector<int> d(n), e(n);
+        e[n-1] = 1000;
+        vector<vector<int>> cities(1001);
+        cities[0].push_back(0);
+        cities[1000].push_back(n-1);
+        rep(i,1,n-1) {
+            cin >> d[i] >> e[i];
+            cities[e[i]].push_back(i);
+        }
+        vector<vector<pair<int, int>>> G(n);
+        rep(_,0,m) {
+            int a, b, c;
+            cin >> a >> b >> c;
+            --a, --b;
+            G[a].push_back({b, c});
+        }
+
+        vector<vector<int>> dp(n, vector<int>(n, 1e8));  // cost to go from i (up) to j (down)
+        dp[n-1][n-1] = 0;
+
+        revrep(a,1000,0) {
+            int N = cities[a].size();
+            rep(S,0,1<<N) {
+                vector<vector<int>> up(n, vector<int>(n, 1e8)), down(n, vector<int>(n, 1e8));
+                rep(i,0,n) up[i][i] = down[i][i] = 0;
+                int dd = 0;
+                rep(i,0,n) {
+                    if (e[i] < a) continue;
+                    if (e[i] == a) {
+                        auto j = find(all(cities[a]), i) - cities[a].begin();
+                        if (!S>>j&1) continue;
+                        dd += d[i];
+                    }
+                    for (auto [j, c] : G[i]) {
+                        if (e[i] <= e[j]) up[i][j] = c + d[i];
+                        if (e[i] >= e[j]) down[i][j] = c + d[j];
+                        if (e[i] == a) up[i][j] -= d[i];
+                        if (e[j] == a) down[i][j] -= d[j];
+                    }
+                }
+
+                rep(k,0,n) rep(i,0,n) rep(j,0,n) chmin(up[i][j], up[i][k] + up[k][j]);
+                rep(k,0,n) rep(i,0,n) rep(j,0,n) chmin(down[i][j], down[i][k] + down[k][j]);
+
+                for (int i : cities[a]) for (int j : cities[a]) {
+                    int k = find(all(cities[a]), i) - cities[a].begin();
+                    if (!S>>k&1) continue;
+                    k = find(all(cities[a]), j) - cities[a].begin();
+                    if (!S>>k&1) continue;
+
+                    rep(k,0,n) rep(l,0,n) if (a < e[k] && a < e[l]) {
+                        chmin(dp[i][j], up[i][k] + dp[k][l] + down[l][j] + dd);
+                    }
+                }
+            }
+        }
+        cout << (dp[0][0] < 1e8 ? dp[0][0] : -1) << endl;
+    }
+}

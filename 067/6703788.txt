@@ -1,0 +1,537 @@
+// common part begin
+#include <algorithm>
+#include <array>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <cfenv>
+#include <cfloat>
+#include <chrono>
+#include <cinttypes>
+#include <climits>
+#include <cmath>
+#include <complex>
+#include <cstdarg>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <initializer_list>
+#include <iomanip>
+#include <ios>
+#include <iostream>
+#include <istream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <map>
+#include <memory>
+#include <new>
+#include <numeric>
+#include <ostream>
+#include <queue>
+#include <random>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <streambuf>
+#include <string>
+#include <tuple>
+#include <type_traits>
+#include <typeinfo>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+using namespace std;
+#define INF (1ll) << 60
+#define rep(i, n) for (long long i = 0; i < n; i++)
+#define all(v) v.begin(), v.end()
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+void chmax(ll &a, ll b)
+{
+  if (a < b)
+    a = b;
+}
+void chmin(ll &a, ll b)
+{
+  if (a > b)
+  {
+    a = b;
+  }
+}
+// common part end
+#define hi_ cout << "hi" << endl;
+#define yes cout << "yes" << endl
+#define no cout << "no" << endl
+#define Yes cout << "Yes" << endl
+#define No cout << "No" << endl
+#define llV(name, size)                   \
+  std::vector<long long> name(size);      \
+  for (unsigned int i = 0; i < size; i++) \
+  cin >> name[i]
+#define die(x)       \
+  cout << x << endl; \
+  return 0;
+class Print
+{
+public:
+  Print() {}
+};
+
+void operator<<(Print p, vector<ll> v)
+{
+  for (auto i : v)
+    cout << i << " ";
+  cout << endl;
+}
+
+void operator<<(Print p, vector<vector<ll>> v)
+{
+  for (auto i : v)
+  {
+    for (auto j : i)
+    {
+      cout << j << " ";
+    }
+    cout << endl;
+  }
+}
+
+void operator<<(Print p, ull x)
+{
+  cout << x << endl;
+}
+void operator<<(Print p, vector<ull> v)
+{
+  for (auto i : v)
+    cout << i << " ";
+  cout << endl;
+}
+
+void operator<<(Print p, vector<vector<ull>> v)
+{
+  for (auto i : v)
+  {
+    for (auto j : i)
+    {
+      cout << j << " ";
+    }
+    cout << endl;
+  }
+}
+
+void operator<<(Print p, ll x)
+{
+  cout << x << endl;
+}
+
+void operator<<(Print p, string s)
+{
+  cout << s << endl;
+}
+void operator<<(Print p, vector<string> s)
+{
+  for (auto i : s)
+    cout << i << endl;
+}
+
+void operator<<(Print p, vector<pair<pair<ll, ll>, ll>> v)
+{
+  for (auto i : v)
+  {
+    cout << i.first.first << " " << i.first.second << " " << i.second << endl;
+  }
+}
+void operator<<(Print p, vector<pair<ll, pair<ll, ll>>> v)
+{
+  for (auto i : v)
+  {
+    cout << i.first << " " << i.second.first << " " << i.second.second << endl;
+  }
+}
+void operator<<(Print p, pair<ll, ll> v)
+{
+  cout << v.first << " " << v.second << endl;
+}
+
+Print print;
+
+// //0-1 dfs
+// class Maze
+// {
+// public:
+//   vector<vector<ll>> G;
+//   ll H, W;
+//   function<vector<pair<pair<ll, ll>, ll>>(pair<ll, ll>)> destination;
+//   Maze(vector<vector<ll>> G_, function<vector<pair<pair<ll, ll>, ll>>( pair<ll, ll>)> destination_) : G(G_), H(G_.size()), W(G_.at(0).size()), destination(destination_)
+//   {
+//   }
+
+//   void solve(pair<ll, ll> S, pair<ll, ll> T)
+//   {
+//     deque<pair<pair<ll, ll>, ll>> q;
+//     q.push({S, 0});
+//     while (!q.empty())
+//     {
+//       pair<ll, ll> now = q.front().first;
+//       ll c = q.front().second;
+//       q.pop();
+//       auto next = destination(now);
+//       for (auto n : next)
+//       {
+
+//       }
+//     }
+//   }
+// };
+// class Maze01
+// {
+// public:
+//   vector<vector<ll>> G;
+//   function<vector<pair<pair<ll, ll>, ll>>(pair<ll, ll>)> destination;
+//   ll H, W;
+//   // 1 is # 0 is .
+//   Maze01(vector<vector<ll>> G_, function<vector<pair<pair<ll, ll>, ll>>(pair<ll, ll>)> destination_) : G(G_), H(G.size()), W(G.at(0).size()), destination(destination_)
+//   {
+//   }
+
+//   vector<vector<ll>> solve(pair<ll, ll> S)
+//   {
+//     if (G[S.first][S.second] == 1)
+//       return vector<vector<ll>>(H, vector<ll>(W, INF));
+//     deque<pair<pair<ll, ll>, ll>> q;
+//     q.push_back({S, 0});
+//     vector<vector<ll>> dis(H, vector<ll>(W, INF));
+//     dis[S.first][S.second] = 0;
+//     while (!q.empty())
+//     {
+//       auto now = q.front();
+//       q.pop_front();
+//       auto next = destination(now.first);
+//       for (auto n : next)
+//       {
+//         ll h = n.first.first;
+//         ll w = n.first.second;
+//         ll c = n.second;
+//         if (h < 0 || H <= h || w < 0 || w >= W)
+//         {
+//           continue;
+//         }
+//         if (dis[h][w] != INF)
+//           continue;
+//         if (G[h][w] == 1)
+//           continue;
+//         dis[h][w] = dis[now.first.first][now.first.second] + c;
+//         if (c)
+//         {
+//           q.push_back({{h, w}, c});
+//         }
+//         else
+//         {
+//           q.push_front({{h, w}, c});
+//         }
+//       }
+//     }
+//     return dis;
+//   }
+// };
+
+// class Maze
+// {
+// public:
+//   vector<vector<ll>> G;
+//   function<vector<pair<ll, ll>>(pair<ll, ll>)> destination;
+//   ll H, W;
+//   // 1 is # 0 is .
+//   Maze(vector<vector<ll>> G_, function<vector<pair<ll, ll>>(pair<ll, ll>)> destination_) : G(G_), H(G.size()), W(G.at(0).size()), destination(destination_)
+//   {
+//   }
+
+//   vector<vector<ll>> solve(pair<ll, ll> S)
+//   {
+//     if (G[S.first][S.second] == 1)
+//       return vector<vector<ll>>(H, vector<ll>(W, INF));
+//     queue<pair<ll, ll>> q;
+//     q.push(S);
+//     vector<vector<ll>> dis(H, vector<ll>(W, INF));
+//     dis[S.first][S.second] = 0;
+//     while (!q.empty())
+//     {
+//       auto now = q.front();
+//       q.pop();
+//       auto next = destination(now);
+//       for (auto n : next)
+//       {
+//         if (n.first < 0 || H <= n.first || n.second < 0 || n.second >= W)
+//         {
+//           continue;
+//         }
+//         if (dis[n.first][n.second] != INF)
+//           continue;
+//         if (G[n.first][n.second] == 1)
+//           continue;
+//         dis[n.first][n.second] = dis[now.first][now.second] + 1;
+//         q.push({n.first, n.second});
+//       }
+//     }
+//     return dis;
+//   }
+// };
+template <typename T>
+map<T, T> prime_factor(T n)
+{
+  map<T, T> ret;
+  for (T i = 2; i * i <= n; i++)
+  {
+    T tmp = 0;
+    while (n % i == 0)
+    {
+      tmp++;
+      n /= i;
+    }
+    ret[i] = tmp;
+  }
+  if (n != 1)
+    ret[n] = 1;
+  return ret;
+}
+const int N_MAX = 2000000;
+ll spf[N_MAX]; // smallest prime factors
+void prepare_factorize()
+{
+  rep(i, N_MAX) spf[i] = i;
+  for (int p = 2; p * p <= N_MAX; p++)
+  {
+    for (int i = p; i < N_MAX; i += p)
+    {
+      if (spf[i] == i)
+        spf[i] = p;
+    }
+  }
+}
+
+// 素因数分解
+// その素因数が何個あるかのmapを返す
+map<ll, ll> factorize_fast(ll n)
+{
+  if (spf[1] == 0)
+  {
+    // p("please initialize");
+    exit(0);
+  }
+  map<ll, ll> mp;
+  while (n != 1)
+  {
+    ll p = spf[n];
+    mp[p]++;
+    n /= p;
+  }
+  return mp;
+}
+
+// 約数の種類数
+// 6 => 1, 2, 3, 6なので4
+ll yaku(ll n)
+{
+  auto mp = factorize_fast(n);
+  ll ret = 1;
+  for (auto pa : mp)
+  {
+    ret *= (pa.second + 1);
+  }
+  return ret;
+}
+
+class SCC
+{
+public:
+  vector<ll> used;
+  vector<ll> rused;
+  vector<vector<ll>> G;
+  vector<vector<ll>> rG;
+  vector<ll> vs;
+  vector<ll> cmp;
+  vector<vector<ll>> groups; // groupごとの要素を記録。
+  ll N;
+  SCC(ll N_, vector<vector<ll>> G_) : N(N_), used(N_), rused(N_), G(G_), rG(N_), cmp(N_, -1), groups(N_)
+  {
+    rep(i, N)
+    {
+      for (auto e : G[i])
+      {
+        rG[e].push_back(i);
+      }
+    }
+  }
+  void dfs(ll now)
+  {
+    used[now] = 1;
+    for (auto e : G[now])
+    {
+      if (used[e])
+        continue;
+      dfs(e);
+    }
+    vs.push_back(now);
+  }
+  void rdfs(ll now, ll k)
+  {
+    rused[now] = 1;
+    cmp[now] = k;
+    groups[k].push_back(now);
+    for (auto e : rG[now])
+    {
+      if (rused[e])
+        continue;
+      rdfs(e, k);
+    }
+  }
+  ll scc()
+  {
+    ll k = 0;
+    rep(i, N)
+    {
+      if (!used[i])
+        dfs(i);
+    }
+    for (ll i = vs.size() - 1; i >= 0; i--)
+    {
+      if (!rused[vs[i]])
+      {
+        rdfs(vs[i], k);
+        k++;
+      }
+    }
+    return k;
+  }
+};
+
+template <int MOD>
+struct ModInt
+{
+  static const int Mod = MOD;
+  unsigned x;
+  ModInt() : x(0) {}
+  ModInt(signed sig) { x = sig < 0 ? sig % MOD + MOD : sig % MOD; }
+  ModInt(signed long long sig) { x = sig < 0 ? sig % MOD + MOD : sig % MOD; }
+  int get() const { return (int)x; }
+  ModInt &operator+=(ModInt that)
+  {
+    if ((x += that.x) >= MOD)
+      x -= MOD;
+    return *this;
+  }
+  ModInt &operator-=(ModInt that)
+  {
+    if ((x += MOD - that.x) >= MOD)
+      x -= MOD;
+    return *this;
+  }
+  ModInt &operator*=(ModInt that)
+  {
+    x = (unsigned long long)x * that.x % MOD;
+    return *this;
+  }
+  ModInt &operator/=(ModInt that) { return *this *= that.inverse(); }
+  ModInt operator+(ModInt that) const { return ModInt(*this) += that; }
+  ModInt operator-(ModInt that) const { return ModInt(*this) -= that; }
+  ModInt operator*(ModInt that) const { return ModInt(*this) *= that; }
+  ModInt operator/(ModInt that) const { return ModInt(*this) /= that; }
+  ModInt inverse() const
+  {
+    long long a = x, b = MOD, u = 1, v = 0;
+    while (b)
+    {
+      long long t = a / b;
+      a -= t * b;
+      std::swap(a, b);
+      u -= t * v;
+      std::swap(u, v);
+    }
+    return ModInt(u);
+  }
+  bool operator==(ModInt that) const { return x == that.x; }
+  bool operator!=(ModInt that) const { return x != that.x; }
+  ModInt operator-() const
+  {
+    ModInt t;
+    t.x = x == 0 ? 0 : Mod - x;
+    return t;
+  }
+};
+
+template <int MOD>
+ostream &operator<<(ostream &st, const ModInt<MOD> a)
+{
+  st << a.get();
+  return st;
+};
+
+template <int MOD>
+ModInt<MOD> operator^(ModInt<MOD> a, unsigned long long k)
+{
+  ModInt<MOD> r = 1;
+  while (k)
+  {
+    if (k & 1)
+      r *= a;
+    a *= a;
+    k >>= 1;
+  }
+  return r;
+}
+
+typedef ModInt<1000000000 + 7> mint1_7;
+typedef ModInt<998244353> mint9_3;
+
+int main()
+{
+  vector<vector<ll>> G(100);
+  vector<ll> deg(100);
+  while (true)
+  {
+    ll a, b;
+    cin >> a >> b;
+    if (a == 0 && b == 0)
+      break;
+    a--;
+    b--;
+    G[a].push_back(b);
+    G[b].push_back(a);
+    deg[a]++;
+    deg[b]++;
+  }
+  bool flag1 = false;
+  bool flag2 = false;
+  rep(i, 100)
+  {
+    if (deg[i] % 2 == 1)
+    {
+      if (i == 0)
+      {
+        flag1 = true;
+      }else if(i==1){
+        flag2=true;
+      }else{
+        die("NO");
+      }
+    }
+  }
+  if(flag1 && flag2){
+    cout<<"OK"<<endl;
+  }else{
+    cout<<"NO"<<endl;
+  }
+}
+
+// memo
+// igaito maniau
+

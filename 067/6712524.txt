@@ -1,0 +1,50 @@
+#include <iostream>
+#include <map>
+#include <vector>
+#include <algorithm>
+using namespace std;
+int gcd(int a,int b){
+  if(a%b){
+    return gcd(b,a%b);
+  }else{
+    return b;
+  }
+}
+int main(){
+  string s;cin>>s;
+  string bo = "";
+  int x = -1;
+  int nos = 0;
+  int los = 0;
+  for(int i = 0; s.size() > i; i++){
+    if(s[i] == '.'){
+      x = 0;
+      continue;
+    }else if(s[i] == '('){
+      x = 1;
+      continue;
+    }else if(s[i] == ')'){
+      break;
+    }
+
+    if(x == 0){
+      bo.push_back('0');
+      los = los*10+s[i]-'0';
+      nos = nos*10+s[i]-'0';
+    }
+    else if(x == 1){
+      bo.push_back('9');
+      los = los*10+s[i]-'0';
+    }else{
+      los = los*10+s[i]-'0';
+      nos = nos*10+s[i]-'0';
+    }
+    
+  }
+  if(bo[bo.size()-1] == '0')bo.push_back('1');
+  reverse(bo.begin(),bo.end());
+
+  int z = stoi(bo);
+  if(x==1)cout << (los-nos)/gcd((los-nos),z) << "/" << z/gcd((los-nos),z) << endl;
+  else cout << los/gcd(los,z) << "/" << z/gcd(los,z) << endl;
+}

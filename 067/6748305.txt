@@ -1,0 +1,86 @@
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class Main {
+	
+	//回答用
+	static int answer = 0;
+	//上、下、右、左、右上、右下、左上、左下
+	static int[] dx = {0,0,1,-1,1,1,-1,-1};
+	static int[] dy = {-1,1,0,0,-1,1,-1,1};
+	static int[][] tizu;
+	static int w;
+	static int h;
+	static Boolean ansaddflg;
+	
+	public static void dfs(int x, int y) {
+		int sx;
+		int sy;
+		tizu[x][y]=9;
+		
+		for(int i =0;i<8;i++) {
+			sx=x+dx[i];
+			sy=y+dy[i];
+			
+			if(sx<0 || sy<0 || sx>w-1 || sy>h-1) continue;
+			
+			if(tizu[sx][sy]==1){
+				dfs(sx,sy);
+			}
+			
+		}
+		
+		ansaddflg=true;
+		
+	}
+	
+	public static void main(String[] args) {
+		// TODO 自動生成されたメソッド・スタブ
+		Scanner sc = new Scanner(System.in);
+		
+		do {
+			w = sc.nextInt();
+			h = sc.nextInt();
+			answer = 0;
+			if(w==0) {
+				//System.out.println("finish");
+				break;
+			}
+			//地図を作る
+			tizu = new int[w][h];
+			for (int i=0;i<h;i++) {
+				for (int j = 0;j<w;j++) {
+					tizu[j][i] = sc.nextInt();
+				}
+			}
+			
+			//左上から確認する
+			for (int i=0;i<h;i++) {
+				for (int j = 0;j<w;j++) {
+					ansaddflg = false;
+					//陸なら以下の処理
+					if(tizu[j][i]==1) {
+						dfs(j,i);
+						if(ansaddflg) {
+							answer++;
+						}
+					
+					}
+				}
+			}
+			
+			System.out.println(answer);
+//			for(int i = 0;i<h;i++){
+//				for(int j =0;j<w;j++) {
+//					System.out.print(tizu[j][i]);
+//				}
+//			}
+			
+		}while(true);
+		
+
+	}
+
+}
+

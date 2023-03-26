@@ -1,0 +1,57 @@
+import java.util.Scanner
+import scala.annotation.tailrec
+
+object Main extends App {
+  class Node(var left:NodeRef = None, var right:NodeRef = None)
+  type NodeRef = Option[Int]
+
+  val sc = new Scanner(System.in)
+  val N  = sc.nextInt()
+  val nodes = Array.fill[Node](N+1)(new Node)
+  val preorder = (for (_ <- 0 until N) yield sc.nextInt()).toList
+  val inorder = (for (_ <- 0 until N) yield sc.nextInt()).toList
+  val rootIdx = preorder.head
+
+  @tailrec
+  def isLeft(il:List[Int], p:Int, q:Int): Boolean = il match {
+    case Nil => throw new RuntimeException(s"Both $p and $q is not found in inorder-list.")
+    case x::_ if x == q => true
+    case x::_ if x == p => false
+    case _ => isLeft(il.tail, p, q)
+  }
+
+  @tailrec
+  def build(pl:List[Int]):Unit = {
+    @tailrec
+    def iterate(idx:Int, p:Int): Unit = {
+      if (isLeft(inorder, idx, p)) nodes(idx).left match {
+        case None => nodes(idx).left = Some(p)
+        case Some(x) => iterate(x, p)
+      } else nodes(idx).right match {
+        case None => nodes(idx).right = Some(p)
+        case Some(x) => iterate(x, p)
+      }
+    }
+
+    pl match {
+      case Nil => ()
+      case x::xs =>
+        iterate(rootIdx, x)
+        build(xs)
+    }
+  }
+
+  def traverse(idx:Int, ac:List[Int]):List[Int] = {
+    val lac = nodes(idx).left match {
+      case None => ac
+      case Some(x) => traverse(x, ac)
+    }
+    val rac = nodes(idx).right match {
+      case None => lac
+      case Some(x) => traverse(x, lac)
+    }
+    idx::rac
+  }
+  build(preorder.tail)
+  println(s"${traverse(rootIdx, Nil).reverse.mkString(" ")}")
+}

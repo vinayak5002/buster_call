@@ -1,0 +1,258 @@
+
+#[allow(unused_imports)]
+use std::collections::HashMap;
+#[allow(unused_imports)]
+use std::collections::{VecDeque, BinaryHeap};
+#[allow(unused_imports)]
+use std::hash::Hash;
+#[allow(unused_imports)]
+use std::io::{BufWriter, Write};
+#[allow(unused_imports)]
+use std::iter::Sum;
+#[allow(unused_imports)]
+use std::ops::{Add, Div, Deref};
+#[allow(unused_imports)]
+use std::ops::Index;
+#[allow(unused_imports)]
+use std::ops::Mul;
+#[allow(unused_imports)]
+use std::ops::Sub;
+#[allow(unused_imports)]
+use std::ptr::NonNull;
+#[allow(unused_imports)]
+use std::str::FromStr;
+#[allow(unused_imports)]
+use std::{collections::BTreeMap, collections::BTreeSet, fs::read, ops::AddAssign, ops::Neg, ops::RangeInclusive, rc::Rc, vec};
+#[allow(unused_imports)]
+use std::cmp::{Ordering, Reverse};
+#[allow(unused_imports)]
+use std::fmt::Debug;
+
+const PARSE_ERROR: &str = "Can't Parse";
+const EOF_ERROR: &str = "No Line";
+#[allow(unused_macros)]
+macro_rules! freeze {
+    ($($id:ident), *) => {
+        $(let $id = $id;)*
+    };
+}
+#[allow(unused_macros)]
+macro_rules! read_line {
+    () => {
+        {
+            let mut buffer = String::new();
+            std::io::stdin().read_line(&mut buffer).expect(EOF_ERROR);
+            buffer.trim().to_owned()
+        }
+    };
+    (&mut $buffer: ident) => {
+        {
+            std::io::stdin().read_line(&mut $buffer).expect(EOF_ERROR);
+            $buffer.trim().to_owned()
+        }
+    };
+}
+#[allow(unused_macros)]
+macro_rules! show {
+    () => {};
+    ($tt:expr) => {
+        println!("{} {} => {:?}", line!(), stringify!($tt), $tt);
+    };
+    ($tt:tt) => {
+        println!("{} {} => {:?}", line!(), stringify!($tt), $tt);
+    };
+    ($head:expr, $($tail:expr)*) => {
+        show!($head);
+        show!($($tail)*);
+    };
+}
+#[allow(unused_macros)]
+macro_rules! read {
+    () => {
+        read_line!()
+    };
+    ([[char]; $size: expr]) => {
+        (0 .. $size).into_iter().map(|_| read!([char])).collect::<Vec<_>>()
+    };
+    ([[usize1]; $size: expr]) => {
+        (0 .. $size).into_iter().map(|_| read!([usize1])).collect::<Vec<_>>()
+    };
+    ([[$ty:ty]; $size: expr]) => {
+        (0 .. $size).into_iter().map(|_| read!([$ty])).collect::<Vec<_>>()
+    };
+    ([usize1; $size: expr]) => {
+        (0 .. $size).into_iter().map(|_| read!(usize1)).collect::<Vec<_>>()
+    };
+    ([$ty:ty; $size: expr]) => {
+        (0 .. $size).into_iter().map(|_| read!($ty)).collect::<Vec<_>>()
+    };
+    ([$block: block; $size: expr]) => {
+        (0 .. $size).into_iter().map(|_| read!($block)).collect::<Vec<_>>()
+    };
+    
+    ([f64] ASC) => {
+        {
+            read!(mut vec: [f64]);
+            vec.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            vec
+        }
+    };
+    ([f64; $len: expr] ASC) => {
+        {
+            read!(mut vec: [f64; $len]);
+            vec.sort_by(|a, b| a.partial_cmp(b).unwrap());
+            vec
+        }
+    };
+    ([$($tt: tt)*] ASC) => {
+        {
+            read!(mut vec: [$($tt)*]);
+            vec.sort();
+            vec
+        }
+    };
+    ([f64] DESC) => {
+        {
+            read!(mut vec: [f64]);
+            vec.sort_by(|a, b| a.partial_cmp(b).unwrap().reverse());
+            vec
+        }
+    };
+    ([f64; $len: expr] DESC) => {
+        {
+            read!(mut vec: [f64; $len]);
+            vec.sort_by(|a, b| a.partial_cmp(b).unwrap().reverse());
+            vec
+        }
+    };
+    ([$($tt: tt)*] DESC) => {
+        {
+            read!(mut vec: [$($tt)*]);
+            vec.sort_by_key(|&v| Reverse(v));
+            vec
+        }
+    };
+    ([char]) => {
+        read_line!().chars().collect::<Vec<_>>()
+    };
+    ([String]) => {
+        read_line!().split_whitespace().map(|s| s.to_owned()).collect::<Vec<String>>()
+    };
+    ([usize1]) => {
+        read_line!().split_whitespace().map(|x| x.parse::<usize>().ok().expect(PARSE_ERROR) - 1).collect::<Vec<usize>>()
+    };
+    ([$ty: ty]) => {
+        read_line!().split_whitespace().map(|x| x.parse().ok().expect(PARSE_ERROR)).collect::<Vec<$ty>>()
+    };
+    (usize1) => {
+        read_line!().parse::<usize>().ok().expect(PARSE_ERROR) - 1
+    };
+    ($ty: ty) => {
+        read_line!().parse::<$ty>().ok().expect(PARSE_ERROR)
+    };
+    ($block: block) => {
+        $block
+    };
+    ($ident: ident: [$($tt:tt)*]) => {
+        let $ident = read!([$($tt)*]);
+    };
+    (mut $ident: ident: [$($tt:tt)*]) => {
+        let mut $ident = read!([$($tt)*]);
+    };
+    ($ident: ident: [$($tt:tt)*] ASC) => {
+        let $ident = read!([$($tt)*] ASC);
+    };
+    ($ident: ident: [$($tt:tt)*] DESC) => {
+        let $ident = read!([$($tt)*] DESC);
+    };
+    ($ident: ident: String) => {
+        let $ident = read!();
+    };
+    (mut $ident: ident: String) => {
+        let mut $ident = read!();
+    };
+    ($ident: ident: $ty: ty) => {
+        let $ident = read_line!().parse::<$ty>().unwrap();
+    };
+    (mut $ident: ident: $ty: ty) => {
+        let mut $ident = read_line!().parse::<$ty>().unwrap();
+    };
+    ($($token: tt)*) => {
+        let line = read_line!();
+        let mut iter = line.split_whitespace().into_iter();
+        read_from_iter!(iter; $($token)*);
+    };
+}
+#[allow(unused_macros)]
+macro_rules! read_from_iter {
+    ($iter:expr; mut $ident:ident:usize1, $($rest:tt)*) => {
+        let mut $ident = $iter.next().unwrap().parse::<usize>().expect(PARSE_ERROR) - 1;
+        read_from_iter!($iter; $($rest)*);
+    };
+    ($iter:expr; mut $ident:ident:$ty:ty, $($rest:tt)*) => {
+        let mut $ident = $iter.next().unwrap().parse::<$ty>().expect(PARSE_ERROR);
+        read_from_iter!($iter; $($rest)*);
+    };
+    ($iter:expr; $ident:ident:usize1, $($rest:tt)*) => {
+        let $ident = $iter.next().unwrap().parse::<usize>().expect(PARSE_ERROR) - 1;
+        read_from_iter!($iter; $($rest)*);
+    };
+    ($iter:expr; $ident:ident:$ty:ty, $($rest:tt)*) => {
+        let $ident = $iter.next().unwrap().parse::<$ty>().expect(PARSE_ERROR);
+        read_from_iter!($iter; $($rest)*);
+    };
+    ($iter:expr; mut $ident:ident:usize1) => {
+        let mut $ident = $iter.next().unwrap().parse::<usize>().expect(PARSE_ERROR) - 1;
+    };
+    ($iter:expr; mut $ident:ident:$ty:ty) => {
+        let mut $ident = $iter.next().unwrap().parse::<$ty>().expect(PARSE_ERROR);
+    };
+    ($iter:expr; $ident:ident:usize1) => {
+        let $ident = $iter.next().unwrap().parse::<usize>().expect(PARSE_ERROR) - 1;
+    };
+    ($iter:expr; $ident:ident:$ty:ty) => {
+        let $ident = $iter.next().unwrap().parse::<$ty>().expect(PARSE_ERROR);
+    };
+    ($iter: expr; ) => {};
+}
+
+fn solve(c: usize, d: usize, w: usize, x: usize, benefits: Vec<Vec<usize>>, costs: Vec<Vec<usize>>) -> usize {
+    let mut max_benefit = vec![vec![vec![0; x + 1]; w + 1]; d + 1];
+    for day in 0 .. d {
+        for w_rest in 0 .. max_benefit[day].len() {
+            for x_rest in 0 .. max_benefit[day][w_rest].len() {
+                max_benefit[day + 1][w_rest][x_rest] = std::cmp::max(max_benefit[day + 1][w_rest ][x_rest], max_benefit[day][w_rest][x_rest]);
+            }
+        }
+        for block in 0 .. c {
+            for w_rest in costs[block][day] as usize .. max_benefit[day].len() {
+                for x_rest in 0 .. max_benefit[day][w_rest].len() {
+                    max_benefit[day + 1][w_rest - costs[block][day]][x_rest] = std::cmp::max(max_benefit[day + 1][w_rest - costs[block][day]][x_rest], max_benefit[day][w_rest][x_rest] + benefits[block][day]);
+                }
+            }
+            let mut sum_cost = 0;
+            let mut sum_benefit = 0;
+            for to in block .. c {
+                if benefits[to][day] == 0 { break; }
+                sum_cost += costs[to][day];
+                sum_benefit += benefits[to][day];
+                for w_rest in sum_cost .. max_benefit[day].len() {
+                    for x_rest in 1 .. max_benefit[day][w_rest].len() {
+                        max_benefit[day + 1][w_rest - sum_cost][x_rest - 1] = std::cmp::max(max_benefit[day + 1][w_rest - sum_cost][x_rest - 1], max_benefit[day][w_rest][x_rest] + sum_benefit);
+                    }
+                }
+            }
+        }
+    }
+    *max_benefit.last().unwrap().first().unwrap().first().unwrap()
+}
+fn main() {
+    loop {
+        read!(c: usize, d: usize, w: usize, x: usize);
+        if c == 0 {break;}
+        read!(benefits: [[usize]; c]);
+        read!(costs: [[usize]; c]);
+        let result = solve(c, d, w, x, benefits, costs);
+        println!("{}", result);
+    }
+}

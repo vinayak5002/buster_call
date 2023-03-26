@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 500001
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 11001
+#define MAXM 110
+typedef long long int ll;
+
+int n, weight, v, w;
+int t = 0;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+
+long long int res;
+const long long int infty = (1LL<<31) - 1;
+const long long int M = 998244353777789;
+const long long int N = 499122177;
+
+vector<int> S;
+int A[MAXM][MAXN] ; 
+int VAL[MAXM] ; //コインの額面
+int W[MAXM];
+
+///////////計算量を減らす工夫///////////////
+// i番目までの荷物で重さjまででの最大価値をA[i][j]に保管
+// A[i][j] = max (A[i-1][j], A[i-1][j-W[i]] + VAL[i] )
+/////////////////////////////
+void init(){
+    for (int i=0 ; i<MAXM ; i++) {
+        A[i][0] = 0;
+    }
+    for (int i=0 ; i<MAXM ; i++ ) {
+        for (int j=1 ; j<MAXN ; j++) {
+            A[i][j] = 0;
+        }
+    }
+    // printf("END init  \n");
+}
+
+
+int ansback(int cargo, int w){
+    int tmp = 0 ;
+    int maxv = 0; 
+    //printf (" A[%d][%d] = max (ansback(%d-1,%d), ansback(%d,w-W[%d]) + %d) \n", cargo , w, cargo,w, cargo,cargo,  VAL[cargo]) ;  
+    //printf ("W[cargo]=%d  \n", W[cargo]);
+    if (cargo == 0 || w<0 ) {return 0;}
+    else if ( A[cargo][w] > 0 ) { maxv = A[cargo][w];}
+    else {
+        if (w-W[cargo]<0 ) { A[cargo][w] = ansback(cargo-1,w) ;}
+        else { A[cargo][w] = max (ansback(cargo-1,w), ansback(cargo,w-W[cargo]) + VAL[cargo]) ; } 
+        maxv = A[cargo][w];
+    }
+    //printf("ansback(%d,%d) = %d \n", cargo,w,maxv);
+    return maxv;
+}
+
+
+// bitset全探索を書きます。
+int main(){
+    cin >> n  ;
+    for (int i=1; i<=n ; i++) {
+        cin >> v ;
+        S.push_back(v);
+    }
+    int ans = 0;
+    int maxvalu = 0;
+    int lastnum=0;
+    int tmpvalu = 0;
+    for (t=0; t<(1<<n); t++) {
+        lastnum=0;  tmpvalu =0;
+        for (int i=0; i<n ; i++) {
+            if (t & (1<<i) ) { 
+                if ( S[i] > lastnum ) {
+                    lastnum = S[i];  tmpvalu++;
+                } else { tmpvalu= -1; break; }   
+            }
+        }
+        maxvalu = max (tmpvalu,maxvalu);        
+    }
+    printf ("%d\n", maxvalu);
+    return 0;
+}
+

@@ -1,0 +1,60 @@
+#include<iostream>
+#include<vector>
+
+using namespace std;
+
+int solve(vector<vector<int>>& memo, vector<int>& X, vector<int>&C, int prev_Y, int idx) {
+    if(idx == X.size()) {
+        return 0;
+    }
+
+    if(memo[prev_Y][idx] != -1) {
+        return memo[prev_Y][idx];
+    }
+
+    int min_v = INT_MAX;
+
+    for(int i = 0;i < C.size();i++) {
+        int ny = prev_Y + C[i];
+        if(ny < 0) {
+            ny = 0;
+        }
+        if(ny > 255) {
+            ny = 255;
+        }
+
+        int cost = (ny-X[idx])*(ny-X[idx]);
+
+        min_v = min(min_v, cost + solve(memo, X, C, ny, idx+1));
+    }
+
+    return memo[prev_Y][idx] = min_v;
+}
+
+int main(void) {
+    while(true) {
+        int N, M;
+        cin>>N>>M;
+        if(N == 0 || M == 0) {
+            break;
+        }
+
+        vector<int> C(M); //code block
+        vector<int> X(N);
+        for(int i = 0;i < M;i++) {
+            cin>>C[i];
+        }
+        for(int i = 0;i < N;i++) {
+            cin>>X[i];
+        }
+
+        vector<int> Y(N+10);
+        vector<vector<int>> memo(260, vector<int>(N+10, -1));
+        Y[0] = 128;
+        int ans = solve(memo, X, C, 128, 0);
+        
+        cout<<ans<<endl;
+    }
+
+    return 0;
+}

@@ -1,0 +1,103 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int const p_max = 100001;
+
+struct process {
+    string name;
+    int time;
+};
+
+class Queue {
+  private:
+    process prc[p_max];
+    int head;
+    int tail;
+
+  public:
+    Queue() {
+        head = 0;
+        tail = 0;
+    }
+
+    void queue_print() {
+        cout << endl;
+
+        cout << "head:" << head << " tail:" << tail << endl;
+        for(int i = head; i < tail; i++) {
+            cout << "prc[" << i << "] " << prc[i].name << " " << setw(3)
+                 << prc[i].time << endl;
+        }
+        cout << endl;
+    }
+
+    bool is_empty() {
+        if(head == tail) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    bool is_full() {
+        if(head >= p_max) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    void enqueue(process p) {
+        if(is_full()) {
+            cout << "Error:this queue is full.";
+        }
+        prc[tail] = p;
+        if(tail + 1 == p_max) {
+            tail = 0;
+        } else {
+            tail++;
+        }
+    }
+
+    process dequeue() {
+        if(is_empty()) {
+            cout << "Error:this queue is empty.";
+        }
+        process p = prc[head];
+        if(head + 1 == p_max) {
+            head = 0;
+        } else {
+            head++;
+        }
+        return p;
+    }
+};
+
+int main() {
+    int n;
+    int quant;
+    cin >> n >> quant;
+    int count = 0;
+    process p[n];
+    //process p[n] = {
+    //    {"p1", 150}, {"p2", 80}, {"p3", 200}, {"p4", 350}, {"p5", 20}};
+    for (int i = 0; i < n; i++) {
+        cin >> p[i].name >> p[i].time;
+    }
+    Queue q;
+    for(int i = 0; i < n; i++) {
+        q.enqueue(p[i]);
+    }
+
+    int i = 0;
+    while(!q.is_empty()) {
+        process tmp = q.dequeue();
+        if(quant < tmp.time) {
+            q.enqueue({tmp.name, tmp.time - quant});
+            count += quant;
+        } else {
+            count += tmp.time;
+            cout << tmp.name << " " << count << endl;
+        }
+    }
+
+    return 0;
+}

@@ -1,0 +1,255 @@
+#include <bits/extc++.h>
+
+using namespace std;
+
+#define rep(i,n) for(int i=0;i<(n);++i)
+#define reps(i,s,n) for(int i=(s);i<=(n);++i)
+#define all(x) begin(x), end(x)
+#define Fixed fixed << setprecision(12)
+#define updiv(a,b) ((a + b - 1) / b)
+constexpr int32_t INF  = 0x3f3f3f3f;
+constexpr int64_t LINF = 0x3f3f3f3f3f3f3f3fLL;
+constexpr int mod = 1e9+7;
+// constexpr int mod = 998244353;
+
+template <class Func>
+class FixPoint : Func {
+public:
+    explicit constexpr FixPoint(Func&& f) noexcept : Func(forward<Func>(f)) {}
+
+    template <class... Args>
+    constexpr decltype(auto) operator()(Args&&... args) const {
+        return Func::operator()(*this, std::forward<Args>(args)...);
+    }
+};
+
+template <class Func>
+static inline constexpr decltype(auto) makeFixPoint(Func&& f) noexcept {
+    return FixPoint<Func>{forward<Func>(f)};
+}
+
+template <class A, class B> inline bool chmax(A &a, const B &b) { return b > a && (a = b, true); }
+template <class A, class B> inline bool chmin(A &a, const B &b) { return b < a && (a = b, true); }
+
+template <class T> using max_heap = priority_queue<T>;
+template <class T> using min_heap = priority_queue<T,vector<T>,greater<T> >;
+template <class A, class B> using umap = unordered_map<A,B>;
+template <class A, class B> using uset = unordered_set<A,B>;
+
+template <class T> using Set = __gnu_pbds::tree<T, __gnu_pbds::null_type, less<T>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
+
+template <class T> inline void bye(T x) { cout << x << '\n'; exit(0); }
+
+constexpr int dx[] = {1, 0, -1, 0, 1, 1, -1, -1};
+constexpr int dy[] = {0, -1, 0, 1, 1, -1, -1, 1};
+
+template< typename T >
+vector< int > centroid(const vector<vector< T > > &g) {
+    const int N = (int) g.size();
+
+    stack< pair< int, int > > st;
+    st.emplace(0, -1);
+    vector< int > sz(N), par(N);
+    while(!st.empty()) {
+        auto p = st.top();
+        if(sz[p.first] == 0) {
+            sz[p.first] = 1;
+            for(auto &to : g[p.first]) if(to != p.second) st.emplace(to, p.first);
+        } else {
+            for(auto &to : g[p.first]) if(to != p.second) sz[p.first] += sz[to];
+            par[p.first] = p.second;
+            st.pop();
+        }
+    }
+
+    vector< int > ret;
+    int size = N;
+    for(int i = 0; i < N; i++) {
+        int val = N - sz[i];
+        for(auto &to : g[i]) if(to != par[i]) val = max(val, sz[to]);
+        if(val < size) size = val, ret.clear();
+        if(val == size) ret.emplace_back(i);
+    }
+
+    return ret;
+}
+
+template< typename T>
+bool tree_isomorphism(const vector<vector< T > > &a, const vector<vector< T > > &b) {
+    if(a.size() != b.size()) return false;
+
+    const int N = (int) a.size();
+    using pvi = pair< vector< int >, vector< int > >;
+
+    auto get_uku = [&](const vector<vector< T > > &t, int e) {
+        stack< pair< int, int > > st;
+        st.emplace(e, -1);
+        vector< int > dep(N, -1), par(N);
+        while(!st.empty()) {
+        auto p = st.top();
+        if(dep[p.first] == -1) {
+            dep[p.first] = p.second == -1 ? 0 : dep[p.second] + 1;
+            for(auto &to : t[p.first]) if(to != p.second) st.emplace(to, p.first);
+        } else {
+            par[p.first] = p.second;
+            st.pop();
+        }
+        }
+        return make_pair(dep, par);
+    };
+
+    auto solve = [&](const pvi &latte, const pvi &malta) {
+
+        int d = *max_element(begin(latte.first), end(latte.first));
+        if(d != *max_element(begin(malta.first), end(malta.first))) return false;
+
+        vector< vector< int > > latte_d(d + 1), malta_d(d + 1), latte_key(N), malta_key(N);
+
+        for(int i = 0; i < N; i++) latte_d[latte.first[i]].emplace_back(i);
+        for(int i = 0; i < N; i++) malta_d[malta.first[i]].emplace_back(i);
+
+        for(int i = d; i >= 0; i--) {
+            map< vector< int >, int > ord;
+            for(auto &idx : latte_d[i]) {
+                sort(begin(latte_key[idx]), end(latte_key[idx]));
+                ord[latte_key[idx]]++;
+            }
+            for(auto &idx : malta_d[i]) {
+                sort(begin(malta_key[idx]), end(malta_key[idx]));
+                if(--ord[malta_key[idx]] < 0) return false;
+            }
+            if(i == 0) return ord.size() == 1;
+
+            int ptr = 0;
+            for(auto &p : ord) {
+                if(p.second != 0) return false;
+                p.second = ptr++;
+            }
+            for(auto &idx : latte_d[i]) {
+                latte_key[latte.second[idx]].emplace_back(ord[latte_key[idx]]);
+            }
+            for(auto &idx : malta_d[i]) {
+                malta_key[malta.second[idx]].emplace_back(ord[malta_key[idx]]);
+            }
+        }
+        assert(0);
+    };
+    auto a1 = get_uku(a, 0);
+    auto b1 = get_uku(b, 0);
+    if(solve(a1, b1)) return true;
+    return false;
+}
+
+signed main() {
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+
+    int h1, w1, h2, w2;
+
+    while (cin >> h1 >> w1, h1) {
+        vector<string> s1(h1 + 2, string(w1 + 2, '.'));
+        for (int i = 1; i <= h1; ++i) {
+            for (int j = 1; j <= w1; ++j) {
+                cin >> s1[i][j];
+            }
+        }
+        cin >> h2 >> w2;
+        vector<string> s2(h2 + 2, string(w2 + 2, '.'));
+        for (int i = 1; i <= h2; ++i) {
+            for (int j = 1; j <= w2; ++j) {
+                cin >> s2[i][j];
+            }
+        }
+        h1 += 2;
+        w1 += 2;
+        h2 += 2;
+        w2 += 2;
+
+        vector<vector<bool> > p1(h1, vector<bool>(w1)), p2(h2, vector<bool>(w2));
+
+        for (int i = 0; i < h1; ++i) {
+            for (int j = 0; j < w1; ++j) {
+                p1[i][j] = s1[i][j] == '#';
+            }
+        }
+        for (int i = 0; i < h2; ++i) {
+            for (int j = 0; j < w2; ++j) {
+                p2[i][j] = s2[i][j] == '#';
+            }
+        }
+        
+        auto inside = [](int h, int w, int y, int x) {
+            return (0 <= y && y < h && 0 <= x && x < w);
+        };
+
+        vector<vector<int> > num1(h1, vector<int>(w1, -1)), num2(h2, vector<int>(w2, -1));
+        vector<vector<int> > tree1, tree2;
+
+        auto rec = makeFixPoint([&](auto rec, int y, int x, int &cnum, auto &num, auto &pat, auto &tree) -> void {
+            int my = cnum;
+            int h = num.size(), w = num.front().size();
+            tree.emplace_back(vector<int>());
+            queue<pair<int, int> > que;
+            vector<pair<int, int> > visited;
+            bool origin = pat[y][x];
+            num[y][x] = my;
+            que.emplace(y, x);
+            while (!que.empty()) {
+                auto [cy, cx] = que.front();
+                que.pop();
+                for (int k = 0; k < (origin ? 8 : 4); ++k) {
+                    int ny = cy + dy[k];
+                    int nx = cx + dx[k];
+                    if (inside(h, w, ny, nx) && pat[ny][nx] == origin && num[ny][nx] == -1) {
+                        que.emplace(ny, nx);
+                        num[ny][nx] = my;
+                        visited.emplace_back(ny, nx);
+                    }
+                }
+            }
+            for (auto [y, x] : visited) {
+                for (int k = 0; k < (origin ? 8 : 4); ++k) {
+                    int ny = y + dy[k];
+                    int nx = x + dx[k];
+                    if (inside(h, w, ny, nx) && pat[ny][nx] != origin) {
+                        if (num[ny][nx] == -1) {
+                            tree[my].emplace_back(++cnum);
+                            int tmp = cnum;
+                            rec(ny, nx, cnum, num, pat, tree);
+                            tree[tmp].emplace_back(my);
+                        }
+                    }
+                }
+            }
+        });
+
+        int cnt = 0;
+        rec(0, 0, cnt, num1, p1, tree1);
+        cnt = 0;
+        rec(0, 0, cnt, num2, p2, tree2);
+
+        // for (int i = 0; i < tree1.size(); ++i) {
+        //     for (auto e : tree1[i]) {
+        //         cout << i << " -> " << e << '\n';
+        //     }
+        // }
+        // cout << endl;
+        // for (int i = 0; i < tree2.size(); ++i) {
+        //     for (auto e : tree2[i]) {
+        //         cout << i << " -> " << e << '\n';
+        //     }
+        // }
+
+        // cout.flush();
+
+        if (tree_isomorphism(tree1, tree2)) {
+            cout << "yes\n";
+        } else {
+            cout << "no\n";
+        }
+    }
+
+    return(0);
+}
+
+

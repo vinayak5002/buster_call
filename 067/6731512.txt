@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+namespace {
+    const int NIL = -1;
+    const int LIM = 25;
+}  // namespace
+
+struct Node {
+    int parent, left, right;
+    Node() {
+        parent = NIL;
+        left = NIL;
+        right = NIL;
+    }
+};
+
+namespace {
+    vector<Node> tree(LIM);
+}  // namespace
+
+void preParse(int id);
+void inParse(int id);
+void postParse(int id);
+
+int main() {
+    int n, id, left, right, root;
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        cin >> id >> left >> right;
+        tree.at(id).left = left;
+        tree.at(id).right = right;
+        if (left != NIL) {
+            tree.at(left).parent = id;
+        }
+        if (right != NIL) {
+            tree.at(right).parent = id;
+        }
+    }
+
+    for (int i = 0; i < n; i++) {
+        if (tree.at(i).parent == NIL) {
+            root = i;
+        }
+    }
+
+    cout << "Preorder" << endl;
+    preParse(root);
+    cout << endl;
+    cout << "Inorder" << endl;
+    inParse(root);
+    cout << endl;
+    cout << "Postorder" << endl;
+    postParse(root);
+    cout << endl;
+}
+
+void preParse(int id) {
+    if (id == NIL) {
+        return;
+    }
+    cout << " " << id;
+    preParse(tree.at(id).left);
+    preParse(tree.at(id).right);
+}
+
+void inParse(int id) {
+    if (id == NIL) {
+        return;
+    }
+    inParse(tree.at(id).left);
+    cout << " " << id;
+    inParse(tree.at(id).right);
+}
+
+void postParse(int id) {
+    if (id == NIL) {
+        return;
+    }
+    postParse(tree.at(id).left);
+    postParse(tree.at(id).right);
+    cout << " " << id;
+}

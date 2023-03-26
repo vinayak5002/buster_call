@@ -1,0 +1,66 @@
+#include<stdio.h>
+#include<ctype.h>
+
+int main(){
+	char buf[256];
+	fgets(buf, sizeof(buf) - 1, stdin);
+
+	int r, c, table[100][100] = {}, sumr[100] = {}, sumc[100] = {};
+	long int  ans_table[101][101] = {};
+	sscanf(buf, "%d %d", &r, &c);
+
+	for (int i = 0; i < r; i++){
+		fgets(buf, sizeof(buf) - 1, stdin);
+		char *p = buf;
+		for (int j = 0; j < c; j++){
+			sscanf(p, "%d", &table[i][j]);
+
+			if (*p == '-'){
+				p++;
+			}
+
+			while (isdigit(*p)){
+				p++;
+			}
+			while (isspace(*p)){
+				p++;
+			}
+		}
+	}
+
+	for (int i = 0; i <= r; i++){
+		for (int j = 0; j <= c; j++){
+
+			if (i == r && j == c){
+				for (int a = 0; a < r; a++){
+					ans_table[i][j] += sumr[a];
+				}
+			}
+			else if (j == c){
+				ans_table[i][j] = sumr[i];
+			}
+			else if (i == r){
+				if (j != c){
+					ans_table[i][j] = sumc[j];
+				}
+			}
+			else{
+				ans_table[i][j] = table[i][j];
+				sumr[i] += table[i][j];
+				sumc[j] += table[i][j];
+			}
+		}
+	}
+
+	for (int i = 0; i <= r; i++){
+		for (int j = 0; j <= c; j++){
+			printf("%ld",ans_table[i][j]);
+			if (j != c){
+				printf(" ");
+			}
+		}
+		printf("\n");
+	}
+
+	return 0;
+}
