@@ -1,0 +1,27 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+const int INF = 1001001001;
+int main(){
+	int v, e;
+	cin >> v >> e;
+	vector<vector<int>> g(v, vector<int>(v,INF));
+	rep (i,e) {
+		int s, t, d;
+		cin >> s >> t >> d;
+		g[s][t] = d;
+	}
+	vector<vector<int>> dp((1 << v), vector<int> (v, INF));
+	dp[0][0] = 0;
+	for (int bit = 1; bit < (1 << v); bit++) {
+		rep (i,v) {
+			if (bit & (1 << i)) {
+				rep (j,v) {
+					dp[bit][i] = min(dp[bit][i],dp[bit^(1<<i)][j]+g[i][j]);
+				}
+			}
+		}
+	}
+	if (dp[(1 << v)-1][0]!=INF) cout << dp[(1 << v)-1][0] << endl;
+	else cout << -1 << endl;
+}

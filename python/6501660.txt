@@ -1,0 +1,69 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+    let q = si[0];
+    let ArraySize = 200;// 要素数に応じて拡張される
+    let array = [ArraySize];
+    let head = ArraySize / 2;
+    let tail = ArraySize / 2;
+    
+    for (let i = 0; i < q; i++) {
+		let pair = si[i + 1].split(" ");
+		// クエリはsi[1](2行目)からsi[q - 1](q + 1行目)までの, 総計q個存在する.
+		// 1行目以降, 1行に与えられた最大3組の数字を別個の要素にする.
+
+		let leftN = Number(pair[0]);
+		let middleN = Number(pair[1]);
+		let rightN = Number(pair[2]);
+		//so.write(leftN + "," + middleN + "," + rightN + "\n");//forDebug
+		
+		if (Math.abs(head - tail) <= 1){// 配列内に要素がないとき
+			array[ArraySize / 2] = rightN;
+			head = ArraySize / 2 - 1;
+			tail = ArraySize / 2 + 1;
+			
+		} else {
+			switch (leftN){
+			case 0:// 整数を挿入
+				if (middleN === 0){
+					array[head] = rightN;
+					head--;
+				} else {
+					array[tail] = rightN;
+					tail++;
+				}
+				break;
+				
+			case 1:// 番地の要素を出力
+				head++;
+				so.write(array[head + middleN] + "\n");
+				head--;
+				break;
+				
+			case 2:// 要素を削除
+				if (middleN === 0){
+					head++;
+					array[head] = null;
+				} else {
+					tail--;
+					array[tail] = null;
+				}
+				break;
+			}
+		}
+		
+		if (head <= 0 || tail >= ArraySize){// 端に達したら配列を拡張
+			let tmp = array.slice();
+			ArraySize = ArraySize * 2;
+			array = [ArraySize];
+			for (let j = 0; j < ArraySize / 2; j++){
+				array[ArraySize / 4 + j] = tmp[j];
+			}
+			head = ArraySize / 4 + head;
+			tail = ArraySize / 4 + tail;
+		}
+	}
+}
+

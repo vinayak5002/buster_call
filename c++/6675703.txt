@@ -1,0 +1,125 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+
+template<class T>
+class PriorityQueue {
+private:
+	vector<T> h_;
+
+private:
+	void max_heapify(int i) {
+		int n = int(h_.size());
+		int max_idx = i;
+		T max_val = h_[i];
+		int i2 = 2 * i;
+		int l_idx = i2 + 1;
+		int r_idx = i2 + 2;
+
+		if (l_idx < n && max_val < h_[l_idx]) {
+			max_idx = l_idx;
+			max_val = h_[l_idx];
+		}
+		if (r_idx < n && max_val < h_[r_idx]) {
+			max_idx = r_idx;
+		}
+		if (max_idx != i) {
+			swap(h_[i], h_[max_idx]);
+			max_heapify(max_idx);
+		}
+		return;
+	}
+
+public:
+	PriorityQueue() {
+		return;
+	}
+
+	~PriorityQueue() {
+		return;
+	}
+
+	void push(const T& x) {
+		if (!h_.empty()) {
+			int c_idx = -1;
+
+			h_.push_back(x);
+			c_idx = int(h_.size() - 1);
+			while (true) {
+				int p_idx = (c_idx - 1) / 2;
+
+				if (h_[p_idx] < h_[c_idx]) {
+					swap(h_[p_idx], h_[c_idx]);
+					c_idx = p_idx;
+					if (c_idx == 0) {
+						break;
+					}
+				}
+				else {
+					break;
+				}
+			}
+		}
+		else {
+			h_.push_back(x);
+		}
+		return;
+	}
+
+	bool empty() const {
+		return h_.empty();
+	}
+
+	T top() const {
+		return h_[0];
+	}
+
+	void pop() {
+		h_[0] = h_.back();
+		h_.pop_back();
+		if (!h_.empty()) {
+			max_heapify(0);
+		}
+		return;
+	}
+};
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n, q;
+	vector<PriorityQueue<int> > ques;
+
+	cin >> n >> q;
+	ques.resize(n);
+	for (int i = 0; i < q; i++) {
+		int op, t, x;
+
+		cin >> op >> t;
+		if (op == 0) {
+			cin >> x;
+			ques[t].push(x);
+		}
+		else if (op == 1) {
+			if (!ques[t].empty()) {
+				cout << ques[t].top() << endl;
+			}
+		}
+		else {
+			if (!ques[t].empty()) {
+				ques[t].pop();
+			}
+		}
+	}
+	return 0;
+}

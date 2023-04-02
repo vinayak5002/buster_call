@@ -1,0 +1,57 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+vector<vector<bool>> seen;
+vector<vector<int>> c;
+const int dw[8] = {-1, 0, 1,-1, 1,-1, 0, 1};
+const int dh[8] = {-1,-1,-1, 0, 0, 1, 1, 1};
+
+void dfs(int i, int j)
+{
+    seen[i][j] = true;
+
+    for(int dir=0; dir<8; dir++)
+        if (c[i+dh[dir]][j+dw[dir]] == 1 && !seen[i+dh[dir]][j+dw[dir]]) dfs(i+dh[dir], j+dw[dir]);
+}
+
+int main()
+{
+    int w,h;
+
+    while(true)
+    {
+        cin >> w >> h;
+        if (w == 0 && h == 0) break;
+        c.resize(h+2);
+        seen.resize(h+2);
+        for(int i=0; i<h+2; i++)
+        {
+            c[i].resize(w+2);
+            c[i].assign(w+2, 0);
+            seen[i].resize(w+2);
+            seen[i].assign(w+2, false);
+        }
+
+        for(int i=1; i<h+1; i++)
+            for(int j=1; j<w+1; j++)
+                cin >> c[i][j];
+
+        int counter = 0;
+        for(int i=1; i<h+1; i++)
+        {
+            for(int j=1; j<w+1; j++)
+            {
+                if (seen[i][j] || c[i][j] == 0) continue;
+
+                dfs(i, j);
+                counter++;
+            }
+        }
+
+        // cout << "ans:" << counter << endl;
+        cout << counter << endl;
+    }
+
+    return 0;
+}

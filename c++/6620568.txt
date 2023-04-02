@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+#define rep(i, n) for(int i = 0; i < (n); i++)
+const int INF = (1ll << 31) - 1;
+int N, noeud[400010];
+
+void init(int N_) {
+	N=1; while(N<N_) N*=2;
+	rep(i,2*N-1) noeud[i] = INF;
+}
+
+void update(int i, int val) {
+	i += (N-1);
+	noeud[i] = val;
+	while(i>0) {
+		i = (i-1)/2;
+		noeud[i] = min(noeud[2*i+1], noeud[2*i+2]);
+	}
+}
+
+int query(int a, int b, int k=0, int g=0, int d=N) {
+	if(b<=g || d<=a) return INF;
+	if(a<=g && d<=b) return noeud[k];
+	int vg = query(a, b, 2*k+1, g, (g+d)/2);
+	int vd = query(a, b, 2*k+2, (g+d)/2, d);
+	return min(vg, vd);
+}
+
+int main(void) {
+	int n, t; 
+	cin >> n >> t;
+	init(n);
+	while(t--) {
+		int comm, x, y;
+		cin >> comm >> x >> y;
+		if(comm == 0) {
+			update(x, y);
+		} else {
+			cout << query(x, y+1) << endl;
+		}
+	}
+
+	return 0;
+}
+

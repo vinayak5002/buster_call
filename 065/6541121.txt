@@ -1,0 +1,36 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let line = si[0]
+	let num = line.split(" ")
+	let array = new Array()
+	for (let i = 0; i < num[0]; i++) {
+		array[i] = new Array()
+	}
+	
+	for (let i = 1; i <= num[1]; i++) {
+		let line = si[i]
+		let num = line.split(" ")
+		
+		if (num[0] == '0') {
+			// 指定された配列の末尾に追加
+			array[num[1]].push(num[2])
+		
+		} else if (num[0] == '1') {
+			// 指定された配列の全要素を表示
+			if (array[num[1]].length === 0) {
+				so.write("\n")
+			} else {
+				so.write(array[num[1]].join(" ") + "\n")
+			}
+			
+		} else {
+			//指定された配列tの末尾に配列sを接続
+			Array.prototype.push.apply(array[num[2]], array[num[1]])
+			// 配列sの全要素を消去
+			array[num[1]].length = 0
+		}
+	}
+}

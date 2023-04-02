@@ -1,0 +1,102 @@
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100000
+
+struct process {
+    char name[100];
+    int time;
+};
+
+int head, tail, n, q, count = 0;
+
+void initialize();
+bool isEmpty();
+bool isFull();
+void enqueue(struct process*, struct process);
+struct process dequeue(struct process*);
+
+int main(void)
+{
+    struct process tmp;
+    struct process* queue = NULL;
+    scanf("%d %d", &n, &q);
+
+    queue = (struct process*)malloc(sizeof(struct process) * n);
+    if (queue == NULL) {
+        fprintf(stderr, "error");
+        exit(1);
+    }
+
+    initialize();
+    for (int i = 0; i < n; i++) {
+        scanf("%s", tmp.name);
+        scanf("%d", &tmp.time);
+        enqueue(queue, tmp);
+    }
+
+    while (!isEmpty()) {
+        if ((queue[head].time - q) <= 0) {
+            count += queue[head].time;
+            printf("%s %d\n", queue[head].name, count);
+            dequeue(queue);
+        } else {
+            tmp = dequeue(queue);
+            tmp.time -= q;
+            enqueue(queue, tmp);
+            count += q;
+        }
+    }
+
+    return 0;
+}
+
+//初期化
+void initialize()
+{
+    head = tail = 0;
+}
+
+//空判定
+bool isEmpty()
+{
+    return head == tail;
+}
+
+//満判定
+bool isFull()
+{
+    return head == (tail + 1) % MAX;
+}
+
+//キュー最後尾追加
+void enqueue(struct process* x, struct process a)
+{
+    if (isFull()) {
+        fprintf(stderr, "オーバーフローが発生しています。\n");
+        exit(1);
+    }
+    x[tail] = a;
+    if (tail + 1 == MAX-1) {
+        tail = 0;
+    } else {
+        tail++;
+    }
+}
+
+//キュー先頭削除
+struct process dequeue(struct process* x)
+{
+    struct process a;
+    if (isEmpty()) {
+        fprintf(stderr, "アンダーフローが発生しています。\n");
+    }
+    a = x[head];
+    if (head + 1 == MAX) {
+        head = 0;
+    } else {
+        head++;
+    }
+    return a;
+}

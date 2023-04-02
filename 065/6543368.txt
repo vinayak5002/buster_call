@@ -1,0 +1,50 @@
+import java.util.Scanner;
+
+class Main{
+    public static void main(String[] args){
+	Scanner sc = new Scanner(System.in);
+	GasSt St = new GasSt(sc.nextInt());
+	int M = sc.nextInt();
+
+	for(int i=0; i<M; i++){
+	    int in1 = sc.nextInt();
+	    if(in1==1)St.inQ(sc.nextInt());
+	    else St.deQ(sc.nextInt());
+	}
+    }
+}
+
+class GasSt{
+    private int n,m;
+    private int[] sum = new int[10];
+    private int[][] lane = new int[10][50];
+    private int[][] head_tail = new int[10][2];
+
+    public GasSt(int N){
+	this.n = N;
+	for(int i=0; i<N; i++){
+	    sum[i]=0;
+	    head_tail[i][0]=0;
+	    head_tail[i][1]=0;
+	}
+    }
+
+    public void inQ(int car){
+	int min=50,array=10;
+	for(int i=0; i<this.n; i++){
+	    if(min>sum[i]){
+		min=sum[i];
+		array=i;
+	    }
+	}
+	sum[array]++;
+	this.lane[array][head_tail[array][1]]=car;
+	this.head_tail[array][1]++;
+    }
+
+    public void deQ(int Lane){
+	System.out.println(this.lane[Lane-1][this.head_tail[Lane-1][0]]);
+	this.head_tail[Lane-1][0]++;
+	sum[Lane-1]--;
+    }
+}

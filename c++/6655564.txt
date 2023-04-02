@@ -1,0 +1,137 @@
+#include<string>
+#include<iostream>
+#include<map>
+#include<vector>
+
+std::vector<int> makeKMPTable(const std::string& str) {
+	std::vector<int> ret(str.size() + 1, 0);
+	int tarIdx = 1;
+	int strIdx = 0;
+	while (tarIdx < str.size()) {
+		if (str[tarIdx] == str[strIdx]) {
+			tarIdx++;
+			strIdx++;
+			ret[tarIdx] = strIdx;
+		}
+		else {
+			if (strIdx == 0) {
+				tarIdx++;
+			}
+			else {
+				strIdx = ret[strIdx];
+			}
+		}
+	}
+	return ret;
+}
+
+std::vector<std::vector<int>> makeKMPTable1D(const std::vector<std::string>& pattern) {
+	std::vector<std::vector<int>> KMPTable1D(pattern.size(), std::vector<int>(pattern[0].size(), 0));
+	for (int i = 0; i < pattern.size(); i++) {
+		KMPTable1D[i] = makeKMPTable(pattern[i]);
+	}
+	return KMPTable1D;
+}
+
+std::vector<int> makeKMPTable2D(const std::vector<std::vector<int>>& KMPTable1D, const std::vector<std::string>& pattern) {
+	const int W = pattern[0].size();
+	std::vector<int> ret(W, 0);
+	int tarIdx = 1;
+	int strIdx = 0;
+	while (tarIdx < W) {
+		if (pattern[tarIdx] == pattern[strIdx]) {
+			tarIdx++;
+			strIdx++;
+			ret[tarIdx] = strIdx;
+		}
+		else {
+			if (strIdx == 0) {
+				tarIdx++;
+			}
+			else {
+				strIdx = ret[strIdx];
+			}
+		}
+	}
+	return ret;
+}
+
+std::vector<int> strSearchKMP(const std::string& text, const std::string& pattern, const std::vector<int>& KMPTable) {
+	std::vector<int> ret;
+
+	int textIdx = 0;
+	int patIdx = 0;
+
+	while (textIdx < text.size()) {
+		if (text[textIdx] == pattern[patIdx]) {
+			if (patIdx == pattern.size() - 1) {
+				// 完全一致
+				ret.push_back(textIdx - int(pattern.size()) + 1);
+			}
+			textIdx++;
+			patIdx++;
+		}
+		else {
+			if (patIdx == 0) {
+				textIdx++;
+			}
+			else {
+				patIdx = KMPTable[patIdx];
+			}
+		}
+	}
+	return ret;
+}
+
+void strSearchKMP2D(const std::vector<std::string>& text, const std::vector<std::string>& pattern) {
+	const std::vector<std::vector<int>> KMPTable1D = makeKMPTable1D(pattern);
+	const std::vector<int> KMPTable2D = makeKMPTable2D(KMPTable1D, pattern);
+
+	const int H = text.size();
+	const int W = text[0].size();
+
+	int textIdxH = 0;
+	int patIdxH = 0;
+
+	while (textIdxH + pattern.size() <= H) {
+		// 最初の行のマッチング
+		const std::vector<int> matchIdx = strSearchKMP(text[textIdxH], pattern[patIdxH], KMPTable1D[patIdxH]);
+		// 最初の行があっていたら次の行以下を試す
+		for (auto& idx : matchIdx) {
+			for (int i = 1; i < pattern.size(); i++) {
+
+				if (text[textIdxH + i].substr(idx, pattern[0].size()) == pattern[patIdxH + i]) {
+					if (patIdxH + i == pattern.size() - 1) {
+						// 完全一致
+						std::cout << textIdxH << " " << idx << std::endl;
+					}
+				}
+				else {
+					break;
+				}
+			}
+		}
+		textIdxH++;
+	}
+}
+
+int main() {
+	// read
+	int H, W;
+	std::cin >> H >> W;
+
+	std::vector<std::string> text(H);
+	for (int i = 0; i < H; i++) {
+		std::cin >> text[i];
+	}
+
+	int R, C;
+	std::cin >> R >> C;
+
+	std::vector<std::string> pattern(R);
+	for (int i = 0; i < R; i++) {
+		std::cin >> pattern[i];
+	}
+
+	strSearchKMP2D(text, pattern);
+}

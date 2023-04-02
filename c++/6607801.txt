@@ -1,0 +1,74 @@
+#include <cstdio>
+#include <stdlib.h>
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#define min(a,b)    (((a) < (b)) ? (a) : (b))
+#define max(a,b)    (((a) > (b)) ? (a) : (b))
+#define abs(x)    ((x) < 0 ? -(x) : (x))
+//#define INF 0x3f3f3f3f
+#define delta 0.85
+#define eps 1e-3
+#define PI 3.14159265358979323846
+#define MAX_V 205
+#define MAX_R 1005
+using namespace std;
+const int INF = 1e8; //0x3f3f3f3f * 3 则 int 溢出
+int E, V, R;
+int order[MAX_R];
+int dl[MAX_V][MAX_V], ds[MAX_V][MAX_V], dp[MAX_R][MAX_V];
+
+int main(){
+	while(~scanf("%d%d", &V, &E) && V){
+		for(int i = 0; i < V; i++){
+			for(int j = 0; j < V; j++){
+				dl[i][j] = ds[i][j] = INF;
+			}
+			dl[i][i] = ds[i][i] = 0;
+		}
+		for(int i = 0; i < E; i++){
+			char c;
+			int u, v, d;
+			scanf("%d%d%d %c", &u, &v, &d, &c);
+			--u, --v;
+			if(c == 'L') dl[u][v] = dl[v][u] = min(dl[u][v], d);
+			else ds[u][v] = ds[v][u] = min(ds[u][v], d);
+		}
+		scanf("%d", &R);
+		for(int i = 0; i < R; i++){
+			scanf("%d", order + i);
+			--order[i];
+		}
+		// Warshall_floyd
+		for(int k = 0; k < V; k++){
+			for(int i = 0; i < V; i++){
+				for(int j = 0; j < V; j++){
+					dl[i][j] = min(dl[i][j], dl[i][k] + dl[k][j]);
+					ds[i][j] = min(ds[i][j], ds[i][k] + ds[k][j]);
+				}
+			}
+		}
+		// Dp
+		for (int i = 0; i < R; i++){
+			for(int j = 0; j < V; j++){
+				dp[i][j] = INF;
+			}
+		}
+		dp[0][order[0]] = 0;
+		for(int i = 0; i < R - 1; i++){
+			for(int j = 0; j < V; j++){
+				if(dp[i][j] != INF){
+					// 直接走陆路
+					dp[i + 1][j] = min(dp[i + 1][j], dp[i][j] + dl[order[i]][order[i + 1]]);
+					for(int k = 0; k < V; k++){
+						// 陆路-海路-陆路
+						dp[i + 1][k] = min(dp[i + 1][k], dp[i][j] + dl[order[i]][j] + ds[j][k] + dl[k][order[i + 1]]);
+					}
+				}
+			}
+		}
+		printf("%d\n", *min_element(dp[R - 1], dp[R - 1] + V));
+	}
+	return 0;
+}
+

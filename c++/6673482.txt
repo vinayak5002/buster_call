@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const long long INF = 1LL<<60;
+const double PI = acos(-1.0);
+using Graph = vector<vector<ll>>;
+template<class T> inline bool chmax(T& a, T b) { if (a < b) { a = b; return 1; } return 0; }
+template<class T> inline bool chmin(T& a, T b) { if (a > b) { a = b; return 1; } return 0; }
+
+int main()
+{
+    int n;
+    cin >> n;
+    Graph graph(n);
+    for (int i=0; i<n; i++) {
+        int u, k;
+        cin >> u >> k;
+        --u;
+        for (int j=0; j<k; j++) {
+            int v;
+            cin >> v;
+            --v;
+            graph[u].push_back(v);
+        }
+    }
+
+    vector<int> dist(n, -1);
+    queue<int> que;
+    dist[0] = 0;
+    que.push(0);
+    
+    while (!que.empty()) {
+        int u = que.front();
+        que.pop();
+        for (int v:graph[u]) {
+            if (dist[v] != -1)
+                continue;
+            dist[v] = dist[u] + 1;
+            que.push(v);
+        }
+    }
+
+    for (int u=0; u<n; u++)
+        cout << u+1 << " " << dist[u] << endl;
+}

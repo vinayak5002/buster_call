@@ -1,0 +1,190 @@
+#include<stdio.h>
+#include<iostream>
+#include <stdlib.h>
+
+using namespace std;
+
+
+int times;
+
+struct Node{
+    long long key;
+    Node *parent, *leftChild, *rightChild;
+};
+
+Node *root, *NIL;
+
+void insert(long long k){
+    Node* p = NIL;
+    Node* cur = root;
+    Node* z = (Node*) malloc(sizeof(Node));
+    z->key = k;
+    z->leftChild = NIL;
+    z->rightChild = NIL;
+
+    while(cur != NIL){
+        p = cur;
+        if(z->key < cur->key){
+            cur = cur->leftChild;
+        }else{
+            cur = cur->rightChild;
+        }
+    }
+
+    z->parent = p;
+
+    if(p == NIL){
+        root = z;
+    }else if(p->key < z->key){
+        p->rightChild = z;
+    }else{
+        p->leftChild = z;
+    }
+}
+
+
+void inOrderPrint(Node* n){
+    if(n){
+        inOrderPrint(n->leftChild);
+        cout << " "<< n->key;
+        inOrderPrint(n->rightChild);
+    }
+}
+
+void preOrderPrint(Node* n){
+    if(n){
+        cout<< " "<< n->key;
+        preOrderPrint(n->leftChild);
+        preOrderPrint(n->rightChild);
+    }
+}
+
+void find(long long key){
+    Node* cur = root;
+    while(cur != NIL){
+        if(cur->key == key){
+            cout << "yes" << endl;
+            return;
+        }else if(cur->key < key){
+            cur = cur->rightChild;
+        }else{
+            cur = cur->leftChild;
+        }
+    }cout << "no" <<endl;
+}
+
+Node* findNode(long long key){
+    if(root == NIL) return NIL;
+    if(root->key == key) return root;
+    Node* targetNode = root;
+    while(targetNode != NIL){
+        if(targetNode->key < key)
+            targetNode = targetNode->rightChild;
+        else if(targetNode->key > key)
+            targetNode = targetNode->leftChild;
+        else
+            return targetNode;
+    }return targetNode;
+}
+
+Node* leftMax(Node* n){
+    Node* p = n;
+    while(n != NIL){
+        p = n;
+        n = n->rightChild;
+    }return p;
+}
+
+Node* rightMin(Node * n){
+    Node* p = n;
+    while(n != NIL){
+        p = n;
+        n = n->leftChild;
+    }return p;
+}
+void deleteNode(int k){
+    Node* n = findNode(k);
+    if(n == NIL) return;
+    if(n == root && root->leftChild == NIL && root->rightChild == NIL){
+        free(n);
+        root = NIL;
+        return;
+    }
+    if(n->leftChild == NIL && n->rightChild == NIL){
+         Node* p = n->parent;
+        if(p->leftChild == n) p->leftChild = NIL;
+        else p->rightChild = NIL;
+        free(n);
+        return;
+    }else if(n->leftChild == NIL){
+        Node* p = n->parent;
+        if(p->leftChild == n){
+                p->leftChild = n->rightChild;
+        }else{
+                p->rightChild = n->rightChild;
+        }free(n);
+    }else if(n-> rightChild == NIL){
+         Node* p = n->parent;
+        if(p->leftChild == n){
+                p->leftChild = n->leftChild;
+        }else{
+                p->rightChild = n->leftChild;
+        }free(n);
+    }else{
+        //find max of left subtree;
+        Node* leftMaxNode = leftMax(n->leftChild);
+        n->key = leftMaxNode->key;
+        Node* pl = leftMaxNode->parent;
+    
+        if(leftMaxNode->leftChild != NIL){
+            Node* leftMaxLeftChild = leftMaxNode->leftChild;
+            if(pl == n){
+                 leftMaxLeftChild->parent = pl;
+                pl->leftChild = leftMaxLeftChild;
+            }else{
+                 leftMaxLeftChild->parent = pl;
+                pl->rightChild = leftMaxLeftChild;
+            }
+        }else{
+            if(pl == n)
+                n->leftChild = NIL;
+            else
+                pl->rightChild = NIL;
+        }
+        free(leftMaxNode);
+    }
+
+}
+
+
+int main(){
+
+    string s;
+    int key;
+    scanf("%d", &times);
+    for(int i = 0; i< times; i++){
+        cin >> s;
+      
+        if(s== "insert"){
+            scanf("%d", &key);
+            insert(key);
+        }
+        else if(s == "find"){
+            scanf("%d", &key);
+            find(key);
+        }
+        else if(s == "delete"){
+            scanf("%d", &key);
+            deleteNode(key);
+        }
+        else if (s == "print"){
+            inOrderPrint(root);
+            cout<< endl;
+            preOrderPrint(root);
+            cout<< endl;
+        }
+    }
+
+    return 0;
+}
+

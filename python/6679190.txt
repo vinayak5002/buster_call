@@ -1,0 +1,38 @@
+
+#include<iostream>
+#include<vector>
+using namespace std;
+
+void dfs( int u, vector< vector<int>> g, vector<int>&d, vector<int>&f, int &time, vector<bool> &seen) {
+	time++;
+	d[u] = time;
+	seen[u] = true;
+	for (int next : g[u]) {
+		if (seen[next])continue;
+		dfs(next, g, d, f, time, seen);
+	}
+	time++;
+	f[u] = time;
+}
+int main() {
+	int n;
+	cin >> n;
+	vector<vector<int> > g(n);
+	vector<int>d(n, 0);
+	vector<int>f(n, 0);
+	vector<bool>seen(n, false);
+	for (int i = 0; i < n; i++) {
+		int u, k;
+		cin >> u >> k;
+		for (int i = 0; i < k; i++) {
+			int v;
+			cin >> v;
+			g[u-1].push_back(v-1);
+		}
+	}
+	int t = 0;
+	dfs(0, g, d, f, t, seen);
+	for (int i = 0; i < n; i++) {
+		cout << i + 1<<" "<< d[i]<<" "<< f[i] << endl;
+	}
+}

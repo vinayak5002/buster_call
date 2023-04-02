@@ -1,0 +1,65 @@
+#include<stdio.h>
+#include<string.h>
+
+void encrypt(int temp, char text[], int key);
+
+int main()
+{
+    char text[6000];
+    char the[4] = {'T','t','h','e'};
+    char this[5] = {'T','t','h','i','s'};
+    char that[5] = {'T','t','h','a','t'};
+    int temp, key;
+    int i = 0;
+    while((temp = getchar())!= EOF){
+        if(temp != 10){
+            text[i] = temp;
+            i++;
+        }   
+    }
+    for(int j = 1; j <= 26; j++)
+    {
+        encrypt(temp, text, 1);
+        for(i = 0; i < (strlen(text)-1); i++)
+        {
+            if(text[i] == the[0] || text[i] == the[1])
+            {
+                int index = 0;
+                for(int j = 1; j <= 2; j++)
+                    if(text[i+j] == the[1+j])index++;
+                if(index == 2)key = j;
+                index = 0;
+                for(int j = 1; j <= 3; j++)
+                    if(text[i+j] == this[1+j])index++;
+                if(index == 3)key = j;
+                index = 0;
+                for(int j = 1; j <= 3; j++)
+                    if(text[i+j] == that[1+j])index++;
+                if(index == 3)key = j;
+            }
+        }
+    }
+    encrypt(temp, text, key);
+    puts(text);
+    return 0;
+}
+
+void encrypt(int temp, char text[6000], int key)
+{
+    for(int i = 0; i < strlen(text); i++)
+    {
+        temp = text[i];
+
+        if(temp >= 65 && temp <= 90){
+            temp -= key;
+            if(temp < 65)temp += 26;
+        }
+
+        if(temp >= 97 && temp <= 122){
+            temp -= key;
+            if(temp < 97)temp += 26;
+        }
+
+        text[i] = (char)temp;
+    }
+}

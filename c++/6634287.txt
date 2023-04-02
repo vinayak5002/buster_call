@@ -1,0 +1,91 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+class rolling_hash1D{
+  using ull = unsigned long long;
+  private:
+    ull base, cons;
+  public:
+    rolling_hash1D(){
+      base = (rand() % (ull)1e9) + (ull)1e9;
+      cons = (rand() % 10) + 10;
+    }
+
+    ull func(char c){
+      return (ll)(c) + cons;
+    }
+
+    // aはbに含まれているか(一致した時bの先頭のindexの配列を返す)
+    vector<ll> contain_vec(string &a, string &b){
+      ll sa = a.size();
+      ll sb = b.size();
+      vector<ll> res;
+
+      if(sa > sb) return res;
+      ull t = 1;
+      for(ll i = 0; i < sa; i++) t *= base;
+
+      // aとbの先頭a.size()文字のハッシュ値を計算
+      ull ha = 0, hb = 0;
+      for(ll i = 0; i < sa; i++) ha = ha * base + func(a[i]);
+      for(ll i = 0; i < sa; i++) hb = hb * base + func(b[i]);
+      
+      // bの位置を進めながらチェック
+      for(ll i = 0; i + sa <= sb; i++){
+        if(ha == hb) res.push_back(i);
+        if(i + sa < sb) hb = hb * base + func(b[i + sa]) - func(b[i]) * t;
+      }
+      return res;
+    }
+
+    bool contain(string &a, string &b){
+      return (contain_vec(a, b).size() != 0);
+    }
+
+    // aの末尾とbの先頭が何文字一致するか
+    ll overlap(string &a, string &b){
+      ll sa = a.size();
+      ll sb = b.size();
+      ll res = 0;
+      ull ha = 0, hb = 0, t = 1;
+      for(ll i = 1; i <= min(sa, sb); i++){
+        ha = ha + func(a[sa - i]) * t;
+        hb = hb * base + func(b[i - 1]);
+        if(ha == hb) res = i;
+        t *= base;
+      }
+      return res;
+    }
+};
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  string s, t;
+  cin >> s >> t;
+
+  rolling_hash1D roliha;
+  auto vec = roliha.contain_vec(t, s);
+  rep(i, 0, SZ(vec)) cout << vec[i] << endl;
+
+
+
+  return 0;
+}

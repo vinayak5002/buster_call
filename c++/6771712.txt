@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <limits.h>
+#define MAX 128
+#define WHITE 0
+#define GRAY 7
+#define BLACK 11
+
+void prim(int M[MAX][MAX], int n)
+{
+    int mincost, u;
+    int color[MAX] = {0};
+    int d[MAX];
+    for (int i = 0; i < n; i++)
+    {
+        d[i] = INT_MAX;
+    }
+
+    d[0] = 0;
+    color[0] = GRAY;
+
+    while (1)
+    {
+        mincost = INT_MAX;
+        u = -1;
+        for (int i = 0; i < n; i++)
+        {
+            if (color[i] != BLACK && d[i] < mincost)
+            {
+                u = i;
+                mincost = d[i];
+            }
+        }
+        if (u == -1)
+        {
+            break;
+        }
+        color[u] = BLACK;
+        for (int i = 0; i < n; i++)
+        {
+            if (color[i] != BLACK && M[u][i] != INT_MAX)
+            {
+                if (d[i] > d[u] + M[u][i])
+                {
+                    d[i] = d[u] + M[u][i];
+                    color[i] = GRAY;
+                }
+            }
+        }
+    }
+    for (int i = 0; i < n; i++)
+    {
+        printf("%d %d\n", i, d[i]);
+    }
+}
+
+int main(void)
+{
+    int n, u, k, v, c;
+    int A[MAX][MAX];
+    for (int i = 0; i < MAX; i++)
+    {
+        for (int j = 0; j < MAX; j++)
+        {
+            A[i][j] = INT_MAX;
+        }
+    }
+
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++)
+    {
+        scanf("%d", &u);
+        scanf("%d", &k);
+        for (int j = 0; j < k; j++)
+        {
+            scanf("%d", &v);
+            scanf("%d", &c);
+            A[u][v] = c;
+        }
+    }
+    prim(A, n);
+
+    return 0;
+}

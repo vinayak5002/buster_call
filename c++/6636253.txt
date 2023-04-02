@@ -1,0 +1,78 @@
+#include<iostream>
+#include<string>
+using namespace std;
+
+struct Dice{
+    int set[6];
+    void roll(char ch){
+        int buf;
+        if(ch=='N'){
+            buf=set[0];
+            set[0]=set[1];
+            set[1]=set[5];
+            set[5]=set[4];
+            set[4]=buf;
+        }
+        if(ch=='S'){
+            buf=set[0];
+            set[0]=set[4];
+            set[4]=set[5];
+            set[5]=set[1];
+            set[1]=buf;
+        }
+        if(ch=='E'){
+            buf=set[0];
+            set[0]=set[3];
+            set[3]=set[5];
+            set[5]=set[2];
+            set[2]=buf;
+        }
+        if(ch=='W'){
+            buf=set[0];
+            set[0]=set[2];
+            set[2]=set[5];
+            set[5]=set[3];
+            set[3]=buf;
+        }
+        if(ch=='R'){
+            buf=set[1];
+            set[1]=set[2];
+            set[2]=set[4];
+            set[4]=set[3];
+            set[3]=buf;
+        }
+    }
+    int top(){return set[0];}
+    int front(){return set[1];}
+    int right(){return set[2];}
+    int left(){return set[3];}
+    int back(){return set[4];}
+    int bottom(){return set[5];}
+};
+
+int main(){
+    Dice d;
+    int target[6], count=0, frag=0;
+    for(int i=0; i<6; i++){cin>>target[i];}
+    for(int i=0; i<6; i++){cin>>d.set[i];}
+    //
+    int top=target[0], front=target[1];
+    if(d.top()!=top){
+        if(d.right()==top){d.roll('W');}
+        else if(d.left()==top){d.roll('E');}
+        else{
+            while(d.top()!=top){
+                d.roll('N'); count++;
+                if(count > 6){frag=1; break;}
+            }
+        }
+    }
+    count=0;
+    while(d.front()!=front){
+        d.roll('R'); count++;
+        if(count > 6){frag=1; break;}
+    }
+    //
+    if(d.right()==target[2] && d.left()==target[3] && d.back==target[4] && d.bottom==d[5] && frag==0){cout<<"Yes"<<endl;}
+    else{cout<<"No"<<endl;}
+}

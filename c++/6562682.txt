@@ -1,0 +1,127 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+
+class edge{
+public:
+  ll to, cost;
+  edge(ll to, ll cost): to(to), cost(cost) {}
+};
+
+bool bellman_ford(ll s, vector<vector<edge> > &G, vector<ll> &dist){
+  bool negative = false;
+  ll n = dist.size();
+
+  for(ll i = 0; i < n; i++) dist[i] = INF;
+  dist[s] = 0;
+
+  for(ll i = 0; i < n - 1; i++){
+    for(ll j = 0; j < n; j++){
+      for(ll k = 0; k < G[j].size(); k++){
+        edge e = G[j][k];
+        if(dist[j] != INF && dist[e.to] > dist[j] + e.cost){
+          dist[e.to] = dist[j] + e.cost;
+        }
+      }
+    }
+  }
+  for(ll j = 0; j < n; j++){
+    for(ll k = 0; k < G[j].size(); k++){
+      edge e = G[j][k];
+      if(dist[j] != INF && dist[e.to] > dist[j] + e.cost){
+        negative = true;
+      }
+    }
+  }
+  return negative;
+}
+
+void dijkstra(ll s, vector<vector<edge> > &G, vector<ll> &dist){
+  priority_queue<pair<ll, ll>, vector<pair<ll, ll> >, greater<pair<ll, ll> > > que;
+  
+  ll n = dist.size();
+  for(ll i = 0; i < n; i++){
+    dist[i] = INF;
+  }
+
+  dist[s] = 0;
+  que.push(make_pair(0, s));
+
+  while(!que.empty()){
+    pair<ll, ll> p = que.top();
+    que.pop();
+    ll v = p.second;
+    if(dist[v] < p.first) continue;
+    for(ll i = 0; i < G[v].size(); i++){
+      edge e = G[v][i];
+      if(dist[e.to] > dist[v] + e.cost){
+        dist[e.to] = dist[v] + e.cost;
+        que.push(make_pair(dist[e.to], e.to));
+      }
+    }
+  }
+}
+
+bool potential_dijkstra(vector<vector<edge> > &G, vector<vector<ll> > &dist){
+  ll n = dist.size();
+  vector<ll> potential(n);
+  bool negative = bellman_ford(0, G, potential);
+  if(negative == true) return true;
+
+  for(ll i = 0; i < n; i++){
+    for(ll j = 0; j < G[i].size(); j++){
+      edge e = G[i][j];
+      G[i][j] = edge(e.to, e.cost + potential[i] - potential[e.to]);
+    }
+  }
+
+  for(ll i = 0; i < n; i++){
+    dijkstra(i, G, dist[i]);
+  }
+  for(ll i = 0; i < n; i++){
+    for(ll j = 0; j < n; j++){
+      if(dist[i][j] != INF) dist[i][j] += potential[j] - potential[i];
+    }
+  }
+  return false;
+}
+
+void print(ll x){
+  if(x == INF) cout << "INF";
+  else cout << x;
+  return;
+}
+
+
+int main(){
+  cout << fixed << setprecision(20);
+
+  ll v, e;
+  cin >> v >> e;
+  vector<vector<ll> > dist(v, vector<ll>(v));
+  vector<vector<edge> > G(v, vector<edge>());
+  for(ll i = 0; i < e; i++){
+    ll s, t, d;
+    cin >> s >> t >> d;
+    G[s].push_back(edge(t, d));
+  }
+  bool f = potential_dijkstra(G, dist);
+  if(f){
+    cout << "NEGATIVE CYCLE" << endl;
+    return 0;
+  }
+  for(ll i = 0; i < v; i++){
+    for(ll j = 0; j < v; j++){
+      if(j) cout << " ";
+      print(dist[i][j]);
+    }
+    cout << endl;
+  }
+  
+  return 0;
+}

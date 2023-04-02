@@ -1,0 +1,106 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+template <class T>
+bool chmax(T &a, const T &b)
+{
+    if (a < b)
+    {
+        a = b;
+        return 1;
+    }
+    return 0;
+}
+template <class T>
+bool chmin(T &a, const T &b)
+{
+    if (b < a)
+    {
+        a = b;
+        return 1;
+    }
+    return 0;
+}
+
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define all(x) (x).begin(), (x).end()
+
+typedef long long ll;
+const long long INF = 1LL << 60;
+
+struct phash
+{
+    inline size_t operator()(const pair<ll, ll> &p) const
+    {
+        const auto h1 = hash<ll>()(p.first);
+        const auto h2 = hash<ll>()(p.second);
+        return h1 ^ (h2 << 1);
+    }
+};
+
+int main()
+{
+    ll N;
+    cin >> N;
+    vector<ll> A(N);
+    rep(i, N)
+    {
+        cin >> A[i];
+    }
+    ll M;
+    cin >> M;
+    vector<ll> B(2001);
+    rep(i, M)
+    {
+        ll b;
+        cin >> b;
+        B[i] = b;
+    }
+
+    vector<bool> R(2001, false);
+    for (ll i = 0; i < (1 << N); i++)
+    {
+        ll sum = 0;
+        for (int j = 0; j < N; j++)
+        {
+            if (i & 1 << j)
+            {
+                sum += A[j];
+            }
+        }
+        if (sum > 2000)
+            continue;
+
+        R[sum] = true;
+    }
+
+    rep(i, M)
+    {
+        ll m = B[i];
+        if (R[m])
+        {
+            cout << "yes" << endl;
+        }
+        else
+        {
+            cout << "no" << endl;
+        }
+    }
+}
+/**
+10
+9 4
+4 3
+1 1
+4 2
+2 4
+5 8
+4 0
+5 3
+0 5
+5 2
+
+ *
+ */

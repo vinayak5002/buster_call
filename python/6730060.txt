@@ -1,0 +1,89 @@
+import sys,random,bisect
+from collections import deque,defaultdict
+from heapq import heapify,heappop,heappush
+from itertools import permutations
+from math import log,gcd
+
+
+input = lambda :sys.stdin.readline()
+mi = lambda :map(int,input().split())
+li = lambda :list(mi())
+
+mod = 10**9 + 7
+
+sys.setrecursionlimit(10**6+100)
+
+def ope(x,y,o):
+    if o=="+":
+        return x + y
+    elif o == "-":
+        return x-y
+    else:
+        return x * y
+
+
+class sisoku:
+
+    def __init__(self,s,op):
+        self.next = 0
+        self.string = s + "#"
+        self.op = op
+
+    def number(self):
+        res = 0
+        while self.string[self.next] in "0123456789":
+            res = 10 * res + int(self.string[self.next])
+            self.next += 1
+        return res
+    
+    def factor(self):
+        if self.string[self.next] == "(":
+            self.next += 1
+            res = self.op2()
+            self.next += 1
+            return res
+        else:
+            return self.number()
+        
+    def op0(self):
+        res = self.factor()
+        while True:
+            if self.string[self.next] == self.op[0]:
+                self.next += 1
+                res = ope(res,self.factor(),self.op[0])
+            else:
+                break
+        return res
+    
+    def op1(self):
+        res = self.op0()
+        while True:
+            if self.string[self.next] == self.op[1]:
+                self.next += 1
+                res = ope(res,self.op0(),self.op[1])
+            else:
+                break
+        return res
+    
+    def op2(self):
+        res = self.op1()
+        while True:
+            if self.string[self.next] == self.op[2]:
+                self.next += 1
+                res = ope(res,self.op1(),self.op[2])
+            else:
+                break
+        return res
+
+
+
+S = input()
+L = permutations(["+","-","*"])
+res = -10**18
+for p in L:
+    ans = sisoku(S,p)
+    res = max(res,ans.op2())
+
+print(res)
+
+

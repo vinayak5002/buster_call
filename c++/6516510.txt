@@ -1,0 +1,94 @@
+#pragma GCC optimize("O3")
+#include<bits/stdc++.h> 
+using namespace std;
+using ll=long long;
+using P=pair<ll,ll>;
+template<class T> using V=vector<T>; 
+#define fi first
+#define se second
+#define all(v) (v).begin(),(v).end()
+const ll inf=(1e18);
+// const ll mod=998244353;
+const ll mod=1000000007;
+const vector<int> dy={-1,0,1,0},dx={0,-1,0,1};
+struct __INIT{__INIT(){cin.tie(0);ios::sync_with_stdio(false);cout<<fixed<<setprecision(15);}} __init;
+template<class T> bool chmax(T &a, const T &b) { if (a<b) { a=b; return 1; } return 0; }
+template<class T> bool chmin(T &a, const T &b) { if (a>b) { a=b; return 1; } return 0; }
+template<class T>void debag(const vector<T> &a){cerr<<"debag :";for(auto v:a)cerr<<v<<" ";cerr<<"\n";}
+template<class T>void print(const vector<T> &a){for(auto v:a)cout<<v<<" ";cout<<"\n";}
+V<V<int>> dp;
+V<V<ll>> sum;
+string s;
+int n;
+int calc1(int l,int r){
+    if(l>r)return 0;
+    if(dp[l][r]!=-1)return dp[l][r];
+    int res=n*n;
+    for(char c='a';c<='z';c++){
+        if(s[l]!=c&&s[r]!=c)continue;
+        chmin(res,calc1(l+(s[l]==c),r-(s[r]==c))+1+(l!=r));
+    }
+    return dp[l][r]=res;
+}
+ll calc2(int l,int r){
+    if(l>r)return 1ll;
+    if(sum[l][r]!=-1)return sum[l][r];
+    sum[l][r]=0;
+    for(char c='a';c<='z';c++){
+        if(s[l]!=c&&s[r]!=c)continue;
+        int num;
+        if(l+(s[l]==c)>r-(s[r]==c))num=0;
+        else num=dp[l+(s[l]==c)][r-(s[r]==c)];
+        if(dp[l][r]==num+1+(l!=r)){
+            sum[l][r]+=calc2(l+(s[l]==c),r-(s[r]==c));
+            if(sum[l][r]>2*inf)sum[l][r]=2*inf;
+        }
+    }
+    return sum[l][r];
+}
+string  ans="";
+void calc3(int l,int r,ll rem){
+    if(l>r)return;
+    bool ok=false;
+    for(char c='a';c<='z';c++){
+        if(s[l]!=c&&s[r]!=c)continue;
+        if(l+(s[l]==c)>r-(s[r]==c)){
+            if(rem!=1){
+                cout<<"NONE"<<"\n";
+                exit(0);
+            }
+            ans.push_back(c);
+            ok=true;
+            break;
+        }
+        if(sum[l+(s[l]==c)][r-(s[r]==c)]==-1)continue;
+        if(sum[l+(s[l]==c)][r-(s[r]==c)]<rem){
+            rem-=sum[l+(s[l]==c)][r-(s[r]==c)];
+        }else{
+            ok=true;
+            string res;
+            res.push_back(c);
+            calc3(l+(s[l]==c),r-(s[r]==c),rem);
+            res+=ans;
+            res.push_back(c);
+            swap(ans,res);
+            break;
+        }
+    }
+    if(!ok){
+        cout<<"NONE"<<"\n";
+        exit(0);
+    }
+}
+int main(){
+    cin>>s;
+    ll k;
+    cin>>k;
+    n=s.size();
+    dp=V<V<int>>(n,V<int>(n,-1));
+    calc1(0,n-1);
+    sum=V<V<ll>>(n,V<ll>(n,-1));
+    calc2(0,n-1);
+   calc3(0,n-1,k);
+    cout<<ans<<"\n";
+}

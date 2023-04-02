@@ -1,0 +1,63 @@
+#include <vector>
+#include <iostream>
+#include <string>
+#include <utility>
+#include <queue>
+
+
+using namespace std;
+using ll = long double ;
+using vec_ll = vector<ll>;
+using vec_i = vector<int>;
+using vec_vec_i = vector<vector<int>>;
+
+
+enum class node_color{
+    white, gray, black
+};
+node_color color[100000];
+int n;
+
+
+void dfs_init(vec_vec_i &g, queue<int> &que){
+    for(int i=0; i<g[que.front()].size(); ++i){
+        int num=g[que.front()][i];
+        if(color[num]==node_color::white){
+            que.push(num);
+            color[num]=node_color::gray;
+        }
+    }
+    color[que.front()]=node_color::black;
+    que.pop();
+} 
+bool dfs(vec_vec_i &g, int p1, int p2){
+    for(int i=0; i<n; ++i){
+        color[i]=node_color::white;
+    }
+    queue<int> que;
+    que.push(p1);
+    color[p1]=node_color::gray;
+    while(color[p2]==node_color::white && !que.empty()){
+        dfs_init(g, que);
+    }
+    return color[p2]!=node_color::white;
+}
+int main(){
+    cin>>n;
+    vec_vec_i g(n);
+    int m;
+    cin>>m;
+    for(int i=0; i<m; ++i){
+        int p1, p2;
+        cin>>p1>>p2;
+        g[p1].push_back(p2);
+        g[p2].push_back(p1);
+    }
+    int q;
+    cin>>q;
+    for(int i=0; i<q; ++i){
+        int p1, p2;
+        cin>>p1>>p2;
+        cout<<(dfs(g, p1, p2) ? "yes" : "no")<<endl;
+    }
+}

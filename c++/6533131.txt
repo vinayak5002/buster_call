@@ -1,0 +1,61 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+int main(void)
+{
+	int n; //プロセス数
+	int q; //クォンタム
+	int head=0; //処理を行う位置
+	int tail; //処理の最後尾の次の位置
+	int count=0; //処理が終了したプロセスの数
+	int total=0; //総処理時間
+	char **nArray; //プロセス名の格納先ポインタ
+	int *ringBuffer; //プロセスのリングバッファ
+	char ntmp[15]; //名前の一時保存
+	int tmp; //数値の一時保存
+	char str[20];
+	int i;
+	
+	scanf("%d%d\n", &n, &q);
+	
+	tail = n; //tailの代入
+	
+	nArray = malloc(sizeof(char *)*(n+1)); //char型ポインタをプロセス数+1動的割り当て
+	ringBuffer = malloc(sizeof(int)*(n+1)); //int型をプロセス数+1動的割り当て
+	
+	for(i=0; i<n; i++){
+		nArray[i] = malloc(sizeof(char)*10); //nArray[i]にchar10個分動的割り当て
+		fgets(str, sizeof(str), stdin);
+		sscanf(str, "%s%d", nArray[i], &ringBuffer[i]);
+	}
+	nArray[i] = malloc(sizeof(char)*10); //nArray[n]に動的割り当て
+	
+	while(count < n){
+		strcpy(ntmp, nArray[head]);
+		tmp = ringBuffer[head];
+		
+		if(tmp <= q){ //クォンタム以下の処理時間
+			
+			total += tmp; //残りを総処理時間に追加
+			printf("%s %d\n", ntmp, total); //出力する
+			count++;
+		}else{
+			total += q; //クォンタム分総処理時間に追加
+			tmp -= q;
+			strcpy(nArray[tail], ntmp); //名前を最後尾に
+			ringBuffer[tail] = tmp; //残りの処理時間を最後尾に
+			tail++;
+			if(tail == n+1){ //tailが一番後ろまで来たら
+				tail=0; //0(先頭)に戻す
+			}
+		}
+		
+		head++;
+		if(head == n+1){ //headが一番後ろまで来たら
+			head=0; //0(先頭)に戻す
+		}
+	}
+	
+	return 0;
+}

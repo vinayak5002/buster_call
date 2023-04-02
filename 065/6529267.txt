@@ -1,0 +1,104 @@
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+struct mint {
+	int v;
+
+	static const int_fast64_t MOD = 2013265921;
+	static const int_fast64_t LOG1 = MOD - 1;
+	static const int PR = 31; // Primitive Root
+
+	mint(int_fast64_t _v) : v(_v % MOD) {}
+	mint operator + (mint x) const {return mint((int_fast64_t) v + (int_fast64_t) x.v);}
+	mint operator - (mint x) const {return mint((int_fast64_t) v + MOD - (int_fast64_t) x.v);}
+	mint operator * (mint x) const {return mint((int_fast64_t) v * (int_fast64_t) x.v);}
+	mint operator ^ (int k) const {
+		while (k < 0) k += MOD - 1;
+		if (k == 0) return mint(1);
+		mint r = (*this * *this)^(k / 2);
+		return k % 2 == 0 ? r : r * *this;
+	}
+	mint operator / (mint x) const {return *this * (x^-1);}
+	void p() const {cout << (v > MOD / 2 ? v - MOD : v);}
+};
+
+struct Int {
+	vector<mint> A;
+	bool s;
+
+	static const int DIGITS = 4;
+	static const int_fast64_t BASE = 10000;
+
+	int conv(const string& S, int b, int e)
+	{
+		return b >= e || s >= e ? 0 : conv(S, b, e - 1) * 10 + S[e - 1] - '0';
+	}
+
+	Int(const Int&) = default;
+	Int(bool _s, int n) : A(n, 0), s(_s) {}
+	Int(string S) : s(S[0] == '-') {
+		for (int n = (int) S.size(); n >= s; n -= DIGITS) A.push_back(conv(S, n - DIGITS, n));
+		if (A.back().v == 0) A.pop_back();
+	}
+
+	void p() const {
+		if (A.empty() || (A.size() == 1 && A[0].v == 0)) {
+			cout << 0 << endl;
+			return;
+		}
+		if (s) cout << '-';
+		auto p = A.crbegin();
+		cout << setw(0) << p->v;
+		while (++p != A.crend()) cout << setw(DIGITS) << setfill('0') << p->v;
+		cout << endl;
+	}
+
+	void fntt(vector<mint>& A, int b, int s, mint X) {
+		vector<mint> B(A);
+		for (int i = 0; i < (int) A.size(); ++i) {
+			A[i] = 0;
+			for (int j = 0; j < (int) A.size(); ++j) {
+				A[i] = A[i] + (X^(i * j)) * B[j];
+			}
+		}
+	}
+
+	void f(vector<mint>& A) const {
+		int_fast64_t c = 0;
+		for (int i = 0; i < (int) A.size(); ++i) {
+			c += A[i].v;
+			A[i] = c % BASE;
+			c /= BASE;
+		}
+		for (; c != 0; c /= BASE) A.push_back(c % BASE);
+		while (A.size() > 1 && A.back().v == 0) A.pop_back();
+	}
+
+	Int operator * (const Int& a) {
+		Int P(s != a.s, 0);
+		vector<mint> AA(A), BB(a.A);
+		int N = A.size() + a.A.size(), NN, s;
+		for (NN = 1, s = 0; NN < N; NN *= 2, ++s) {}
+		AA.resize(NN, mint(0)); BB.resize(NN, mint(0));
+		mint u = mint(mint::PR)^(mint::LOG1 / NN);
+		fntt(AA, 0, s, u); fntt(BB, 0, s, u);
+		for (int i = 0; i < NN; ++i) AA[i] = AA[i] * BB[i];
+		fntt(AA, 0, s, u^-1);
+		for (int i = 0; i < NN; ++i) AA[i].v /= NN;
+		f(AA);
+		P.A = AA;
+		return P;
+	}
+};
+
+int main()
+{
+	string A, B; cin >> A >> B;
+	(Int(A) * Int(B)).p();
+	return 0;
+}
+

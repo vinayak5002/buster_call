@@ -1,0 +1,95 @@
+#include<bits/stdc++.h>
+#define int long long
+#define ls(x) ((x)<<1)
+#define rs(x) ((x)<<1|1)
+using namespace std;
+int const N=2333333,INF=0x3f3f3f3f3f3f3f3fll;
+int n,q,x[N],d[N],l[N],val[N][2],lt[N][2],ans[N][2];
+inline void update(int x,int op){
+	val[x][op]=min(val[ls(x)][op],val[rs(x)][op]);
+}
+inline void download(int x,int op){
+	if(!lt[x][op])return;
+	int t=lt[x][op];lt[x][op]=0;
+	val[ls(x)][op]+=t,val[rs(x)][op]+=t;
+	lt[ls(x)][op]+=t,lt[rs(x)][op]+=t;
+}
+inline void build(int x,int l,int r){
+	if(l==r){
+		val[x][0]=val[x][1]=l;return;
+	}
+	int mid=(l+r)>>1;
+	build(ls(x),l,mid);
+	build(rs(x),mid+1,r);
+	update(x,0),update(x,1);
+}
+inline void modify(int x,int l,int r,int ql,int qr,int k,int op){
+	if(ql<=l&&r<=qr){
+		val[x][op]+=k,lt[x][op]+=k;return;
+	}
+	download(x,op);
+	int mid=(l+r)>>1;
+	if(ql<=mid)
+		modify(ls(x),l,mid,ql,qr,k,op);
+	if(qr>mid)
+		modify(rs(x),mid+1,r,ql,qr,k,op);
+	update(x,op);
+}
+inline void queryx(int x,int l,int r,int k,int&res){
+	if(l==r){
+		if(val[x][0]<=k)res=max(res,l);
+		return;
+	}
+	download(x,0);
+	int mid=(l+r)>>1;
+	if(val[rs(x)][0]>k)
+		queryx(ls(x),l,mid,k,res);
+	else
+		queryx(rs(x),mid+1,r,k,res);
+}
+inline void queryy(int x,int l,int r,int k,int&res){
+	if(l==r){
+		if(val[x][1]>k)res=min(res,l);
+		return;
+	}
+	download(x,1);
+	int mid=(l+r)>>1;
+	if(val[rs(x)][1]>k){
+		res=min(res,mid+1);
+		queryy(ls(x),l,mid,k,res);
+	}else
+		queryy(rs(x),mid+1,r,k,res);
+}
+inline void dfs(int x,int l,int r){
+	if(l==r){
+		ans[l][0]=val[x][0],ans[l][1]=val[x][1];
+		return;
+	}
+	download(x,0),download(x,1);
+	int mid=(l+r)>>1;
+	dfs(ls(x),l,mid),dfs(rs(x),mid+1,r);
+}
+signed main(){
+	ios::sync_with_stdio(0);
+	cin>>n>>q;
+	build(1,1,n);
+	for(int i=1;i<=q;i++)
+		cin>>x[i]>>d[i]>>l[i];
+	for(int i=q;i>=1;i--){
+		if(d[i]==1){
+			int p=-INF;
+			queryx(1,1,n,x[i],p);
+			if(p!=-INF)
+				modify(1,1,n,1,p,-2*l[i],1);
+		}else{
+			int p=INF;
+			queryy(1,1,n,x[i],p);
+			if(p!=INF)
+				modify(1,1,n,p,n,2*l[i],0);
+		}
+	}
+	dfs(1,1,n);
+	for(int i=1;i<=n;i++)
+		cout<<(ans[i][0]-ans[i][1]>>1)<<"\n";
+}
+//42231892 

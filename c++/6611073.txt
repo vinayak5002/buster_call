@@ -1,0 +1,53 @@
+# https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_2_D&lang=ja
+
+
+from typing import List, Tuple
+
+
+def insertion_sort(
+    sort_list: List[int], list_length: int, interval: int
+) -> Tuple[List[int], int]:
+    count = 0
+
+    for i in range(interval, list_length):
+        min_value = sort_list[i]
+        insertion_num = i - interval
+
+        while insertion_num >= 0 and sort_list[insertion_num] > min_value:
+            sort_list[insertion_num + interval] = sort_list[insertion_num]
+            insertion_num -= interval
+            count += 1
+
+        sort_list[insertion_num + interval] = min_value
+
+    return (sort_list, count)
+
+
+def shell_sort(
+    sort_list: List[int], list_length: int
+) -> Tuple[List[int], List[int], int]:
+    count = 0
+    intervals, h = [], 1
+
+    while not h > list_length:
+        intervals.append(h)
+        h = (h * 3) + 1
+
+    for interval in intervals[::-1]:
+        sort_list, num = insertion_sort(sort_list, list_length, interval)
+        count += num
+
+    return (sort_list, intervals[::-1], count)
+
+
+n = int(input())
+nums = [int(input()) for i in range(n)]
+nums, intervals, cnt = shell_sort(nums, n)
+
+print(len(intervals))
+print(" ".join(map(str, intervals)))
+print(cnt)
+
+for num in nums:
+    print(num)
+

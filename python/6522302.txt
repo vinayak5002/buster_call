@@ -1,0 +1,57 @@
+import heapq
+import sys
+sys.setrecursionlimit(10**6)
+input = sys.stdin.readline
+def MI(): return map(int, input().split())
+def LI(): return list(map(int, input().split()))
+def LS(): return list(input().rstrip())
+
+class UnionFind:
+    def __init__(self, n):
+        self.n=n
+        self.parent_size=[-1]*n
+
+    def union(self, a, b):
+        x, y=self.find(a), self.find(b)
+        if x == y:
+            return 
+        if abs(self.parent_size[x])<abs(self.parent_size[y]):
+            x, y=y, x
+        self.parent_size[x] += self.parent_size[y] 
+        self.parent_size[y]=x
+        return
+
+    def same(self, a, b):
+        return self.find(a) == self.find(b)
+        
+    def find(self, a):
+        if self.parent_size[a]<0:
+            return a
+        self.parent_size[a]=self.find(self.parent_size[a])
+        return self.parent_size[a]
+
+    def size(self, a):
+        return abs(self.parent_size[self.find(a)])
+
+    def groups(self):
+        result=[[] for _ in range(self.n)]
+        for i in range(self.n):
+            result[self.find(i)].append(i)
+        return [r for r in result if r != []]
+
+V, E = MI()
+edge = []
+for i in range(E):
+    s, t, w = MI()
+    edge.append((w, s, t))
+
+ans = 0
+uf = UnionFind(V)
+heapq.heapify(edge)
+while len(edge)>0:
+    w, s, t = heapq.heappop(edge)
+    if uf.same(s, t):
+        continue
+    uf.union(s, t)
+    ans += w
+print(ans)

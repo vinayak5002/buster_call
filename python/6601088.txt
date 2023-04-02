@@ -1,0 +1,294 @@
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let sc = Scanner::new();
+    let (n, m) = sc.read::<(usize, usize)>();
+    let mut g = vec![vec![]; n];
+    let mut reverse = vec![vec![]; n];
+    let mut uf = UnionFind::new(n);
+    for _ in 0..m {
+        let (s, t) = sc.read::<(usize, usize)>();
+        g[s].push(t);
+        reverse[t].push(s);
+        uf.unite(s, t);
+    }
+    let scc = strong_connected_component(&g);
+    let sccn = scc.len();
+    let mut group = vec![0usize; n];
+    for i in 0..sccn {
+        for c in &scc[i] {
+            group[*c] = i;
+        }
+    }
+    let mut scc_tree = vec![vec![]; sccn];
+    for i in 0..sccn {
+        for c in &scc[i] {
+            for to in &g[*c] {
+                if i != group[*to] {
+                    scc_tree[i].push(group[*to]);
+                }
+            }
+        }
+    }
+    let mut is_root = vec![true; sccn];
+    for i in 0..sccn {
+        if !is_root[i] {
+            continue;
+        }
+        dfs_root(&scc_tree, &mut is_root, i);
+    }
+    let mut visited = vec![false; sccn];
+    let mut is_leaf = vec![true; sccn];
+    for i in 0..sccn {
+        if visited[i] {
+            continue;
+        }
+        dfs_leaf(&scc_tree, &mut is_leaf, &mut visited, i);
+    }
+    let root = is_root
+        .into_iter()
+        .fold(0i64, |c, v| if v { c + 1 } else { c });
+    let leaf = is_leaf
+        .into_iter()
+        .fold(0i64, |c, v| if v { c + 1 } else { c });
+    let ans = if sccn == 1 && uf.len() == 1 {
+        0i64
+    } else {
+        root.max(leaf)
+    };
+    println!("{}", ans);
+    Ok(())
+}
+
+fn dfs_root(scc_tree: &Vec<Vec<usize>>, is_root: &mut Vec<bool>, c: usize) {
+    for i in &scc_tree[c] {
+        is_root[*i] = false;
+        dfs_root(scc_tree, is_root, *i);
+    }
+}
+
+fn dfs_leaf(
+    scc_tree: &Vec<Vec<usize>>,
+    is_leaf: &mut Vec<bool>,
+    visited: &mut Vec<bool>,
+    c: usize,
+) {
+    visited[c] = true;
+    for i in &scc_tree[c] {
+        dfs_leaf(scc_tree, is_leaf, visited, *i);
+        is_leaf[c] = false;
+    }
+}
+
+pub struct UnionFind {
+    parent: Vec<Option<usize>>,
+}
+
+impl UnionFind {
+    fn new(n: usize) -> Self {
+        UnionFind {
+            parent: vec![None; n],
+        }
+    }
+    fn unite(&mut self, x: usize, y: usize) -> bool {
+        let rx = self.root(x);
+        let ry = self.root(y);
+        if rx == ry {
+            false
+        } else {
+            self.parent[rx] = Some(ry);
+            true
+        }
+    }
+    fn root(&mut self, x: usize) -> usize {
+        match self.parent[x] {
+            Some(p) => {
+                let r = self.root(p);
+                self.parent[x] = Some(r);
+                r
+            }
+            None => x,
+        }
+    }
+    pub fn is_same(&mut self, x: usize, y: usize) -> bool {
+        let px = self.root(x);
+        let py = self.root(y);
+        px == py
+    }
+    fn len(&self) -> usize {
+        self.parent
+            .iter()
+            .filter(|v| match *v {
+                Some(_) => false,
+                None => true,
+            })
+            .count()
+    }
+}
+
+fn strong_connected_component(g: &Vec<Vec<usize>>) -> Vec<Vec<usize>> {
+    let n = g.len();
+    let mut index_list: Vec<usize> = vec![0; n];
+    let mut visited: Vec<bool> = vec![false; n];
+    let mut id = 0;
+    fn indexing(
+        g: &Vec<Vec<usize>>,
+        i: usize,
+        visited: &mut Vec<bool>,
+        id: &mut usize,
+        index_list: &mut Vec<usize>,
+    ) {
+        visited[i] = true;
+        for nex in &g[i] {
+            if visited[*nex] {
+                continue;
+            }
+            indexing(g, *nex, visited, id, index_list);
+        }
+        index_list[*id] = i;
+        *id += 1;
+    }
+    fn generate_components(
+        backward: &Vec<Vec<usize>>,
+        i: usize,
+        visited: &mut Vec<bool>,
+        component: &mut Vec<usize>,
+    ) {
+        visited[i] = true;
+        component.push(i);
+        for nex in &backward[i] {
+            if visited[*nex] {
+                continue;
+            }
+            generate_components(backward, *nex, visited, component);
+        }
+    }
+    for i in 0..n {
+        if visited[i] {
+            continue;
+        }
+        indexing(&g, i, &mut visited, &mut id, &mut index_list);
+    }
+    for i in 0..n {
+        visited[i] = false;
+    }
+    let mut scc = vec![];
+    let mut backward = vec![vec![]; n];
+    for i in 0..n {
+        for e in &g[i] {
+            backward[*e].push(i);
+        }
+    }
+    while let Some(i) = index_list.pop() {
+        if visited[i] {
+            continue;
+        }
+        let mut component = vec![];
+        generate_components(&backward, i, &mut visited, &mut component);
+        scc.push(component);
+    }
+    scc
+}
+
+use std::{num::ParseIntError, str::FromStr, vec};
+type Chars = Vec<char>;
+
+pub struct Scanner {
+    handle: std::io::Stdin,
+}
+
+impl Scanner {
+    pub fn new() -> Self {
+        Scanner {
+            handle: std::io::stdin(),
+        }
+    }
+
+    pub fn scan_line(&self) -> String {
+        let mut buf = String::new();
+        self.handle.read_line(&mut buf).unwrap();
+        buf.trim_end_matches('\n')
+            .trim_end_matches('\r')
+            .to_string()
+    }
+
+    pub fn read<T>(&self) -> T
+    where
+        T: Scannable,
+    {
+        <T as Scannable>::from_scan(self.scan_line())
+    }
+}
+
+pub trait Scannable {
+    fn from_scan(s: String) -> Self;
+}
+
+macro_rules! impl_Scannable_for_numeical {
+    ($($t:ty)*) => {
+        $(
+            impl Scannable for $t  {
+                fn from_scan(s: String) -> Self {
+                    s.as_str().parse().unwrap()
+                }
+            }
+        )*
+    };
+}
+impl_Scannable_for_numeical!(usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64);
+
+macro_rules! impl_Scannable_for_numeical_vector {
+    ($($t:ty)*) => {
+        $(
+            impl Scannable for Vec<$t> {
+                fn from_scan(s: String) -> Self {
+                    s.split_whitespace()
+                        .map(|i| i.parse().unwrap())
+                        .collect()
+                }
+            }
+        )*
+    };
+}
+impl_Scannable_for_numeical_vector!(usize u8 u16 u32 u64 isize i8 i16 i32 i64 f32 f64);
+
+impl Scannable for Chars {
+    fn from_scan(s: String) -> Self {
+        s.chars().collect()
+    }
+}
+
+impl Scannable for Vec<String> {
+    fn from_scan(s: String) -> Self {
+        s.split_whitespace().map(|s| s.to_string()).collect()
+    }
+}
+
+impl<T, U> Scannable for (T, U)
+where
+    T: FromStr<Err = ParseIntError>,
+    U: FromStr<Err = ParseIntError>,
+{
+    fn from_scan(s: String) -> Self {
+        let mut it = s.split_whitespace();
+        (
+            it.next().unwrap().parse().unwrap(),
+            it.next().unwrap().parse().unwrap(),
+        )
+    }
+}
+
+impl<T, U, V> Scannable for (T, U, V)
+where
+    T: FromStr<Err = ParseIntError>,
+    U: FromStr<Err = ParseIntError>,
+    V: FromStr<Err = ParseIntError>,
+{
+    fn from_scan(s: String) -> Self {
+        let mut it = s.split_whitespace();
+        (
+            it.next().unwrap().parse().unwrap(),
+            it.next().unwrap().parse().unwrap(),
+            it.next().unwrap().parse().unwrap(),
+        )
+    }
+}
+

@@ -1,0 +1,93 @@
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args){
+        try(Scanner sc = new Scanner(System.in)){
+            int T = sc.nextInt();
+            for(int i = 0; i < T; i++){
+                int[] number = new int[9];
+                int[] color = new int[9];
+                for(int j = 0; j < 9; j++){
+                    number[j] = sc.nextInt();
+                }
+                for(int j = 0; j < 9; j++){
+                    String tmp = sc.next();
+                    if(tmp.equals("R")){color[j] = 1;}
+                    if(tmp.equals("G")){color[j] = 2;}
+                    if(tmp.equals("B")){color[j] = 3;}
+                }
+
+                Solve s = new Solve(number, color);
+                System.out.println(s);
+            }
+        }
+    }
+}
+
+class Solve{
+    private int[] number = new int[9];
+    private int[] color = new int[9];
+    private int[] red = new int[9];
+    private int[] green = new int[9];
+    private int[] blue = new int[9];
+    private int sum = 0;
+
+    Solve(int[] number, int[] color){
+        this.number = Arrays.copyOf(number, 9);
+        this.color = Arrays.copyOf(color, 9);
+        for(int i = 0; i < 9; i++){
+            red[i] = 0;
+            green[i] = 0;
+            blue[i] = 0;
+        }
+        check();
+    }
+
+    void check(){
+        for(int i = 0; i < 9; i++){
+            if(color[i] == 1){
+                int tmp = number[i] - 1 ;
+                red[tmp] += 1;
+            }
+            if(color[i] == 2){
+                int tmp = number[i] - 1;
+                green[tmp] += 1;
+            }
+            if(color[i] == 3){
+                int tmp = number[i] - 1;
+                blue[tmp] += 1;
+            }
+        }
+
+        sum += counter(red);
+        sum += counter(green);
+        sum += counter(blue);
+    }
+
+    int counter(int[] a){
+        int s = 0;
+        for(int i = 0; i < 9; i++){
+            if(a[i] >= 3){
+                s += 1;
+                a[i] -= 3;
+            }
+        }
+        for(int i = 0; i < 7; i++){
+            if(a[i] > 0 && a[i + 1] > 0 && a[i + 2] > 0){
+                s += 1;
+                a[i] -= 1;
+                a[i + 1] -= 1;
+                a[i + 2] -= 1;
+            }
+        }
+        return s;
+    }
+
+    public String toString(){
+        if(sum >= 3){
+            return "1";
+        }else{
+            return "0";
+        }
+    }
+}

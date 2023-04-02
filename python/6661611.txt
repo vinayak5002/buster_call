@@ -1,0 +1,71 @@
+def scc(N, G):
+    order = []
+    used = [False]*N
+    group = [None]*N
+    RG = [[] for _ in range(N)]
+    for i in range(N):
+        for j in G[i]:
+            RG[j].append(i)
+    
+    def dfs(pos):
+        stack = [(1, pos), (0, pos)]
+        while stack:
+            t, pos = stack.pop()
+            if t == 0:
+                if used[pos]:
+                    stack.pop()
+                    continue
+                used[pos] = True
+                for npos in G[pos]:
+                    if not used[npos]:
+                        stack.append((1, npos))
+                        stack.append((0, npos))
+            else:
+                order.append(pos)
+
+    def rdfs(pos, col):
+        stack = [pos]
+        group[pos] = col
+        used[pos] = True
+        while stack:
+            pos = stack.pop()
+            for npos in RG[pos]:
+                if not used[npos]:
+                    used[npos] = True
+                    group[npos] = col
+                    stack.append(npos)
+                    
+    for i in range(N):
+        if not used[i]:
+            dfs(i)
+    used = [False]*N
+    label = 0
+    for s in reversed(order):
+        if not used[s]:
+            rdfs(s, label)
+            label += 1
+    return label, group
+
+def construct(N, G, label, group):
+    G0 = [[] for _ in range(label)]
+    GP = [[] for _ in range(label)]
+    for v in range(N):
+        lbs = group[v]
+        for w in G[v]:
+            lbt = group[w]
+            if lbs == lbt:
+                continue
+            G0[lbs].append(lbt)
+        GP[lbs].append(v)
+    return G0, GP
+    
+n, m = map(int, input().split())
+edges = [[] for _ in range(n)]
+for _ in range(m):
+    u, v = map(int, input().split())
+    edges[u].append(v)
+
+label, group = scc(n, edges)
+for _ in range(int(input())):
+    s, t = map(int, input().split())
+    print(int(group[s] == group[t]))

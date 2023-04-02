@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+
+template<class T>
+class binary_indexed_tree{
+  private:
+  public:
+  ll n; 
+  vector<T> bit;
+  binary_indexed_tree(ll N){
+    n = N + 1;
+    bit.resize(n, 0);
+  }
+  // a[i] に+xを加算
+  void add(ll i, T x){
+    while(i <= n){
+      bit[i] += x;
+      i += (i & -i);
+    }
+  }
+  // a[0] +...+ a[i]を計算
+  T sum(ll i){
+    T s = 0;
+    while(i > 0){
+      s += bit[i];
+      i -= (i & -i);
+    }
+    return s;
+  }
+  // a[s] + ... + a[t]
+  T sum2(ll s, ll t){
+    return sum(t + 1) - sum(s);
+  }
+};
+
+
+int main(){
+  cout << fixed << setprecision(20);
+
+  ll n, q;
+  cin >> n >> q;
+  binary_indexed_tree<ll> bit(n);
+
+  while(q){
+    ll c;
+    cin >> c;
+    if(c == 0){
+      ll i, x;
+      cin >> i >> x;
+      bit.add(i, x);
+    }
+    else{
+      ll s, t;
+      cin >> s >> t;
+      s--; t--;
+      cout << bit.sum2(s, t) << endl;
+    }
+    q--;
+  }
+  
+  return 0;
+}
+
+
+
+

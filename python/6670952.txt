@@ -1,0 +1,18 @@
+ri = raw_input().split()
+stack = []
+for i in xrange(len(ri)):
+  if ri[i] == "+":
+    b = stack.pop()
+    a = stack.pop()
+    stack.append(str(int(a)+int(b)))
+  elif ri[i] == "-":
+    b = stack.pop()
+    a = stack.pop()
+    stack.append(str(int(a)-int(b)))
+  elif ri[i] == "*":
+    b = stack.pop()
+    a = stack.pop()
+    stack.append(str(int(a)*int(b)))
+  else:
+    stack.append(ri[i])
+print stack.pop()

@@ -1,0 +1,65 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let line = si[0].split(" ").map(val => Number(val))
+	let listNum = line[0]
+	let start = new Array(listNum).fill(-1)
+	let end = new Array(listNum).fill(-1)
+	let array = new Array()
+	let queryNum = line[1]
+	let out = ""
+	
+	for (let i = 0; i < queryNum; i++) {
+		let queryLine = si[i + 1].split(" ")
+		let order = queryLine[0]
+		
+		if (order == 0) {
+			// 挿入
+			let pointer = queryLine[1]
+			let elem = queryLine[2]
+			// 挿入する要素を生成
+			add = {
+				val: elem,
+				nextIndex: -1
+			}
+			array.push(add)
+			let nowIndex = array.length - 1
+			if (start[pointer] == -1) {
+				start[pointer] = nowIndex
+			} else {
+				array[end[pointer]].nextIndex = nowIndex
+			}
+			end[pointer] = nowIndex
+		} else if (order == 1) {
+			// 要素の列挙
+			let pointer = queryLine[1]
+			for (let j = start[pointer]; 0 <= j; j = array[j].nextIndex) {
+				out += array[j].val
+				if (0 <= array[j].nextIndex) {
+					out += " "
+				}
+			}
+			out += "\n"
+		} else {
+			// 接合
+			let suffixIndex = queryLine[1]
+			let prefixIndex = queryLine[2]
+			if (start[prefixIndex] == -1) {
+				// 前の配列が空の時、後ろの配列のスタートにする
+				start[prefixIndex] = start[suffixIndex]
+			} else {
+				// 前の配列の最後の要素の次のインデックスを、後ろの配列のスタートにする
+				array[end[prefixIndex]].nextIndex = start[suffixIndex]
+			}
+			// 前の配列の最後を指すインデックスを後ろの配列のエンドにする
+			end[prefixIndex] = end[suffixIndex]
+			// 後ろの配列を空にする
+			start[suffixIndex] = -1
+			end[suffixIndex] = -1
+		}	
+	}
+	so.write(out)
+}
+

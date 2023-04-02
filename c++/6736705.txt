@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+#include <string>
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <string.h>
+#include <queue>
+using namespace std;
+vector<vector<pair<int,int>>> V;
+int inf=9999999;
+int main(){
+  int N,m;
+  cin>>N>>m;
+  V.resize(N);//V[i]には{iから行けるノード、コスト}を入れる。
+  int A,B,C,D;
+  for(int i=0; i<m; i++){
+    scanf("%d,%d,%d,%d",&A,&B,&C,&D);
+    V[A-1].push_back({B-1,C});
+    V[B-1].push_back({A-1,D});
+  }
+  //最短経路を求める。
+  int DP[N][N]; //DP[i][j]i→jに行く最短コスト
+  for(int i=0; i<N; i++)for(int j=0; j<N; j++){
+    DP[i][j]=inf;
+    if(i==j)DP[i][j]=0;
+  }
+  for(int i=0; i<N; i++){
+    int l=V[i].size();
+    for(int j=0; j<l; j++)DP[i][V[i][j].first]=V[i][j].second;
+  }
+  for(int a=0; a<N; a++){
+    for(int j=0; j<N; j++){
+      for(int k=0; k<N; k++){
+      DP[j][k]=min(DP[j][k], DP[j][a]+DP[a][k]);
+      }
+    }
+  }
+  
+  int s,g,V,P;
+  scanf("%d,%d,%d,%d",&s,&g,&V,&P);
+  int ans=V-P-DP[s-1][g-1];
+  cout<<ans<<endl;
+}

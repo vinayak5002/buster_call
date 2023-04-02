@@ -1,0 +1,39 @@
+from bisect import bisect
+
+n,k = map(int,input().split())
+w = [int(input()) for _ in range(n)]
+w.sort()
+
+
+def can_it(x):
+    if w[-1] > x:
+        return False
+
+    track = 0
+    check = [True]*n
+    for a in range(k):
+        x_i = x
+        while x_i > 0: # 貪欲にとれるものを取っていく
+            i = bisect(w, x_i) - 1
+            while i >= 0 and check[i] == False:
+                i -= 1
+            
+            if i < 0: 
+                break
+            check[i] = False
+            x_i -= w[i]
+            track += 1
+    return n == track
+
+
+# 二分探索を行う
+ok = sum(w)+1
+ng = 0
+while ok - ng > 1:
+    mid = (ok + ng)//2
+    if can_it(mid):
+        ok = mid
+    else:
+        ng = mid
+
+print(ok)

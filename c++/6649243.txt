@@ -1,0 +1,60 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <queue>
+#include <algorithm>
+typedef long long ll;
+using namespace std;
+bool was_reached[110][110];
+int MAP[110][110];
+vector<int> ans;
+
+void dfs(int startx,int starty,int w, int h) {
+  was_reached[starty][startx]=true;
+  for(int i=-1;i<=1;i++) {//縦
+    for(int j=-1;j<=1;j++) {//横
+      if(i==0&&j==0) continue;
+      int x =startx+j;
+      int y =starty+i;
+      if(x>=w || x<0 || y>=h || y<0) continue;
+      if(!was_reached[y][x] && MAP[y][x]==1) {
+        dfs(x,y,w,h);
+      }
+    }
+  }
+}
+
+void print_island_num(int w,int h) {
+
+  for(int i=0;i<h;i++) {
+    for(int j=0;j<w;j++) {
+      cin >> MAP[i][j];
+      was_reached[i][j]=false;
+    }
+  }
+  int count=0;
+
+  for(int i=0;i<h;i++) {
+    for(int j=0;j<w;j++) {
+      if(!was_reached[i][j]&& MAP[i][j]==1) {//陸かつまだ訪れていない
+        count++;
+        dfs(j,i,w,h);
+      }
+    }
+  }
+  ans.push_back(count);
+}
+
+int main() {
+
+  while(true) {
+    int w,h;
+    cin >> w >> h;
+    if(w==0&&h==0) break;
+    print_island_num(w,h);
+  }
+  for (vector<int>::const_iterator it = ans.begin(), e = ans.end(); it != e; ++it) {
+    cout << *it << std::endl;
+  }
+}
+

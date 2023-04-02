@@ -1,0 +1,101 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+#include<string.h>
+#define MAX 2000000000
+
+typedef struct{
+    int parent;
+    int left_child;
+    int right_sibling;
+}Node;
+
+int calc_depth(Node *Tree,int tmp,int count){
+    int i;
+
+    if(Tree[tmp].parent == -1){
+        return count;
+    }
+    count = calc_depth(Tree,Tree[tmp].parent,count);
+
+    return count+1;
+}
+
+//tmp にはTree[id].left_c の値を入れる
+print_Tree(Node *Tree, int tmp){
+    int left = Tree[tmp].left_child;
+
+    if(left == -1 && Tree[tmp].right_sibling == -1){
+    }else{
+        while(Tree[left].right_sibling != -1){
+            
+            printf("%d, ",left);
+            left = Tree[left].right_sibling;
+        }
+        printf("%d",left);
+    }
+    
+}
+
+
+
+
+int main(){
+    int i,j,k;
+    int n;
+    int id,dim;
+    int type;
+    int right_c;
+    int deepth;
+    
+
+    scanf("%d",&n);
+    Node Tree[100000];
+    for(i=0;i<n;i++){
+        Tree[i].parent = -1;
+        Tree[i].left_child = -1;
+        Tree[i].right_sibling = -1;
+    }
+
+    for(i=0;i<n;i++){
+        scanf("%d %d",&id,&dim);
+
+        for(j=0;j<dim;j++){
+            scanf("%d",&type);
+            if(j==0){
+                Tree[id].left_child =type;
+            }else{
+                Tree[right_c].right_sibling = type;
+            }
+            right_c = type;
+            Tree[right_c].parent = id;
+
+        }
+
+    }
+
+    for(i=0;i<n;i++){
+        deepth = calc_depth(Tree,i,0);
+        printf("node %d: parent = %d, depth = %d, ",i,Tree[i].parent,deepth);
+        if(Tree[i].parent == -1){
+            printf("root, [");
+            print_Tree(Tree,i);
+            printf("]\n");
+        }else if(Tree[i].left_child == -1){
+            printf("leaf, []\n");
+        }else{
+            printf("internal node, [");
+            print_Tree(Tree,i);
+            printf("]\n");
+        }
+    }
+
+
+
+    return 0;
+}
+
+
+
+
+

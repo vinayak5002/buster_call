@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+const ll mod = 998244353;
+const int MAX = 1e6;
+const int INF = (1 << 30);
+
+vector<int> tpn;
+vector<int> tpn_odd;
+
+void init_tpn() {
+    for(int i = 0; i < 200; i++) {
+        tpn.push_back((i+1) * (i+2) * (i+3) / 6);
+        if(tpn[i] % 2) tpn_odd.push_back(tpn[i]);
+    }
+    return;
+}
+
+int main() {
+    init_tpn();
+    vector<int> dp1(MAX, INF);
+    vector<int> dp2(MAX, INF);
+    dp1[0] = 0, dp2[0] = 0;
+    for(int i = 0; i < 200; i++) {
+        for(int j = 0; j <= MAX; j++) {
+            if(j >= tpn[i]) dp1[j] = min(dp1[j-tpn[i]]+1, dp1[j]);
+        }
+    }
+    for(int i = 0; i < 50; i++) {
+        for(int j = 0; j <= MAX; j++) {
+            if(j >= tpn_odd[i]) dp2[j] = min(dp2[j-tpn_odd[i]]+1, dp2[j]);
+        }
+    }
+    while(true) {
+        int N;
+        cin >> N;
+        if(!N) break;
+        cout << dp1[N] << " " << dp2[N] << endl;
+    }
+	return 0;
+}

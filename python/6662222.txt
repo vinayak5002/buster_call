@@ -1,0 +1,72 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def calc_diameter(num_nodes, adjacency_list):
+    stack = [(0, 0)]
+    u = -1
+    max_dist = 0
+    is_visited = [False] * num_nodes
+
+    while stack:
+        c_n, c_dist = stack.pop()
+        if is_visited[c_n]:
+            continue
+
+        is_visited[c_n] = True
+        for edge in adjacency_list[c_n]:
+            n_n = edge[0]
+            if is_visited[n_n]:
+                continue
+            n_dist = c_dist + edge[1]
+            if max_dist < n_dist:
+                max_dist = n_dist
+                u = n_n
+            stack.append((n_n, n_dist))
+
+    stack = [(u, 0)]
+    max_dist = 0
+    is_visited = [False] * num_nodes
+
+    while stack:
+        c_n, c_dist = stack.pop()
+        if is_visited[c_n]:
+            continue
+        is_visited[c_n] = True
+        for edge in adjacency_list[c_n]:
+            n_n = edge[0]
+            if is_visited[n_n]:
+                continue
+            n_dist = c_dist + edge[1]
+            max_dist = max(max_dist, n_dist)
+            stack.append((n_n, n_dist))
+
+    return max_dist
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    num_nodes = int(f.readline())
+    adjacency_list = [[] for _ in range(num_nodes)]
+    for _ in range(num_nodes - 1):
+        s, t, w = map(int, f.readline().split())
+        adjacency_list[s].append([t, w])
+        adjacency_list[t].append([s, w])
+
+    diameter = calc_diameter(num_nodes, adjacency_list)
+    print(diameter)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

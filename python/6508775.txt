@@ -1,0 +1,67 @@
+import java.util.Scanner;
+
+class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+
+        Queue[] q = new Queue[n];
+        for (int i = 0; i < n; i++) {
+            q[i] = new Queue();
+        }
+
+        for (int i = 0; i < m; i++) {
+            int x = sc.nextInt();
+            if (x == 0) {
+                int lane = sc.nextInt() - 1;
+                System.out.println(q[lane].dequeue());
+            } else {
+                int car = sc.nextInt();
+                int mini = q[0].size();
+                int enterNum = 0;  // 入るレーンの番号
+                for (int j = 0; j < n; j++) {
+                    if (q[j].size() < mini) {
+                        mini = q[j].size();
+                        enterNum = j;
+                    }
+                }
+                q[enterNum].enqueue(car);
+            }
+        }
+    }
+}
+
+class Queue {
+    private int[] queue;
+    private int queueSize;
+    private int front;
+    private int rear;
+
+    Queue() {
+        queueSize = 100000;
+        queue = new int[queueSize];
+        front = rear = 0;
+    }
+
+    private int next(int a) {
+        return (a + 1) % queueSize;
+    }
+
+    int size() {
+        return queueSize - front + next(rear);
+    }
+
+    void enqueue(int num) {
+        queue[rear] = num;
+        rear = next(rear);
+    }
+
+    int dequeue() {
+        int value = queue[front];
+        queue[front] = 0;
+        front = next(front);
+        return value;
+    }
+}

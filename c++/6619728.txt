@@ -1,0 +1,133 @@
+#include <bits/stdc++.h>
+
+// clang-format off
+
+using namespace std;
+#define all(a) a.begin(), a.end()
+#define int long long
+#define over_load_(_1, _2, _3, _4, NAME, ...) NAME
+#define rep(...) over_load_(__VA_ARGS__, rep4, rep3, rep2)(__VA_ARGS__)
+#define rep2(i, r) for (int i = 0; i < static_cast<int>(r); (i) += 1)
+#define rep3(i, l, r) for (int i = static_cast<int>(l); i < static_cast<int>(r); (i) += 1)
+#define rep4(i, l, r, stride) for (int i = static_cast<int>(l); i < static_cast<int>(r); (i) += (stride))
+#define rrep(...) over_load_(__VA_ARGS__, rrep4, rrep3, rrep2)(__VA_ARGS__)
+#define rrep2(i, r) for (int i = static_cast<int>(r) - 1; i >= 0; (i) -= 1)
+#define rrep3(i, l, r) for (int i = static_cast<int>(r) - 1; i >= static_cast<int>(l); (i) -= 1)
+#define rrep4(i, l, r, stride) for (int i = static_cast<int>(r) - 1; i >= static_cast<int>(l); (i) -= (stride))
+#define fore(i, a) for (auto &i : a)
+template <typename T1, typename T2>
+inline bool chmax(T1 &a, T2 b)
+{
+    return a < b && (a = b, true);
+}
+template <typename T1, typename T2>
+inline bool chmin(T1 &a, T2 b)
+{
+    return a > b and (a = b, true);
+}
+constexpr char newl = '\n';
+
+long long pow2(int x) {return x * x;}
+bool isupper(char c) {return ('A' <= c and c <= 'Z');}
+bool islower(char c) {return ('a' <= c and c <= 'z');}
+bool isnumber(char c) {return ('0' <= c and c <= '9');}
+
+// O(logX)
+int getdigit(long long x) {
+    int res = 0;
+    while(x > 0) {
+        res++;
+        x /= 10;
+    }
+    return res;
+}
+
+using ll = long long;
+using vi = vector<int>;
+using vll = vector<ll>;
+using vvi = vector<vi>;
+using vvll = vector<vll>;
+using vp = vector<pair<int, int>>;
+using vs = vector<string>;
+
+const ll sup = LONG_LONG_MAX / 100 - 1;
+const double pi = 3.141592653589793;
+
+int w, h;
+vs grid;
+vvi G;
+
+int f(int y, int x) {
+    return y * w + x;
+}
+
+void make() {
+    G = vvi(w * h, vi(w * h, sup));
+    rep(i, G.size()) if (grid[i / w][i % w] != 'x') G[i][i] = 0;
+    vi d = {-1, 1};
+    rep(y, h) rep(x, w) {
+        if (grid[y][x] == 'x') continue;
+        fore(dx, d) if (0 <= x + dx and x + dx < w) if (grid[y][x + dx] != 'x') {
+            G[f(y, x)][f(y, x + dx)] = 1;
+            G[f(y, x + dx)][f(y, x)] = 1;
+        }
+        fore(dy, d) if (0 <= y + dy and y + dy < h) if (grid[y + dy][x] != 'x') {
+            G[f(y, x)][f(y + dy, x)] = 1;
+            G[f(y + dy, x)][f(y, x)] = 1;
+        }
+    }
+}
+
+void find(pair<int, int>& robot, vp& gomis) {
+    rep(y, h) rep(x, w) {
+        if (grid[y][x] == 'o') robot = {y, x};
+        if (grid[y][x] == '*') gomis.push_back({y, x});
+    }
+}
+
+void wf() {
+    rep(k, w * h) rep(i, w * h) rep(j, w * h) chmin(G[i][j], G[i][k] + G[k][j]);
+}
+
+int calc(pair<int, int>& p, pair<int, int>q) {
+    return G[f(p.first, p.second)][f(q.first, q.second)];
+}
+
+void solve() {
+    make();
+    pair<int, int> robot;
+    vp gomis;
+    find(robot, gomis);
+    wf();
+
+    vi index(gomis.size(), 0);
+    rep(i, index.size()) index[i] = i;
+
+    // ごみがなかった時
+    if (index.size() == 0) {
+        cout << 0 << newl;
+        return;
+    }
+    
+    // 順列全探索
+    ll ans = sup;
+
+    do {
+        ll dist = 0;
+        dist += calc(robot, gomis[index.front()]);
+        rep(i, index.size() - 1) dist += calc(gomis[index[i]], gomis[index[i + 1]]);
+        chmin(ans, dist);
+    } while(next_permutation(all(index)));
+
+    cout << (ans == sup ? -1 : ans) << newl;
+}
+
+signed main() {
+    while(1) {
+        cin >> w >> h;
+        if (w == 0 and h == 0) break;
+        grid = vs(h);
+        fore(x, grid) cin >> x;
+        solve();
+    }
+}

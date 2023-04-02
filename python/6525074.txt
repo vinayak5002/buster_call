@@ -1,0 +1,29 @@
+n = int(input())
+
+p = list(map(float,input().split()))
+q = list(map(float,input().split()))
+p.insert(0,0)
+
+opt = [[float('inf') for x in range(n+1)] for x in range(n+1)]
+
+w = [[0 for x in range(n+1)] for x in range(n+1)]
+
+for i in range(n+1):
+    opt[i][i] = q[i]
+    w[i][i] = p[i] + q[i] + q[i-1]
+
+for i in range(0,n+1):
+    for j in range(i+1,n+1):
+        w[i][j] = w[i][j-1] + p[j] + q[j]
+
+for len in range(2,n+2):
+    i = 0
+    j = i + len - 1
+    while(j <= n):
+        for m in range(i+1,j+1):
+            opt[i][j] = min(opt[i][j],opt[i][m-1] + opt[m][j])
+        opt[i][j] = opt[i][j] + w[i][j]
+        i = i + 1
+        j = j + 1
+
+print(opt[0][n])

@@ -1,0 +1,90 @@
+import java.util.*;
+import java.io.*;
+
+class Main
+{
+    static int top1 = 0;
+    static int top2 = 0;
+    static int[] stacktmp = new int[20000];
+    static int[] stack_index = new int[10000];
+    static int[] stack_area = new int[10000];
+    
+    public static void main(String[] args) throws IOException
+    {
+        int totalArea = 0;
+        stack_index[0] = -1;
+        stack_area[0] = -1;
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String rawData = br.readLine();
+        for(int i = 0; i < rawData.length(); i++){
+            if(rawData.charAt(i) == '\\'){
+                push(i);
+            }
+            if(rawData.charAt(i) == '/'){
+                int tmp = pop();
+                if(tmp != -1){
+                    push(tmp, i - tmp);
+                }
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(top2);
+        sb.append(" ");
+        for(int j = 1; j <= top2; j++){
+            totalArea += getEach(j);
+            sb.append(getEach(j));
+            if(j != top2){
+                sb.append(" ");
+            }
+        }
+        System.out.println(totalArea);
+        System.out.println(sb);
+        
+    }
+    static boolean isEmpty()
+    {
+        if(top1 == 0) return true;
+        else return false;
+    }
+    static void push(int x)
+    {
+        top1++;
+        stacktmp[top1] = x;
+    }
+    static void push(int x, int y)
+    {
+        if(stack_index[top2] < x){
+            top2++;
+            stack_index[top2] = x;
+            stack_area[top2] = y;
+        }else{
+            stack_index[top2] = x;
+            stack_area[top2] += y;
+            
+            while(true){
+                if(stack_index[top2 - 1] < x){
+                    
+                    break;
+                }else{
+                    top2--;
+                    stack_index[top2] = x;
+                    stack_area[top2] += stack_area[top2 + 1];
+                }
+            }
+        }
+    }
+    static int pop()
+    {
+        if(isEmpty()){
+            return -1;
+        }else{
+            top1--;
+            return stacktmp[top1 + 1];
+        }
+    }
+    static int getEach(int i)
+    {
+        return stack_area[i];
+    }
+}
+

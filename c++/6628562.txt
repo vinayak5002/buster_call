@@ -1,0 +1,199 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+struct node{
+	struct node *parent;
+	struct node *left;
+	struct node *right;
+	int key;
+};
+
+typedef struct node Node;			//ポインタにはNULLが入っている
+Node *root; 
+int m;
+
+void insert(int id){
+	Node *x = root;
+	Node *y = NULL;
+	
+	Node *z = (Node *)malloc(sizeof(Node));			//動的に配列を割り当て
+	z->left = NULL;
+	z->right = NULL;
+	z->key = id;
+	
+	while(x != NULL){		//zの親を探索
+		y = x;
+		if(x->key < z->key){
+			x = x->right;
+		}
+		
+		else if(x->key > z->key){
+			x = x->left;
+		}
+		
+	}
+	
+	z->parent = y;
+	
+	if(y == NULL){		//二分木がからの時
+		root = z;
+	}
+	
+	else if(y->key < z->key){
+		y->right = z;
+	}
+	
+	else{
+		y->left= z;
+	}
+	
+}
+
+Node *find(int id){
+	Node *z = root;
+	while(z != NULL){
+		if(z->key == id){
+			return z;
+		}
+		
+		else if(z->key < id){
+			z = z->right;
+		}
+		
+		else{
+			z = z->left;
+		}
+	}
+	
+	return NULL;
+}
+
+Node *treeMinimum(Node *p){
+	while(p->left != NULL){
+		p = p->left;
+	}
+	
+	return p;
+}
+
+Node *treeSuccessor(Node *p){
+	//中間順探索を行った時のpの次の節点を探索
+	
+	//pに右の子がいる時
+	if(p->right != NULL){
+		return treeMinimum(p->right);
+	}
+}
+
+void delete(Node *p){
+	Node *y;			//yは削除する節点を格納
+	Node *x = NULL;				//xは削除する節点yの子を格納
+	
+	//削除する節点の捜索
+	if(p->left == NULL || p->right == NULL){
+		y = p;			//削除する節点が子を一つ持つ、または一つも持たない時はzを削除
+	}
+	
+	else{
+		y = treeSuccessor(p);		//削除する節点が子を2つ持つときはzの次節点を削除
+	}
+	
+	//削除する節点yの子を捜索
+	if(y->left != NULL){
+		x = y->right;
+	}
+	
+	else if(y->right != NULL){
+		x = y->right;
+	}
+	
+	//削除する節点の子がいた時、子の親に削除する節点yの親を格納
+	if(x != NULL){
+		x->parent = y->parent;
+	}
+	
+	//削除する節点が根の時
+	if(y->parent == NULL){
+		root = x;
+	}else{
+		if(y == y->parent->left){
+			y->parent->left = x;
+		}
+		
+		else{
+			y->parent->right = x;
+		
+		}
+	}
+	
+	if(y != p){
+		p->key = y->key;
+		
+	}
+	
+	//削除する節点に子がいなかった時も含めてyを削除
+	free(y);
+}
+
+void inorder(Node *p){
+	if(p == NULL){
+		return;
+	}
+	inorder(p->left);
+	printf(" %d", p->key);
+	inorder(p->right);
+}
+
+void preorder(Node *p){
+	if(p == NULL){
+		return;
+	}
+	printf(" %d", p->key);
+	preorder(p->left);
+	preorder(p->right);
+}
+
+
+int main (void){
+	int i, id;
+	char com[10];
+	
+	scanf("%d", &m);		//命令数を受け取る
+	
+	for(i = 0; i < m; i++){
+		scanf("%s", com);
+		if(com[0] == 'i'){
+			scanf("%d", &id);
+			insert(id);
+		}
+		
+		else if(com[0] == 'f'){
+			scanf("%d", &id);
+			Node *p = find(id);
+			if(p == NULL){
+				printf("no\n");
+			}
+			
+			else{
+				printf("yes\n");
+			}
+		}
+		
+		else if(com[0] == 'p'){
+			inorder(root);
+			printf("\n");
+			preorder(root);
+			printf("\n");
+		}
+		
+		else{
+			if(com[0] == 'd'){
+				scanf("%d", &id);
+				delete(find(id));
+			}
+		}
+	}
+	
+	return 0;
+}

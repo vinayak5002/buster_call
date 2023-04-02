@@ -1,0 +1,122 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+using ld=long double;
+ll inf=1001001001001000000;
+ll mod=1000000007;
+struct Miller{
+  const vector<long long> v = { 2 , 7 , 61 }; // < 4,759,123,141
+  // x^k (mod m)
+  long long modpow( long long x, long long k, long long m ){
+    long long res = 1;
+    while( k ){
+      if( k & 1 ){
+        res = res * x % m;
+      }
+      k /= 2;
+      x = x * x % m;
+    }
+    return res;
+  }
+  // check if n is prime
+  bool check( long long n ){
+    if( n < 2 ){
+      return false;
+    }
+    long long d = n - 1;
+    long long s = 0;
+    while( d % 2 == 0 ){
+      d /= 2;
+      s++;
+    }
+    for( long long a : v ){
+      if( a == n ){
+        return true;
+      }
+      if( modpow( a , d , n ) != 1 ){
+        bool ok = true;
+        for( long long r = 0; r < s; r++ ){
+          if( modpow( a, d * (1LL << r), n ) == n-1 ){
+            ok = false;
+            break;
+          }
+        }
+        if( ok ){
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+};
+
+Miller miller;
+int main(){
+    vector<ll>ans;
+    while (1)
+    {
+        ll p;
+        cin >> p;
+        if (miller.check(p))
+        {
+            ans.push_back(p+2);
+            continue;
+        }
+        
+        if (p==0)
+        {
+            break;
+        }
+        if (p==1)
+        {
+            ans.push_back(3);
+            continue;
+        }
+        vector<tuple<ll,ll,ll>>a;
+        ll x=0;
+        for (ll i = 1; i >=0; i++)
+        {
+            if (i*i*i>p)
+            {
+                break;
+            }
+            x=i;
+        }
+        ll y=0;
+        for (ll i = x; i*i*i >=1 ; i--)
+        {
+            if (p%i!=0)
+            {
+                continue;
+            }
+            for (ll j = sqrt(p/i); j>=1; j--)
+            {
+                if ((p/i)%j!=0)
+                {
+                    continue;
+                }
+                a.push_back(make_tuple(i,j,p/(i*j)));
+                y+=1;
+                break;
+            }
+            if (y!=0)
+            {
+                break;
+            }
+        }
+        ll aa=inf;
+        for (ll i = 0; i < a.size(); i++)
+        {
+            ll x=get<0>(a[i]);
+            ll y=get<1>(a[i]);
+            ll z=get<2>(a[i]);
+            aa=min(aa,x+y+z);
+        }
+        ans.push_back(aa);
+    }
+    for (ll i = 0; i < ans.size(); i++)
+    {
+        cout << ans[i] << endl;
+    }
+    
+}

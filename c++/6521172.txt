@@ -1,0 +1,102 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+#define M 1046527
+
+//#define L 14
+
+string H[M];
+
+// 文字を数値に変換
+int getChar(char ch)
+{
+    switch (ch) {
+    case 'A':
+	return 1;  break;
+    case 'C':
+	return 2;  break;
+    case 'G':
+	return 3;  break;
+    case 'T':
+	return 4;  break;
+    default:
+	return 0;
+    }
+}
+
+// 文字列を key に１対１対応で変換 
+long long getKey(string str)
+{
+    long long sum = 0, p = 1, i;
+    for (i = 0; i < str.length(); ++i) {
+	sum += p * getChar(str[i]);
+	p *= 5;
+    }
+    return sum;
+}
+
+// 第１ハッシュ関数
+int h1(int key)
+{
+    return key % M;
+}
+
+// 第２ハッシュ関数
+int h2(int key)
+{                                // M が素数なら
+    return 1 + key % (M - 1);    // 0 < 1 + key % (M-1) < M
+}                                // より、戻り値は M と互いに素
+
+bool find(string str)
+{
+    long long h, key, i;
+    key = getKey(str);
+    for (i = 0; ; ++i) {
+	h = (h1(key) + i * h2(key)) % M;
+	if (H[h] == str)
+	    return true;
+	else if (H[h].length() == 0)
+	    return false;
+    }
+    //    return false;
+}
+
+bool insert(string str)
+{
+    long long key, h, i;
+    key = getKey(str);
+    for (i = 0; ; ++i) {
+	h = (h1(key) + i * h2(key)) % M;
+	if (H[h] == str)
+	    return true;
+	else if (H[h].length() == 0) {
+	    H[h] = str;
+	    return false;
+	}
+    }
+    //    return false;
+}
+    
+int main()
+{
+    int i, n;
+    string str, com;
+    for (i = 0; i < M; ++i)
+	H[i][0] = '\0';
+    cin >> n;
+    for (i = 0; i < n; ++i) {
+	cin >> com >> str;
+	if (com == "insert")
+	    insert(str);
+	else if (com == "find") {
+	    if (find(str) == true)
+		cout << "yes" << endl;
+	    else
+		cout << "no" << endl;
+	}
+    }
+    return 0;
+}
+

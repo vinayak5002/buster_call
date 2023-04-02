@@ -1,0 +1,42 @@
+<?php
+ini_set("memory_limit", "-1");
+
+$cnt = 0;
+function merge(&$A,$N,$left,$mid,$right){
+    global $cnt;
+    $n1 = $mid - $left;
+    $n2 = $right - $mid;
+    for ($i=0; $i < $n1; $i++) { 
+        $L[$i] = $A[$left + $i];
+    }
+    for ($i=0; $i < $n2; $i++) { 
+        $R[$i] = $A[$mid + $i];
+    }
+    $L[$n1] = $R[$n2] = INF;
+    $i = $j = 0;
+    for ($k= $left ; $k < $right; $k++) { 
+        if($L[$i] <= $R[$j]){
+            $A[$k] = $L[$i++];
+        }
+        else{
+            $A[$k] = $R[$j++];
+            $cnt += $n1 - $i;
+        }
+    }
+}
+
+function mergeSort(&$A,$N,$left,$right){
+    if($left + 1< $right){
+        $mid = (int)(($left + $right)/2);
+        mergeSort($A,$N,$left,$mid);
+        mergeSort($A,$N,$mid,$right);
+        merge($A,$N,$left,$mid,$right);
+    }
+}
+
+fscanf(STDIN, '%d', $N);
+$A = explode(' ', trim(fgets(STDIN)));
+
+mergeSort($A,$N,0,$N);
+printf("%d\n",$cnt);
+

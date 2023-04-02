@@ -1,0 +1,131 @@
+#include <bits/extc++.h>
+
+using namespace std;
+
+#define rep(i,n) for(int i=0;i<(n);++i)
+#define reps(i,s,n) for(int i=(s);i<=(n);++i)
+#define all(x) begin(x), end(x)
+#define Fixed fixed << setprecision(12)
+#define int int64_t
+using pii = pair<int,int>;
+constexpr int32_t INF  = 0x3f3f3f3f;
+constexpr int64_t LINF = 0x3f3f3f3f3f3f3f3fLL;
+constexpr int mod1 = 1e9+7;
+constexpr int mod2 = 998244353;
+
+template <class Func>
+class FixPoint : Func {
+public:
+    explicit constexpr FixPoint(Func&& f) noexcept : Func(forward<Func>(f)) {}
+
+    template <class... Args>
+    constexpr decltype(auto) operator()(Args&&... args) const {
+        return Func::operator()(*this, std::forward<Args>(args)...);
+    }
+};
+
+template <class Func>
+static inline constexpr decltype(auto) makeFixPoint(Func&& f) noexcept {
+    return FixPoint<Func>{forward<Func>(f)};
+}
+
+template <class A, class B> inline bool chmax(A &a, const B &b) { return b > a && (a = b, true); }
+template <class A, class B> inline bool chmin(A &a, const B &b) { return b < a && (a = b, true); }
+
+template <class T> using max_heap = priority_queue<T>;
+template <class T> using min_heap = priority_queue<T,vector<T>,greater<T> >;
+template <class A, class B> using umap = unordered_map<A,B>;
+
+template <class T> using Set = __gnu_pbds::tree<T, __gnu_pbds::null_type, less<T>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
+
+template <class T> inline void bye(T x) { cout << x << '\n'; exit(0); }
+
+inline int updiv(int a,int b){ return (a + b - 1) / b; }
+
+constexpr int dx[] = {1,0,-1,0,1,1,-1,-1};
+constexpr int dy[] = {0,-1,0,1,1,-1,-1,1};
+
+signed main() {
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+
+    auto subStr = [](auto &str, int p) -> pair<string, int> {
+        string ret;
+        while (p < str.size() && str[p] != '"') {
+            ret.push_back(str[p++]);
+        }
+        return (make_pair(ret, p));
+    };
+
+    string s, t;
+    while (true) {
+        cin >> s;
+        if (s == ".") break;
+        cin >> t;
+
+        int slen = s.size(), tlen = t.size();
+
+        bool flg = false;
+        int pos = 0;
+        vector<string> ss, ts;
+        vector<bool> sf, tf;
+        while (true) {
+            if (pos >= slen) break;
+            if (s[pos] == '"') {
+                string sub;
+                ++pos;
+                tie(sub, pos) = subStr(s, pos);
+                ss.emplace_back(sub);
+                sf.emplace_back(true);
+                ++pos;
+            } else {
+                string sub;
+                tie(sub, pos) = subStr(s, pos);
+                ss.emplace_back(sub);
+                sf.emplace_back(false);
+            }
+            // cout << pos << '\n';
+        }
+        pos = 0;
+        while (true) {
+            if (pos >= tlen) break;
+            if (t[pos] == '"') {
+                string sub;
+                ++pos;
+                tie(sub, pos) = subStr(t, pos);
+                ts.emplace_back(sub);
+                tf.emplace_back(true);
+                ++pos;
+            } else {
+                string sub;
+                tie(sub, pos) = subStr(t, pos);
+                ts.emplace_back(sub);
+                tf.emplace_back(false);
+            }
+        }
+
+        bool diff = ts.size() != ss.size();
+        int cnt = 0;
+
+        for (int i = 0; i < min(ts.size(), ss.size()); ++i) {
+            if (sf[i] != tf[i]) {
+                diff = true;
+            } else if (sf[i] && tf[i]) {
+                if (ts[i] != ss[i]) ++cnt;
+            } else {
+                if (ts[i] != ss[i]) diff = true;
+            }
+        }
+
+        if (diff || cnt > 1) {
+            cout << "DIFFERENT\n";
+        } else if (cnt == 1) {
+            cout << "CLOSE\n";
+        } else {
+            cout << "IDENTICAL\n";
+        }
+    }
+
+    return(0);
+}
+

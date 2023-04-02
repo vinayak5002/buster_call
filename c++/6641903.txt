@@ -1,0 +1,60 @@
+#include <iostream>
+#include <stack>
+using namespace std;
+
+int n;                           //  頂点数
+#define MAX_n     100            //  n の最大数
+int d[MAX_n + 1];                //  d[v]: 頂点 v の 1 からの深さ
+int Adj[MAX_n + 1][MAX_n + 1];   //  Adj[v]:  頂点 v の隣接リスト
+int T[MAX_n][MAX_n + 1];         //  T[i]:  頂点 1 から深さ i 以下の集合
+
+
+void oneNbhd(int N[], int S[])
+{
+    for (int u = 1; u <= n; u++) {
+	if (S[u] == 0)
+	    continue;
+	for (int i = 0; i < n; i++) {
+	    int v = Adj[u][i];
+	    if (v == 0)
+		break;
+	    N[v] = 1;
+	}
+    }
+}
+    
+
+int main()
+{
+    cin >> n;
+    
+    for (int i = 0; i < n; i++) {
+	int u;
+	cin >> u;
+	int k;     // u に隣接する頂点の数
+	cin >> k;
+	for (int j = 0; j < k; j++)
+	    cin >> Adj[u][j];
+    }
+
+    T[0][1] = 1;
+    for (int i = 1; i < n; i++)
+	oneNbhd(T[i], T[i-1]);
+
+    for (int i = 0; i < n; i++) {
+	for (int u = 1; u < n; u++) 
+	    cout << " " << T[i][u];
+	cout << " " << T[i][n] << endl;
+    }
+
+    for (int i = 1; i < n; i++) 
+	for (int u = 1; u <= n; u++) 
+	    if (T[i][u] == 1 && T[i-1][u] == 0)
+		d[u] = i;
+  
+    for (int v = 1; v <= n; v++)
+	cout << v << ' ' << d[v] << endl;
+
+    return 0;
+}
+

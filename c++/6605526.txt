@@ -1,0 +1,86 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+int main(){
+    int n;
+    while(scanf("%d",&n)!=EOF){
+        if( n < 2 || n > 255)break;
+        int grid[300][300] = {};
+        for(int i = 0; i < n; i++){
+            char t[300]={};
+            scanf("%s",t);
+            for(int j = 0; j < n; j++){
+                grid[i][j] = (t[j]=='0')?0:1;
+            }
+        }
+        int max = 0;
+        for(int i = 0; i < n; i++){
+            for(int j = 0; j < n; j++){
+                if(!grid[i][j])continue;
+                if(max==n)break;
+                int ti = i, tj = j;
+                int temp = 1;
+                if( (n - i) > max ){
+                    while(ti + 1 < n){
+                        if(!grid[ti+1][j])break;
+                        temp++;
+                        ti++;
+                    }
+                    if(temp > max){
+                        max = temp;
+                        /*printf("%d %d\n",i,j);*/
+                    }
+                    temp = 1;
+                    ti = i;
+                }
+
+                if( (n - j) > max ){
+                    while(tj + 1 < n){
+                        if(!grid[i][tj+1])break;
+                        temp++;
+                        tj++;
+                    }
+                    if(temp > max){
+                        max = temp;
+                        /*printf("%d %d\n",i,j);*/
+                    }
+                    temp = 1;
+                    tj = j;
+                }
+
+                if( (((n - j) > (n - i))?(n - j):(n - i)) > max ){
+                    while((tj + 1 < n) && (ti + 1 < n)){
+                        if(!grid[ti+1][tj+1])break;
+                        temp++;
+                        tj++;
+                        ti++;
+                    }
+                    if(temp > max){
+                        max = temp;
+                        /*printf("%d %d\n",i,j);*/
+                    }
+                    temp = 1;
+                    tj = j;
+                    ti = i;
+                }
+
+                if( ( ((n - j) > i)?(n - j):i) > max ){
+                    while((tj + 1 < n) && (ti - 1>= 0)){
+                        if(!grid[ti-1][tj+1])break;
+                        temp++;
+                        tj++;
+                        ti--;
+                    }
+                    if(temp > max){
+                        max = temp;
+                        /*printf("%d %d\n",i,j);*/
+                    }
+                }
+            }
+            if(max==n)break;
+        }
+        printf("%d\n", max);
+    }
+    return 0;
+}
+

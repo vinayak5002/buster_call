@@ -1,0 +1,63 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+
+long long dp_mcm (vector<pair<int, int> > size_vec) {
+    vector<vector<tuple<long long, long long, long long> > > pyramid;
+    vector<tuple<long long, long long, long long> > inner_vec; //縦、横、最小計算回数
+    int left_count, right_count;
+
+    for (int i=0; i < size_vec.size(); i++) {
+        for(int j=0; j < size_vec.size()-i; j++) {
+            inner_vec.push_back(make_tuple(0, 0, 0));
+        }
+        pyramid.push_back(inner_vec);
+        inner_vec.clear();
+    }
+
+    for (int k=0; k < size_vec.size(); k++) {
+        for(int s=0; s < size_vec.size()-k; s++) {
+            if (k == 0) {
+                get<0>(pyramid.at(0).at(s)) = size_vec.at(s).first;
+                get<1>(pyramid.at(0).at(s)) = size_vec.at(s).second;
+            }
+            else if (k == 1) {
+                get<0>(pyramid.at(1).at(s)) = get<0>(pyramid.at(0).at(s));
+                get<1>(pyramid.at(1).at(s)) = get<1>(pyramid.at(0).at(s+1));
+                get<2>(pyramid.at(1).at(s)) = get<1>(pyramid.at(0).at(s)) * get<0>(pyramid.at(0).at(s+1));
+            }
+            else {
+                // 計算回数
+                left_count = get<1>(pyramid.at(k-1).at(s)) * get<0>(pyramid.at(0).at(s+k));
+                right_count = get<1>(pyramid.at(0).at(s-k+1)) * get<0>(pyramid.at(k-1).at(s+1));
+                if (left_count < right_count) {
+                    get<0>(pyramid.at(k).at(s)) = get<0>(pyramid.at(k-1).at(s));
+                    get<1>(pyramid.at(k).at(s)) = get<1>(pyramid.at(0).at(s+k));
+                    get<2>(pyramid.at(k).at(s)) = left_count;
+                }
+                else {
+                    get<0>(pyramid.at(k).at(s)) = get<0>(pyramid.at(0).at(s-k+1));
+                    get<1>(pyramid.at(k).at(s)) = get<1>(pyramid.at(k-1).at(s+1));
+                    get<2>(pyramid.at(k).at(s)) = right_count;
+                }
+            }
+        }
+    }
+    return get<2>(pyramid.at(size_vec.size()-1).at(0));     
+}
+
+
+
+int main() {
+    int n;
+    cin >> n;
+    vector<pair<int, int> > size_vec(n);
+    for (int i=0; i<q; i++) {
+        cin >> size_vec.at(i).first >> size_vec.at(i).second;
+    }
+    long long ans = dp_mcm (size_vec);
+    
+    cout << ans << endl;
+
+    return 0;
+}

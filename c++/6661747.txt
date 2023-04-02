@@ -1,0 +1,111 @@
+#include<bits/stdc++.h>
+using namespace std;
+using pii = pair<int,int>;
+using ll = long long;
+
+template<class t=ll>
+t in(){
+	t res;
+	cin >> res;
+	return res;
+}
+
+using BOperator = function<ll(ll,ll)>;
+using P = pair<string,BOperator>;
+
+vector<P> Operators;
+
+ll add(ll a,ll b){
+	return a | b;
+}
+
+ll exor(ll a,ll b){
+	return a ^ b;
+}
+ll mul(ll a,ll b){
+	return a & b;
+}
+
+
+string str;
+vector<int> table;
+
+bool readNumber(ll &value,int &p){
+	if(not ('a' <= str[p] and str[p] <= 'd'))return false;
+	value = table[str[p] - 'a'];
+	++p;
+	return true;
+}
+
+bool readToken(string token,int &p){
+	if(str.substr(p,token.size()) == token){
+		p += token.size();
+		return true;
+	}
+	return false;
+}
+
+bool expression(ll &value,int &p){
+	do{
+		int np = p;
+		if(not readNumber(value,np))break;
+		p = np;
+		return true;
+	}while(false);
+	for(auto op:Operators){
+		int np = p;
+		if(not readToken("[",np))continue;
+		if(not readToken(op.first,np))continue;
+		ll l;
+		ll r;
+		if(not expression(l,np))continue;
+		if(not expression(r,np))continue;
+		if(not readToken("]",np))continue;
+		p = np;
+		value = op.second(l,r);
+		return true;
+	}
+	return false;
+}
+
+
+string func(){
+	Operators.emplace_back("+",add);
+	Operators.emplace_back("*",mul);
+	Operators.emplace_back("^",exor);
+	table.assign(4,0);
+	vector<int> cnts(20,0);
+	for(int i=0;i<10;++i){
+		for(int j=0;j<10;++j){
+			for(int k=0;k<10;++k){
+				for(int l=0;l<10;++l){
+					table[0] = i;
+					table[1] = j;
+					table[2] = k;
+					table[3] = l;
+					ll value;
+					int p = 0;
+					expression(value,p);
+					++cnts[value];
+				}
+			}
+		}
+	}
+	string v = in<string>();
+	for(int i=0;i<4;++i){
+		table[i] = v[i] - '0';
+	}
+	ll value;
+	int p;
+	expression(value,p);
+	return to_string(value) + " " + to_string(cnts[value]);
+}
+
+int main(){
+	while(true){
+		str=  in<string>();
+		if(str==".")break;
+		cout << func() << endl;
+	}
+}
+

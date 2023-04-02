@@ -1,0 +1,121 @@
+
+#include <iostream>
+using namespace std;
+
+int parent(int i)
+{
+    return i / 2;
+}
+
+int left(int i)
+{
+    return 2 * i;
+}
+
+int right(int i)
+{
+    return 2 * i + 1;
+}
+
+void maxHeapify(int A[], int H, int i)
+{
+    int l = left(i);
+    int r = right(i);
+    int largest = i;      // 左の子、自分、右の子の中で値が最大のノード
+    if (l <= H) {
+	if (A[l] > A[i])
+	    largest = l;
+	if (r <= H && A[r] > A[largest])
+	    largest = r;
+    }
+    /*
+      深さ d 以上のノードに関しては maxヒープ条件をみたしているとする。
+      深さ d-1 のノード i に上の操作をほどこすと、そのノードとその直下に関しては
+      条件をみたすことになる。もしそれによって、ノード i が下降した場合には、
+      そこは条件が壊れる（可能性がある）ので、そのノードに関して再び同じことを行う。
+    */
+    if (largest != i) {
+	swap(A[i], A[largest]);
+	maxHeapify(A, H, largest);
+    }
+}
+
+void buildMaxHeap(int A[], int H)
+{
+    for (int i = H/2; i > 0; i--)     // H/2 == parent(H)
+	maxHeapify(A, H, i);
+}
+
+void heapSort(int A[], int N)
+{
+    buildMaxHeap(A, N);
+
+    int H = N;   // ヒープサイズ
+    while (H > 1) {
+    swap(A[1], A[H]);      // 最大値をA[H] に、A[1] には不明な数
+    H--;                   // 最後の項ははずして、残りの数列を考える
+    maxHeapify(A, H, 1);   // A[1] 以外は maxヒープ条件をみたしている
+    }
+} 
+
+// A[1]..A[H] はソートされているとする
+void heapUp(int A[], int H)
+{
+    if (H <= 1)
+	return;
+    else if (H == 2)
+	swap(A[1], A[2]);  
+    else {
+	heapUp(A, H - 1);
+	swap(A[H-1], A[H]);          //  A[H - 1] == Min <---> A[H] == Max
+    	int i = H - 1;
+	int p = parent(i);
+	while (p >= 1) {
+	    swap(A[i], A[p]);          //  最大値を親と交換
+	    i = p;
+	    p = parent(i);
+	}
+    }
+}
+
+
+/*
+// A[1]..A[H] はソートされているとする
+void heapUp(int A[], int H)
+{
+    for (int h = 2; h <= H; h++) {
+	if (h == 2) {
+	    swap(A[1], A[2]);
+	} else {
+	    swap(A[h-1], A[h]);
+	    int i = h - 1;
+	    int p = parent(i);
+	    while (p >= 1) {
+		swap(A[i], A[p]);          //  最大値を親と交換
+		i = p;
+		p = parent(i);
+	    }
+	}
+    }
+}
+*/
+
+int main()
+{
+    int N;
+    cin >> N;
+
+    int A[N + 1];
+    for (int i = 1; i <= N; ++i)
+	cin >> A[i];
+
+    heapSort(A, N);
+    heapUp(A, N);
+
+    for (int i = 1; i <= N; ++i)
+	cout << " " << A[i];
+    cout << endl;
+
+    return 0;
+}
+

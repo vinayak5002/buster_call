@@ -1,0 +1,245 @@
+// g++ -std=c++17 -D DEV=1 main.cpp
+#include <stdio.h>
+#include <cassert>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <map>
+#include <deque>
+#include <queue>
+#include <tuple>
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <functional>
+#include <set>
+
+using namespace std;
+
+#define rep(i, a, n) for (long i = (a); i < (n); ++i)
+#define bit(n, k) ((n >> k) & 1)
+#define yes { cout << "Yes" << endl; return ; }
+#define no { cout << "No" << endl; return ; }
+
+template <class T>
+bool min(T &a, const T b) {
+    if (a > b) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template<class T> istream& operator>>(istream& i, vector<T>& v) { rep(j, 0, v.size()) i >> v[j]; return i; }
+template<class T> ostream& operator<<(ostream& o, vector<T>& v) { rep(j, 0, v.size()) { if (j == 0) o << v[j]; else o << " " << v[j]; } return o; }
+
+class BigInteger {
+private:
+
+public:
+
+    int n;
+
+    vector<int> v;
+
+    bool minus = false;
+
+    BigInteger(string s) {
+        if (s[0] == '-') {
+            minus = true;
+            s = s.substr(1);
+        }
+
+        n = s.size();
+        v.resize(n);
+        rep(i, 0, n) {
+            v[n-1-i] = s[i]-'0';
+        }
+    }
+
+    BigInteger(vector<int> a, bool sign = false) {
+        v = a;
+        n = a.size();
+        minus = sign;
+    }
+
+    bool operator==(const BigInteger& o) const {
+        bool ok = true;
+        rep(i, 0, n) {
+            if (v[i] != o.v[i]) {
+                ok = false;
+                break;
+            }
+        }
+        return ok;
+    }
+
+    bool operator>(const BigInteger& o) const {
+        // cout << "this:" << toString() << endl;
+        // cout << "o:" << o.toString() << endl;
+        bool ok = false;
+        rep(i, 0, n) {
+            if (v[n-i-1] == o.v[n-i-1]) {
+                continue;
+            }
+            if (v[n-i-1] > o.v[n-i-1]) {
+                ok = true;
+            }
+            break;
+        }
+        return ok;
+    }
+
+    BigInteger subtract(const BigInteger& o);
+
+    BigInteger add(BigInteger& o);
+
+    string toString() const;
+};
+
+string BigInteger::toString() const {
+    string s;
+    if (minus) {
+        s.append("-");
+    }
+    for (int i = n-1; i >= 0; --i) {
+        s.append(std::to_string(v[i]));
+    }
+    return s;
+}
+
+BigInteger BigInteger::subtract(const BigInteger& o) {
+    while (n < o.v.size()) {
+        v.push_back(0);
+        n++;
+    }
+
+    vector<int> u;
+    u.resize(n);
+
+    int c = 0;
+    rep(i, 0, n) {
+        int x = 0;
+        if (i < o.v.size()) {
+            x = v[i]-o.v[i]+c;
+        } else {
+            x = v[i]+c;
+        }
+
+        if (x < 0) {
+            x += 10;
+            c = -1;
+        } else {
+            c = 0;
+        }
+        u[i] = x;
+    }
+
+    while (n >= 2 and u[n-1] == 0) {
+        u.pop_back();
+        n--;
+    }
+
+    return BigInteger(u);
+}
+
+BigInteger BigInteger::add(BigInteger& o) {
+    while (n < o.v.size()) {
+        v.push_back(0);
+        n++;
+    }
+    while (n != o.v.size()) {
+        o.v.push_back(0);
+        o.n++;
+    }
+
+    bool sign = false;
+    if (minus and o.minus) {
+        sign = true;
+    } else if (not minus and not o.minus) {
+        sign = false;
+    } else {
+        if (*this == o) {
+            return BigInteger("0");
+        } else if (*this > o) {
+            sign = minus;
+            auto val = subtract(o);
+            // cout << "val1:" << val.toString() << endl;
+            val.minus = sign;
+            return val;
+        } else {
+            sign = o.minus;
+            auto val = o.subtract(*this);
+            // cout << "val2:" << val.toString() << endl;
+            val.minus = sign;
+            return val;
+        }
+    }
+
+    vector<int> u;
+    u.resize(n+1);
+
+    int c = 0;
+    rep(i, 0, n) {
+        int x = 0;
+        if (i < o.v.size()) {
+            x = v[i]+o.v[i]+c;
+        } else {
+            x = v[i]+c;
+        }
+        c = x / 10;
+        u[i] = x % 10;
+    }
+
+    if (c != 0) {
+        u[n] = c;
+    } else {
+        u.resize(n);
+    }
+
+    return BigInteger(u, sign);
+}
+
+class Solver {
+private:
+
+    string s, t;
+
+public:
+
+    Solver() {
+        cin >> s >> t;
+    }
+
+    void solve() {
+        auto a = BigInteger(s);
+        auto b = BigInteger(t);
+        cout << a.add(b).toString() << endl;
+    }
+};
+
+int main(int argc, char **argv) {
+
+#ifdef DEV
+    std::ifstream in("input");
+    cin.rdbuf(in.rdbuf());
+
+
+    int t; cin >> t;
+    for (int x = 1; x <= t; ++x) {
+        auto start = std::chrono::system_clock::now();
+        Solver s;
+        s.solve();
+        auto end = std::chrono::system_clock::now();
+        cout << "time:" << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count() << endl;
+    }
+#else
+    Solver s;
+    s.solve();
+#endif
+
+    return 0;
+}
+

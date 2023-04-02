@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for (int i = 0; i < (n); ++i)
+#define reprep(i,j,n) for (int i = 0; i < (n); ++i) for (int j = 0; j < (n); ++j)
+using namespace std;
+using ll = long long;
+using P = pair<int,int>;
+
+const ll MAX_W = 1000000000000; 
+
+int main(){
+    int n;
+    cin >> n;
+    ll edge[100][100];
+    reprep(i,j,100) {
+        edge[i][j]=MAX_W;
+        if(i==j) edge[i][j]=0;
+    }
+    rep(i,n){
+        int u,k;
+        cin >>u >>k;
+        rep(j,k){
+            int v;
+            ll c;
+            cin >> v >>c;
+            edge[i][v] = c;
+        }
+    }
+    vector<int> V(n);
+    rep(i,n) {
+        V[i]=0;
+    }
+    vector<ll> dist_min(n);
+    rep(i,n) dist_min[i]=MAX_W;
+    dist_min[0]=0;
+    rep(step,n){
+        ll d_min = MAX_W;
+        int p=0;
+        rep(i,n){
+            if((V[i]==0)&(dist_min[i]<d_min)) {
+                d_min = dist_min[i];
+                p = i;
+            }
+        }
+        V[p]=1;
+        rep(i,n){
+            dist_min[i]=min(dist_min[i],dist_min[p]+edge[p][i]);
+        }
+    }
+    rep(i,n){
+        cout << i <<" " <<dist_min[i] << endl;
+    }
+}

@@ -1,0 +1,74 @@
+#1_index
+seg_len = 1<<19 # > 5*(10**5)
+INF = (1<<31)-1
+data = [0 for i in range(2*seg_len)]
+lazy = [None for i in range(2*seg_len)] # default: RAQ=>0, RUQ=>None
+
+# 与えられた区間より上側のノードを取得
+def gindex(l,r):
+  l += seg_len; r += seg_len
+  lm = (l // (l & -l)) >> 1
+  rm = (r // (r & -r)) >> 1
+  ids = []
+  while l < r:
+    if r <= rm: ids.append(r)
+    if l <= lm: ids.append(l)
+    l >>= 1; r >>= 1
+  while l:
+    ids.append(l)
+    l >>= 1
+  return ids
+
+# 与えられた区間の上側の遅延させてたやつををトップダウンに伝播
+def propagates(ids):
+  for i in reversed(ids):
+    if i == 0: continue
+    v = lazy[i]
+    if v is None: continue 
+    # RUQ
+    data[2*i] = data[2*i+1] = lazy[2*i] = lazy[2*i+1] = v//2
+    lazy[i] = None
+
+
+def update(l, r, x):
+  ids = gindex(l,r)
+  propagates(ids)
+  l += seg_len; r += seg_len
+  while l < r:
+    if l & 1:
+      data[l] = lazy[l] = x
+      l += 1
+    if r & 1:
+      data[r-1] = lazy[r-1] = x
+      r -= 1
+    l >>= 1; r >>= 1
+    x *= 2
+  for i in ids:
+    data[i] = data[i*2] + data[i*2+1]
+
+def get_query(l,r):
+  ids = gindex(l,r)
+  propagates(ids)
+  l += seg_len; r += seg_len
+  ret = 0
+  while l < r:
+    if l & 1:
+      ret += data[l]
+      l += 1
+    if r & 1:
+      ret += data[r-1]
+      r -= 1
+    l >>= 1; r >>= 1
+  return ret
+
+import sys
+input = sys.stdin.readline
+n,q = map(int,input().split())
+for i in range(q):
+  c,*p = map(int,input().split())
+  if c:
+    s,t = p
+    print(get_query(s,t+1))
+  else:
+    s,t,x = p
+    update(s,t+1,x)

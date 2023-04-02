@@ -1,0 +1,66 @@
+#include <iostream>
+#ifdef CLOCK
+    #include <time.h>
+#endif
+using namespace std;
+
+/*
+// ver.1:  遅い
+int lcs(string X, string Y)
+{
+    int lX = X.length();
+    int lY = Y.length();
+	
+    for (int k = 0; k < lY; k++) {
+	for (int j = 0; j < lX; j++) { 
+	    if (X[j] == Y[k]) {
+		string X1 = X.substr(j + 1, lX - j - 1);
+		string Y1 = Y.substr(k + 1, lY - k - 1);
+		return max(1 + lcs(X1, Y1), lcs(X, Y1));
+	    }
+	}
+    }
+    return 0;
+}
+*/
+
+#define MAXLEN 1000
+int T[MAXLEN][MAXLEN];
+
+int lcs (string X, string Y, int k)
+{
+    int lX = X.length();
+    int lY = Y.length();
+    if (k >= lY)
+	return 0;
+    for (int j = 0; j < lX; j++) {
+	if (X[j] == Y[k]) {
+	    string X1 = X.substr(j + 1, lX - j - 1);
+	    return max(1 + lcs(X1, Y, k + 1), lcs(X, Y, k + 1));
+	}
+    }
+    return lcs(X, y, k+ 1);
+}
+
+int main()
+{
+#ifdef CLOCK
+    clock_t start_clock = clock();
+#endif 
+    int q;
+    cin >> q;
+    for (int i = 0; i < q; i++) {
+	string X, Y;
+	cin >> X >> Y;
+	cout << lcs(X, Y, 0) << endl;
+    }
+#ifdef CLOCK
+    clock_t end_clock = clock();
+    cout << 1000 * (end_clock - start_clock) / CLOCKS_PER_SEC << " ms"
+     << endl;
+#endif
+    return 0;
+}
+
+
+

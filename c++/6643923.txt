@@ -1,0 +1,62 @@
+#include<stdio.h>
+
+#define MAX_A 1000000
+#define SIZE_G 100
+
+int main(void){
+    int     n;
+    int     A[MAX_A], G[SIZE_G];
+    int     i, j, k;
+    int     cnt = 0;
+    int     v;
+    int     temp;
+    int     maxa = 0;
+    int     sizeg = 1;
+
+    //for(i = 0; i < SIZE_G; ++i)G[i] = i + 1;
+
+    
+    scanf("%d", &n);
+
+    
+    
+    for(i = 0; i < n; ++i){
+        scanf("%d", A + i);
+        maxa = (maxa > A[i] ? maxa : A[i]);
+    }
+
+    G[0] = 1;
+    for(j = 0;G[j] * 3 + 1 <= maxa; ++j,++sizeg){
+        G[j + 1] = G[j] * 3 + 1;
+    }
+    
+    for(k = 1; k <= sizeg; ++k){
+        for(i = G[sizeg - k]; i < n; i += G[sizeg - k]){
+            v = A[i];
+            for(j = i - G[sizeg - k]; j >= 0 && A[j] > v; j -= G[sizeg - k]){
+                A[j + G[sizeg - k]] = A[j];
+                ++cnt;
+            }
+            A[j + G[sizeg - k]] = v;
+            
+        }
+    }
+    printf("%d\n", sizeg);
+    i = 0;
+    while(1){
+        printf("%d",G[sizeg - i - 1]);++i;
+        if(i == sizeg)break;
+        printf(" ");
+    }
+    printf("\n");
+
+    printf("%d\n", cnt);
+
+    i = 0;
+    while(1){
+        printf("%d",A[i]);++i;
+        if(i == n)break;
+        printf("\n");
+    }
+    return 0;
+}

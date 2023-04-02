@@ -1,0 +1,67 @@
+use std::collections::HashMap;
+use std::io;
+use std::io::Read;
+
+fn main() {
+    let mut buf = String::new();
+    io::stdin().read_to_string(&mut buf).unwrap();
+    let mut iter = buf.split_whitespace();
+    let mut sectors;
+    let mut files_ref = HashMap::new();
+    let mut blank = Vec::new();
+
+    loop {
+        let n: usize = iter.next().unwrap().parse().unwrap();
+        if n == 0 {
+            break;
+        }
+        sectors = vec![-1; 1000000001];
+        let mut files = vec![Vec::new(); 10001];
+        files_ref.clear();
+        blank.clear();
+
+        blank.push(0);
+
+        for i in 0..n {
+            let command = iter.next().unwrap();
+            if command == "R" {
+                let index: usize = iter.next().unwrap().parse().unwrap();
+                println!("{}", sectors[index])
+            } else if command == "W" {
+                let filename: usize = iter.next().unwrap().parse().unwrap();
+                let size: i32 = iter.next().unwrap().parse().unwrap();
+                let mut index = blank.pop().unwrap();
+                files_ref.insert(filename, i);
+                files[*files_ref.get(&filename).unwrap()].push(index);
+
+                for _ in 0..size {
+                    if sectors[index] != -1 {
+                        index = blank.pop().unwrap();
+                        files[*files_ref.get(&filename).unwrap()].push(index);
+                    }
+                    sectors[index] = filename as i32;
+                    index += 1
+                }
+                blank.push(index);
+            } else if command == "D" {
+                let filename: usize = iter.next().unwrap().parse().unwrap();
+                let mut index = files[*files_ref.get(&filename).unwrap()].pop().unwrap();
+                blank.push(index);
+
+                loop {
+                    if sectors[index] != filename as i32 {
+                        match files[*files_ref.get(&filename).unwrap()].pop() {
+                            Some(n) => index = n,
+                            None => break,
+                        }
+                        blank.push(index);
+                    }
+                    sectors[index] = -1;
+                    index += 1
+                }
+            }
+        }
+        println!("");
+    }
+}
+

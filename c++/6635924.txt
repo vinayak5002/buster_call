@@ -1,0 +1,95 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+const int INF=1000000000;
+
+int V;
+vector<int>es[2000];
+int match[2000];
+int vis[2000];
+
+void add_edge(int u,int v){
+    es[u].push_back(v);
+    es[v].push_back(u);
+}
+
+bool dfs(int v){
+    vis[v]=1;
+
+    for(int i=0;i<es[v].size();i++){
+        int u=es[v][i],w=match[u];
+        if(w<0||!vis[w]&&dfs(w)){
+            match[u]=v;
+            match[v]=u;
+            return true;
+        }
+    }
+    return false;
+}
+
+int max_matching(){
+    memset(match,-1,sizeof(match));
+    int res=0;
+
+    for(int i=0;i<V;i++){
+        if(match[i]<0){
+            memset(vis,0,sizeof(vis));
+            if(dfs(i))
+                res++;
+        }
+    }
+    return res;
+}
+
+
+int N,M,L;
+
+int p[1000],t[1000];
+
+int d[100][100];
+
+void solve(){
+    for(int i=0;i<2000;i++)es[i].clear();
+
+    for(int i=0;i<N;i++)
+        fill(d[i],d[i]+N,INF);
+
+    for(int i=0;i<M;i++){
+        int u,v,c;
+        scanf("%d%d%d",&u,&v,&c);
+        d[u][v]=c;
+        d[v][u]=c;
+    }
+
+    for(int k=0;k<N;k++)
+        for(int i=0;i<N;i++)
+        for(int j=0;j<N;j++)
+        d[i][j]=min(d[i][j],d[i][k]+d[k][j]);
+
+    V=2*L;
+
+    for(int i=0;i<L;i++){
+        int u,v;
+        scanf("%d%d",&u,&v);
+
+        for(int j=0;j<i;j++){
+            if(d[u][p[j]]>abs(v-t[j]))continue;
+
+            if(v<t[j]){
+                add_edge(i,j+L);
+            }
+            else add_edge(j,i+L);
+        }
+        p[i]=u;
+        t[i]=v;
+    }
+    printf("%d\n",L-max_matching());
+}
+
+int main()
+{
+    while(scanf("%d%d%d",&N,&M,&L)&&N)
+        solve();
+}
+
+

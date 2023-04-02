@@ -1,0 +1,122 @@
+#include <stdlib.h>
+#include <stdio.h>
+
+struct node
+{
+  struct node *right;
+  struct node *left;
+  struct node *parent;
+  int key;
+};
+typedef struct node *Node;
+#define NIL NULL
+
+Node root;
+
+Node treeSearch(Node u, int k)
+{
+  if (u == NULL || u->key == k)
+    return u;
+
+  //キーと子の比較(再帰的処理)
+  if (u->key < k)
+    return treeSearch(u->right, k);
+  return treeSearch(u->left, k);
+}
+
+void insert(int item)
+{
+  struct node *ptr, *parentptr, *nodeptr;
+  ptr = (Node)malloc(sizeof(struct node));
+  if (ptr == NULL)
+  {
+    printf("insertできません");
+  }
+  else
+  {
+    ptr->key = item;
+    ptr->left = NULL;
+    ptr->right = NULL;
+    if (root == NULL)
+    {
+      root = ptr;
+      root->left = NULL;
+      root->right = NULL;
+    }
+    else
+    {
+      parentptr = NULL;
+      nodeptr = root;
+      while (nodeptr != NULL)
+      {
+        parentptr = nodeptr;
+        if (item < nodeptr->key)
+        {
+          nodeptr = nodeptr->left;
+        }
+        else
+        {
+          nodeptr = nodeptr->right;
+        }
+      }
+      if (item < parentptr->key)
+      {
+        parentptr->left = ptr;
+      }
+      else
+      {
+        parentptr->right = ptr;
+      }
+    }
+  }
+}
+
+  void inorder(Node u)
+  {
+    if (u == NIL)
+      return;
+
+    inorder(u->left);
+
+    printf("%d ", u->key);
+
+    inorder(u->right);
+  }
+  void preorder(Node u)
+  {
+    if (u == NIL)
+      return;
+
+    printf("%d ", u->key);
+
+    preorder(u->left);
+
+    preorder(u->right);
+  }
+
+  int main()
+  {
+    int n, i, x;
+    char com[20];
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++)
+    {
+      scanf("%s", com);
+      if (com[0] == 'i')
+      {
+        scanf("%d", &x);
+        insert(x);
+      }
+      else if (com[0] == 'p')
+      {
+        inorder(root);
+        printf("\n");
+        preorder(root);
+        printf("\n");
+      }
+    }
+
+    return 0;
+  }
+

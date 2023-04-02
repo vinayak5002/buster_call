@@ -1,0 +1,120 @@
+#include <iostream>
+#include <cstdio>
+#include <iterator>
+#include <string>
+#include <sstream>
+#include <bitset>
+#include <vector>
+#include <array>
+#include <stack>
+#include <queue>
+#include <map>
+#include <set>
+#include <algorithm>
+#include <numeric>
+#define _USE_MATH_DEFINES  // for M_PI
+#include <cmath>
+using std::cin;
+using std::cout;
+using std::endl;
+using std::string;
+using std::bitset;
+using std::vector;
+using std::array;
+using std::stack;
+using std::queue;
+using std::set;
+using std::map;
+using std::pair;
+#define REP(i, n) for (int i = 0; i < static_cast<int>(n); ++i)
+#define FOR(i, a, b) for (int i = static_cast<int>(a); i < static_cast<int>(b); ++i)
+
+
+void PrintArray(const int* a, const size_t n);
+bool IsPrime(const unsigned int a);
+long long Pow(long long a, long long n, long long mod_prime=1);
+long long InvMod(long long a, long long mod);
+
+
+int N;
+array<long long, 100000> S;
+int Q;
+array<long long, 50000> T;
+
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    cin.tie(0);
+
+    cin >> N;
+    REP(i, N) cin >> S[i];
+    cin >> Q;
+    REP(i, Q) cin >> T[i];
+
+    std::sort(S.begin(), S.begin() + N);
+    std::sort(T.begin(), T.begin() + N);
+
+    int cnt = 0;
+    REP(i, Q) {
+        auto s_i = *std::lower_bound(S.begin(), S.begin() + N, T[i]);
+        if (s_i >= 0 && s_i < Q) ++cnt;
+    }
+    cout << cnt << endl;
+}
+
+
+void PrintArray(const int* a, const size_t n) {
+    REP(i, n) {
+        cout << a[i];
+        if (i != static_cast<int>(n)-1) cout << " ";
+    }
+    cout << endl;
+}
+
+
+bool IsPrime(const unsigned int a) {
+    if (a <= 1) return false;
+    if (a <= 3) return true;
+    if (a % 2 == 0 || a % 3 ==0) return false;
+
+    for (uint i = 5; i * i <= a; i += 6) {
+        if (a % i == 0) return false;  // x6 - 1
+        if (a % (i + 2) == 0) return false;  // x6 + 1
+    }
+    return true;
+}
+
+
+long long Pow(long long a, long long n, long long mod_prime) {
+    long long ret = 1;
+    if (mod_prime > 1) {
+        while (n > 0) {
+            if (n & 1) ret = ret * a % mod_prime;
+            a = a * a % mod_prime;
+            n >>= 1;
+        }
+    }
+    else {
+        while (n > 0) {
+            if (n & 1) ret *= a;
+            a *= a;
+            n >>= 1;
+        }
+    }
+    return ret;
+}
+
+
+long long InvMod(long long a, long long mod) {
+    long long b = mod, u = 1, v = 0;
+    while (b) {
+        long long t = a / b;
+        a -= t * b; std::swap(a, b);
+        u -= t * v; std::swap(u, v);
+    }
+    u %= mod;
+    if (u < 0) u += mod;
+    return u;
+}
+
+

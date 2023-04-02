@@ -1,0 +1,69 @@
+class SCC[A] {
+  def reverseGraph(graph: Map[A, Set[A]]): Map[A, Set[A]] = {
+    graph.foldLeft(Map[A, Set[A]]()){
+      case (map, (vertex, edges)) =>
+        edges.foldLeft(map){
+          (m, e) => if (m.contains(e)) m + (e -> (m(e) ++ Set(vertex))) else m + (e -> Set(vertex))
+        }
+    }
+  }
+  def scc(graph: Map[A, Set[A]]): Set[Set[A]] = {
+    def dfs(vertex: A, visited: Set[A], t: List[A]): (Set[A], List[A]) = {
+      if (visited.contains(vertex)) {
+        (visited, t)
+      } else if (!graph.contains(vertex)) {
+        (visited ++ Set(vertex), vertex::t)
+      } else {
+        val (newVisited, newT) = graph(vertex).foldLeft((visited ++ Set(vertex), t)){
+          case ((vi, tt), v) => dfs(v, vi, tt)
+        }
+        (newVisited, vertex::newT)
+      }
+    }
+    val t: List[A] = graph.keySet.foldLeft((Set[A](), List[A]())){
+      case ((visited, t), vertex) => dfs(vertex, visited, t)
+    }._2
+
+    val revGraph = reverseGraph(graph)
+    def rdfs(vertex: A, visited: Set[A], acc: Set[A]): (Set[A], Set[A]) = {
+      if (visited.contains(vertex)) {
+        (visited, acc)
+      } else if (!revGraph.contains(vertex)) {
+        (visited ++ Set(vertex), acc ++ Set(vertex))
+      } else {
+        revGraph(vertex).foldLeft((visited ++ Set(vertex), acc ++ Set(vertex))) {
+          case ((vi, ac), v) => rdfs(v, vi, ac)
+        }
+      }
+    }
+    t.foldLeft((Set[A](), Set[Set[A]]())){
+      case ((visited, divided), vertex) =>
+        val (newVisited, newAcc) = rdfs(vertex, visited, Set[A]())
+        if (newAcc.isEmpty) (newVisited, divided) else (newVisited, divided ++ Set(newAcc.toSet))
+    }._2
+  }
+}
+
+
+
+object Main {
+  def main(args: Array[String]): Unit = {
+    val sc = new java.util.Scanner(System.in)
+    val v, e = sc.nextInt()
+    val st = List.fill(e)((sc.nextInt(), sc.nextInt()))
+    val q = sc.nextInt()
+    val uv = List.fill(q)((sc.nextInt(), sc.nextInt()))
+
+    val graph: Map[Int, Set[Int]] = st.foldLeft(Map[Int, Set[Int]]()){
+      case (map, (s, t)) => if (map.contains(s)) map + (s -> (map(s) ++ Set(t))) else map + (s -> Set(t))
+    }
+
+    val set = (new SCC).scc(graph)
+    val map = set.foldLeft(Map[Int, Int](), 0){
+      case ((map, i), s) => (s.foldLeft(map)((m, n) => m + (n -> i)), i + 1)
+    }._1
+    for ((u, v) <- uv) {
+      if (!map.contains(u) || !map.contains(v)) println(0) else if (map(u) == map(v)) println(1) else println(0)
+    }
+  }
+}

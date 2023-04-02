@@ -1,0 +1,64 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <cmath>
+#include <set>
+#include <map>
+#define TEST cout << "TEST" << endl
+#define IINF 2147483647
+#define LLINF 9223372036854775807
+#define AMARI 998244353
+using namespace std;
+
+int main(void){
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    int n,h,w,c,d,x,y,z;
+    cin >> n >> w >> h;
+    vector<pair<int, int>> tplist(0);
+    vector<pair<int, int>> yplist(0);
+    for (int i = 0; i < n; i++) {
+        cin >> x >> y >> z;
+        tplist.push_back({ max(x - z,0),1 });
+        tplist.push_back({ x + z,-1 });
+        yplist.push_back({ max(y - z,0),1 });
+        yplist.push_back({ y + z,-1 });
+    }
+    sort(tplist.begin(), tplist.end());
+    sort(yplist.begin(), yplist.end());
+    int tpointer = 0,yajirusi = 0,ystart;
+    //for (int i = 0; i < yplist.size(); i++)cout << yplist[i].first << ' ';
+    if (tplist[0].first > 0 && yplist[0].first > 0) {
+        cout << "No" << endl;
+        return 0;
+    }
+
+    int kari = 0;
+    bool flag = false;
+    for (int i = 0; i < 2 * n; i++) {
+        kari += tplist[i].second;
+        if (kari == 0 && i != 2 * n - 1) {
+            if (tplist[i + 1].first != tplist[i].first) {
+                flag = true;
+                break;
+            }
+        }
+    }
+    if (!flag) {
+        cout << "Yes" << endl;
+        return 0;
+    }
+    kari = 0;
+    for (int i = 0; i < 2 * n; i++) {
+        kari += yplist[i].second;
+        if (kari == 0 && i != 2 * n - 1) {
+            if (yplist[i + 1].first != yplist[i].first) {
+                cout << "No" << endl;
+                return 0;
+            }
+        }
+    }
+    cout << "Yes" << endl;
+    return 0;
+}

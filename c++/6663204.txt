@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+using namespace std;
+using pii = pair<int, int>;
+using tup = tuple<int, int, int>;
+
+void debug(tup& a) {
+    cout << get<0>(a) << " " << get<1>(a) << " " << get<2>(a) << endl;
+}
+
+tup gettup(pii& a, pii& b) {
+    tup res(a.first, a.second, -1);
+    if (b.second - a.second > 0) get<2>(res) = 0;
+    if (b.first - a.first > 0) get<2>(res) = 1;
+    if (b.second - a.second < 0) get<2>(res) = 2;
+    if (b.first - a.first < 0) get<2>(res) = 3;
+    return res;
+}
+
+void input(set<tup>& st) {
+    int m; cin >> m;
+    vector<pii> p(m);
+    for(auto& x : p) cin >> x.second >> x.first;
+    for (int i = 0 ; i < m - 1 ; i++) {
+        st.emplace(gettup(p[i], p[i + 1])); 
+        st.emplace(gettup(p[i + 1], p[i]));
+    }
+}
+
+set<tup> trans(set<tup>& st) {
+    int miny = 10001, minx = 10001;
+    for (auto& p : st) {
+        miny = min(get<0>(p), miny);
+        minx = min(get<1>(p), minx);
+    }
+
+    set<tup> res;
+    for (auto p : st) res.emplace(make_tuple(get<0>(p) - miny, get<1>(p) - minx, get<2>(p)));
+
+    return res;
+} 
+
+set<tup> rotate(set<tup>& st) {
+    set<tup> res;
+    for (auto p : st) res.emplace(make_tuple(get<1>(p), -get<0>(p), (get<2>(p) + 1) % 4));
+    return res;
+}
+
+set<tup> getmin(set<tup>& st) {
+    set<tup> res(st.begin(), st.end());
+    res = trans(res);
+    set<tup> cp = res;
+    for (int i = 0 ; i < 4 ; i++) {
+        cp = rotate(cp);
+        // for (auto p : cp) debug(p);
+        // cout << endl;
+        cp = trans(cp);
+        res = min(res, cp);
+    }
+    return res;
+} 
+
+void solve(int n) {
+    set<tup> g; input(g);
+    g = getmin(g);
+    vector<int> ans;
+    for (int i = 0 ; i < n ; i++) {
+        set<tup> st; input(st);
+        st = getmin(st);
+        if (g == st) ans.emplace_back(i + 1);
+    }
+
+    for (auto& x : ans) cout << x << endl;
+
+}
+
+int main() {
+    while(1) {
+        int n; cin >> n;
+        if (n == 0) break;
+        solve(n);
+        cout << "+++++" << endl;
+    }
+}
+

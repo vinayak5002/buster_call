@@ -1,0 +1,105 @@
+#include<stdio.h>
+#define MAX 10000
+#define NIL -1
+
+typedef struct Node {
+    int parent;
+    int left;
+    int right;
+} t;
+
+t Tree[MAX];
+int Depth[MAX], Height[MAX];
+
+int max(int x, int y)
+{
+    if(x > y){return x;}
+    else{return y;}
+}
+
+int setHeight(int u)
+{
+    int h1 = 0;
+    int h2 = 0;
+    if(Tree[u].right != NIL)
+    {
+        h1 = setHeight(Tree[u].right) + 1;
+    }
+    if(Tree[u].left != NIL)
+    {
+        h2 = setHeight(Tree[u].left) + 1;
+    }
+
+    return Height[u] = max(h1, h2);
+}
+
+void setDepth(int u, int d)
+{
+    if(u == NIL){return;}
+    Depth[u] = d;
+    setDepth(Tree[u].left, d+1);
+    setDepth(Tree[u].right, d+1);
+}
+
+int getSibling(int u)
+{
+    if(Tree[u].parent == NIL)
+    {return NIL;}
+    if((Tree[Tree[u].parent].left != u) && (Tree[Tree[u].parent].left != NIL))
+    {return Tree[Tree[u].parent].left;}
+    if((Tree[Tree[u].parent].right != u) && (Tree[Tree[u].parent].right != NIL))
+    {return Tree[Tree[u].parent].right;}
+    return NIL;
+}
+
+int main()
+{
+    int n, i, value, l, r;
+    int root = 0;
+    int deg;
+    scanf("%d", &n);
+    //親ノード初期化
+    for(i=0; i<n; i++)
+    {
+        Tree[i].parent = NIL;
+    }
+
+    for(i=0; i<n; i++)
+    {
+        scanf("%d %d %d", &value, &l, &r);
+        Tree[value].left = l;
+        Tree[value].right = r;
+        if(l != NIL){Tree[l].parent = value;}
+        if(r != NIL){Tree[r].parent = value;}
+    }
+
+    for(i=0; i<n; i++)
+    {
+        if(Tree[i].parent == NIL)
+        {root = i;}
+    }
+    setDepth(root, 0);
+    setHeight(root);
+
+    //結果の表示
+    for(i=0; i<n; i++)
+    {
+        printf("node %d: ", i);
+        printf("parent = %d, ", Tree[i].parent);
+        printf("sibling = %d, ", getSibling(i));
+        deg = 0;
+        if(Tree[i].left != NIL){deg = deg + 1;}
+        if(Tree[i].right != NIL){deg = deg + 1;}
+        printf("degree = %d, ", deg);
+        printf("depth = %d, ", Depth[i]);
+        printf("height = %d, ", Height[i]);
+
+        if(Tree[i].parent == NIL)
+        {printf("root\n");}
+        else if((Tree[i].left == NIL) && (Tree[i].right == NIL))
+        {printf("leaf\n");}
+        else
+        {printf("internal node\n");}
+    }
+    return 0;
+}

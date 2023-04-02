@@ -1,0 +1,54 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <cmath>
+
+using namespace std;
+using vector_ll = vector<long long>;
+using ll = long long;
+ll get_parent(int id, vector_ll &vec){
+    int id_w = floor(id/2);
+    if(1<=id_w && id_w<=vec.size())return id_w;
+    else return -1;
+}
+ll get_left(int id, vector_ll &vec){
+    int id_w = 2*id;
+    if(0<id_w && id_w<=vec.size())return id_w;
+    else return -1;
+}
+ll get_right(int id, vector_ll &vec){
+    int id_w = 2*id+1;
+    if(0<id_w && id_w<=vec.size())return id_w;
+    else return -1;
+}
+void max_heapify(vector_ll &A, ll i){
+    ll l = get_left(i, A);
+    ll r = get_right(i, A);
+    ll largest;
+    if(l!=-1 && A[l] > A[i]) largest = l;
+    else largest = i;
+    if(r!=-1 && A[r] > A[largest])largest = r;
+    if(largest != i){
+        swap(A[i], A[largest]);
+        max_heapify(A, largest);
+    }
+}
+void build_max_heap(vector_ll &A){
+    for(ll i=A.size()/2; i>=1; --i){
+        max_heapify(A, i);
+    }
+}
+int main(){
+    long int n;
+    cin>>n;
+    vector_ll vec(n+1);
+    for(ll i=1; i<vec.size(); ++i){
+        ll &x=vec[i];
+        cin>>x;
+    }
+    build_max_heap(vec);
+    for(ll i=1; i<vec.size(); ++i){
+        cout<<" "<<vec[i];
+    }
+    cout<<endl;
+}

@@ -1,0 +1,30 @@
+package main
+
+import "fmt"
+import "math"
+
+type point struct {x, y, z float64}
+
+func calc_d(a, b point) float64 {
+    return math.Sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y) + (a.z - b.z) * (a.z - b.z))
+}
+
+func main(){
+    var n, r float64
+    fmt.Scan(&n, &r)
+
+    arr := make([]point, int(n) + 1)
+    for i := range arr {
+        var x, y, z float64
+        fmt.Scan(&x, &y, &z)
+        arr[i] = point{x, y, z}
+    }
+    arr[int(n)] = arr[0]
+
+    v := n * 4.0  * math.Pi * r * r * r / 3.0
+    for i := 0; i < len(arr)-1; i++ {
+        d := calc_d(arr[i], arr[i+1])
+        v -= 2.0 * math.Pi * (r - d / 2) * (r - d / 2) * (2 * r + d / 2) / 3.0
+    }
+    fmt.Println(v)
+}

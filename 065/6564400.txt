@@ -1,0 +1,28 @@
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+
+int main() {
+    int N, K; std::cin >> N >> K;
+    std::vector<int> A(N);
+    for (auto &e : A) std::cin >> e;
+
+    std::unordered_map<int, int> M;
+    int right = 0;
+    int sum = 0;
+    int ans = (1<<30);
+    for (int left = 0; left < N; left++) {
+        while (right < N && M.size() < K) {
+            if (A[right] <= K) M[A[right]]++;
+            right++;
+        }
+        if (M.size() == K) ans = std::min(ans, right - left);
+        if (A[left] <= K) {
+            M[A[left]]--;
+            if (M[A[left]] == 0) M.erase(A[left]);
+        }
+        if (left == right) right++;
+    }
+    if (ans == (1<<30)) ans = 0;
+    std::cout << ans << std::endl;
+}

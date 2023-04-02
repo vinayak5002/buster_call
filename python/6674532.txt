@@ -1,0 +1,52 @@
+from collections import deque
+
+N=4
+
+a,b,c,d=map(int,input().split())
+e,f,g,h=map(int,input().split())
+i,j,k,l=map(int,input().split())
+m,n,o,p=map(int,input().split())
+
+GOAL=(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0)
+
+Q=[((a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p),0,-10)]
+Q=deque(Q)
+
+USE=set()
+USE.add((a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p))
+
+while Q:
+    NOW,ANS,fr=Q.popleft()
+
+    if NOW==GOAL:
+        print(ANS)
+        break
+
+    for i in range(N*N):
+        if NOW[i]==0:
+            zero=i
+
+    for i in [1,-1,N,-N]:
+        if i==fr:
+            continue
+
+        if i==1:
+            if zero%N==N-1:
+                continue
+        elif i==-1:
+            if zero%N==0:
+                continue
+        elif i==N or i==-N:
+            if zero+i<0 or zero+i>=N*N:
+                continue
+
+        NOW_LIST=list(NOW)
+        NOW_LIST[zero],NOW_LIST[zero+i]=NOW_LIST[zero+i],NOW_LIST[zero]
+
+        NOW_tuple=tuple(NOW_LIST)
+
+        if NOW_tuple in USE:
+            continue
+        USE.add(NOW_tuple)
+
+        Q.append((NOW_tuple,ANS+1,-i))

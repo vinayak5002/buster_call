@@ -1,0 +1,110 @@
+#include <bits/stdc++.h>
+#pragma GCC optimize("Ofast")
+#define _GLIBCXX_DEBUG
+using namespace std;
+using std::cout;
+using std::cin;
+using std::endl;
+using ll=long long;
+using ld=long double;
+ll ILL=2167167167167167167;
+const int INF=2100000000;
+const ll mod=998244353;
+#define rep(i,a) for (int i=0;i<a;i++)
+#define all(p) p.begin(),p.end()
+template<class T> using _pq = priority_queue<T, vector<T>, greater<T>>;
+template<class T> ll LB(vector<T> &v,T a){return lower_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> ll UB(vector<T> &v,T a){return upper_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> bool chmin(T &a,const T &b){if(a>b){a=b;return 1;}else return 0;}
+template<class T> bool chmax(T &a,const T &b){if(a<b){a=b;return 1;}else return 0;}
+template<class T> void So(vector<T> &v) {sort(v.begin(),v.end());}
+template<class T> void Sore(vector<T> &v) {sort(v.begin(),v.end(),[](T x,T y){return x>y;});}
+void yneos(bool a){if(a) cout<<"Yes\n"; else cout<<"No\n";}
+template<class T> void vec_out(vector<T> &p){for(int i=0;i<(int)(p.size());i++){if(i) cout<<" ";cout<<p[i];}cout<<"\n";}
+
+int t=INF;
+void solve();
+// oddloop
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	
+	//cin>>t;
+	rep(i,t) solve();
+}
+
+void solve(){
+	int n,T,F;
+	cin>>n>>T>>F;
+	if(T+F==0){
+		t=-1;
+		return;
+	}
+	vector<int> seen(T+F,-1),pare(T+F,-1);
+	vector<vector<pair<int,int>>> G(T+F);
+	rep(i,n){
+		int a,b;
+		string S;
+		cin>>a>>b>>S;
+		a--,b--;
+		int c=0;
+		if(S[0]=='n') c=1;
+		G[a].push_back({b,c});
+		G[b].push_back({a,c});
+	}
+	int ind=0;
+	vector<int> order;
+	vector<vector<int>> dp(0),C;
+	vector<int> em(T+F+1,-1);
+	dp.push_back(em);
+	dp[0][0]=0;
+	rep(i,T+F){
+		if(pare[i]!=-1) continue;
+		vector<int> q={i},c(2);
+		seen[i]=0,pare[i]=i;
+		int k=0;
+		while(k!=(int)(q.size())){
+			c[seen[q[k]]]++;
+			for(auto x:G[q[k]]){
+				if(pare[x.first]==-1){
+					pare[x.first]=i;
+					seen[x.first]=(x.second^seen[q[k]]);
+					q.push_back(x.first);
+				}
+			}
+			k++;
+		}
+		order.push_back(i);
+		dp.push_back(em);
+		rep(j,T+F){
+			if(dp[ind][j]==-1) continue;
+			if(dp[ind+1][j+c[0]]==-1) dp[ind+1][j+c[0]]=0;
+			else dp[ind+1][j+c[0]]=-2;
+			if(dp[ind+1][j+c[1]]==-1) dp[ind+1][j+c[1]]=1;
+			else dp[ind+1][j+c[1]]=-2;
+		}
+		//vec_out(dp[ind+1]);
+		ind++;
+		C.push_back(c);
+	}
+	if(dp[ind][T]<0){
+		cout<<"no\n";
+		return;
+	}
+	int v=T;
+	map<int,int> m;
+	while(ind){
+		ind--;
+		m[order[ind]]=dp[ind+1][v];
+		v-=C[ind][dp[ind+1][v]];
+	}
+	rep(i,T+F){
+		if(m[pare[i]]==seen[i]){
+			cout<<i+1<<"\n";
+		}
+	}
+	cout<<"end\n";
+	//vec_out(pare);
+}
+
+

@@ -1,0 +1,63 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+typedef struct arr{
+    char str[30];
+    int n[100];
+    int count = 0;
+} arr;
+int compare(const void *a, const void *b)
+{
+    int *pa = (int*)a;
+    int *pb = (int*)b;
+    return(*pa - * pb);
+}
+
+int cmplength(const void *a,const void *b){
+    char la,lb,result;
+    struct arr *pa=(struct arr *)a;
+    struct arr *pb=(struct arr *)b;
+
+    return( strcmp((char *)(pa->str),(char *)(pb->str)) );
+}
+
+int main(){
+    arr dict[1000];
+    char tmp_str[30];
+    int now = 0;
+    int tmp;
+    int i,num;
+
+    while(scanf("%s",tmp_str) != EOF){
+        scanf("%d",&num);
+        for(i = 0;i < now;i++){
+            if(strcmp(tmp_str,dict[i].str) == 0){
+                tmp = i;
+                break;
+            }
+        }
+        if(i == now){
+            strcpy(dict[now].str,tmp_str);
+            dict[now].n[dict[now].count++] = num;
+            now++;
+        }else{
+            dict[tmp].n[dict[tmp].count++] = num;
+        }
+        //scanf("%d",&dict[now].n);        
+    }
+    qsort(dict,now,sizeof(dict[0]),cmplength);
+    for(i = 0;i < now;i++){
+        qsort(dict[i].n,dict[i].count,sizeof(int),compare);
+    }
+    for(i = 0;i < now;i++){
+        printf("%s\n",dict[i].str);
+        for(int j = 0;j < dict[i].count;j++){
+            printf("%d",dict[i].n[j]);
+            if(j != dict[i].count -1)
+                printf(" ");
+        }
+        printf("\n");
+    }
+    
+}

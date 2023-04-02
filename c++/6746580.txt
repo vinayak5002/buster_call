@@ -1,0 +1,89 @@
+#include <iostream>
+#include <ctype.h>
+#include <string> 
+
+
+using namespace std;
+void doubleLinkedListProblem();
+
+int main() {
+	// your code goes here
+	doubleLinkedListProblem();
+	return 0;
+}
+
+void doubleLinkedListProblem() {
+	int commandsNum;
+	cin >> commandsNum;
+	cin.ignore(256, '\n'); // remaining input characters up to the next newline character
+
+	
+	int dll[commandsNum];
+	int firstIndex = 0;
+	int lastIndex = -1;
+	
+	// init
+	for(int k = 0; k < commandsNum; ++k) {
+		dll[k] = -1;
+	}
+	
+	for(int k = 0; k < commandsNum; ++k) {
+		string command;
+		getline (cin, command);
+		
+		if (isdigit(command.at(command.length() - 1))) { // if the command has a digit in the end
+			int num = stoi(command.substr(7, command.length() - 1));
+			
+			if (command.at(0) == 'i') { //insert
+				++lastIndex;
+				dll[lastIndex] = num;
+			} else { // delete
+				
+				if (lastIndex != -1) { // do if not empty
+					for (int l = firstIndex; l <= lastIndex; ++l) {
+						if (dll[l] == num) {
+							dll[l] = -1;
+							
+							if (l == firstIndex) {
+								++firstIndex;
+							} else if (l == lastIndex) {
+								--lastIndex;
+							}
+							
+							break;
+						}
+					}	
+				}
+				
+			}
+			
+		} else {
+			if (lastIndex != -1) {
+				if (command.compare("deleteFirst") == 0) {
+				    dll[lastIndex] = -1;
+					--lastIndex;
+					
+				} else {
+				    dll[firstIndex] = -1;
+					++firstIndex;
+				}
+			}
+		}
+	}
+	
+	// output
+	int counter = 0;
+	for(int k = commandsNum - 1; k >= 0; --k) {
+		if (dll[k] != -1) {
+		    if (counter == 0) {
+    			cout << dll[k];
+		    } else {
+    			cout << " " << dll[k];
+		    }
+		    
+		    counter += 1;
+		}
+	}
+	
+
+}

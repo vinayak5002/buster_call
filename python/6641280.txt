@@ -1,0 +1,98 @@
+// AOJ2007 Make Purse Light
+// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2007&lang=jp
+// 所要時間:
+#include <bits/stdc++.h>
+typedef long long ll;
+using namespace std;
+
+ll N;
+int main() {
+    bool first = true;
+    while (cin >> N && N > 0) {
+        if (first) {
+            first = false;
+        } else {
+            cout << endl;
+        }
+        ll amax, bmax, cmax, dmax;
+        cin >> amax >> bmax >> cmax >> dmax;
+
+        ll a, b, c, d, mincoins;
+        mincoins = amax + bmax + cmax + dmax + 2 * N;
+
+        for (ll adash = amax; adash >= 0; adash--) {
+            for (ll bdash = bmax; bdash >= 0; bdash--) {
+                for (ll cdash = cmax; cdash >= 0; cdash--) {
+                    for (ll ddash = dmax; ddash >= 0; ddash--) {
+                        // cout << adash << ", " << bdash << ", " << cdash << ", " << ddash << endl;
+                        ll pay = 500 * ddash + 100 * cdash + 50 * bdash + 10 * adash;
+                        // cout << "pay:" << pay << endl;
+                        ll x = pay - N;
+                        // cout << "x:" << x << endl;
+                        if (x < 0) {
+                            break;
+                        } else {
+                            ll newcoins = -adash - bdash - cdash - ddash + (x % 50) / 10 + (x % 100) / 50 + (x % 500) / 100 + x / 500;
+                            // cout << "newcoins:" << newcoins << endl;
+                            if (adash > 0 && (x % 50) / 10 > 0) {
+                                // cout << "1" << endl;
+                                continue;
+                            }
+                            if (bdash > 0 && (x % 100) / 50 > 0) {
+                                // cout << "2" << endl;
+                                continue;
+                            }
+                            if (cdash > 0 && (x % 500) / 100 > 0) {
+                                // cout << "3" << endl;
+                                continue;
+                            }
+                            if (ddash > 0 && x / 500 > 0) {
+                                // cout << "4" << endl;
+                                continue;
+                            }
+                            // cout << "5" << endl;
+                            if (mincoins > newcoins) {
+                                // cout << "6" << endl;
+                                mincoins = newcoins;
+                                a = adash;
+                                b = bdash;
+                                c = cdash;
+                                d = ddash;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (a > 0) {
+            cout << 10 << " " << a << endl;
+        }
+        if (b > 0) {
+            cout << 50 << " " << b << endl;
+        }
+        if (c > 0) {
+            cout << 100 << " " << c << endl;
+        }
+        if (d > 0) {
+            cout << 500 << " " << d << endl;
+        }
+    }
+}
+
+// お釣りのコイン枚数: x=(pay - price)として (x%50)/10 + (x%100)/50 +
+// (x%500)/100 + x/500
+
+// pay = 10a + 50b + 100c + 500d
+// price = N
+
+// pay >= price、0<=i<=imaxの条件のもと、
+// コインの枚数 = amax - a + bmax - b + cmax - c + dmax - d + (x%50)/10 +
+// (x%100)/50 + (x%500)/100 + x/500
+// を最小化する
+// maxは定数なので、
+// -a -b -c -d + (x%50)/10 + (x%100)/50 + (x%500)/100 + x/500
+// を最小化すると言い換えれる
+
+// お釣りに同じコインの種類があってはならないという条件
+

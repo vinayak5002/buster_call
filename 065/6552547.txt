@@ -1,0 +1,45 @@
+import sys 
+from collections import deque 
+Vec = [[0,1],[1,1],[1,0],[1,-1],[0,-1],[-1,-1],[-1,1],[-1,0]]
+while True:
+  w,h = map(int,input().split())
+  if w == 0 and h == 0:
+    sys.exit()
+  else:
+    List1 = [list(map(int,input().split())) for _ in range(h)]
+    seen = [0]*(h*w)
+    count = 0
+    ans = 0
+    for i in range(h):
+      for j in range(w):
+        if List1[i][j] == 0:
+          count += 1
+          #print(i,j)
+          seen[w*i+j] = 1
+    while count < w*h:
+      #print(seen)
+      index = seen.index(0)
+      D = deque()
+      D.append([index%w,index//w])
+      seen[index] = 1
+      count += 1
+      while D:
+        x = D.popleft()
+        for l in Vec:
+          x1 = max(x[0] + l[0],0)
+          x1 = min(x1,w-1)
+          y1 = max(x[1] + l[1],0)
+          y1 = min(y1,h-1)
+          if seen[w*y1+x1] == 0:
+            D.appendleft([x1,y1])
+            seen[w*y1+x1] = 1
+            count += 1
+      ans += 1
+    print(ans)
+
+
+
+
+
+        
+    

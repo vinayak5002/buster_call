@@ -1,0 +1,295 @@
+#include <bits/stdc++.h>
+
+#define rep(i, n) for (int i = 0; i < (int)(n); ++ i)
+
+#define endl "\n"
+#define fin std::cin
+#define fout std::cout
+#define ferr std::cerr
+
+using i64 = long long;
+const int mxn = 1e5 + 5, mod = 1e9 + 7;
+const i64 inf = 3e18 + 7;
+
+inline void uadd(int &x, int y) {
+	x += y - mod;
+	x += x >> 31 & mod;
+}
+
+int n;
+i64 x_s[mxn], d_s[mxn], d_n[mxn];
+int jmp_s[mxn], jmp_n[mxn];
+std::vector <int> adj[mxn];
+std::vector <std::vector <int> > cyc;
+bool oncyc[mxn];
+
+int top[mxn], cid[mxn];
+i64 dep[mxn];
+
+int ansv[mxn], anss[mxn];
+
+struct chain_work {
+	struct node {
+		int v;
+		node *ls, *rs;
+		node(): v(-1), ls(), rs() {}
+		~node() {
+			if (ls) delete ls;
+			if (rs) delete rs;
+		}
+	};
+	inline void set(node *&x, i64 p, int v, i64 a = -inf, i64 b = +inf) {
+		x = x ? x : new node();
+		if (a + 1 == b) return x->v = v, void();
+		i64 m = a + (b - a) / 2;
+		p < m ? set(x->ls, p, v, a, m) : set(x->rs, p, v, m, b);
+	}
+	inline int get(node *&x, i64 p, i64 a = -inf, i64 b = +inf) {
+		if (!x) return -1;
+		if (a + 1 == b) return x->v;
+		i64 m = a + (b - a) / 2;
+		return p < m ? get(x->ls, p, a, m) : get(x->rs, p, m, b);
+	}
+	node *buc;
+	int dist[mxn];
+} chainw;
+
+struct cycle_work {
+	int len;
+	std::vector <int> c;
+	struct node {
+		std::pair <i64, int> mn;
+		node *ls, *rs;
+		node(): mn(std::make_pair(+inf, +mxn)), ls(), rs() {}
+		~node() {
+			if (ls) delete ls;
+			if (rs) delete rs;
+		}
+	};
+	inline void pushup(node *x) {
+		x->mn = std::min(
+				x->ls ? x->ls->mn : std::make_pair(+inf, +mxn),
+				x->rs ? x->rs->mn : std::make_pair(+inf, +mxn)
+		);
+	}
+	inline void set(node *&x, i64 p, std::pair <i64, int> v, i64 a = -inf, i64 b = +inf) {
+		x = x ? x : new node();
+		if (a + 1 == b) return x->mn = std::min(x->mn, v), void();
+		i64 m = a + (b - a) / 2;
+		p < m ? set(x->ls, p, v, a, m) : set(x->rs, p, v, m, b);
+		pushup(x);
+	}
+	inline std::pair <i64, int> querymn(node *&x, i64 l, i64 r, i64 a = -inf, i64 b = +inf) {
+		if (!x) return std::make_pair(+inf, +mxn);
+		if (l <= a && b <= r) return x->mn;
+		if (r <= a || b <= l) return std::make_pair(+inf, +mxn);
+		i64 m = a + (b - a) / 2;
+		return std::min(querymn(x->ls, l, r, a, m), querymn(x->rs, l, r, m, b));
+	}
+	struct mnode {
+		node *v;
+		mnode *ls, *rs;
+		mnode(): v(), ls(), rs() {}
+		~mnode() {
+			if (v) delete v;
+			if (ls) delete ls;
+			if (rs) delete rs;
+		}
+	};
+	inline void set(mnode *&x, i64 p, node *v, i64 a, i64 b) {
+		x = x ? x : new mnode();
+		if (a + 1 == b) return x->v = v, void();
+		i64 m = a + (b - a) / 2;
+		p < m ? set(x->ls, p, v, a, m) : set(x->rs, p, v, m, b);
+	}
+	inline node *get(mnode *&x, i64 p, i64 a, i64 b) {
+		if (!x) return nullptr;
+		if (a + 1 == b) return x->v;
+		i64 m = a + (b - a) / 2;
+		return p < m ? get(x->ls, p, a, m) : get(x->rs, p, m, b);
+	}
+	std::vector <i64> sum;
+	mnode *pre, *suf;
+	i64 S, M;
+	inline void work(std::vector <int> _c, std::vector <std::pair <i64, int> > vqry[]) {
+		c = _c;
+		len = (int) c.size();
+		sum.resize(len + 1);
+		rep(i, len) sum[i + 1] = sum[i] + d_n[c[i]];
+		S = 0;
+		rep(i, len) S += d_n[c[i]];
+		M = std::abs(S);
+		if (!M) ++ M;
+		static std::pair <i64, int> pr[mxn];
+		rep(i, len) for (auto p : vqry[c[i]]) pr[p.second] = {+inf, mxn * 2};
+		pre = nullptr;
+		rep(i, len) {
+			for (auto p : vqry[c[i]]) {
+				i64 x = p.first;
+				int id = p.second;
+				node *temp = get(pre, ((x - sum[i] + S) % M + M) % M, 0, M);
+				std::pair <i64, int> g;
+				if (S < 0) g = querymn(temp, -x + sum[i] - S, +inf);
+				else g = querymn(temp, x - sum[i] + S, +inf);
+				if (g.first < +inf) {
+					std::pair <i64, int> cur = std::make_pair(+inf, mxn * 2);
+					if (S < 0) cur = std::make_pair((g.first - (-x + sum[i] - S)) / -S, g.second + len);
+					else if (S) cur = std::make_pair((g.first - (x - sum[i] + S)) / S, g.second + len);
+					else if (g.first == x - sum[i] + S) cur = {0, g.second + len};
+					pr[id] = std::min(pr[id], cur);
+				}
+			}
+			{
+				node *temp = get(pre, ((x_s[c[i]] - sum[i]) % M + M) % M, 0, M);
+				if (S < 0) set(temp, sum[i] - x_s[c[i]], std::make_pair(sum[i] - x_s[c[i]], i));
+				else set(temp, x_s[c[i]] - sum[i], std::make_pair(x_s[c[i]] - sum[i], i));
+				set(pre, ((x_s[c[i]] - sum[i]) % M + M) % M, temp, 0, M);
+			}
+		}
+		if (pre) delete pre;
+		suf = nullptr;
+		for (int i = len - 1; ~i; -- i) {
+			{
+				node *temp = get(suf, ((x_s[c[i]] - sum[i]) % M + M) % M, 0, M);
+				if (S < 0) set(temp, sum[i] - x_s[c[i]], std::make_pair(sum[i] - x_s[c[i]], i));
+				else set(temp, x_s[c[i]] - sum[i], std::make_pair(x_s[c[i]] - sum[i], i));
+				set(suf, ((x_s[c[i]] - sum[i]) % M + M) % M, temp, 0, M);
+			}
+			for (auto p : vqry[c[i]]) {
+				i64 x = p.first;
+				int id = p.second;
+				node *temp = get(suf, ((x - sum[i]) % M + M) % M, 0, M);
+				std::pair <i64, int> g;
+				if (S < 0) g = querymn(temp, -x + sum[i], +inf);
+				else g = querymn(temp, x - sum[i], +inf);
+				if (g.first < +inf) {
+					std::pair <i64, int> cur = std::make_pair(+inf, mxn * 2);
+					if (S < 0) cur = std::make_pair((g.first - (-x + sum[i])) / -S, g.second);
+					else if (S) cur = std::make_pair((g.first - (x - sum[i])) / S, g.second);
+					else if (g.first == x - sum[i]) cur = {0, g.second};
+					pr[id] = std::min(pr[id], cur);
+				}
+			}
+		}
+		if (suf) delete suf;
+		rep(i, len) for (auto p : vqry[c[i]]) {
+			int u = c[i];
+			i64 x = p.first;
+			int id = p.second;
+			int &steps = anss[id];
+			if (u == n - 1) {
+				ansv[id] = u;
+				continue;
+			}
+			if (pr[id].first < +inf) {
+				pr[id].second %= len;
+				x += S * pr[id].first;
+				if (i <= pr[id].second) x += sum[pr[id].second] - sum[i];
+				else x += S - sum[i] + sum[pr[id].second];
+				uadd(steps, (int)(1LL * pr[id].first % mod * len % mod));
+				if (i <= pr[id].second) uadd(steps, pr[id].second - i);
+				else uadd(steps, len - i + pr[id].second);
+				ansv[id] = c[pr[id].second];
+			} else {
+				ansv[id] = -1;
+			}
+		}
+	}
+} cyclew;
+
+std::vector <std::pair <i64, int> > vqry[mxn], nqry[mxn];
+
+inline void dfs(int u, int p = -1) {
+	top[u] = ~p ? top[p] : u;
+	cid[u] = ~p ? cid[p] : cid[u];
+	dep[u] = (~p ? dep[p] : 0) + d_n[u];
+	int last = chainw.get(chainw.buc, x_s[u] + dep[u]);
+	chainw.set(chainw.buc, x_s[u] + dep[u], u);
+	chainw.dist[u] = ~p ? chainw.dist[p] + 1 : 0;
+	for (auto pr : vqry[u]) {
+		i64 x = pr.first;
+		int id = pr.second;
+		int v = chainw.get(chainw.buc, x + dep[u]);
+		if (~v) ansv[id] = v, uadd(anss[id], chainw.dist[u] - chainw.dist[v]);
+		else {
+			nqry[top[u]].push_back({x + dep[u] - dep[top[u]], id});
+			uadd(anss[id], chainw.dist[u] - chainw.dist[top[u]]);
+		}
+	}
+	for (int v : adj[u]) dfs(v, u);
+	chainw.set(chainw.buc, x_s[u] + dep[u], last);
+}
+
+int main() {
+	#ifdef DEBUG
+	freopen("in", "r", stdin);
+	freopen("out", "w", stdout);
+	#endif
+	std::ios::sync_with_stdio(false);
+	i64 x0;
+	fin >> n >> x0;
+	rep(i, n) {
+		fin >> x_s[i] >> d_s[i] >> jmp_s[i] >> d_n[i] >> jmp_n[i];
+		-- jmp_s[i], -- jmp_n[i];
+	}
+	x_s[n] = 0; d_s[n] = d_n[n] = 0; jmp_s[n] = jmp_n[n] = n;
+	++ n;
+	static bool vis[mxn];
+	rep(i, n) if (!vis[i]) {
+		std::vector <int> stk;
+		static bool onhold[mxn];
+		int u;
+		for (u = i; !vis[u]; u = jmp_n[u]) {
+			stk.push_back(u);
+			vis[u] = true;
+			onhold[u] = true;
+		}
+		if (onhold[u]) {
+			cyc.push_back({});
+			int x;
+			do {
+				x = stk.back();
+				stk.pop_back();
+				onhold[x] = false;
+				oncyc[x] = true;
+				cyc.back().push_back(x);
+			} while (x != u);
+			std::reverse(cyc.back().begin(), cyc.back().end());
+		}
+		while (!stk.empty()) {
+			int x = stk.back();
+			onhold[x] = false;
+			stk.pop_back();
+		}
+	}
+	rep(i, n) if (!oncyc[i]) adj[jmp_n[i]].push_back(i);
+	rep(i, n) vqry[jmp_s[i]].push_back({x_s[i] + d_s[i], i});
+	vqry[0].push_back({x0, n});
+	memset(ansv, -1, sizeof(ansv));
+	memset(anss, 0, sizeof(anss));
+	rep(i, cyc.size()) {
+		for (int u : cyc[i]) {
+			cid[u] = i;
+			dfs(u);
+		}
+		cyclew.work(cyc[i], nqry);
+	}
+	rep(i, n) vis[i] = false;
+	int ans = 0;
+	int u = n;
+	while (true) {
+		int v = ansv[u];
+		uadd(ans, anss[u]);
+		if (v == n - 1) break;
+		if (v == -1 || vis[v]) {
+			fout << -1 << endl;
+			return 0;
+		}
+		vis[v] = true;
+		x0 = x_s[v] + d_s[v], u = v, uadd(ans, 1);
+		if (jmp_s[v] == n - 1) break;
+	}
+	fout << ans << endl;
+	return 0;
+}
+

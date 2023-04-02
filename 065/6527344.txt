@@ -1,0 +1,124 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace _20220424_AOJ
+{
+    internal class ITP2_7C
+    {
+        static int ReadInt() { return int.Parse(Console.ReadLine()); }
+        static double ReadDouble() { return double.Parse(Console.ReadLine()); }
+        static int[] ReadIntArr(char dlm = ' ') { return Console.ReadLine().Split(dlm).Select(x => int.Parse(x)).ToArray(); }
+        static double[] ReadDoubleArr(char dlm = ' ') { return Console.ReadLine().Split(dlm).Select(x => double.Parse(x)).ToArray(); }
+        static string[] ReadStringArr(char dlm = ' ') { return Console.ReadLine().Split(dlm).ToArray(); }
+
+        static void Main(string[] args)
+        {
+            string line = Console.ReadLine();
+            int q = int.Parse(line);
+            HashSet<int> S = new HashSet<int>();
+            
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < q; i++)
+            {
+                int[] query = ReadIntArr();
+                int command = query[0]; ;
+                int x = query[1];
+                if (command == 0)
+                {
+                    S.Add(x);
+                    sb.AppendLine(S.Count.ToString());
+                }
+                else if(command == 1)
+                {
+                    int exists = S.Contains(x) ? 1 : 0;
+                    sb.AppendLine(exists.ToString());
+                }
+                else if (command == 2)
+                {
+                    S.Remove(x);
+                }
+                else
+                {
+                    if (S.Count > 0)
+                    {
+                        int L = x;
+                        int R = query[2];
+                        int[] arr = S.ToArray();
+                        Array.Sort(arr);
+                        int lb = LowerBound(arr, L, 0, S.Count - 1);
+                        int ub = UpperBound(arr, R, Math.Max(0, lb - 1), S.Count - 1);
+                        for (int j = lb; j < ub; j++)
+                        {
+                            sb.AppendLine(arr[j].ToString());
+                        }
+                    }
+                }
+            }
+            Console.Write(sb);
+        }
+
+        static int LowerBound(int[] arr, int k, int b, int e)
+        {
+            int rv = -1;
+            if (b == e)
+            {
+                if (k <= arr[b])
+                {
+                    rv = b;
+                }
+                else
+                {
+                    rv = b + 1;
+                }
+            }
+            else
+            {
+                int h = (b + e) / 2;
+                if (k <= arr[h])
+                {
+                    rv = LowerBound(arr, k, b, h);
+                }
+                else
+                {
+                    rv = LowerBound(arr, k, h + 1, e);
+                }
+            }
+
+            return rv;
+        }
+
+        static int UpperBound(int[] arr, int k, int b, int e)
+        {
+            int rv = -1;
+            if (b == e)
+            {
+                if (k < arr[b])
+                {
+                    rv = b;
+                }
+                else
+                {
+                    rv = b + 1;
+                }
+            }
+            else
+            {
+                int h = (b + e) / 2;
+                if (k >= arr[h])
+                {
+                    rv = UpperBound(arr, k, h + 1, e);
+                }
+                else
+                {
+                    rv = UpperBound(arr, k, b, h);
+                }
+            }
+
+            return rv;
+        }
+    }
+}
+

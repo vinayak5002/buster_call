@@ -1,0 +1,79 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <queue>
+#include <array>
+#include <algorithm>
+#include <numeric>
+#include <unordered_map>
+#include <unordered_set>
+#include <map>
+#include <set>
+#include <cassert>
+#include <iterator>
+#include <random>
+#include <stack>
+#include <climits>
+#include <chrono>
+#include <iomanip>
+
+constexpr int MOD = 998244353;
+long long int pow_mod(long long int base, int exp) {
+	long long int result{ 1 };
+	base %= MOD;
+	while (exp > 0) {
+		if (exp & 1) {
+			result = result * base % MOD;
+		}
+		base = base * base % MOD;
+		exp >>= 1;
+	}
+	return result;
+}
+int main() {
+	int n; std::cin >> n;
+	std::vector<int> nums(n);
+	for (auto& a : nums) {
+		std::cin >> a;
+	}
+	std::vector<long long int> factorial(n + 1, 1), inverse(n + 1, 1);
+	for (auto i = 2; i <= n; ++i) {
+		factorial[i] = i * factorial[i - 1] % MOD;
+	}
+	inverse[n] = pow_mod(factorial[n], MOD - 2);
+	for (auto i = n; i >= 2; --i) {
+		inverse[i - 1] = i * inverse[i] % MOD;
+	}
+	const auto combination = [&factorial, &inverse](const int n, const int r) {
+		return factorial[n] * inverse[r] % MOD * inverse[n - r] % MOD;
+	};
+	int count1{ 0 }, count2{ 0 }, count3{ 0 }, count5{ 0 }, count7{ 0 };
+	long long int result{ 1 };
+	for (const auto a : nums) {
+		if (a == 1) {
+			++count1;
+		}
+		else if (a == 5) {
+			++count5;
+		}
+		else if (a == 7) {
+			++count7;
+		}
+		else if (a == 2 || a == 4 || a == 8) {
+			++count2;
+		}
+		else if (a == 3 || a == 9) {
+			++count3;
+		}
+		else {
+			result = result * combination(count2 + count3, count2) % MOD;
+			count2 = 0;
+			count3 = 0;
+		}
+	}
+	result = result * combination(count2 + count3, count2) % MOD;
+	result = result * combination(n, count1 + count5 + count7) % MOD;
+	result = result * combination(count1 + count5 + count7, count7) % MOD;
+	result = result * combination(count1 + count5, count5) % MOD;
+	std::cout << result << '\n';
+}

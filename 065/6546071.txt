@@ -1,0 +1,313 @@
+#include<bits/stdc++.h>
+#define rep(i,a,n) for (int i=(a);i<=(n);i++)
+#define per(i,a,n) for (int i=(n);i>=(a);i--)
+#define inf 0x3f3f3f3f
+#define pb push_back
+#define all(x) x.begin(),x.end()
+#define SZ(x) ((int)x.size())
+using namespace std;
+string Ns[] = {"1", "2", "4", "8", "16", "32", "64", "128"};
+int DNs[] = {128, 64, 32, 16, 8, 4, 2, 1};
+string RS[] = {"C", "D", "E", "F", "G", "A", "B"};
+char RC[] = {'C', 'D', 'E', 'F', 'G', 'A', 'B'};
+int RK[] = {0, 2, 4, 5, 7, 9, 11};
+int LD[] = {2, 2, 2, 2, 3, 3, 3, 4};
+const string I = "hyh";
+const int N = 100015, M = 1280;
+
+template<class A, class B>
+bool upd(A &x, A y, B &xx, B yy) {
+	if (x > y) {
+		x = y;
+		xx = yy;
+		return true;
+	}
+
+	return false;
+}
+
+int NTD(string s) {
+
+	rep(i, 0, 7) if (Ns[i] == s) return DNs[i];
+}
+
+int CTRK(char ch) {
+
+	rep(i, 0, 6) if (RC[i] == ch) return RK[i];
+}
+
+int STD(string S, int DD) {
+
+	int Num = -1, Dot = count(all(S), '.'), D = 0;
+
+	rep(i, 0, 7) if (DNs[i] == DD) Num = i;
+
+	rep(i, 0, 7) if (S.substr(0, SZ(Ns[i])) == Ns[i]) Num = i;
+
+	rep(i, 0, Dot) D += DNs[Num + i];
+
+	return D;
+
+}
+
+string KTS(int AK, int OT) {
+	string _C, n_C;
+	auto Do = [&]() {if (SZ(n_C) < SZ(_C) || _C.empty()) _C = n_C;};
+
+	rep(i, 0, 6) {
+		if (OT * 12 + RK[i] == AK)
+			n_C = RS[i], Do();
+
+		if (OT * 12 + RK[i] + 1 == AK)
+			n_C = RS[i] + "+", Do();
+
+		if (OT * 12 + RK[i] - 1 == AK)
+			n_C = RS[i] + "-", Do();
+	}
+
+	if (_C.empty()) {return I;}
+
+	return _C;
+}
+
+string DTS(int D, int DD) {
+	vector<int> ms;
+
+	rep(i, 0, 7) if (D & DNs[i]) ms.pb(i);
+
+	if (SZ(ms) != ms.back() - ms[0] + 1) return I;
+
+	string Num, Dot;
+	Num = DNs[ms[0]] == DD ? "" : Ns[ms[0]];
+
+	rep(_, 2, SZ(ms)) Dot += ".";
+
+	return Num + Dot;
+};
+
+string kts[111][8], dts[256][256];
+
+void Calc(string dp[M + 15][8], int s) {
+	static int L[M + 15][8];
+	memset(L, 0x3f, sizeof L);
+	L[0][s] = 0;
+
+	rep(i, 0, M) {
+
+		rep(j, 0, 7) rep(k, 0, 7) if (j != k) {
+			upd(L[i][k], L[i][j] + LD[j], dp[i][k], dp[i][j] + "L" + Ns[k]);
+		}
+
+		rep(j, 0, 7) rep(k, 0, 255) {
+			if (i + k > M) break;
+
+			string &s = dts[k][DNs[j]];
+
+			if (s == I) continue;
+
+			upd(L[i + k][j], L[i][j] + 1 + SZ(s), dp[i + k][j], dp[i][j] + "R" + s);
+		}
+	}
+}
+
+string dp[8][M + 15][8];
+
+void Prework() {
+	rep(i, 0, 7) rep(j, 0, 11) rep(k, 0, 7) kts[i * 12 + j][k] = KTS(i * 12 + j, k);
+
+	rep(i, 1, 255) rep(j, 0, 7) dts[i][DNs[j]] = DTS(i, DNs[j]);
+
+	rep(s, 0, 7) Calc(dp[s], s);
+}
+
+int Tr[8][8];
+
+void GTr(int D) {
+	int O = D, cnt = 0;
+
+	while (O > M) O -= 128, cnt++;
+
+	rep(p, 0, 7) rep(q, 0, 7) Tr[p][q] = SZ(dp[p][O][q]) + cnt;
+}
+
+string GS(int D, int p, int q) {
+	int O = D, cnt = 0;
+
+	while (O > M) O -= 128, cnt++;
+
+	string res = dp[p][O][q];
+
+	if (cnt) res.insert(p == 0 ? 0 : (res.find("L1") + 2), cnt, 'R');
+
+	return res;
+}
+
+struct Note {
+	int AK, Vl, D;
+	bool IR;
+	string ktos(int OT) {return kts[AK][OT];}
+	string dtos(int DD) {return dts[D][DD];}
+} A[N];
+
+Note Read(string O, int &OT, int &DD, int &Vl) {
+	Note res = (Note) {0, 0, 0, 0};
+
+	if (O[0] == '<') OT--;
+	else if (O[0] == '>') OT++;
+	else if (O[0] == 'O') OT = O[1] - '1';
+	else if (O[0] == 'L') DD = NTD(O.substr(1));
+	else if (O[0] == 'V') Vl = stoi(O.substr(1));
+	else if (O[0] == 'R') {
+		res.IR = 1;
+		res.D = STD(O.substr(1), DD);
+
+	} else {
+		res.Vl = Vl;
+		res.AK = OT * 12 + CTRK(O[0]);
+		O.erase(O.begin());
+
+		if (SZ(O) > 0) {
+			if (O[0] == '+') {
+				O.erase(O.begin());
+				res.AK++;
+
+			} else if (O[0] == '-') {
+				O.erase(O.begin());
+				res.AK--;
+			}
+		}
+
+		res.D = STD(O, DD);
+	}
+
+	return res;
+}
+
+int n, f[N][8], fr[N][8];
+string se, DA[N], OTA[N], Ex[N];
+
+void SD() {
+	rep(i, 0, n) memset(f[i], 0x3f, sizeof f[i]);
+
+	int Vl = 100;
+	f[0][2] = 0;
+
+	rep(i, 1, n) {
+		if (A[i].IR) {
+			GTr(A[i].D);
+
+			rep(p, 0, 7) rep(q, 0, 7) upd(f[i][p], f[i - 1][q] + Tr[q][p], fr[i][p], q);
+
+		} else {
+			rep(p, 0, 7) rep(q, 0, 7) upd(f[i][p], f[i - 1][q] + (p != q) * LD[p] + SZ(A[i].dtos(DNs[p])), fr[i][p], q);
+
+			if (Vl != A[i].Vl) {
+				Vl = A[i].Vl;
+				Ex[i] += "V" + to_string(Vl);
+			}
+		}
+	}
+
+	int Min = inf, p = 0, np = 0;
+
+	rep(i, 0, 7) upd(Min, f[n][i], p, i);
+
+	per(i, 1, n) {
+		np = fr[i][p];
+
+		if (A[i].IR) {
+			DA[i] = GS(A[i].D, np, p);
+
+		} else {
+			if (p != np) Ex[i] += "L" + Ns[p];
+
+			DA[i] = A[i].dtos(DNs[p]);
+		}
+
+		p = np;
+	}
+}
+
+void SOT() {
+	rep(i, 0, n) memset(f[i], 0x3f, sizeof f[i]);
+
+	f[0][3] = 0;
+
+	rep(i, 1, n) {
+		if (A[i].IR) {
+			rep(p, 0, 7) upd(f[i][p], f[i - 1][p], fr[i][p], p);
+
+		} else {
+			rep(p, 0, 7) rep(q, 0, 7) {
+				string oo = A[i].ktos(p);
+
+				if (oo == I) continue;
+
+				int o = (p == q ? 0 : abs(p - q) == 1 ? 1 : 2);
+
+				upd(f[i][p], f[i - 1][q] + o + SZ(oo), fr[i][p], q);
+			}
+		}
+	}
+
+	int Min = inf, p = 0, np = 0;
+
+	rep(i, 0, 7) upd(Min, f[n][i], p, i);
+
+	per(i, 1, n) {
+		np = fr[i][p];
+
+		if (!A[i].IR) {
+			if (p != np) {
+				if (np + 1 == p) Ex[i] += ">";
+				else if (np - 1 == p) Ex[i] += "<";
+				else Ex[i] += "O" + to_string(p + 1);
+			}
+
+			OTA[i] = A[i].ktos(p);
+		}
+
+		p = np;
+	}
+
+}
+
+void solve() {
+	int OT = 3, DD = NTD("4"), Vl = 100;
+	n = 0;
+
+	for (int l = 0, r; r = l, l < SZ(se); l = r + 1) {
+		while (r + 1 < SZ(se) && !('A' <= se[r + 1] && se[r + 1] <= 'Z') && se[r + 1] != '<' && se[r + 1] != '>') r++;
+
+		Note Cur = Read(se.substr(l, r - l + 1), OT, DD, Vl);
+
+		if (!Cur.D) continue;
+
+		if (A[n].IR && Cur.IR) A[n].D += Cur.D;
+		else A[++n] = Cur;
+	}
+
+	rep(i, 1, n) Ex[i] = OTA[i] = DA[i] = "";
+
+	SD();
+	SOT();
+
+	rep(i, 1, n) cout << Ex[i] << OTA[i] << DA[i];
+}
+
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr); cout.tie(nullptr);
+	Prework();
+	int test = 0;
+
+	while (cin >> se) {
+		if (se == "*") break;
+
+		cout << "Case " << ++test << ": ";
+		solve();
+		cout << endl;
+	}
+
+	return 0;
+}

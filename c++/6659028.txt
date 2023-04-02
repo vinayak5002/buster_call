@@ -1,0 +1,38 @@
+#include<bits/stdc++.h>
+#define ll long long
+using namespace std;
+const ll N=100010,INF=1e18;
+ll n;double ans=INF;
+struct node{
+	double x,y;
+}a[N];
+double pf(double x){
+	return x*x;
+}
+bool cmp(node a,node b){
+	return a.x*a.y<b.x*b.y;
+}
+double dis(node a,node b){
+	return pf(a.x-b.x)+pf(a.y-b.y);
+}
+void solve(double k){
+	for(ll i=1;i<=n;i++){
+		double x=a[i].x,y=a[i].y;
+		double nx=x*cos(k)-y*sin(k);
+		double ny=x*sin(k)+y*cos(k);
+		a[i].x=nx,a[i].y=ny;
+	}
+	sort(a+1,a+n+1,cmp);
+	for(ll i=1;i<=n;i++)
+		for(ll j=i+1;j<=min(i+28,n);j++)
+			ans=min(ans,dis(a[i],a[j]));
+}
+int main(){
+	srand(time(0)),scanf("%lld",&n);
+	for(ll i=1;i<=n;i++)
+		scanf("%lf%lf",&a[i].x,&a[i].y);
+	for(ll i=1;i<=3;i++)
+		solve(rand()%10*1.0/10);
+	printf("%.7lf\n",round(ans));
+	return 0;
+}

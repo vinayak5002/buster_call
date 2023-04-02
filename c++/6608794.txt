@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long int ll;
+#define chmin(x,y) x = min(x,y)
+#define chmax(x,y) x = max(x,y)
+#define fill1(arr,num) fill(arr,arr+sizeof(arr)/sizeof(*arr),num);
+#define fill2(arr,num) fill(*arr,*arr+sizeof(arr)/sizeof(**arr),num);
+#define fill3(arr,num) fill(**arr,**arr+sizeof(arr)/sizeof(***arr),num);
+#define BIG_NUM 2000000000
+#define HUGE_NUM 4000000000000000000
+#define MOD 1000000007
+
+
+#define SIZE 15
+int n,m;
+int POW[SIZE+1];
+int dp[1<<SIZE][SIZE],dist[SIZE][SIZE];
+
+
+int main(){
+    cin>>n>>m;
+    fill2(dp,BIG_NUM);
+    fill2(dist,BIG_NUM);
+    for(int i=0;i<m;i++){
+        int s,t,d;
+        cin>>s>>t>>d;
+        dist[s][t]=d;
+    }
+    for(int i=0;i<=n;i++){
+        POW[i]=1<<i;
+    }
+    dp[POW[0]][0]=0;
+    for(int state=POW[0];state<POW[n];state+=2){
+        for(int last=0;last<n;last++){
+            if(dp[state][last]==BIG_NUM)continue;
+            for(int next=0;next<n;next++){
+                if((state&POW[next])>0||dist[last][next]==BIG_NUM)continue;
+                int next_state=state|POW[next];
+                int next_dist=dp[state][last]+dist[last][next];
+                chmin(dp[next_state][next],next_dist);
+            }
+        }
+    }
+    int ans=BIG_NUM;
+    for(int i=1;i<n;i++){
+        if(dist[i][0]==BIG_NUM||dp[POW[n]-1][i]==BIG_NUM)continue;
+        chmin(ans,dp[POW[n]-1][i]+dist[i][0]);
+    }
+    if(ans==BIG_NUM){
+        cout<<-1<<endl;
+    }else{
+        cout<<ans<<endl;
+    }
+}

@@ -1,0 +1,88 @@
+package main
+
+import (
+	"bufio"
+	"container/list"
+	"fmt"
+	"os"
+	"strconv"
+)
+
+func main() {
+	sc := bufio.NewScanner(os.Stdin)
+	sc.Split(bufio.ScanWords)
+
+	sc.Scan()
+	n, _ := strconv.Atoi(sc.Text())
+
+	sc.Scan()
+	m, _ := strconv.Atoi(sc.Text())
+
+	v := make([][]int, n)
+	for i := 0; i < m; i++ {
+		sc.Scan()
+		s, _ := strconv.Atoi(sc.Text())
+
+		sc.Scan()
+		t, _ := strconv.Atoi(sc.Text())
+
+		v[s] = append(v[s], t)
+		v[t] = append(v[t], s)
+	}
+
+	sc.Scan()
+	q, _ := strconv.Atoi(sc.Text())
+
+	rs := make([]int, q)
+	ls := make([]int, q)
+	for i := 0; i < q; i++ {
+		sc.Scan()
+		r, _ := strconv.Atoi(sc.Text())
+		rs[i] = r
+
+		sc.Scan()
+		l, _ := strconv.Atoi(sc.Text())
+		ls[i] = l
+	}
+
+	for i := range rs {
+		found := make([]bool, n)
+		ans := bfs(v, found, rs[i], ls[i])
+		if ans {
+			fmt.Println("yes")
+		} else {
+			fmt.Println("no")
+		}
+	}
+}
+
+func bfs(v [][]int, found []bool, s, f int) bool {
+
+	if found[s] {
+		return false
+	}
+	found[s] = true
+
+	que := list.New()
+	que.PushBack(s)
+
+	for que.Len() != 0 {
+		qv := que.Front().Value.(int)
+
+		for _, value := range v[qv] {
+			if found[value] {
+				continue
+			}
+			if f == value {
+				return true
+			}
+
+			found[value] = true
+			que.PushBack(value)
+		}
+		que.Remove(que.Front())
+	}
+
+	return false
+}
+

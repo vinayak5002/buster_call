@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Card {
+    char suit, value;
+};
+
+void trace(vector<Card>& data){
+    for(int i = 0; i < data.size() - 1; i++){
+        cout << data.at(i).suit << data.at(i).value << " ";
+    }
+    cout << data.back().suit << data.back().value  << endl;
+}
+
+bool isStable(vector<Card>& indata, vector<Card>& outdata){
+    assert(indata.size() == outdata.size());
+    for(int i = 0; i < indata.size(); i++){
+        for(int j = i+1; j < indata.size(); j++){
+            for(int a = 0; a < indata.size(); a++){
+                for(int b = a+1; b < indata.size(); b++){
+                    if( indata.at(i).value == indata.at(j).value 
+                        && indata.at(i).suit == outdata.at(b).suit 
+                        && indata.at(j).suit == outdata.at(a).suit){
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+void BubbleSort(vector<Card>& data){
+    bool flag = true;
+
+    while(flag){
+        flag = false;
+        for(int j = data.size() - 1; j > 0; j--){
+            if(data.at(j).value < data.at(j-1).value){
+                swap(data.at(j).suit, data.at(j-1).suit);
+                swap(data.at(j).value, data.at(j-1).value);
+                flag = true;
+            }
+        }
+    }
+
+    return;
+}
+
+void SelectionSort(vector<Card>& data){
+    auto begin_itr = data.begin();
+
+    for(auto i = 0; i < data.size(); i++, begin_itr++){
+        int min_index = distance(data.begin(), min_element(begin_itr, data.end(), [](const auto& a, const auto& b){ return a.value < b.value;}));
+        if( i < min_index){
+            swap(data.at(i).suit, data.at(min_index).suit);
+            swap(data.at(i).value, data.at(min_index).value);
+        }
+    }
+
+    return;
+}
+
+int main(){
+    int MaxNum, SortCnt;
+    cin >> MaxNum;
+
+    vector<Card> indata(MaxNum), Bubbledata(MaxNum), SelectionData(MaxNum);
+    for(auto &card : indata){
+        cin >> card.suit >> card.value;
+    }
+    copy(indata.begin(), indata.end(), Bubbledata.begin());
+    copy(indata.begin(), indata.end(), SelectionData.begin());
+
+    BubbleSort(Bubbledata);
+    trace(Bubbledata);
+    if(isStable(indata, Bubbledata)){
+        cout << "Stable" << endl;
+    }else{
+        cout << "Not Stable" << endl;
+    }
+
+    SelectionSort(SelectionData);
+    trace(SelectionData);
+    if(isStable(indata, SelectionData)){
+        cout << "Stable" << endl;
+    }else{
+        cout << "Not Stable" << endl;
+    }
+
+    return 0;
+}

@@ -1,0 +1,122 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+#include<string.h>
+#define MAX 2000000000
+typedef struct{
+    int n;
+    char c;
+}Card;
+
+
+void swap(Card *A,int i,int j){
+    int tmp;
+    char tmp_c;
+    tmp = A[i].n;
+    A[i].n = A[j].n;
+    A[j].n = tmp;
+
+    tmp_c = A[i].c;
+    A[i].c = A[j].c;
+    A[j].c = tmp_c;
+}
+
+
+int  partition(Card *A, int p, int r){
+    int x;
+    int i,j;
+    x = A[r].n;
+    i=p-1;
+
+    for(j=p; j<=r-1;j++){
+        if(A[j].n <= x){
+            i++;
+            swap(A,i,j);
+        }
+    }
+    swap(A,i+1,r);
+
+    return i+1;
+
+}
+
+void quicksort(Card *A, int p,int r){
+    int q;
+    if(p<r){
+        q = partition(A,p,r);
+        quicksort(A,p,q-1);
+        quicksort(A,q+1,r);
+    }
+}
+
+
+
+int main(){
+    int i,j,k;
+    int n;
+    Card A[2000000];
+    Card B[2000000];
+    int check[2000000];
+    int q;
+    int save_n;
+    char save_c;
+    int flag = 0;
+    int flag_num = 0;
+
+    scanf("%d\n",&n);
+
+    for(i=0;i<n;i++){
+        scanf("%c %d\n",&A[i].c,&A[i].n);
+        B[i].c = A[i].c;
+        B[i].n = A[i].n;
+        check[i] = 0;
+    }
+    
+
+    quicksort(A,0,n-1);
+
+    save_n = A[0].n;
+    for(i=0;i<n-1;i++){
+        flag_num = 0;
+        for(j=0;j<n;j++){
+            if(A[i].c == B[j].c && A[i].n == B[j].n && A[i].n == A[i+1].n){
+                for(k=j+1;k<n;k++){
+                    if(A[i+1].n == B[k].n){
+                        flag_num = 1;
+                        break;
+                    }
+                }
+                if(flag_num == 0){
+                    flag = 1;
+                }
+                break;
+            }
+        }
+        if(flag == 1){
+            break;
+        }
+    }
+    
+
+    if(flag== 1){
+        printf("Not stable\n");
+        for(i=0;i<n;i++){
+            printf("%c %d\n",A[i].c,A[i].n);
+        }
+    }else{
+        printf("Stable\n");
+        for(i=0;i<n;i++){
+            printf("%c %d\n",A[i].c,A[i].n);
+        }
+    }
+
+    
+
+
+    return 0;
+}
+
+
+
+
+

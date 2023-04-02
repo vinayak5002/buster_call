@@ -1,0 +1,129 @@
+#define _USE_MATH_DEFINES
+#include<iostream>
+#include<iomanip>
+#include<vector>
+#include<string>
+#include<algorithm>
+#include<cmath>
+#include<stack>
+#include<queue>
+#include<set>
+#include<map>
+#include<climits>
+#include<bitset>
+#include<unordered_map>
+#include<unordered_set>
+#include<random>
+#include<list>
+#include<functional>
+using namespace std;
+#define LP(I,S,G) for (long long int I = (S); I < (G); I++)
+#define IN(X) 	for (int in = 0; in < X.size(); in++)cin >> X[in]
+#define OUT(X) 	for (int in = 0; in < X.size(); in++)cout << X[in]<<" "
+#define SORT(X) sort((X).begin(), (X).end())
+#define CSORT(X,Y) sort(X.begin(), X.end(),Y)
+#define COPY(X,Y) copy(X.begin(), X.end(), Y.begin())
+#define ALL(X,Y) for (auto X = (Y).begin(); X != (Y).end(); X++)
+#define FULL(a)  (a).begin(),(a).end()
+#define BFS(Q,S) for(Q.push(S);Q.size()!=0;Q.pop())
+typedef long long int ll;
+typedef unsigned long long int ull;
+long long int M = 998244353;
+
+
+int dx[] = { 1,0,-1,0 }, dy[] = { 0,-1,0,1 };
+
+ll MAX(ll A, ll B) { return ((A) > (B) ? (A) : (B)); }
+double MIN(double A, double B) { return ((A) < (B) ? (A) : (B)); }
+long long int xor128() {
+	static long long int x = 123456789, y = 362436069, z = 521288629, w = 88675123;
+	long long int t = (x ^ (x << 11));
+	x = y; y = z; z = w;
+	return (w = (w ^ (w >> 19)) ^ (t ^ (t >> 8)));
+}
+
+struct HashPair {
+	//注意 constがいる
+	template<class T1, class T2>
+	size_t operator()(const pair<T1, T2> &p) const {
+		//first分をハッシュ化する
+		auto hash1 = hash<T1>{}(p.first);
+		//second分をハッシュ化する
+		auto hash2 = hash<T2>{}(p.second);
+		//重複しないようにハッシュ処理
+		size_t seed = 0;
+		seed ^= hash1 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		seed ^= hash2 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		return seed;
+	}
+};
+template<class I1, class I2>
+istream& operator>>(istream& s, pair<I1, I2>& in) {
+	s >> in.first >> in.second;
+	return s;
+}
+
+
+int main() {
+	while (1) {
+		string s;
+		cin >> s;
+		
+		if (s == "#")break;
+		ll n = s.size();
+		ll ans_size = 0;
+		priority_queue<string> q;
+		priority_queue<string, vector<string>, greater<string>> rq;
+		vector<string> ans;
+		LP(x, 0, (1 << n)) {
+			string e = s;
+			set<char> t,use;
+			use.insert('a');
+			LP(i, 0, n)t.insert(s[i]);
+			bool ok = 1;
+			LP(i, 0, n) {
+				if ((x&(1 << i)) != 0) {
+					if (e[i] == 'z') {
+						ok = 0;
+						continue;
+					}
+					if (t.find(e[i]) == t.end()) {
+						ok = 0;
+						break;
+					}
+					t.erase(e[i]);
+					use.insert(e[i]+1);
+					e[i] += 1;
+				}
+			}
+			ALL(i, use)t.erase(*i);
+			if (t.size() != 0)ok = 0;
+			if (ok) {
+				ans_size++;
+				q.push(e);
+				rq.push(e);
+				if (q.size() > 10)q.pop();
+				if (rq.size() > 10)rq.pop();
+			}
+		}
+		cout << ans_size << "\n";
+		if (ans_size > 10) {
+			LP(i, 0, 5)q.pop(), rq.pop();
+			LP(i, 0, 5) {
+				ans.push_back(q.top());
+				ans.push_back(rq.top());
+				q.pop();
+				rq.pop();
+			}
+			SORT(ans);
+			LP(i, 0, 10)cout << ans[i] << "\n";
+		}
+		else {
+			while (rq.size() != 0) {
+				cout << rq.top() << "\n";
+				rq.pop();
+			}
+		}
+	}
+	return 0;
+}

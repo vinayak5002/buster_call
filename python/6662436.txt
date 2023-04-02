@@ -1,0 +1,61 @@
+// #define _GLIBCXX_DEBUG
+#include <bits/stdc++.h>
+
+using namespace std;
+#define ll long long
+#define LLMAX numeric_limits<ll>::max()
+#define LLMIN numeric_limits<ll>::min()
+#define INTMAX numeric_limits<int>::max()
+#define INTMIN numeric_limits<int>::min()
+#define rep(i, n) for (decltype(n) i = 0; i < (n); i++)
+#define rep1(i, n) for (decltype(n) i = 1; i <= (n); i++)
+#define rep2(i, k, n) for (decltype(n) i = k; i <= (n); i++)
+#define repr(i, n) for (decltype(n) i = (n)-1; i >= 0; i--)
+#define repr1(i, n) for (decltype(n) i = (n); i > 0; i--)
+#define repr2(i, k, n) for (decltype(n) i = n; i >= k; i--)
+auto chmax = [](auto& a, auto b) {bool ret=a<b; if(ret)a=b; return ret; };
+auto chmin = [](auto& a, auto b) {bool ret=a>b; if(ret)a=b; return ret; };
+template <typename T>
+using pq_inv = priority_queue<T, vector<T>, greater<T>>;
+
+struct Solver {
+    vector<vector<int>> visited;
+    // vector<int> dh = {1, 0, -1,1, -1,1,0,-1};
+    // vector<int> dw = {-1,-1,-1,0, 0, 1,1, 1};
+    vector<int> dd = {1,0,-1,0,1,-1,-1,1,1};
+    void dfs(vector<vector<int>>& M, int h, int w) {
+        visited[h][w] = 1;
+        rep(i, 8) {
+            int nh = h + dd[i];
+            int nw = w + dd[i + 1];
+            if (M[nh][nw] != 1 || visited[nh][nw]) continue;
+            dfs(M, nh, nw);
+        }
+    }
+    void solve(int w, int h) {
+        vector<vector<int>> M(h + 2, vector<int>(w + 2));
+        visited.assign(h + 2, vector<int>(w + 2, 0));
+        rep1(r, h) rep1(c, w) cin >> M[r][c];
+        int ans = 0;
+        rep1(i, h) rep1(j, w) {
+            if (M[i][j] != 1 || visited[i][j] == 1) continue;
+            dfs(M, i, j);
+            ans++;
+        }
+        cout << ans << endl;
+    };
+};
+
+int main() {
+    std::cin.tie(nullptr);
+    while (true) {
+        int w, h;
+        cin >> w >> h;
+        if(w==0 && h==0)break;
+        Solver solver;
+        solver.solve(w,h);
+    }
+    return 0;
+}
+
+

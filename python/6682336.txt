@@ -1,0 +1,104 @@
+import java.util.HashMap;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeSet;
+
+public class Main {
+	
+	static class Deck{ //全部そろっているカード１セットを表すメソッド
+		Set<Integer> treeS = new TreeSet<>();
+		Set<Integer> treeH = new TreeSet<>();
+		Set<Integer> treeC = new TreeSet<>();
+		Set<Integer> treeD = new TreeSet<>();
+		HashMap<Mark,Set<Integer>> hm = new HashMap<>();
+		HashMap<Mark, Set<Integer>> insert = new HashMap<Mark,Set<Integer>>();
+		
+		void removeCard(Mark mark,int num) {//太郎が持っているカードを全部のカードから引き抜く
+			Set<Integer> set;
+			set = hm.get(mark);
+			set.remove(num);
+		}
+		
+		void getSet(Mark mark) {//現在のツリーセット（絵柄ごとのカード情報）をHashMap（絵柄を数字を蘭連づけ）に格納する
+			
+			hm.put(mark,insert.get(mark));
+		
+		}
+	}
+	
+	static enum Mark{//カードの絵柄
+		S,
+		H,
+		C,
+		D;
+	}
+	
+	static class Card implements Comparable<Card>{//カード一枚一枚の情報
+		int num;
+		Mark mark;;
+		
+		Card(int num,Mark mark){//コンストラクタ（数字と絵柄を定義）
+			this.num = num;
+			this.mark = mark;
+		}
+
+		@Override
+		public int compareTo(Card o) {//TreeSetの順番を指定
+			if(this.num > o.num) {
+				return 1;
+			}
+			if(this.num < o.num) {
+				return -1;
+			}
+			return 0;
+		}
+		
+	}
+	
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		
+		int n = sc.nextInt();
+		Deck dc = new Deck();
+		Mark mark = Mark.S;
+		
+		for(int i=1;i<=13;i++) {//TreeSetにすべてのカードを入れる
+			dc.treeS.add(i);
+			dc.treeH.add(i);
+			dc.treeC.add(i);
+			dc.treeD.add(i);
+		}
+		
+		dc.insert.put(Mark.S,dc.treeS);
+		dc.insert.put(Mark.H,dc.treeH);
+		dc.insert.put(Mark.C,dc.treeC);
+		dc.insert.put(Mark.D,dc.treeD);
+		
+		for(Mark mark1 : Mark.values()) {//treeSetをhashMapに格納
+			dc.getSet(mark1);
+		}
+		
+		for(int i=0;i<n;i++) {//太郎のカードを引き抜く
+			mark = Mark.valueOf(sc.next());
+			dc.removeCard(mark,sc.nextInt());
+		}
+		
+		for(Mark mark1 : Mark.values()) {
+			dc.getSet(mark1);//treeSetをhashMapに格納
+		}
+		print(dc);
+	}
+	
+	static void print(Deck dc) {//最終的にhashMapに残ったカードをprintする
+		
+		for(Mark mark : Mark.values()) {
+			Set<Integer> set = dc.hm.get(mark);
+			for(int j=1;j<=13;j++) {
+				if(set.contains(j)) {
+					System.out.println(mark.toString() + " " + j);
+				}
+			}
+		}
+	}
+}
+

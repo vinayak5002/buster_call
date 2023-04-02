@@ -1,0 +1,53 @@
+#include <iostream>
+using namespace std;
+void MP(string,string);
+void MPNext(string,int,int []);
+int main()
+{
+	string P;
+	string T;
+	cin>>T;
+	cin>>P;
+	MP(P,T);
+	return 0;
+}
+
+void MP(string P,string T)
+{
+	int PL = P.length();
+	int TL = T.length();
+	int i = 0;
+	int j = 0;
+	int *mpNext = new int[PL + 1];
+	MPNext(P,PL,mpNext);
+	while(j < TL) 
+	{
+		while( i > -1 && P[i] != T[j])
+		{
+			i = mpNext[i];
+		}
+		i++;
+		j++;
+		if(i >= PL)
+		{
+			cout<<j - i<<endl;
+			i = mpNext[i]; 
+		} 
+	}	
+	delete [] mpNext;
+}
+
+void MPNext(string P,int PL,int mpNext[])
+{
+	int i = 0;
+	int j = -1;
+	mpNext[0] = j;
+	while(i < PL)
+	{
+		while( j > -1 && P[i] != P[j])
+		{
+			j = mpNext[j]; 
+		}
+		mpNext[++i] = ++j;
+	}
+}

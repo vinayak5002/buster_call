@@ -1,0 +1,91 @@
+#include <stdio.h>
+#define MAX 25
+#define NIL -1
+
+typedef struct
+{
+    int parent;
+    int left;
+    int right;
+} Node;
+
+Node Tree[MAX];
+
+int n;
+
+void printPreorder(int u)
+{
+	if(u != NIL)
+	{
+		printf(" %d", u);
+		printPreorder(Tree[u].left);
+		printPreorder(Tree[u].right);
+	}
+}
+
+void printInorder(int u)
+{
+	if(u != NIL)
+	{
+		printInorder(Tree[u].left);
+		printf(" %d", u);
+		printInorder(Tree[u].right);
+	}
+}
+
+void printPostorder(int u)
+{
+	if(u != NIL)
+	{
+		printPostorder(Tree[u].left);
+		printPostorder(Tree[u].right);
+		printf(" %d", u);
+	}
+}
+
+int main(void)
+{
+    int n, i, j, node, left_num, right_num, root;
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++)
+    {
+        Tree[i].parent = NIL;
+        Tree[i].left = NIL;
+        Tree[i].right = NIL;
+    }
+
+    /* 格納 */
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d %d %d", &node, &left_num, &right_num);
+
+        Tree[node].left = left_num;
+    	Tree[node].right = right_num;
+    	Tree[left_num].parent = node;
+    	Tree[right_num].parent = node;
+    }
+
+    /* rootノード */
+    for (i = 0; i < n; i++)
+	{
+        if (Tree[i].parent == NIL)
+		{
+            root = i;
+		}
+	}
+   
+	printf("Preorder\n");
+	printPreorder(root);
+	printf("\n");
+	
+	printf("Inorder\n");
+	printInorder(root);
+	printf("\n");
+	
+	printf("Postorder\n");
+	printPostorder(root);
+	printf("\n");
+	
+    return 0;
+}

@@ -1,0 +1,234 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+
+// グラフ
+using Node = int;              // ノード番号
+using EdgeWeight = long long;  // 枝の重み
+
+// エッジ重みの最大値
+constexpr EdgeWeight kEdgeWeightInf = numeric_limits<EdgeWeight>::max() >> 16;  // 2^32を足し引きしてもオーバーフローしない十分大きな数
+
+typedef struct structEdge {
+   structEdge(const Node from_node, const Node to_node, const EdgeWeight edge_weight) {
+      from = from_node;
+      to = to_node;
+      weight = edge_weight;
+   }
+
+   structEdge(const structEdge& edge) {
+      from = edge.from;
+      to = edge.to;
+      weight = edge.weight;
+   }
+
+   bool operator<(const structEdge& right) const {
+      return weight < right.weight;
+   }
+
+   Node from;
+   Node to;
+   EdgeWeight weight;
+} Edge;
+
+// Graph(隣接リスト)
+// ノード番号は1-indexedで保持
+class Graph {
+  public:
+   Graph();
+
+   // Nノードで初期化
+   explicit Graph(const size_t N);
+
+   // ノードの追加
+   // @retval 追加したノードのノード番号
+   Node AddNode();
+
+   // 無向エッジの追加
+   // @param node_1, node_2: 枝の端点となるノード
+   // @param weight エッジの重み(default: 1)
+   void AddUndirectedEdge(const Node node_1, const Node node_2, const EdgeWeight weight = 1);
+
+   // 有向エッジの追加
+   // @param from, to: 枝の始点、終点となるノード
+   // @param weight エッジの重み(default: 1)
+   void AddDirectedEdge(const Node from, const Node to, const EdgeWeight weight = 1);
+
+   // ベルマン・フォード法で単一始点最短路を求める
+   // @note 負の重みが存在しても正しく動く
+   // @note 負の閉路があれば検知可能
+   // @retval true 負の閉路が存在, false 負の閉路が存在しない
+   // @note 負の閉路が存在する場合、重みがマイナス無限大になるノードをDetectNegtiveInfNode()で特定する必要がある
+   // @note 計算量: O(E * N)
+   pair<bool, vector<EdgeWeight>> ShortestPathBellmanFord(const Node start) const;
+
+   // 最短路の重みが負の無限大になるノードを特定する
+   // @param min_weight_list : ShortestPathBellmanFord()を実行済の重みリスト
+   // @param negative_inf_node[i] = true : ノードiの重みが負の無限大
+   vector<bool> DetectNegativeInfNode(vector<EdgeWeight>* min_weight_list) const;
+
+  private:
+   vector<Node> node_list_;              // Nodeのリスト
+   vector<vector<Edge>> adj_to_list_;    // 隣接リスト(接続先): NodeにつながっているEdgeのリスト
+   vector<vector<Edge>> adj_from_list_;  // 隣接リスト(接続元): NodeにつながっているEdgeのリスト
+};
+
+Graph::Graph()
+    : adj_to_list_(1, vector<Edge>()),   // 1-indexにするためダミーノードを追加
+      adj_from_list_(1, vector<Edge>())  // 1-indexにするためダミーノードを追加
+{
+}
+
+Graph::Graph(const size_t N)
+    : adj_to_list_(1, vector<Edge>()),   // 1-indexにするためダミーノードを追加
+      adj_from_list_(1, vector<Edge>())  // 1-indexにするためダミーノードを追加
+{
+   for (size_t i = 0; i < N; i++) {
+      AddNode();
+   }
+}
+
+Node Graph::AddNode() {
+   Node node = (Node)node_list_.size() + 1;  // Node番号は1-indexed
+
+   node_list_.push_back(node);
+   adj_to_list_.push_back(vector<Edge>());
+   adj_from_list_.push_back(vector<Edge>());
+
+   return node;
+}
+
+void Graph::AddUndirectedEdge(const Node node_1, const Node node_2, const EdgeWeight weight) {
+   adj_to_list_[node_1].emplace_back(node_1, node_2, weight);
+   adj_to_list_[node_2].emplace_back(node_2, node_1, weight);
+
+   adj_from_list_[node_1].emplace_back(node_2, node_1, weight);
+   adj_from_list_[node_2].emplace_back(node_1, node_2, weight);
+}
+
+void Graph::AddDirectedEdge(const Node from, const Node to, const EdgeWeight weight) {
+   Edge edge(from, to, weight);
+   adj_to_list_[from].push_back(edge);
+   adj_from_list_[to].push_back(edge);
+}
+
+pair<bool, vector<EdgeWeight>> Graph::ShortestPathBellmanFord(const Node start) const {
+   // 重みリストの初期化
+   size_t size = node_list_.size() + 1;  // ノード番号は1-indexed
+
+   vector<EdgeWeight> min_weight_list(size, kEdgeWeightInf);
+   min_weight_list[start] = 0;
+
+   // 辺のリスト
+   vector<Edge> edge_list;
+
+   for (const Node node : node_list_) {
+      for (const Edge& edge : adj_to_list_[node]) {
+         edge_list.push_back(edge);
+      }
+   }
+
+   bool negative_loop = false;
+
+   for (size_t i = 1; i <= size; i++) {
+      for (const Edge& edge : edge_list) {
+         if (min_weight_list[edge.from] == kEdgeWeightInf) {
+            // 重み < 0の可能性があり直後の判定式inf > inf - dで成立し意図しない挙動になるため明示的にスキップ
+            continue;
+         }
+
+         if (min_weight_list[edge.to] > min_weight_list[edge.from] + edge.weight) {
+            min_weight_list[edge.to] = min_weight_list[edge.from] + edge.weight;
+
+            if (i == size) {
+               // N-1回目のループで最短経路が求まる
+               // ⇒N回目のループで値の更新が起こるのは負の閉路がある場合
+               negative_loop = true;
+               break;
+            }
+         }
+      }
+   }
+
+   return {negative_loop, min_weight_list};
+}
+
+vector<bool> Graph::DetectNegativeInfNode(vector<EdgeWeight>* min_weight_list) const {
+   // 負の無限大フラグリストの初期化
+   size_t size = node_list_.size() + 1;  // ノード番号は1-indexed
+   vector<bool> negative_inf_node(size, false);
+
+   // 辺のリスト
+   vector<Edge> edge_list;
+
+   for (const Node node : node_list_) {
+      for (const Edge& edge : adj_to_list_[node]) {
+         edge_list.push_back(edge);
+      }
+   }
+
+   for (size_t i = 1; i <= size; i++) {
+      for (const Edge& edge : edge_list) {
+         if ((*min_weight_list)[edge.from] == kEdgeWeightInf) {
+            continue;
+         }
+
+         if ((*min_weight_list)[edge.to] > (*min_weight_list)[edge.from] + edge.weight) {
+            // N+1回目以降で値の更新が起きている ⇒　繰り返すことで負の無限大へ
+            (*min_weight_list)[edge.to] = (*min_weight_list)[edge.from] + edge.weight;
+            negative_inf_node[edge.to] = true;
+         }
+
+         // 負の無限大になるノードから遷移可能
+         if (negative_inf_node[edge.from]) {
+            negative_inf_node[edge.to] = true;
+         }
+      }
+   }
+
+   return negative_inf_node;
+}
+
+int main() {
+   int V, E, r;
+   cin >> V >> E >> r;
+   r++;
+
+   Graph graph(V);
+
+   for (int i = 0; i < E; i++) {
+      int s, t, d;
+      cin >> s >> t >> d;
+
+      s++;
+      t++;
+
+      graph.AddDirectedEdge(s, t, d);
+   }
+
+   auto [neg, min_weight] = graph.ShortestPathBellmanFord(r);
+
+   if (neg) {
+      auto neg_list = graph.DetectNegativeInfNode(&min_weight);
+
+      for (int i = 1; i <= V; i++) {
+         if (min_weight[i] != kEdgeWeightInf && neg_list[i]) {
+            cout << "NEGATIVE CYCLE" << endl;
+            return 0;
+         }
+      }
+   }
+
+   for (int i = 1; i <= V; i++) {
+      if (min_weight[i] == kEdgeWeightInf) {
+         cout << "INF" << endl;
+      } else {
+         cout << min_weight[i] << endl;
+      }
+   }
+
+   return 0;
+}
+

@@ -1,0 +1,40 @@
+from math import inf
+from array import array
+
+rxs = lambda: list(map(int, input().split()))
+N, Q = rxs()
+Qs = [rxs() for _ in range(Q)]
+
+m = 1
+while m < N: m *= 2
+
+seg0 = array('Q', [0]*(2*m-1))
+seg1 = array('Q', [0]*(2*m-1))
+
+@profile
+def add(s, t, x, node=0, lft=0, rht=m):
+    if s <= lft and rht <= t:
+        seg0[node] += x
+    elif lft < t and s < rht:
+        mid = (lft+rht)//2
+        seg1[node] = min(add(s,t,x,node*2+1, lft, mid), add(s,t,x,node*2+2, mid, rht))
+    return seg0[node] + seg1[node]
+
+@profile
+def find(s, t, node=0, lft=0, rht=m):
+    if t <= lft or  rht <= s: return inf
+    if s <= lft and rht <= t: return seg0[node]+seg1[node]
+    mid = (lft+rht)//2
+    return seg0[node] + min(find(s,t,node*2+1, lft, mid), find(s,t,node*2+2, mid, rht))
+
+ans = []
+for q, *params in Qs:
+    if q:
+        s, t = params
+        ans.append(find(s, t+1))
+    else:
+        s, t, x = params
+        add(s, t+1, x)
+
+print("\n".join(map(str, ans)))
+

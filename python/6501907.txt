@@ -1,0 +1,37 @@
+use std::{io::Read, collections::VecDeque};
+
+fn main() {
+    let mut input = String::new();
+    std::io::stdin().read_to_string(&mut input).unwrap();
+    let i = input.lines().take(1).collect::<String>();
+    let mut stk1:VecDeque<u32> = VecDeque::new();
+    let mut stk2:VecDeque<(u32,u32)> = VecDeque::new();
+
+    i.chars().enumerate().for_each(|(i,e)| {
+        let mut temp_sum_area = 0u32;
+        match e {
+            '/' => {
+                if let Some(last_descent) = stk1.pop_back() {
+                    temp_sum_area += i as u32 - last_descent;
+                    while let Some((last_puddle_left, last_puddle_area)) = stk2.back() 
+                    {
+                        if *last_puddle_left <= last_descent{ break; }
+                        temp_sum_area += last_puddle_area;
+                        stk2.pop_back();
+                    }
+                    stk2.push_back((last_descent, temp_sum_area));
+                }
+            },
+            '\\' => stk1.push_back(i as u32),
+            _ => (),
+        }
+    });
+    let total_area = stk2.iter().fold(0u32, |sum, (_,area)| {
+        sum + area
+    });
+    println!("{}", total_area);
+    print!("{}", stk2.len());
+    stk2.iter().for_each(|(_,area)| {
+        print!(" {}",area);
+    });
+}

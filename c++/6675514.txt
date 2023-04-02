@@ -1,0 +1,67 @@
+# 個々のノードのクラス（idはリストの番目になるから持たない）
+class Node:
+    def __init__(self):
+        self.parent_id = -1
+        self.left = -1
+        self.right = -1
+
+global nodes
+
+# 先行順巡回
+def pre_parse(id):
+    if id == -1: return
+    print(f' {id}', end="")
+    pre_parse(nodes[id].left)
+    pre_parse(nodes[id].right)
+
+# 中間順巡回
+def in_parse(id):
+    if id == -1: return
+    in_parse(nodes[id].left)
+    print(f' {id}', end="")
+    in_parse(nodes[id].right)
+
+# 後行順巡回
+def post_parse(id):
+    if id == -1: return
+    post_parse(nodes[id].left)
+    post_parse(nodes[id].right)
+    print(f' {id}', end="")
+
+
+n = int(input())
+
+# n個のノードを登録しておく
+# キーはリストの番目になる
+nodes = [Node() for _ in range(n)]
+
+# ノードごとのくり返し
+for i in range(n):
+    # 入力値
+    params = list(map(int,input().split()))
+
+    # 子ノード左の設定
+    if params[1] > -1:
+        nodes[params[1]].parent_id = params[0]
+    
+    # 子ノード右の設定
+    if params[2] > -1:
+        nodes[params[2]].parent_id = params[0]
+
+    # 自ノードの設定
+    nodes[params[0]].left = params[1]
+    nodes[params[0]].right = params[2]
+        
+
+print("Preorder")
+pre_parse(0)
+print("")
+
+print("Inorder")
+in_parse(0)
+print("")
+
+print("Postorder")
+post_parse(0)
+print("")
+

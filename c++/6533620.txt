@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+const int INF = 1000100100;
+int V, E;
+vector<vector<int>> Graph;
+
+int solve(vector<vector<int>>& dp, int S, int v) {
+  // 初期状態か, メモ済ならその値を返す
+  if(S == 0 || dp[S][v] != INF) return dp[S][v];
+  // あり得ないパターンならINFを返す
+  if((S & (1<<v)) == 0) return INF;
+  int val = INF;
+  for(int i=0; i<V; ++i) val = min(val, solve(dp, S^(1<<v), i)+Graph[i][v]);
+  return dp[S][v] = val;
+}
+
+int main() {
+  cin>>V>>E;
+  Graph.resize(V, vector<int>(V, INF));
+  // 各頂点間の距離は, 一旦INFで初期化
+  // 与えられた辺をグラフに入れる
+  for(int i=0; i<E; ++i) {
+    int s, t, d; cin>>s>>t>>d;
+    Graph[s][t] = d;
+  }
+  // 周った都市をbitで表したbit列, 最後に訪れた都市でdpを組む
+  vector<vector<int>> dp(1<<V, vector<int>(V, INF));
+  dp[0][0] = 0;
+
+  int res = solve(dp, (1<<V)-1, 0);
+  if(res != INF) cout<<res<<endl;
+  else cout<<"-1"<<endl;
+}
+

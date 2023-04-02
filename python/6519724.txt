@@ -1,0 +1,39 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let ele = si[1].split(" ");
+	let q = si[2];
+	
+	for (let i = 0; i < q; i++) {// q回命令を実行.
+		let pair = si[i + 3].split(" ");
+		let begin = Number(pair[0]);
+        let middle = Number(pair[1]);
+		let end = Number(pair[2]);
+		let tmp = new Array(end - begin);
+		
+		if (end < ele.length) {// 指定された部分を切り取って仮置き配列を作る.
+			tmp = ele.slice(begin, end)
+		} else {
+			tmp = ele.slice(begin)
+		}
+		
+		//console.log(tmp) // forDebug
+
+        
+		for (let j = 0; j < end - begin; j++) {
+            //console.log(begin + ((j + (end - middle)) % (end - begin)))
+			ele[begin + ((j + (end - middle)) % (end - begin))] = tmp[j];
+		}
+	}
+	
+	let str ="";
+	for (let i = 0; i < ele.length; i++) {
+		str += ele[i];
+		if (i < ele.length - 1) {
+			str += " ";
+		}
+	}
+	so.write(str + "\n");
+}

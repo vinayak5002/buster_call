@@ -1,0 +1,36 @@
+import math
+maxNum =7368791+1
+#エラトステネスの篩で素数か否かを7368791まで判定(問題文とサンプル出力より最大値がこれに決定)
+primeNumsFilter = [True] * (maxNum)
+#素数のリスト
+primeNums = []
+for i in range(2,maxNum):
+    if primeNumsFilter[i] == True:
+        primeNums.append(i)
+        for j in range(i,maxNum,i):
+            primeNumsFilter[j] = False
+
+while True:
+    m, n = list(map(int, input().strip().split()))
+    if m==0:
+        break
+    N = [True] *  (m * m + 1)
+    c = 0
+    #mの二乗までの種をまく個数を数える。
+    for l in range(m, m * m + 1):
+        if N[l] == True:
+            c+=1
+            if (c == n + 1):
+                print(l)
+                break
+            for i in range(l, m * m+1, l):
+                N[i] = False
+    #mの二乗以降は前準備しておいた素数のリストを参照する。素数なら種をまかないといけないので退屈な年は種をまけなかった初めての素数の年になる。
+    else:
+        startInd=0
+        for i,num in enumerate(primeNums):
+            if(m*m<num):
+                startInd = i
+                break
+        print(primeNums[startInd+(n-c)])
+

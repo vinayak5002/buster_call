@@ -1,0 +1,50 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
+
+func main() {
+	var r, c int
+	fmt.Scan(&r, &c)
+	sheet := make([][]int, r+1)
+	for i := 0; i < r+1; i++ {
+		sheet[i] = make([]int, c+1)
+	}
+	scanner := bufio.NewScanner(os.Stdin)
+	for i := 0; i < r; i++ {
+		scanner.Scan()
+		inputs := strings.Split(scanner.Text(), " ")
+		for mm, input := range inputs {
+			sheet[i][mm], _ = strconv.Atoi(input)
+		}
+	}
+	for i := 0; i < r; i++ {
+		tmp := 0
+		for j := 0; j < c; j++ {
+			tmp += sheet[i][j]
+		}
+		sheet[i][c] = tmp
+	}
+	ssum := 0
+	for i := 0; i < c; i++ {
+		tmp := 0
+		for j := 0; j < r; j++ {
+			tmp += sheet[j][i]
+		}
+		sheet[r][i] = tmp
+		ssum += tmp
+	}
+	sheet[r][c] = ssum
+	for i := 0; i < r+1; i++ {
+		for j := 0; j < c; j++ {
+			fmt.Printf("%d ", sheet[i][j])
+		}
+		fmt.Println(sheet[i][len(sheet[i])-1])
+	}
+}
+

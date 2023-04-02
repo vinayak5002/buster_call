@@ -1,0 +1,67 @@
+#include <iostream>
+#include <vector>
+#include <cassert>
+
+bool isAssign(int P, int k, std::vector<int> baggage_weight) //※荷物の数だけ繰り返すようにする
+{
+    //荷物のsize()回繰り返す。
+    // Pを超えたらカウンターとkを比較
+    //カウンターがkを超えてたらfalse
+    // for文を抜けたとき（カウンターがkと同じなら？）true
+    int sum_weight = 0;
+    int count = 0;
+    for (size_t i = 0; i < baggage_weight.size(); i++)
+    {
+        sum_weight += baggage_weight[i];
+        if (P < sum_weight)
+        {
+            sum_weight = 0;
+            i--;
+            count++;
+        }
+        else if (count > k)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+int main()
+{
+    int n;                              // n個の荷物
+    int k;                              // k台のトラック
+    std::vector<int> baggage_weight(n); // 荷物それぞれの重さ
+    int gross_weight = 0;               // 全荷物の合計重量
+    int max_weight = 0;                 // 全荷物の中での最大重量
+
+    std::cin >> n >> k;
+    for (int i = 0; i < n; i++)
+    {
+        int w; //荷物1つのwkg
+        std::cin >> w;
+        baggage_weight.push_back(w);
+        gross_weight += w;
+        if (max_weight < w)
+        {
+            max_weight = w;
+        }
+    }
+
+    int P_low = 0;
+    gross_weight / k > max_weight ? P_low = gross_weight / k : P_low = max_weight;
+    //「総重量/トラックの数」「最も重い荷物の重量」を比較→重いほうが最低限必要な最大積載量
+
+    int P = P_low; //最大積載量/台
+    while (1)
+    {
+        if (isAssign(P, k, baggage_weight) /* ちょうどよく荷物を載せれるか確認する関数 */)
+        {
+            std::cout << P << std::endl; // Pを表示する
+            break;                       // 乗せれたらbreak;
+        }
+        P++;
+    }
+
+    return 0;
+}

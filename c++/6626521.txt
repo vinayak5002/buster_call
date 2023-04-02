@@ -1,0 +1,90 @@
+#include<stdio.h>
+#define MAX 100005
+#define NIL -1
+typedef struct {int parent,left,right;}Node;
+ Node T[MAX];
+
+int N,Depth[MAX];
+
+void recursive(int u,int p){
+    int D[MAX];
+    D[u]=p;
+    if(T[u].right!=-1){
+        recursive(T[u].right,p);
+    }
+    if(T[u].left!=-1){
+        recursive(T[u].left,p+1);
+    }
+    }
+    
+void print_node(int u){
+    int c=T[u].left;
+    while(c!=-1){
+        printf("%d",c);
+        c=T[c].right;
+    }
+}
+int main(void)
+{
+    int i, j, N_child, node_num, child_num, left_child, right_sibling,root;
+    scanf("%d", &N);
+
+    /* treeを初期化 */
+    for (i = 0; i < N; i++)
+    {
+        T[i].parent = NIL;
+        T[i].left = NIL;
+        T[i].right = NIL;
+    }
+
+    /* 格納 */
+    for (i = 0; i < N; i++)
+    {
+        /* ノード番号と持つ子の数 */
+        scanf("%d %d", &node_num, &N_child);
+
+        /* 子の関係を格納する */
+        for (j = 0; j < N_child; j++)
+        {
+            scanf("%d", &child_num);
+
+            /* 
+            最初の子ノードはleft_childに格納
+            次からは最初の子ノードの兄弟なので、right_siblingに入れる。
+             */
+            if (j == 0)
+                T[node_num].left = child_num;
+            else
+                T[left_child].right = child_num;
+
+            /* 親ノードの番号を入れる */
+            left_child = child_num;
+            T[child_num].parent = node_num;
+        }
+    }
+
+    /* rootノードを見つける */
+    for (i = 0; i < N; i++)
+        if (T[i].parent == NIL)
+            root = i;
+
+    /* 深さD[]に格納する */
+    recursive(root, 0);
+
+    for (i = 0; i < N; i++)
+        print_node(i);
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+

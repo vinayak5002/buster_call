@@ -1,0 +1,65 @@
+#include<bits/stdc++.h>
+#define all(x) begin(x),end(x)
+#define rep(i,a,b) for (ll i = a; i < b; i++)
+#define trav(a,x) for (auto &a : x)
+#define vi vector<int>
+#define vll vector<long long>
+
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<long long,long long> ii;
+
+const ll INF=1e18;
+
+ll n,m,a,b,num[100003],low[100003],tail[100003],timedfs=0;
+vll e[100003];
+set<ll>ans;
+
+void dfs(int u, int pre)
+{
+    int child=0;
+    num[u]=low[u]= ++timedfs;
+    trav(v, e[u])
+    {
+        if (v== pre ) continue;
+        if (!num[v])
+        {
+            dfs(v,u);
+            low[u]=min(low[u],low[v]);
+            child++;
+            if (u == pre)
+            {
+                if (child > 1) ans.insert(u);
+            }
+            else if (low[v] >= num[u]) ans.insert(u);
+        }
+        else low[u]=min(low[u],num[v]);
+
+    }
+    return;
+}
+
+int main()
+{
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+    cin>>n>>m;
+    rep(i,0,m)
+    {
+        cin>>a>>b;
+        e[a].push_back(b);
+        e[b].push_back(a);
+    }
+    rep(i,0,n)
+    {
+        if (!num[i]) dfs(i,i);
+    }
+    trav(i,ans)
+    {
+        cout<<i<<'\n';
+    }
+    return 0;
+}
+

@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct list{
+	int x;
+	struct list *next;
+};
+
+struct list* n_list(int x){
+	struct list* listREI = (struct list *)malloc(sizeof(struct list));
+	listREI->x = x;
+	listREI->next = NULL;
+	return listREI;
+}
+
+int main(void) {
+	int n, q, i, query, s, t, x;
+	struct list *head[1000], *tail[1000], *point, *sn;
+	scanf("%d %d", &n, &q);
+
+	for (i = 0; i < n; i++){
+		head[i] = NULL;
+		tail[i] = NULL;
+	}
+
+	for (i = 0; i < q; i++){
+		scanf("%d", &query);
+		if (query == 0){
+			scanf("%d %d", &t, &x);
+			sn = n_list(x);
+
+			if (head[t] == NULL){
+				head[t] = sn;
+				tail[t] = sn;
+			}
+			else {
+				tail[t]->next = sn;
+				tail[t] = sn;
+			}
+		}
+
+		else if (query == 1){
+			scanf("%d", &t);
+			for (point = head[t]; point != NULL; point = point->next){
+				printf("%d", point->x);
+				if (point->next != NULL){
+					printf(" ");
+				}
+			}
+			printf("\n");
+		}
+
+		else if (query == 2){
+			scanf("%d %d", &s, &t);
+			if (head[t] == NULL){
+				head[t] = head[s];
+				tail[t] = tail[s];
+			}
+			else{
+				tail[t]->next = head[s];
+				tail[t] = tail[s];
+			}
+			
+			head[s] = NULL;
+			tail[s] = NULL;
+		}
+	}
+
+	for (i = 0; i < n; i++){
+		while (head[i] != NULL){
+			point = head[i]->next;
+			free(head[i]);
+			head[i] = point;
+		}
+	}
+	return 0;
+}

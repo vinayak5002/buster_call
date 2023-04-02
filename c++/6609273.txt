@@ -1,0 +1,123 @@
+#include <iostream>
+using namespace std;
+
+
+typedef struct{
+	char suit;
+	int value;
+}card;
+
+
+void swap(card *a, card *b)
+{
+	card tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+
+
+void insertion_sort(card *a, int n)
+{
+	for(int i = 0; i < n - 1; i++)
+	{
+		for(int j = i + 1; j > 0; j--)
+		{
+			if(a[j].value < a[j - 1].value)
+				swap(a + j - 1, a + j);
+			else
+				break;
+		}
+	}
+}
+
+
+void bubble_sort(card *a, int n)
+{
+	for(int i = 0; i < n - 1; i++)
+	{
+		for(int j = n - 1; i < j; j--)
+		{
+			if(a[j].value < a[j - 1].value)
+				swap(a + j - 1, a + j);
+		}
+	}
+}
+
+
+void selection_sort(card *a, int n)
+{
+	for(int i = 0; i < n - 1; i++)
+	{
+		int minj = i;
+		for(int j = i + 1; j < n; j++)
+		{
+			if(a[j].value < a[minj].value)
+				minj = j;
+		}
+		if(minj != i)
+			swap(a + i, a + minj);
+	}
+}
+
+
+void print_cards(card *cards, int n)
+{
+	for(int i = 0; i < n - 1; i++)
+		cout << cards[i].suit << cards[i].value << " ";
+	cout << cards[n - 1].suit << cards[n - 1].value << endl;
+}
+
+
+bool is_stable(card *in, card *out, int n)
+{
+	for(int i = 1; i < 10; i++)
+	{
+		string str_in = "", str_out = "";
+		for(int j = 0; j < n; j++)
+		{
+			if(in[j].value == i)
+				str_in.push_back(in[j].suit);
+			if(out[j].value == i)
+				str_out.push_back(out[j].suit);
+		}
+		if(str_in != str_out)
+			return false;
+	}
+	return true;
+}
+
+
+int main()
+{
+	int n;
+	card cards[36];
+	card bubble_sorted_cards[36];
+	card insertion_sorted_cards[36];
+	card selection_sorted_cards[36];
+
+	cin >> n;
+	for(int i = 0; i < n; i++)
+		cin >> cards[i].suit >> cards[i].value;
+	for(int i = 0; i < n; i++)
+		insertion_sorted_cards[i] = bubble_sorted_cards[i] = selection_sorted_cards[i] = cards[i];
+	//bubble_sort(bubble_sorted_cards, n);
+	insertion_sort(insertion_sorted_cards, n);
+	selection_sort(selection_sorted_cards, n);
+	/*
+	print_cards(bubble_sorted_cards, n);
+	if(is_stable(cards, bubble_sorted_cards, n))
+		cout << "Stable" << endl;
+	else
+		cout << "Not stable" << endl;
+	*/
+	print_cards(insertion_sorted_cards, n);
+	if(is_stable(cards, insertion_sorted_cards, n))
+		cout << "Stable" << endl;
+	else
+		cout << "Not stable" << endl;
+	print_cards(selection_sorted_cards, n);
+	if(is_stable(cards, selection_sorted_cards, n))
+		cout << "Stable" << endl;
+	else
+		cout << "Not stable" << endl;
+}

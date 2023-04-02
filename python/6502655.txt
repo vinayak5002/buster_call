@@ -1,0 +1,54 @@
+import java.util.Scanner;
+
+
+class Queue {
+    private int head=0, tail=0, MAXI=10005;
+    private int[] q=new int[MAXI];
+    
+    void push(int x) {
+        if((head+1)%MAXI==tail) return;
+        q[head]=x;
+        head++;
+        head%=MAXI;
+    }
+
+    int pop() {
+        if(tail==head) return -1;
+        int res=q[tail];
+        tail++;
+        tail%=MAXI;
+        return res;
+    }
+
+    int size() {
+        return (head+MAXI-tail)%MAXI;
+    }
+}
+
+class GasStation {
+    public static void main(String[] args) {
+        Scanner sc=new Scanner(System.in);
+        int n=sc.nextInt(), m=sc.nextInt();
+        Queue[] q=new Queue[n];
+        for(int i=0; i<n; i++) {
+            q[i]=new Queue();
+        }
+        for(int i=0; i<m; i++) {
+            int first=sc.nextInt(), second=sc.nextInt();
+            if(first==0) {
+                second--;
+                System.out.println(q[second].pop());
+                continue;
+            }
+            int mini=m, num=0;
+            for(int j=0; j<n; j++) {
+                if(mini>q[j].size()) {
+                    num=j;
+                    mini=q[j].size();
+                }
+            }
+            q[num].push(second);
+        }
+    }
+}
+

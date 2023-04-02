@@ -1,0 +1,109 @@
+/* create at 2022.06.03 */
+// #pragma GCC optimize(2)
+// #pragma GCC optimize(3,"Ofast","inline")
+#include<bits/stdc++.h>
+using namespace std;
+#define rep(i, x, y) for(int i = (int)x; i < (int)y; ++ i)
+#define _rep(i, x, y) for(int i = (int)x; i > (int)y; -- i)
+#define PII pair<int,int>
+#define eb emplace_back
+#define pb push_back
+#define fi first
+#define se second
+#define PQ priority_queue
+#define lb lower_bound
+#define ub upper_bound
+#define all(x) (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+#define SZ(x) (int)(x).size()
+typedef long long ll;
+typedef vector<int> VI;
+typedef vector<VI> VII;
+typedef vector<ll> VL;
+typedef vector<vector<ll>> VLL;
+constexpr int mod = 1e9 + 7;
+constexpr int KINF = 0x3f3f3f3f;
+template <typename T> static constexpr T INF = numeric_limits<T>::max() / 2;
+template <class T> auto vect(const T& v, int n) { return vector<T>(n, v); }
+template <class T, class... D> auto vect(const T& v, int n, D... m) {
+  return vector<decltype(vect(v, m...))>(n, vect(v, m...));
+}
+template <class T> void out(const vector<T>& a){ 
+	for(int i = 0; i < SZ(a); ++ i) cout << a[i] << " \n"[i == SZ(a) - 1]; 
+}
+template <class T> void out(const T* a, int n){ 
+	for(int i = 0; i < n; ++ i) cout << a[i] << " \n"[i == n - 1]; 
+}
+template <typename T>
+void debug(string_view name, const T & x) {
+ 	cerr << name << " = " << x << "\n";
+}
+template <typename T, typename... Ts>
+void debug(string_view name, const T & x, const Ts&... others) {
+	size_t pos = name.find(',');
+	cerr << name.substr(0, pos) << " = " << x << ",";
+	debug(name.substr(pos + 1), others...);
+}
+struct P{
+	ll x, y;
+	P(ll _x, ll _y) : x(_x), y(_y){}
+};
+using L = pair<P,P>;
+int main(){
+	ios::sync_with_stdio(false); cin.tie(nullptr), cout.tie(nullptr);
+	cout << fixed << setprecision(11);
+	int n;
+	cin >> n;
+	VI bx, by;
+	vector<L> a;
+	rep(i, 0, n){
+		int x0, y0, x1, y1;
+		cin >> x0 >> y0 >> x1 >> y1;
+		a.eb(P(x0, y0), P(x1, y1));
+		bx.eb(x0);
+		bx.eb(x1);
+		by.eb(y0);
+		by.eb(y1);
+	}
+	sort(all(bx));
+	sort(all(by));
+	bx.erase(unique(all(bx)), bx.end());
+	by.erase(unique(all(by)), by.end());
+	auto fx = [&](int x){return lb(all(bx), x) - bx.begin() + 1;};
+	auto fy = [&](int x){return lb(all(by), x) - by.begin() + 1;};
+	int XN = SZ(bx) + 1;
+	vector<vector<PII>> q(XN);
+	vector<vector<PII>> q2(XN);
+	rep(i, 0, SZ(a)){
+		if(a[i].fi.y != a[i].se.y) {
+			q2[fx(a[i].fi.x)].eb(fy(a[i].fi.y), fy(a[i].se.y));
+		}
+		else{
+			q[fx(a[i].fi.x)].eb(fy(a[i].fi.y), 1);
+			q[fx(a[i].se.x)].eb(fy(a[i].fi.y), -1);
+		}
+	}
+	int YN = SZ(by) + 1;
+	VI sum(YN + 1);
+	auto add = [&](int x, int v){while(x < YN){sum[x] += v, x += (x & (-x));}};
+	auto query = [&](int x){ll res = 0;while(x){res += sum[x], x &= (x - 1);} return res;};
+	ll ans = 0;
+	rep(i, 1, XN){
+		for(auto& [s, e] : q2[i]){
+			ans += query(e) - query(s - 1);
+		}
+		for(auto& [x, v] : q[i]){
+			add(x, v);
+		}
+	}
+	cout << ans << "\n";
+	return 0;
+} 
+// 小心左移运算符导致的int溢出
+// dp记得处理非法状态
+// resize并不会初始化数组
+// 全局函数一定要记得inline
+// 带空格字符串不能直接cin,要用getline
+// 最好用"\n"代替endl
+
+

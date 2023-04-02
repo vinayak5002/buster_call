@@ -1,0 +1,156 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+
+	const q = parseInt(si[0].split("\n"));
+	const BIT_NUM = 32;
+	
+	const ON = new Array(2);
+	ON[0] = Array(BIT_NUM).fill('1');
+	ON[1] = Array(BIT_NUM).fill('1');
+	
+	const OFF = new Array(2);
+	OFF[0] = Array(BIT_NUM).fill('0');
+	OFF[1] = Array(BIT_NUM).fill('0');
+	
+	let flag = new Array(2);
+	flag[0] = Array(BIT_NUM).fill('0');
+	flag[1] = Array(BIT_NUM).fill('0');
+	
+	let ans = '';
+
+	const thirty_two = String(Math.pow(2, 32));
+	
+	for (let i = 1; i < q + 1; i++) {
+		let order = si[i].split(" ");
+		let l = 0;
+		let n = 0;
+		let check = true;
+		switch (order[0]) {
+			case '0':	//test
+				l = Math.floor(order[1] / BIT_NUM);
+				n = order[1] % BIT_NUM;
+				ans += flag[l][n] + '\n';
+				break;
+				
+			case '1':	//set
+				l = Math.floor(order[1] / BIT_NUM);
+				n = order[1] % BIT_NUM;
+				flag[l][n] = '1';
+				break;
+				
+			case '2':	//clear
+				l = Math.floor(order[1] / BIT_NUM);
+				n = order[1] % BIT_NUM;
+				flag[l][n] = '0';
+				break;
+				
+			case '3':	//flip
+				l = Math.floor(order[1] / BIT_NUM);
+				n = order[1] % BIT_NUM;
+				if (flag[l][n] === '0') {
+					flag[l][n] = '1';
+				} else {
+					flag[l][n] = '0';
+				}
+				break;
+				
+			case '4':	//all
+			for (let j = 0; j < BIT_NUM; j++) {
+				if (flag[0][j] !== '1' || flag[1][j] !== '1') {
+					check = false;
+					break;
+				}
+			}
+			if (check) {
+				ans += '1\n';
+			} else {
+				ans += '0\n';
+			}
+				break;
+				
+			case '5':	//any
+			for (let j = 0; j < BIT_NUM; j++) {
+				if (flag[0][j] === '1' || flag[1][j] !== '1') {
+					check = false;
+					break;
+				}
+			}
+			if (check) {
+				ans += '0\n';
+			} else {
+				ans += '1\n';
+			}
+				break;
+				
+			case '6':	//none
+				for (let j = 0; j < BIT_NUM; j++) {
+					if (flag[0][j] !== '0' || flag[1][j] !== '0') {
+						check = false;
+						break;
+					}
+				}
+				if (check) {
+					ans += '1\n';
+				} else {
+					ans += '0\n';
+				}
+				break;
+				
+			case '7':	//count
+				let count = 0;
+				for (let j = 0; j < 2; j++) {
+					for (let k = 0; k < BIT_NUM; k++) {
+						count += Number(flag[j][k]);
+					}
+				}
+				ans += count + '\n';
+				break;
+				
+			case '8':	//val
+				let head = [];
+				let tail = [];
+				
+				for (let j = BIT_NUM - 1; j >= 0; j--) {
+					head += flag[1][j];
+					tail += flag[0][j];
+				}
+				let num = head + tail;
+				num = parseInt(num, 2)
+				tail = parseInt(tail, 2);
+
+				for (let j = BIT_NUM - 1; j >= 0; j--) {
+					if (flag[1][j] === '1') {
+						tail += Ruijo(32 + j);
+					}
+				}
+				tail %= 100000
+				
+				num = String(Math.floor(num / 100000));
+				if (num === '0') {
+					num = String(tail)
+				} else {
+					num += String(tail)
+				}
+				ans += num + 'n';
+				break;
+		}
+	}
+	so.write(ans);
+}
+
+function Ruijo(num) {
+	if (num === 0) {
+		return 1;
+	}
+	let data = 2;
+
+	for (let i = 1; i < num; i++) {
+		data *= 2;
+		data %= 1000000;
+	}
+
+	return data;
+}

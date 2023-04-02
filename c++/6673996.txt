@@ -1,0 +1,47 @@
+#include <iostream>
+#include<vector>
+#include<map>
+using namespace std;
+
+int main(void){
+    int n,m,t,p;
+    while(true){
+        cin>>n>>m>>t>>p;
+        if(n==0&&m==0&&t==0&&p==0)break;
+        else{
+            vector<vector<int>> V (1000,vector<int> (1000));
+            for(int i=0;i<m;i++){
+                for(int j=0;j<n;j++){
+                    V.at(i).at(j)=1;
+                }
+            }
+            int d,c,l=0,u=0,x,y;
+            for(int i=0;i<t;i++){
+                cin>>d>>c;
+                if(d==1){
+                    for(int j=0;j<m;j++){
+                        for(int k=0;k<c;k++){
+                            V.at(u+j).at(l+c+k)+=V.at(u+j).at(l+c-1-k);
+                            V.at(u+j).at(l+c-1-k)=0;
+                        }
+                    }
+                    l+=c;
+                }
+                else{
+                    for(int j=0;j<n;j++){
+                        for(int k=0;k<c;k++){
+                            V.at(u+c+k).at(l+j)+=V.at(u+c-1-k).at(l+j);
+                            V.at(u+c-1-k).at(l+j)=0;
+                        }
+                    }
+                    u+=c;
+                }
+            }
+            for(int i=0;i<p;i++){
+                cin>>x>>y;
+                cout<<V.at(u+y).at(l+x)<<endl;
+            }
+        }
+    }
+}
+

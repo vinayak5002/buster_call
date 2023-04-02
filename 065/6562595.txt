@@ -1,0 +1,36 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int main(){
+    //入力の受け取り
+    int N,W; cin >> N >> W;
+    vector<int> value, weight;
+    for (int i=0; i<N; i++) {
+        int v,w,l; cin >> v >> w >> l;
+        vector<int> vtmp(l,v);
+        vector<int> wtmp(l,w);
+        value.insert(value.end(), vtmp.begin(), vtmp.end());
+        weight.insert(weight.end(), wtmp.begin(), wtmp.end());
+    }
+
+    //dp
+    vector<vector<int> > dp(value.size()+1, vector<int>(W+1, 0));
+
+    //動的計画法
+    for (int i=1; i<value.size()+1; i++){
+        for (int j=1; j<W+1; j++){
+
+            //i番目の品物が選べない場合
+            if (j - weight[i-1] < 0) dp[i][j] = dp[i-1][j];
+
+            //i番目の品物を選べる場合は選んだ時に価値が大きくなるかどうかで緩和処理
+            else dp[i][j] = max(dp[i-1][j], dp[i-1][j-weight[i-1]] + value[i-1]); 
+        }
+    }
+
+    //出力
+    cout << dp[value.size()][W] << endl;
+}

@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>  
+using namespace std;
+typedef long long ll;
+typedef vector<int> vi;
+typedef pair<int, int> pi;
+#define mp make_pair
+#define pb push_back
+#define MAX_N 200005
+int n, q;
+vector<int> fa(MAX_N, 0);
+vector<int> rk(MAX_N, 0);
+
+int find(int x) {
+    if (x != fa[x]) {
+        fa[x] = find(fa[x]);
+    }
+    return fa[x];
+}
+
+void unionSt(int x, int y) {
+    int fx = find(x);
+    int fy = find(y);
+    if (fx == fy) {
+        return;
+    }
+    if (rk[fx] > rk[fy]) {
+        fa[fy] = fx;
+    } else if (rk[fx] < rk[fy]) {
+        fa[fx] = fy;
+    } else {
+        rk[fx]++;
+        fa[fy] = fa[fx];
+    }
+}
+
+void solve(){
+    for (int i = 0; i < n; i++) {
+        fa[i] = i;
+    }
+    for (int i = 1; i <= q; i++) {
+        int c, a, b;
+        cin >> c >> a >> b;
+        if (c == 0) {
+            unionSt(a,b);
+        } else {
+            cout << ((find(a) == find(b)) ? 1 : 0)<< endl;
+        }
+    }
+    
+}
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cin >> n >> q;
+    solve();
+    return 0;
+}

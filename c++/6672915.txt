@@ -1,0 +1,39 @@
+#include <iostream>
+#include <vector>
+using ll = long long;
+using namespace std;
+struct BIT {
+	ll n;
+	vector<ll> bit;
+	BIT(ll n): n(n) {
+		bit.resize(n+1, 0);
+	}
+	void add(ll i, ll x) {
+		for (ll idx = i; idx <= n; idx += (idx & -idx)) {
+			bit[idx] += x;
+		}
+	}
+	ll sum(ll i) {
+		ll s = 0;
+		for (ll idx = i; idx >= 1; idx -= (idx & -idx)) {
+			s += bit[idx];
+		}
+		return s;
+	}
+	ll sum(ll i, ll j) {return sum(j) - sum(i-1);}
+};
+int main() {
+	ll n, q; cin >> n >> q;
+	BIT b(n);
+	vector<ll> ans;
+	for (ll i = 0; i < q; i++) {
+		ll c, x, y; cin >> c >> x >> y;
+		if (c == 0) {
+			b.add(x, y);	
+		} else if (c == 1) {
+			ans.push_back(b.sum(x, y));
+		}
+	}
+	for (auto x: ans) cout << x << endl;
+}
+

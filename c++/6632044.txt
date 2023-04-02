@@ -1,0 +1,154 @@
+#include<stdio.h>
+#include<iostream>
+#include <stdlib.h>
+
+using namespace std;
+
+
+int n;
+
+struct Node{
+    int key;
+    Node *parent, *leftChild, *rightChild;
+};
+
+Node *root, *NIL;
+
+void insert(int k){
+    Node* p = NIL;
+    Node* cur = root;
+    Node* z = (Node*) malloc(sizeof(Node));
+    z->key = k;
+    z->leftChild = NIL;
+    z->rightChild = NIL;
+
+    while(cur != NIL){
+        p = cur;
+        if(z->key < cur->key){
+            cur = cur->leftChild;
+        }else{
+            cur = cur->rightChild;
+        }
+    }
+
+    z->parent = p;
+
+    if(p == NIL){
+        root = z;
+    }else if(p->key < z->key){
+        p->rightChild = z;
+    }else{
+        p->leftChild = z;
+    }
+}
+
+
+void inOrderPrint(Node* n){
+    if(n){
+        inOrderPrint(n->leftChild);
+        cout << " "<< n->key;
+        inOrderPrint(n->rightChild);
+    }
+}
+
+void preOrderPrint(Node* n){
+    if(n){
+        cout<< " "<< n->key;
+        preOrderPrint(n->leftChild);
+        preOrderPrint(n->rightChild);
+    }
+}
+
+void find(int key){
+    Node* cur = root;
+    while(cur != NIL){
+        if(cur->key == key){
+            cout << "yes" << endl;
+            return;
+        }else if(cur->key < key){
+            cur = cur->rightChild;
+        }else{
+            cur = cur->leftChild;
+        }
+    }cout << "no" <<endl;
+}
+
+Node* findNode(int key){
+    if(root == NIL) return NIL;
+    if(root->key == key) return root;
+    Node* targetNode = root;
+    while(targetNode != NIL){
+        if(targetNode->key < key)
+            targetNode = targetNode->rightChild;
+        else if(targetNode->key > key)
+            targetNode = targetNode->leftChild;
+        else
+            return targetNode;
+    }return targetNode;
+}
+
+void deleteNode(int k){
+    Node* targetNode = findNode(k);
+    if(targetNode == NIL) return;
+    if(targetNode == root){
+        root = NIL;
+        return;
+    }
+     Node* p = targetNode->parent;
+    if(targetNode->leftChild == NIL && targetNode->rightChild == NIL){
+        if(p->leftChild == targetNode) p->leftChild = NIL;
+        else p->rightChild = NIL;
+        delete targetNode;
+    }else if(targetNode->rightChild == NIL){
+        //find value of max of left sub tree;
+        Node* leftSubMax = targetNode;
+        while(leftSubMax->rightChild != NIL)
+            leftSubMax = leftSubMax->rightChild;
+        int leftSubTreeMaxValue = leftSubMax->rightChild->key;
+        targetNode->key = leftSubTreeMaxValue;
+        Node* tmp = leftSubMax->rightChild;
+        delete tmp;
+        leftSubMax->leftChild = NIL;
+    }else //(targetNode->leftChild == NIL){
+    {    //find value of min of right sub treee;
+        Node* rightSubMinNode = targetNode;
+        while(rightSubMinNode->leftChild != NIL) rightSubMinNode = rightSubMinNode->leftChild;
+        int rightSubTreeMinValue = rightSubMinNode->leftChild->key;
+        Node* tmp = rightSubMinNode->leftChild;
+        targetNode->key = rightSubTreeMinValue;
+        delete tmp;
+        rightSubMinNode->leftChild = NIL;
+    }
+}
+
+
+int main(){
+
+    string s;
+    int key;
+    scanf("%d", &n);
+    for(int i = 0; i< n; i++){
+        cin >> s;
+        if(s== "insert"){
+            scanf("%d", &key);
+            insert(key);
+        }
+        else if(s == "find"){
+            scanf("%d", &key);
+            find(key);
+        }
+        else if(s == "delete"){
+            scanf("%d", &key);
+            deleteNode(key);
+        }
+        else if (s == "print"){
+            inOrderPrint(root);
+            cout<< endl;
+            preOrderPrint(root);
+            cout<< endl;
+        }
+    }
+
+
+    return 0;
+}

@@ -1,0 +1,50 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+int m,n;
+/// 这里500保证足够大就行了,具体最大长度可以根据题目给定的数据范围算出来
+char s[500];
+int stack[500];
+int top;
+
+int main(){
+    int i,j;
+    top=0;
+    while(scanf("%s",s)!=-1){
+        int n=strlen(s);
+        //如果是空格就不管
+        if(s[0]==' '){
+            continue;
+        }
+        else if('0'<=s[0]&&s[0]<='9'){
+            int number=0;
+            for(i=0;i<n;i++){
+                number=number*10+(s[i]-'0');
+            }
+            stack[top++]=number;
+        }
+        else{
+            int x=stack[--top];
+            int y=stack[--top];
+            //这里要注意的是x是栈最上面的数,y是栈上面开始数的第二个数,所以在算式中是y+x、y-x和y*x(主要是减法有影响)
+            int new_number;
+            if(s[0]=='+'){
+                new_number=y+x;
+            }
+            if(s[0]=='-'){
+                new_number=y-x;
+            }
+            if(s[0]=='*'){
+                new_number=y*x;
+            }
+			//现在计算得到的新数字存放在new_number中,把这个新数字放到栈中
+			stack[top++]=new_number;
+        }
+    }
+    printf("%d\n",stack[0]);
+
+
+    return 0;
+}
+

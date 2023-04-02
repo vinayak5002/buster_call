@@ -1,0 +1,32 @@
+#include<bits/stdc++.h>
+#define int short
+#define max(a,b) ((a)>(b)?(a):(b))
+#define min(a,b) ((a)<(b)?(a):(b))
+using namespace std;
+int const N=405,INF=0x3f3f;
+int n,g,r,y,gr[N],gy[N],rg[N],ry[N],yg[N],yr[N],f[N][N][N][3];
+string s;
+signed main(){
+	memset(f,INF,sizeof f);
+	f[0][0][0][0]=f[0][0][0][1]=f[0][0][0][2]=0;
+	cin>>n>>s;
+	for(int i=0;i<n;i++)
+		switch(s[i]){
+			case 71:gr[g]=r,gy[g]=y,g++;break;
+			case 82:rg[r]=g,ry[r]=y,r++;break;
+			case 89:yg[y]=g,yr[y]=r,y++;break;
+		}
+	for(int i=0;i<=r;i++)
+		for(int j=0;j<=g;j++)
+			for(int k=0;k<=y;k++)
+				for(int p=0;p<3;p++){
+					int t=f[i][j][k][p];
+					switch(p){
+						case 0:f[i][j+1][k][1]=min(f[i][j+1][k][1],t+max(gr[j]-i,0)+max(gy[j]-k,0));f[i][j][k+1][2]=min(f[i][j][k+1][2],t+max(yr[k]-i,0)+max(yg[k]-j,0));break;
+						case 1:f[i+1][j][k][0]=min(f[i+1][j][k][0],t+max(rg[i]-j,0)+max(ry[i]-k,0));f[i][j][k+1][2]=min(f[i][j][k+1][2],t+max(yr[k]-i,0)+max(yg[k]-j,0));break;
+						case 2:f[i+1][j][k][0]=min(f[i+1][j][k][0],t+max(rg[i]-j,0)+max(ry[i]-k,0));f[i][j+1][k][1]=min(f[i][j+1][k][1],t+max(gr[j]-i,0)+max(gy[j]-k,0));break;
+					}
+				}
+	int ans=min(f[r][g][y][0],min(f[r][g][y][1],f[r][g][y][2]));
+	cout<<(ans<INF?ans:-1);
+}

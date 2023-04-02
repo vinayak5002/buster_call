@@ -1,0 +1,26 @@
+n, m = gets.chomp.split.map(&:to_i)
+cost, road = Hash.new{|h, k| h[k] = []}, []
+m.times{|i|
+    a, b, c = gets.chomp.split.map(&:to_i)
+    cost[c] << i
+    road << [a, b]
+}
+cost = cost.to_a.sort
+parent = (0...n).to_a
+idx, sum = 0, 0
+while idx < cost.length
+    c, arr = cost[idx]
+    arr.each{|id|
+        a, b = road[id]
+        pa, pb = a, b
+        pa = parent[pa] while pa != parent[pa]
+        pb = parent[pb] while pb != parent[pb]
+        if pa != pb
+            min, max = [pa, pb].minmax
+            parent[a] = parent[b] = parent[max] = min
+            sum += c
+        end
+    }
+    idx += 1
+end
+puts sum

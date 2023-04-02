@@ -1,0 +1,159 @@
+#define PROBLEM "https://judge.yosupo.jp/problem/shortest_path"
+
+//yukicoder@cpp17
+
+//標準入出力
+#include <iostream>
+
+#include <cmath>
+#include <algorithm>
+
+#include <iomanip>
+
+//コンテナ系
+#include <string>
+#include <vector>
+#include <set>
+#include <stack>
+#include <queue>
+#include <map>
+
+#include <bitset>
+
+//複素数
+#include <complex>
+
+#include <cctype>
+#include <utility>
+#include <climits>
+
+#include <numeric>
+
+//なまえくーかん！
+using namespace std;
+using ll = long long;
+using P = pair<ll,ll>;
+
+//てーすう！
+const ll MOD = 998244353;
+const ll MODx = 1000000007;
+const int INF = (1<<30)-1;
+const ll LINF = (1LL<<62LL)-1;
+const double EPS = (1e-10);
+
+//でふぁいん！
+#define anyfill(n,s) setw(n) << setfill(s)
+#define loop(s) for(int (i) = 0; (s) > (i); (i)++)
+#define rep(i,q) for(int (i) = 0; (q) > (i); (i)++)
+#define repp(i,n,q) for(int (i) = (n); (q) > (i); (i)++)
+#define dep(i,q) for(int (i) = (q); 0 < (i); (i)--)
+
+//みじかく！
+#define pb push_back
+#define mkp make_pair
+#define fir first
+#define scn second
+
+//きんぼーnほーこー！！
+P ar4[4] = {mkp(0,1),mkp(0,-1),mkp(1,0),mkp(-1,0)};
+P ar8[8] = {mkp(-1,-1),mkp(-1,0),mkp(-1,1),mkp(0,-1),mkp(0,1),mkp(1,-1),mkp(1,0),mkp(1,1)};
+
+
+template <typename T> vector<T> make_vector(size_t a, T b) { return vector<T>(a, b); }
+template <typename... Ts> auto make_vector(size_t a, Ts... ts) { return vector<decltype(make_vector(ts...))>(a, make_vector(ts...)); }
+ 
+ /*
+確認ポイント
+cout << fixed << setprecision(n) << 小数計算//n桁の小数表記になる
+
+計算量は変わらないが楽できるシリーズ
+min(max)_element(iter,iter)で一番小さい(大きい)値のポインタが帰ってくる
+count(iter,iter,int)でintがiterからiterの間にいくつあったかを取得できる
+*/
+
+/*
+Below is function corner
+*/
+
+
+/*
+Above is Function corner
+*/
+
+__attribute__((constructor))
+void initial() {
+ cin.tie(0);
+ ios::sync_with_stdio(false);
+}
+
+template<typename T>
+class dijkstra{
+  struct vg{
+    int t;
+    T c;
+  };
+  vector<T> cost;
+  void run(int x){
+    auto comp = [](vg a,vg b){
+      return a.c>b.c;
+    };
+    priority_queue<vg,vector<vg>,decltype(comp)> R{comp};
+    for(int i = 0; n > i; i++){
+      cost[i] = INF;
+    }
+    cost[x] = 0;
+    R.push({x,0});
+    while(R.size()){
+      auto k = R.top();R.pop();
+      if(cost[k.t] != k.c)continue;
+      for(int i = 0; A[k.t].size() > i; i++){
+        if(cost[A[k.t][i].t] <= k.c+A[k.t][i].c)continue;
+        cost[A[k.t][i].t] = k.c+A[k.t][i].c;
+        R.push({A[k.t][i].t,k.c+A[k.t][i].c});
+      }
+    }
+
+  }
+
+public:
+  int n;
+  vector<vector<vg>> A;
+	dijkstra(int n_):n(n_),A(n_),cost(n_,-1){}
+
+  //双方向
+  void push(int s,int v,int c){
+    A[s].push_back({v,c});
+    A[v].push_back({s,c});
+  }
+
+  void push_side(int s,int v,int c){
+    A[s].push_back({v,c});
+  }
+
+  void build(int x){
+    run(x);
+  }
+
+  int operator[](int i){
+    return cost[i];
+  }
+  
+};
+
+
+
+
+int main(){
+  int n,m,s;cin>>n>>m>>s;
+  dijkstra<long long> A(n);
+  for(int i = 0; m > i; i++){
+    int a,b,c;cin>>a>>b>>c;
+    A.push_side(a,b,c);
+  }
+  A.build(s);
+  for(int i = 0; n > i; i++){
+    if(A[i] == INF) cout << "INF" << endl;
+    else cout << A[i] << endl;
+  }
+}
+

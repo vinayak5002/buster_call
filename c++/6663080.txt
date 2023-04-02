@@ -1,0 +1,214 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define for_(i, a, b) for(int i = (a);i < (b);++i)
+#define rfor_(i, a, b) for(int i = (b)-1;i >= (a);--i)
+#define rep(i, n) for_(i, 0, n)
+#define rrep(i, n) rfor_(i, 0, n)
+
+/* accelration */
+// 高速バイナリ生成
+#pragma GCC target("avx")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+// cin cout の結びつけ解除, stdioと同期しない(入出力非同期化)
+// cとstdの入出力を混在させるとバグるので注意
+struct Fast {Fast() {std::cin.tie(0); ios::sync_with_stdio(false);}} fast;
+
+/* define short */
+#define all(obj) (obj).begin(), (obj).end()
+
+/* alias */
+using ull = unsigned long long;
+using ll = long long;
+const int inf = 100000000;
+const ll infl = 1LL << 60;
+
+ll mul(ll a, ll b) { if (infl / a < b) return infl; return min(infl, a * b); }
+ll gcd(ll a, ll b) { return a ? gcd(b % a, a) : b; }
+ll lcm(ll a, ll b) { if (a == infl || b == infl) return infl; return mul(a / gcd(a, b), b); }
+
+template<class T>bool chmax(T& a, const T& b) { if (a < b) { a = b; return 1; } return 0; }
+template<class T>bool chmin(T& a, const T& b) { if (b < a) { a = b; return 1; } return 0; }
+
+
+// 途中までやってわからなくなって答え見た
+// 自分で解いたときは下のようにvectorの2次元目を
+// j番目のコードブックを使用するとしたとき
+// という考え方を使用したため、pair<int, int>で
+// 値を保存していく必要性があるとともに、
+// 同じ最小値をとるときどちらのynを保存したら良いのか
+// みたいなことで詰まってしまった。
+// ※問題文の制約のところで触れられてはいなかったが、
+// ※信号の範囲が0~255という256種類しかないことに注目する
+// vectorの2次元目を信号にすることで
+// 前の信号が何だったかということがわかり、さらに
+// 1つのintを扱うだけで済む
+int N, M;
+
+
+// 自分でやったやつ
+/* int main() {
+    vector<int> anss;   // 答え
+
+    while (cin >> N >> M) {
+        if (N == 0) break;
+
+        vector<int> Cs(M);
+        rep(i, M) cin >> Cs[i];
+
+        vector<int> xs(N);
+        rep(i, N) cin >> xs[i];
+
+        // i番目の出力でj番目のコードブックの値を使用すると仮定したときの最小の値を求めていく
+        // first: 差の最小値、second: yn(y_crnt)
+        vector<vector<pair<int, int>>> dif_sum_mins(N, vector<pair<int, int>>(M, {inf, -1}));
+        // 1番目の出力における最小値を求めておく
+        rep(j, M) {
+            int y_crnt = 128 + Cs[j];
+
+            if (y_crnt < 0) y_crnt = 0;
+            else if (y_crnt > 255) y_crnt = 255;
+
+            int dif_sum = abs(y_crnt - xs[0]);
+
+            dif_sum_mins[0][j] = {dif_sum, y_crnt};
+        }
+
+        // 2番目以降を求めていく
+        for_(i, 1, N) {
+            rep(j, M) {
+                // i-1番目の出力の中で差が最も小さくなるものを探す
+                int dif_sum_min_crnt = inf;
+                int y_crnt = -1;
+                rep(k, M) {
+                    int dif_sum_min_prev, y_prev;
+                    tie(dif_sum_min_prev, y_prev) = dif_sum_mins[i-1][k];
+
+                    int y_tmp = y_prev + Cs[j];
+
+                    if (y_tmp < 0) y_tmp = 0;
+                    else if (y_tmp > 255) y_tmp = 255;
+
+                    int dif_sum_tmp = abs(y_tmp - xs[i]) + dif_sum_min_prev;
+
+                    if (dif_sum_tmp < dif_sum_min_crnt) {
+                        dif_sum_min_crnt = dif_sum_tmp;
+                        y_crnt = y_tmp;
+                    }
+                    
+                    // dif_sum_tmp == dif_sum_min_crnt　となった場合に
+                    // どちらのynを保存しておくのか、両方しておくなら
+                    // どのように保存しておくのか気になる
+
+                }
+                
+                dif_sum_mins[i][j] = {dif_sum_min_crnt, y_crnt};
+            }
+        }
+
+        // 最終的に一番差の合計が小さかったものを解とする
+        int ans = inf;
+        rep(j, M) chmin(ans, dif_sum_mins[N-1][j].first);
+        anss.push_back(ans);
+    }
+
+    for (const auto &ans : anss) cout << ans << endl;
+} */
+
+
+int main() {
+    vector<int> anss;   // 答え
+
+    while (cin >> N >> M) {
+        if (N == 0) break;
+
+        vector<int> Cs(M);
+        rep(i, M) cin >> Cs[i];
+
+        vector<int> xs(N);
+        rep(i, N) cin >> xs[i];
+
+        // i番目の出力で復号化の値としてy_crntを使用すると仮定したときの
+        // 二乗和の最小の値を求めていく
+        vector<vector<int>> dif_sum_mins(N, vector<int>(256, -1));
+        // 1番目の出力における最小値を求めておく
+        rep(j, M) {
+            int y_crnt = 128 + Cs[j];
+
+            if (y_crnt < 0) y_crnt = 0;
+            else if (y_crnt > 255) y_crnt = 255;
+
+            int dif_sum = pow(y_crnt - xs[0], 2);
+
+            if (dif_sum_mins[0][y_crnt] == -1) {
+                dif_sum_mins[0][y_crnt] = dif_sum;
+            }
+            else chmin(dif_sum_mins[0][y_crnt], dif_sum);
+        }
+
+        // 2番目以降を求めていく
+        for_(i, 1, N) {
+            rep(j, M) {
+                // i-1番目の出力の中で差が最も小さくなるものを探す
+                /* int dif_sum_min_crnt = inf;
+                int y_crnt = -1; */
+                rep(y_prev, 256) {
+                    // i-1番目の復号化後の信号として存在しないときはcontinue
+                    if (dif_sum_mins[i-1][y_prev] == -1) continue;
+
+                    int dif_sum_min_prev = dif_sum_mins[i-1][y_prev];
+
+                    int y_crnt = y_prev + Cs[j];
+                    
+                    if (y_crnt < 0) y_crnt = 0;
+                    else if (y_crnt > 255) y_crnt = 255;
+
+                    int dif_sum_crnt = pow(y_crnt - xs[i], 2) + dif_sum_min_prev;
+
+                    if (dif_sum_mins[i][y_crnt] == -1) {
+                        dif_sum_mins[i][y_crnt] = dif_sum_crnt;
+                    }
+                    else chmin(dif_sum_mins[i][y_crnt], dif_sum_crnt);
+
+                    /* if (dif_sum_tmp < dif_sum_min_crnt) {
+                        dif_sum_min_crnt = dif_sum_tmp;
+                        y_crnt = y_tmp;
+                    }
+
+
+
+                    if (y_tmp < 0) y_tmp = 0;
+                    else if (y_tmp > 255) y_tmp = 255;
+
+                    int dif_sum_tmp = abs(y_tmp - xs[i]) + dif_sum_min_prev;
+
+                    if (dif_sum_tmp < dif_sum_min_crnt) {
+                        dif_sum_min_crnt = dif_sum_tmp;
+                        y_crnt = y_tmp;
+                    } */
+                    
+                    // dif_sum_tmp == dif_sum_min_crnt　となった場合に
+                    // どちらのynを保存しておくのか、両方しておくなら
+                    // どのように保存しておくのか気になる
+
+                }
+                
+                //dif_sum_mins[i][j] = {dif_sum_min_crnt, y_crnt};
+            }
+        }
+
+        // 最終的に一番差の合計が小さかったものを解とする
+        int ans = inf;
+        rep(yn, 256) {
+            if (dif_sum_mins[N-1][yn] != -1) {
+                chmin(ans, dif_sum_mins[N-1][yn]);
+            }
+        }
+        anss.push_back(ans);
+
+        //cout << ans << endl;
+    }
+
+    for (const auto &ans : anss) cout << ans << endl;
+}

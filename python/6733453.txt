@@ -1,0 +1,61 @@
+
+def inputSplit():
+    return [v for v in input().split()]
+
+
+def searchTree(pre_i, i, st, ed, pre_list, in_list, post_list):
+    # i... 現在のin_listのindex
+    # st... 自分の子のindex最小値
+    # ed... 自分の子のindex最大値(含まない)
+
+    pre_v = pre_list[pre_i]
+    #print(pre_v, pre_i, pre_list[pre_i], "  ", i, in_list[i], st, ed, post_list)
+
+
+    if i < st or (ed <= i):# 子の位置を超えた場合、終了
+        return pre_i
+
+    if pre_i + 1 == len(in_list):
+        # これ以上探索不可より
+        post_list.append(pre_v)
+        return pre_i
+
+
+    pre_i += 1
+    next_v = pre_list[pre_i]
+    next_in_i = in_list.index(next_v)
+
+    #print("left", pre_v)
+    pre_i = searchTree(pre_i, next_in_i, st, i, pre_list, in_list, post_list)
+
+
+    next_v = pre_list[pre_i]
+    next_in_i = in_list.index(next_v)
+    #print("right", pre_v)
+
+    pre_i = searchTree(pre_i, next_in_i, i, ed, pre_list, in_list, post_list)
+
+
+    ## 自身を記録
+    post_list.append(pre_v)
+    return pre_i
+
+    
+
+
+if __name__ == "__main__":
+    N = int(input())
+    pre_list = inputSplit()
+    in_list = inputSplit()
+    post_list = []
+
+
+    st_v = pre_list[0]
+    i = in_list.index(st_v)# rootのindex
+
+    searchTree(0, i, 0, len(in_list), pre_list, in_list, post_list)
+
+
+    print(" ".join(post_list))
+
+

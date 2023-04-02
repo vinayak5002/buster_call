@@ -1,0 +1,32 @@
+import heapq
+#--------------------------------------[入力受取]--------------------------------------#
+INF = float('inf')
+V, E, r = map(int, input().split())
+graph = [[] for _ in range(V)]
+for _ in range(E):
+    s, t, d = map(int, input().split())
+    graph[s].append((t, d))
+#--------------------------------------[初期値]--------------------------------------#
+dp = [INF] * V
+visited = [-1] * V
+dp[r] = 0
+h = [(0, r)]
+#--------------------------------------[探索開始]--------------------------------------#
+while h:
+    d, s = heapq.heappop(h) # costが小さい順に取り出す
+    if visited[s] == 1:
+        continue
+    visited[s] = 1
+    targets = graph[s]
+    for target in targets:
+        t, d = target
+        if dp[t] > dp[s] + d:
+            dp[t] = dp[s] + d
+            heapq.heappush(h, (dp[t], t))
+#--------------------------------------[回答]--------------------------------------#
+for answer in dp:
+    if answer == INF:
+        print('INF')
+    else:
+        print(answer)
+

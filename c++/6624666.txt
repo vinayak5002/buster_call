@@ -1,0 +1,47 @@
+# 問題:GRL_1_A - 単一始点最短経路
+# 問題URL:https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=GRL_1_A&lang=ja
+# 解法URL:
+
+import heapq
+
+V, E, r = map(int, input().split())
+G = []
+for _ in range(V):
+    G.append([])
+
+for _ in range(E):
+    u, v, c = map(int, input().split())
+    G[u].append((v, c))
+
+dist = []
+for _ in range(V):
+    dist.append(-1)
+
+Q = []
+
+heapq.heappush(Q, (0, r))
+dist[r] = 0
+
+done = []
+for _ in range(V):
+    done.append(False)
+
+while Q:
+    d, i = heapq.heappop(Q)
+
+    if done[i]:
+        continue
+
+    done[i] = True
+
+    for(j, c) in G[i]:
+        if dist[j] == -1 or dist[j] > dist[i] + c:
+            dist[j] = dist[i] + c
+            heapq.heappush(Q, (dist[j], j))
+
+for i in dist:
+    if i == -1:
+        print("INF")
+    else:
+        print(i)
+

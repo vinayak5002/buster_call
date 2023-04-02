@@ -1,0 +1,60 @@
+use std::io;
+use std::cmp;
+
+fn read_i32() -> i32 {
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).ok();
+    input.trim().parse::<i32>().unwrap()
+}
+
+fn bubble(mut cards: Vec<String>) -> Vec<String> {
+    for i in 0..(cards.len()) {
+        for j in ((i + 1)..(cards.len())).rev() {
+            if cards[j].bytes().nth(1) < cards[j-1].bytes().nth(1) {
+                cards.swap(j, j -1);
+            }
+        }
+    }
+    cards
+}
+
+fn selection(mut cards : Vec<String>) -> Vec<String> {
+    for i in 0..cards.len() {
+        let mut minj = i;
+        for j  in i..cards.len() {
+            if cards[j].bytes().nth(1) < cards[minj].bytes().nth(1) {
+                minj = j;
+            }
+        }
+        cards.swap(i, minj);
+    }
+    cards
+}
+
+fn is_stable(x: &Vec<String>, y: &Vec<String>) -> bool {
+    let mut values : Vec<Vec<u8>> = (0..10).map(|_| Vec::<u8>::new()).collect();
+    for c in x {
+        values[c.chars().nth(1).unwrap().to_digit(10).unwrap() as usize].push(
+            c.bytes().nth(0).unwrap());
+    }
+    let mut values2 : Vec<Vec<u8>> = (0..10).map(|_| Vec::<u8>::new()).collect();
+    for c in y {
+        values2[c.chars().nth(1).unwrap().to_digit(10).unwrap() as usize].push(
+            c.bytes().nth(0).unwrap());
+    }
+    values == values2
+}
+
+fn main() {
+    let n = read_i32() as usize;
+    let mut input : String = String::new();
+    io::stdin().read_line(&mut input).ok();
+    let cards : Vec<String> = input.trim().split(' ').map(str::to_string).collect();
+    let result_b = bubble(cards.clone());
+    let result_s = selection(cards.clone());
+
+    println!("{}", result_b.join(" "));
+    println!("{}", if is_stable(&cards, &result_b) { "Stable" } else { "Not Stable" });
+    println!("{}", result_s.join(" "));
+    println!("{}", if is_stable(&cards, &result_s) { "Stable" } else { "Not Stable" });
+}

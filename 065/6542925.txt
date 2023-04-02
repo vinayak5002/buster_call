@@ -1,0 +1,29 @@
+#include <stdio.h>
+#include <string.h>
+
+char a[205], b[205];
+
+int main()
+{
+	int k, ans;
+	char *p, *q, *wp, *wq;
+	char *s[3] = { "IDENTICAL", "CLOSE", "DIFFERENT" };
+
+	while (scanf("%s", a) && a[0] != '.') {
+		scanf("%s", b); p = a, q = b; ans = -1, k = 0;
+		while (*p && *q) {
+			if (*p != *q) { ans = 2; break; }
+			if (*p == '"') { wp = ++p, wq = ++q;
+				while (*p != '"') p++;
+				while (*q != '"') q++;
+				*p = *q = 0;
+				k += 1 - (strcmp(wp, wq) == 0);
+				if (k > 1) { ans = 2; break; }
+			}
+			p++, q++;
+		}
+		if (ans < 0) if (*p == *q) ans = k; else ans = 2;
+		puts(s[ans]);
+	}
+	return 0;
+}

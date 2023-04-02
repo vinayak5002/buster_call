@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+#define INF 1e18
+#define rep(i, n) for(int (i) = 0; (i) < (n); (i)++)
+#define all(x) (x).begin(), (x).end()
+typedef pair<int, int> P;
+typedef pair<int, P> PP;
+const int mod = 1000000007;
+//const int mod = 998244353;
+
+int d, w;
+int field[11][11];
+
+int calc(int ly, int ry, int lx, int rx){
+    int Min = INF;
+    for(int i = lx; i <= rx; i++)Min = min({Min, field[ly][i], field[ry][i]});
+    for(int i = ly; i <= ry; i++)Min = min({Min, field[i][lx], field[i][rx]});
+    int res = 0;
+    for(int i = ly+1; i < ry; i++)for(int j = lx+1; j < rx; j++){
+        if(field[i][j] >= Min)return 0;
+        res += Min - field[i][j];
+    }
+    return res;
+}
+
+signed main(){
+    cout << fixed << setprecision(18);
+    
+    while(1){
+        cin >> d >> w;
+        if(d == 0)break;
+        rep(i, d)rep(j, w)cin >> field[i][j];
+        int ans = 0;
+        for(int i = 0; i < d; i++)for(int j = 0; j < w; j++)for(int k = i; k < d; k++)for(int l = j; l < w; l++){
+            ans = max(ans, calc(i, k, j, l));
+        }
+        cout << ans << endl;
+    }
+}
+

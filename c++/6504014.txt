@@ -1,0 +1,50 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+long long dp_mcm (vector<long long> size_vec, int n) {
+    vector<vector<int> > mim_cost(n, vector<int>(n));
+    long long tmp_max;
+    
+    for (int i=0; i<n; i++) {
+        mim_cost.at(i).at(i) = 0;
+    }
+
+    for (int s=1; s<n; s++) {
+        for (int i=0; i<n-s; i++) {
+            int j = i + s;
+            for (int k=i; k<j; k++){
+                if (k==i) {
+                    tmp_max = mim_cost.at(i).at(k) + mim_cost.at(k+1).at(j) + size_vec.at(i) * size_vec.at(k+1) * size_vec.at(j+1) ;
+                    // cout << "tmp_max " << tmp_max << " size_vec.at(0) "<< size_vec.at(0) << " size_vec.at(1) "<< size_vec.at(1) << " size_vec.at(2) "<< size_vec.at(2) << endl;
+                }
+                else {
+                    tmp_max = min (tmp_max, mim_cost.at(i).at(k) + mim_cost.at(k+1).at(j) + size_vec.at(i) * size_vec.at(k+1) * size_vec.at(j+1)) ;
+                }
+                mim_cost.at(i).at(j) = tmp_max; 
+            } 
+        }
+    } 
+    return mim_cost.at(0).at(n-1);     
+}
+
+
+
+int main() {
+    int n;
+    long long tmp;
+    cin >> n;
+    vector<long long> size_vec(n+1);
+
+    for (int i=0; i<n; i++) {
+        cin >> size_vec.at(i) >> tmp;
+        // cout << "tmp " << tmp << endl;
+    }
+    size_vec.at(n)=tmp;
+    // cout << " size_vec.size() " << size_vec.size() << endl;
+
+    long long ans = dp_mcm (size_vec, n);
+    
+    cout << ans << endl;
+
+    return 0;
+}

@@ -1,0 +1,694 @@
+// common part begin
+#include <algorithm>
+#include <array>
+#include <bitset>
+#include <cassert>
+#include <cctype>
+#include <cfenv>
+#include <cfloat>
+#include <chrono>
+#include <cinttypes>
+#include <climits>
+#include <cmath>
+#include <complex>
+#include <cstdarg>
+#include <cstddef>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <deque>
+#include <fstream>
+#include <functional>
+#include <initializer_list>
+#include <iomanip>
+#include <ios>
+#include <iostream>
+#include <istream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <map>
+#include <memory>
+#include <new>
+#include <numeric>
+#include <ostream>
+#include <queue>
+#include <random>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <streambuf>
+#include <string>
+#include <tuple>
+#include <type_traits>
+#include <typeinfo>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+using namespace std;
+#define INF (1ll) << 60
+#define rep(i, n) for (long long i = 0; i < n; i++)
+#define all(v) v.begin(), v.end()
+typedef long double ld;
+typedef long long ll;
+typedef unsigned long long ull;
+void chmax(ll &a, ll b)
+{
+  if (a < b)
+    a = b;
+}
+void chmin(ll &a, ll b)
+{
+  if (a > b)
+  {
+    a = b;
+  }
+}
+// common part end
+#define hi_ cout << "hi" << endl;
+#define yes cout << "yes" << endl
+#define no cout << "no" << endl
+#define Yes cout << "Yes" << endl
+#define No cout << "No" << endl
+#define llV(name, size)                   \
+  std::vector<long long> name(size);      \
+  for (unsigned int i = 0; i < size; i++) \
+  cin >> name[i]
+#define die(x)       \
+  cout << x << endl; \
+  return 0;
+class Print
+{
+public:
+  Print() {}
+};
+
+void operator<<(Print p, vector<ll> v)
+{
+  for (auto i : v)
+    cout << i << " ";
+  cout << endl;
+}
+
+void operator<<(Print p, vector<vector<ll>> v)
+{
+  for (auto i : v)
+  {
+    for (auto j : i)
+    {
+      cout << j << " ";
+    }
+    cout << endl;
+  }
+}
+
+void operator<<(Print p, ull x)
+{
+  cout << x << endl;
+}
+void operator<<(Print p, vector<ull> v)
+{
+  for (auto i : v)
+    cout << i << " ";
+  cout << endl;
+}
+
+void operator<<(Print p, vector<vector<ull>> v)
+{
+  for (auto i : v)
+  {
+    for (auto j : i)
+    {
+      cout << j << " ";
+    }
+    cout << endl;
+  }
+}
+
+void operator<<(Print p, ll x)
+{
+  cout << x << endl;
+}
+
+void operator<<(Print p, string s)
+{
+  cout << s << endl;
+}
+void operator<<(Print p, vector<string> s)
+{
+  for (auto i : s)
+    cout << i << endl;
+}
+
+void operator<<(Print p, vector<pair<pair<ll, ll>, ll>> v)
+{
+  for (auto i : v)
+  {
+    cout << i.first.first << " " << i.first.second << " " << i.second << endl;
+  }
+}
+void operator<<(Print p, vector<pair<ll, pair<ll, ll>>> v)
+{
+  for (auto i : v)
+  {
+    cout << i.first << " " << i.second.first << " " << i.second.second << endl;
+  }
+}
+void operator<<(Print p, pair<ll, ll> v)
+{
+  cout << v.first << " " << v.second << endl;
+}
+
+enum Objective
+{
+  MINIMIZE = 1,
+  MAXIMIZE = -1,
+};
+enum class Status
+{
+  OPTIMAL,
+  INFEASIBLE,
+};
+
+template <class Flow, class Cost, Objective objective = Objective::MINIMIZE>
+class MinCostFlow
+{
+  using V_id = uint32_t;
+  using E_id = uint32_t;
+
+  class Edge
+  {
+    friend class MinCostFlow;
+
+    V_id src, dst;
+    Flow flow, cap;
+    Cost cost;
+    E_id rev;
+
+  public:
+    Edge() = default;
+
+    Edge(const V_id src, const V_id dst, const Flow cap, const Cost cost,
+         const E_id rev)
+        : src(src), dst(dst), flow(0), cap(cap), cost(cost), rev(rev) {}
+
+    [[nodiscard]] Flow residual_cap() const { return cap - flow; }
+  };
+
+public:
+  class EdgePtr
+  {
+    friend class MinCostFlow;
+
+    const MinCostFlow *instance;
+    V_id v;
+    E_id e;
+
+    EdgePtr(const MinCostFlow *const instance, const V_id v, const E_id e)
+        : instance(instance), v(v), e(e) {}
+
+    [[nodiscard]] const Edge &edge() const { return instance->g[v][e]; }
+
+    [[nodiscard]] const Edge &rev() const
+    {
+      const Edge &e = edge();
+      return instance->g[e.dst][e.rev];
+    }
+
+  public:
+    EdgePtr() = default;
+
+    [[nodiscard]] V_id src() const { return v; }
+
+    [[nodiscard]] V_id dst() const { return edge().dst; }
+
+    [[nodiscard]] Flow flow() const { return edge().flow; }
+
+    [[nodiscard]] Flow lower() const { return -rev().cap; }
+
+    [[nodiscard]] Flow upper() const { return edge().cap; }
+
+    [[nodiscard]] Cost cost() const { return edge().cost; }
+
+    [[nodiscard]] Cost gain() const { return -edge().cost; }
+  };
+
+private:
+  V_id n;
+  std::vector<std::vector<Edge>> g;
+  std::vector<Flow> b;
+
+public:
+  MinCostFlow() : n(0) {}
+
+  V_id add_vertex()
+  {
+    ++n;
+    g.resize(n);
+    b.resize(n);
+    return n - 1;
+  }
+
+  std::vector<V_id> add_vertices(const size_t size)
+  {
+    std::vector<V_id> ret(size);
+    std::iota(std::begin(ret), std::end(ret), n);
+    n += size;
+    g.resize(n);
+    b.resize(n);
+    return ret;
+  }
+
+  EdgePtr add_edge(const V_id src, const V_id dst, const Flow lower,
+                   const Flow upper, const Cost cost)
+  {
+    const E_id e = g[src].size(), re = src == dst ? e + 1 : g[dst].size();
+    assert(lower <= upper);
+    g[src].emplace_back(Edge{src, dst, upper, cost * objective, re});
+    g[dst].emplace_back(Edge{dst, src, -lower, -cost * objective, e});
+    return EdgePtr{this, src, e};
+  }
+
+  void add_supply(const V_id v, const Flow amount) { b[v] += amount; }
+
+  void add_demand(const V_id v, const Flow amount) { b[v] -= amount; }
+
+private:
+  // Variables used in calculation
+  static Cost constexpr unreachable = std::numeric_limits<Cost>::max();
+  Cost farthest;
+  std::vector<Cost> potential;
+  std::vector<Cost> dist;
+  std::vector<Edge *> parent; // out-forrest.
+  std::priority_queue<std::pair<Cost, int>, std::vector<std::pair<Cost, int>>,
+                      std::greater<>>
+      pq; // should be empty outside of dual()
+  std::vector<V_id> excess_vs, deficit_vs;
+
+  Edge &rev(const Edge &e) { return g[e.dst][e.rev]; }
+
+  void push(Edge &e, const Flow amount)
+  {
+    e.flow += amount;
+    g[e.dst][e.rev].flow -= amount;
+  }
+
+  Cost residual_cost(const V_id src, const V_id dst, const Edge &e)
+  {
+    return e.cost + potential[src] - potential[dst];
+  }
+
+  bool dual()
+  {
+    dist.assign(n, unreachable);
+    parent.assign(n, nullptr);
+    excess_vs.erase(std::remove_if(std::begin(excess_vs), std::end(excess_vs),
+                                   [&](const V_id v)
+                                   { return b[v] <= 0; }),
+                    std::end(excess_vs));
+    deficit_vs.erase(std::remove_if(std::begin(deficit_vs),
+                                    std::end(deficit_vs),
+                                    [&](const V_id v)
+                                    { return b[v] >= 0; }),
+                     std::end(deficit_vs));
+    for (const auto v : excess_vs)
+      pq.emplace(dist[v] = 0, v);
+    farthest = 0;
+    std::size_t deficit_count = 0;
+    while (!pq.empty())
+    {
+      const auto [d, u] = pq.top();
+      pq.pop();
+      if (dist[u] < d)
+        continue;
+      farthest = d;
+      if (b[u] < 0)
+        ++deficit_count;
+      if (deficit_count >= deficit_vs.size())
+        break;
+      for (auto &e : g[u])
+      {
+        if (e.residual_cap() <= 0)
+          continue;
+        const auto v = e.dst;
+        const auto new_dist = d + residual_cost(u, v, e);
+        if (new_dist >= dist[v])
+          continue;
+        pq.emplace(dist[v] = new_dist, v);
+        parent[v] = &e;
+      }
+    }
+    pq = decltype(pq)(); // pq.clear() doesn't exist.
+    for (V_id v = 0; v < n; ++v)
+    {
+      potential[v] += std::min(dist[v], farthest);
+    }
+    return deficit_count > 0;
+  }
+
+  void primal()
+  {
+    for (const auto t : deficit_vs)
+    {
+      if (dist[t] > farthest)
+        continue;
+      Flow f = -b[t];
+      V_id v;
+      for (v = t; parent[v] != nullptr; v = parent[v]->src)
+      {
+        f = std::min(f, parent[v]->residual_cap());
+      }
+      f = std::min(f, b[v]);
+      if (f <= 0)
+        continue;
+      for (v = t; parent[v] != nullptr;)
+      {
+        auto &e = *parent[v];
+        push(e, f);
+        int u = parent[v]->src;
+        if (e.residual_cap() <= 0)
+          parent[v] = nullptr;
+        v = u;
+      }
+      b[t] += f;
+      b[v] -= f;
+    }
+  }
+
+public:
+  std::pair<Status, Cost> solve()
+  {
+    potential.resize(n);
+    for (auto &es : g)
+      for (auto &e : es)
+      {
+        const Flow rcap = e.residual_cap();
+        const Cost rcost = residual_cost(e.src, e.dst, e);
+        if (rcost < 0 || rcap < 0)
+        {
+          push(e, rcap);
+          b[e.src] -= rcap;
+          b[e.dst] += rcap;
+        }
+      }
+    for (V_id v = 0; v < n; ++v)
+      if (b[v] != 0)
+      {
+        (b[v] > 0 ? excess_vs : deficit_vs).emplace_back(v);
+      }
+
+    while (dual())
+      primal();
+    Cost value = 0;
+    for (const auto &es : g)
+      for (const auto &e : es)
+      {
+        value += e.flow * e.cost;
+      }
+    value /= 2;
+
+    if (excess_vs.empty() && deficit_vs.empty())
+    {
+      return {Status::OPTIMAL, value / objective};
+    }
+    else
+    {
+      return {Status::INFEASIBLE, value / objective};
+    }
+  }
+
+  std::tuple<Status, Cost, Flow> solve(const V_id s, const V_id t)
+  {
+    assert(s != t);
+    Flow inf_flow = std::abs(b[s]);
+    for (const auto &e : g[s])
+      inf_flow += std::max(e.cap, static_cast<Flow>(0));
+
+    add_edge(t, s, 0, inf_flow, 0);
+    const auto [status, circulation_value] = solve();
+
+    if (status == Status::INFEASIBLE)
+    {
+      g[s].pop_back();
+      g[t].pop_back();
+      return {status, circulation_value, 0};
+    }
+    inf_flow = std::abs(b[s]);
+    for (const auto &e : g[s])
+      inf_flow += e.residual_cap();
+    b[s] += inf_flow;
+    b[t] -= inf_flow;
+    const auto [mf_status, mf_value] = solve();
+    b[s] -= inf_flow;
+    b[t] += inf_flow;
+    g[s].pop_back();
+    g[t].pop_back();
+    return {Status::OPTIMAL, mf_value, b[t]};
+  }
+};
+
+const int MAX = 5100000;
+const int MOD_for_COM = 1000000007;
+
+long long fac[MAX], finv[MAX], inv[MAX];
+
+// テーブルを作る前処理
+void COMinit()
+{
+  const int MOD = MOD_for_COM;
+  fac[0] = fac[1] = 1;
+  finv[0] = finv[1] = 1;
+  inv[1] = 1;
+  for (int i = 2; i < MAX; i++)
+  {
+    fac[i] = fac[i - 1] * i % MOD;
+    inv[i] = MOD - inv[MOD % i] * (MOD / i) % MOD;
+    finv[i] = finv[i - 1] * inv[i] % MOD;
+  }
+}
+
+// 二項係数計算
+long long COM(int n, int k)
+{
+  const int MOD = MOD_for_COM;
+  if (n < k)
+    return 0;
+  if (n < 0 || k < 0)
+    return 0;
+  return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
+}
+
+template <int MOD>
+struct ModInt
+{
+  static const int Mod = MOD;
+  unsigned x;
+  ModInt() : x(0) {}
+  ModInt(signed sig) { x = sig < 0 ? sig % MOD + MOD : sig % MOD; }
+  ModInt(signed long long sig) { x = sig < 0 ? sig % MOD + MOD : sig % MOD; }
+  int get() const { return (int)x; }
+  ModInt &operator+=(ModInt that)
+  {
+    if ((x += that.x) >= MOD)
+      x -= MOD;
+    return *this;
+  }
+  ModInt &operator-=(ModInt that)
+  {
+    if ((x += MOD - that.x) >= MOD)
+      x -= MOD;
+    return *this;
+  }
+  ModInt &operator*=(ModInt that)
+  {
+    x = (unsigned long long)x * that.x % MOD;
+    return *this;
+  }
+  ModInt &operator/=(ModInt that) { return *this *= that.inverse(); }
+  ModInt operator+(ModInt that) const { return ModInt(*this) += that; }
+  ModInt operator-(ModInt that) const { return ModInt(*this) -= that; }
+  ModInt operator*(ModInt that) const { return ModInt(*this) *= that; }
+  ModInt operator/(ModInt that) const { return ModInt(*this) /= that; }
+  ModInt inverse() const
+  {
+    long long a = x, b = MOD, u = 1, v = 0;
+    while (b)
+    {
+      long long t = a / b;
+      a -= t * b;
+      std::swap(a, b);
+      u -= t * v;
+      std::swap(u, v);
+    }
+    return ModInt(u);
+  }
+  bool operator==(ModInt that) const { return x == that.x; }
+  bool operator!=(ModInt that) const { return x != that.x; }
+  ModInt operator-() const
+  {
+    ModInt t;
+    t.x = x == 0 ? 0 : Mod - x;
+    return t;
+  }
+};
+
+template <int MOD>
+ostream &operator<<(ostream &st, const ModInt<MOD> a)
+{
+  st << a.get();
+  return st;
+};
+
+template <int MOD>
+ModInt<MOD> operator^(ModInt<MOD> a, unsigned long long k)
+{
+  ModInt<MOD> r = 1;
+  while (k)
+  {
+    if (k & 1)
+      r *= a;
+    a *= a;
+    k >>= 1;
+  }
+  return r;
+}
+
+typedef ModInt<1000000000 + 7> mint1_7;
+
+Print print;
+template <class Flow, class Cost>
+using MaxGainFlow = MinCostFlow<Flow, Cost, Objective::MAXIMIZE>;
+
+class SCC
+{
+public:
+  vector<ll> used;
+  vector<ll> rused;
+  vector<vector<ll>> G;
+  vector<vector<ll>> rG;
+  vector<ll> vs;
+  vector<ll> cmp;
+  vector<vector<ll>> groups; // groupごとの要素を記録。
+  ll N;
+  SCC(ll N_, vector<vector<ll>> G_) : N(N_), used(N_), rused(N_), G(G_), rG(N_), cmp(N_, -1),groups(N_)
+  {
+    rep(i, N)
+    {
+      for (auto e : G[i])
+      {
+        rG[e].push_back(i);
+      }
+    }
+  }
+  void dfs(ll now)
+  {
+    used[now] = 1;
+    for (auto e : G[now])
+    {
+      if (used[e])
+        continue;
+      dfs(e);
+    }
+    vs.push_back(now);
+  }
+  void rdfs(ll now, ll k)
+  {
+    rused[now] = 1;
+    cmp[now] = k;
+    groups[k].push_back(now);
+    for (auto e : rG[now])
+    {
+      if (rused[e])
+        continue;
+      rdfs(e, k);
+    }
+  }
+  ll scc()
+  {
+    ll k = 0;
+    rep(i, N)
+    {
+      if (!used[i])
+        dfs(i);
+    }
+    for (ll i = vs.size() - 1; i >= 0; i--)
+    {
+      if (!rused[vs[i]])
+      {
+        rdfs(vs[i], k);
+        k++;
+      }
+    }
+    return k;
+  }
+};
+
+// vector<ll> topological_sort(vector<vector<ll>> &G){
+//   ll N=G.size();
+//   vector<ll> indegree(N);
+//   rep(i,N){
+//     for(auto e:G[i])indegree[e]++;
+//   }
+//   vector<ll> res;
+//   priority_queue<ll,vector<ll>,greater<ll>> q;
+//   rep(i,N){
+//     if(indegree[i]==0)q.push(i);
+//   }
+//   while(!q.empty()){
+//     ll now=q.top();q.pop();
+//     for(auto e:G[now]){
+//       indegree[e]--;
+//       if(indegree[e]==0)q.push(e);
+//     }
+//     res.push_back(now);
+//   }
+//   return res;
+// }
+
+
+int main()
+{
+  while (true)
+  {
+    ll N;
+    cin >> N;
+    if (N == 0)
+      break;
+    vector<vector<ll>> G(N);
+    vector<ld> P(N);
+    rep(i, N)
+    {
+      ll m;
+      ld p;
+      cin >> p >> m;
+      P[i] = p;
+      rep(j, m)
+      {
+        ll a;
+        cin >> a;
+        G[i].push_back(a - 1);
+      }
+    }
+    ld res=1;
+    SCC S(N, G);
+    ll k=S.scc();
+    rep(i,k){
+      bool flag=true;
+      ld p=1;
+
+      for(auto e:S.groups[i]){
+        p*=P[e];
+
+        for(auto j:S.rG[e]){
+          flag&=(S.cmp[j]==S.cmp[e]);
+        }
+      }
+      if(flag)res*=(1-p);
+    }
+
+    cout << setprecision(15) << res << endl;
+  }
+}

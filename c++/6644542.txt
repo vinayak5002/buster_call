@@ -1,0 +1,73 @@
+#include <iostream>
+#include <vector>
+#include <climits>
+#include <iomanip>
+
+//とりあえずバブルソートで回答→TLE
+//※Binary Indexed Tree（BIT）という方法で回答する
+//→MergeSortする
+
+long long int merge(std::vector<int> &S, int left, int mid, int right)
+{
+    int n1 = mid - left;
+    int n2 = right - mid;
+    std::vector<int> L(n1);
+    std::vector<int> R(n2);
+    for (int m = 0; m < n1; m++)
+    {
+        L[m] = S[left + m];
+    }
+    for (int n = 0; n < n2; n++)
+    {
+        R[n] = S[mid + n];
+    }
+    L.push_back(INT_MAX);
+    R.push_back(INT_MAX);
+    int i = 0;
+    int j = 0;
+    long long int count = 0;
+    for (int k = left; k < right; k++)
+    {
+        if (L[i] <= R[j])
+        {
+            S[k] = L[i];
+            i++;
+        }
+        else //↓右側から下りだす場合の処理↓
+        {
+            S[k] = R[j];
+            j++;
+            count += L.size() - i - 1;
+        }
+    }
+    return count; // 反転数
+}
+
+long long int mergeSort(std::vector<int> &S, int left, int right)
+{
+    if (left + 1 >= right) //判定に入らないものを先に除外する
+    {
+        return 0;
+    }
+
+    int mid = (left + right) / 2;
+    long long int count = 0;
+    count += mergeSort(S, left, mid);
+    count += mergeSort(S, mid, right);
+    count += merge(S, left, mid, right);
+    return count;
+}
+
+int main()
+{
+    int n;
+    std::cin >> n;
+    std::vector<int> A(n);
+    for (int i = 0; i < n; i++)
+    {
+        std::cin >> A[i];
+    }
+
+    std::cout << /*std::setprecision(10) <<*/ mergeSort(A, 0, n) << std::endl; //とりあえずマージソートする
+    return 0;
+}

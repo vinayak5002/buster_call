@@ -1,0 +1,86 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define N 100
+struct stack
+{
+	int array[N]; //受け取った数値を格納していく配列
+	int top;	  //末尾のデータが格納されている配列の要素番号
+};
+
+void initialize(struct stack *stk){
+    stk->top = 0;
+}
+
+int push(struct stack *stk, int input)
+{
+	if (stk->top <= N)
+	{
+		stk->top++;
+		stk->array[stk->top] = input;
+		return 0;
+	}
+	else
+	{
+		printf("データをこれ以上追加出来ません\n");
+		exit(1); //扱えるデータの数が上限を超えたため異常終了
+	}
+}
+
+int pop(struct stack *stk)
+{
+	if (stk->top != 0)
+	{
+		int tmp = stk->top;
+		stk->top--;
+		return stk->array[tmp];
+	}
+	else
+	{
+		printf("データが無くなりました\n");
+		exit(0); //データがなくなったため正常終了
+	}
+}
+
+int main()
+{
+	int a, b;
+	char s[N];
+	struct stack stk;
+
+    initialize(&stk);
+	while (scanf("%s", s) != EOF)
+	{		
+        if (s[0] == '+')
+		{
+			a = pop(&stk);
+			b = pop(&stk);
+			push(&stk, a + b);
+		}
+
+		else if (s[0] == '-')
+		{
+			a = pop(&stk);
+			b = pop(&stk);
+			push(&stk, b - a);
+		}
+
+		else if (s[0] == '*')
+		{
+			a = pop(&stk);
+			b = pop(&stk);
+			push(&stk, a * b);
+		}
+
+		else
+		{
+            push(&stk, atoi(s)); //atoiは文字列をint型の数値に変換する関数
+		}
+	}
+
+	printf("%d\n", pop(&stk));
+
+	return 0;
+}
+

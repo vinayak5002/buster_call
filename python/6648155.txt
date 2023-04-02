@@ -1,0 +1,57 @@
+/**
+ *    author:  shosei
+ *    created: 25.05.2022 00:55:14
+ **/
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#define rep(i, n) for (int i = 0; i < (n); i++)
+#define pra(ans) printf("%d\n", ans);
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
+
+#define MAX 1001
+
+// dp[i][j]:xのi文字目，yのj文字目までの最長共通部分列の長さ，１オリジン
+int dp[MAX][MAX];
+
+// x, yの最長共通部分列の長さを返す
+int lcs(char *x, char *y) {
+  int i, j;
+  int len1 = strlen(x);  // row
+  int len2 = strlen(y);  // column
+  char c1, c2;
+  // init, sentinel
+  for (i = 0; i <= len1; i++) dp[i][0] = 0;
+  for (j = 0; j <= len2; j++) dp[0][j] = 0;
+
+  // dpテーブルの生成
+  for (i = 1; i <= len1; i++) {
+    for (j = 1; j <= len2; j++) {
+      c1 = x[i - 1];
+      c2 = y[j - 1];
+
+      if (c1 == c2) {
+        dp[i][j] = dp[i - 1][j - 1] + 1;
+      } else {
+        dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+      }
+    }
+  }
+  return dp[len1][len2];
+}
+
+int main() {
+  int q;
+  char x[MAX], y[MAX];
+  scanf("%d", &q);
+
+  for (int i = 0; i < q; i++) {
+    scanf("%s", x);
+    scanf("%s", y);
+    printf("%d\n", lcs(x, y));
+  }
+  return 0;
+}

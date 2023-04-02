@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int parents[10005], ra[10005];
+void make(int n){
+    for(int i=0;i<n;i++){
+        parents[i] = i;
+        ra[i] = 0;
+    }
+}
+int root(int x){
+    if(x!=parents[x]){
+        parents[x]=root(parents[x]);
+    }
+    return parents[x];
+}
+bool same(int x, int y){
+    return root(x)==root(y);
+}
+void unite(int x, int y){
+    x=root(x); y=root(y);
+    if(ra[x]>ra[y]) {
+        parents[y]=x;
+    } else if(ra[x]==ra[y]) {
+        parents[y]=x;
+        ra[x]++;
+    } else {
+        parents[x]=y;
+    }
+}
+
+int main(){
+    vector<int> res;
+    int n,q;
+    cin>>n>>q;
+    make(n);
+    for(int i=0;i<q;i++){
+        int com,x,y;
+        cin>>com>>x>>y;
+        if(com==0) unite(x,y);
+        else res.push_back(same(x,y));
+    }
+    for(bool i:res){
+        cout<<i<<endl;
+    }
+}
+

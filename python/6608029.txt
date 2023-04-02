@@ -1,0 +1,95 @@
+import java.util.*;
+
+abstract class Strategy
+{
+    int n;
+    int[] ar;
+    void sort(int[] array)
+    {
+        this.ar = array;
+        n = ar.length;
+    }
+    void swap(int i,int j)
+    {
+        int a = ar[i];
+        ar[i] = ar[j];
+        ar[j] = a;
+    }
+}
+
+class MergeSort extends Strategy
+{
+    int[] xarray;
+    int count= 0;
+    void sort(int[] array)
+    {
+        super.sort(array);
+        int r = super.n;
+        int l = 0;
+        xarray = merge_sort(l,r);
+    }
+    
+    int[] merge_sort(int l,int r)
+    {
+        int mid = (r + l) / 2;
+        int size = r - l;
+        int[] sorted = new int[size];
+        Arrays.fill(sorted,Integer.MAX_VALUE);
+        if(r - l == 1)
+        {
+            sorted[0] = super.ar[l];
+            return sorted;
+        }
+        int[] left = merge_sort(l,mid);
+        int[] right = merge_sort(mid,r);
+        int l_size = left.length;
+        int r_size = right.length;
+        int L = 0;
+        int R = 0;
+        for(int i = 0;i < size;i ++)
+        {
+            count++;
+            if(l_size != L)sorted[i] = left[L];
+            if(r_size != R)
+            {
+                if(sorted[i] > right[R])
+                {
+                    sorted[i] = right[R];
+                    R++;
+                    continue;
+                }
+            }
+            L++;
+        }
+        return sorted;
+    }
+    void print()
+    {
+        for(int i = 0;i < super.n ;i++)
+        {
+            System.out.print(xarray[i] + " ");
+        }
+        System.out.println();
+        System.out.println(count);
+
+    }
+}
+
+class Main
+{
+    public static void main(String[] args)
+    {
+        int n;
+        int[] array;
+        Scanner sc = new Scanner(System.in);
+        n = sc.nextInt();
+        array = new int[n];
+        for(int i = 0;i < n ;i++)
+        {
+            array[i] = sc.nextInt();
+        }
+        Strategy ss = new MergeSort();
+        ss.sort(array);
+        ss.print();
+    }
+}

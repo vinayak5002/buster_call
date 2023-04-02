@@ -1,0 +1,72 @@
+import java.util.*;
+class Main
+{
+    static int head, tail, max, totaltime, tmptime;
+    static String tmpname;
+    static String[] name;
+    static int[] time;
+
+    public static void main(String[] args)
+    {
+        Scanner sc = new Scanner(System.in);
+        int num = sc.nextInt();
+        int quantum = sc.nextInt();
+        max = num + 10;
+        name = new String[max];
+        time = new int[max];
+        
+        for(int i = 0; i < num; i++){
+            name[i] = sc.next();
+            time[i] = sc.nextInt();
+        }
+        
+        initialize();
+        head = 0;
+        tail = num;
+        while(!isEmpty()){
+            execute(quantum);
+        }
+    }
+    static void initialize()
+    {
+        head = tail = 0;
+    }
+    static void enqueue(String n, int t)
+    {
+        name[tail] = n;
+        time[tail] = t;
+        if(tail == max){
+            tail = 0;
+        }else{
+            tail++;
+        }
+    }
+    static void dequeue()
+    {
+        tmpname = name[head];
+        tmptime = time[head];
+        if(head == max){
+            head = 0;
+        }else{
+            head++;
+        }
+    }
+    static void execute(int q)
+    {
+        dequeue();
+        if(tmptime <= q){
+            totaltime += tmptime;
+            System.out.println(tmpname + " " + totaltime);
+        }else{
+            totaltime += q;
+            tmptime -= q;
+            enqueue(tmpname, tmptime);
+        }
+    }
+
+    static boolean isEmpty()
+    {
+        if(head == tail) return true;
+        else return false;
+    }
+}

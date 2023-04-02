@@ -1,0 +1,44 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n = int(f.readline())
+    n2 = n // 2
+    t_list = [int(f.readline()) for _ in range(n - 1)]
+    t_list = [0] + t_list
+
+    dp = [[[math.inf] * 2 for _ in range(n2 + 1)] for _ in range(2)]
+
+    dp[0][0][0] = 0
+    dp[0][0][1] = 0
+    for i in range(n):
+        cur = i & 1
+        nex = 1 - cur
+        for j in range(n2 + 1):
+            dp[nex][j][0] = dp[nex][j][1] = math.inf
+
+        for j in range(n2):
+            dp[nex][j + 1][0] = dp[cur][j][0]
+            dp[nex][j + 1][0] = min(dp[nex][j + 1][0], dp[cur][j][1] + t_list[i])
+            dp[nex][j][1] = dp[cur][j][1]
+            dp[nex][j][1] = min(dp[nex][j][1], dp[cur][j][0] + t_list[i])
+
+    print(min(dp[n & 1][n2][0], dp[n & 1][n2][1]))
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

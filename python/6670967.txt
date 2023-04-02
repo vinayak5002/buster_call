@@ -1,0 +1,15 @@
+f = raw_input().split(" ")
+stack = []
+for i in f:
+	if i.isdigit():
+		stack.append(int(i))
+	else:
+		y = stack.pop()
+		x = stack.pop()
+		if i == "+":
+			stack.append(x+y)
+		if i == "-":
+			stack.append(x-y)
+		if i == "*":
+			stack.append(x*y)
+print stack.pop()

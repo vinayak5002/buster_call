@@ -1,0 +1,64 @@
+def partition(AN, p, r):
+    i = p-1
+    for j in range(p, r):
+        if AN[j] <= AN[r]:
+            i += 1
+            AN[i], AN[j] = AN[j], AN[i]
+    AN[r], AN[i+1] = AN[i+1], AN[r]
+    return i+1
+
+def quickSort(AN, p, r):
+    if p < r:
+        q = partition(AN, p, r)
+        quickSort(AN, p, q-1)
+        quickSort(AN, q+1, r)
+
+def solve(A, A_before, minimum):
+    T = [""]* 10000
+    Loopchecked = [""] * len(A)
+    for i in range(len(A)):
+        T[A[i]] = i
+        Loopchecked[i] = False
+    
+    cost = 0
+    for i in range(len(A)):
+        if Loopchecked[i]:
+            continue
+        
+        weights = 0
+        loop_component = 0
+        cur_idx = i
+        min = 10000
+        while True:
+            loop_component += 1
+            if min > A_before[cur_idx]:
+                min = A_before[cur_idx]
+            weights += A_before[cur_idx]
+            Loopchecked[cur_idx] = True
+
+            cur_idx = T[A_before[i]]
+            if Loopchecked[cur_idx]:
+                added_cost = weights + (loop_component -2) * min
+                if added_cost >  weights + min + (loop_component+1) * minimum:
+                    added_cost = weights + min + (loop_component+1) * minimum
+                cost += added_cost
+                break
+
+    return cost
+      
+
+
+
+#input
+n = int(input())
+A_before = list(map(int,input().split()))
+A = [""] * n
+minimum = 10000
+for i in range(n):
+    A[i] = A_before[i]
+    if minimum > A[i]:
+        minimum = A[i]
+
+quickSort(A, 0, n-1)
+c = solve(A, A_before, minimum)
+print(c)

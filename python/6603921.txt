@@ -1,0 +1,29 @@
+def dfs(p)
+  $a[p][2].each do |i|
+    $a[i][1]=$a[p][1]+1
+    dfs(i)
+  end
+end
+n=gets.to_i
+$a=Array.new(n) {Array.new(3) {|i|
+  case i
+  when 0; -1
+  when 1; 0
+  when 2; []
+  end
+}}
+n.times do
+  id,k,*ci=gets.split.map(&:to_i)
+  $a[id][2]=ci if ci
+  $a[id][2].each {|i| $a[i][0]=id}
+end
+r=$a.index($a.min)
+dfs(r)
+$a.each_with_index do |i,j|
+  puts "node #{j}: parent = #{i[0]}, depth = #{i[1]}, #{
+    if i[1]==0; 'root'
+    elsif i[2].size==0; 'leaf'
+    else; 'internal node'
+    end
+  }, [#{i[2]*', '}]"
+end

@@ -1,0 +1,43 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let ele = si[1].split(" ");
+	let q = si[2];
+	
+	let str = "";
+	for (let i = 0; i < q; i++) {
+		let pair = si[i + 3].split(" ");
+		let order = Number(pair[0]);
+		let start = Number(pair[1]);
+		let end = Number(pair[2]) - 1;
+		//console.log(order + " " + start + " " + end)// forDebug
+		switch(order) {
+			case 0:
+				//console.log("start = " + ele[start] + ", end = " + ele[end]);// forDebug
+				let min = Number(ele[start]);
+				for (let j = start; j < end; j++) {
+					if (min > Number(ele[j + 1])) {
+					//console.log(min + " > " + ele[j + 1]);
+						min = ele[j + 1]
+					}
+				}
+				str += min + "\n"
+				//console.log("order =  0");// forDebug
+				break;
+			case 1:
+				//console.log("start = " + ele[start] + ", end = " + ele[end]);// forDebug
+				let max = Number(ele[start]);
+				for (let j = start; j < end; j++) {
+					if (max < Number(ele[j + 1]) ){
+						//console.log(max + " < " + ele[j + 1]);// forDebug
+						max = ele[j + 1]
+					}
+				}
+				str += max + "\n"
+				break;
+		}
+	}
+	so.write(str);
+}

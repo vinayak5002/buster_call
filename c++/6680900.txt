@@ -1,0 +1,33 @@
+#include <iostream>
+#include <string>
+#include <cstdint>
+#include <vector>
+#include <cmath>
+using ull = uint64_t;
+using namespace std;
+ull B = pow(10, 9) + 7;
+// is a contained in b?
+vector<ull> contains(string a, string b) {
+	int al = a.size(), bl = b.size();
+	vector<ull> ans;
+	if (al > bl) return ans;
+	ull t = 1;
+	for (int i = 0; i < al; i++) t *= B;
+	ull ah = 0, bh = 0;
+	for (int i = 0; i < al; i++) {
+		ah = ah * B + a[i];
+		bh = bh * B + b[i];
+	}
+	for (int i = 0; i < bl; i++) {
+		if (ah == bh) ans.push_back(i);
+		if (i+al >= bl) break;
+		bh = bh * B + b[i+al] - b[i] * t;
+	}
+	return ans;
+}
+int main() {
+	string s,t; cin >> s >> t;
+	vector<ull> ans = contains(t, s);
+	for (auto x: ans) cout << x << endl;
+}
+

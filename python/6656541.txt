@@ -1,0 +1,149 @@
+public class ColaConPrioridad {
+    
+   protected int[] elements;
+   protected int size;
+
+   
+     public ColaConPrioridad(){
+      
+        elements = new int[100];
+        
+        size = 0;
+    }
+     private  void resize() {
+        int[] newElements = new int[elements.length + 100];
+        System.arraycopy(elements, 0, newElements, 0, size);
+        elements = newElements;
+    }
+     public  void adicionar(int x) {
+        if (size == elements.length) {
+            resize();
+        }
+       elements[size]= x; 
+        SiftUp(size++); // ffiltrar hacia ariva 
+       
+    }
+    private void SiftUp(int pos) { //filtrado hacia arriba
+        int i = pos;
+            while (i > 0) {
+            int padre = (i - 1) / 2;
+            if (elements[padre] < elements[i]) {
+                Intercambiar(padre,i);
+             }
+            i = padre;
+           }
+    }
+    private void Intercambiar(int a, int b){
+    
+    int aux = elements[a];
+    elements[a] = elements[b];
+    elements[b]= aux;
+    
+    }    
+    public int  extraer() {
+        
+        int x = elements[0];
+        elements[0] = elements[size];
+        size--;
+       // heapify(0);
+        SiftDown(0);
+        System.out.println (x);
+        
+        return x;
+    }
+    
+    private void heapify(int i ){
+    
+    int Izq = 2*i + 1;
+    int dere = 2*i +2;
+    
+    
+    int mayor;
+    
+    if(Izq < size && elements[Izq] < elements[dere] ){
+    
+        mayor = dere;
+     }
+    else {
+        
+         mayor = Izq;
+         
+         }
+    
+     if(dere < size && elements[mayor] < elements[i] ){
+    
+        mayor = i;
+     }
+       if( mayor!= i ){
+           
+           Intercambiar(i,mayor);
+       
+           //heapify(mayor);
+          
+       } }       
+    
+    
+   public void SiftDown(int pos){
+    int i = pos;
+    
+    boolean parar = false;
+    
+    while (i < size/2 && !parar){
+        int aux = i;
+        
+        int leftson = 2*pos+1;
+        
+        int rightson= 2*pos+2;
+        
+    if(leftson <= size && elements[leftson]>elements[i] ){
+        
+      i = leftson;
+      
+    }
+    if(rightson <= size && elements[rightson]>elements[i] ){
+       i = rightson;
+    }
+    if( i!= aux){
+        Intercambiar(aux, i);
+    }
+    else {
+     parar = true;
+      }
+    }
+  }
+    
+   
+    public void mostrarcola(){
+    
+    for(int i = 0; i< size;i++){
+        
+  
+   System.out.print(  elements[i] + "\t");
+    
+    }
+    
+    
+    }
+    
+   private  static void  mostrarAreglos (int[] A){
+    
+    for(int i= 0; i<A.length ; i++){
+        
+            System.out.print(A[i] +"\t");
+        
+        
+        }
+    
+    }
+   
+    public static void main(String[] args) {
+       
+          ColaConPrioridad app = new ColaConPrioridad();
+          app.adicionar(10);
+          app.extraer();
+
+
+       
+    }
+    
+}

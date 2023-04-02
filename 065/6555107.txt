@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+#include <cmath>
+using namespace std;
+#define rep(i,n) for(int i=0;i<(n);i++)
+#define INF  -1000000
+
+int main(){
+    int w,h;
+    while(true){
+       cin>>w>>h;
+       if(w == 0 && h == 0) break;
+
+       int k = h + w - 1;
+       vector<vector<int>> a(h,vector<int>(w,INF));
+       vector<int> x(w,INF),y(h,INF);
+
+       rep(i,k){
+           int n,x1,y1;
+           cin>>x1>>y1;
+           x1--;
+           y1--;
+           a[x1][y1] = n;
+       }
+       x[0]=0;
+
+       while(true){
+           int ans=0;
+
+           rep(i,h){
+               rep(j,w){
+                    if (x[j] != INF && y[i] != INF && a[i][j] == INF) {
+                        a[i][j] = x[j] + y[i];
+                        k++;
+                        ans++;
+                    } else if (x[j] != INF && y[i] == INF && a[i][j] != INF) {
+                        y[i] = a[i][j] - x[j];
+                        ans++;
+                    } else if (x[j] == INF && y[i] != INF && a[i][j] != INF) {
+                        x[j] = a[i][j] - y[i];
+                        ans++;
+                    }
+               }
+           }
+           if(k == h*w){ //a[][]のすべてのマスが埋まったか
+               cout<<"Yes"<<endl;
+               break;
+           }
+           if(ans == 0){
+               cout<<"No"<<endl;
+           }
+       }
+    }
+    return 0;
+}

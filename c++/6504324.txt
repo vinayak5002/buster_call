@@ -1,0 +1,113 @@
+#include <bits/stdc++.h>
+
+template <class T, class M>
+class segtree
+{
+private:
+    long long N;
+    long long LEAF_INIT;
+    T IDM;
+    M OPM;
+    std::vector<T> data;
+    std::vector<std::pair<long long, long long>> range;
+
+    T get_kernel(const long long i, const long long j, const long long ii)
+    {
+        if (i >= j)
+        {
+            return IDM;
+        }
+        else if (range[ii] == std::make_pair(i, j))
+        {
+            return data[ii];
+        }
+        else
+        {
+            const long long c = (range[ii].first + range[ii].second) / 2;
+            const long long iic = 2 * (ii + 1) - 1;
+            return OPM(get_kernel(i, std::min({ j, c }), iic), get_kernel(std::max({ i, c }), j, iic + 1));
+        }
+    }
+
+    void update_kernel(long long ii)
+    {
+        while (ii != 0)
+        {
+            const long long iip = (ii + 1) / 2 - 1;
+            const long long iil = 2 * (iip + 1) - 1;
+            const long long iir = iil + 1;
+            data[iip] = OPM(data[iil], data[iir]);
+            ii = iip;
+        }
+    }
+
+public:
+    segtree(void) = default;
+    segtree(const segtree&) = default;
+    segtree(segtree&&) noexcept = default;
+    segtree& operator=(const segtree&) & = default;
+    segtree& operator=(segtree&&) & noexcept = default;
+
+    segtree(const long long _N, const T& _init, const T& _IDM, const M& _OPM)
+        : N(_N)
+        , IDM(_IDM)
+        , OPM(_OPM)
+    {
+        assert(N >= 1);
+        long long n_pow2 = 1;
+        while (n_pow2 < N)
+        {
+            n_pow2 *= 2;
+        }
+        LEAF_INIT = n_pow2 - 1;
+        data.assign(2 * n_pow2 - 1, _init);
+        range.resize(data.size());
+        for (long long ii = LEAF_INIT; ii < static_cast<long long>(range.size()); ++ii)
+        {
+            range[ii] = { ii - LEAF_INIT, ii - LEAF_INIT + 1 };
+        }
+        for (long long ii = LEAF_INIT - 1; ii >= 0; --ii)
+        {
+            const long long iic = 2 * (ii + 1) - 1;
+            range[ii] = { range[iic].first, range[iic + 1].second };
+        }
+    }
+
+    T get(const long long i, const long long j)
+    {
+        assert(0 <= i && i < N);
+        assert(0 < j && j <= N);
+        assert(i < j);
+        return get_kernel(i, j, 0);
+    }
+
+    void set(const long long i, const T& val)
+    {
+        assert(0 <= i && i < N);
+        data[LEAF_INIT + i] = val;
+        update_kernel(LEAF_INIT + i);
+    }
+};
+
+int main(void)
+{
+    long n, q;
+    std::cin >> n >> q;
+    const auto op = [](auto i, auto j)
+    { return std::min({ i, j }); };
+    segtree<long, decltype(op)> test(n, (1L << 31) - 1, (1L << 31) - 1, op);
+    for (long i = 0; i < q; ++i)
+    {
+        long c, x, y;
+        std::cin >> c >> x >> y;
+        if (c == 0)
+        {
+            test.set(x, y);
+        }
+        else
+        {
+            std::cout << test.get(x, y + 1) << std::endl;
+        }
+    }
+    return 0;
+}

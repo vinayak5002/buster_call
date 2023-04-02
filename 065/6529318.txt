@@ -1,0 +1,85 @@
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.Scanner;
+
+
+public class Main {
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int laneCount = sc.nextInt();
+        int infoCount = sc.nextInt();
+
+        GasStation gasStation = new GasStation(laneCount);
+
+        for (int i = 0; i < infoCount; i++) {
+            int command = sc.nextInt();
+            int info = sc.nextInt();
+
+            switch (command) {
+                //給油を終える
+                case 0:
+                    Car filledCar = gasStation.getLane(info).leaveCar();
+                    System.out.println(filledCar.getNumber());
+                    break;
+                //並ぶ
+                case 1:
+                    Car newCar = new Car(info);
+                    gasStation.getFewestLane().addCar(newCar);
+                    break;
+                default :
+                    System.out.println("Input error!");
+            }
+        }
+    }
+}
+
+class Car {
+    private int _number;
+
+    public int getNumber() {
+        return _number;
+    }
+
+    public Car(int num) {
+        _number = num;
+    }
+}
+
+class GasStation {
+    private Lane[] _lanes;
+    public Lane getLane(int i){return _lanes[i - 1];}
+
+    public GasStation(int laneCount) {
+        _lanes = new Lane[laneCount];
+        for (int i = 0; i < laneCount; i++) {
+            _lanes[i] = new Lane();
+        }
+    }
+
+    //車が一番少ないレーンを返す
+    public Lane getFewestLane() {
+        Lane minLane = _lanes[0];
+        for(int i = 1; i < _lanes.length; i++){
+            if(minLane.getQueueLength() > _lanes[i].getQueueLength()){
+                minLane = _lanes[i];
+            }
+        }
+        return minLane;
+    }
+}
+
+
+class Lane {
+    private Queue<Car> _carQueue = new ArrayDeque<>();
+
+    public Car leaveCar() {
+        return _carQueue.poll();
+    }
+
+    public void addCar(Car car) {
+        _carQueue.add(car);
+    }
+
+    public int getQueueLength(){return _carQueue.size();}
+}

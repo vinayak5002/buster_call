@@ -1,0 +1,65 @@
+#pragma GCC optimize("O3,unroll-loops")
+#pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
+
+#include "bits/stdc++.h"
+using namespace std;
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace __gnu_pbds;
+template<class key, class cmp = std::less<key>>
+using op_set = tree<key, null_type, cmp, rb_tree_tag, tree_order_statistics_node_update>;
+#ifdef thunder
+#include "bug.h"
+#else
+#define bug(...) 
+#endif
+
+#define ll long long
+#define lld double
+#define all(x) x.begin(), x.end()
+#define iceil(n, x) (((n) + (x) - 1) / (x))
+#define goog(tno) cout << "Case #" << tno <<": "
+
+const ll INF=2e18;
+const ll mod=1000000007;
+const ll maxn=1e6+5;
+
+vector<ll> dp(maxn,INF);
+vector<ll> dp2(maxn,INF);
+
+void solve(){
+    ll n;
+    dp[0]=0;
+    dp[1]=1;
+    dp2[0]=0;
+    dp2[1]=1;
+    for(ll i=2;i<maxn;i++){
+        for(ll j=1;j<=105;j++){
+            ll x=(j*(j+1)*(j+2))/6;
+            if(i-x>=0){
+                dp[i]=min(dp[i],dp[i-x]+1);
+            }
+            if(x%2&&i-x>=0){
+                dp2[i]=min(dp2[i],dp2[i-x]+1);
+            }
+        }
+    }
+    while(1){
+        cin>>n;
+        if(n==0) break;
+        cout<<dp[n]<<' ';
+        cout<<dp2[n]<<'\n';
+    }
+}
+
+signed main(){
+    ios_base::sync_with_stdio(false), cin.tie(nullptr);
+    //freopen("input.txt","r",stdin);
+    //freopen("output.txt","w",stdout);
+    int t=1;
+    // cin>>t;
+    for(int i=1;i<=t;i++){
+        solve();
+    }
+    return 0;
+}

@@ -1,0 +1,79 @@
+"""
+会津オンラインジャッジ
+Distance
+ITP1_11_C
+https://onlinejudge.u-aizu.ac.jp/courses/lesson/2/ITP1/11/ITP1_11_C
+"""
+
+
+class Dice:
+    def __init__(self, value):
+        self.value = value
+
+    def kaiten(self, c):
+        if c == 'S':
+            temp = self.value[0]
+            self.value[0] = self.value[4]
+            self.value[4] = self.value[5]
+            self.value[5] = self.value[1]
+            self.value[1] = temp
+        elif c == 'N':
+            temp = self.value[0]
+            self.value[0] = self.value[1]
+            self.value[1] = self.value[5]
+            self.value[5] = self.value[4]
+            self.value[4] = temp
+        elif c == 'E':
+            temp = self.value[0]
+            self.value[0] = self.value[3]
+            self.value[3] = self.value[5]
+            self.value[5] = self.value[2]
+            self.value[2] = temp
+        elif c == 'W':
+            temp = self.value[0]
+            self.value[0] = self.value[2]
+            self.value[2] = self.value[5]
+            self.value[5] = self.value[3]
+            self.value[3] = temp
+        else:
+            pass
+
+    def value_of_top(self):
+        return self.value[0]
+
+
+def check4(dice1, dice2):
+    for _ in range(4):
+        if dice1.value == dice2.value:
+            return True
+        dice2.kaiten('S')
+
+
+def is_same(dice1, dice2):
+    for _ in range(4):
+        if check4(dice1, dice2):
+            return True
+        dice2.kaiten('W')
+    dice2.kaiten('S')
+    dice2.kaiten('W')
+    if check4(dice1, dice2):
+        return True
+    dice2.kaiten('W')
+    dice2.kaiten('W')
+    if check4(dice1, dice2):
+        return True
+    return False
+
+
+line = input()
+values = list(map(int, line.split(' ')))
+dice1 = Dice(values)
+line = input()
+values = list(map(int, line.split(' ')))
+dice2 = Dice(values)
+
+if is_same(dice1, dice2):
+    print('Yes')
+else:
+    print('No')
+

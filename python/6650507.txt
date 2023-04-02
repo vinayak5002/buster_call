@@ -1,0 +1,70 @@
+import sys
+from heapq import heappush, heappop
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def is_extending(n, a_list, i):
+    if a_list[i] == 0:
+        return False
+
+    if i == 0 and a_list[0] > a_list[1]:
+        return True
+
+    if i == n - 1 and a_list[-1] > a_list[-2]:
+        return True
+
+    if a_list[i - 1] < a_list[i] > a_list[i + 1]:
+        return True
+
+    return False
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, max_l = map(int, f.readline().split())
+    a_list = [int(f.readline()) for _ in range(n)]
+    hq = []
+    extending_icicle_set = set()
+
+    for i, a in enumerate(a_list):
+        if is_extending(n, a_list, i):
+            heappush(hq, (max_l - a, i, 0))
+            extending_icicle_set.add(i)
+
+    c_time = 0
+    while hq:
+        icicle_list = [heappop(hq)]
+        while hq and hq[0][0] == icicle_list[0][0]:
+            icicle_list.append(heappop(hq))
+
+        c_time = icicle_list[0][0] + max(icicle[2] for icicle in icicle_list)
+        for _, i, _ in icicle_list:
+            a_list[i] = 0
+            extending_icicle_set.discard(i)
+
+        for _, i, _ in icicle_list:
+            pi = i - 1
+            ni = i + 1
+            if i > 0 and pi not in extending_icicle_set and is_extending(n, a_list, pi):
+                heappush(hq, (max_l - a_list[pi], pi, c_time))
+                extending_icicle_set.add(pi)
+            if i < n - 1 and ni not in extending_icicle_set and is_extending(n, a_list, ni):
+                heappush(hq, (max_l - a_list[ni], ni, c_time))
+                extending_icicle_set.add(ni)
+
+    print(c_time)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

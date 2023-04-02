@@ -1,0 +1,35 @@
+#include<bits/stdc++.h>
+#define db double
+using namespace std;
+int xp1,xp2,yp1,yp2,q,x,y; db k,b,stk,stb; bool shust,shu; 
+inline pair<db,db> get_cross(db k1,db b1,db k2,db b2){
+	db x=(b2-b1)/(k1-k2);
+	return make_pair(x,x*k1+b1);
+}
+inline pair<db,db> Projection(){
+	if(shu) return make_pair(x,stb+stk*x);
+	b=y-k*x;
+	if(shust) return make_pair(xp1,b+k*xp1);
+	return get_cross(stk,stb,k,b);
+} 
+inline void print(pair<db,db> pa){
+	printf("%.9lf %.9lf\n",pa.first,pa.second);
+}
+inline pair<db,db> Reflection(){
+	pair<db,db> now=Projection();
+	return make_pair(now.first*2-x,now.second*2-y);
+}
+int main(){
+	scanf("%d%d%d%d%d",&xp1,&yp1,&xp2,&yp2,&q);
+	if(xp2==xp1) shust=1,k=-1/((db)(yp2-yp1)/(xp2-xp1));
+	else{
+		stk=(db)(yp2-yp1)/(xp2-xp1);
+		(stk==0)?shu=1:k=-1/stk;
+	}
+	if(!shust) stb=yp1-stk*xp1;
+	while(q--){
+		scanf("%d%d",&x,&y);
+		print(Reflection());
+	}
+	return 0;
+}

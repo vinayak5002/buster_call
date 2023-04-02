@@ -1,0 +1,107 @@
+#include<stdio.h>
+
+#define M 100000
+#define N -1
+
+typedef struct{
+    int parent;
+    int lft;
+    int rgt
+    ;
+
+}Node;
+
+Node T[M];
+int Dep[M];
+
+void print(int i){
+    int j,next;
+
+    next=T[i].lft;
+
+    
+    printf("node %d: parent = %d, ",i,T[i].parent);
+
+    printf("depth = %d, ",Dep[i]);
+
+    if(T[i].parent==N){//根のとき
+        printf("root, ");
+    }
+    else if(T[i].lft==N){//葉の時
+        printf("leaf, ");        
+    }
+    else{//内部接点のとき
+        printf("internal node, ");
+    }
+
+    printf("[");
+
+    for(j=0;;j++){
+        if(next==N){
+            break;
+        }
+        if(j>0){
+            printf(", ");
+        }
+        printf("%d",next);
+        next=T[next].rgt;
+    }
+    printf("]\n");
+       
+}
+
+void Depth(int root, int d){
+    Dep[root]=d;
+    if(T[root].rgt!=N){
+        Depth(T[root].rgt,d);//右に子がある場合は右のノードもｄを代入
+    }
+    if(T[root].lft!=N){//左にノードがあればｄ＋１を代入
+        Depth(T[root].lft,d+1);
+    }  
+}
+
+
+int main(void){
+    int n,i,j,k,c,id,l;
+
+    scanf("%d",&n);
+
+    for(i=0;i<n;i++){
+        T[i].parent=N;
+        T[i].lft=N;
+        T[i].rgt=N;
+    }
+
+    for(i=0;i<n;i++){
+        scanf("%d",&id);
+        scanf("%d",&k);
+
+        for(j=0;j<k;j++){
+            scanf("%d",&c);
+            T[c].parent=id;
+            if(j==0){
+                T[id].lft=c;
+            }
+            else{
+                T[l].rgt=c;
+            }
+            l=c;
+        }
+    }
+    for(i=0;i<n;i++){
+        if(T[i].parent==N){
+            c=i;
+            break;
+        }
+    }
+
+    Depth(c,0);
+    
+
+    for(i=0;i<n;i++){
+        print(i);
+    }
+
+    return 0;
+
+}

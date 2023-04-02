@@ -1,0 +1,74 @@
+
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+constexpr int N = 8;
+vector<int> queen(N, -1);
+int board[N * N] = {  };
+int notfree[8][2] = {
+	{-1, -1},
+	{-1, 0},
+	{-1, 1},
+	{0, -1},
+	{0, 1},
+	{1, -1},
+	{1, 0},
+	{1, 1}
+};
+
+
+void print() {
+	for (int i = 0; i < N * N; i++) {
+		if (queen[i / N] == i % N) cout << "Q";
+		else cout << ".";
+		if (i % N == 7) cout << endl;
+	}
+}
+
+void checkBoard(const int r, const int c, const int update_board_num) {
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
+			int next_r = r - notfree[i][0] * j;
+			int next_c = c - notfree[i][1] * j;
+			if (next_r < 0 || next_r > N - 1 ||
+				next_c < 0 || next_c > N - 1) continue;
+			board[next_r * N + next_c] += update_board_num;
+		}
+	}
+}
+
+
+void putQueen(const int r) {
+	if (r > N - 1) {
+		print();
+		return;
+	}
+	if (queen[r] != -1) {
+		putQueen(r + 1);
+	}
+	else {
+		for (int c = 0; c < N; c++) {
+			if (board[r * N + c] != 0) continue;
+			queen[r] = c;
+			checkBoard(r, c, 1);
+			putQueen(r + 1);
+			checkBoard(r, c, -1);
+			queen[r] = -1;
+		}
+	}
+}
+
+int main() {
+	int qnum;
+	cin >> qnum;
+	for (int i = 0; i < qnum; i++) {
+		int r, c;
+		cin >> r >> c;
+		queen[r] = c;
+		checkBoard(r, c, 1);
+	}
+	putQueen(0);
+}
+

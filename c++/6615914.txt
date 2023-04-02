@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef long double ld ;
+typedef pair<ll,ll> P ;
+typedef tuple<ll,ll,ll> TP ;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define rep2(i, s, n) for (int i = (s); i < (int)(n); i++)
+#define endl "\n"
+#define chmin(a,b) a = min(a,b)
+#define chmax(a,b) a = max(a,b)
+#define bit_count(x) __builtin_popcountll(x)
+#define gcd(a,b) __gcd(a,b)
+#define lcm(a,b) a / gcd(a,b) * b
+
+ll inf = 1e18;
+
+ll f(ll y,ll c){
+  ll y_n = 0;
+  if(y+c < 0) y_n = 0;
+  else if(y+c > 255) y_n = 255;
+  else y_n = (ll)y+(ll)c;
+  return y_n;
+}
+
+ll dp[20202][256];
+int main(){
+  while(true){
+    int n,m;
+    cin >> n >>m;
+    if(n == 0 && m == 0) break;
+
+    vector<ll> c(m);
+    vector<ll> x(n);
+    rep(i, m) cin >> c[i];
+    rep(i, n) cin >> x[i];
+
+    rep(i, 20202) rep(j, 256) dp[i][j] = inf;
+
+    dp[0][128] = 0;
+
+    rep(i, n+1){
+      rep(j, 256){
+        rep(k, m){
+          chmin(dp[i+1][f(j, c[k])], dp[i][j]+(x[i]-f(j, c[k]))*(x[i]-f(j, c[k])));
+        }
+      }
+    }
+
+    ll ans = inf;
+    rep(j, 256) chmin(ans, dp[n][j]);
+    cout << ans << endl;
+  }
+}
+

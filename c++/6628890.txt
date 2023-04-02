@@ -1,0 +1,82 @@
+#include <stdio.h>
+#define N 8
+#define Free -1
+#define Not_Free 1
+
+int row[N],col[N],dpos[2*N-1],dneg[2*N-1];
+int x[N][N];
+
+void init(void){
+      int i,j;
+   for(i = 0; i < N; i++){
+      row[i] = Free;
+      col[i] = Free;
+   }
+   for(j = 0; j < N * 2 -1; j++){
+      dpos[j] = Free;
+      dneg[j] = Free;
+   }
+}
+
+void printBoard(){
+      int i,j;
+      for(i=0 ;i<N ;i++){
+          for(j=0 ;j<N ;j++){
+            if(x[i][j]){
+                  if(row[i] != j)
+                  return;
+            }
+         }
+      }
+      
+      for(i=0 ;i<N ;i++){
+            for(j=0 ;j<N ;j++){
+                  //printf("222");
+                  if(row[i] == j) printf("Q");
+                  else printf("·");
+            }
+            printf("\n");
+      }
+}
+
+void recursive(int i){
+      if(i == N){
+            printBoard();
+            return;
+      }
+      
+      int j;
+      for(j=0 ;j<N ;j++){
+            if(col[j] == Not_Free ||
+               dpos[i+j] == Not_Free ||
+               dneg[i-j+(N-1)] == Not_Free) continue;
+               //printf("%d",i);
+               row[i] = j; 
+               col[j] = dpos[i+j] = dneg[i-j+(N-1)] = Not_Free;
+               recursive(i+1);
+               row[i] = col[j] = dpos[i+j] = dneg[i-j+(N-1)] = Free;
+      } 
+}
+
+int main(void){
+    // Your code here!
+    init();
+    int n,i,j,a,b;
+    scanf("%d",&n);
+    
+    for(i=0 ;i<N ;i++){
+          for(j=0 ;j<N ;j++)
+          x[i][j] = 0;
+    }
+    
+    for(i=0 ;i<n ;i++){
+          scanf("%d%d",&a,&b);
+          x[a][b] = 1;
+    }
+    
+    recursive(0);
+    
+    return 0;
+}
+
+

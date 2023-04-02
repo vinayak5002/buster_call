@@ -1,0 +1,90 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef LOCAL
+#include "debug.hpp"
+#else
+#define debug(...) 42
+#endif
+
+#define PII pair<int, int>
+#define vec vector
+#define str string
+#define fi first
+#define se second
+#define all(a) (a).begin(), (a).end()
+#define SZ(x) static_cast<int>((x).size())
+
+using db = double;
+using ll = long long;
+
+class SCC {
+private:
+  int scc_num;
+  vec<int> strongly_connected_components;
+
+  int n, m, idx;
+  vec<vec<int>> G;
+  vec<int> dfn, low, stk;
+
+  void tarjan(int u) {
+    dfn[u] = low[u] = ++idx, stk.emplace_back(u);
+    for (int v : G[u]) {
+      if (dfn[v] == 0) {
+        tarjan(v), low[u] = min(low[u], low[v]);
+      } else if (dfn[v] < dfn[u]) {
+        low[u] = min(low[u], dfn[v]);
+      }
+    }
+    if (low[u] == dfn[u]) {
+      ++scc_num;
+      while (true) {
+        int v = stk.back();
+        stk.pop_back();
+        strongly_connected_components[v] = scc_num;
+        if (v == u) break;
+      }
+    }
+  }
+
+public:
+  SCC(int _n, int _m) : n(_n), m(_m), G(n) {
+    for (int u, v, _ = 0; _ < m; _++) {
+      cin >> u >> v;
+      G[u].emplace_back(v);
+    }
+  }
+  pair<int, vec<int>> scc() {
+    strongly_connected_components.assign(n, 0);
+    idx = scc_num = 0;
+    dfn.assign(n, 0);
+    low.assign(n, 0);
+    for (int i = 0; i < n; i++) {
+      if (dfn[i] == 0) tarjan(i);
+    }
+    return {scc_num, strongly_connected_components};
+  }
+};
+
+void SingleTest(int TestCase) {
+  int n, m; cin >> n >> m;
+  SCC graph(n, m);
+  auto [_, scc] = graph.scc();
+  int Q; cin >> Q;
+  for (int u, v; Q--; ) {
+    cin >> u >> v;
+    cout << int(scc[u] == scc[v]) << '\n';
+  }
+}
+
+void init() {}
+
+int main() {
+  cin.tie(nullptr)->sync_with_stdio(false);
+  // cout << fixed << setprecision(10);
+  int T = 1, TestCase = 0;
+  // cin >> T;
+  for (init(); T--;) SingleTest(++TestCase);
+  return 0;
+}
+

@@ -1,0 +1,56 @@
+def oi(): return int(input())
+def os(): return input()
+def mi(): return list(map(int, input().split()))
+
+# import sys
+# input = sys.stdin.readline
+
+import sys
+sys.setrecursionlimit(10**8)
+
+input_count=0
+while True:
+    W,H = mi()
+    if W==0 and H==0:
+        break
+    maps = [[] for i in range(H+2)]
+    count_maps = [[0]*(W+2) for i in range(H+2)]
+    maps[0] = [-1] * (W+2)
+    for i in range(1, H+1):
+        maps[i]=[-1] + mi() + [-1]
+    maps[-1] = [-1] * (W+2)
+
+    count = 1
+    reached = set([])
+    dy_list = [-1,-1,-1, 0,0, 1,1,1]
+    dx_list = [-1,0,1, -1,1, -1,0,1]
+
+    def dfs(y, x):
+        global count
+        global reached
+
+        
+        count_maps[x][y] = count
+        #print(count_maps[x][y], x,y)
+        reached.add(f"{y}_{x}")
+        for dy, dx in zip(dy_list, dx_list):
+            if maps[dx+x][dy+y] == 1 and count_maps[dx+x][dy+y] == 0:
+                if f"{dy+y}_{dx+x}" not in reached:
+                    reached.add(f"{dy+y}_{dx+x}")
+                    count_maps[dx+x][dy+y] = count
+                    dfs(dy+y, dx+x)
+
+    count = 0
+    sets = set([])
+    island = 0
+    for h in range(1, H+1):
+        for w in range(1, W+1):
+            count += 1
+            if maps[w][h] == 1 and count_maps[w][h] == 0:
+                count_maps[w][h] = count
+                dfs(h,w)
+                
+                if count_maps[w][h] not in sets:
+                    sets.add(count_maps[w][h])
+                    island += 1
+    print(island)

@@ -1,0 +1,104 @@
+import java.util.Scanner
+import scala.annotation.tailrec
+
+class Card(val order:Int)
+class Hart(override val order:Int) extends Card(order) {
+  override def toString:String = s"H $order"
+}
+class Spade(override val order:Int) extends Card(order) {
+  override def toString:String = s"S $order"
+}
+class Dia(override val order:Int) extends Card(order) {
+  override def toString:String = s"D $order"
+}
+class Clover(override val order:Int) extends Card(order) {
+  override def toString:String = s"C $order"
+}
+
+object Main extends App {
+  val sc = new Scanner(System.in)
+  val N = sc.nextInt()
+  val arr = (for (_ <- 0 until N) yield sc.next() match {
+    case "H" => new Hart(sc.nextInt())
+    case "S" => new Spade(sc.nextInt())
+    case "D" => new Dia(sc.nextInt())
+    case "C" => new Clover(sc.nextInt())
+  }).toArray
+
+  def quickSort(cards:Array[Card]):Array[Card] = {
+    def exchange(i:Int, j:Int):Unit = {
+      val t = cards(i)
+      cards(i) = cards(j)
+      cards(j) = t
+    }
+    def partition(p:Int, r:Int):Int = {
+      val x = cards(r)
+      @tailrec
+      def iterate(i:Int, j:Int):Int = {
+        if (j < r) {
+          if (cards(j).order <= x.order) {
+            exchange(i, j)
+            iterate(i+1, j+1)
+          } else
+            iterate(i, j+1)
+        } else {
+          exchange(i, r)
+          i
+        }
+      }
+      iterate(p, p)
+    }
+    def iterate(p:Int, r:Int):Unit = {
+      if (p < r) {
+        val q = partition(p, r)
+        iterate(p, q-1)
+        iterate(q+1, r)
+      } 
+    }
+    iterate(0, N-1)
+    cards
+  }
+  
+  def mergeSort(cards:Array[Card]):Array[Card] = {
+    val Sentinel = new Dia(Int.MaxValue)
+    val bufSize = (N >> 1) + 2
+    val bufL = Array.ofDim[Card](bufSize)
+    val bufR = Array.ofDim[Card](bufSize)
+    def merge(l:Int, m:Int, r:Int):Unit = {
+      val a = m - l
+      val b = r - m
+      Array.copy(cards, l, bufL, 0, a)
+      Array.copy(cards, m, bufR, 0, b)
+      bufL(a) = Sentinel
+      bufR(b) = Sentinel
+      @tailrec
+      def iterate(i:Int, j:Int, k:Int):Unit = {
+        if (k < r) {
+          if (bufL(i).order <= bufR(j).order) {
+            cards(k) = bufL(i)
+            iterate(i+1, j, k+1)
+          } else {
+            cards(k) = bufR(j)
+            iterate(i, j+1, k+1)
+          }
+        }
+      }
+      iterate(0, 0, l)
+    }
+    def sort(l:Int, r:Int):Unit = {
+      if (l+1 < r) {
+        val m = (l+r) >> 1
+        sort(l, m)
+        sort(m, r)
+        merge(l, m, r)
+      }
+    }
+    sort(0, N)
+    cards
+  }
+  
+  val refer = mergeSort(arr.clone())
+  val result = quickSort(arr)
+   println(if (refer.zipWithIndex.forall(x => x._1 == result(x._2))) "Stable" else "Not stable")
+   print(s"${result.mkString("\n")}")
+}

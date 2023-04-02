@@ -1,0 +1,83 @@
+#include <iostream>
+using namespace std;
+
+struct Card {
+  char suit;
+  int value;
+};
+
+int partition(Card A[], int p, int q)
+{
+  int x = A[q].value;
+
+  // A[p], ..., A[i} <= x < A[i+1], ..., A[j]
+  int i = p - 1;
+  for (int j = p; j < q; j++) 
+    if (A[j].value <= x)
+      swap(A[++i], A[j]);
+  swap(A[++i], A[q]);
+  return i;
+}
+
+void quickSort(Card A[], int p, int q)
+{
+  if (p >= q)
+    return;
+  
+  int m = partition(A, p, q);
+  quickSort(A, p, m - 1);
+  quickSort(A, m + 1, q);
+}
+
+bool isStable(Card in[], Card out[], int n)
+{
+  for (int i = 0; i < n; ++i) {
+    int val = in[i].value;       // 1つの数字 val = in[i].value について調べる
+    for (int j = i + 1; j < n; ++j) {
+      if (in[j].value != val)            
+	continue;
+                               // この時点で in[i].value = in[j].value, i < j
+      for (int a = 0; a < n; ++a) {
+	if (out[a].value != val)       
+	  continue;
+	                      //   val = out[a].value
+	for (int b = a + 1; b < n; ++b) {
+	  if (out[b].value != val)
+	    continue;
+	                    // この時点で out[a].value = out[b].value, a < b
+	  if ((in[i].suit == out[b].suit) &&
+	      (in[j].suit == out[a].suit)) {   // 2つのカードが逆になっている
+	    return false;
+	  }
+	}
+      }
+    }
+  }
+  return true;
+}
+
+int main()
+{
+  int n; 
+  cin >> n;
+  
+  Card C1[n];
+  Card C2[n];
+  for (int i = 0; i < n; i++) {
+    cin >> C1[i].suit;
+    cin >> C1[i].value;
+    C2[i].suit = C1[i].suit;
+    C2[i].value = C1[i].value;
+  }
+
+  quickSort(C2, 0, n-1);
+  if (isStable(C1, C2, n))
+    cout << "Stable" << endl;
+  else
+    cout << "Not stable" << endl;
+  for (int i = 0; i < n; i++)
+    cout << C2[i].suit << " " << C2[i].value << endl;
+ 
+  return 0;
+}
+

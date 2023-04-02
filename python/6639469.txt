@@ -1,0 +1,104 @@
+
+import java.util.Scanner;
+
+class Main{
+
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+
+		int[] diceNumbers = new int[6];
+		diceNumber = Input(diceNumbers);
+		int[] diceNumbers2 = new int[6];
+		diceNumber2 = Input(diceNumbers2);
+		int count = 0;
+		boolean check = true;
+
+
+
+		// 上面を特定
+		while(diceNumbers[0] != diceNumbers2[0]) {
+			if(count == 0 || count == 5) {
+				diceNumbers2 = dice.eastRoll(diceNumbers2);
+				count++;
+			}else if(count == 6){
+				check = false;
+				System.out.println("No");
+				break;
+			}else {
+				diceNumbers2 = dice.northRoll(diceNumbers2);
+				count++;
+			}
+		}
+
+		if(check) {
+			// 横に倒す
+			diceNumbers = dice.eastRoll(diceNumbers);
+			diceNumbers2 = dice.eastRoll(diceNumbers2);
+
+			// 上面を固定して側面を4回転
+			count = 0;
+			while(diceNumbers[0] != diceNumbers2[0] && count != 4) {
+				diceNumbers2 = dice.northRoll(diceNumbers2);
+				count++;
+			}
+
+
+			if(diceNumbers[0] == diceNumbers2[0] && diceNumbers[1] == diceNumbers2[1] && diceNumbers[3] == diceNumbers2[3] && diceNumbers[4] == diceNumbers2[4] && diceNumbers[5] == diceNumbers2[5]) {
+
+				System.out.println("Yes");
+			}else {
+				System.out.println("No");
+			}
+		}
+		sc.close();
+	}
+
+
+	public static int[] Input(int[] dice) {
+		for(int i = 0;i < 6;i++) {
+			dice[i] = sc.nextInt();
+		}
+		
+		return dice;
+	}
+	
+	public static int[] northRoll(int[] diceNumbers) {
+		int upperNumber = diceNumbers[0];
+		diceNumbers[0] = diceNumbers[1];
+		diceNumbers[1] = diceNumbers[5];
+		diceNumbers[5] = diceNumbers[4];
+		diceNumbers[4] = upperNumber;
+		
+		return diceNumbers;
+	}
+	
+	public static int[] southRoll(int[] diceNumbers) {
+		int upperNumber = diceNumbers[0];
+		diceNumbers[0] = diceNumbers[4];
+		diceNumbers[4] = diceNumbers[5];
+		diceNumbers[5] = diceNumbers[1];
+		diceNumbers[1] = upperNumber;
+		
+		return diceNumbers;
+	}
+
+	public static int[] eastRoll(int[] diceNumbers) {
+		int upperNumber = diceNumbers[0];
+		diceNumbers[0] = diceNumbers[3];
+		diceNumbers[3] = diceNumbers[5];
+		diceNumbers[5] = diceNumbers[2];
+		diceNumbers[2] = upperNumber;
+		
+		return diceNumbers;
+	}
+
+	public static int[] westRoll(int[] diceNumbers) {
+		int upperNumber = diceNumbers[0];
+		diceNumbers[0] = diceNumbers[2];
+		diceNumbers[2] = diceNumbers[5];
+		diceNumbers[5] = diceNumbers[3];
+		diceNumbers[3] = upperNumber;
+		
+		return diceNumbers;
+	}
+}

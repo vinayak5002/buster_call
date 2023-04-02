@@ -1,0 +1,53 @@
+#include<iostream>
+using namespace std;
+const int inf = 1 << 30;
+
+int main(){
+    long v,e;
+    cin >> v >> e;
+    long cost[v][v];
+    for (long i=0;i<v;i++){
+        for (long j=0;j<v;j++){
+            if (i==j){
+                cost[i][j]=0;
+            }else{
+                cost[i][j]=inf;
+            }
+        }
+    }
+    for (long i=0;i<e;i++){
+        long s,t,d;
+        cin >> s >> t >> d;
+        cost[s][t]=d;
+    }
+    for (long i=0;i<v;i++){
+        for (long j=0;j<v;j++){
+            for (long k=0;k<v;k++){
+                if (cost[j][i]==inf || cost[i][k]==inf){
+                    continue;
+                }
+                if (cost[j][k]>cost[j][i]+cost[i][k]){
+                    cost[j][k]=cost[j][i]+cost[i][k];
+                    if (cost[j][k]<0 && j==k){
+                        cout << "NEGATIVE CYCLE" << endl;
+                        return 0;
+                    }
+                }
+            }
+        }
+    }
+    for (long i=0;i<v;i++){
+        for (long j=0;j<v;j++){
+            if (cost[i][j]==inf){
+                cout << "INF";
+            }else{
+                cout << cost[i][j];
+            }
+            if (j!=v-1){
+                cout << " ";
+            }
+        }
+        cout << endl;
+    }
+    return 0;
+}

@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#pragma GCC target("avx")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+
+using ull = unsigned long long;
+using ll = long long;
+using vi = vector<int>;
+using vl = vector<long>;
+using vll = vector<long long>;
+using vvi = vector<vi>;
+using vvl = vector<vl>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using pii = pair<int, int>;
+
+#define all(obj) (obj).begin(), (obj).end()
+#define reps(i, a, n) for (ll i = (a); i < (ll)(n); ++i)
+#define rep(i, n) reps(i, 0, n)
+#define rrep(i, n) reps(i, 1, n + 1)
+#define repd(i, n) for (ll i = n - 1; i >= 0; i--)
+#define rrepd(i, n) for (ll i = n; i >= 1; i--)
+#define debug(x)                                                    \
+    cerr << "\033[33m(line:" << __LINE__ << ") " << #x << ": " << x \
+         << "\033[m"                                                \
+         << "\n";
+template <typename T>
+inline void print(const vector<T>& v, string s = " ") {
+    rep(i, v.size()) cout << v[i] << (i != (ll)v.size() - 1 ? s : "\n");
+}
+template <typename T, typename S>
+inline void print(const pair<T, S>& p) {
+    cout << p.first << " " << p.second << "\n";
+}
+template <typename T>
+inline void print(const T& x) {
+    cout << x << "\n";
+}
+
+int dp[60][1000][1000] = {0};
+void solve(ll n) {
+    ll b[60], sum = 0;
+    rep(i, n) {
+        cin >> b[i];
+        sum += b[i];
+    }
+    rep(i, n + 1) {
+        rep(j, sum) {
+            rep(k, sum) { dp[i][j][k] = 0; }
+        }
+    }
+    dp[0][0][0] = 1;
+    rep(i, n) {
+        rep(j, sum) {
+            if (j + b[i] >= 1000) continue;
+            rep(k, sum) {
+                if (k + b[i] >= 1000) continue;
+                if (!dp[i][j][k]) continue;
+                dp[i + 1][j + b[i]][k] = dp[i][j][k];
+                dp[i + 1][j][k + b[i]] = dp[i][j][k];
+                dp[i + 1][j][k] = dp[i][j][k];
+            }
+        }
+    }
+    ll ans = -1;
+    rep(j, sum) {
+        rep(k, sum) {
+            if (dp[n][j][k]) {
+                ans = max(ans, min(j, min(k, sum - j - k)));
+            }
+        }
+    }
+    print(ans);
+}
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(0);
+    ll n;
+    while (1) {
+        cin >> n;
+        if (n == 0) break;
+        solve(n);
+    }
+    return 0;
+}

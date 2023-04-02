@@ -1,0 +1,35 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int a, b;
+    cin >> a >> b;
+
+    vector<int> anna(a), bruno(b);
+    for (int i = 0; i < a; ++i) cin >> anna[i];
+    for (int i = 0; i < b; ++i) cin >> bruno[i];
+
+    deque<vector<int>> ab;
+    ab.push_back(vector<int>(a + 1, 0));
+    ab.push_back(vector<int>(a + 1, 0));
+
+    int max_len = 0;
+    for (int row = 1; row <= b; ++row) {
+        for (int col = 1; col <= a; ++col) {
+            if (bruno[row - 1] == anna[col - 1]) {
+                ab[1].at(col) = ab[0].at(col - 1) + 1;
+            } else {
+                ab[1].at(col) = ab[1].at(col - 1);
+            }
+            max_len = max(max_len, ab[1].at(col));
+        }
+        ab.pop_front();
+        ab.push_back(vector<int>(a + 1, 0));
+    }
+    cout << max_len << endl;
+    return 0;
+}
+

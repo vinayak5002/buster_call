@@ -1,0 +1,47 @@
+#include<stdio.h>
+
+#define MAX 100000
+
+int list[MAX][100];
+int count[MAX];
+int group[MAX];
+int key=1;
+ 
+void dfs(int s){
+    int i;
+    
+    group[s]=key;
+    for(i=0;i<count[s];i++){
+        if(group[list[s][i]]==0)
+        	dfs(list[s][i]);
+    }
+}
+ 
+int main(void){
+	int number, relation,question_sum;
+    int vertex_s,vertex_t;
+    int i,j;
+     
+    scanf("%d%d", &number, &relation);
+    for(i=0;i<relation;i++){
+        scanf("%d%d",&vertex_s,&vertex_t);
+        list[vertex_s][count[vertex_s]++]=vertex_t;
+        list[vertex_t][count[vertex_t]++]=vertex_s;
+    }
+    for(i=0;i<number;i++){
+        if(group[i]==0){
+            dfs(i);
+            key++;
+        }
+    } 
+    scanf("%d",&question_sum);
+    for(i=0;i<question_sum;i++){
+        scanf("%d%d",&vertex_s,&vertex_t);
+        if(group[vertex_s]==group[vertex_t] )
+        	printf("yes\n");
+        else
+        	printf("no\n");
+    }
+    return 0;
+}
+

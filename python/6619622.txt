@@ -1,0 +1,12 @@
+import sys
+input = sys.stdin.readline
+
+s = input()
+p = input()
+p = p[:len(p)-1]
+s2 = s[:len(s)-1]+s
+for _ in range(len(s2)-len(p)):
+  if s2[_:_+len(p)] == p:
+    print("Yes")
+    exit()
+print("No")

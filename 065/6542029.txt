@@ -1,0 +1,64 @@
+use std::io::Read;
+const P_MAX: usize = 1_000_000;
+fn main() {
+    let mut input = String::new();
+    std::io::stdin()
+        .read_to_string(&mut input)
+        .expect("invalid input");
+    let mut itr = input.lines();
+    let num_tracks = itr
+        .next()
+        .unwrap()
+        .split_ascii_whitespace()
+        .nth(1)
+        .unwrap()
+        .parse::<usize>()
+        .unwrap();
+    let payloads = itr.fold(Vec::new(), |mut v, e| {
+        v.push(e.parse::<usize>().unwrap());
+        v
+    });
+    println!(
+        "{}, {:?}, {}",
+        num_tracks,
+        payloads,
+        payloads.iter().sum::<usize>()
+    );
+    let mut right = P_MAX;
+    let mut left = 1usize;
+
+    while left < right {
+        let mid = (left + right) / 2;
+        if try_load_tracks(mid, num_tracks, &payloads) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
+    println!("{}", left);
+}
+
+fn try_load_tracks(max_cap: usize, track_num: usize, payloads: &Vec<usize>) -> bool {
+    let mut rem_tracks = track_num;
+    let mut rem_cap = 0;
+    payloads.iter().all(|pl| {
+        if rem_cap >= *pl {
+            rem_cap -= *pl;
+            true
+        } else {
+            if rem_tracks > 0 {
+                rem_tracks -= 1;
+                rem_cap = max_cap;
+                if rem_cap >= *pl {
+                    rem_cap -= *pl;
+                    true
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        }
+    })
+}
+

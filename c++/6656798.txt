@@ -1,0 +1,70 @@
+#include <stdio.h>
+#define MAX 10000
+#define NIL -1
+ 
+typedef struct
+{
+    int parent;//親の頂点番号
+    int left; //左の子の頂点番号
+    int right; //右の子の頂点番号
+}node;
+
+node T[MAX];
+
+void preParse(int walk) {
+    if ( walk == NIL ) return;
+    printf( " %d", walk);
+    preParse(T[walk].left);
+    preParse(T[walk].right);    
+}
+ 
+void inParse(int walk) {
+    if ( walk == NIL ) return;
+    inParse(T[walk].left);
+    printf(" %d", walk);
+    inParse(T[walk].right);
+}
+ 
+void postParse(int walk) {
+    if ( walk == NIL ) return;
+    postParse(T[walk].left);
+    postParse(T[walk].right);
+    printf(" %d", walk);
+}
+ 
+int main() {
+     
+    int a, b, c, n;
+    int i;
+
+    scanf("%d", &n);
+
+    for(i=0; i<n; i++){//構造体の中身を全て初期化
+	    T[i].parent = NIL;
+	    T[i].left = NIL;
+	    T[i].right = NIL;
+    }
+
+    for(i=0; i<n; i++){//入力から親と左右の子の関係を代入
+        scanf("%d%d%d", &a, &b, &c);
+        T[b].parent = a;
+        T[c].parent = a;
+        T[a].left = b;
+        T[a].right = c;
+    }
+     
+    for ( i = 0; i < n; i++ ){
+        if ( T[i].parent == NIL ){
+            printf("Preorder\n");
+            preParse(i);
+            printf("\n");
+            printf("Inorder\n");
+            inParse(i);
+            printf("\n");
+            printf("Postorder\n");
+            postParse(i);
+            printf("\n");
+        }
+    }        
+}
+

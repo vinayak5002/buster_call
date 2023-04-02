@@ -1,0 +1,187 @@
+import java.util.*;
+
+class Dice
+{
+    int lb[] = new int[6];
+    String ans;
+    Dice(int l1, int l2, int l3, int l4, int l5, int l6)
+    {
+        lb[0] = l1;
+        lb[1] = l2;
+        lb[2] = l3;
+        lb[3] = l4;
+        lb[4] = l5;
+        lb[5] = l6;
+    }
+    void setAns(String s){
+        switch(s){
+            case "Top":
+                ans = Integer.toString(lb[0]);
+                break;
+            case "solveRight":
+                ans = ans;
+            case "compare":
+                ans = ans;
+
+        }
+    }
+    void solveRight(int a, int b){
+    
+        int top = a;
+        int flont = b;
+        
+        for(int i = 0; i < 4; i++){
+            turnN();
+            if(lb[0] == a) break;
+        }
+        for(int j = 0; j < 4; j++){
+            turnE();
+            if(lb[0] == a) break;
+        }
+        for(int k = 0; k < 4; k++){
+            turnR();
+            if(lb[1] == b) break;
+        }
+        
+        ans = Integer.toString(lb[2]);
+    }
+    void compareLabels(int a, int b, int c, int d, int e, int f){
+        int[] tmplb = new int[6];
+        boolean flag1 = false;
+        boolean flag2 = false;
+        tmplb[0] = a; tmplb[1] = b; tmplb[2] = c; tmplb[3] = d; tmplb[4] = e; tmplb[5] = f;
+        
+        int i = 0;
+        while(i < 4){
+            turnN();
+            if(lb[0] == tmplb[0]){
+                flag1 = true;
+                break;
+            }
+            i++;
+        }
+        if(flag1){
+           
+        }else{
+            int j = 0;
+            while(j < 4){
+                turnE();
+                if(lb[0] == tmplb[0]){
+                    flag1 = true;
+                    break;    
+                }
+                j++;
+            }
+        }
+        if(flag1){
+            int k = 0;
+            while(k < 4){
+                turnR();
+                if(lb[1] == tmplb[1]){
+                    flag2 = true;
+                    break;
+                }
+                k++;
+            }
+        }
+        if(flag1 && flag2){
+            if(lb[2] == tmplb[2] && lb[3] == tmplb[3] && lb[4] == tmplb[4] && lb[5] == tmplb[5]){
+                ans = "Yes";
+            }else{
+                turnE(); turnE(); turnN();
+                if(lb[0] == tmplb[0] && lb[1] == tmplb[1] && lb[2] == tmplb[2] && lb[3] == tmplb[3] && lb[4] == tmplb[4] && lb[5] == tmplb[5]){
+                    ans = "Yes";
+                }else{
+                    ans = "No";
+                }
+            } 
+        }
+        
+    }
+    void turnN(){
+        int tmp1 = lb[0];
+        int tmp2 = lb[1];
+        int tmp6 = lb[5];
+        int tmp5 = lb[4];
+            
+        lb[0] = tmp2;
+        lb[1] = tmp6;
+        lb[5] = tmp5;
+        lb[4] = tmp1;
+    }
+    void turnS(){
+        int tmp1 = lb[0];
+        int tmp2 = lb[1];
+        int tmp6 = lb[5];
+        int tmp5 = lb[4];
+            
+        lb[0] = tmp5;
+        lb[1] = tmp1;
+        lb[5] = tmp2;
+        lb[4] = tmp6;
+    }
+    void turnE(){
+        int tmp1 = lb[0];
+        int tmp3 = lb[2];
+        int tmp6 = lb[5];
+        int tmp4 = lb[3];
+            
+        lb[0] = tmp4;
+        lb[2] = tmp1;
+        lb[5] = tmp3;
+        lb[3] = tmp6;
+    }
+    void turnW(){
+        int tmp1 = lb[0];
+        int tmp3 = lb[2];
+        int tmp6 = lb[5];
+        int tmp4 = lb[3];
+            
+        lb[0] = tmp3;
+        lb[2] = tmp6;
+        lb[5] = tmp4;
+        lb[3] = tmp1;
+    }
+    void turnR(){
+        int tmp2 = lb[1];
+        int tmp3 = lb[2];
+        int tmp5 = lb[4];
+        int tmp4 = lb[3];
+            
+        lb[1] = tmp3;
+        lb[2] = tmp5;
+        lb[4] = tmp4;
+        lb[3] = tmp2;
+    }
+    void show(){
+        System.out.println(ans);
+    }
+    int getLabel(int a){
+        return lb[a];
+    }
+}
+
+
+class Main
+{
+    public static void main(String[] args)
+    {
+        Scanner sc = new Scanner(System.in);
+        Dice[] dice = new Dice[2];
+        for(int k = 0; k < 2; k++){
+            int label[] = new int[6];
+            for(int i = 0; i < label.length; i++){
+                label[i] = sc.nextInt();
+            }
+            dice[k] = new Dice(label[0], label[1], label[2], label[3], label[4], label[5]);
+        }
+            int[] tmplb = new int[6];
+            for(int j = 0; j < 6; j++){
+                tmplb[j] = dice[0].getLabel(j);
+            }
+            dice[1].compareLabels(tmplb[0], tmplb[1], tmplb[2], tmplb[3], tmplb[4], tmplb[5]);
+            dice[1].setAns("compare");
+            dice[1].show();
+        
+    }
+}

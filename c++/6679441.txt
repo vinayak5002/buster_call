@@ -1,0 +1,166 @@
+#pragma GCC optimize("Ofast")
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <queue>
+#include <cstdio>
+#include <ctime>
+#include <assert.h>
+#include <chrono>
+#include <random>
+#include <numeric>
+#include <set>
+#include <deque>
+#include <stack>
+#include <sstream>
+#include <utility>
+#include <cstring>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+#include <array>
+#include <bitset>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long ull;
+
+mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
+ll myRand(ll B) {
+    return (ull)rng() % B;
+}
+inline double time() {
+    return static_cast<long double>(chrono::duration_cast<chrono::nanoseconds>(chrono::steady_clock::now().time_since_epoch()).count()) * 1e-9;
+}
+
+template<typename T>
+struct dinic{
+    struct edge{
+        int to;
+        T c,f;
+    };
+    T eps;
+    const T inf=numeric_limits<T>::max();
+    int n,m = 0;
+    vector<edge> e;
+    vector<vector<int>> g;
+    vector<int> level, ptr;
+    dinic(int n): n(n), g(n), level(n), ptr(n) {
+        eps = (T)1 / (T)1e9;
+    }
+    void add_edge(int s, int t, T c){
+        e.push_back({t, c, 0});
+        e.push_back({s, 0, 0});
+        g[s].push_back(m++);
+        g[t].push_back(m++);
+    }
+    bool bfs(int s, int t){
+        fill(level.begin(), level.end(), -1);
+        level[s] = 0;
+        for(queue<int> q({s});q.size();q.pop()){
+            int s = q.front();
+            for(int i:g[s]){
+                int t = e[i].to;
+                if(level[t] == -1 and (e[i].c - e[i].f) > eps){
+                    level[t] = level[s] + 1;
+                    q.push(t);
+                }
+            }
+        }
+        return (level[t] != -1);
+    }
+    T dfs(int s, int t, T psh){
+        if(!(psh > eps) or s == t) return psh;
+        for(int &i = ptr[s]; i < (int)g[s].size(); ++i){
+            auto &eg = e[g[s][i]];
+            if(level[eg.to] != level[s] + 1 or !(eg.c - eg.f > eps)) continue;
+            T f = dfs(eg.to, t, min(psh, eg.c-eg.f));
+            if(f > eps){
+                eg.f += f;
+                e[g[s][i]^1].f -= f;
+                return f;
+            }
+        }
+        return 0;
+    }
+    T max_flow(int s, int t){
+        T f = 0;
+        while(bfs(s,t)){
+            fill(ptr.begin(), ptr.end(), 0);
+            while(1){
+                T c = dfs(s, t, inf);
+                if(c > eps){
+                    f += c;
+                }
+                else{
+                    break;
+                }
+            }
+        }
+        return f;
+    }
+};
+
+int main(){
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    int h,w,c,m,nw,nc,nm;
+    while(cin >> h >> w >> c >> m >> nw >> nc >> nm, h != -1){
+        int N = 1+1+h+(w+1)*2+(c+1)*2+(m+1);
+        dinic<int> g(N);
+        int S = N-2, T = N-1;
+        int p = 0;
+        for(int i=0;i<h;i++){
+            g.add_edge(S, i, 1);
+            g.add_edge(i, h+w, 1);
+        }
+        for(int i=0;i<w;i++){
+            int q; cin >> q;
+            while(q--){
+                int u; cin >> u; u--;
+                g.add_edge(u, h+i, 1);
+            }
+        }
+        p += h;
+        for(int i=0;i<w;i++){
+            g.add_edge(p+i, p+i+(w+1), 1);
+        }
+        g.add_edge(p+w, p+w+1+w, nw);
+        p += (w+1);
+        for(int i=0;i<c;i++){
+            int q; cin >> q;
+            while(q--){
+                int u; cin >> u; u--;
+                g.add_edge(p+u, p+w+1+i, 1);
+            }
+            g.add_edge(p+w, p+w+1+i, 1);
+        }
+        for(int i=0;i<w;i++){
+            g.add_edge(p+i, p+w+1+c, 1);
+        }
+        p += (w+1);
+        for(int i=0;i<c;i++){
+            g.add_edge(p+i, p+c+1+i, 1);
+        }
+        g.add_edge(p+c, p+c+1+c, nc);
+        p += (c+1);
+        for(int i=0;i<m;i++){
+            int q; cin >> q;
+            while(q--){
+                int u; cin >> u; u--;
+                g.add_edge(p+u, p+c+1+i, 1);
+            }
+            g.add_edge(p+c, p+c+1+i, 1);
+        }
+        for(int i=0;i<c;i++){
+            g.add_edge(p+i, p+c+1+m, 1);
+        }
+        p += (c+1);
+        for(int i=0;i<m;i++){
+            g.add_edge(p+i, T, 1);
+        }
+        g.add_edge(p+m, T, nm);
+        cout << g.max_flow(S, T) << "\n";
+    }
+}
+

@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+using ull = unsigned long long;
+
+#define rep(i,start,end) for(ll i=start; i<end; i++)
+#define rrep(i,start,end) for(ll i=start; i>=end; i--)
+
+ull INF = 1LL << 60;
+ld PI = 3.141592653589793;
+
+struct Init {
+    Init() {
+        cout << setprecision(15);
+    }
+}init;
+
+struct BFS_W {
+    vector<ll> ret;
+    BFS_W(vector<vector<pair<ll,ll>>> G, int64_t size, int64_t pos) {
+        ret.resize(size,INF);
+        queue<int64_t> que;
+        ret[pos] = 0;
+        que.push(pos);
+
+        while(!que.empty()) {
+            int64_t v = que.front();
+            que.pop();
+
+            for (auto &nv : G[v]) {
+                if (ret[v] + nv.second < ret[nv.first])
+                ret[nv.first] = ret[v] + nv.second;
+                que.push(nv.first);
+            }
+        }
+    }
+    vector<ll> vec() {return ret;}   
+    
+};
+
+int main() {
+
+    ll V, E, R; cin >> V >> E >> R;
+    vector<vector<pair<ll,ll>>> v(V);
+    ll S, T, D;
+    rep(i,0,E) {
+        cin >> S >> T >> D;
+        v[S].emplace_back(T,D);
+    }
+    BFS_W BFS(v,V,R);
+    vector<ll> bf = BFS.vec();
+    rep(i,0,V) cout << bf[i] << endl;
+
+
+}
+
+

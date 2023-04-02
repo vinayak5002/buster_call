@@ -1,0 +1,44 @@
+def eval(x)
+  if $u[x]!=-1 then
+    if x<$n-1 then
+      $u[x*2+1]=$u[x]
+      $u[x*2+2]=$u[x]
+    end
+    $s[x]=$u[x]
+    $u[x]=-1
+  end
+end
+def find(l,r,lx,rx,x)
+  eval(x)
+  if rx<=l || r<=lx then
+    2**31-1
+  elsif l<=lx && rx<=r then
+    $s[x]
+  else
+    [find(l,r,lx,(lx+rx)/2,x*2+1),find(l,r,(lx+rx)/2,rx,x*2+2)].min
+  end
+end
+def up(l,r,lx,rx,x,k)
+  eval(x)
+  if l<=lx && rx<=r then
+    $u[x]=k
+    eval(x)
+  elsif l<rx && lx<r then
+    up(l,r,lx,(lx+rx)/2,x*2+1,k)
+    up(l,r,(lx+rx)/2,rx,x*2+2,k)
+    $s[x]=[$s[x*2+1],$s[x*2+2]].min
+  end
+end
+n,q=gets.split.map(&:to_i)
+n=2**Math.log(n,2).ceil
+$n=n
+$s=Array.new(2*n-1,2**31-1)
+$u=Array.new(2*n-1,-1)
+q.times do
+  r=gets.split.map(&:to_i)
+  if r[0]==0 then
+    up(r[1],r[2]+1,0,n,0,r[3])
+  else
+    puts find(r[1],r[2]+1,0,n,0)
+  end
+end

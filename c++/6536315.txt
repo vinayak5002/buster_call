@@ -1,0 +1,48 @@
+#include <stdio.h>
+#include <limits.h>
+
+#define MAX_N 200000
+#define max(a, b) ((a) > (b) ? (a) : (b))
+
+int r[MAX_N];
+int d[MAX_N];
+
+int solve(int i, int j)
+{
+  int m, sl, ml, sr, mr, ii, jj;
+
+  if (i == j) {
+    return d[i];
+  }
+
+  m = (i + j) / 2;
+  sl = 0;
+  ml = INT_MIN;
+  for (ii = m; ii >= i; ii--) {
+    sl += d[ii];
+    ml = max(ml, sl);
+  }
+  sr = 0;
+  mr = INT_MIN;
+  for (jj = m + 1; jj <= j; jj++) {
+    sr += d[jj];
+    mr = max(mr, sr);
+  }
+  return max(max(ml + mr, solve(i, m)), solve(m + 1, j));
+}
+
+int main()
+{
+  int n, i;
+
+  scanf("%d", &n);
+  for (i = 0; i < n; i++) {
+    scanf("%d", &(r[i]));
+  }
+  for (i = 1; i < n; i++) {
+    d[i - 1] = r[i] - r[i - 1];
+  }
+  printf("%d\n", solve(0, n - 2));
+  return 0;
+}
+

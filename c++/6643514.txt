@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define LLMAX numeric_limits<ll>::max()
+#define LLMIN numeric_limits<ll>::min()
+#define INTMAX numeric_limits<int>::max()
+#define INTMIN numeric_limits<int>::min()
+#define rep(i, n) for (decltype(n) i = 0; i < (n); i++)
+#define rep1(i, n) for (decltype(n) i = 1; i <= (n); i++)
+#define rep2(i, k, n) for (decltype(n) i = k; i <= (n); i++)
+#define repr(i, n) for (decltype(n) i = (n)-1; i >= 0; i--)
+#define repr1(i, n) for (decltype(n) i = (n); i > 0; i--)
+#define repr2(i, k, n) for (decltype(n) i = n; i >= k; i--)
+auto chmax = [](auto& a, auto b) {bool ret=a<b; if(ret)a=b; return ret; };
+auto chmin = [](auto& a, auto b) {bool ret=a>b; if(ret)a=b; return ret; };
+template <typename T>
+using pq_inv = priority_queue<T, vector<T>, greater<T>>;
+
+void floydWarshar(vector<vector<ll>>& dist, vector<vector<ll>>& dp) {
+    int N = dist.size();
+    rep(i, N) rep(j, N) dp[i][j] = dist[i][j];
+    rep(i, N) rep(j, N) rep(k, N) {
+        dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j]);
+    }
+}
+
+int main() {
+    int v, e;
+    cin >> v >> e;
+    vector<vector<ll>> dist(v, vector<ll>(v, 1LL << 40));
+    vector<vector<ll>> dp(v, vector<ll>(v));
+    rep(i,v) dist[i][i]=0;
+    rep(i, e) {
+        ll s, t, d;
+        cin >> s >> t >> d;
+        dist[s][t] = d;
+    }
+    floydWarshar(dist, dp);
+    rep(i,v)rep(j,v) {
+        if (dp[i][j] <0) {
+            cout << "NEGATIVE CYCLE" << endl;
+            return 0;
+        }
+
+    }
+    rep(i, v) {
+        rep(j, v) {
+            if(dp[i][j]==1LL<<40) cout << "INF" << ' ';
+            else cout << dp[i][j] << ' ';
+        }
+        cout << endl;
+    }
+}
+

@@ -1,0 +1,441 @@
+#include <bits/stdc++.h>
+#define all(x) (x).begin(), (x).end()
+#define x first
+#define y second
+
+using namespace std;
+using ll = long long;
+using pnt = pair<double, double>;
+using vec = pnt;
+
+const double EPS = 1e-8, PI = acos(-1.0);
+
+// 判断实数 a 的符号， 若接近 0 则判为 0
+int sgn(double a) {
+    if (abs(a) < EPS)
+        return 0;
+    else
+        return a > 0 ? 1 : -1;
+}
+
+double operator*(const vec& a, const vec& b) {
+    return a.x * b.x + a.y * b.y;
+}
+
+double operator%(const vec& a, const vec& b) {
+    return a.x * b.y - a.y * b.x;
+}
+
+// 向量 a 的长度
+double abs(const vec& a) {
+    return sqrt(a.x * a.x + a.y * a.y);
+}
+
+// 向量 a 的长度的平方
+double abs2(const vec& a) {
+    return a.x * a.x + a.y * a.y;
+}
+
+// 向量 a 和向量 b 的夹角 范围 [0, PI]
+double abs_angle(const vec& a, const vec& b) {
+    return acos(a * b / abs(a) / abs(b));
+}
+
+// 向量 a 和向量 b 的夹角 范围 [-PI, PI]
+// 即向量 a 应当旋转多少角度才能与 b 重合 逆时针方向为正方向
+double angle(const vec& a, const vec& b) {
+    return abs_angle(a, b) * ((sgn(a % b) == 1) ? 1 : -1);
+}
+
+// 向量 a 和向量 b 的夹角 范围 [0, 2*PI]
+// 即向量 a 应当逆时针旋转多少角度才能与 b 重合
+double mono_angle(const vec& a, const vec& b) {
+    double res = angle(a, b);
+    if (res < 0)
+        res += 2 * PI;
+    return res;
+}
+
+// 向量 a 的法向量
+vec normal(const vec& a) {
+    return {-a.y, a.x};
+}
+vec operator+(const vec& a, const vec& b) {
+    return {a.x + b.x, a.y + b.y};
+}
+vec operator-(const vec& a, const vec& b) {
+    return {a.x - b.x, a.y - b.y};
+}
+vec operator-(const vec& a) {
+    return {-a.x, -a.y};
+}
+vec operator*(const vec& a, double x) {
+    return {a.x * x, a.y * x};
+}
+vec operator*(double x, const vec& a) {
+    return {a.x * x, a.y * x};
+}
+vec operator/(const vec& a, double x) {
+    return {a.x / x, a.y / x};
+}
+bool operator==(const vec& a, const vec& b) {
+    return !sgn(a.x - b.x) && !sgn(a.y - b.y);
+}
+
+// 向量 a 逆时针旋转 th 弧度
+vec turn(const vec& a, double th) {
+    return {a.x * cos(th) - a.y * sin(th), a.x * sin(th) + a.y * cos(th)};
+}
+
+// 点 a 以 点 b 为中心，逆时针旋转 th 弧度
+vec turnP(const vec& a, const vec& b, double th) {
+    return turn(a - b, th) + b;
+}
+
+vec unit(const vec& a) {
+    return a / abs(a);
+}
+
+// 判断点 p 是否在直线 ab 上
+bool p_on_l(const pnt& p, const pnt& a, const pnt& b) {
+    return !sgn((p - a) % (p - b));
+}
+
+// 判断点 p 是否在线段 ab 上
+bool p_on_s(const pnt& p, const pnt& a, const pnt& b) {
+    return p_on_l(p, a, b) && (p - a) * (p - b) <= 0;
+}
+
+// 点 p 到线段 ab 的距离
+double dist_p2s(const pnt& p, const pnt& a, const pnt& b) {
+    if (a == b)
+        return abs(p - a);
+    vec u = p - a, v = p - b, w = b - a;
+    if (sgn(u * w) < 0)
+        return abs(u);
+    if (sgn(v * w) > 0)
+        return abs(v);
+    return abs((u % w) / abs(w));
+}
+
+// 点 p 到直线 ab 的距离
+double dist_p2l(const pnt& p, const pnt& a, const pnt& b) {
+    return abs((p - a) % (b - a)) / abs(b - a);
+}
+
+// 点 p 在直线 ab 上的投影
+pnt shadow_p2l(const pnt& p, const pnt& a, const pnt& b) {
+    vec u = p - a, v = p - b, w = b - a;
+    double len1 = u * w / abs(w), len2 = -v * w / abs(w);
+    return a + w * (len1 / (len1 + len2));
+}
+
+// 点 p 在直线 ab 另一侧的对称点
+pnt sym_p2l(const pnt& p, const pnt& a, const pnt& b) {
+    return p + (shadow_p2l(p, a, b) - p) * 2;
+}
+
+// 直线 ab 与直线 cd 的交点
+pnt inters_l2l(const pnt& a, const pnt& b, const pnt& c, const pnt& d) {
+    vec u = b - a, v = d - c, w = a - c;
+    return a + u * ((v % w) / (u % v));
+}
+
+// 判断直线 ab 和线段 cd 是否相交
+bool l_cross_s(const pnt& a, const pnt& b, const pnt& c, const pnt& d) {
+    return p_on_s(inters_l2l(a, b, c, d), c, d);
+}
+
+bool s_cross_s(const pnt& a, const pnt& b, const pnt& c, const pnt& d) {
+    return l_cross_s(a, b, c, d) && l_cross_s(c, d, a, b);
+}
+
+// 判断 p 是在 多边形 plg 内、外或边界上 使用射线法
+// 外: 0
+// 边界上: 1
+// 内: 2
+int p_in_poly(const pnt& p, const vector<pnt>& plg) {
+    int n = plg.size(), cnt = 0;
+    for (int i = 0; i < n; i++) {
+        const auto &a = plg[i], &b = plg[(i < n - 1) ? i + 1 : 0];
+        if (p_on_s(p, a, b))
+            return 1;
+        if (p.y >= min(a.y, b.y) && p.y < max(a.y, b.y)) {
+            double tmp = a.x + (p.y - a.y) / (b.y - a.y) * (b.x - a.x);
+            cnt += sgn(tmp - p.x) > 0;
+        }
+    }
+    return cnt & 1;
+}
+
+// 多边形面积
+double poly_area(const vector<pnt>& a) {
+    double res = 0;
+    int n = a.size();
+    for (int i = 1; i < n; i++)
+        res += a[i - 1] % a[i];
+    return (res + a[0] % a[n - 1]) / 2;
+}
+
+// /*2.【圆的面积并】*/
+
+// /*3.【三角形面积并】*/
+
+// 点集 a 的凸包 按逆时针顺序排列
+
+vector<pnt> conv_hull(vector<pnt> a) {
+    sort(all(a));
+    vector<pnt> res{};
+    for (auto sg : {1, 0}) {
+        size_t st = res.size() + sg;
+        for (auto p : a) {
+            while (res.size() > st && sgn((res.back() - *(res.end() - 2)) % (p - *(res.end() - 2))) <= 0)
+                res.pop_back();
+            res.push_back(p);
+        }
+        if (sg)
+            a.pop_back(), reverse(all(a));
+    }
+    res.pop_back();
+    return res;
+}
+
+// 凸包 a 的直径 使用旋转卡壳算法
+double convh_diameter(const vector<pnt>& a) {
+    assert(a.size());
+    if (a.size() == 1)
+        return 0;
+    double res = abs(a[1] - a[0]);
+    int n = a.size();
+    for (int i = 0, j = 2; i < n; i++) {
+        auto i1 = (i + 1) % n;
+        while (sgn((a[i1 % n] - a[i]) % (a[j] - a[i]) - (a[i1 % n] - a[i]) % (a[(j + 1) % n] - a[i])) < 0)
+            j = (j + 1) % n;
+        res = max({res, abs(a[j] - a[i]), abs(a[j] - a[(i + 1) % n])});
+    }
+    return res;
+}
+
+vector<pnt> inters_cir2l(const pnt& o, double r, const pnt& a, const pnt& b) {
+    double d = dist_p2l(o, a, b);
+    pnt u = shadow_p2l(o, a, b);
+    double k = sqrt(r * r - d * d);
+    if (sgn(r - d) == 0)
+        return {u};
+    return {u + unit(a - b) * k, u - unit(a - b) * k};
+}
+
+// 以点 o 为圆心 以 r 为半径的圆与线段 ab 的交点
+vector<pnt> inters_cir2s(const pnt& o, double r, const pnt& a, const pnt& b) {
+    auto s = inters_cir2l(o, r, a, b);
+    vector<pnt> res;
+    for (const auto& p : s) {
+        if (sgn((a - p) * (b - p)) <= 0)
+            res.push_back(p);
+    }
+    return res;
+}
+
+// 点 a 所在的象限，象限包含左端点，不含右端点
+int phase_range(const pnt& a) {
+    if (sgn(a.x) > 0)
+        return a.y >= 0 ? 1 : 4;
+    else if (sgn(a.x) < 0)
+        return a.y <= 0 ? 3 : 2;
+    else {
+        return a.y >= 0 ? 2 : 4;
+    }
+}
+
+// 对点 a 旋转平移变换 变换后使得u与原点重合，v在x轴正半轴
+// 返回 变换后的点 a
+pnt transform(const pnt& a, const pnt& u, const pnt& v, int p = 1) {
+    if (p == 1) {
+        pnt res = a - u;
+        auto x = v - u;
+        x.y *= -1;
+        auto y = normal(x);
+        x = x / abs(x), y = y / abs(y);
+        return {x.x * res.x + y.x * res.y, x.y * res.x + y.y * res.y};
+    } else {
+        auto x = v - u;
+        auto y = normal(x);
+        x = x / abs(x), y = y / abs(y);
+        pnt res = a;
+        res = {x.x * res.x + y.x * res.y, x.y * res.x + y.y * res.y};
+        res = res + u;
+        return res;
+    }
+}
+
+// 对点 a 旋转平移变换 变换后使得u与原点重合，v在x轴正半轴
+void make_transform(pnt& a, pnt u, pnt v, int p = 1) {
+    a = transform(a, u, v, p);
+}
+
+// 保持向量 uv 长度不变，u移动至原点，向量 uv 朝向 x 轴正方向
+void turn_x(pnt& u, pnt& v) {
+    double len = abs(u - v);
+    u = {0, 0};
+    v = {len, 0};
+}
+
+// 对vector a 中的所有指针指向的点做旋转平移变换 变换后使得u与原点重合，v在x轴正半轴
+void turn_move(const vector<pnt*>& a, pnt u, pnt v, int p = 1) {
+    for (auto pe : a) {
+        make_transform(*pe, u, v, p);
+    }
+}
+
+// 极角比较 向量 a 的极角 是否小于 b 的极角
+bool angle_cmp(const pnt& a, const pnt& b) {
+    auto pa = phase_range(a), pb = phase_range(b);
+    if (pa != pb)
+        return pa < pb;
+    return a % b > 0;
+}
+
+// 极角排序
+template <typename I>
+void angle_sort(I l, I r) {
+    sort(l, r, angle_cmp);
+}
+
+// 边长为 a b c 的三角形的面积
+double area_triangle(double a, double b, double c) {
+    double p = (a + b + c) / 2;
+    return sqrt(p * (p - a) * (p - b) * (p - c));
+}
+
+vector<pnt> inters_cir2cir(pair<pnt, double> c1, pair<pnt, double> c2) {
+    auto& [o1, r1] = c1;
+    auto& [o2, r2] = c2;
+    if (r1 < r2)
+        swap(c1, c2);
+    auto d = abs(o1 - o2);
+    if (d > r1 + r2 || d < r1 - r2)  // 相离
+        return {};
+    if (!sgn(r2 - abs(d - r1)))  // 相切
+        return {sgn(d - r1) * o1 * (r2 / d) + o2 * (r1 / d)};
+    double h = area_triangle(r1, r2, d) * 2 / d, p = sqrt(r1 * r1 - h * h);
+    vec vx = unit(o2 - o1);
+    pnt i1 = o1 + vx * p + normal(vx) * h, i2 = sym_p2l(i1, o1, o2);
+    return {i1, i2};
+}
+
+// /*3.【半平面交】*/
+// struct Line{
+//     Point a,b;LD k;Line(Point A=Point(0,0),Point B=Point(0,0)){a=A,b=B,k=atan2(b.y-a.y,b.x-a.x);}
+//     inline bool operator<(const Line &O)const{return dcmp(k-O.k)?dcmp(k-O.k)<0:judge(O.a,O.b,a);}//如果角度相等则取左边的
+// }L[N],Q[N];
+// inline Point cross(Line L1,Line L2){return cross_LL(L1.a,L1.b,L2.a,L2.b);}//获取直线L1,L2的交点
+// inline int judge(Line L,Point a){return dcmp(Cro(a-L.a,L.b-L.a))>0;}//判断点a是否在直线L的右边
+// inline int halfcut(Line *L,Re n,Point *P){//【半平面交】
+//     sort(L+1,L+n+1);Re m=n;n=0;
+//     for(Re i=1;i<=m;++i)if(i==1||dcmp(L[i].k-L[i-1].k))L[++n]=L[i];
+//     Re h=1,t=0;
+//     for(Re i=1;i<=n;++i){
+//         while(h<t&&judge(L[i],cross(Q[t],Q[t-1])))--t;//当队尾两个直线交点不是在直线L[i]上或者左边时就出队
+//         while(h<t&&judge(L[i],cross(Q[h],Q[h+1])))++h;//当队头两个直线交点不是在直线L[i]上或者左边时就出队
+//         Q[++t]=L[i];
+//     }
+//     while(h<t&&judge(Q[h],cross(Q[t],Q[t-1])))--t;
+//     while(h<t&&judge(Q[t],cross(Q[h],Q[h+1])))++h;
+//     n=0;
+//     for(Re i=h;i<=t;++i)P[++n]=cross(Q[i],Q[i<t?i+1:h]);
+//     return n;
+// }
+
+// /*4.【闵可夫斯基和】*/
+// Vector V1[N],V2[N];
+// inline int Mincowski(Point *P1,Re n,Point *P2,Re m,Vector *V){//【闵可夫斯基和】求两个凸包{P1},{P2}的向量集合{V}={P1+P2}构成的凸包
+//     for(Re i=1;i<=n;++i)V1[i]=P1[i<n?i+1:1]-P1[i];
+//     for(Re i=1;i<=m;++i)V2[i]=P2[i<m?i+1:1]-P2[i];
+//     Re t=0,i=1,j=1;V[++t]=P1[1]+P2[1];
+//     while(i<=n&&j<=m)++t,V[t]=V[t-1]+(dcmp(Cro(V1[i],V2[j]))>0?V1[i++]:V2[j++]);
+//     while(i<=n)++t,V[t]=V[t-1]+V1[i++];
+//     while(j<=m)++t,V[t]=V[t-1]+V2[j++];
+//     return t;
+// }
+
+// /*5.【动态凸包】*/
+
+// /*七：【圆】*/
+
+// /*1.【三点确定一圆】*/
+// #define S(a) ((a)*(a))
+// struct Circle{Point O;LD r;Circle(Point P,LD R=0){O=P,r=R;}};
+// inline Circle getCircle(Point A,Point B,Point C){//【三点确定一圆】暴力解方程
+//     LD x1=A.x,y1=A.y,x2=B.x,y2=B.y,x3=C.x,y3=C.y;
+//     LD D=((S(x2)+S(y2)-S(x3)-S(y3))*(y1-y2)-(S(x1)+S(y1)-S(x2)-S(y2))*(y2-y3))/((x1-x2)*(y2-y3)-(x2-x3)*(y1-y2));
+//     LD E=(S(x1)+S(y1)-S(x2)-S(y2)+D*(x1-x2))/(y2-y1);
+//     LD F=-(S(x1)+S(y1)+D*x1+E*y1);
+//     return Circle(Point(-D/2.0,-E/2.0),sqrt((S(D)+S(E)-4.0*F)/4.0));
+// }
+// inline Circle getcircle(Point A,Point B,Point C){//【三点确定一圆】向量垂心法
+//     Point P1=(A+B)*0.5,P2=(A+C)*0.5;
+//     Point O=cross_LL(P1,P1+Normal(B-A),P2,P2+Normal(C-A));
+//     return Circle(O,Len(A-O));
+// }
+
+// /*2.【最小覆盖圆】*/
+// inline int PIC(Circle C,Point a){return dcmp(Len(a-C.O)-C.r)<=0;}//判断点A是否在圆C内
+// inline void Random(Point *P,Re n){for(Re i=1;i<=n;++i)swap(P[i],P[rand()%n+1]);}//随机一个排列
+// inline Circle Min_Circle(Point *P,Re n){//【求点集P的最小覆盖圆】
+// //  random_shuffle(P+1,P+n+1);
+//     Random(P,n);Circle C=Circle(P[1],0);
+//     for(Re i=2;i<=n;++i)if(!PIC(C,P[i])){
+//         C=Circle(P[i],0);
+//         for(Re j=1;j<i;++j)if(!PIC(C,P[j])){
+//             C.O=(P[i]+P[j])*0.5,C.r=Len(P[j]-C.O);
+//             for(Re k=1;k<j;++k)if(!PIC(C,P[k]))C=getcircle(P[i],P[j],P[k]);
+//         }
+//     }
+//     return C;
+// }
+
+// /*3.【三角剖分】*/
+// inline LD calc(Point A,Point B,Point O,LD R){//【三角剖分】
+//     if(A==O||B==O)return 0;
+//     Re op=dcmp(Cro(A-O,B-O))>0?1:-1;LD ans=0;
+//     Vector x=A-O,y=B-O;
+//     Re flag1=dcmp(Len(x)-R)>0,flag2=dcmp(Len(y)-R)>0;
+//     if(!flag1&&!flag2)ans=Abs(Cro(A-O,B-O))/2.0;//两个点都在里面
+//     else if(flag1&&flag2){//两个点都在外面
+//         if(dcmp(dis_PL(O,A,B)-R)>=0)ans=R*R*Angle(x,y)/2.0;//完全包含了圆弧
+//         else{//分三段处理 △+圆弧+△
+//             if(dcmp(Cro(A-O,B-O))>0)swap(A,B);//把A换到左边
+//             Point F=FootPoint(O,A,B);LD lenx=Len(F-O),len=sqrt(R*R-lenx*lenx);
+//             Vector z=turn_P(F-O,Pi/2.0)*(len/lenx);Point B_=F+z,A_=F-z;
+//             ans=R*R*(Angle(A-O,A_-O)+Angle(B-O,B_-O))/2.0+Cro(B_-O,A_-O)/2.0;
+//         }
+//     }
+//     else{//一个点在里面，一个点在外面
+//         if(flag1)swap(A,B);//使A为里面的点，B为外面的点
+//         Point F=FootPoint(O,A,B);LD lenx=Len(F-O),len=sqrt(R*R-lenx*lenx);
+//         Vector z=turn_P(F-O,Pi/2.0)*(len/lenx);Point C=dcmp(Cro(A-O,B-O))>0?F-z:F+z;
+//         ans=Abs(Cro(A-O,C-O))/2.0+R*R*Angle(C-O,B-O)/2.0;
+//     }
+//     return ans*op;
+// }
+
+int main() {
+    pnt o1, o2;
+    double r1, r2;
+    cin >> o1.x >> o1.y >> r1;
+    cin >> o2.x >> o2.y >> r2;
+    auto ans = inters_cir2cir({o1, r1}, {o2, r2});
+    if (ans.size() == 1)
+        ans.push_back(ans.back());
+    for (auto& [x, y] : ans)
+        swap(x, y);
+    sort(all(ans));
+    for (auto& [x, y] : ans)
+        swap(x, y);
+    for (const auto& p : ans) {
+        if (&p != &*ans.begin())
+            putchar(' ');
+        printf("%.10lf %.10lf", p.x, p.y);
+    }
+    return 0;
+}

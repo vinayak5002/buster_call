@@ -1,0 +1,63 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+
+	const n = parseInt(si[0].split(" "));
+	let points = new Object();
+	let x_array = new Array();
+	
+	for (let i = 1; i < n + 1; i++) {
+		let order = si[i].split(" ");
+		let x = parseInt(order[0]);
+		let check = false;
+		for (let j = 0; j < x_array.length; j++) {
+			if (x === x_array[j]) {
+				check = true;
+				break;
+			}
+		}
+		if (!check) {
+			x_array.push(x);
+			for (let j = x_array.length - 1; j >= 0; j--) {
+				if (x_array[j] < x_array[j - 1]) {
+					x_array[j] = x_array[j - 1];
+					x_array[j - 1] = x;
+				} else {
+					break;
+				}
+			}
+		}
+		
+		if (!points[x]) {
+			points[x] = new Array();
+		}
+		let y = parseInt(order[1]);
+		points[x].push(y);
+		for (let j = points[x].length - 1; j >= 0; j--) {
+			if (points[x][j] < points[x][j - 1]) {
+				points[x][j] = points[x][j - 1];
+				points[x][j - 1] = y;
+			} else {
+				break;
+			}
+		}
+	}
+	
+	Object.keys(points).sort;
+	
+	let ans = '';
+	
+	for (let i = 0; i < x_array.length; i++) {
+		if (points[x_array[i]].length === 1) {
+			ans += x_array[i] + ' ' + points[x_array[i]] + '\n'
+		} else {
+			for (let j = 0; j < points[x_array[i]].length; j++) {
+				ans += x_array[i] + ' ' + points[x_array[i]][j] + '\n'
+			}
+		}
+	}
+	so.write(ans);
+	
+}

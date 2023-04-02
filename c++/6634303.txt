@@ -1,0 +1,40 @@
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+int main()
+{
+	int N, q;
+	cin >> N >> q;
+	unordered_set<string> G;
+	vector<string> S(q);
+	for (auto& s : S) {
+		cin >> s;
+		string g;
+		for (auto c : s) if (c == 'A') g.push_back(c);
+		for (auto c : s) if (c == 'B') g.push_back(c);
+		for (auto c : s) if (c == 'C') g.push_back(c);
+		G.insert(g);
+	}
+	unordered_map<string, int> D;
+	queue<pair<int, string>> Q;
+	for (const auto& g : G) for (Q.push({0, g}); !Q.empty(); Q.pop()) {
+		auto [n, T] = Q.front();
+		if (D.count(T) > 0 && D[T] <= n) continue;
+		D[T] = n;
+		for (int i = 2; i <= N; ++i) {
+			string U = T;
+			reverse(U.begin(), U.begin() + i);
+			if (D.count(U) > 0) continue;
+			Q.push({n + 1, U});
+		}
+	}
+	for (const auto& s : S) cout << D[s] << endl;
+	return 0;
+}
+

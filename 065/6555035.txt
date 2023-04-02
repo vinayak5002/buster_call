@@ -1,0 +1,55 @@
+# 2022/04/29
+# Yutaka Watanobe
+from heapq import heappop, heappush
+
+LIMIT = 45
+N = 4                                                          # N * N pieces
+
+adj = [{1, 4}, {0, 2, 5}, {1, 3, 6}, {2, 7},                   # N * N pieces are represented by 0, 1, ..., (N*N-1)
+      {0, 5, 8}, {1, 4, 6, 9}, {2, 5, 7, 10}, {3, 6, 11},      # adj[i]: an adj list for piece i
+      {4, 9, 12}, {5, 8, 10, 13}, {6, 9, 11, 14}, {7, 10, 15}, # ** this is for only N = 4
+      {8, 13}, {9, 12, 14}, {10, 13, 15}, {11, 14}]
+
+pieces = [[[0] for j in range(N)] for i in range(N)]           # contents for simulation
+op = [0 for i in range(LIMIT+1)]                               # operations for simulation
+
+MD = [[abs(i//N-j//N)+abs(i%N-j%N) for j in range(N*N) ] for i in range(N*N)]    # manhattan dist between piece i and j
+PW = [16**i for i in range(N*N)]                               # 16^i
+SW = [[i*PW[j] for j in range(N*N) ] for i in range(N*N)]      # i * 16^j
+
+initial_v, initial_h, initial_b = 0, 0, -1
+target = 0
+
+p = 0
+for i in range(N):
+    row = list(map(int, input().split()))
+    for j in range(N):
+        pieces[i][j] = row[j]
+        if row[j] == 0:
+            initial_b = i*N + j                                # set the place of the blank
+        else:
+            
+            initial_v += row[j]*PW[p]                          # initial hash value of the puzzle
+            initial_h += MD[p][row[j]-1]                       # initial estimation cost
+        if (p+1) <= 15: target += (p+1)*PW[p]
+        p += 1
+        
+queue = [(initial_h, 0, initial_h, initial_v, initial_b)]
+visited = set()
+
+while True:
+    c, d, heuristic, statev, space = heappop(queue)
+    if statev in visited: continue
+    elif statev == target:
+        print(d)
+        break
+    visited.add(statev)
+
+    for next_b in adj[space]:
+        num = (statev >> (4*next_b)) & 15
+        nstatev = statev - SW[num][next_b] + SW[num][space]
+        if nstatev in visited: continue
+        next_h = heuristic + MD[space][num-1] - MD[next_b][num-1]
+        if d+1 > LIMIT: continue
+        heappush(queue, (d + 1 + next_h, d+1, next_h, nstatev, next_b))
+

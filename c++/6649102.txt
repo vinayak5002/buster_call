@@ -1,0 +1,97 @@
+#include<bits/stdc++.h>
+
+#define ll long long
+#define st first
+#define nd second
+#define pii pair<int,int>
+
+const int maxn=2e3+1;
+const int mod=1e9+7;
+const ll inf=1e18;
+
+using namespace std;
+
+int n,m;
+ll d[maxn];
+bool kt;
+
+void inout()
+{
+    freopen("cf.inp","r",stdin);
+    freopen("cf.out","w",stdout);
+}
+
+void fast()
+{
+    ios_base::sync_with_stdio(0);
+    cin.tie(0),cout.tie(0);
+}
+
+struct kdl{
+    int u,v;
+    ll w;
+};
+
+vector<kdl> g;
+
+void bm(){
+    for(int i=0; i<n-1; ++i){
+        for(auto x: g){
+            int u=x.u;
+            int v=x.v;
+            ll w=x.w;
+            if(d[v]>d[u]+w && d[u]!=inf){
+                d[v]=d[u]+w;
+            }
+        }
+    }
+}
+
+void check(){
+  for(int i=0; i<n; ++i){
+        for(auto x: g){
+            int u=x.u;
+            int v=x.v;
+            ll w=x.w;
+            if(d[v]>d[u]+w && d[u]!=inf){
+                kt=1;
+            }
+        }
+    }
+}
+
+int32_t main()
+{
+    //inout();
+    fast();
+
+    cin>>n>>m;
+
+    for(int i=1; i<=m; ++i){
+        int s,t,ww;
+        cin>>s>>t>>ww;
+        g.push_back({s,t,ww});
+    }
+
+    for(int i=0; i<n; ++i){
+        for(int j=0; j<n; ++j) d[j]=inf;
+        d[i]=0;
+        kt=0;
+        bm();
+        check();
+        if(kt==1){
+            cout<<"NEGATIVE CYCLE"<<'\n';
+            return 0;
+        }
+        for(int k=0; k<n; ++k){
+            if(d[k]!=inf){
+                cout<<d[k]<<' ';
+            }
+            else cout<<"INF"<<' ';
+        }
+        cout<<'\n';
+    }
+
+    return 0;
+}
+

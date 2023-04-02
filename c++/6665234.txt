@@ -1,0 +1,125 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct tree_node_s {
+  struct tree_node_s *left;
+  struct tree_node_s *right;
+  int data;
+} tree_node_t;
+
+tree_node_t* create_node(int val)
+/* 値 val を保持する新しい節点を作成し, その節点へのポインタを返す */
+{
+  tree_node_t *new_node;
+  new_node = (tree_node_t*) malloc(sizeof(tree_node_t));
+  new_node->data = val;
+  new_node->left = NULL;
+  new_node->right = NULL;
+  return new_node;
+}
+
+
+tree_node_t* insert(tree_node_t *n, int val)
+/* n を根とする二分木に val (の節点) を挿入する */
+{
+  /* val と同じ値を持つ節点が存在すれば挿入しないようにせよ. */
+    if ( n == NULL) {
+    n = create_node(val);
+    }
+    if (val < n->data) {
+        n->left = insert(n->left, val);
+    }
+    if (val > n->data){
+        n->right = insert(n->right, val);
+    }
+    return n;
+}
+
+void pre(tree_node_t *n)//preorder巡回
+{
+    if( n == NULL ) return;//もし葉であれば返す
+
+    printf(" %d", n->data);//先に節点出力して、左部分木巡回、右部分木巡回に進む
+    pre(n->left);
+    pre(n->right);
+}
+
+void in(tree_node_t *n)
+{
+    if( n == NULL ) return;//もし葉であれば返す
+
+    in(n->left);//先に左部分木を巡回して、節点を出力して、右部分木巡回に進む
+    printf(" %d", n->data);
+    in(n->right);
+}
+
+
+
+void tprint(tree_node_t *n)
+/* 二分木の内容を表示する */
+{
+    in(n);
+    printf("\n");
+    pre(n);
+    printf("\n");
+}
+
+
+tree_node_t* find(tree_node_t *n, int val)
+/* *n を根とする二分木中に値が val の節点を探す
+   見つかればその節点のポインタを, なければ NULL を返す */
+{
+    while( n != NULL )
+    {
+        if( n->data == val ) return n;
+        else{
+            if( n->data < val) n = n->right;
+            else n = n->left;
+        }
+    }
+    return NULL;
+}
+
+
+void all_delete(tree_node_t *n)
+/* 二分木のデータを解放する */
+{
+  if (n != NULL) {
+    all_delete(n->left);
+    all_delete(n->right);
+    free(n);
+  }
+}
+
+int main(void)
+{
+    tree_node_t *root = NULL;
+    tree_node_t *tmp = NULL;
+    int i,n,key;
+    char str[10];
+    scanf("%d", &n);
+
+    for( i = 0; i < n; i++)
+    {
+        scanf("%s",str);
+        if(str[0] == 'i')
+        {
+            scanf("%d",&key);
+            root = insert(root, key);
+        }
+        else if(str[0] == 'f')
+        {
+            scanf("%d",&key);
+            tmp = find(root,key);
+            if(tmp == NULL)    printf("no\n");
+            else    printf("yes\n");
+        }
+        else
+        {
+            tprint(root);
+        }
+    }
+
+    all_delete(root);
+    return 0;
+}

@@ -1,0 +1,89 @@
+#include <iostream>
+#include <array>
+#include <cmath>
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////     HEADER    ///////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+#define fequal(a, b) (fabs((a) - (b)) < 1.0e-10)
+constexpr double EPS = 1e-10;
+
+struct Point2D
+{
+    double x, y;
+};
+
+class Vector2D
+{
+public:
+    Vector2D(double x, double y) : x(x), y(y) {}
+    Vector2D(const Point2D &p_start, const Point2D &p_end) : x(p_end.x - p_start.x), y(p_end.y - p_start.y) {}
+
+    inline double X() const { return x; };
+    inline double Y() const { return y; };
+
+    inline Vector2D operator+(const Vector2D &v) const { return Vector2D(x + v.x, y + v.y); };
+    inline Vector2D operator-(const Vector2D &v) const { return Vector2D(x - v.x, y - v.y); };
+    inline Vector2D operator*(double k) const { return Vector2D(x * k, y * k); };
+    inline Vector2D operator/(double k) const { return Vector2D(x / k, y / k); };
+
+    inline double dot(const Vector2D &v) const { return x * v.x + y * v.y; };
+    inline double cross(const Vector2D &v) const { return x * v.y - y * v.x; };
+    inline double norm() const { return std::sqrt(x * x + y * y); };
+    inline Vector2D unit() const { return (*this) / norm(); };
+
+    inline bool parallel(Vector2D &v) const { return fequal(cross(v), 0); };
+    inline bool orthogonal(Vector2D &v) const { return fequal(dot(v), 0); };
+
+    double subtended_angle(const Vector2D &v) const;
+
+private:
+    double x, y;
+};
+
+double Vector2D::subtended_angle(const Vector2D &v) const
+{
+    double norm_a = dot(*this);
+    double norm_b = v.dot(v);
+    if (norm_a == 0 || norm_b == 0)
+        return 0;
+
+    double value = dot(v) / (norm_a * norm_b);
+    return std::acos(value);
+}
+
+void read_point(Point2D &p)
+{
+    std::cin >> p.x >> p.y;
+}
+//////////////////////////////////////// END OF HEADER ///////////////////////////////////////////
+
+Vector2D projection(const Vector2D &a, const Vector2D &b)
+{
+    double x = a.dot(b) / a.dot(a);
+    return a * x;
+}
+
+int main()
+{
+    Point2D p1, p2;
+
+    read_point(p1);
+    read_point(p2);
+
+    auto vec_a = Vector2D(p1, p2);
+
+    double q;
+    std::cin >> q;
+
+    for (int i = 0; i < q; i++)
+    {
+        Point2D p{};
+        read_point(p);
+
+        auto vec_b = Vector2D(p1, p);
+        auto proj_vec = projection(vec_a, vec_b);
+
+        printf("%.10f %.10f\n", p1.x + proj_vec.X(), p1.y + proj_vec.Y());
+    }
+}

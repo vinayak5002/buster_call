@@ -1,0 +1,115 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+
+public class Main {
+
+	static int[] parent, left, right;
+	static StringBuilder sb = new StringBuilder();
+
+	public static void main(String[] args) throws IOException{
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		PrintWriter out = new PrintWriter(System.out);
+
+		int n = Integer.parseInt(br.readLine());
+
+		parent = new int[n];
+		left = new int[n];
+		right = new int[n];
+
+		String[] num;
+		String input, pre, in, post;
+		int inp, inr, inl;
+		int x = 0;
+
+		for(int i=0; i<n; i++) {
+			parent[i] = -1;
+			left[i] = -1;
+			right[i] = -1;
+		}
+
+		//入力&格納
+		for(int i=0; i<n; i++) {
+
+			input = br.readLine();
+			num = input.split(" ");
+			inp = Integer.parseInt(num[0]);
+			inl = Integer.parseInt(num[1]);
+			inr = Integer.parseInt(num[2]);
+
+			left[inp] = inl;
+			right[inp] = inr;
+
+			if(inl != -1)
+				parent[inl] = inp;
+			if(inr != -1)
+				parent[inr] = inp;
+		}
+
+		for(int i=0; i<n; i++) {
+
+			if(parent[i] == -1)
+				x = i;
+		}
+
+		pre = preOrder(x);
+		in = inOrder(x);
+		post = postOrder(x);
+
+		out.println("Preorder\n" + pre + "\nInorder\n" + in + "\nPostorder\n" + post);
+
+		out.flush();
+	}
+
+
+	//前順
+	static String preOrder(int x) {
+
+		String s = " " + x;
+
+		if(left[x] != -1)
+			s += preOrder(left[x]);
+
+		if(right[x] != -1)
+			s += preOrder(right[x]);
+
+		return s;
+	}
+
+	//中順
+	static String inOrder(int x) {
+
+		String s = "";
+
+		if(left[x] != -1)
+			s += inOrder(left[x]);
+
+		s += " " + x;
+
+		if(right[x] != -1)
+			s += inOrder(right[x]);
+
+		return s;
+
+	}
+
+	//後順
+	static String postOrder(int x) {
+
+		String s = "";
+
+		if(left[x] != -1)
+			s += postOrder(left[x]);
+
+		if(right[x] != -1)
+			s += postOrder(right[x]);
+
+		s += " " + x;
+
+		return s;
+
+	}
+
+}

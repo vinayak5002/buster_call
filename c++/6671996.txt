@@ -1,0 +1,63 @@
+#include <iostream>
+#include <cmath>
+#include <vector>
+#define ll long long
+using namespace std;
+struct RMQ {
+	ll n;
+	vector<ll> dat, lazy;
+	ll INF = pow(2, 31) - 1;
+	RMQ(ll a) {
+		n = 1;
+		while (n < a) n <<= 1;
+		dat.resize(2*n-1, INF);
+		lazy.resize(2*n-1, INF);
+	}
+	void eval(ll k) {
+		if (lazy[k] == INF) return;
+		if (k < n-1) {
+			lazy[2*k+1] = lazy[2*k+2] = lazy[k];
+		}
+		dat[k] = lazy[k];
+		lazy[k] = INF;
+	}
+	void update(ll i, ll x) {
+		update(i, i+1, x, 0, 0, n);
+	}
+	void update(ll a, ll b, ll x, ll k, ll l, ll r) {
+		eval(k);
+		if (a <= l && r <= b){
+			dat[k] = x;
+			if (k < n-1) lazy[2*k+1] = lazy[2*k+2] = x;
+			return;
+		}
+		if (r <= a || b <= l) return;
+		update(a, b, x, 2*k+1, l, (l+r)/2);
+		update(a, b, x, 2*k+2, (l+r)/2, r);
+		dat[k] = min(dat[2*k+1], dat[2*k+2]);
+	}
+	ll find(ll a, ll b) {return find(a, b, 0, 0, n);}
+	ll find(ll a, ll b, ll k, ll l, ll r) {
+		eval(k);
+		if (a <= l && r <= b) return dat[k];
+		if (r <= a || b <= l) return INF;
+		ll vl = find(a, b, 2*k+1, l, (l+r)/2);
+		ll vr = find(a, b, 2*k+2, (l+r)/2, r);
+		return min(vl, vr);
+	}
+};
+int main() {
+	ll n, q; cin >> n >> q;
+	RMQ rmq(n);
+	vector<ll> ans;
+	for (ll i = 0; i < q; i++) {
+		ll c, x, y; cin >> c >> x >> y;
+		if (c == 0) {
+			rmq.update(x, y);
+		} else if (c == 1) {
+			ans.push_back(rmq.find(x, y+1));
+		}
+	}
+	for (auto x: ans) cout << x << endl;
+}
+

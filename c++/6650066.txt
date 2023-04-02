@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <string.h>
+
+
+typedef struct {
+	char word[31];
+	int page[1001];
+} INDEX;
+
+
+
+int main(void)
+{
+	INDEX index[100];
+	char word[31];
+	INDEX *index_p[100], *tmp;
+	int page;
+	int n;
+	int i, j;
+	int flag;
+	
+	
+	memset(index, 0, sizeof(index));
+
+	for (i = 0; i < 100; i++){
+		index_p[i] = &index[i];
+	}
+	
+	n = 0;
+	while (scanf("%s%d", word, &page) != EOF){
+		for (i = 0; i < n; i++){
+			if (strcmp(index_p[i]->word, word) == 0){
+				break;
+			}
+		}
+		
+		if (i == n){
+			strcpy(index_p[n]->word, word);
+			n++;
+		}
+		index_p[i]->page[page] = 1;
+	}
+
+	for (i = 0; i < n; i++){
+		for (j = 0; j < n - i - 1; j++){
+			if (strcmp(index_p[j]->word, index_p[j + 1]->word) > 0){
+				tmp = index_p[j];
+				index_p[j] = index_p[j + 1];
+				index_p[j + 1] = tmp;
+			}
+		}
+	}
+
+	for (i = 0; i < n; i++){
+		printf("%s\n", index_p[i]->word);
+		flag = 0;
+		for (j = 1; j <= 1000; j++){
+			if (index_p[i]->page[j] != 0){
+				if (flag == 1){
+					printf(" ");
+				}
+				flag = 1;
+				printf("%d", j);
+			}
+		}
+		printf("\n");
+	}
+	
+	return (0);
+}

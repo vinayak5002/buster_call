@@ -1,0 +1,61 @@
+#include <stdio.h>
+#define MAX 101
+
+int d[MAX], f[MAX], y[MAX][MAX], judge[MAX];
+int time = 0, n;
+
+void dfs_visit(int i){
+	int j;
+	judge[i] = 1;
+	d[i] = ++time;
+	for(j = 0; j < n; j++){
+		if(judge[j] == 0 && y[i][j] == 1){
+			dfs_visit(j);
+		}
+	}
+	
+	f[i] = ++time;
+	judge[i] = 2;
+}
+
+void dfs(){
+	int i;
+	for(i = 0; i < n; i++){
+		judge[i] = 0;			//0が未探索、1が訪問した、2が訪問済みを表す
+	}
+	
+	for(i = 0; i < n; i++){
+		if(judge[i] == 0){
+			dfs_visit(i);
+		}
+	}
+}
+
+
+int main (void){
+	int i, j, number, count, v;
+	scanf("%d", &n);
+	
+	for(i = 0; i < n; i++){
+		for(j = 0; j < n; j++){
+			y[i][j] = 0;
+		}
+	}
+	
+	for(i = 0; i < n; i++){
+		scanf("%d",&number);
+		scanf("%d", &count);
+		for(j = 1; j <= count; j++){
+			scanf("%d", &v);
+			y[number - 1][v - 1] = 1;
+		}
+	}
+	
+	dfs();
+	
+	for(i = 0; i < n; i++){
+		printf("%d %d %d\n", i + 1, d[i], f[i]);
+	}
+	
+	return 0;
+}

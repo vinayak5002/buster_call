@@ -1,0 +1,52 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <string>
+#include <unordered_map>
+using namespace std;
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int q, com;
+	string key;
+	int x;
+	unordered_multimap<string, int> m;
+	string left, right;
+
+	cin >> q;
+	for (int i = 0; i < q; i++) {
+		cin >> com;
+		if (com == 0) {
+			cin >> key >> x;
+			m.emplace(key, x);
+		}
+		else if (com == 1) {
+			cin >> key;
+			auto p = m.equal_range(key);
+			for (auto it = p.first; it != p.second; it++) {
+				cout << it->second << endl;
+			}
+		}
+		else if (com == 2) {
+			cin >> key;
+			m.erase(key);
+		}
+		else {
+			cin >> left >> right;
+			unordered_multimap<string, int>::const_iterator it = m.lower_bound(left);
+			unordered_multimap<string, int>::const_iterator end = m.upper_bound(right);
+			for (; it != end; it++) {
+				cout << it->first << " " << it->second << endl;
+			}
+		}
+	}
+	return 0;
+}

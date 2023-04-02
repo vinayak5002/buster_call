@@ -1,0 +1,94 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+const vector<int> dx_2d = {1,-1,0,0};
+const vector<int> dy_2d = {0,0,1,-1};
+
+void Yyy(){
+  cout << "Yes" << endl;
+}
+
+void Nnn(){
+  cout << "No" << endl;
+}
+
+void fixprecision(){
+  cout << fixed << setprecision(20);
+}
+
+template<class T> bool chmin(T& a,T b){
+  if(a > b){
+    a = b;
+    return true;
+  }
+  else return false;
+}
+
+template<class T> bool chmax(T& a,T b){
+  if(a < b){
+    a = b;
+    return true;
+  }
+  else return false;
+}
+
+int main(){
+  int N;
+  cin >> N;
+  vector<vector<int>> G(N);
+  map<string,vector<int>> Map;
+  for(int i=0;i<N;i++){
+    int k;
+    cin >> k;
+    for(int j=0;j<k;j++){
+      string l;
+      cin >> l;
+      Map[l].push_back(i);
+    }
+  }
+  vector<vector<bool>> E(N,vector<bool>(N,false));
+  for(auto L:Map){
+    vector<int> A = L.second;
+    for(int i=0;i<A.size();i++){
+      for(int j=0;j<A.size();j++){
+        if(i != j){
+          E[A[i]][A[j]] = true;
+        }
+      }
+    }
+  }
+  vector<vector<int>> same(N,vector<int>(N,0));
+  for(int i=0;i<N;i++){
+    for(int j=0;j<N;j++){
+      for(int k=0;k<N;k++){
+        if(E[i][k] && E[j][k]){
+          same[i][j]++;
+        }
+      }
+    }
+  }
+  for(int i=0;i<N;i++) for(int j=0;j<N;j++) if(E[i][j]) G[i].push_back(j);
+  long long int ans = 0;
+  for(int i=0;i<N;i++){ //人iが真ん中→長さ4のパスの真ん中
+    vector<int> nei = G[i];
+    int M = nei.size();
+    for(int j=0;j<M;j++){ //人nei[j]が2番目
+      for(int k=0;k<M;k++){ //人nei[k]が4番目
+        if(j == k) continue;
+        int a = nei[j];
+        int b = nei[k];
+        int J = G[a].size(); //人aとコミュニケーション可能な人の数
+        int K = G[b].size(); //人bとコミュニケーション可能な人の数
+        J--; //人iは除く
+        K--; //人iは除く
+        if(E[a][b]){ //nei[j]とnei[k]がコミュニケーション可能なら
+          J--; //人bは除く
+          K--; //人aは除く
+        }
+        ans += J*K;
+        ans -= same[a][b]-1;
+      }
+    }
+  }
+  cout << ans << endl;
+}

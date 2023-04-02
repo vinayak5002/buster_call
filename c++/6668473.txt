@@ -1,0 +1,83 @@
+#include <stdio.h>
+
+void A(int a[6]){
+    int b = a[0];
+    a[0] = a[4];
+    a[4] = a[5];
+    a[5] = a[1];
+    a[1] = b;
+}
+
+void B(int c[6]){
+    int d = c[1];
+    c[1] = c[3];
+    c[3] = c[4];
+    c[4] = c[2];
+    c[2] = d;
+}
+
+int C(const int f[6], const int e[6]){
+    int g;
+    int h[6];
+    for(g=0;g<6;g++){
+        h[g] = f[g];
+    }
+    for(g=0;g<4;g++){
+        int i;
+        for(i=0;i<6;i++){
+            printf("%d", e[i]);
+            if(e[i] != h[i]){
+                break;
+            }
+        }
+        if(i>=6){
+            return 1;
+        }
+        B(h);
+    }
+    return 0;
+}
+
+int D(const int X[6], const int Y[6]){
+    int H[6];
+    int Z;
+    for(Z=0;Z<6;Z++){
+        H[Z] = Y[Z];
+    }
+    if(C(X,Y))return 1;
+    for(Z=0;Z<4;Z++){
+        B(Y);
+        A(Y);
+        C(X,Y);
+        A(Y);
+        A(Y);
+        A(Y);
+    }
+    A(Y);
+    A(Y);
+    C(X,Y);
+    return C(X,Y);
+}
+
+int main(void){
+    int n;
+    scanf("%d", &n);
+    int i,j,k;
+    int count[100][6];
+    if(scanf("%d", &n) != 1) return 1;
+    for(i=0;i<n;i++){
+        for(j=0;j<6;j++){
+            if(scanf("%d", &count[i][j]) != 1) return 1;
+        }
+    }
+    for(i=0;i<n;i++){
+        for(j=i+1;j<n;j++){
+            if(D(count[i],count[j])){
+                printf("No\n");
+                return 0;
+            }
+        }
+    }
+    printf("Yes\n");
+    return 0;
+}

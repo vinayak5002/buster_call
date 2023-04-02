@@ -1,0 +1,32 @@
+import sys
+readline = sys.stdin.readline
+
+def main():
+    while True:
+        N = int(readline())
+        if N == 0:
+            break
+        A = list(map(int, readline().split()))
+        dp = [[0] * N for _ in range(N)]
+
+        for i in range(N-1):
+            if abs(A[i]-A[i+1]) <= 1:
+                dp[i][i+1] += 2
+
+        for w in range(2, N):
+            for i in range(N):
+                j = i + w
+                if j >= N:
+                    break
+                if abs(A[i]-A[j]) <= 1 and dp[i+1][j-1] == w-1:
+                    dp[i][j] = w + 1
+                else:
+                    for mid in range(i, j):
+                        if dp[i][j] < dp[i][mid]+dp[mid+1][j]:
+                            dp[i][j] = dp[i][mid]+dp[mid+1][j]
+
+        print(dp[0][-1])
+
+if __name__ == '__main__':
+    main()
+

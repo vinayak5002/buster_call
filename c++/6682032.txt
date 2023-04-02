@@ -1,0 +1,153 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for (int i = 0; (i) < (int) (n); (i) ++)
+#define all(a) (a).begin(), (a).end()
+#define rall(a) (a).rbegin(), (a).rend()
+using ll = long long;
+template<typename T, typename U> ostream& operator << (ostream& os, const pair<T, U>& p) { os << p.first << " " << p.second; return os; }
+template<typename T> ostream& operator << (ostream& os, const vector<T>& vec) { for (int i = 0; i < vec.size(); i ++) { os << vec[i] << (i + 1 == vec.size() ? "" : " "); } return os; }
+template<typename T> ostream& operator << (ostream& os, const set<T> &p) { os << "{"; for (auto it = p.begin(); it != p.end(); it ++) { if (it != p.begin()) { os << ", "; } os << *it; } os << "}"; return os; }
+template<typename T, typename U> ostream& operator << (ostream& os, const map<T, U> &p) { os << "{"; for (auto it = p.begin(); it != p.end(); it ++) { if (it != p.begin()) { os << ", "; } os << (*it).first << ": " << (*it).second; } os << "}"; return os; }
+template<typename T> bool chmin(T &a, const T& b) { if (a > b) { a = b; return true; } return false; }
+template<typename T> bool chmax(T &a, const T& b) { if (a < b) { a = b; return true; } return false; }
+void dump_inner() { cerr << endl; }
+template <typename T, typename... U> void dump_inner(T front, U... rest) { cerr << front; if (sizeof...(rest) > 0) { cerr << ", "; } dump_inner(rest...); }
+#ifdef LOCAL
+#define dump(...) cerr << #__VA_ARGS__ << " = ", dump_inner(__VA_ARGS__)
+#else
+#define dump(...)
+#endif
+
+vector<ll> sz(52);
+vector<map<ll, ll>> vec(52);
+vector<set<ll>> has(52);
+
+void init() {
+        rep(i, 52) {
+                sz[i] = 0;
+                vec[i].clear();
+                has[i].clear();
+        }
+}
+
+int idx(char c) {
+        int n = c - 'a';
+        if (0 <= n && n < 26) {
+                return n;
+        } else {
+                return 26 + c - 'A';
+        }
+}
+
+ll number(string &s, int &p) {
+        ll res = 0;
+        while (isdigit(s[p])) {
+                res *= 10;
+                res += s[p] - '0';
+                p ++;
+        }
+        return res;
+}
+
+ll expression(string &s, int &p) {
+        if (isdigit(s[p])) {
+                return number(s, p);
+        }
+        char name = s[p];
+        p ++;
+        assert(s[p] == '[');
+        p ++;
+        ll pos = expression(s, p);
+        if (pos == -1) {
+                return -1;
+        }
+        if (sz[idx(name)] <= pos) {
+                return -1;
+        }
+        if (has[idx(name)].count(pos) == 0) {
+                return -1;
+        }
+        assert(s[p] == ']');
+        p ++;
+        return vec[idx(name)][pos];
+}
+
+void declaration(string &s, int &p) {
+        char name = s[p];
+        p ++;
+        assert(s[p] == '[');
+        p ++;
+        ll num = number(s, p);
+        assert(s[p] == ']');
+        sz[idx(name)] = num;
+}
+
+bool assignment(string &s, int &p) {
+        char name = s[p];
+        p ++;
+        assert(s[p] == '[');
+        p ++;
+        ll pos = expression(s, p);
+        if (pos == -1) {
+                return false;
+        }
+        if (sz[idx(name)] <= pos) {
+                return false;
+        }
+        assert(s[p] == ']');
+        p ++;
+        assert(s[p] == '=');
+        p ++;
+        ll val = expression(s, p);
+        if (val == -1) {
+                return false;
+        }
+        vec[idx(name)][pos] = val;
+        has[idx(name)].insert(pos);
+        return true;
+}
+
+int ans(vector<string> &ss) {
+        rep(i, ss.size()) {
+                int p = 0;
+                if (count(all(ss[i]), '=') == 1) {
+                        bool ok = assignment(ss[i], p);
+                        if (not ok) {
+                                return i + 1;
+                        }
+                } else {
+                        declaration(ss[i], p);
+                }
+        }
+        return 0;
+}
+
+void solve() {
+        while (true) {
+                string s;
+                cin >> s;
+                if (s[0] == '.') {
+                        break;
+                }
+                init();
+                vector<string> ss;
+                while (s[0] != '.') {
+                        ss.push_back(s);
+                        cin >> s;
+                }
+                cout << ans(ss) << '\n';
+        }
+}
+
+int main() {
+        cin.tie(nullptr);
+        ios::sync_with_stdio(false);
+        // int t; cin >> t;
+        int t = 1;
+        while (t --) {
+                solve();
+        }
+        return 0;
+}
+
+

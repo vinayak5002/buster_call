@@ -1,0 +1,153 @@
+#include "iostream"
+#include "climits"
+#include "list"
+#include "queue"
+#include "stack"
+#include "set"
+#include "functional"
+#include "algorithm"
+#include "string"
+#include "map"
+#include "unordered_map"
+#include "unordered_set"
+#include "iomanip"
+#include "cmath"
+#include "random"
+#include "bitset"
+#include "cstdio"
+#include "numeric"
+#include "cassert"
+#include "ctime"
+
+using namespace std;
+
+//constexpr long long int MOD = 1000000007;
+constexpr long long int MOD = 998244353;
+constexpr double EPS = 1e-8;
+
+//int N, M, K, T, H, W, L, R;
+long long int N, M, K, T, H, W, L, R;
+
+class UnionFind {
+	vector<int>parent;
+	vector<int>rank;
+public:
+	UnionFind(int num) {
+		num++;
+		parent.resize(num);
+		rank.resize(num);
+		for (int i = 0; i < num; i++) {
+			parent[i] = i;
+			rank[i] = 0;
+		}
+	}
+	int Find(int node) {
+		if (parent[node] == node)return node;
+		else return parent[node] = Find(parent[node]);
+	}
+	void Unite(int u, int v) {
+		u = Find(u);
+		v = Find(v);
+		if (u == v)return;
+		if (rank[u] < rank[v])parent[u] = v;
+		else {
+			parent[v] = u;
+			if (rank[u] == rank[v])rank[u]++;
+		}
+	}
+	bool Check_Same(int u, int v) {
+		return Find(u) == Find(v);
+	}
+};
+
+struct Edge {
+	int cost;
+	int u, v;
+	Edge(int cost, int u, int v) :cost(cost), u(u), v(v) {
+
+	}
+	bool operator<(const Edge& edge)const {
+		return cost < edge.cost;
+	}
+};
+
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(0);
+
+	while (cin >> N >> M >> K, N) {
+		vector<int>au;
+		vector<int>av;
+		vector<int>aw;
+		vector<int>bu;
+		vector<int>bv;
+		vector<int>bw;
+		for (int i = 0; i < M; i++) {
+			int a, b, c;
+			cin >> a >> b >> c;
+			a--, b--;
+			char ab;
+			cin >> ab;
+			if (ab == 'A') {
+				au.push_back(a);
+				av.push_back(b);
+				aw.push_back(c);
+			}
+			else {
+				bu.push_back(a);
+				bv.push_back(b);
+				bw.push_back(c);
+			}
+		}
+		long long ans = LLONG_MAX;
+		for (int i = -200; i <= 200; i++) {
+			int score = 0;
+			{
+				UnionFind uf(N);
+				vector<Edge>edge;
+				for (int j = 0; j < au.size(); j++) {
+					edge.push_back(Edge(aw[j] + i, au[j], av[j]));
+				}
+				for (int j = 0; j < bu.size(); j++) {
+					edge.push_back(Edge(bw[j], -bu[j], -bv[j]));
+				}
+				reverse(edge.begin(), edge.end());
+				stable_sort(edge.begin(), edge.end());
+				int num = 0;
+				for (auto j : edge) {
+					if (uf.Check_Same(abs(j.u), abs(j.v)))continue;
+					uf.Unite(abs(j.u), abs(j.v));
+					score += j.cost;
+					num += j.u + j.v > 0;
+				}
+				L = num;
+			}
+			{
+				UnionFind uf(N);
+				vector<Edge>edge;
+				for (int j = 0; j < au.size(); j++) {
+					edge.push_back(Edge(aw[j] + i, au[j], av[j]));
+				}
+				for (int j = 0; j < bu.size(); j++) {
+					edge.push_back(Edge(bw[j], -bu[j], -bv[j]));
+				}
+				stable_sort(edge.begin(), edge.end());
+				int num = 0;
+				for (auto j : edge) {
+					if (uf.Check_Same(abs(j.u), abs(j.v)))continue;
+					uf.Unite(abs(j.u), abs(j.v));
+					num += j.u + j.v > 0;
+				}
+				R = num;
+			}
+			if (L > R) {
+				swap(L, R);
+			}
+			if (L <= K && K <= R) {
+				ans = min(ans, score - i * K);
+			}
+		}
+		if (ans == LLONG_MAX)ans = -1;
+		cout << ans << endl;
+	}
+}

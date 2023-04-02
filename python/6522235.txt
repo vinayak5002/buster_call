@@ -1,0 +1,163 @@
+class Dice
+  TOP = 0
+  FRONT = 1
+  RIGHT = 2
+  LEFT = 3
+  BACK = 4
+  BOTTOM = 5
+
+  def initialize(faces)
+    @faces = faces
+    @labels = [1, 2, 3]
+    @normalized = false
+  end
+  attr_reader :faces
+
+  def self.parse(s)
+    faces = s.split.map(&:to_i)
+    raise "Invalid Dice string: #{s}" if 6 != faces.size
+    new(faces)
+  end
+
+  public
+  def identical?(other)
+    normalize! unless normalized?
+    other.normalize! unless other.normalized?
+    faces == other.faces
+  end
+
+  def normalized?
+    @normalized
+  end
+
+  def normalize!
+    i = faces.index(faces.min)
+    case i
+    when TOP
+      # do nothing
+    when FRONT
+      operate('N')
+    when RIGHT
+      operate('W')
+    when LEFT
+      operate('E')
+    when BACK
+      operate('S')
+    else # BOTTOM
+      operate('E')
+      operate('E')
+    end
+    update_faces
+
+    j = faces.index(faces[1..4].min)
+    spin(j-1)
+
+    @normalized = true
+    self
+  end
+
+  def top
+    @labels[TOP]
+  end
+
+  def top=(v)
+    @labels[TOP] = v
+  end
+
+  def front
+    @labels[FRONT]
+  end
+
+  def front=(v)
+    @labels[FRONT] = v
+  end
+
+  def right
+    @labels[RIGHT]
+  end
+
+  def right=(v)
+    @labels[RIGHT] = v
+  end
+
+  def bottom
+    opposite(top)
+  end
+
+  def back
+    opposite(front)
+  end
+
+  def left
+    opposite(right)
+  end
+
+  private
+  def operate(cmd)
+    case cmd
+    when 'N'
+      t = front
+      f = bottom
+      self.top = t
+      self.front = f
+    when 'E'
+      t = left
+      r = top
+      self.top = t
+      self.right = r 
+    when 'S'
+      t = back
+      f = top
+      self.top = t
+      self.front = f
+    else # W
+      t = right
+      r = bottom
+      self.top = t
+      self.right = r
+    end
+  end
+
+  def opposite(label)
+    7 - label
+  end
+
+  def face(label)
+    @faces[label-1]
+  end
+
+  def update_faces
+    @faces = ( @labels + [left, back, bottom] ).map{|l| face(l) }
+    @labels = [1, 2, 3]
+  end
+
+  def spin(n)
+    case n
+    when 0
+      # do nothing
+      f = front
+      r = right
+    when 1
+      f = right
+      r = back
+    when 2
+      f = left
+      r = front
+    else # 3
+      f = back
+      r = left
+    end
+    self.front = f
+    self.right = r
+
+    update_faces
+  end
+end
+
+def main
+  dices = 2.times.map{ Dice.parse(gets.chomp) }
+  puts dices[0].identical?(dices[1]) ? 'Yes' : 'No'
+end
+
+main()
+

@@ -1,0 +1,51 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+
+using namespace std;
+
+template<typename T>
+class binary{
+    public:
+    T st;
+    T limit;
+    T p;
+    binary(T lim): st{1}, limit{static_cast<T>(pow(2, lim))}, p{lim}{}
+    ~binary(){}
+    const bool get(T n) const{
+        T temp;
+        temp=st/pow(2, n);
+        return (temp%2==1) ? true : false;
+    }
+    binary operator++(){
+        ++st;
+        if(st>limit)st=0;
+        return *this;
+    }
+};
+
+template<typename T>
+bool check(vector<T>& vec, T num){
+    for(binary<T> bin{static_cast<T>(vec.size())};bin.st!=0;++bin){
+        T sum{0};
+        for(T i=0;i<vec.size();++i){
+            if(bin.get(i))sum+=vec[i];
+            if(sum==num)return true;
+        }
+    }
+    return false;
+}
+int main(){
+    vector<int> A;
+    int n, q, temp;
+    cin>>n;
+    for(int i=0; i<n;++i){
+        cin>>temp;
+        A.push_back(temp);
+    }
+    cin>>q;
+    for(int i=0; i<q; ++i){
+        cin>>temp;
+        cout<< ((check(A, temp)) ? "yes\n" : "no\n");
+    }
+}

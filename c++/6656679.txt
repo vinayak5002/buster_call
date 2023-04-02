@@ -1,0 +1,92 @@
+#include<stdio.h>
+#define MAX 10000
+#define NIL -1
+
+
+typedef struct{
+	int p;//parent
+	int l;//left
+	int r;//right
+}Node;
+
+Node T[MAX];//Tree
+int n;
+
+void preParse(int u){
+	
+	if( u == NIL ){
+		return;
+	}
+	printf(" %d",u);
+	preParse( T[u].l );
+	preParse( T[u].r );
+}
+
+void inParse(int u){
+	
+	if( u == NIL ){
+		return;
+	}
+	inParse( T[u].l );
+	printf(" %d",u);
+	inParse( T[u].r );
+	
+}
+
+void postParse(int u){
+	
+	if( u == NIL ){
+		return;
+	}
+	postParse( T[u].l );
+	postParse( T[u].r );
+	printf(" %d",u);
+	
+}
+
+int main(void){
+	
+	int i;
+	int id, left, right;
+	int root = 0;
+	
+	scanf("%d", &n);
+	
+	for( i = 0 ; i < n ; i++ ){
+		T[i].p = NIL;
+	}
+	
+	for( i = 0 ; i < n ; i++ ){
+		scanf("%d %d %d", &id, &left, &right);
+		
+		T[id].l = left;
+		T[id].r = right;
+		
+		if( left != NIL ){
+			T[left].p = id;
+		}
+		if( right != NIL ){
+			T[right].p = id;
+		}
+	}
+	
+	for( i = 0 ; i < n ; i++ ){
+		if( T[i].p == NIL ){
+			root = i;
+		}
+	}
+	
+	printf("Preorder\n");
+	preParse(root);
+	printf("\n");
+	printf("Inorder\n");
+	inParse(root);
+	printf("\n");
+	printf("Postorder\n");
+	postParse(root);
+	printf("\n");
+	
+	return 0;
+	
+}
+

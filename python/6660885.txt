@@ -1,0 +1,155 @@
+//#include <atcoder/all>
+#include <bits/stdc++.h>
+using namespace std;
+using lint = long long;
+constexpr lint mod = 1e9 + 7;
+#define all(x) begin(x), end(x)
+#define bitcount(n) __builtin_popcountll((lint)(n))
+#define fcout cout << fixed << setprecision(15)
+#define highest(x) (63 - __builtin_clzll(x))
+#define rep(i, n) for(int i = 0; i < int(n); i++)
+#define rep2(i, l, r) for(int i = int(l); i < int(r); i++)
+#define repr(i, n) for(int i = int(n) - 1; i >= 0; i--)
+#define repr2(i, l, r) for(int i = int(r) - 1; i >= int(l); i--)
+#define accumulate you cannot use this word!
+constexpr int inf9 = 1e9; constexpr lint inf18 = 1e18;
+inline void Yes(bool condition){ if(condition) cout << "Yes" << endl; else cout << "No" << endl; }
+template<class itr> void array_output(itr start, itr goal){ for(auto i = start; i != goal; i++) cout << (i == start ? "" : " ") << (*i); cout << endl; }
+template<class itr> void cins(itr first, itr last){ for(auto i = first; i != last; i++){ cin >> (*i); } }
+template<class T> T gcd(T a, T b){ if(b) return gcd(b, a % b); else return a; }
+template<class T> T lcm(T a, T b){ return a / gcd(a, b) * b; }
+template<class T> bool chmax(T &a, const T &b){ if(a < b){ a = b; return 1; } return 0; }
+template<class T> bool chmin(T &a, const T &b){ if(b < a){ a = b; return 1; } return 0; }
+inline int has(lint i, int j){ return (i >> j) & 1; }
+int dy[4] = {1, 0, -1, 0}; int dx[4] = {0, 1, 0, -1};
+bool is_inside(lint y, lint x, lint H, lint W){ return (0 <= y && y < H && 0 <= x && x < W); }
+
+struct io_init {
+    io_init() {
+        cin.tie(nullptr); cout.tie(nullptr);
+        std::ios::sync_with_stdio(false);
+    }
+} io_init;
+
+template<class T = int>
+struct Edge{
+    int from, to;
+    T cost;
+    int id;
+    
+    Edge() = default;
+    Edge(int from, int to, T cost = 1, int id = -1) : from(from), to(to), cost(cost), id(id) {}
+    
+    operator int() const { return to; }
+};
+
+template<class T = int>
+struct Graph{
+private:
+    vector<vector<Edge<T>>> g;
+public:
+    int edge_cnt = 0;
+    T INF = numeric_limits<T>::max() / 4;
+    
+    Graph() = default;
+    
+    explicit Graph(int n) : g(n) {}
+    
+    int size(){
+        return int(g.size());
+    }
+    
+    void add_directed_edge(int from, int to, T cost = 1){
+        g[from].push_back(Edge(from, to, cost, edge_cnt++));
+    }
+    
+    void add_edge(int from, int to, T cost = 1){
+        g[from].push_back(Edge(from, to, cost, edge_cnt));
+        g[to].push_back(Edge(to, from, cost, edge_cnt++));
+    }
+    
+    vector<Edge<T>>& operator [](int k){
+        return g[k];
+    }
+    
+    void resize(int n){
+        g.resize(n);
+    }
+};
+template<class T = int>
+using Edges = vector<Edge<T>>;
+
+struct UnionFind{
+    int sz;
+    vector<int> data;
+    
+    UnionFind(int n): sz(n), data(n, -1) { }
+    
+    int find(int k){
+        if(data[k] < 0){
+            return k;
+        }else{
+            return data[k] = find(data[k]);
+        }
+    }
+    
+    bool unite(int a, int b){
+        a = find(a), b = find(b);
+        if(a == b) return false;
+        if(-data[a] < -data[b]){
+            swap(a, b);
+        }
+        data[a] += data[b];
+        data[b] = a;
+        return true;
+    }
+};
+
+template<class T>
+Graph<T> MST(Graph<T> g){
+    int n = g.size();
+    
+    Edges<T> edges;
+    rep(at, n) for(auto e: g[at]){
+        edges.push_back(e);
+    }
+    
+    sort(all(edges), [](Edge<T> e1, Edge<T> e2){ return e1.cost < e2.cost; });
+    
+    UnionFind uf(n);
+    Graph<T> g_ret(n);
+    for(auto e: edges){
+        if(uf.unite(e.from, e.to)){
+            g_ret.add_edge(e.from, e.to, e.cost);
+        }
+    }
+    
+    return g_ret;
+}
+
+
+int main(){
+    int n;
+    cin >> n;
+    Graph<lint> g(n);
+    rep(i, n) rep(j, n){
+        int a;
+        cin >> a;
+        if(a == -1) continue;
+        
+        g.add_edge(i, j, a);
+    }
+    
+    auto mst = MST(g);
+    lint ans = 0;
+    rep(at, n) for(auto e: mst[at]){
+        int to = e.to;
+        
+        if(at < to) ans += e.cost;
+    }
+    
+    cout << ans << endl;
+}
+
+
+

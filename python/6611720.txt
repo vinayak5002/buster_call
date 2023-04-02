@@ -1,0 +1,49 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace AtCoderCS {
+    internal class Program {
+        static void Main(string[] args) {
+            long s = long.Parse(Console.ReadLine());
+
+            //15の塊をブロックとする
+            //(開始位置, 長さ, 個数)
+            List<(long, long, long)> blocks = new List<(long, long, long)>();
+            blocks.Add((0, 8 + 35, 1));
+            for (long i = 2; ; i++) {
+                //i桁
+                long blockidx = blocks[blocks.Count - 1].Item1 + blocks[blocks.Count - 1].Item2 * blocks[blocks.Count - 1].Item3;
+                if (blockidx > s) break;
+                long blocklen = i * 8 + 32;
+                long blockcount = (long)(Math.Floor(Math.Pow(10, i) / 15) - Math.Ceiling(Math.Pow(10, i - 1) / 15));
+                blocks.Add((blockidx, blocklen, blockcount));
+
+                //桁上り
+                blockidx = blocks[blocks.Count - 1].Item1 + blocks[blocks.Count - 1].Item2 * blocks[blocks.Count - 1].Item3;
+                if (blockidx > s) break;
+                blocklen = i * 8 + 35;
+                blocks.Add((blockidx, blocklen, 1));
+            }
+            long blockpos = (s - blocks[blocks.Count - 1].Item1) / blocks[blocks.Count - 1].Item2 + blocks.Take(blocks.Count - 1).Sum(s => s.Item3);
+            long idx = (s - blocks[blocks.Count - 1].Item1) % blocks[blocks.Count - 1].Item2;
+            long startnum = 1 + 15 * blockpos;
+
+            StringBuilder sb = new StringBuilder();
+            for (long i = startnum; i <= startnum + 20; i++) {
+                if (i % 15 == 0)
+                    sb.Append("FizzBuzz");
+                else if (i % 3 == 0)
+                    sb.Append("Fizz");
+                else if (i % 5 == 0)
+                    sb.Append("Buzz");
+                else
+                    sb.Append(i);
+            }
+
+            string ans = sb.ToString()[(int)(idx - 1)..(int)(idx + 19)];
+        }
+    }
+}
+

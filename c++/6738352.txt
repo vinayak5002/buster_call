@@ -1,0 +1,56 @@
+#include <iostream>
+#include <vector>
+
+int nv, ne;
+std::vector<bool> visited;
+
+using adj_list = std::vector<std::vector<int>>;
+
+bool flag = false;
+int targ_v_idx;
+
+void dfs(const adj_list &g, int v) {
+  visited[v] = true;
+
+  for(auto next_v : g[v]) {
+    if(visited[next_v])
+      continue;
+
+    if(targ_v_idx == next_v) {
+      flag = true;
+      return; 
+    }
+    
+    dfs(g, next_v);
+  }
+}
+
+int main() {
+  std::cin >> nv >> ne;
+
+  adj_list graph(nv);
+
+  for(int i = 0; i < ne; ++i) {
+    int s, t;
+    std::cin >> s >> t;
+    graph[s].push_back(t);
+  }
+
+  for(int i = 0; i < nv; ++i) {
+    targ_v_idx = i;
+    visited.assign(nv, false);
+    flag = false;
+    dfs(graph, i);
+
+    if(flag) {
+      std::cout << "1\n";
+      break;
+    }
+  }
+  if(!flag) {
+    std::cout << "0\n";
+  }
+
+  return 0;
+}
+

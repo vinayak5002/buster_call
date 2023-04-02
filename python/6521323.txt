@@ -1,0 +1,83 @@
+import java.io.*;
+import java.util.*;
+import java.math.BigDecimal;
+import java.lang.Object;
+import java.util.function.*;
+
+public class Main {
+  public static void main(String[] args){
+      int n,m,s=0,t,sum,ans=0,mx,mn,cnt;
+      int[] a=new int[9],b=new int[8];
+      String str,S="01234567";
+      Scanner scanner =new Scanner(System.in);      
+       Queue<Pair<String, Integer>> q = new ArrayDeque<Pair<String, Integer>>();
+       HashMap<String,Integer>hs=new HashMap<String,Integer>();
+       q.add(new Pair<String, Integer>(S,0));
+       while(!q.isEmpty()){
+         Pair<String,Integer> w=q.poll();
+         Pair<String,Integer> x=new Pair<String,Integer>();
+        if(hs.containsKey(w.first))continue;
+         for(int i=0;i<8;i++){
+           if(w.first.charAt(i)=='0')s=i;
+         }
+         w.print();
+         hs.put(w.first,w.second);
+         if(!(s==3||s==7)){
+           x.second=w.second+1;
+           x.first=swap(w.first,Math.toIntExact(s),Math.toIntExact(s+1));
+           if(!hs.containsKey(x.first))q.add(new Pair<String,Integer>(x));
+         }
+         if(!(s==0||s==4)){
+          x.second=w.second+1;
+          x.first=swap(w.first,Math.toIntExact(s),Math.toIntExact(s-1));
+          if(!hs.containsKey(x.first))q.add(new Pair<String,Integer>(x));
+        }
+        {
+          x.second=w.second+1;
+          x.first=swap(w.first,Math.toIntExact(s),Math.toIntExact(s^4));
+          if(!hs.containsKey(x.first))q.add(new Pair<String,Integer>(x));
+        }
+      }
+      while(scanner.hasNext()){
+       //n=Integer.parseInt(scanner.next());
+       sum=0;
+       for(int i=0;i<8;i++){
+        a[i]=Integer.parseInt(scanner.next());
+        sum*=10;
+        sum+=a[i];
+       }
+       str=Integer.valueOf(sum).toString();
+       if(a[0]==0)str="0"+str;
+       System.out.println(str);
+       ans=hs.get(str);
+       System.out.println(ans);
+      }
+      scanner.close();
+  }
+    
+    static String swap(String str, int i, int j)
+    {
+        char ch[] = str.toCharArray();
+        char tempo = ch[i];
+        ch[i] = ch[j];
+        ch[j] = tempo;
+        return new String(ch);
+    }
+}   
+class Pair<T,E>{
+    T first;
+    E second;
+    public Pair(T a,E b){
+      first=a;
+      second=b;
+    }
+    public Pair(Pair<T,E>x){
+      first=x.first;
+      second=x.second;
+    }
+    public Pair(){}
+    void print(){
+      System.out.println("first:"+first+" second:"+second);
+    }
+  }
+  

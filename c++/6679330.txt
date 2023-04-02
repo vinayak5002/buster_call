@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef pair<int, int> Pair;
+
+int N;
+vector<Pair> coords;
+vector<bool> visited;
+
+long solve() {
+    long totalCost = 0;
+
+    priority_queue<Pair, vector<Pair>, greater<Pair>> queue;
+    queue.push(make_pair(0, 0));
+
+    int numVisitedCities = 0;
+    while (true) {
+        Pair p = queue.top();
+        queue.pop();
+        while (visited[p.second]) {
+            p = queue.top();
+            queue.pop();
+        }
+
+        totalCost += p.first;
+        visited[p.second] = true;
+
+        numVisitedCities++;
+        if (numVisitedCities == N)
+            break;
+
+        for (int i = 0; i < N; i++) {
+            if (visited[i])
+                continue;
+            queue.push(make_pair(max(abs(coords[i].first - coords[p.second].first), abs(coords[i].second - coords[p.second].second)), i));
+        }
+    }
+
+    return totalCost;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+
+    cin >> N;
+    coords.resize(N);
+    visited.resize(N);
+    for (int i = 0; i < N; i++)
+        cin >> coords[i].first >> coords[i].second;
+    cout << solve() << endl;
+
+    return 0;
+}
+

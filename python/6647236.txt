@@ -1,0 +1,51 @@
+import sys
+import heapq
+from _heapq import heappush, heappop
+from collections import deque
+
+
+BIG_NUM = 2000000000
+
+
+class Edge:
+    def __init__(self,to,dist):
+        self.to = to
+        self.dist = dist
+
+class Info:
+    def __init__(self,node,sum_dist):
+        self.node = node
+        self.sum_dist = sum_dist
+
+    def __lt__(self,another):
+        return self.sum_dist < another.sum_dist
+
+N = int(input())
+G = [[] for _ in range(N)]
+min_dist = [BIG_NUM]*N
+
+for _ in range(N):
+    node,num,*work = list(map(int,input().split()))
+    for i in range(0,2*num,2):
+        to = work[i]
+        dist = work[i+1]
+        G[node].append(Edge(to,dist))
+
+min_dist[0] = 0
+Q = []
+heappush(Q,Info(0,0))
+
+while len(Q) > 0:
+    info = heappop(Q)
+    if info.sum_dist > min_dist[info.node]:
+        continue
+    for e in G[info.node]:
+        next_node = e.to
+        next_dist = info.sum_dist + e.dist
+        if min_dist[next_node] > next_dist:
+            min_dist[next_node] = next_dist
+            heappush(Q,Info(next_node,next_dist))
+
+for i in range(N):
+    print("%d %d"%(i,min_dist[i]))
+

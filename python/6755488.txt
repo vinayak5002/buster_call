@@ -1,0 +1,29 @@
+V, E = map(int, input().split())
+links = [[] for _ in range(V)]
+for _ in range(E):
+    s, t, d = map(int, input().split())
+    links[s].append((t, d))
+
+inf = float("inf")
+dp = [[inf] * V for _ in range(1<<V)]
+dp[0][0] = 0
+for s in range(1<<V):
+
+    for u in range(V):
+        if s != 0:
+            if (s>>u) & 1 == 0:
+                continue
+
+        for v, c in links[u]:
+            if (s>>v) & 1 == 1:
+                continue
+
+            ns = s | (1<<v)
+            dp[ns][v] = min(dp[ns][v], dp[s][u] + c)
+
+ans = dp[(1<<V)-1][0]
+if ans == inf:
+    ans = -1
+print(ans)
+
+

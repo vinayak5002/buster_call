@@ -1,0 +1,53 @@
+#include <map>
+#include <vector>
+#include <iostream>
+
+using namespace std;
+
+map<pair<int, int>, int>c;
+vector<int> q;
+
+int dfs(int i, int j)
+{
+	if (c.find(pair<int,int>({ i,j })) != c.end())
+		return c[pair<int, int>({i, j})];
+	if (i >= j-1)
+		return 0;
+	if (i == j - 2)
+	{
+		int v = q[i] * q[i + 1] * q[i + 2];
+		c.insert({ { i,j }, v });
+		return v;
+	}
+	int num = INT_MAX;
+	for (int k = i + 1; k < j;k++)
+	{
+		num = min(num, dfs( i, k) + dfs( k, j) + q[i] * q[j] * q[k]);
+	}
+	c.insert({ { i,j }, num });
+	return num;
+}
+int main()
+{
+	int n;
+	cin >> n;
+
+
+
+	q.clear();
+	c.clear();
+
+	for (int i = 0; i < n; i++)
+	{
+		int k1,k2;
+		cin >> k1>>k2;
+		if (i == 0)
+			q.push_back(k1);
+		q.push_back(k2);
+	}
+	int res = dfs(0, n);
+	cout << res << endl;
+
+	return 0;
+
+}

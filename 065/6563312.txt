@@ -1,0 +1,57 @@
+#include <iostream>
+using namespace std;
+
+// 配列に改行を付加して印字
+void print_ln(int A[], int n)
+{
+  for (int i = 0; i < n - 1; i++) 
+    cout << A[i] << " ";
+  cout << A[n-1] << endl;
+}
+ 
+void countingSort(int I[], int O[], int n, int k)
+{
+  int C1[k + 2];
+  for (int x = 0; x <= k + 1; x++)
+    C1[x] = 0;
+  int *C = C1 + 1;           // C[-1] を番兵に
+
+  // C[i] に i の出現数を記録する
+  for (int i = 1; i <= n; i++)
+    C[I[i]]++;
+
+  // C[x] に x 以下の数の出現数を記録する*/
+  for (int x = 1; x <= k; x++)
+    C[x] += C[x - 1];
+  /*
+  // C[x-1] < y <= C[x] ===> O[y] = x
+  for (int x = k; x >= 0; x--)
+    for (int y = C[x]; y > C[x - 1]; y--)
+      O[y] = x;
+  */
+  for (int i = n; i >=1; i--) {
+    int x = I[i];               // i番目の元 x をとる
+    O[C[x]] = x;                // 昇順に並べたとき、C[x] 番目の元は x
+    C[x]--;                     // x を置いたので、x 以下の元の数ははひとつ減る
+  }
+}
+
+int main()
+{
+  int n; 
+  cin >> n;
+  int I[n + 1];
+  int k = 0;
+  for (int i = 1; i <= n; i++) {
+    cin >> I[i];
+    if (I[i] > k)
+      k = I[i];
+  }
+
+  int O[n + 1];
+  countingSort(I, O, n, k); 
+  print_ln(O+1, n);
+ 
+  return 0;
+}
+

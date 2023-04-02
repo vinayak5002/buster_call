@@ -1,0 +1,58 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct list{ int element;     struct list *next; };
+
+int Add(struct list *L, int A);
+int draw(struct list *Adj[], int color[], int i, int c);
+
+int main(void)
+{
+    int i, j, c;
+    
+    int n, m;
+    int s, t;
+    struct list *Adj[100000];
+    int color[100000];
+    int q;
+    int query[100000][2];
+    
+    for( i = 0 ; i <= 100000 - 1 ; i++ ){ Adj[i] = NULL; }
+    for( i = 0 ; i <= 100000 - 1 ; i++ ){ color[i] = 0; }
+    
+    scanf("%d %d", &n, &m);
+    for( i = 0 ; i <= m - 1 ; i++ ){ scanf("%d %d", &s, &t);     Add(Adj[s], t);     Add(Adj[t], s); }
+    scanf("%d", &q);
+    for( i = 0 ; i <= q - 1 ; i++ ){ scanf("%d %d", &query[i][0], &query[i][1]); }
+    
+    c = 1;
+    for( i = 0 ; i <= n - 1 ; i++ )
+    {
+      if( color[i] == 0 ){ draw(Adj, color, i, c);     c++; }
+    }
+    
+    for( i = 0 ; i <= q - 1 ; i++ )
+    {
+      if( color[query[i][0]] == color[query[i][1]] ){ printf("yes"); }
+      else{ printf("no"); }
+    }
+    
+    return 0;
+}
+
+int Add(struct list *L, int A)
+{
+  struct list *node = L;
+  while( node != NULL ){ if( node->element == A ){ return 0; }     node = node->next; }
+  node = (struct list *)malloc( sizeof(struct list) );     node->next = NULL;
+  return 0;
+}
+
+int draw(struct list *Adj[], int color[], int i, int c)
+{
+  struct list *node = Adj[i];
+  color[i] = c;
+  while( node != NULL ){ if( color[node->element] == 0 ){ draw(Adj, color, node->element, c); }     node = node->next; }
+  return 0;
+}
+

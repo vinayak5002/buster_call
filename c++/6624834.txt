@@ -1,0 +1,203 @@
+#define _USE_MATH_DEFINES
+#include<bits/stdc++.h>
+
+using namespace std;
+#define LP(I,S,G) for (long long int I = (S); I < (G); I++)
+#define IN(X) 	for (int in = 0; in < X.size(); in++)cin >> X[in]
+#define OUT(X) 	for (int in = 0; in < X.size(); in++)cout << X[in]<<" "
+#define SORT(X) sort((X).begin(), (X).end())
+#define CSORT(X,Y) sort(X.begin(), X.end(),Y)
+#define COPY(X,Y) copy(X.begin(), X.end(), Y.begin())
+#define ALL(X,Y) for (auto X = (Y).begin(); X != (Y).end(); X++)
+#define FULL(a)  (a).begin(),(a).end()
+#define BFS(Q,S) for(Q.push(S);Q.size()!=0;Q.pop())
+typedef long long int ll;
+typedef unsigned long long int ull;
+long long int M = pow(10, 9) + 7;
+
+
+int dx[] = { 0,-1,0,1 }, dy[] = { -1,0,1,0 };
+
+ll MAX(ll A, ll B) { return ((A) > (B) ? (A) : (B)); }
+ll MIN(ll A, ll B) { return ((A) < (B) ? (A) : (B)); }
+long long int xor128() {
+	static long long int x = 123456789, y = 362436069, z = 521288629, w = 88675123;
+	long long int t = (x ^ (x << 11));
+	x = y; y = z; z = w;
+	return (w = (w ^ (w >> 19)) ^ (t ^ (t >> 8)));
+}
+
+struct HashPair {
+	//注意 constがいる
+	template<class T1, class T2>
+	size_t operator()(const pair<T1, T2> &p) const {
+		//first分をハッシュ化する
+		auto hash1 = hash<T1>{}(p.first);
+		//second分をハッシュ化する
+		auto hash2 = hash<T2>{}(p.second);
+		//重複しないようにハッシュ処理
+		size_t seed = 0;
+		seed ^= hash1 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		seed ^= hash2 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		return seed;
+	}
+};
+template<class I1, class I2>
+istream& operator>>(istream& s, pair<I1, I2>& in) {
+	s >> in.first >> in.second;
+	return s;
+}
+
+class runtime_modint {
+	using u64 = std::uint_fast64_t;
+
+	static u64 &mod() {
+		static u64 mod_ = 0;
+		return mod_;
+	}
+
+public:
+	u64 a;
+	runtime_modint(const u64 x = 0) : a(x % get_mod()) {}
+	u64 &value() noexcept { return a; }
+	const u64 &value() const noexcept { return a; }
+	runtime_modint operator+(const runtime_modint rhs) const {
+		return runtime_modint(*this) += rhs;
+	}
+	runtime_modint operator-(const runtime_modint rhs) const {
+		return runtime_modint(*this) -= rhs;
+	}
+	runtime_modint operator*(const runtime_modint rhs) const {
+		return runtime_modint(*this) *= rhs;
+	}
+	runtime_modint operator/(const runtime_modint rhs) const {
+		return runtime_modint(*this) /= rhs;
+	}
+	runtime_modint &operator+=(const runtime_modint rhs) {
+		a += rhs.a;
+		if (a >= get_mod()) {
+			a -= get_mod();
+		}
+		return *this;
+	}
+	runtime_modint &operator-=(const runtime_modint rhs) {
+		if (a < rhs.a) {
+			a += get_mod();
+		}
+		a -= rhs.a;
+		return *this;
+	}
+	runtime_modint &operator*=(const runtime_modint rhs) {
+		a = a * rhs.a % get_mod();
+		return *this;
+	}
+	runtime_modint &operator/=(runtime_modint rhs) {
+		u64 exp = get_mod() - 2;
+		while (exp) {
+			if (exp % 2) {
+				*this *= rhs;
+			}
+			rhs *= rhs;
+			exp /= 2;
+		}
+		return *this;
+	}
+
+	static void set_mod(const u64 x) { mod() = x; }
+	static u64 get_mod() { return mod(); }
+};
+
+template<class group = long long int>
+class calculator {
+	group cal_add_sub(string& s, ll& now) {
+		if (fail)return 0;
+		group ret = cal_mult_div(s, now);
+		while (1) {
+			if (s[now] == '+') {
+				now++;
+				ret += cal_mult_div(s, now);
+			}
+			else if (s[now] == '-') {
+				now++;
+				ret -= cal_mult_div(s, now);
+			}
+			else return ret;
+		}
+	}
+	group cal_mult_div(string& s, ll& now) {
+		if (fail)return 0;
+		group ret = cal_child(s, now);
+		while (1) {
+			if (s[now] == '*') {
+				now++;
+				ret *= cal_child(s, now);
+			}
+			else if (s[now] == '/') {
+				now++;
+				group x = cal_child(s, now);
+				if (x.a == 0) {
+					fail = 1;
+					return 0;
+				}
+				ret /= x;
+			}
+			else return ret;
+		}
+	}
+
+	group cal_child(string& s, ll& now) {
+		if (fail)return 0;
+		if (s[now] == '(') {
+			now++;
+			group ret = cal_add_sub(s, now);
+			now++;
+			return ret;
+		}
+		return get_group(s, now);
+	}
+	//ここが群によって変わる
+	group get_group(string& s, ll& now) {
+		group ret = 0;
+		while (s[now] - '0' >= 0 && s[now] - '0' <= 9) {
+			ret *= 10;
+			ret += s[now] - '0';
+			now++;
+			if (now == s.size())return ret;
+		}
+		return ret;
+	}
+public:
+	bool fail = 0;
+	group solve(string& s) {
+		ll now = 0;
+		fail = 0;
+		return cal_add_sub(s, now);
+	}
+};
+
+int main() {
+	calculator<runtime_modint> c;
+	while (1) {
+		string s;
+		getline(cin, s);
+		if (s[0] == 0)break;
+		bool f = 0;
+		ll p = 0;
+		string math;
+		LP(i,0,s.size()){
+			if (s[i] == ':') f = 1;
+			else if (!f) {
+				p *= 10;
+				p += s[i] - '0';
+			}
+			else {
+				if (s[i] != ' ')math.push_back(s[i]);
+			}
+		}
+		runtime_modint::set_mod(p);
+		ll ans = c.solve(math).a;
+		if (!c.fail)cout << math << " = " << ans << " (mod " << p << ")"<<endl;
+		else cout << "NG"<<endl;
+	}
+	return 0;
+}

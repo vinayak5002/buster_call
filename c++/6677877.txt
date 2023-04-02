@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+using ld=long double;
+using P=pair<ll,ll>;
+using V=vector<ll>;
+#define rep(i,n) for(int i=0;i<n;i++)
+#define REP(i,n) for(int i=1;i<=n;i++)
+
+int n=1;
+ll inf=2147483647;
+vector<ll> k(800000,inf);
+
+void update(int a,int x){
+    int i=n-1+a;
+    k[i]=x;
+    while(i){
+        i=(i-1)/2;
+        k[i]=min(k[i*2+1],k[i*2+2]);
+    }
+}
+
+int query(int a,int b,int i,int l,int r){
+    if(b<=l||r<=a) return inf;
+    if(a<=l&&r<=b) return k[i];
+    int v1=query(a,b,i*2+1,l,(l+r)/2);
+    int v2=query(a,b,i*2+2,(l+r)/2,r);
+    return min(v1,v2);
+}
+
+int main(){
+    int _n,q;
+    cin >> _n >> q;
+    while(n<_n) n*=2;
+    
+    rep(i,q){
+        int c,x,y;
+        cin >> c >> x >> y;
+        if(c==0) update(x,y);
+        else cout << query(x,y+1,0,0,n) << endl;
+    }
+}

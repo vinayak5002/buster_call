@@ -1,0 +1,61 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+#define NIL -1
+using namespace std;
+
+int lookup[109][10009]{ NIL };
+
+void initialize() {
+	for (int i = 0; i < 109; i++)
+	{
+		for (int j = 0; j < 10009; j++)
+		{
+			lookup[i][j] = NIL;
+		}
+	}
+}
+
+int solution(int i, int c,int w_total, vector<int> v, vector<int> w) {
+	if (lookup[i][c] == NIL) {
+		//ベースケース達
+		if (i == 0) {
+			if (w[0] <= c)lookup[0][c] = v[0];
+			else lookup[0][c] = 0;
+		}
+		else if (lookup[i - 1] == 0) {
+			if (w[i] <= c)lookup[i][c] = v[i];
+			else lookup[i][c] = 0;
+		}
+		else if (c == 0) lookup[i][c] = 0;
+		//漸化式で、i-1を利用する
+		else {
+			if (c - w[i] < 0) lookup[i][c]= solution(i - 1, c, w_total, v, w);
+			else lookup[i][c]= max(solution(i - 1, c, w_total, v, w), solution(i - 1, c - w[i], w_total, v, w)+v[i]);
+		}
+	}
+ 
+		return lookup[i][c];
+	
+}
+
+int main() {
+	int N, W;
+	cin >> N >> W;
+	vector<int> v(N);
+	vector<int> w(N);
+	for (int i = 0; i < N; i++)
+	{
+		cin >> v[i] >> w[i];
+	}
+	int ans = -1;
+	//initialize();
+	for (int c = 1; c <= W; c++)
+	{
+		ans = max(ans, solution(N-1,c , W, v, w));
+		//cout << ans << endl;
+	}
+	cout << ans << endl;
+
+}

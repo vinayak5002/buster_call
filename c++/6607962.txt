@@ -1,0 +1,97 @@
+#include<cstdio>
+#include<set>
+#include<cstring>
+using namespace std;
+
+typedef int State[8];
+
+set<int> s;
+
+State st[41000];
+int d[41000];
+State goal;
+
+
+int dr[]={-1,1,0,0};
+int dc[]={0,0,-1,1};
+
+void init_table()
+{
+    s.clear();
+}
+
+bool insert_table(int u)
+{
+    int ans=0;
+    for(int i=0;i<8;i++)ans=ans*10+st[u][i];
+    if(s.count(ans))return false;
+
+    s.insert(ans);
+    return true;
+}
+
+void solve()
+{
+    int front=1,back=2;
+    d[1]=0;
+    while(front<back)
+    {
+        State& cur=st[front];
+        if(!memcmp(cur,goal,sizeof(cur))){printf("%d\n",d[front]);return ;}
+
+        int z=0;
+        while(cur[z])z++;
+        int r=z/4,c=z%4;
+
+        for(int i=0;i<4;i++)
+        {
+            int newr=r+dr[i],newc=c+dc[i];
+            if(newr<0||newr>1||newc<0||newc>3)continue;
+
+            int newz=newr*4+newc;
+
+            State& t=st[back];
+            memcpy(t,cur,sizeof(t));
+            t[z] =cur[newz];t[newz]=cur[z];
+
+            d[back]=d[front]+1;
+
+            if(insert_table(back))back++;
+        }
+        front++;
+    }
+}
+int main()
+{
+
+    int n=1000;
+    for(int i=0;i<8;i++)goal[i]=i;
+
+    while(n--)
+    {
+        init_table();
+        for(int i=0;i<8;i++)scanf("%d",&st[1][i]);
+        solve();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

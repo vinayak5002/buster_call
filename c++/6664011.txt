@@ -1,0 +1,123 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+
+class UnionFindTree {
+private:
+	vector<int> parent_;
+	vector<int> rank_;
+
+public:
+	UnionFindTree(int n) {
+		parent_.resize(n, 0);
+		rank_.resize(n, 0);
+
+		for (int i = 0; i < n; i++) {
+			parent_[i] = i;
+		}
+		return;
+	}
+
+	~UnionFindTree() {
+		return;
+	}
+
+	int find(int x) {
+		if (parent_[x] == x) {
+			return x;
+		}
+		return parent_[x] = find(parent_[x]);
+	}
+
+	void unite(int x, int y) {
+		x = find(x);
+		y = find(y);
+
+		if (x == y) {
+			return;
+		}
+
+		if (rank_[x] < rank_[y]) {
+			parent_[x] = y;
+		}
+		else {
+			parent_[y] = x;
+			if (rank_[x] == rank_[y]) {
+				rank_[x]++;
+			}
+		}
+		return;
+	}
+
+	bool is_same(int x, int y) {
+		return find(x) == find(y);
+	}
+};
+
+class Edge {
+public:
+	int u;
+	int v;
+	int cost;
+
+	Edge() : u(-1), v(-1), cost(-1) {
+		return;
+	}
+
+	~Edge() {
+		return;
+	}
+	bool operator < (const Edge& r) {
+		return this->cost < r.cost;
+	}
+};
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n;
+	int w;
+	vector<Edge> edges;
+
+	cin >> n;
+	for (int i = 0; i < n; i++) {
+		int offset = i * n;
+		for (int j = 0; j < n; j++) {
+			cin >> w;
+			if (w >= 0) {
+				Edge e;
+
+				e.u = i;
+				e.v = j;
+				e.cost = w;
+
+				edges.push_back(e);
+			}
+		}
+	}
+
+	sort(edges.begin(), edges.end());
+	UnionFindTree uft(n);
+	int result = 0;
+
+	for (const Edge& e : edges) {
+		if (!uft.is_same(e.u, e.v)) {
+			uft.unite(e.u, e.v);
+			result += e.cost;
+		}
+	}
+
+	cout << result << endl;
+	return 0;
+}

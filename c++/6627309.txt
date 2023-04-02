@@ -1,0 +1,98 @@
+#include<stdio.h>
+#define MAX 100005
+#define NIL -1//親、左の子、右の兄弟
+
+typedef struct
+{
+    int p, l, r;//節の親のノード、一番左のノード、節の右の兄弟ノード
+}Node;
+
+Node T[MAX];//木
+int n, D[MAX];//深さ
+
+void print(int u)
+{
+    int i, c;
+    printf("node %d: ", u);
+    printf("parent = %d, ", T[u].p);
+    printf("depth = %d, ", D[u]);
+ 
+    if(T[u].p == NIL)
+    {
+        printf("root, ");
+    }
+    else if(T[u].l == NIL)
+    {
+        printf("leaf, ");
+    }
+    else
+    {
+        printf("internal node, ");
+    }
+    printf("[");
+
+    for(i=0, c = T[u].l; c != NIL; i++, c = T[c].r)
+    {
+        if(i)
+        {
+            printf(", ");
+        }
+        printf("%d", c);
+    }
+    printf("]\n");
+}
+
+void rec(int u, int p)//深さを求める
+{
+    D[u] = p;
+    if(T[u].r != NIL)//兄弟を同じ深さ
+    {
+        rec(T[u].r, p);
+    }
+    if(T[u].l != NIL)//左の子に自分の深さ+1
+    {
+        rec(T[u].l, p+1);
+    }
+}
+
+int main(void)
+{
+    int i, j, d, v, c, l, r=0;
+    scanf("%d", &n);
+    for(i=0; i<n; i++)
+    {
+        T[i].p = T[i].l = T[i].r = NIL;
+    }
+    for(i=0; i<n; i++)
+    {
+        scanf("%d %d", &v, &d);
+        for(j=0; j<d; j++)
+        {
+            scanf("%d", &c);
+            if(j==0)
+            {
+                T[v].l = c;
+            }
+            else
+            {
+                T[l].r = c;
+            }
+            l = c;
+            T[c].p = v;
+        }
+    }
+    for(i=0; i<n; i++)
+    {
+        if(T[i].p == NIL)
+        {
+            r = i;
+        }
+    }
+
+    rec(r,0);
+    for(i=0; i<n; i++)
+    {
+        print(i);
+    }
+    return 0;
+}

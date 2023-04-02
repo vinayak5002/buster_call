@@ -1,0 +1,47 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using NLog;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Dapper;
+using System.Data.SqlClient;
+using System.Collections.Generic;
+
+namespace でんさい取りまとめマスタ.Pages
+{
+    public class IndexModel : PageModel
+    {
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
+        private string _conStr = string.Empty;
+        private IConfigurationSection _section;
+        public List<(string 支払先コード, string 取りまとめ先コード)> _densaiData;
+
+        public IndexModel(IConfiguration config)
+        {
+            var configration = new ConfigurationBuilder()
+                    .AddJsonFile("appSettings.json", true, true).Build();
+            _section = configration.GetSection("appSettings");
+            _conStr = _section["DCS"];
+        }
+
+        public void OnGet()
+        {
+            using (var connection = new SqlConnection(_conStr))
+            {
+                connection.Open();
+                string query = "SELECT 支払先コード, 取りまとめ先コード FROM でんさい取りまとめマスタ";
+
+                _densaiData = connection.Query<(string 支払先コード, string 取りまとめ先コード)>(query).ToList();
+            }
+        }
+
+        public void Post()
+        {
+
+        }
+    }
+}
+

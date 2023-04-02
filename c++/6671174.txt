@@ -1,0 +1,149 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct queue{
+	char c;
+	int count;
+	struct queue *left;
+	struct queue *right;
+}QUEUE;
+
+QUEUE *p_queue[27];
+
+void Up_heap(int pos){
+	int parent=pos/2;
+	
+	QUEUE *x=p_queue[pos];
+
+	while(parent>=1){
+		if(p_queue[parent]->count>x->count){
+			p_queue[pos]=p_queue[parent];
+			pos=parent;
+			parent=pos/2;
+		}else
+			break;
+	}
+
+	p_queue[pos]=x;
+}
+
+QUEUE *Down_heap(int count){
+	QUEUE *x,*temp;
+	int pos=1;
+	int m=2;
+
+	x=p_queue[1];
+	temp=p_queue[1]=p_queue[count--];
+
+	while(m<=count){
+		if((m+1)<=count&&p_queue[m]->count>p_queue[m+1]->count)
+			m++;
+
+		if(p_queue[m]->count<temp->count){
+			p_queue[pos]=p_queue[m];
+			pos=m;
+			m=pos*2;
+		}else
+			break;
+	}
+
+	p_queue[pos]=temp;
+
+	return x;
+}
+
+void Add(int count,int num,int freqency){
+	QUEUE *p;
+
+	p=(QUEUE*)malloc(sizeof(QUEUE));
+
+	p->c=97+num;
+	p->count=freqency;
+	p->left=NULL;
+	p->right=NULL;
+
+	p_queue[count]=p;
+
+	Up_heap(count);
+}
+
+void Add2(QUEUE *x,int count){
+	p_queue[count]=x;
+	Up_heap(count);
+}
+
+QUEUE *Make_huffmann_tree(QUEUE *left, QUEUE *right){
+	QUEUE *p;
+
+	p=(QUEUE*)malloc(sizeof(QUEUE));
+
+	p->c='X';
+	p->count=left->count+right->count;
+	p->left=left;
+	p->right=right;
+
+	return p;
+}
+
+int SUM=0;
+char CODE[256]="";
+
+void Tree_walk(QUEUE *x,int depth){
+	char moji[256];
+
+	if(x->left!=NULL){
+		strcat(CODE,"0");
+		Tree_walk(x->left,depth+1);
+		CODE[strlen(CODE)-1]='\0';
+	}
+	if(x->right!=NULL){
+		strcat(CODE,"1");
+		Tree_walk(x->right,depth+1);
+		CODE[strlen(CODE)-1]='\0';
+	}
+	if(x->left==NULL&x->right==NULL){
+		SUM+=strlen(CODE)*x->count;
+	}
+}
+
+int main(void){
+	QUEUE *x,*y,*z;
+	char in_str[1000005];
+	int freqency[26];
+	int len;
+	int count,count2;
+	int i,j,k;
+
+	scanf("%s",in_str);
+
+	len=strlen(in_str);
+
+	for(i=0;i<26;i++)
+		freqency[i]=0;
+
+	for(i=0;i<len;i++)
+		freqency[in_str[i]-97]++;
+
+	count=1;
+	for(i=0;i<26;i++)
+		if(freqency[i]!=0)
+			Add(count++,i,freqency[i]);
+		
+	count--;
+	while(count!=1){
+		x=Down_heap(count--);
+		y=Down_heap(count--);
+		z=Make_huffmann_tree(x, y);
+		Add2(z,++count);
+	}
+	Tree_walk(p_queue[1],0);
+
+	if(SUM)
+		printf("%d\n",SUM);
+	else
+		printf("%d\n",p_queue[1]->count);
+
+	return 0;
+}
+

@@ -1,0 +1,106 @@
+//テンプレート
+//include
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <cmath>
+#include <vector>
+#include <iomanip>
+#include <random>
+#include <climits>
+#include <set>
+#include <map>
+#include <stack>
+#include <queue>
+#include <thread>
+#include <chrono>
+#include <ctime>
+#include <deque>
+#include <sstream>
+#include <bitset>
+#include <list>
+#include <unordered_map>
+#include <unordered_set>
+
+//名前空間、型名
+using namespace std;
+using ll = long long;
+template<class T1, class T2> using umap = unordered_map<T1, T2>;
+template<class T> using uset = unordered_set<T>;
+using Graph = vector<vector<int>>;//Graph(n) n:頂点数
+
+struct Edge {
+	int to;
+	int weight;
+	Edge(int t, int w) :to(t), weight(w) {}
+};
+using WGraph = vector<vector<Edge>>;
+
+//関数
+
+template<class T> bool chmin(T& a, T b) {
+	if (a > b) {
+		a = b;
+		return true;
+	}
+	else return false;
+}
+template<class T> bool chmax(T& a, T b) {
+	if (a < b) {
+		a = b;
+		return true;
+	}
+	else return false;
+}
+
+template<class T> void vprint(vector<T> a) {
+	for (auto& A : a) {
+		cout << setw(3) << A;
+	}
+	cout << endl;
+}
+
+/*
+メモ
+*/
+
+int main() {
+
+	int n, m, r;
+	cin >> n >> m >> r;
+	WGraph g(n);
+	for (int i = 0; i < m; ++i) {
+		int a, b, c;
+		cin >> a >> b >> c;
+		g[a].push_back(Edge(b, c));
+	}
+
+	bool flag = false;
+	constexpr int INF = 1 << 30;
+	vector<int> dist(n, INF);
+	dist[r] = 0;
+	for (int i = 0; i < n; ++i) {
+		bool update = false;
+		for (int v = 0; v < n; ++v) {
+			if (dist[v] == INF)continue;
+			for (auto& s : g[v]) {
+				if (chmin(dist[s.to], dist[v] + s.weight)) {
+					update = true;
+				}
+			}
+		}
+		if (!update)break;
+		if (i == n - 1 and update)flag = true;
+	}
+
+	if (flag)cout << "NEGATIVE CYCLE" << endl;
+	else {
+		for (int& D : dist) {
+			if (D == INF)cout << "INF" << endl;
+			else cout << D << endl;
+		}
+	}
+
+
+	return 0;
+}

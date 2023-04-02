@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+#pragma GCC optimize("Ofast")
+#define _GLIBCXX_DEBUG
+using namespace std;
+using std::cout;
+using std::cin;
+using std::endl;
+using ll=long long;
+using ld=long double;
+ll ILL=1167167167167167167;
+const int INF=1050000000;
+const ll mod=1e9+7;
+#define rep(i,a) for (ll i=0;i<a;i++)
+#define all(p) p.begin(),p.end()
+template<class T> using _pq = priority_queue<T, vector<T>, greater<T>>;
+template<class T> ll LB(vector<T> &v,T a){return lower_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> ll UB(vector<T> &v,T a){return upper_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> bool chmin(T &a,const T &b){if(a>b){a=b;return 1;}else return 0;}
+template<class T> bool chmax(T &a,const T &b){if(a<b){a=b;return 1;}else return 0;}
+template<class T> void So(vector<T> &v) {sort(v.begin(),v.end());}
+template<class T> void Sore(vector<T> &v) {sort(v.begin(),v.end(),[](T x,T y){return x>y;});}
+void yneos(bool a){if(a) cout<<"Yes\n"; else cout<<"No\n";}
+template<class T> void vec_out(vector<T> &p){for(int i=0;i<(int)(p.size());i++){if(i) cout<<" ";cout<<p[i];}cout<<"\n";}
+
+
+void solve();
+// oddloop
+int main() {
+	solve();
+}
+
+void solve(){
+	int N,T;
+	cin>>N>>T;
+	string A,B; 
+	cin>>A>>B; 
+	map<string,int> m;
+	int ind=0;
+	vector<vector<string>> S(N);
+	vector<vector<int>> p(N);
+	int X=0;
+	rep(i,N){
+		int a;
+		cin>>a;
+		X+=a;
+		S[i].resize(a);
+		p[i].resize(a-1);
+		rep(j,a){
+			cin>>S[i][j];
+			if(!m.count(S[i][j])){
+				m[S[i][j]]=ind;
+				ind++;
+			}
+		}
+		rep(j,a-1) cin>>p[i][j];
+	}
+	vector<vector<pair<int,pair<int,int>>>> G(X+ind);
+	vector<pair<int,int>> seen(X+ind,{INF,0});
+	seen[X+m[A]]={0,0};
+	_pq<tuple<int,int,int>> pq;
+	pq.push({0,0,X+m[A]});
+	int Y=0;
+	rep(i,N){
+		rep(j,(int)(S[i].size())){
+			G[Y].push_back({X+m[S[i][j]],{T,0}});
+			G[X+m[S[i][j]]].push_back({Y,{0,1}});
+			if(j){
+				G[Y].push_back({Y-1,{p[i][j-1],0}});
+				G[Y-1].push_back({Y,{p[i][j-1],0}});
+			}
+			Y++;
+		}
+	}
+	while(!pq.empty()){
+		int ne,time,ri;
+		tie(time,ri,ne)=pq.top();
+		pq.pop();
+		if(seen[ne]>make_pair(time,ri)) continue;
+		for(auto x:G[ne]){
+			if(chmin(seen[x.first],{x.second.first+time,x.second.second+ri})){
+				pq.push({seen[x.first].first,seen[x.first].second,x.first});
+			}
+		}
+	}
+	if(seen[X+m[B]].first==INF) cout<<"-1\n";
+	else cout<<seen[X+m[B]].first-T<<" "<<seen[X+m[B]].second-1<<"\n";
+}
+

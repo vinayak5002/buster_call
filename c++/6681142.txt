@@ -1,0 +1,77 @@
+#include <iostream>
+#include <sstream>
+#define MAX 100
+
+using std::cout;
+using std::cin;
+using std::endl;
+using std::string;
+
+template<typename T>
+class Stack {
+private:
+  T S[MAX];
+  int sp;
+public:
+  Stack() {
+    sp = 0;
+  };
+  bool isEmpty() {
+    return sp == 0;
+  }
+  bool isFull() {
+    return sp == MAX;
+  }
+  void push(T x) {
+    if (isFull()) {
+      throw std::logic_error("overflow");
+    }
+    S[sp++] = x;
+  }
+
+  T top() {
+    if (isEmpty()) {
+      throw std::logic_error("underflow");
+    }
+    return S[sp-1];
+  }
+  void pop() {
+    if (isEmpty()) {
+      throw std::logic_error("underflow");
+    }
+    sp--;
+  }
+};
+
+int main() {
+  Stack<int> s;
+  string expr; 
+  getline(cin, expr);
+  std::istringstream is(expr);
+  while(!is.eof()){ 
+    string op; 
+    is >> op;
+    int tmp1, tmp2;
+    switch(op[0]){
+      case '+': tmp1 = s.top(); s.pop();
+        tmp2 = s.top(); s.pop();
+        s.push(tmp2+tmp1);
+      break;
+      case '-': tmp1 = s.top(); s.pop();
+        tmp2 = s.top(); s.pop();
+        s.push(tmp2-tmp1);
+      break;
+      case '*': tmp1 = s.top(); s.pop();
+        tmp2 = s.top(); s.pop();
+        s.push(tmp2*tmp1);
+      break;
+      default: std::istringstream is2(op);
+        is2 >> tmp1;
+        s.push(tmp1);
+      break;
+    }
+  }
+  cout << s.top() << endl;
+  return 0;
+}
+

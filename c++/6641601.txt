@@ -1,0 +1,59 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <cmath>
+#include <set>
+#include <map>
+#include <deque>
+#define TEST cout << "TEST" << endl
+#define IINF 2147483647
+#define LLINF 9223372036854775807
+#define AMARI 998244353
+using namespace std;
+
+int main(void){
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    int n;
+    cin >> n;
+    vector<int> p(n);
+    for (int i = 0; i < n; i++)cin >> p[i];
+    vector<int> kaisuu(n, IINF);
+    vector<int> ikisaki(n, 0);
+    kaisuu[0] = 0;
+
+    for (int i = 0; i < n; i++)if (p[i] != 0 && ikisaki[i] == 0)ikisaki[i] = p[i];
+    for (int i = 0; i < n; i++) {
+        if (ikisaki[i] >= 1) {
+            int now = i;
+            bool flag = false;
+            while (ikisaki[now] != 0) {
+                //cout << now << endl;
+                now += ikisaki[now];
+                if (now == i || ikisaki[now] == -1) {
+                    flag = true;
+                    break;
+                }
+            }
+            if (flag)ikisaki[i] = -1;
+            else ikisaki[i] = now - i;
+        }
+    }
+    
+    kaisuu[0] = 0;
+    for (int i = 0; i < n; i++) {
+        if (ikisaki[i] < 0)continue;
+        if (ikisaki[i] > 0) {
+            kaisuu[i + ikisaki[i]] = min(kaisuu[i + ikisaki[i]], kaisuu[i]);
+            continue;
+        }
+        for (int j = 0; j < 6; j++) {
+            if (i + j + 1 == n)break;
+            kaisuu[i + j + 1] = min(kaisuu[i + j + 1],kaisuu[i] + 1);
+        }
+    }
+    cout << kaisuu[n - 1] << endl;
+
+    return 0;
+}

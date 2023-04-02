@@ -1,0 +1,35 @@
+import qualified Data.ByteString.Char8 as B
+import Control.Monad ( forM_ )
+import Data.Char (isSpace)
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as VM
+import Control.Monad.ST ( RealWorld )
+main :: IO ()
+main = do
+  n <- readLn
+  av <- fmap (V.unfoldr (B.readInt . B.dropWhile isSpace)) B.getLine
+  putStrLn . unwords . V.toList . V.map show $ av
+  _ <- isort n av
+  return ()
+isort :: Int -> V.Vector Int -> IO (VM.MVector RealWorld  Int)
+isort n av = do
+  amv <- V.thaw av
+  forM_ [1..n-1] (\i -> do
+                     let j = i-1
+                     v <- VM.read amv i
+                     j <- while amv j v
+                     VM.write amv (j+1) v
+                     printmv amv)
+  return amv
+  where
+    --printmv :: Show a => VM.MVector RealWorld a -> IO ()
+    printmv v = putStrLn . unwords . V.toList . V.map show =<< V.freeze v
+    --while :: VM.MVector (PrimState m) Int -> Int -> Int -> m Int
+    while av j v = do
+      if j < 0 then return j
+      else do
+        u <- VM.read av j
+        if u <= v then return j
+        else do
+          VM.write av (j+1) u
+          while av (j - 1) v

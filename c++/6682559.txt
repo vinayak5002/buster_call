@@ -1,0 +1,95 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+struct node{
+  struct node *right;
+  struct node *left;
+  struct node *p;
+  int key;
+};
+typedef struct node * Node;
+#define NIL NULL
+
+Node root;
+
+void insert(int k){
+  Node y = NIL;
+  Node x = root;
+  Node z;
+
+  z = malloc(sizeof(struct node));
+  z->key = k;
+  z->left = NIL;
+  z->right = NIL;
+
+	while(x!=NIL){
+        //親の設定
+		y=x;
+
+		if(z->key<x->key){
+            //左に移動
+			x=x->left;
+		}
+		else{
+            //右に移動
+			x=x->right;
+		}
+	}
+	z->p=y;
+	if(y==NIL){
+		root=z;
+	}
+	else{
+		if(z->key<y->key){
+            //Zをｙの左の子にする
+			y->left=z;
+		}
+		else{
+            //ｚをｙの右の子にする
+			y->right=z;
+		}
+	}
+}
+
+//先行順
+void preorder(Node u){
+	if(u==NIL){
+		return;
+	}
+	printf(" %d",u->key);
+	preorder(u->left);
+	preorder(u->right);
+}
+
+//中間順
+void inorder(Node u){
+	if(u==NIL){
+		return;
+	}
+	inorder(u->left);
+	printf(" %d",u->key);
+	inorder(u->right);
+}
+
+
+int main(void){
+  int n, i, x;
+  char lite[20];
+  scanf("%d", &n);
+
+  for ( i = 0; i < n; i++ ){
+    scanf("%s", lite);
+    if ( lite[0] == 'i' ){
+      scanf("%d", &x);
+      insert(x);
+    } 
+    else if ( lite[0] == 'p' ){
+      inorder(root);
+      printf("\n");
+      preorder(root);
+      printf("\n");
+    } 
+  }
+
+  return 0;
+}

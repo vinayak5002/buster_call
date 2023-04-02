@@ -1,0 +1,60 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using ll = long long;
+using namespace std;
+ll MOD = 1LL << 61 -1;
+ll B = 1LL << 9 + 7;
+
+ll modpow(ll a, ll n) {
+	ll val = 1;
+	while (n > 0) {
+		if (n & 1) val = val * a % MOD;
+		a = a * a % MOD;
+		n >>= 1;
+	}
+	return val;
+}
+vector<ll> vec_contains(string s, string t) {
+	ll n = s.size();
+	ll m = t.size();
+	vector<ll> ans;
+	if (n < m) return ans;
+	ll shash = 0;
+	ll thash = 0;
+	for (ll i = 0; i < m; i++) {
+		shash = (shash * B + s[i]) % MOD;
+		thash = (thash * B + t[i]) % MOD;
+	}
+	ll BM = modpow(B, m);
+	
+	for (ll i = 0; i < n; i++) {
+		if (shash == thash)  ans.push_back(i);
+		if (i + m > n) break;
+		shash = (shash * B - s[i] * BM + s[i+m]) % MOD;
+	}
+	return ans;
+}
+
+bool contains(string s, string t) {
+	ll n = s.size();
+	ll m = t.size();
+	if (n < m) return false;
+	ll shash = 0;
+	ll thash = 0;
+	for (ll i = 0; i < m; i++) {
+		shash = (shash * B + s[i]) % MOD;
+		thash = (thash * B + t[i]) % MOD;
+	}
+	ll BM = modpow(B, m);
+	for (ll i = 0; i + m < n; i++) {
+		if (shash == thash) return true;
+		if (i + m < n) shash = (shash * B - s[i] * BM + s[i+m]) % MOD;
+	}
+	return false;
+}
+int main() {
+	string s, t; cin >> s >> t;
+	for (auto x: vec_contains(s, t)) cout << x << endl;
+}
+

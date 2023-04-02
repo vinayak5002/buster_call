@@ -1,0 +1,91 @@
+
+"""
+
+dp[i][a][b] = i番目まで見て、最少がa,次がbの時がありうるか
+
+dp[i][a] = [b1,b2,...]
+i番目まで見て、最少がaの時にありうるbの一覧
+
+とすれば後は簡単
+
+"""
+
+import sys
+from sys import stdin
+
+ANS = []
+
+while True:
+
+    n = int(stdin.readline())
+    if n == 0:
+        break
+    
+    b = list(map(int,stdin.readline().split()))
+    b.sort()
+    #b.reverse()
+
+    dp = {}
+
+    dp[0] = set()
+    dp[0].add(0)
+    nsum = 0
+
+    bl = b[-1]
+    del b[-1]
+    
+    for v in b:
+
+        ndp = {}
+
+        for lasta in dp:
+            for lastb in dp[lasta]:
+
+                lastc = nsum - lasta - lastb
+
+                #add a
+
+                
+                newa,newb,newc = sorted([lasta + v,lastb,lastc])
+                if newa not in ndp:
+                    ndp[newa] = set([newb])
+                else:
+                    ndp[newa].add(newb)
+
+                #add b
+                newa,newb,newc = sorted([lasta,lastb + v,lastc])
+                if newa not in ndp:
+                    ndp[newa] = set([newb])
+                else:
+                    ndp[newa].add(newb)
+
+                #add c
+                newa,newb,newc = sorted([lasta,lastb,lastc + v])
+                if newa not in ndp:
+                    ndp[newa] = set([newb])
+                else:
+                    ndp[newa].add(newb)
+                
+        nsum += v
+        dp = ndp
+
+    ans = 0
+    v = bl
+    for lasta in dp:
+        for lastb in dp[lasta]:
+
+            lastc = nsum - lasta - lastb
+
+            newa,newb,newc = sorted([lasta + v,lastb,lastc])
+            ans = max(ans , newa)
+            newa,newb,newc = sorted([lasta , lastb + v , lastc])
+            ans = max(ans , newa)
+            newa,newb,newc = sorted([lasta , lastb ,lastc+v])
+            ans = max(ans , newa)
+
+        #print (ndp)
+
+    ANS.append(str(ans))
+
+print ("\n".join(ANS),flush=True)
+

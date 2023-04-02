@@ -1,0 +1,148 @@
+#include<bits/stdc++.h>
+#define rep(i,a,b) for(int i = (a); i <= (b); i++)
+#define per(i,b,a) for(int i = (b); i >= (a); i--)
+#define N 101000
+#define ll long long
+#define mod 1000000007
+#define fr first
+#define sc second
+using namespace std;
+
+int n, c[N], e[N];
+ll x, a[N], b[N], d[N];
+vector<ll> rev[N], A[N];
+ll ans;
+
+int deg[N], circ[N], dep[N], dfn[N], r[N], root[N], loc[N];
+int cnt, num;
+bool oncyc[N]; map<ll, bool> vis[N];
+map<int, ll> acc[N];
+vector<int> node, vec, son[N];
+vector<vector<int> > circle;
+map<ll, map<ll, vector<int> > > cycle[N];
+ll s1[N], s2[N];
+ll sum[N];
+
+void topo(){
+    queue<int> q;
+    rep(i,1,n+1){ oncyc[i] = true; if(!deg[i]) q.push(i); }
+    while(!q.empty()){
+        int x = q.front(); q.pop();
+        oncyc[x] = false;
+        if(!(--deg[e[x]])) q.push(e[x]);
+    }
+}
+
+void dfs(int x){
+    node.push_back(x);
+    dfn[x] = ++num;
+    for(int y : rev[x]) if(!oncyc[y])
+        s1[y] = s1[x] + d[y], dep[y] = dep[x]+1, dfs(y);
+    r[x] = num;
+}
+
+void build(int l, int r, int f){
+    if(l > r) return;
+    int it = l, num = 0;
+    while(it <= r){
+        int x = node[vec[it]-1];
+        son[f].push_back(x);
+        int ti = upper_bound(vec.begin(), vec.end(), ::r[x]) - vec.begin();
+        if(it+1 > l && ti-1 < r) build(it+1, ti-1, x);
+        it = ti;
+        if(it == r && ti == r) break;
+        assert((++num) <= 1000);
+    }
+}
+
+void getacc(int x, int pre, ll C){
+    if(x != n+1 && a[x]+s1[x] == C) pre = x;
+    acc[x][C-s1[x]] = pre;
+    for(int y : son[x]) getacc(y, pre, C);
+}
+
+void work(int root){
+    map<ll, vector<int> > C;
+    s1[root] = d[root], num = 0;
+    node.clear(), dfs(root);
+    for(int x : node){
+        sort(A[x].begin(), A[x].end());
+        A[x].erase(unique(A[x].begin(), A[x].end()), A[x].end());
+        C[a[x]+s1[x]].push_back(dfn[x]);
+        for(ll k : A[x]) if(k != a[x]) C[k+s1[x]].push_back(dfn[x]);
+        ::root[x] = root;
+    }
+    for(pair<ll, vector<int> > p : C){
+        vec = p.sc;
+        son[0].clear();
+        build(0, (int)vec.size()-1, 0);
+        getacc(0, 0, p.fr);
+        // if(n >= 100) assert(false);
+    }
+}
+
+void getcirc(int x){
+    circle.back().push_back(x);
+    circ[x] = circle.size();
+    if(!circ[e[x]]) getcirc(e[x]);
+}
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin>>n>>x;
+    rep(i,1,n){
+        cin>>a[i]>>b[i]>>c[i]>>d[i]>>e[i];
+        deg[e[i]]++, rev[e[i]].push_back(i);
+        A[c[i]].push_back(a[i] + b[i]);
+    }
+    A[1].push_back(x);
+
+    topo();
+    rep(i,1,n+1) if(oncyc[i] || i == n+1){
+        work(i);
+        if(n >= 100) assert(false);
+        if(i == n+1 || circ[i]) continue;
+        circle.push_back({}), getcirc(i);
+        int id = circle.size();
+        ll pre = 0;
+        for(int x : circle.back()) s2[x] = pre, pre = s2[x] + d[x];
+        sum[id] = pre;
+        rep(i,0,(int)circle.back().size()-1){
+            int x = circle.back()[i];
+            ll v = a[x]-s2[x], md = abs(sum[id]), rem = md ? (v%md + md) % md : 0;
+            if(md) cycle[id][rem][(v-rem)/sum[id]].push_back(i);
+            else cycle[id][v][v].push_back(i);
+            loc[x] = i;
+        }
+    }
+    // if(n >= 100) assert(false);
+
+    int cur = 1, num = 0;
+    while(cur != n+1){
+        // assert(num <= 1000);
+        if(vis[cur][x]) break;
+        vis[cur][x] = true;
+        if(acc[cur][x]){ 
+            int nxt = acc[cur][x];
+            ans += dep[cur] - dep[nxt], cur = nxt;
+        } 
+        else if(root[cur] == n+1){ (ans += dep[cur]) %= mod, cur = n+1; break; }
+        else{
+            (ans += dep[cur]) %= mod;
+            int rt = root[cur]; 
+            ll val = x + s1[cur] - d[rt], md = abs(sum[circ[rt]]), v = val-s2[rt];
+            ll i1 = circ[rt], i2 = md ? (v%md + md) % md : v, i3 = md ? (v-i2)/sum[i1] : v;
+            if(cycle[i1][i2].empty()) break;
+            auto it = cycle[i1][i2].lower_bound(i3);
+            if(it == cycle[i1][i2].end()) break;
+            if(it->fr == i3 && loc[rt] > it->sc.back() && ++it == cycle[i1][i2].end()) break;
+            int nloc = loc[rt] < it->sc.front() || it->fr == i3 ? *lower_bound(it->sc.begin(), it->sc.end(), loc[rt]) : it->sc.front();
+            (ans += (it->fr - i3) * (circle[i1-1].size()) + nloc - loc[rt]) %= mod;
+            cur = circle[i1-1][nloc];
+        }
+        x = a[cur] + b[cur], cur = c[cur];
+        (ans += 1) %= mod;
+    }
+    cout<< (cur == n+1 ? ans : -1) <<endl;
+    return 0;
+}

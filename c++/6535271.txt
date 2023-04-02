@@ -1,0 +1,53 @@
+#include<stdio.h>
+#include<stdlib.h>
+int L[500000], a = 500000;
+
+int main(void){
+	int q, i;
+	int x = 0, y = 0;
+	if (scanf("%d", &q) != 1)return 1;
+	for (i = 0; i < q; i++){
+		int query, p1;
+		if (scanf("%d", &query) != 1) return 1;
+		if (query != 2 && scanf("%d", &p1) != 1) return 1;
+		switch (query){
+		case 0:
+			if (y == 0){
+				L[--a] = p1;
+				y++;
+				break;
+			}
+			else{
+				for (int w = y; w > 500000 - a; w--){
+					L[500000 - w - 1] = L[500000-w];
+				}
+				L[--a] = p1;
+				y++;
+				break;
+			}
+		case 1:
+			if (p1 < 0){
+				p1 = abs(p1);
+				a = a - p1;
+				break;
+			}
+			else if (p1>=0){
+				a = a + p1;
+				break;
+			}
+		case 2:
+			x = a;
+			for (int r = y; r > 500000 - a;r--){
+				L[a] = L[a - 1];
+				x--;
+			}
+			y--;
+			a++;
+			break;
+		}
+	}
+	for (i = y; i >0; i--){
+		printf("%d\n", L[500000 - i]);
+	}
+	return 0;
+}

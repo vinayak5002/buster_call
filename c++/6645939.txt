@@ -1,0 +1,144 @@
+#include<bits/stdc++.h>
+#define int ll
+#define rep(i, N) for(int i = 0; i < (int)N; ++i)
+#define rep1(i, N) for(int i = 1; i <= (int)N; ++i)
+#define per(i, N) for(int i = N-1; i >= 0; --i)
+#define all(v) (v).begin(), (v).end()
+#define rall(v) (v).rbegin(), (v).rend()
+#define bit(n) (1ll << (n))
+#define pcnt(n) (__builtin_popcount(n))
+#define TakAo(ans) ans ? cout << "Takahashi\n" : cout << "Aoki\n"
+#define YesNo(ans) ans ? cout << "Yes\n" : cout << "No\n"
+#define endl '\n'
+#define fi first
+#define se second
+#define mkpr make_pair
+#define mktpl make_tuple
+#define eb emplace_back
+
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+using point = struct{ ll x, y; };
+template<class T> using max_heap = priority_queue<T>;
+template<class T> using min_heap = priority_queue<T, vector<T>, greater<T>>;
+template<class T> using vec = vector<T>;
+template<class T> using vvec = vec<vec<T>>;
+template<class T> using vvvec = vec<vec<vec<T>>>;
+template<class T> using vvvvec = vec<vec<vec<vec<T>>>>;
+
+constexpr ld EPS = 1e-10;
+constexpr int INF = 1001001001;
+constexpr ll LINF = 1001001001001001001ll;
+constexpr int MOD = 1e9+7;
+//constexpr ll MOD = 998244353;
+constexpr int div2 = (MOD + 1) >> 1;
+constexpr int NIL = -1;
+constexpr int pm[2] = {1, -1};
+constexpr int dy[4] = {0, 1, 0, -1};
+constexpr int dx[4] = {1, 0, -1, 0};
+
+ll cel(ll a, ll b){ return (a + b - 1) / b;}
+ll Gcd(ll a, ll b){ return b ? Gcd(b, a % b) : a;}
+template<class T> T powi(T x, ll exp){
+    return exp > 0 ? (exp & 1 ? x : 1) * powi(x * x, exp >> 1) : 1;
+}
+ll modpow(ll x, ll exp, ll mod){
+    x %= mod;
+    return exp > 0 ? (exp & 1 ? x : 1) * modpow(x * x, exp >> 1, mod) % mod : 1;
+}
+template<class T> bool chmin(T &a, T b){ return a > b ? (a = b, true) : 0;}
+template<class T> bool chmax(T &a, T b){ return a < b ? (a = b, true) : 0;}
+
+using P = pair<ll, ll>;
+using Tpl = tuple<int, int, int, int>;
+
+class RollHash{
+    const int mod1 = 1e9+7;
+    const int mod2 = 998244353;
+    const int base = 557;
+    ll powb1 = 1, powb2 = 1;
+    ll invb1 = modinv(base, mod1), invb2 = modinv(base, mod2);
+    ll modinv(ll a, ll mod){
+        ll b = mod, y = 1, x = 0;
+        while(b){
+            ll t = a / b;
+            a -= t * b; swap(a, b);
+            y -= t * x; swap(y, x);
+        }
+        y %= mod;
+        if(y < 0) y += mod;
+        return y;
+    }
+    void increment(){
+        powb1 *= base, powb2 *= base;
+        if(powb1 >= mod1) powb1 %= mod1;
+        if(powb2 >= mod2) powb2 %= mod2;
+    }
+    void decrement(){
+        powb1 *= invb1, powb2 *= invb2;
+        if(powb1 >= mod1) powb1 %= mod1;
+        if(powb2 >= mod2) powb2 %= mod2;
+    }
+
+    public:
+    //deque<char> deq;
+    pair<ll, ll> hash = {0, 0};
+    void push_front(char c){
+        hash.fi = (hash.fi * base + c) % mod1;
+        hash.se = (hash.se * base + c) % mod2;
+        increment();
+    }
+    void pop_front(char c){
+        decrement();
+        hash.fi = (hash.fi - c + mod1) * invb1 % mod1;
+        hash.se = (hash.se - c + mod2) * invb2 % mod2;
+    }
+    void push_back(char c){
+        hash.fi = (hash.fi + powb1 * c) % mod1;
+        hash.se = (hash.se + powb2 * c) % mod2;
+        increment();
+    }
+    void pop_back(char c){
+        decrement();
+        hash.fi = (hash.fi - (c * powb1 % mod1) + mod1) % mod1;
+        hash.se = (hash.se - (c * powb2 % mod2) + mod2) % mod2;
+    }
+    bool same(RollHash h2){
+        return hash == h2.hash;
+    }
+};
+
+void Main(){
+    string t, p; cin >> t >> p;
+    int tsz = t.size(), psz = p.size();
+    if(p.size() > t.size()){
+        return;
+    }
+    RollHash th, ph;
+
+    rep(i, psz){
+        th.push_back(t[i]);
+        ph.push_back(p[i]);
+    }
+
+    if(t[0] == '1' && t[1] == '1') return;
+
+    for(int i = 0; i + psz <= tsz; i++){
+        if(th.same(ph)){
+            cout << i << endl;
+        }
+        th.pop_front(t[i]);
+        if(i + psz != tsz) th.push_back(t[i + psz]);
+    }
+}
+
+signed main(){
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    cout << fixed << setprecision(10);
+    Main();
+    return 0;
+}
+

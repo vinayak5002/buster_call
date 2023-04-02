@@ -1,0 +1,110 @@
+#include <bits/extc++.h>
+
+using namespace std;
+
+#define rep(i,n) for(int i=0;i<(n);++i)
+#define reps(i,s,n) for(int i=(s);i<=(n);++i)
+#define all(x) begin(x), end(x)
+#define Fixed fixed << setprecision(12)
+constexpr int32_t INF  = 0x3f3f3f3f;
+constexpr int64_t LINF = 0x3f3f3f3f3f3f3f3fLL;
+constexpr int mod = 1e9+7;
+// constexpr int mod = 998244353;
+
+template <class Func>
+class FixPoint : Func {
+public:
+    explicit constexpr FixPoint(Func&& f) noexcept : Func(forward<Func>(f)) {}
+
+    template <class... Args>
+    constexpr decltype(auto) operator()(Args&&... args) const {
+        return Func::operator()(*this, std::forward<Args>(args)...);
+    }
+};
+
+template <class Func>
+static inline constexpr decltype(auto) makeFixPoint(Func&& f) noexcept {
+    return FixPoint<Func>{forward<Func>(f)};
+}
+
+template <class A, class B> inline bool chmax(A &a, const B &b) { return b > a && (a = b, true); }
+template <class A, class B> inline bool chmin(A &a, const B &b) { return b < a && (a = b, true); }
+
+template <class T> using max_heap = priority_queue<T>;
+template <class T> using min_heap = priority_queue<T,vector<T>,greater<T> >;
+template <class A, class B> using umap = unordered_map<A,B>;
+template <class A, class B> using uset = unordered_set<A,B>;
+
+template <class T> using Set = __gnu_pbds::tree<T, __gnu_pbds::null_type, less<T>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
+
+template <class T> inline void bye(T x) { cout << x << '\n'; exit(0); }
+
+inline int updiv(int a,int b){ return (a + b - 1) / b; }
+
+constexpr int dx[] = {1, 0, -1, 0, 1, 1, -1, -1};
+constexpr int dy[] = {0, -1, 0, 1, 1, -1, -1, 1};
+
+
+signed main() {
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+
+    int64_t n, m, a, b, p, q;
+    cin >> n >> m >> a >> b >> p >> q;
+
+    if (a == 1 && b == 1) {
+        cout << min(m - min(m / (p + q), n) * (p + q), abs(m - min<int64_t>((m + p + q - 1) / (p + q), n) * (p + q))) << '\n';
+        return (0);
+    }
+
+    vector<int64_t> s, t;
+
+    __uint128_t ka = 1, kb = 1;
+    for (int k = 0; k < n; ++k) {
+        __uint128_t sum = (__uint128_t) p * ka + (__uint128_t) q * kb;
+        if (k & 1) s.emplace_back(sum);
+        else t.emplace_back(sum);
+        ka *= a;
+        kb *= b;
+        if (sum > m) break;
+    }
+
+    int ss = s.size(), ts = t.size();
+
+    vector<__int128_t> x, y;
+
+    for (int bit = 0; bit < (1 << ss); ++bit) {
+        __uint128_t sum = 0;
+        for (int i = 0; i < ss; ++i) {
+            if ((bit >> i) & 1) sum += s[i];
+        }
+        x.emplace_back(sum);
+    }
+    for (int bit = 0; bit < (1 << ts); ++bit) {
+        __uint128_t sum = 0;
+        for (int i = 0; i < ts; ++i) {
+            if ((bit >> i) & 1) sum += t[i];
+        }
+        y.emplace_back(sum);
+    }
+
+    sort(all(y));
+
+    int64_t res = LINF;
+    for (int i = 0; i < x.size(); ++i) {
+        int low = 0, high = y.size();
+        while (high - low > 1) {
+            int mid = (high + low) / 2;
+            if (x[i] + y[mid] <= m) low = mid;
+            else high = mid;
+        }
+        chmin(res, m - x[i] - y[low]);
+        chmin(res, abs((int64_t) (m - x[i] - *lower_bound(all(y), m - x[i]))));
+    }
+
+    cout << res << '\n';
+
+    return(0);
+}
+
+

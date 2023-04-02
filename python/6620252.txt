@@ -1,0 +1,55 @@
+/*109006279 Kisoon Jang EECS*/
+
+#include <stdio.h>
+
+int times[100100], cal[100100], cond[100100][3], count[100100];
+
+void change(int i, int a, int b, int c)
+{
+    times[a] = times[b] + c - 1;
+    for(int j = 0; j < i; j++)
+    {
+        if (cond[j][1] == a)
+        {
+            if (times[cond[j][0]] > times[cond[j][1]] + cond[j][2] - 1)
+            {
+                change(j, cond[j][0], cond[j][1], cond[j][2]);
+            }
+        }
+    }
+}
+
+int main(void)
+{
+    int n, m, a, b, c;
+
+    scanf("%d %d", &n, &m);
+    for(int i = 0; i < n; i++)
+    {
+        scanf("%d %d", &times[i+1], &cal[i+1]);
+    }
+
+    for(int i = 0; i < m; i++)
+    {
+        scanf("%d %d %d", &a, &b, &c);
+        cond[i][0] = a;
+        cond[i][1] = b;
+        cond[i][2] = c;
+        if (times[a] > times[b] + c - 1)
+        {
+            change(i, a, b, c);
+        }
+    }
+
+    long long int sum = 0, x, y;
+    for (int i = 1; i <= n; i++)
+    {
+        x = times[i];
+        y = cal[i];
+        sum += x * y;
+    }
+    printf("%lld\n", sum);
+
+    return 0;
+}
+

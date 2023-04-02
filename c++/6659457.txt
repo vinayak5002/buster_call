@@ -1,0 +1,43 @@
+#include<bits/stdc++.h>
+using namespace std;
+vector<vector<int>> graph;
+vector<bool> used;
+vector<int> d;
+vector<int> f;
+int nowtime = 1;
+void dfs(int cur){
+    if(used[cur]) return;
+    d[cur] = nowtime;
+    nowtime++;
+    used[cur] = true;
+    for(auto&& nx:graph[cur]){
+        if(used[nx]) return;
+        dfs(nx);
+    }
+    f[cur] = nowtime;
+    nowtime++;
+}
+int main(){
+    int n;
+    cin >> n;
+    graph = vector<vector<int>>(n);
+    used = vector<bool>(n);
+    d = vector<int>(n);
+    f = vector<int>(n);
+    for(int i = 0; i < n; ++i){
+        int k;
+        cin >> k >> k;
+        for(int j = 0; j < k; ++j){
+            int v;
+            cin >> v;
+            --v;
+            graph[i].push_back(v);
+        }
+    }
+    for(int i = 0; i < n; ++i){
+        dfs(i);
+    }
+    for(int i = 0; i < n; ++i){
+        cout << i+1 << " " << d[i] << " " << f[i] << endl;
+    }
+}

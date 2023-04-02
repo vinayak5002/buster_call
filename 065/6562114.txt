@@ -1,0 +1,93 @@
+#include<iostream>
+#include<vector>
+
+class Graph {
+public:
+	Graph(const int num_nodes) : num_nodes(num_nodes) {
+		edges.assign(num_nodes, std::vector<short>(num_nodes, 0));
+		can_reach.assign(num_nodes * (num_nodes - 1) / 2, false);
+	}
+
+	void addEdge(const int n, const int v) {
+		edges[n][v] = 1;
+	}
+
+	void addNonDirEdge(const int n, const int v) {
+		edges[n][v] = 1;
+		edges[v][n] = 1;
+	}
+
+	void canReachBFS() {
+		for (int s = 0; s < num_nodes; s++) {
+			// 訪問済みなら何もしない
+			if ([=]() -> bool {
+				for (int i = 0; i < num_nodes; i++) {
+					if(can_reach[getIdx(s, i)]) return true;
+				}
+				return false;
+			}()) {
+				continue;
+			}
+            int cnt = 0;
+			std::vector<short> nodes;
+			nodes.push_back(s);
+			while (cnt != nodes.size()) {
+				const int n = nodes[cnt++];
+				for (int i = s + 1; i < num_nodes; i++) {
+					if (edges[n][i] == 1 && !can_reach[getIdx(s, i)]) {
+						can_reach[getIdx(s, i)] = true;
+						nodes.push_back(i);
+					}
+				}
+			}
+			for (int i = 0; i < nodes.size(); i++) {
+				for (int j = i; j < nodes.size(); j++) {
+					can_reach[getIdx(nodes[i], nodes[j])] = true;
+				}
+			}
+		}
+	}
+
+	bool canReach(const int s, const int t) {
+		return can_reach[getiex(s, t)];
+	}
+
+private:
+    int getIdx(const int s, const int t){
+        int l = (s > t) ? s : t;
+        int r = (s < t) ? s : t;
+        return num_node * r - r * (r + 1) / 2 + l;
+    }
+	std::vector<std::vector<short>> edges;
+	int num_nodes;
+	std::vector<bool> can_reach; // distance from s to t
+	
+};
+
+int main() {
+	int num_nodes;
+	int num_rel;
+	std::cin >> num_nodes >> num_rel;
+	Graph graph(num_nodes);
+	// read edge
+	for (int i = 0; i < num_rel; i++) {
+		int n, k;
+		std::cin >> n >> k;
+		graph.addNonDirEdge(n, k);
+	}
+	//graph.printMatrix();
+	graph.canReachBFS();
+
+	int num_ques;
+	std::cin >> num_ques;
+	for (int i = 0; i < num_ques; i++) {
+		int s, t;
+		std::cin >> s >> t;
+		if (s == t || graph.canReach(s, t)) {
+			std::cout << "yes" << std::endl;
+		}
+		else {
+			std::cout << "no" << std::endl;
+		}
+	}
+}

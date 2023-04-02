@@ -1,0 +1,184 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef struct node{
+  struct node *right;
+  struct node *left;
+  struct node *parent;
+  struct node *next;
+  int key;
+}node_t;
+
+#define NIL NULL
+
+node_t *root;
+
+node_t *treeMinimum(node_t *x){
+  while( x != NIL ){
+    x = x->left;
+  }
+  return x;
+}
+
+node_t *treeMaximum(node_t *x){
+  while( x != NIL ){
+    x = x->right;
+  }
+  return x;
+}
+
+node_t *treeSearch(node_t *u, int k){
+  while( u != NIL ){
+    if( u->key == k ) return u;
+    else if( k < u->key ){ u = u->left; }
+    else { u = u->right; }
+  }
+  return NIL;
+}
+
+node_t *treeSuccessor(node_t *x){
+
+}
+
+void setNextNode(node_t *curr, node_t *prev)
+{
+    //ツリーが空の場合に戻る
+    if (curr == NIL) {
+        return;
+    }
+
+    //左側のサブツリーに対して繰り返します
+    setNextNode(curr->left, prev);
+
+    //前のノードの次のポインタを現在のノードに設定します
+    if (prev != NIL) {
+        prev->next = curr;
+    }
+
+    //前のノードを現在のノードに更新します
+    prev = curr;
+
+    //右のサブツリーに対して繰り返します
+    setNextNode(curr->right, prev);
+}
+
+void treeDelete(node_t *z){
+  node_t *y; // node to be deleted
+  node_t *x; // child of y
+
+  int l = 0, r = 0;
+  if( z->left != NIL ) l++;
+  if( z->right != NIL ) r++;
+
+  /*1.z が子を持たない場合、z の親 p の子（つまり z）を削除する。*/
+  if( l + r == 0 ){
+    if( z->parent->left == z ){ z->parent->left = NIL; }
+    else if( z->parent->right == z ){ z->parent->right = NIL; }
+    free(z);
+    z = NIL;
+  }
+  /*2.z がちょうど１つの子を持つ場合、z の親の子を z の子に変更、
+      z の子の親を z の親に変更し、z を木から削除する。*/
+  else if( l + r == 1 ){
+    if ( z->parent->left == z ) {
+      if( l == 1 ) {
+        z->parent->left = z->left;
+        z->left->parent = z->parent;
+      }
+      else if( r == 1 ) {
+        z->parent->left = z->right;
+        z->right->parent = z->parent;
+      }
+    }
+    else if( z->parent->right == z) {
+      if( l == 1 ) {
+        z->parent->right = z->left;
+        z->left->parent = z->parent;
+      }
+      else if( r == 1 ) {
+        z->parent->right = z->right;
+        z->right->parent = z->parent;
+      }
+    }
+    free(z);
+    z = NIL;
+  }
+  /*3.z が子を２つ持つ場合、z の次節点 y のキーを z のキーへコピー
+    し、y を削除する。y の削除では 1. または 2. を適用する。ここ
+    で、z の次節点とは、中間順巡回で z の次に得られる節点である。*/
+  else if( l + r == 2 ){
+    z->next->key = z->key;
+    treeDelete(z->next);
+  }
+}
+
+void insert(int k){
+  node_t *y = NIL;
+  node_t *x = root;
+  node_t *z;
+
+  z = malloc(sizeof(struct node));
+  z->key = k;
+  z->left = NIL;
+  z->right = NIL;
+
+  while(x!=NIL){
+    y = x;
+    if(z->key < x->key){ x = x->left; }
+    else { x = x->right; }
+  }
+  z->parent = y;
+
+  if(y==NIL){ root = z; }
+  else if(z->key < y->key){ y->left = z;}
+  else{ y->right = z; }
+}
+
+void inorder(node_t *u){
+  if( u == NIL ) return;
+  inorder(u->left);
+  printf(" %d", u->key);
+  inorder(u->right);
+}
+
+void preorder(node_t *u){
+  if( u == NIL ) return;
+  printf(" %d", u->key);
+  preorder(u->left);
+  preorder(u->right);
+}
+
+
+int main(){
+  int n, i, x;
+  char com[20];
+  scanf("%d", &n);
+
+  for ( i = 0; i < n; i++ ){
+    scanf("%s", com);
+    if ( com[0] == 'f' ){
+      scanf("%d", &x);
+      node_t *t = treeSearch(root, x);
+      if ( t != NIL ) printf("yes\n");
+      else printf("no\n");
+    } else if ( com[0] == 'i' ){
+      scanf("%d", &x);
+      insert(x);
+    } else if ( com[0] == 'p' ){
+      inorder(root);
+      printf("\n");
+      preorder(root);
+      printf("\n");
+    } else if ( com[0] == 'd' ){
+      setNextNode(root,NIL);
+      for (node_t *p = root; p != NIL; p = p->next ) {
+        printf("node[%d]: %p\n", p->key, p);
+      }
+      //scanf("%d", &x);
+      //treeDelete(treeSearch(root, x));
+    }
+  }
+
+  return 0;
+}
+

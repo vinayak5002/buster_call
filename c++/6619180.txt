@@ -1,0 +1,114 @@
+#include <bits/stdc++.h>
+typedef long long int ll;
+using namespace std;
+const int MOD = 1000000007;
+typedef pair<ll, ll> P;
+const double pi = 3.1415926536;
+const int MAX = 2000003;
+long long fac[MAX], finv[MAX], inv[MAX];
+template<typename T> using min_priority_queue = priority_queue<T, vector<T>, greater<T>>;
+void COMinit() {
+    fac[0] = fac[1] = 1;
+    finv[0] = finv[1] = 1;
+    inv[1] = 1;
+    for (int i = 2; i < MAX; i++){
+        fac[i] = fac[i - 1] * i % MOD;
+        inv[i] = MOD - inv[MOD%i] * (MOD / i) % MOD;
+        finv[i] = finv[i - 1] * inv[i] % MOD;
+    }
+}
+// 二項係数計算
+long long COM(int n, int k){
+    if (n < k) return 0;
+    if (n < 0 || k < 0) return 0;
+    return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
+}
+ll gcd(ll x, ll y) {
+   if (y == 0) return x;
+   else if (y > x) {
+       return gcd (y, x); 
+   }
+   else return gcd(x % y, y);
+}
+
+ll pow_mod(ll x, ll n) {
+    if (n == 0) {
+        return 1;
+    }
+    if (n % 2) return pow_mod(x, n - 1) * x % MOD;
+    else {
+        ll tmp = pow_mod(x, n / 2);
+        return tmp * tmp % MOD;
+    }
+}
+
+
+int main() {
+    vector<int> ans;
+    while (true) {
+        ll n, m;
+        cin >> n >> m;
+        if ((n == 0) && (m == 0)) {
+            break;
+        }
+        ll a[n];
+        ll b[n];
+        for (int i = 0; i < n; i++) {
+            cin >> a[i];
+        }
+        for (int i = 0; i < n; i++) {
+            cin >> b[i];
+        }
+        for (int i = 0; i < n; i++) {
+            a[i] = b[i] - a[i];
+            if (a[i] < 0) {
+                a[i] += m;
+            }
+            // cout << a[i] << endl;
+        }
+        ll dif[n];
+        dif[0] = a[0];
+        for (int i = 1; i < n; i++) {
+            dif[i] = a[i] - a[i - 1];
+        }
+        // for (int i = 0; i < n; i++) cout << dif[i] << endl;
+        priority_queue<ll> pos;
+        min_priority_queue<ll> neg;
+        bool last_neg = false;
+        for (int i = n - 1; i >= 0; i--) {
+            if (dif[i] < 0) {
+                neg.push(dif[i]);
+                last_neg = true;
+            }
+            else {
+                if (last_neg) {
+                    while (pos.size() && neg.size()) {
+                        ll big = pos.top();
+                        ll small = neg.top();
+                        pos.pop();
+                        neg.pop();
+                        if (small + m < big) {
+                            pos.push(small + m);
+                        }
+                        else {
+                            pos.push(big);
+                            break;
+                        }
+                    }
+                    while (neg.size()) neg.pop();
+                }
+                pos.push(dif[i]);
+                last_neg = false;
+            }
+        }
+        ll ret = 0;
+        while (pos.size()) {
+            ret += pos.top();
+            // cout << pos.top() << endl;
+            pos.pop();
+        }
+        ans.push_back(ret);
+    }
+    for (auto x : ans) cout << x << endl;
+    return 0;
+}

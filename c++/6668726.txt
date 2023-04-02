@@ -1,0 +1,169 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+/*
+2022 NTHU PME Programming Practice #1
+E - (Bonus)Road Construction
+*/
+/*version:1.0
+*/
+
+#define			CITY_NOS_MAX		(100000)
+#define			MODE_S2B		0
+#define			MODE_B2S		1
+
+
+//#define IF_DEBUGGING_ON
+
+void		sort0				(	unsigned long		array[]				,
+							unsigned int		index[]				,
+							unsigned int		size				,
+							unsigned char		mode
+						) ;
+void		swap				(	int			*a				,
+							int			*b
+						) ;
+double		route0				(	unsigned long		*axis_x		,
+							unsigned long		*axis_y		,
+							unsigned int		*order		,
+							unsigned int		size
+						) ;
+
+int main(void)
+{
+	long		loop_i						;
+	long		loop_j						;
+	long		loop_k						;
+	unsigned int	city_nos					;
+	unsigned long	axis_x	[CITY_NOS_MAX]				;
+	unsigned long	axis_y	[CITY_NOS_MAX]				;
+	unsigned int	order	[CITY_NOS_MAX]				;
+	double		cost						;
+	unsigned char	running						;
+	unsigned int	temp_idx					;
+	unsigned long	diff_x						;
+	unsigned long	diff_y						;
+
+					running			=	1		;
+	while(running==1) {
+	  if(scanf("%d\n", &city_nos)==EOF) 
+					running			=	0		;
+	  if(running==1) {
+		for(loop_i=0;loop_i<city_nos;loop_i++) {
+		  if(			scanf("%d%d",axis_x+loop_i,axis_y+loop_i)==EOF	) {
+					running			=	0		;
+					break;
+		  }
+		}
+	  }
+
+	  if(running==1) {
+					sort0	(axis_x, order, city_nos, MODE_S2B)	;
+/*
+					diff_x			=	axis_x[order[city_nos-1]]-axis_x[order[0]]	;
+					sort0	(axis_y, order, city_nos, MODE_S2B)	;
+					diff_y			=	axis_y[order[city_nos-1]]-axis_x[order[0]]	;
+		if(			diff_x>diff_y				)
+					sort0	(axis_x, order, city_nos, MODE_S2B)	;
+*/
+#ifdef	IF_DEBUGGING_ON
+		for(loop_i=0;loop_i<city_nos;loop_i++) {
+					temp_idx		=	order[loop_i]	;
+					printf("(x%d,y%d)=(%d,%d)\n",temp_idx,temp_idx,axis_x[temp_idx],axis_y[temp_idx]);
+		}
+#endif
+					cost			=	route0	(axis_x, axis_y, order, city_nos);
+					printf("%.0f\n",cost);
+	  }
+	}
+
+    	return 0;
+}
+
+void		sort0				(	unsigned long		array[]				,
+							unsigned int		index[]				,
+							unsigned int		size				,
+							unsigned char		mode
+						) {
+		int		loop_i			;
+		int 		loop_j			;
+
+		for(loop_i=0;loop_i<size;loop_i++)
+				index	[loop_i]	=		loop_i			;
+
+		for(loop_i=0;loop_i<(size-1);loop_i++) {
+		 for (loop_j=loop_i+1;loop_j<size;loop_j++) {
+ 			if(		mode==MODE_B2S			?
+					array[loop_i]< array[loop_j]	:
+					array[loop_i]> array[loop_j]	)
+				swap(index+loop_i,index+loop_j)					;
+		 }
+		}
+}
+
+void		swap				(	int			*a				,
+							int			*b
+						) {
+ 		int		temp			;
+ 
+ 				temp			=		*a			;
+				*a			=		*b			;
+				*b			=		temp			;
+}
+
+double		route0				(	unsigned long		*axis_x		,
+							unsigned long		*axis_y		,
+							unsigned int		*order		,
+							unsigned int		size
+						) {
+
+		double		result			;
+		int 		loop_i			;
+		int 		loop_j			;
+		unsigned char	done	[CITY_NOS_MAX]	;
+		unsigned int	index_i			;
+		unsigned int	index_j			;
+		unsigned int	index_g			;
+		unsigned long	cost_x			;
+		unsigned long	cost_y			;
+		unsigned long	cost_l			;
+		unsigned long	cost_g			;
+
+				result			=		0			;
+		for(loop_i=0;loop_i<size;loop_i++)
+				done	[loop_i]	=		0			;
+		
+		for(loop_i=0;loop_i<size;loop_i++) {
+				index_i			=		order	[loop_i]	;
+		  if(			done[index_i]==0			) {
+				cost_g			=		-1			;
+		    for(loop_j=0;loop_j<size;loop_j++) {
+		      if(		loop_i!=loop_j				) {
+				index_j			=		order	[loop_j]	;
+				cost_x			=		abs(axis_x[index_i]-axis_x[index_j]);
+				cost_y			=		abs(axis_y[index_i]-axis_y[index_j]);
+			if(		cost_x>cost_y				)
+				cost_l			=		cost_x			;
+			else	cost_l			=		cost_y			;
+
+			if(		cost_l<cost_g				&&
+			    (		loop_i==0				||
+					done[index_j]==1		)	) {
+				cost_g			=		cost_l			;
+				index_g			=		index_j			;
+			}
+		      }
+		    }
+				result			+=		cost_g			;
+				done	[index_i]	=		1			;
+				done	[index_g]	=		1			;
+#ifdef	IF_DEBUGGING_ON
+				printf("(%d,%d)->(%d,%d)\tcost=%u\n",axis_x[index_i],axis_y[index_i],axis_x[index_g],axis_y[index_g],cost_g);
+#endif
+		  }
+		}
+
+		return	result		;
+}
+

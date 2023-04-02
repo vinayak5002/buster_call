@@ -1,0 +1,150 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+template<typename T>
+struct node{
+    T key;
+    node *parent, *left, *right;
+    node(T k):key{k}, parent{nullptr}, left{nullptr}
+    , right{nullptr}{}
+    ~node(){
+        delete left;
+        delete right;
+    }
+    int get_child_num(){
+        int num=0;
+        if(this->left!=nullptr)++num;
+        if(this->right!=nullptr)++num;
+        return num;
+    }
+    void disconect(){
+        this->left=nullptr;
+        this->parent=nullptr;
+        this->right=nullptr;
+    }
+};
+template<typename T>
+node<T>* search_node_end(node<T> *parent, T key){
+    if(parent->key<=key&&parent->right!=nullptr){
+        return search_node_end(parent->right, key);
+    }
+    if(parent->key>key&&parent->left!=nullptr){
+        return search_node_end(parent->left, key);
+    }
+    return parent;
+}
+template<class T>
+node<T>* search_node(node<T> *parent, T key){
+    if(parent->key==key)return parent;
+    if(parent->key<key&&parent->right!=nullptr){
+        return search_node(parent->right, key);
+    }
+    if(parent->key>key&&parent->left!=nullptr){
+        return search_node(parent->left, key);
+    }
+    return nullptr;
+}
+template<typename T>
+void insert(node<T> *&root, node<T> *child){
+    if(root==nullptr){
+        root=child;
+        return;
+    }
+    auto parent=search_node_end(root, child->key);
+    child->parent=parent;
+    if(parent->key<=child->key){
+        parent->right=child;
+    }else{
+        parent->left=child;
+    }
+}
+template<class T>
+void inorder(node<T> *root, vector<T> &vec){
+    if(root==nullptr)return;
+    inorder(root->left, vec);
+    vec.push_back(root->key);
+    inorder(root->right, vec);
+}
+template<class T>
+void preorder(node<T> *root, vector<T> &vec){
+    if(root==nullptr)return;
+    vec.push_back(root->key);
+    preorder(root->left, vec);
+    preorder(root->right, vec);
+}
+template<class T>
+void print(node<T> *root){
+    vector<T> in{}, pre{};
+    inorder(root, in);
+    preorder(root, pre);
+    for(auto x : in){
+        cout<<" "<<x;
+    }
+    cout<<endl;
+    for(auto x : pre){
+        cout<<" "<<x;
+    }
+    cout<<endl;
+}
+template<class T>
+void del(node<T> *p){
+    if(p==nullptr)return;
+    if(p->get_child_num()==0){
+        node<T> *parent=p->parent;
+        if(parent->left!=nullptr&&parent->left->key==p->key){
+            parent->left=nullptr;
+        }else{
+            parent->right=nullptr;
+        }
+        p->disconect();
+        delete p;
+    }else if(p->get_child_num()==1){
+        node<T> *child = ((p->left!=nullptr) ? p->left :p->right);
+        node<T> *parent=p->parent;
+        if(parent->left->key==p->key){
+            parent->left=child;
+        }else{
+            parent->right=child;
+        }
+        child->parent=parent;
+        p->disconect();
+        delete p;
+    }else{
+        p->key=p->left->key;
+        del(p->left);
+    }
+}
+int main(){
+    long int n;
+    cin>>n;
+    node<long long> *root=nullptr;
+    for(long i=0; i<n; ++i){
+        string st;
+        cin>>st;
+        if(st[0]=='i'){
+            long long  key;
+            cin>>key;
+            node<long long>* p= new node(key);
+            insert(root, p);
+        }           
+        else if(st[0]=='p'){
+            print(root);
+        }
+        else if(st[0]=='f'){
+            long long key;
+            cin>>key;
+            auto *p=search_node(root, key);
+            if(p==nullptr)cout<<"no"<<endl;
+            else cout<<"yes"<<endl;
+        }
+        else if(st[0]=='d'){
+            long long key;
+            cin>>key;
+            del(search_node(root, key));
+        }
+    }
+    delete root;
+}

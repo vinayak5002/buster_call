@@ -1,0 +1,86 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+
+//Union-Find
+struct unionfind{
+    vector<int> par, siz;
+
+    //初期化
+    unionfind(int n) : par(n, -1), siz(n, 1) {}
+
+    //根を求める
+    int root(int x) {
+        if (par[x] == -1) return x;
+        else return par[x] = root(par[x]);
+    }
+
+    //xとyの根（グループ）が一致するかどうか
+    bool issame(int x, int y){
+        return root(x) == root(y);
+    }
+
+    //xとyのグループの併合
+    bool unite(int x, int y){
+        x = root(x); y = root(y);
+
+        if (x == y) return false;
+
+        if (siz[x] < siz[y]) swap(x,y);
+
+        par[y] = x;
+        siz[x] += siz[y];
+        return true;
+    }
+
+    //xを含むグループのサイズ
+    int size(int x){
+        return siz[root(x)];
+    }
+};
+
+//辺edgeを<重さ、<頂点、頂点>>と表す
+using edge = pair<int, pair<int,int> >;
+
+int main(){
+    //入力の受け取り
+    int n; cin >> n;
+
+    //辺の集合を配列で管理
+    vector<edge> edges;
+
+    //対称性＆自己ループがないことに注意して全ての辺を記録する
+    for(int i=0; i<n; i++){
+        for(int j=0; j<n; j++){
+            int weight; cin >> weight;
+            if (weight == -1) continue;
+            if(i<j) edges.push_back(edge(weight,make_pair(i,j)));
+        }
+    }
+
+    //各辺を辺の重みが小さい順にソートする
+    sort(edges.begin(), edges.end());
+
+    //クラスカル(Kruskal)法
+    long long ans = 0;
+    unionfind uf(n);
+    for (int i=0; i<edges.size(); i++){
+        int weight = edges[i].first;
+        int u = edges[i].second.first;
+        int v = edges[i].second.second;
+
+        //辺の追加によってサイクルが形成される場合は追加しない
+        if (uf.issame(u,v)) continue;
+        
+        //（既に重みが小さい順となっていることに注意して）それ以外の場合は辺を追加する
+        ans += weight;
+        uf.unite(u,v);
+    }
+
+    //答えの出力
+    cout << ans << endl;
+
+}

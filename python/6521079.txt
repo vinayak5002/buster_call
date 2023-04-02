@@ -1,0 +1,99 @@
+import java.io.*;
+import java.util.*;
+import java.math.BigDecimal;
+import java.lang.Object;
+import java.util.function.*;
+
+public class Main {
+  public static void main(String[] args){
+      long n,m,s=0L,t,sum,ans=0L,mx,mn,cnt;
+      long[] a=new long[9],b=new long[8];
+      String str,S="01234567";
+      Scanner scanner =new Scanner(System.in);  
+      while(scanner.hasNext()){
+       //n=Integer.parseInt(scanner.next());
+       sum=0L;
+       for(int i=0;i<8;i++){
+        a[i]=Long.parseLong(scanner.next());
+        sum*=10;
+        sum+=a[i];
+       }
+       cnt=0L;
+       str=Long.valueOf(sum).toString();
+       if(a[0]==0)str="0"+str;
+       Queue<Pair<String, Long>> q = new LinkedList<Pair<String, Long>>();
+       HashSet<String>hs=new HashSet<String>();
+       q.add(new Pair<String, Long>(str,0L));
+       while(!q.isEmpty()){
+         Pair<String,Long> w=q.poll();
+         Pair<String,Long> x=new Pair<String,Long>();
+        long c=w.second;
+         for(int i=0;i<8;i++){
+           if(w.first.charAt(i)=='0')s=(long)i;
+         }
+         boolean flag=false;
+         if(hs.contains(w.first)){
+          //System.out.println(w);
+           continue;
+         }
+         hs.add(w.first);
+         cnt++;
+         if(w.first.equals(S)){
+           ans=w.second;
+           break;
+         }
+         if(!(s==3||s==7)){
+           x.second=w.second+1;
+           x.first=swap(w.first,Math.toIntExact(s),Math.toIntExact(s+1));
+           if(!hs.contains(x.first)){
+            //x.print();
+            q.add(new Pair<String,Long>(x));
+            }
+         }
+         if(!(s==0||s==4)){
+          x.second=w.second+1;
+          x.first=swap(w.first,Math.toIntExact(s),Math.toIntExact(s-1));
+          if(!hs.contains(x.first)){
+            //x.print();
+            q.add(new Pair<String,Long>(x));
+            }
+        }
+        {
+          x.second=w.second+1;
+          x.first=swap(w.first,Math.toIntExact(s),Math.toIntExact((s+4)%8));
+          if(!hs.contains(x.first)){
+          //x.print();
+          q.add(new Pair<String,Long>(x));
+          }
+        }
+      }
+       System.out.println(ans);
+      }
+    }
+ 
+    static String swap(String str, int i, int j)
+    {
+        char ch[] = str.toCharArray();
+        char tempo = ch[i];
+        ch[i] = ch[j];
+        ch[j] = tempo;
+        return new String(ch);
+    }
+}   
+class Pair<T,E>{
+    T first;
+    E second;
+    public Pair(T a,E b){
+      first=a;
+      second=b;
+    }
+    public Pair(Pair<T,E>x){
+      first=x.first;
+      second=x.second;
+    }
+    public Pair(){}
+    void print(){
+      System.out.println("first:"+first+" second:"+second);
+    }
+  }
+  

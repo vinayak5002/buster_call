@@ -1,0 +1,110 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX 100
+#define NIL NULL
+
+struct Node
+{
+  int key;
+  struct Node *p;
+  struct Node *l;
+  struct Node *r;
+};
+
+typedef struct Node *N;
+
+N root;
+
+void insert(int k)
+{
+  N y = NIL;
+  N x = root;
+  N z;
+
+  z = (N)malloc(sizeof(N));
+  z->key = k;
+  z->l = NIL;
+  z->r = NIL;
+
+  while (x != NIL)
+  {
+    y = x;
+    if (x->key > z->key)
+    {
+      x = x->l;
+    }
+    else
+    {
+      x = x->r;
+    }
+  }
+
+  z->p = y;
+
+  if (y == NIL)
+  {
+    root = z;
+  }
+  else if (y->key > z->key)
+  {
+    y->l = z;
+  }
+  else
+  {
+    y->r = z;
+  }
+}
+
+void preOrder(struct Node *u)
+{
+  if (u == NIL)
+  {
+    return;
+  }
+
+  printf(" %d", u->key);
+  preOrder(u->l);
+  preOrder(u->r);
+}
+
+void inOrder(struct Node *u)
+{
+  if (u == NIL)
+  {
+    return;
+  }
+
+  inOrder(u->l);
+  printf(" %d", u->key);
+  inOrder(u->r);
+}
+
+int main(void)
+{
+  int m, i;
+  char com[MAX];
+
+  scanf("%d", &m);
+
+  for (i = 0; i < m; i++)
+  {
+    scanf("%s", com);
+    // x = atoi(com[8]);
+
+    if (com[0] == 'i')
+    {
+      insert(com[7]);
+    }
+    else if (com[0] == 'p')
+    {
+      inOrder(root);
+      printf("\n");
+      preOrder(root);
+      printf("\n");
+    }
+  }
+
+  return 0;
+}

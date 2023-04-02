@@ -1,0 +1,58 @@
+#define BUF_SIZE 1024
+
+#include <stdio.h>
+#include <string.h>
+
+void print_part(char str[], int start, int end) 
+{
+	char tmp[BUF_SIZE];
+	memset(tmp, 0, sizeof(tmp));
+	strncpy(tmp, str + start, end - start + 1);
+	printf("%s\n", tmp);
+}
+
+void replace(char str[], int start, int end, char replace_str[]) 
+{
+	strncpy(str + start, replace_str, end - start + 1);
+}
+
+void reverse(char str[], int start, int end) 
+{
+	char tmp[BUF_SIZE];
+	int head = start;
+	int tail = end;
+	memset(tmp, 0, sizeof(tmp));
+	strncpy(tmp, str, sizeof(str));
+	while (head <= end) {
+		str[head] = tmp[tail];
+		head++;
+		tail--;
+	}
+}
+
+int main(void)
+{
+	char buf[BUF_SIZE];
+	char str[BUF_SIZE];
+	char command[BUF_SIZE];
+	int start, end, num, i;
+	char replace_str[BUF_SIZE];
+
+	fgets(str, sizeof(str) - 1, stdin);
+	fgets(buf, sizeof(buf) - 1, stdin);
+	sscanf(buf, "%d", &num);
+	for (i = 0; i < num; i++) {
+		fgets(buf, sizeof(buf) - 1, stdin);
+		sscanf(buf, "%s %d %d %s", command, &start, &end, replace_str);
+		if (strcmp(command, "print") == 0) {
+			print_part(str, start, end);
+		}
+		else if (strcmp(command, "replace") == 0) {
+			replace(str, start, end, replace_str);
+		}
+		else if (strcmp(command, "reverse") == 0) {
+			reverse(str, start, end);
+		}
+	}
+	return 0;
+}

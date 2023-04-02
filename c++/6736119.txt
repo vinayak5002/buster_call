@@ -1,0 +1,94 @@
+#include <stdio.h>
+
+#define M 500000
+#define S 2000000000
+
+int l[M / 2 + 2], r[M / 2 + 2];
+int c;
+
+void merge(int a[], int left, int mid, int right)
+{
+    int i, k, n1, n2;
+    int s = 0, t = 0;
+
+    n1 = mid - left;
+    n2 = right - mid;
+
+    for (i = 0; i < n1; i++)
+    {
+        l[i] = a[left + i];
+    }
+
+    for (i = 0; i < n2; i++)
+    {
+        r[i] = a[mid + i];
+    }
+
+    l[n1] = S;
+    r[n2] = S;
+
+    for (k = left; k < right; k++)
+    {
+        c++;
+
+        if (l[s] <= r[t])
+        {
+            a[k] = l[s];
+            s = s + 1;
+        }
+
+        else
+        {
+            a[k] = r[t];
+            t = t + 1;
+        }
+    }
+}
+
+void mergeSort(int a[], int left, int right)
+{
+    int mid;
+
+    if (left + 1 < right)
+    {
+        mid = (left + right) / 2;
+
+        mergeSort(a, left, mid);
+        mergeSort(a, mid, right);
+        merge(a, left, mid, right);
+    }
+}
+
+int main()
+{
+    int a[M];
+    int n, i;
+
+    c = 0;
+
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d", &a[i]);
+    }
+
+    mergeSort(a, 0, n);
+
+    for (i = 0; i < n; i++)
+    {
+        if (i > 0)
+        {
+            printf(" ");
+        }
+
+        printf("%d", a[i]);
+    }
+
+    printf("\n");
+
+    printf("%d\n", c);
+
+    return 0;
+}
+

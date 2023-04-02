@@ -1,0 +1,44 @@
+from collections import defaultdict
+
+def DFS(G, st):
+    def Visit(G, v):
+        nonlocal T#, color, tin, tout
+        #print(color)
+        T += 1
+        color[v] = 1
+        tin[v] = T
+        for ch in G[v]:
+            if color[ch] == 0:
+                Visit(G, ch)
+        T += 1
+        color[v] = 2
+        tout[v] = T
+
+    T = 0
+    color = defaultdict(int)
+    tin = defaultdict(lambda x: 1e7)
+    tout = defaultdict(lambda x: 1e7)
+    Visit(G, st)
+    for v in G:
+        if color[v] != 2:
+            Visit(G, v)
+    return tin, tout, color
+
+def read_graph():
+    V, E = [int(v) for v in input().split()]
+    G = defaultdict(list)
+    for e in range(E):
+        s, t = [int(v) for v in input().split()]
+        G[s].append(t)
+    return G
+
+def print_tops(tin):
+    srt = sorted(tin.items(), key=lambda x: x[1])
+    for tv in srt:
+        print(tv[0])
+
+G = read_graph()
+tin = DFS(G, 0)[0]
+print_tops(tin)
+
+

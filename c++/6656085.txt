@@ -1,0 +1,130 @@
+#include<stdio.h>
+
+#define MAX 10000
+#define NIL -1
+
+typedef struct pp{
+	int p;
+	int l;
+	int r;
+}ni;
+
+ni KI[MAX];
+int n,deep[MAX],height[MAX];
+
+void Depth( int , int );
+int Height( int );
+int Sibling( int );
+void print( int );
+
+int main(void){
+	int i,j;
+	int k,o,d,a=0;
+	
+	scanf("%d",&n);
+	
+	for(i=0;i<n;i++){
+		KI[i].p=NIL;
+		KI[i].l=NIL;
+		KI[i].r=NIL;
+	}
+	
+	for(i=0;i<n;i++){
+		scanf("%d %d %d",&k,&o,&d);
+		KI[k].l=o;
+		KI[k].r=d;
+		if( o != NIL ){
+			KI[o].p=k;
+		}
+		if( d != NIL ){
+			KI[d].p=k;
+		}
+	}
+	
+	for(i=0;i<n;i++){
+		if( KI[i].p == NIL){
+			a=i;
+		}
+	}
+	
+	Depth( a , 0 );
+	Height( a );
+	
+	for(i=0;i<n;i++){
+		print(i);
+	}
+	return 0;
+
+}
+
+void Depth( int x ,int y){
+	deep[x]=y;
+	if(KI[x].r != NIL){
+		Depth( KI[x].r , y+1 );
+	}
+	if(KI[x].l != NIL){
+		Depth( KI[x].l , y+1 );
+	}
+}
+
+int Height( int x ){
+	int h1=0,h2=0;
+	if( KI[x].l != NIL ){
+		h1=Height(KI[x].l)+1;
+	}
+	if( KI[x].r != NIL ){
+		h2=Height(KI[x].r)+1;
+	}
+	if(h1 > h2){
+		height[x]=h1;
+		return h1;
+	}
+	else{
+		height[x]=h2;
+		return h2;
+	}
+}
+
+int Sibling( int x ){
+	int y;
+	if(KI[x].p == NIL){
+		return NIL;
+	}
+	y=KI[x].p;
+	if(KI[y].l != NIL && KI[y].r !=NIL){
+		if(KI[y].l == x){
+			return KI[y].r;
+		}
+		else if(KI[y].r == x){
+			return KI[y].l;
+		}
+	}
+	
+	return NIL;
+
+}
+
+void print( int x ){
+	int dd=0;
+	printf("node %d: ",x );
+	printf("parent = %d, ",KI[x].p);
+	printf("sibling = %d, ",Sibling(x));
+	if( KI[x].l != NIL ){
+		dd++;
+	}
+	if( KI[x].r != NIL ){
+		dd++;
+	}
+	printf("degree = %d, ",dd);
+	printf("depth = %d, ",deep[x]);
+	printf("height = %d, ",height[x]);
+	if( KI[x].p == NIL ){
+		printf("root\n");
+	}
+	else if( KI[x].l != NIL || KI[x].r != NIL ){
+		printf("internal node\n");
+	}
+	else{
+		printf("leaf\n");
+	}
+}

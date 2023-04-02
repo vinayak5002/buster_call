@@ -1,0 +1,189 @@
+// 多倍長整数
+#include <iostream>
+
+struct multiprecision{
+  private:
+  const long long base=100;
+  const int lg = 2;
+  std::vector<long long> num;
+
+  void adjust(){
+    for(int i=0;i<num.size();i++){
+      long long z=num[i]/base;
+      num[i]%=base;
+      if(num[i]<0){
+        if(z!=0||i<num.size()-1){
+          z--;
+          num[i]+=base;
+        }
+      }
+      if(z==0)continue;
+      if(i==num.size()-1){
+        num.emplace_back(z);
+      }
+      else{
+        num[i+1]+=z;
+      }
+    }
+
+    while(num.size()>0&&num[num.size()-1]==0)num.pop_back();
+    if(num.size()==0)num.emplace_back(0);
+    while(num[num.size()-1]==-1&&num.size()>1&&num[num.size()-2]!=0){
+      num[num.size()-2]-=base;
+      num.pop_back();
+    }
+  }
+
+  public:
+  multiprecision(long long val){
+    if(val==0){
+      num.emplace_back(0);
+    }
+    else{
+      long long cpy=val;
+      while(cpy!=0){
+        num.emplace_back(cpy%base);
+        cpy/=base;
+      }
+    }
+    adjust();
+  }
+
+  multiprecision(std::vector<long long> val){
+    num=val;
+    adjust();
+  }
+
+  multiprecision(std::string s){
+    reverse(s.begin(),s.end());
+    bool neg=0;
+    if(s[s.size()-1]=='-'){
+      s[s.size()-1]='0';
+      neg=1;
+    }
+    while(s.size()%lg!=0){
+      s+='0';
+    }
+
+    for(int i=0;i<s.size()/lg;i++){
+      std::string t="";
+      for(int j=0;j<lg;j++){
+        t+=s[i*lg+j];
+      }
+      reverse(t.begin(),t.end());
+      num.emplace_back(std::stoll(t));
+    }
+
+    if(neg){
+      multiprecision zero=multiprecision(0);
+      zero-=*this;
+      *this=zero;
+    }
+
+    adjust();
+  }
+
+  std::vector<long long> val(){
+    return num;
+  }
+
+  std::string s_val(){
+    bool flg=0;
+    if(num[num.size()-1]<0){
+      flg=1;
+      for(int i=0;i<num.size();i++){
+        num[i]*=-1;
+      }
+      adjust();
+    }
+    std::string res="";
+    if(flg)res+='-';
+    for(int i=num.size()-1;i>=0;i--){
+      std::string t=std::to_string(num[i]);
+      if(i==num.size()-1){
+        res+=t;
+        continue;
+      }
+      for(int j=0;j<lg-t.size();j++){
+        res+='0';
+      }
+      res+=t;
+    }
+
+    if(flg){
+      for(int i=0;i<num.size();i++){
+        num[i]*=-1;
+      }
+      adjust();
+    }
+
+    return res;
+  }
+
+  multiprecision& operator =(const multiprecision& other){
+    this->num=other.num;
+    return *this;
+  }
+
+  multiprecision& operator +=(const multiprecision& other){
+    for(int i=0;i<other.num.size();i++){
+      if(i>=this->num.size()){
+        this->num.emplace_back(other.num[i]);
+      }
+      else{
+        this->num[i]+=other.num[i];
+      }
+    }
+    this->adjust();
+    return *this;
+  }
+
+  multiprecision& operator -=(const multiprecision& other){
+    for(int i=0;i<other.num.size();i++){
+      if(i>=this->num.size()){
+        this->num.emplace_back(-other.num[i]);
+      }
+      else{
+        this->num[i]-=other.num[i];
+      }
+    }
+    this->adjust();
+    return *this;
+  }
+};
+
+#include <bits/stdc++.h>
+using namespace std;
+ 
+using ll = long long;
+using ld = long double;
+ 
+using vi = vector<int>;
+using vvi = vector<vi>;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vld = vector<ld>;
+using vvld = vector<vld>;
+using vst = vector<string>;
+using vvst = vector<vst>;
+ 
+#define fi first
+#define se second
+#define pb push_back
+#define eb emplace_back
+#define pq_big(T) priority_queue<T,vector<T>,less<T>>
+#define pq_small(T) priority_queue<T,vector<T>,greater<T>>
+#define all(a) a.begin(),a.end()
+#define rep(i,start,end) for(ll i=start;i<(ll)(end);i++)
+#define per(i,start,end) for(ll i=start;i>=(ll)(end);i--)
+#define uniq(a) sort(all(a));a.erase(unique(all(a)),a.end())
+
+int main(){
+  string a,b;
+  cin>>a>>b;
+
+  multiprecision mp1(a),mp2(b);
+  mp1+=mp2;
+
+  cout<<mp1.s_val()<<endl;
+}

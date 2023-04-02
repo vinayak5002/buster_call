@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+
+#define rep(i, to) for (int i=0; i<to; i++)
+#define repr(i, from, to) for (int i=from; i<to; i++)
+
+using namespace std;
+using ll = long long;
+using P = pair<int, int>;
+
+#ifdef DEBUG
+#include "debug.hpp"
+#else
+template<class T> auto print(T v) { cout << v << endl; }
+void _main(); int main() { _main(); }
+#endif
+
+// ================================================================================ //
+
+const auto MAX = 20;
+
+void _main() {
+    int N; cin >> N;
+    vector<int> A(N); rep(i, N) cin >> A[i];
+    
+    /*
+     dp[i][n] = Ai-1まででnが作れるかどうか
+     
+     dp[0][n] = false
+     dp[0][0] = true
+     
+     dp[i+1][n] |= dp[i][n]
+     dp[i+1][n] |= dp[i][n-A[i]]
+     */
+    
+    auto dp = vector(N+1, vector(MAX, false));
+    dp[0][0] = true;
+    rep(i, N) {
+        rep(n, MAX) {
+            dp[i+1][n] = dp[i+1][n] || dp[i][n];
+            if (n-A[i] >= 0) dp[i+1][n] = dp[i+1][n] || dp[i][n-A[i]];
+        }
+    }
+    
+    int Q; cin >> Q;
+    rep(_, Q) {
+        int M; cin >> M;
+        if (dp[N][M]) {
+            print("yes");
+        } else {
+            print("no");
+        }
+    }
+}
+

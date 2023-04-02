@@ -1,0 +1,59 @@
+import java.io.*;
+
+class Main
+{
+    static boolean excess = false;
+    public static void main(String[] args) throws IOException
+    {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String[] tmp_str = br.readLine().split("\\s");
+        int n = Integer.parseInt(tmp_str[0]);
+        int k = Integer.parseInt(tmp_str[1]);
+        int[] w = new int[n];
+        int sum = 0;
+        
+        for(int i = 0; i < n; i++){
+            w[i] = Integer.parseInt(br.readLine());
+            sum += w[i];
+        }
+        //binaly search
+        int left = 0;
+        int right = sum;
+        int p = (left + right) / 2;
+        while(left < right){
+            
+            if(check_load(n ,k, p, w)){
+                break;
+            }else if(excess){
+                left = p;
+                p = (left + right) / 2;
+            }else{
+                right = p;
+                p = (left + right) / 2;
+            }
+        }
+        System.out.println(p);
+    }
+    
+    static boolean check_load(int n, int k, int p, int[] w)
+    {
+        int tmp_sum = 0;
+        int total_num = 1;
+        
+        if(p == 0) return false;
+        
+        for(int i = 0; i < n; i++){
+            if(w[i] > p) return false;
+            
+            tmp_sum += w[i];
+            if(tmp_sum > p){
+                total_num ++;
+                i--;
+                tmp_sum = 0;
+            }
+        }
+        if(total_num > k) excess = true;
+        if(total_num == k) return true;
+        else return false;
+    }
+}

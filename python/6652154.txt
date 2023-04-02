@@ -1,0 +1,68 @@
+
+from re import X
+
+
+class Node:
+    def __init__(self, key):
+        self.key = key
+        self.parent = None
+        self.right = None
+        self.left = None
+
+
+def insert(root, node):
+    parent = None
+    current = root
+
+    # 順序の制約を満たす空いている場所を探す 
+    while current:
+        parent = current
+        if node.key < parent.key:
+            current = parent.left
+        else:
+            current = parent.right
+
+    node.parent = parent
+
+    # 木が空のとき
+    if parent is None:
+        return node
+
+    # 左右どちらの子になるかを決める
+    if node.key < parent.key:
+        parent.left = node
+    else:
+        parent.right = node
+
+    return root
+    
+
+def traverse(node):
+    if not node:
+        return
+    yield from traverse(node.left)
+    yield node.key
+    yield from traverse(node.right)
+
+
+def traverse_pre(node):
+    if not node:
+        return
+    yield node.key
+    yield from traverse_pre(node.left)
+    yield from traverse_pre(node.right)
+
+
+if __name__ == '__main__':
+    N = int(input())
+    tree = None
+    for _ in range(N):
+        command = input()
+        if command.startswith('insert'):
+            op, n = command.split(' ')
+            tree = insert(tree, Node(int(n)))
+        else:
+            if tree:
+                print(' ' + ' '.join(map(str, traverse(tree))))
+                print(' ' + ' '.join(map(str, traverse_pre(tree))))
+

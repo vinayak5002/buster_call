@@ -1,0 +1,86 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+
+	const q = parseInt(si[0].split("\n"));
+	const BIT_NUM = 64;
+	const ON = Array(BIT_NUM).fill('1');
+	const OFF = Array(BIT_NUM).fill('0');
+	let flag = Array(BIT_NUM).fill('0');
+	let ans = '';
+	
+	for (let i = 1; i < q + 1; i++) {
+		let order = si[i].split(" ");
+
+		switch (order[0]) {
+			case '0':	//test
+				ans += flag[order[1]] + '\n';
+				//console.log('flag : ' + flag[order[1]]);
+				break;
+				
+			case '1':	//set
+				flag[order[1]] = '1';
+				break;
+				
+			case '2':	//clear
+				flag[order[1]] = '0';
+				break;
+				
+			case '3':	//flip
+				if (flag[order[1]] === '0') {
+					flag[order[1]] = '1';
+				} else {
+					flag[order[1]] = '0';
+				}
+				//flag[order[1]] = Math.abs(flag[order[1]] - 1);
+				break;
+				
+			case '4':	//all
+				if (flag === ON) {
+					ans += '1\n';
+				} else {
+					ans += '0\n';
+				}
+				break;
+				
+			case '5':	//any
+				if (flag === OFF) {
+					ans += '0\n';
+				} else {
+					ans += '1\n';
+				}
+				break;
+				
+			case '6':	//none
+				if (flag === OFF) {
+					ans += '1\n';
+				} else {
+					ans += '0\n';
+				}
+				break;
+				
+			case '7':	//count
+				let count = 0;
+				for (let j = 0; j < BIT_NUM; j++) {
+					if (flag[j] === '1') {
+						count++;
+					}
+				}
+				ans += count + '\n';
+				break;
+				
+			case '8':	//val
+				let num = [];
+				for (let j = BIT_NUM - 1; j >= 0; j--) {
+					num += flag[j];
+				}
+				ans += parseInt(num, 2) + '\n';
+				break;
+		}
+	}
+
+	so.write(ans);
+
+}

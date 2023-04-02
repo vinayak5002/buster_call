@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+class UnionFind {
+public:
+    UnionFind() = default;
+    explicit UnionFind(int n) : data(n, -1) {}
+
+    int find(int x) {
+        if (data[x] < 0) return x;
+        return data[x] = find(data[x]);
+    }
+
+    void unite(int x, int y) {
+        x = find(x);
+        y = find(y);
+        if (x == y) return;
+        if (data[x] > data[y]) std::swap(x, y);
+        data[x] += data[y];
+        data[y] = x;
+    }
+
+    bool same(int x, int y) {
+        return find(x) == find(y);
+    }
+
+    int size(int x) {
+        return -data[find(x)];
+    }
+
+private:
+    std::vector<int> data;
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    int N, M;
+    cin >> N >> M;
+    vector<tuple<int, int, int, int>> edges;
+    rep(i,0,M) {
+        int S, D, C;
+        cin >> S >> D >> C;
+        --S, --D;
+        edges.push_back({C, S, D, i});
+    }
+    sort(all(edges));
+    vector<pair<int, int>> cand;
+    UnionFind uf(N);
+    int cost = 0;
+    for (auto [c, s, d, i] : edges) {
+        if (!uf.same(s, d)) {
+            uf.unite(s, d);
+            cost += c;
+            cand.push_back({i, c});
+        }
+    }
+    int ans = 0, cnt = 0;
+    for (auto [k, w] : cand) {
+        UnionFind uf2(N);
+        int cost2 = 0;
+        for (auto [c, s, d, i] : edges) {
+            if (i == k) continue;
+            if (!uf2.same(s, d)) {
+                uf2.unite(s, d);
+                cost2 += c;
+            }
+        }
+        if (uf2.size(0) < N || cost < cost2) {
+            ++cnt;
+            ans += w;
+        }
+    }
+    cout << cnt << " " << ans << endl;
+}

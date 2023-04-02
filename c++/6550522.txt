@@ -1,0 +1,516 @@
+#line 1 "main.cpp"
+#define PROBLEM "https://onlinejudge.u-aizu.ac.jp/problems/GRL_5_D"
+
+#include <cstdint>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#line 1 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/fenwicktree.hpp"
+
+
+
+#include <cassert>
+#line 6 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/fenwicktree.hpp"
+
+#line 1 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/internal_type_traits.hpp"
+
+
+
+#line 5 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/internal_type_traits.hpp"
+#include <numeric>
+#include <type_traits>
+
+namespace atcoder {
+
+namespace internal {
+
+#ifndef _MSC_VER
+template <class T>
+using is_signed_int128 =
+    typename std::conditional<std::is_same<T, __int128_t>::value ||
+                                  std::is_same<T, __int128>::value,
+                              std::true_type,
+                              std::false_type>::type;
+
+template <class T>
+using is_unsigned_int128 =
+    typename std::conditional<std::is_same<T, __uint128_t>::value ||
+                                  std::is_same<T, unsigned __int128>::value,
+                              std::true_type,
+                              std::false_type>::type;
+
+template <class T>
+using make_unsigned_int128 =
+    typename std::conditional<std::is_same<T, __int128_t>::value,
+                              __uint128_t,
+                              unsigned __int128>;
+
+template <class T>
+using is_integral = typename std::conditional<std::is_integral<T>::value ||
+                                                  is_signed_int128<T>::value ||
+                                                  is_unsigned_int128<T>::value,
+                                              std::true_type,
+                                              std::false_type>::type;
+
+template <class T>
+using is_signed_int = typename std::conditional<(is_integral<T>::value &&
+                                                 std::is_signed<T>::value) ||
+                                                    is_signed_int128<T>::value,
+                                                std::true_type,
+                                                std::false_type>::type;
+
+template <class T>
+using is_unsigned_int =
+    typename std::conditional<(is_integral<T>::value &&
+                               std::is_unsigned<T>::value) ||
+                                  is_unsigned_int128<T>::value,
+                              std::true_type,
+                              std::false_type>::type;
+
+template <class T>
+using to_unsigned = typename std::conditional<
+    is_signed_int128<T>::value,
+    make_unsigned_int128<T>,
+    typename std::conditional<std::is_signed<T>::value,
+                              std::make_unsigned<T>,
+                              std::common_type<T>>::type>::type;
+
+#else
+
+template <class T> using is_integral = typename std::is_integral<T>;
+
+template <class T>
+using is_signed_int =
+    typename std::conditional<is_integral<T>::value && std::is_signed<T>::value,
+                              std::true_type,
+                              std::false_type>::type;
+
+template <class T>
+using is_unsigned_int =
+    typename std::conditional<is_integral<T>::value &&
+                                  std::is_unsigned<T>::value,
+                              std::true_type,
+                              std::false_type>::type;
+
+template <class T>
+using to_unsigned = typename std::conditional<is_signed_int<T>::value,
+                                              std::make_unsigned<T>,
+                                              std::common_type<T>>::type;
+
+#endif
+
+template <class T>
+using is_signed_int_t = std::enable_if_t<is_signed_int<T>::value>;
+
+template <class T>
+using is_unsigned_int_t = std::enable_if_t<is_unsigned_int<T>::value>;
+
+template <class T> using to_unsigned_t = typename to_unsigned<T>::type;
+
+}  // namespace internal
+
+}  // namespace atcoder
+
+
+#line 8 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/fenwicktree.hpp"
+
+namespace atcoder {
+
+// Reference: https://en.wikipedia.org/wiki/Fenwick_tree
+template <class T> struct fenwick_tree {
+    using U = internal::to_unsigned_t<T>;
+
+  public:
+    fenwick_tree() : _n(0) {}
+    explicit fenwick_tree(int n) : _n(n), data(n) {}
+
+    void add(int p, T x) {
+        assert(0 <= p && p < _n);
+        p++;
+        while (p <= _n) {
+            data[p - 1] += U(x);
+            p += p & -p;
+        }
+    }
+
+    T sum(int l, int r) {
+        assert(0 <= l && l <= r && r <= _n);
+        return sum(r) - sum(l);
+    }
+
+  private:
+    int _n;
+    std::vector<U> data;
+
+    U sum(int r) {
+        U s = 0;
+        while (r > 0) {
+            s += data[r - 1];
+            r -= r & -r;
+        }
+        return s;
+    }
+};
+
+}  // namespace atcoder
+
+
+#line 1 "/home/anqooqie/.proconlib/tools/hld.hpp"
+
+
+
+#line 5 "/home/anqooqie/.proconlib/tools/hld.hpp"
+#include <cstddef>
+#line 8 "/home/anqooqie/.proconlib/tools/hld.hpp"
+#include <limits>
+#include <stack>
+#include <utility>
+#include <iterator>
+#line 1 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/dsu.hpp"
+
+
+
+#line 7 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/dsu.hpp"
+
+namespace atcoder {
+
+// Implement (union by size) + (path compression)
+// Reference:
+// Zvi Galil and Giuseppe F. Italiano,
+// Data structures and algorithms for disjoint set union problems
+struct dsu {
+  public:
+    dsu() : _n(0) {}
+    explicit dsu(int n) : _n(n), parent_or_size(n, -1) {}
+
+    int merge(int a, int b) {
+        assert(0 <= a && a < _n);
+        assert(0 <= b && b < _n);
+        int x = leader(a), y = leader(b);
+        if (x == y) return x;
+        if (-parent_or_size[x] < -parent_or_size[y]) std::swap(x, y);
+        parent_or_size[x] += parent_or_size[y];
+        parent_or_size[y] = x;
+        return x;
+    }
+
+    bool same(int a, int b) {
+        assert(0 <= a && a < _n);
+        assert(0 <= b && b < _n);
+        return leader(a) == leader(b);
+    }
+
+    int leader(int a) {
+        assert(0 <= a && a < _n);
+        if (parent_or_size[a] < 0) return a;
+        return parent_or_size[a] = leader(parent_or_size[a]);
+    }
+
+    int size(int a) {
+        assert(0 <= a && a < _n);
+        return -parent_or_size[leader(a)];
+    }
+
+    std::vector<std::vector<int>> groups() {
+        std::vector<int> leader_buf(_n), group_size(_n);
+        for (int i = 0; i < _n; i++) {
+            leader_buf[i] = leader(i);
+            group_size[leader_buf[i]]++;
+        }
+        std::vector<std::vector<int>> result(_n);
+        for (int i = 0; i < _n; i++) {
+            result[i].reserve(group_size[i]);
+        }
+        for (int i = 0; i < _n; i++) {
+            result[leader_buf[i]].push_back(i);
+        }
+        result.erase(
+            std::remove_if(result.begin(), result.end(),
+                           [&](const std::vector<int>& v) { return v.empty(); }),
+            result.end());
+        return result;
+    }
+
+  private:
+    int _n;
+    // root node: -1 * component size
+    // otherwise: parent
+    std::vector<int> parent_or_size;
+};
+
+}  // namespace atcoder
+
+
+#line 1 "/home/anqooqie/.proconlib/tools/less_by.hpp"
+
+
+
+namespace tools {
+
+  template <class F>
+  class less_by {
+  private:
+    F selector;
+
+  public:
+    less_by(const F& selector) : selector(selector) {
+    }
+
+    template <class T>
+    bool operator()(const T& x, const T& y) const {
+      return selector(x) < selector(y);
+    }
+  };
+}
+
+
+#line 14 "/home/anqooqie/.proconlib/tools/hld.hpp"
+
+namespace tools {
+  class hld {
+  private:
+    bool m_built;
+    ::std::vector<::std::vector<::std::size_t>> m_graph;
+    ::std::vector<::std::size_t> m_edges;
+    ::std::vector<::std::size_t> m_parent;
+    ::std::vector<::std::size_t> m_depth;
+    ::atcoder::dsu m_dsu;
+    ::std::vector<::std::size_t> m_vid2dfs;
+    ::std::vector<::std::size_t> m_dfs2vid;
+    ::std::vector<::std::size_t> m_eid2dfs;
+    ::std::vector<::std::size_t> m_dfs2eid;
+
+  public:
+    hld() = default;
+    hld(const ::tools::hld&) = default;
+    hld(::tools::hld&&) = default;
+    ~hld() = default;
+    ::tools::hld& operator=(const ::tools::hld&) = default;
+    ::tools::hld& operator=(::tools::hld&&) = default;
+
+    explicit hld(const ::std::size_t n) : m_built(false), m_graph(n) {
+      assert(n >= 1);
+    }
+
+    ::std::size_t size() const {
+      return this->m_graph.size();
+    }
+    const ::std::vector<::std::size_t>& vid2dfs() const {
+      assert(this->m_built);
+      return this->m_vid2dfs;
+    }
+    const ::std::vector<::std::size_t>& dfs2vid() const {
+      assert(this->m_built);
+      return this->m_dfs2vid;
+    }
+    const ::std::vector<::std::size_t>& eid2dfs() const {
+      assert(this->m_built);
+      return this->m_eid2dfs;
+    }
+    const ::std::vector<::std::size_t>& dfs2eid() const {
+      assert(this->m_built);
+      return this->m_dfs2eid;
+    }
+
+    void add_edge(const ::std::size_t u, const ::std::size_t v) {
+      assert(!this->m_built);
+      assert(u < this->size());
+      assert(v < this->size());
+      this->m_graph[u].push_back(this->m_edges.size());
+      this->m_graph[v].push_back(this->m_edges.size());
+      this->m_edges.push_back(u ^ v);
+    }
+
+    void build(const ::std::size_t root) {
+      assert(!this->m_built);
+      assert(root < this->size());
+      assert(this->m_edges.size() + 1 == this->size());
+
+      this->m_parent.resize(this->size());
+      this->m_depth.resize(this->size());
+      this->m_dsu = ::atcoder::dsu(this->size());
+      this->m_vid2dfs.resize(this->size());
+      this->m_dfs2vid.resize(this->size());
+      this->m_eid2dfs.resize(this->m_edges.size());
+      this->m_dfs2eid.resize(this->m_edges.size());
+
+      ::std::vector<::std::size_t> subtree_size(this->size());
+      this->m_parent[root] = ::std::numeric_limits<::std::size_t>::max();
+      this->m_depth[root] = 0;
+      {
+        ::std::stack<::std::pair<::std::size_t, bool>> stack;
+        stack.emplace(root, false);
+        stack.emplace(root, true);
+        while (!stack.empty()) {
+          const auto [here, pre] = stack.top();
+          stack.pop();
+          if (pre) {
+            for (const auto eid : this->m_graph[here]) {
+              const auto next = this->m_edges[eid] ^ here;
+              if (here == root || next != (this->m_edges[this->m_parent[here]] ^ here)) {
+                this->m_parent[next] = eid;
+                this->m_depth[next] = this->m_depth[here] + 1;
+                stack.emplace(next, false);
+                stack.emplace(next, true);
+              }
+            }
+          } else {
+            subtree_size[here] = 1;
+            for (const auto eid : this->m_graph[here]) {
+              const auto child = this->m_edges[eid] ^ here;
+              if (here == root || child != (this->m_edges[this->m_parent[here]] ^ here)) {
+                subtree_size[here] += subtree_size[child];
+              }
+            }
+          }
+        }
+      }
+
+      for (::std::size_t v = 0; v < this->size(); ++v) {
+        if (v != root) {
+          this->m_graph[v].erase(::std::find(this->m_graph[v].begin(), this->m_graph[v].end(), this->m_parent[v]));
+        }
+        ::std::iter_swap(
+          this->m_graph[v].begin(),
+          ::std::max_element(
+            this->m_graph[v].begin(),
+            this->m_graph[v].end(),
+            ::tools::less_by([&](const ::std::size_t eid) { return subtree_size[this->m_edges[eid] ^ v]; })
+          )
+        );
+      }
+
+      {
+        ::std::size_t dfs_order = 0;
+        ::std::stack<::std::size_t> stack;
+        stack.push(root);
+        while (!stack.empty()) {
+          const auto here = stack.top();
+          stack.pop();
+
+          this->m_vid2dfs[here] = dfs_order;
+          this->m_dfs2vid[dfs_order] = here;
+          if (here != root) {
+            this->m_eid2dfs[this->m_parent[here]] = dfs_order - 1;
+            this->m_dfs2eid[dfs_order - 1] = this->m_parent[here];
+          }
+          ++dfs_order;
+
+          if (!this->m_graph[here].empty()) {
+            this->m_dsu.merge(here, this->m_edges[this->m_graph[here].front()] ^ here);
+          }
+          for (auto it = this->m_graph[here].rbegin(); it != this->m_graph[here].rend(); ++it) {
+            stack.push(this->m_edges[*it] ^ here);
+          }
+        }
+      }
+
+      this->m_built = true;
+    }
+    void build() {
+      this->build(0);
+    }
+
+    ::std::vector<::std::pair<::std::size_t, ::std::size_t>> vquery(::std::size_t u, ::std::size_t v) {
+      assert(this->m_built);
+      assert(u < this->size());
+      assert(v < this->size());
+
+      ::std::vector<::std::pair<::std::size_t, ::std::size_t>> head, tail;
+      while (!this->m_dsu.same(u, v)) {
+        if (this->m_depth[this->m_dsu.leader(u)] >= this->m_depth[this->m_dsu.leader(v)]) {
+          head.emplace_back(this->m_vid2dfs[u] + 1, this->m_vid2dfs[this->m_dsu.leader(u)]);
+          u = this->m_edges[this->m_parent[this->m_dsu.leader(u)]] ^ this->m_dsu.leader(u);
+        } else {
+          tail.emplace_back(this->m_vid2dfs[this->m_dsu.leader(v)], this->m_vid2dfs[v] + 1);
+          v = this->m_edges[this->m_parent[this->m_dsu.leader(v)]] ^ this->m_dsu.leader(v);
+        }
+      }
+      if (this->m_depth[u] >= this->m_depth[v]) {
+        head.emplace_back(this->m_vid2dfs[u] + 1, this->m_vid2dfs[v]);
+      } else {
+        head.emplace_back(this->m_vid2dfs[u], this->m_vid2dfs[v] + 1);
+      }
+
+      ::std::copy(tail.rbegin(), tail.rend(), ::std::back_inserter(head));
+      return head;
+    }
+
+    ::std::vector<::std::pair<::std::size_t, ::std::size_t>> equery(::std::size_t u, ::std::size_t v) {
+      assert(this->m_built);
+      assert(u < this->size());
+      assert(v < this->size());
+
+      ::std::vector<::std::pair<::std::size_t, ::std::size_t>> head, tail;
+      while (!this->m_dsu.same(u, v)) {
+        if (this->m_depth[this->m_dsu.leader(u)] >= this->m_depth[this->m_dsu.leader(v)]) {
+          head.emplace_back(this->m_eid2dfs[this->m_parent[u]] + 1, this->m_eid2dfs[this->m_parent[this->m_dsu.leader(u)]]);
+          u = this->m_edges[this->m_parent[this->m_dsu.leader(u)]] ^ this->m_dsu.leader(u);
+        } else {
+          tail.emplace_back(this->m_eid2dfs[this->m_parent[this->m_dsu.leader(v)]], this->m_eid2dfs[this->m_parent[v]] + 1);
+          v = this->m_edges[this->m_parent[this->m_dsu.leader(v)]] ^ this->m_dsu.leader(v);
+        }
+      }
+      if (this->m_depth[u] > this->m_depth[v]) {
+        head.emplace_back(this->m_eid2dfs[this->m_parent[u]] + 1, this->m_eid2dfs[this->m_graph[v].front()]);
+      } else if (this->m_depth[u] < this->m_depth[v]) {
+        head.emplace_back(this->m_eid2dfs[this->m_graph[u].front()], this->m_eid2dfs[this->m_parent[v]] + 1);
+      }
+
+      ::std::copy(tail.rbegin(), tail.rend(), ::std::back_inserter(head));
+      return head;
+    }
+  };
+}
+
+
+#line 9 "main.cpp"
+
+using i64 = std::int_fast64_t;
+
+int main() {
+  std::cin.tie(nullptr);
+  std::ios_base::sync_with_stdio(false);
+
+  i64 n;
+  std::cin >> n;
+  std::vector<i64> parent(n, -1);
+  for (i64 i = 0; i < n; ++i) {
+    i64 k;
+    std::cin >> k;
+    for (i64 j = 0; j < k; ++j) {
+      i64 c;
+      std::cin >> c;
+      parent[c] = i;
+    }
+  }
+
+  tools::hld hld(n);
+  for (i64 i = 1; i < n; ++i) {
+    hld.add_edge(parent[i], i);
+  }
+  hld.build();
+  atcoder::fenwick_tree<i64> fenwick(n - 1);
+  i64 q;
+  std::cin >> q;
+  for (i64 i = 0; i < q; ++i) {
+    i64 t;
+    std::cin >> t;
+    if (t == 0) {
+      i64 v, w;
+      std::cin >> v >> w;
+      fenwick.add(hld.eid2dfs()[v - 1], w);
+    } else {
+      i64 u;
+      std::cin >> u;
+      i64 sum = 0;
+      for (const auto& [from, to] : hld.equery(0, u)) {
+        const auto [l, r] = std::minmax(from, to);
+        sum += fenwick.sum(l, r);
+      }
+      std::cout << sum << '\n';
+    }
+  }
+
+  return 0;
+}

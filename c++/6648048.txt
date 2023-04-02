@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+using namespace std; 
+struct cube{
+ int s[6];
+  };
+void roll(int *p,int i,int j,int k,int l){
+  int t;
+  t=p[i];
+  p[i]=p[j];
+  p[j]=p[k];
+  p[k]=p[l];
+  p[l]=t;
+}
+void roll_x(int *p){
+  roll(p,0,1,5,4);//to N
+}
+void roll_y(int *p){
+  roll(p,0,2,5,3);//to W
+}
+void roll_z(int *p){
+  roll(p,1,2,4,3);
+}
+void move(char ch,int *p){
+  if(ch=='N') roll_x(p);
+  if(ch=='S') for(int i=0;i<3;i++) roll_x(p);
+  if(ch=='W') roll_y(p);
+  if(ch=='E') for(int i=0;i<3;i++) roll_y(p);
+}
+int  getright(int *p,int n,int m){
+  for(int i=0;i<6;i++){
+    for(int j=0;j<4;j++){
+      if(p[0]==n&&p[1]==m) return p[2];
+      roll_z(p);
+    }
+    if(i%2==0) roll_x(p);
+    else roll_y(p);
+  }
+  return -1;
+}
+bool getequal(int *p,int *q){
+  for(int i=0;i<6;i++){
+    for(int j=0;j<4;j++){
+      if(p[0]==q[0]&&p[1]==q[1]&&p[2]==q[2]&&p[3]==q[3]&&p[4]==q[4]&&p[5]==q[5]){
+        return true;
+      }
+      roll_z(p);
+    }
+    if(i%2==0) roll_x(p);
+    else roll_y(p);
+  }
+  return false;
+}
+
+  
+int main() {
+  int n;
+  bool x;
+  cin>>n;
+  cube C[n];
+  for(int i=0;i<n;i++) for(int j=0;j<6;j++) cin>>C[i].s[j];
+  for(int i=0;i<n-1;i++){
+    for(int j=i+1;j<n;j++){
+      if(getequal(&C[i].s[0],&C[j].s[0])){
+        cout<<"No"<<endl;
+        return -1;
+      }
+    }
+  }
+  cout<<"Yes"<<endl;
+}

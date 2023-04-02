@@ -1,0 +1,47 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let set = new Set()
+	let queryNum = si[0]
+	for (let i = 1; i <= queryNum; i++) {
+		let queryLine = si[i].split(" ").map(function(value){
+			return Number(value)
+		})
+		let order = queryLine[0]
+		let element = queryLine[1]
+		let upper = queryLine[2]
+		if (order == 0){
+			set.add(element)
+			so.write(set.size + "\n")
+		} else if (order == 1) {
+			if (set.has(element)){
+				so.write("1\n")
+			} else {
+				so.write("0\n")
+			}
+		} else if (order == 2) {
+			set.delete(element)
+		} else if (order == 3) {
+			let array = Array.from(set).sort(function(a, b){
+					return a - b
+			})
+			let ans = []
+			let k =0
+			for (let j = 0; j < ans.length; j++){
+				if (upper < array[j]){
+					break;
+				} else if (element<=array[j]&&array[j]<=upper){
+					ans[k]=array[j]
+					k++
+				}
+			}
+			if (ans.length){
+				so.write(ans.join("\n") + "\n")
+			}
+			
+		}
+	}
+}
+

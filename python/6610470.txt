@@ -1,0 +1,113 @@
+import java.util.*;
+
+abstract class Strategy
+{
+    int n;
+    int[] ar;
+    void sort(int[] array)
+    {
+        this.ar = array;
+        n = ar.length;
+    }
+    void swap(int i,int j)
+    {
+        int a = ar[i];
+        ar[i] = ar[j];
+        ar[j] = a;
+    }
+}
+
+class MergeSort extends Strategy
+{
+    
+    void sort(int[] array)
+    {
+        super.sort(array);
+        int r = super.n;
+        int l = 0;
+        merge_sort(l,r);
+        print();
+        
+    }
+    
+    void merge_sort(int l,int r)
+    {
+        int mid = (l + r) / 2;
+        if(r - l > 1)
+        {
+            merge_sort(l,mid);
+            merge_sort(mid,r);
+        }
+        merge(l,r);
+    }
+    
+    void merge(int l,int r){
+        int mid = (l + r) / 2;
+        int l_size = mid - l;
+        int r_size = r - mid;
+        int[] left = new int[l_size];
+        int[] right = new int[r_size];
+        def(l,mid,left);
+        def(mid,r,right);
+        /*デバッグ用
+        print(l,mid,left);
+        print(mid,r,right);
+        */
+        int L = 0;
+        int R = 0;
+        for(int i = l;i < r ; i++)
+        {
+            super.ar[i] = Integer.MAX_VALUE;
+            if(L < l_size)super.ar[i] = left[L];
+            if(R >= r_size)
+            {
+                L++;
+                continue;
+            }
+            if(super.ar[i] > right[R])
+            {   
+                super.ar[i] = right[R];
+                R++;
+                continue;
+            }
+            L++;
+        }
+        //print(l,r,super.ar);
+    }
+    void def(int l,int r,int[] array)
+
+    {
+        for(int i = l;i < r;i++)
+        {
+            array[i - l] = super.ar[i];
+        }
+    }
+        
+    void print()
+    {
+        for(int i = 0;i < super.n ;i++)
+        {
+            System.out.print(super.ar[i] + " ");
+        }
+        System.out.println();
+    }
+}
+
+class Main
+{
+    public static void main(String[] args)
+    {
+        int n;
+        int[] array;
+        Scanner sc = new Scanner(System.in);
+        n = sc.nextInt();
+        array = new int[n];
+        for(int i = 0;i < n ;i++)
+        {
+            array[i] = sc.nextInt();
+        }
+        MergeSort ss = new MergeSort();
+        ss.sort(array);
+        ss.print();
+    }
+}

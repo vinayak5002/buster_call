@@ -1,0 +1,180 @@
+#include <bits/stdc++.h>
+#ifdef MY_DEBUG
+  #include "dprint.cpp"
+  # define dprint(a, ...);\
+      do {\
+          printf("line : %d, func : %s\n",\
+                __LINE__, __func__);\
+          dprint(#a,a,##__VA_ARGS__ );\
+      } while (0)
+#else
+  #define dprint(a,...) 
+#endif
+using namespace std;
+vector<vector<vector<int>>>room;
+int n;
+vector<int> get_room(int x,int y){
+  return room[x+n][y+n];
+}
+
+void set_room(int x,int y,int top){
+  room[x+n][y+n][0]++;
+  room[x+n][y+n][1]=top;
+}
+
+int get_right_side(int top,int front){
+  top--;
+  front--;
+  int right_side[6][6]={
+    {0,3,5,2,4,0},
+    {4,0,1,6,0,3},
+    {2,6,0,0,1,5},
+    {5,1,0,0,6,2},
+    {3,0,6,1,0,4},
+    {0,4,2,5,3,0}
+  };
+
+  return right_side[top][front];
+
+}
+
+void solve(vector<vector<int>> vec){
+
+for (auto v :vec){
+  int now_x=0;
+  int now_y=0;
+  int  now_z=get_room(now_x,now_x)[0];
+  int now_top=v[0];
+  int now_front=v[1];
+
+  while (true){
+    int rotate=-1;
+    int rotate_num=-1;
+
+    //front
+    int dice=now_front;
+    if(dice>=4&& rotate_num<dice){
+      //目の大きさ的に回転する可能性あり
+      if(get_room(now_x,now_y+1)[0]<now_z){
+        //高低差あり
+        rotate_num=dice;
+        rotate=0;//front
+      }
+    }
+
+    //back 7-front
+     dice=7-now_front;
+    if(dice>=4&& rotate_num<dice){
+      //目の大きさ的に回転する可能性あり
+      if(get_room(now_x,now_y-1)[0]<now_z){
+        //高低差あり
+
+        rotate_num=dice;
+        rotate=1;//-front
+      }
+    }
+
+    //right get_right_side(top,front)
+    dice=get_right_side(now_top,now_front);
+    if(dice>=4&& rotate_num<dice){
+      //目の大きさ的に回転する可能性あり
+      if(get_room(now_x+1,now_y)[0]<now_z){
+        //高低差あり
+        rotate_num=dice;
+        rotate=2;//right
+      }
+    }
+    //left 7-get_right_side(top,side)
+    dice=7-get_right_side(now_top,now_front);
+    if(dice>=4&& rotate_num<dice){
+      //目の大きさ的に回転する可能性あり
+      if(get_room(now_x-1,now_y)[0]<now_z){
+        //高低差あり
+        rotate_num=dice;
+        rotate=3;//-right
+      }
+    }
+
+    if(rotate_num==-1){
+      //確定(転がることができない)
+      set_room(now_x,now_y,now_top);
+      break;
+    }
+    int t_front=now_front;
+    int t_back=7-now_front;
+    int t_right=get_right_side(now_top,now_front);
+    int t_left=7-get_right_side(now_top,now_front);
+    int t_top=now_top;
+    int t_bottom=7-now_top;
+
+    switch (rotate){
+      case 0:
+       now_front=t_top;
+       now_top=t_back;
+      
+       now_y++;
+       now_z=get_room(now_x,now_y)[0];
+      break;
+      
+      case 1:
+        now_front=t_bottom;
+        now_top=t_front;
+
+        now_y--;
+        now_z=get_room(now_x,now_y)[0];
+        break; 
+      case 2:
+        now_top=t_left;
+
+        now_x++;
+        now_z=get_room(now_x,now_y)[0];
+        break;
+
+      case 3:
+        now_top=t_right; 
+
+        now_x--;
+        now_z=get_room(now_x,now_y)[0];
+        break;
+      }
+  }
+  
+  
+
+}
+
+
+
+}
+
+int main() {
+  while (true){
+  cin >>n;
+  if(n==0)break;
+
+  vector<vector<int>> vec(n, vector<int>(2));
+  for (int i = 0; i < n; i++){
+    for(int j=0;j<2;j++){
+      cin >> vec[i][j];
+    }
+  }
+  room=vector<vector<vector<int>>>(2*n+1,vector<vector<int>>(2*n+1,vector<int>(2,0)));
+  solve(vec);
+  vector<int>ans(7,0);
+  for (int i = 0; i < 2*n+1; i++){
+    for (int j = 0; j < 2*n+1; j++){
+      ans[room[i][j][1]]++;
+    }
+    
+  }
+  for (int i = 1; i <= 6; i++)
+  {
+    cout <<ans[i] ; 
+    if(i!=6)cout << " ";
+  }
+  cout   << endl;
+  
+  }
+  
+return 0;
+}

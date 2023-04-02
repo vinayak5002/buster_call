@@ -1,0 +1,677 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Numerics;
+
+namespace AtCoder
+{
+    internal static class Program
+    {
+        private static void Main(string[] args)
+        {
+            checked
+            {
+                int n = Si();
+                int k = Si();
+                if (n < k)
+                {
+                    Console.WriteLine(0);
+                    return;
+                }
+
+                ModInt.ModValue = ModInt._1000000007;
+                ModInt sum = 0;
+                for (int i = k; i >= 1; i--)
+                {
+                    if ((k - i) % 2 == 0)
+                    {
+                        sum += ModInt.Comb(k, i) * ModInt.Pow(i, n);
+                    }
+                    else
+                    {
+                        sum -= ModInt.Comb(k, i) * ModInt.Pow(i, n);
+                    }
+                }
+
+                Console.WriteLine(sum);
+            }
+        }
+
+        #region Utility
+
+        private const int InfinityInt = Common.InfinityInt;
+        private const long Infinity = Common.Infinity;
+        private static readonly StreamScanner Scanner = new StreamScanner(Console.OpenStandardInput());
+        private static int Si() => Scanner.Integer();
+        private static long Sl() => Scanner.Long();
+        private static string Ss() => Scanner.Scan();
+        private static int[] Sai(int count) => Scanner.ArrayInt(count);
+        private static long[] Sal(int count) => Scanner.ArrayLong(count);
+        private static int[][] Sqi(int yCount, int xCount) => Scanner.SquareInt(yCount, xCount);
+        private static long[][] Sql(int yCount, int xCount) => Scanner.SquareLong(yCount, xCount);
+        private static string[] Sss(int count) => Enumerable.Repeat(0, count).Select(_ => Ss()).ToArray();
+        private static T[] Make<T>(int n, Func<T> creator) => Enumerable.Repeat(0, n).Select(_ => creator()).ToArray();
+
+        private static void Loop(long n, Action action)
+        {
+            for (int i = 0; i < n; i++)
+            {
+                action();
+            }
+        }
+
+        #endregion
+    }
+
+    #region Utility Class
+
+    public static class Common
+    {
+        public const int InfinityInt = 1 << 29;
+        public const long Infinity = (long) 1 << 60;
+    }
+
+    public static class MathPlus
+    {
+        public static long CeilingLong(long value, long div)
+        {
+            return value % div == 0 ? value / div : value / div + 1;
+        }
+
+        public static int Digit(long num, int b)
+        {
+            int digit = 0;
+            while (num > 0)
+            {
+                num /= b;
+                digit++;
+            }
+            return digit;
+        }
+
+        public static long Gcd(long a, long b)
+        {
+            return a > b ? GcdRecursive(a, b) : GcdRecursive(b, a);
+        }
+
+        private static long GcdRecursive(long a, long b)
+        {
+            while (true)
+            {
+                if (b == 0) return a;
+                long a1 = a;
+                a = b;
+                b = a1 % b;
+            }
+        }
+        
+        /// <summary> a*x + b*y = 1 となるx,yを求める(1をnにする場合返り値をn倍) </summary>
+        public static (long, long, long) ExtGcd(long a, long b, long x = 0, long y = 0)
+        {
+            if (b == 0) {
+                return (1, 0, a);
+            }
+            (long xx, long yy, long aa) = ExtGcd(b, a%b, y, x);
+            xx -= a/b * yy;
+            return (yy, xx, aa);
+        }
+
+        /// <summary> Ax ≡ B mod Mとなるxを求める </summary>
+        public static long Inv(long a, long b, long mod)
+        {
+            var dd = ExtGcd(a, mod);
+            if (dd.Item1 < 0)
+            {
+                dd.Item1 += mod;
+            }
+            return (dd.Item1 * b) % mod;
+        }
+
+        public static long Lcm(long a, long b)
+        {
+            checked
+            {
+                return (a / Gcd(a, b)) * b;
+            }
+        }
+
+        public static long Combination(long n, long m)
+        {
+            if (m == 0) return 1;
+            if (n == 0) return 0;
+            return n * Combination(n - 1, m - 1) / m;
+        }
+
+        public static long Permutation(long n, long m)
+        {
+            if (m == 0) return 1;
+            if (n == 0) return 0;
+            long value = 1;
+            for (long i = n; i >= n - m + 1; i--)
+            {
+                value *= i;
+            }
+
+            return value;
+        }
+
+        public static IEnumerable<IEnumerable<T>> GetPermutations<T>(params T[] array) where T : IComparable
+        {
+            var a = new List<T>(array);
+            int n = a.Count;
+
+            yield return array;
+
+            bool next = true;
+            while (next)
+            {
+                next = false;
+                int i;
+                for (i = n - 2; i >= 0; i--)
+                {
+                    if (a[i].CompareTo(a[i + 1]) < 0) break;
+                }
+
+                if (i < 0) break;
+
+                int j = n;
+                do
+                {
+                    j--;
+                } while (a[i].CompareTo(a[j]) > 0);
+
+                if (a[i].CompareTo(a[j]) < 0)
+                {
+                    (a[i], a[j]) = (a[j], a[i]);
+                    a.Reverse(i + 1, n - i - 1);
+                    yield return a;
+                    next = true;
+                }
+            }
+        }
+
+        public static IEnumerable<T[]> GetCombinations<T>(IEnumerable<T> items, int k, bool withRepetition = false)
+        {
+            if (k == 1)
+            {
+                foreach (var item in items)
+                    yield return new T[] {item};
+                yield break;
+            }
+
+            IEnumerable<T> enumerable = items as T[] ?? items.ToArray();
+            foreach (var item in enumerable)
+            {
+                var leftside = new T[] {item};
+
+                var unused = withRepetition ? enumerable : enumerable.SkipWhile(e => !e.Equals(item)).Skip(1).ToList();
+
+                foreach (var rightside in GetCombinations(unused, k - 1, withRepetition))
+                {
+                    yield return leftside.Concat(rightside).ToArray();
+                }
+            }
+        }
+        
+        public static long BigPow(long baseValue, long pow, long mod = long.MaxValue)
+        {
+            long p = baseValue % mod;
+            long x = 1;
+            long ret = 1;
+
+            while (true) {
+                if ((pow & x) > 0) {
+                    ret = (ret * p) % mod;
+                }
+
+                x *= 2;
+                if (x > pow) return ret;
+                p = (p * p) % mod;
+            }
+        }
+    }
+
+    public static class Utility
+    {
+        private static T[,] Rotate90<T>(this T[,] self)
+        {
+            int rows = self.GetLength(0);
+            int columns = self.GetLength(1);
+            var result = new T[columns, rows];
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < columns; j++)
+                {
+                    result[j, rows - i - 1] = self[i, j];
+                }
+            }
+
+            return result;
+        }
+
+        public static T[,] Rotate90<T>(this T[,] self, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                self = self.Rotate90();
+            }
+
+            return self;
+        }
+
+        public static T[,] Rotate90<T>(this T[][] self, int count)
+        {
+            var rows = self.Length;
+            var columns = self.First().Length;
+            T[,] array = new T[rows, columns];
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < columns; j++)
+                {
+                    array[i, j] = self[i][j];
+                }
+            }
+
+            return Rotate90(array, count);
+        }
+
+        public static void SafeAdd<T1, T2>(this Dictionary<T1, T2> self, T1 key, Action<T2> action) where T2 : new()
+        {
+            if (!self.ContainsKey(key))
+            {
+                self.Add(key, new T2());
+            }
+            action(self[key]);
+        }
+    }
+
+    public static class BaseN
+    {
+        public static string ToString(long value, int baseValue)
+        {
+            string s = "";
+
+            while (value > 0)
+            {
+                var c = value % baseValue;
+                s = c.ToString() + s;
+                value /= baseValue;
+            }
+
+            return string.IsNullOrEmpty(s) ? "0" : s;
+        }
+
+        public static long ToLong(string s, int baseValue)
+        {
+            long value = 0;
+            for (int i = 0; i < s.Length; i++)
+            {
+                value = ((value * baseValue) + (s[i] - '0'));
+            }
+
+            return value;
+        }
+
+        public static string Convert(string s, int beforeBase, int afterBase)
+        {
+            return ToString(ToLong(s, beforeBase), afterBase);
+        }
+    }
+
+    public class StreamScanner
+    {
+        private const int Size = 1024 * 16;
+
+        public StreamScanner(Stream stream)
+        {
+            str = stream;
+        }
+
+        private readonly Stream str;
+        private readonly byte[] buf = new byte[Size];
+        private int len, ptr;
+        public bool IsEof { get; private set; }
+
+        private byte Read()
+        {
+            if (IsEof) throw new EndOfStreamException();
+            if (ptr >= len)
+            {
+                ptr = 0;
+                if ((len = str.Read(buf, 0, Size)) <= 0)
+                {
+                    IsEof = true;
+                    return 0;
+                }
+            }
+
+            return buf[ptr++];
+        }
+
+        public char Char()
+        {
+            byte b = 0;
+            do b = Read();
+            while (b < 33 || 126 < b);
+            return (char) b;
+        }
+
+        public string Scan()
+        {
+            var sb = new StringBuilder();
+            for (char b = Char(); b >= 33 && b <= 126; b = (char) Read())
+                sb.Append(b);
+            return sb.ToString();
+        }
+
+        public string ScanIncludeSpace()
+        {
+            var sb = new StringBuilder();
+            for (char b = Char(); b >= 32 && b <= 126; b = (char) Read())
+                sb.Append(b);
+            return sb.ToString();
+        }
+
+        public long Long()
+        {
+            long ret = 0;
+            byte b = 0;
+            bool ng = false;
+            do b = Read();
+            while (b != '-' && (b < '0' || '9' < b));
+            if (b == '-')
+            {
+                ng = true;
+                b = Read();
+            }
+
+            for (; true; b = Read())
+            {
+                if (b < '0' || '9' < b)
+                    return ng ? -ret : ret;
+                else ret = ret * 10 + b - '0';
+            }
+        }
+
+        public int Integer()
+        {
+            return (int) Long();
+        }
+
+        public double Double()
+        {
+            return double.Parse(Scan(), CultureInfo.InvariantCulture);
+        }
+
+        /// <summary> 数値読み込み </summary>
+        public long[] ArrayLong(int count = 0)
+        {
+            long[] scan = new long[count];
+            for (int i = 0; i < count; i++)
+            {
+                scan[i] = Long();
+            }
+
+            return scan;
+        }
+
+        /// <summary> 数値読み込み </summary>
+        public int[] ArrayInt(int count = 0)
+        {
+            int[] scan = new int[count];
+            for (int i = 0; i < count; i++)
+            {
+                scan[i] = Integer();
+            }
+
+            return scan;
+        }
+
+        public long[][] SquareLong(int row, int col)
+        {
+            long[][] scan = new long[row][];
+            for (int i = 0; i < row; i++)
+            {
+                scan[i] = ArrayLong(col);
+            }
+
+            return scan;
+        }
+
+        public int[][] SquareInt(int row, int col)
+        {
+            int[][] scan = new int[row][];
+            for (int i = 0; i < row; i++)
+            {
+                scan[i] = ArrayInt(col);
+            }
+
+            return scan;
+        }
+    }
+
+    public class Answerer
+    {
+
+        public static StringBuilder sb;
+
+        public static void Build<T>(T item) => Build(item, "\n");
+        public static void BuildByLine<T>(T item) => Build(item, "\n");
+        public static void BuildBySpace<T>(T item) => Build(item, " ");
+        public static void Build<T>(T item, string splitter)
+        {
+            if (sb != null)
+            {
+                sb.Append(splitter);
+            }
+            else
+            {
+                sb = new StringBuilder();
+            }
+            sb.Append(item);
+        }
+
+        public static void OutBuild()
+        {
+            Console.WriteLine(sb);
+        }
+        
+        /// <summary> Yes出力 </summary>
+        public static void Yes() => Console.WriteLine("Yes");
+        
+        /// <summary> No出力 </summary>
+        public static void No() => Console.WriteLine("No");
+        
+        /// <summary> Yes/No型出力 </summary>
+        public static void YesNo(bool condition)
+        {
+            Console.WriteLine(condition ? "Yes" : "No");
+        }
+
+        /// <summary> 一括出力 </summary>
+        public static void OutAllLine<T>(IEnumerable<T> items)
+        {
+            var sb = new StringBuilder();
+            foreach (T result in items)
+            {
+                sb.Append(result + "\n");
+            }
+
+            if (sb.Length == 0)
+            {
+                Console.WriteLine();
+                return;
+            }
+
+            sb = sb.Remove(sb.Length - 1, 1);
+            Console.WriteLine(sb);
+        }
+
+        public static void OutEachSpace<T>(IEnumerable<T> items)
+        {
+            var sb = new StringBuilder();
+            foreach (T result in items)
+            {
+                sb.Append(result + " ");
+            }
+
+            if (sb.Length == 0)
+            {
+                Console.WriteLine();
+                return;
+            }
+            
+            sb = sb.Remove(sb.Length - 1, 1);
+            Console.WriteLine(sb);
+        }
+    }
+
+    public class Primer
+    {
+        /// <summary> 素数判定 </summary>
+        public bool IsPrime(long num)
+        {
+            if (num < 2) { return false; }
+
+            if (num == 2) { return true; }
+
+            if (num % 2 == 0) { return false; }
+
+            double sqrtNum = Math.Sqrt(num);
+            for (int i = 3; i <= sqrtNum; i += 2)
+            {
+                if (num % i == 0) { return false; }
+            }
+
+            return true;
+        }
+
+        public IEnumerable<long> GetPrimeFactors(long n)
+        {
+            long i = 2;
+            long tmp = n;
+
+            while (i * i <= tmp)
+            {
+                if (tmp % i == 0)
+                {
+                    tmp /= i;
+                    yield return i;
+                    if (IsPrime(tmp))
+                    {
+                        yield return tmp;
+                        tmp = 1;
+                        break;
+                    }
+                }
+                else
+                {
+                    i++;
+                }
+            }
+
+            if (tmp != 1) yield return tmp;
+        }
+
+        public int GetDivisorCount(long n)
+        {
+            int count = 0;
+            long sq = (long) Math.Sqrt(n);
+            for (long i = 1; i <= sq; i++)
+            {
+                if (n % i == 0)
+                {
+                    count += 2;
+                }
+            }
+
+            if (sq * sq == n)
+            {
+                count--;
+            }
+
+            return count;
+        }
+
+        public IEnumerable<long> GetDivisors(long n)
+        {
+            for (long i = 1; i * i <= n; i++)
+            {
+                if (n % i != 0) { continue; }
+
+                yield return i;
+                if (i != n / i)
+                {
+                    yield return n / i;
+                }
+            }
+        }
+    }
+
+    public struct ModInt
+    {
+        long value;
+        public const int _1000000007 = 1000000007;
+        public const int _1000000009 = 1000000009;
+        public const int _998244353 = 998244353;
+        public static int ModValue { get; set; } = _998244353;
+        static List<ModInt> fact = new List<ModInt> {1};
+        public ModInt(long value) => this.value = value;
+        public static implicit operator ModInt(long a) => new ModInt(a % ModValue + (a < 0 ? ModValue : 0));
+        public static explicit operator int(ModInt a) => (int) a.value;
+        public override string ToString() => value.ToString();
+        public static ModInt operator +(ModInt a, ModInt b) => a.value + b.value;
+        public static ModInt operator -(ModInt a, ModInt b) => a.value - b.value;
+        public static ModInt operator *(ModInt a, ModInt b) => a.value * b.value;
+        public static ModInt operator /(ModInt a, ModInt b) => a * Inv(b);
+
+        public static ModInt Fraction(long top, long bottom)
+        {
+            return new ModInt(top) / bottom;
+        }
+        
+        public static ModInt Pow(ModInt a, long n)
+        {
+            if (n == 0) return 1;
+            if (n == 1) return a;
+            ModInt p = Pow(a, n / 2);
+            return p * p * Pow(a, n % 2);
+        }
+
+        public static ModInt Inv(ModInt a) => Pow(a, ModValue - 2);
+
+        public static ModInt Fact(int n)
+        {
+            for (int i = fact.Count; i <= n; i++) fact.Add(fact[^1] * i);
+            return fact[n];
+        }
+
+        public static ModInt Perm(int n, int r)
+        {
+            if (r < 0 || n < 0) return 0;
+            if (r == 0) return 1;
+            if (n <= 0) return 0;
+            if (n < r) return 0;
+            
+            return Fact(n) / Fact(n - r);
+        }
+
+        public static ModInt Comb(int n, int r)
+        {
+            if (r < 0 || n < 0) return 0;
+            if (r == 0) return 1;
+            if (n <= 0) return 0;
+            if (n < r) return 0;
+
+            return Fact(n) / Fact(n - r) / Fact(r);
+        }
+    }
+
+    #endregion
+}

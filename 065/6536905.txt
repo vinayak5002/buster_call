@@ -1,0 +1,54 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+    let line = si[0]
+	let num = line.split(" ")
+	let array = new Array()
+	for (let i = 0; i < num[0]; i++) {
+		array[i] = new Array()
+	}
+	let tall = new Array(Number(num[0])).fill(-1)
+	for (let i = 1; i <= num[1]; i++) {	
+		let line = si[i]
+		let num = line.split(" ").map(function(value) {
+		return Number(value)
+		})
+		//let sortedArray = array
+		let flag = true
+		if (num[0] == '0') {
+			// 指定されたキューに入れる
+			tall[num[1]]++
+			array[num[1]][tall[num[1]]] = (Number(num[2]))
+			if (array[num[1]][tall[num[1]]-1]>Number(num[2])){
+				flag = true
+			}
+		} else if (num[0] == '1') {
+			// 指定されたキューの取り出される要素を表示
+			if (tall[num[1]] >= 0) {
+				if (flag) {
+					array[num[1]] = array[num[1]].sort(function(a, b){
+					return a - b
+					})
+					flag = false
+				}
+				so.write(array[num[1]][tall[num[1]]] + "\n")
+			}
+			
+		} else {
+			//指定されたキューから要素を取り出す
+			if (tall[num[1]] >= 0) {
+				if (flag) {
+					array[num[1]] = array[num[1]].sort(function(a, b){
+					return a - b
+					})
+					flag = false
+				}
+				tall[num[1]]--
+				array[num[1]].pop()
+			}
+		}
+	}
+
+}

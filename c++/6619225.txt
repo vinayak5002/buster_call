@@ -1,0 +1,77 @@
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+
+#include <bits/stdc++.h>
+
+#define _overload(_1, _2, _3, _4, name, ...) name
+#define _rep1(Itr, N) _rep3(Itr, 0, N, 1)
+#define _rep2(Itr, a, b) _rep3(Itr, a, b, 1)
+#define _rep3(Itr, a, b, step) for (i64 Itr = a; Itr < b; Itr += step)
+#define repeat(...) _overload(__VA_ARGS__, _rep3, _rep2, _rep1)(__VA_ARGS__)
+#define rep(...) repeat(__VA_ARGS__)
+
+#define ALL(X) begin(X), end(X)
+
+using namespace std;
+using i64 = int64_t;
+using u64 = uint64_t;
+
+struct Prog {
+  bool is_const;
+  string content;
+  Prog(bool is_const) : is_const(is_const), content(""){};
+};
+
+string solve(string s, string t) {
+  auto parse = [](string &s) {
+    vector<Prog> prog;
+    prog.push_back(Prog(false));
+    bool is_const = false;
+    for (auto ch : s) {
+      if (ch == '"') {
+        is_const ^= true;
+        prog.push_back(Prog(is_const));
+      } else {
+        prog.back().content += ch;
+      }
+    }
+    return prog;
+  };
+
+  auto sprog = parse(s);
+  auto tprog = parse(t);
+
+  if (sprog.size() != tprog.size()) return "DIFFERENT";
+
+  i64 cnt = 0;
+  rep(i, sprog.size()) {
+    if (sprog[i].is_const != tprog[i].is_const) return "DIFFERENT";
+
+    if (sprog[i].content != tprog[i].content) {
+      if (sprog[i].is_const)
+        cnt++;
+      else
+        return "DIFFERENT";
+    }
+  }
+
+  if (cnt == 0)
+    return "IDENTICAL";
+  else if (cnt == 1)
+    return "CLOSE";
+  else
+    return "DIFFERENT";
+};
+
+int main() {
+  cin.tie(nullptr);
+  ios::sync_with_stdio(false);
+
+  string s, t;
+  while (cin >> s, s != ".") {
+    cin >> t;
+    cout << solve(s, t) << endl;
+  }
+
+  return 0;
+}

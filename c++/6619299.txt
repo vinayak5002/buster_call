@@ -1,0 +1,133 @@
+#include<bits/stdc++.h>
+#define int ll
+#define rep(i, N) for(int i = 0; i < (int)N; ++i)
+#define rep1(i, N) for(int i = 1; i <= (int)N; ++i)
+#define per(i, N) for(int i = N-1; i >= 0; --i)
+#define per1(i, N) for(int i = N; i >= 1; --i)
+#define FOR(i, f, t) for(int i = f; i < (int)t; ++i)
+#define all(v) (v).begin(), (v).end()
+#define rall(v) (v).rbegin(), (v).rend()
+#define bit(n) (1ll << (n))
+#define pcnt(n) (__builtin_popcount(n))
+#define TakAo(ans) ans ? cout << "Takahashi\n" : cout << "Aoki\n"
+#define YesNo(ans) ans ? cout << "Yes\n" : cout << "No\n"
+#define endl '\n'
+#define fi first
+#define se second
+#define mkpr make_pair
+#define mktpl make_tuple
+#define eb emplace_back
+
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+using point = struct{ ll x, y; };
+template<class T> using max_heap = priority_queue<T>;
+template<class T> using min_heap = priority_queue<T, vector<T>, greater<T>>;
+template<class T> using vec = vector<T>;
+template<class T> using vvec = vec<vec<T>>;
+template<class T> using vvvec = vec<vec<vec<T>>>;
+template<class T> using vvvvec = vec<vec<vec<vec<T>>>>;
+
+constexpr ld EPS = 1e-10;
+constexpr int INF = 1001001001;
+constexpr ll LINF = 1001001001001001001ll;
+constexpr int MOD = 1e9+7;
+//constexpr ll MOD = 998244353;
+constexpr int div2 = (MOD + 1) >> 1;
+constexpr int NIL = -1;
+constexpr int pm[2] = {1, -1};
+constexpr int dy[4] = {0, 1, 0, -1};
+constexpr int dx[4] = {1, 0, -1, 0};
+
+ll cel(ll a, ll b){ return (a + b - 1) / b;}
+ll Gcd(ll a, ll b){ return b ? Gcd(b, a % b) : a;}
+template<class T> T powi(T x, ll exp){
+    return exp > 0 ? (exp & 1 ? x : 1) * powi(x * x, exp >> 1) : 1;
+}
+ll modpow(ll x, ll exp, ll mod){
+    x %= mod;
+    return exp > 0 ? (exp & 1 ? x : 1) * modpow(x * x, exp >> 1, mod) % mod : 1;
+}
+template<class T> bool chmin(T &a, T b){ return a > b ? (a = b, true) : 0;}
+template<class T> bool chmax(T &a, T b){ return a < b ? (a = b, true) : 0;}
+
+using P = pair<ll, ll>;
+using Tpl = tuple<int, int, int, int>;
+
+bool comp(const pair<point, int> &a, const pair<point, int> &b){
+    return a.fi.x * b.fi.y <= a.fi.y * b.fi.x;
+}
+
+bool eq(const pair<point, int> &a, const pair<point, int> &b){
+    return a.fi.x * b.fi.y == a.fi.y * b.fi.x;
+}
+
+void Main(){
+        int H, W; cin >> H >> W;
+        vvec<char> G(H + 2, vec<char>(W + 2, '.'));
+        rep(i, H){
+            rep(j, W) cin >> G[i + 1][j + 1];
+        }
+        vec<pair<point, int>> XY;
+
+        rep(i, H)rep(j, W){
+            if(G[i + 1][j + 1] == '#'){
+                if(G[i][j] == '.' && G[i + 1][j] == '.' && G[i][j + 1] == '.'){
+                    XY.eb(mkpr(point{j, H - i}, 1));
+                }
+            }
+            else{
+                if(G[i][j] == '#' && G[i + 1][j] == '#' && G[i][j + 1] == '#'){
+                    XY.eb(mkpr(point{j, H - i}, 1));
+                }
+            }
+        }
+        rep(i, H)rep(j, W){
+            if(G[i + 1][j + 1] == '#'){
+                if(G[i + 2][j + 2] == '.' && G[i + 2][j + 1] == '.' && G[i + 1][j + 2] == '.'){
+                    XY.eb(mkpr(point{j + 1, H - i - 1}, -1));
+                }
+            }
+            else{
+                if(G[i + 2][j + 2] == '#' && G[i + 2][j + 1] == '#' && G[i + 1][j + 2] == '#'){
+                    XY.eb(mkpr(point{j + 1, H - i - 1}, -1));
+                }
+            }
+        }
+
+        sort(all(XY), comp);
+        /*
+        for(auto it : XY){
+            cout << it.fi.x << " " << it.fi.y << " " << it.se << endl;
+        }
+        */
+
+        int M = XY.size();
+        pair<point, int> prev = XY[0];
+        int cnt = 2;
+        int ans = 0;
+        rep(i, M){
+            if(i == 0) continue;
+            if(eq(XY[i], prev)){
+                cnt += XY[i].se;
+                prev = XY[i];
+            }
+            else{
+                chmax(ans, cnt);
+                //cout << cnt << endl;
+                cnt += XY[i].se;
+                prev = XY[i];
+            }
+        }
+        cout << ans << endl;
+}
+
+signed main(){
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    cout << fixed << setprecision(10);
+    Main();
+    return 0;
+}

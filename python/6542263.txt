@@ -1,0 +1,123 @@
+/*
+ * Created by karayuu on 2022/04/27.
+ */
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+/*struct Node {
+  int data;
+  struct Node* parent;
+  struct Node* first_child;
+  struct Node* sibling;
+};*/
+
+struct Node {
+  int key;
+  struct Node* parent;
+  struct Node* left;
+  struct Node* right;
+};
+
+typedef struct Node Node;
+
+bool tree_search(Node* tree, int a) {
+  Node* x = tree;
+  while (x != nullptr) {
+    if (x->key == a) {
+      return true;
+    }
+    // この時点で x > a or x < a のいずれか
+    if (a < x->key) {
+      x = x->left;
+    } else {
+      x = x->right;
+    }
+  }
+  return false;
+}
+
+// 返り値は 根のポインタ
+Node* tree_insert(Node* root, int key) {
+  Node* inserted_node = (Node*) malloc(sizeof(Node));
+  inserted_node->key = key;
+  inserted_node->left = nullptr; inserted_node->right = nullptr;
+
+  Node* now = root;
+  Node* next = nullptr;
+
+  if (root == nullptr) {
+    return inserted_node;
+  }
+
+  if (root->key < key) {
+    next = root->right;
+  } else {
+    next = root->left;
+  }
+
+  while (next != nullptr) {
+    now = next;
+    if (now->key < key) {
+      next = now->right;
+    } else {
+      next = now->left;
+    }
+  }
+
+  inserted_node->parent = now;
+  if (now->key < key) {
+    now->right = inserted_node;
+  } else {
+    now->left = inserted_node;
+  }
+
+  return root;
+}
+
+void print_inorder(Node* root) {
+  if (root != nullptr) {
+    print_inorder(root->left);
+    printf(" %d", root->key);
+    print_inorder(root->right);
+  }
+}
+
+void print_preorder(Node* root) {
+  if (root != nullptr) {
+    printf(" %d", root->key);
+    print_preorder(root->left);
+    print_preorder(root->right);
+  }
+}
+
+
+int main() {
+  int n;
+  cin >> n;
+  Node* root = nullptr;
+
+  for (int i = 0; i < n; i++) {
+    string cmd;
+    int key;
+
+    cin >> cmd;
+    if (cmd == "print") {
+      print_inorder(root);
+      printf("\n");
+      print_preorder(root);
+      printf("\n");
+    } else if (cmd == "find") {
+      cin >> key;
+      if (tree_search(root, key)) {
+        printf("yes\n");
+      } else {
+        printf("no\n");
+      }
+    } else {
+      cin >> key;
+      root = tree_insert(root, key);
+    }
+  }
+}

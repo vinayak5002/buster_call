@@ -1,0 +1,154 @@
+#include <vector>
+#include <cmath>
+#include <string>
+#include <iostream>
+
+using namespace std;
+
+class dictionary{
+    struct index{
+        index *A, *C, *G, *T;
+        index(){
+            A=nullptr;
+            C=nullptr;
+            G=nullptr;
+            T=nullptr;
+        }
+        ~index(){
+            delete A;
+            delete C;
+            delete G;
+            delete T;
+        }
+        void add(char c){
+            switch (c){
+                case 'A':{
+                    A = new index();
+                    break;
+                }
+                case 'C':{
+                    C = new index();
+                    break;
+                }
+                case 'G':{
+                    G = new index();
+                    break;
+                }
+                case 'T':{
+                    T = new index();
+                    break;
+                }
+                default:{
+                    runtime_error("invalid char");
+                }
+            }
+        }
+    };
+    index *A, *C, *G, *T;
+    public:
+    dictionary(): A{nullptr}, C{nullptr}, G{nullptr}, T{nullptr}{}
+    ~dictionary(){
+        delete A;
+        delete C;
+        delete G;
+        delete T;
+    }
+    index* access(index* p, char c){
+        if(p==nullptr){
+            switch (c){
+                case 'A':{
+                    return A;
+                }
+                case 'C':{
+                    return C;
+                }
+                case 'G':{
+                    return G;
+                }
+                case 'T':{
+                    return T;
+                }
+                default:{
+                    runtime_error("invalid char");
+                }
+            }
+        }else{
+            switch (c){
+                case 'A':{
+                    return p->A;
+                }
+                case 'C':{
+                    return p->C;
+                }
+                case 'G':{
+                    return p->G;
+                }
+                case 'T':{
+                    return p->T;
+                }
+                default:{
+                    runtime_error("invalid char");
+                }
+            }
+        }
+    }
+    void insert(const string& st){
+        if(access(nullptr, st[0])==nullptr){
+            switch (st[0]){
+                case 'A':{
+                    A = new index();
+                    break;
+                }
+                case 'C':{
+                    C = new index();
+                    break;
+                }
+                case 'G':{
+                    G = new index();
+                    break;
+                }
+                case 'T':{
+                    T = new index();
+                    break;
+                }
+            }
+        }
+        index *p=nullptr;
+        for(auto ctr : st){
+            if(access(p, ctr)==nullptr){
+                p->add(ctr);
+                p=access(p, ctr);
+            }else{
+                p=access(p, ctr);
+            }
+        }
+    }
+    bool find(const string& st){
+        index *p=nullptr;
+        for(auto ctr : st){
+            if(access(p, ctr)==nullptr)return false;
+            p=access(p, ctr);
+        }
+        return true;
+    }
+};
+int main(){
+    unsigned long int n;
+    cin>>n;
+    dictionary dit{};
+    string st;
+    for(unsigned long i=0; i<n; ++i){
+        cin>>st;
+        if(st[0]=='i'){
+            cin>>st;
+            dit.insert(st);
+        }else if(st[0]=='f'){
+            cin>>st;
+            if(dit.find(st)){
+                cout<<"yes"<<endl;
+            }else{
+                cout<<"no"<<endl;
+            }
+        }
+    }
+}

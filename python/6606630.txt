@@ -1,0 +1,43 @@
+import sys
+count = 1
+tetL = [0]
+tetL2 = []
+while True: 
+  n = count*(count+1)*(count+2)//6
+  if n <= 10**6:
+    tetL.append(n)
+    if n%2 == 1:
+      tetL2.append(n)
+  else:
+    break
+  count += 1
+INF = float('inf')
+DP2 = [INF for i in range(10**6+1)]
+DP2[0] = 0
+ansL1 = []
+D1 = dict()
+for i in range(181):
+  for j in range(181):
+    n = [i,j].count(0)
+    ansL1.append([tetL[i]+tetL[j],2-n])
+    D1[tetL[i]+tetL[j]] = 2-n
+#print(len(ansL1))
+
+for j in range(45):
+  for i in range(0,10**6+1):
+    if i < tetL2[j]:
+      pass
+    else:
+      DP2[i] = min(DP2[i],DP2[i-tetL2[j]]+1)    
+while True:
+  N = int(input())
+  if N == 0:
+    sys.exit()
+  else:
+    ans = 5
+    for l in ansL1:
+      M = N-l[0]
+      if D1.get(M):
+        ans = min(ans,l[1]+D1[M])
+    print(ans,DP2[N])
+    

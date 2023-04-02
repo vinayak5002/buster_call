@@ -1,0 +1,51 @@
+#include <stdio.h>
+
+int main() {
+    int n, i, j, k;
+    while (scanf("%d", &n) && n != 0) {
+        int max = 0;
+        char c;
+        int grid[n][n];
+        int horz[n];
+        int vert[n];
+        int lfdiag[(n*2)-1];
+        int rtdiag[(n*2)-1];
+
+        for (i = 0; i < n; i++) {
+            for (j = 0; j < n; j++) {
+                scanf(" %c", &c);
+                grid[i][j] = c - 48;
+            }
+        }
+
+        for (i = 0; i < n; i++) {
+            horz[i] = 0;
+            vert[i] = 0;
+            for (j = 0; j < n; j++) {
+                horz[i] += grid[i][j];
+                vert[i] += grid[j][i];
+            }
+            if (horz[i] > max) max = horz[i];
+            if (vert[i] > max) max = vert[i];
+        }
+
+        for (i = 0; i < n; i++) {
+            lfdiag[i] = 0;
+            for (j = 0; j <= i; j++) {
+                lfdiag[i] += grid[j][i - j];
+            }
+            if (lfdiag[i] > max) max = lfdiag[i];
+        }
+        for (j = n - 2; j >= 0; j--) {
+            lfdiag[i] = 0;
+            for (k = 0; k <= j; k++) {
+                lfdiag[i] += grid[n - k - 1][n - (j - k) - 1];
+            }
+            if (lfdiag[i] > max) max = lfdiag[i];
+            i++;
+        }
+        printf("%d\n",max);
+    }
+    return 0;
+}
+

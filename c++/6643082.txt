@@ -1,0 +1,44 @@
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <queue>
+using namespace std;
+
+int a[10];
+vector<int> b,c;
+
+bool dfs(int cur){
+    if(cur==10){
+        for(int i=0;i<(int)b.size()-1;++i){
+            if(b[i]>b[i+1]) return false;
+        }
+        for(int i=0;i<(int)c.size()-1;++i){
+            if(c[i]>c[i+1]) return false;
+        }
+        return true;
+    }
+    b.push_back(a[cur]);
+    if(dfs(cur+1)) return true;
+    b.pop_back();
+    c.push_back(a[cur]);
+    if(dfs(cur+1)) return true;
+    c.pop_back();
+    return false;
+}
+// #define LOCAL
+int main(){
+    #ifdef LOCAL
+        freopen("input.txt","r",stdin);
+        freopen("output.txt","w",stdout);
+    #endif
+    int T;
+    scanf("%d",&T);
+    while(T-->0){
+        for(int i=0;i<10;++i) scanf("%d",&a[i]);
+        b.clear();
+        c.clear();
+        bool ans=dfs(0);
+        printf("%s\n",ans?"YES":"NO");
+    }
+    return 0;
+}

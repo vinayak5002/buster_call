@@ -1,0 +1,344 @@
+#pragma region Template
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using vi = vector<int>;
+using vl = vector<ll>;
+using vvi = vector<vi>;
+using vvl = vector<vl>;
+#define REP(i, n) for (int i = 0, i##_len = (n); i < i##_len; ++i)
+#define FOR(i, a, b) for (int i = (a), i##_len = (b); i < i##_len; ++i)
+#define ALL(x) (x).begin(), (x).end()  // sortなどの引数を省略したい
+#ifdef _DEBUG
+#define PRE_COMMAND          \
+    cin.rdbuf(in.rdbuf());   \
+    cout.rdbuf(out.rdbuf()); \
+    cout << fixed << setprecision(15);
+#else
+#define PRE_COMMAND                    \
+    cout << fixed << setprecision(15); \
+    ios::sync_with_stdio(false);       \
+    cin.tie(0);
+#endif
+const double EPS = 1e-10, PI = acos(-1.0);
+// 標準入出力
+template <class T1, class T2>
+istream& operator>>(istream& is, tuple<T1, T2>& t) {
+    return is >> get<0>(t) >> get<1>(t);
+}
+template <class T1, class T2, class T3>
+istream& operator>>(istream& is, tuple<T1, T2, T3>& t) {
+    return is >> get<0>(t) >> get<1>(t) >> get<2>(t);
+}
+template <class T> istream& operator>>(istream& is, vector<T>& vec) {
+    for (T& x : vec) is >> x;
+    return is;
+}
+template <class T1, class T2>
+ostream& operator<<(ostream& os, const tuple<T1, T2>& t) {
+    return os << get<0>(t) << " " << get<1>(t);
+}
+template <class T1, class T2, class T3>
+ostream& operator<<(ostream& os, const tuple<T1, T2, T3>& t) {
+    return os << get<0>(t) << " " << get<1>(t) << " " << get<2>(t);
+}
+template <class T> ostream& COUT_MAIN(ostream& os, const T& v) {
+    if (!v.size()) return os;
+    typename T::const_iterator ii = v.begin();
+    os << *ii++;
+    for (; ii != v.end(); ++ii) os << " " << *ii;
+    return os;
+}
+template <class T> ostream& operator<<(ostream& os, const vector<T>& v) {
+    return COUT_MAIN(os, v);
+}
+template <class T> ostream& operator<<(ostream& os, const set<T>& v) {
+    return COUT_MAIN(os, v);
+}
+template <class T, class S>
+ostream& operator<<(ostream& os, const map<T, S>& m) {
+    for (typename map<T, S>::const_iterator ii = m.begin(); ii != m.end();) {
+        os << tuple<T, S>(*(ii++));
+        if (ii != m.end()) os << '\n';
+    }
+    return os;
+}
+// 出力用関数
+void PRINT() {}
+template <class Head> void PRINT(Head&& head) { std::cout << head << '\n'; }
+template <class Head, class... Tail> void PRINT(Head&& head, Tail&&... tail) {
+    std::cout << head << ' ';
+    PRINT(std::forward<Tail>(tail)...);
+}
+template <class T> auto MAX(T& seq) { return *max_element(ALL(seq)); }
+template <class T> auto MIN(T& seq) { return *min_element(ALL(seq)); }
+template <class T> auto SUM(T& seq) {
+    return accumulate(++ALL(seq), *seq.begin());
+}
+template <class T> void REV(T& seq) { reverse(ALL(seq)); }
+template <class T> void SORT(T& seq) { sort(ALL(seq)); }
+template <class T, class S> void SORT(T& seq, S ordr) { sort(ALL(seq), ordr); }
+template <class T> void SORTR(vector<T>& seq) { sort(ALL(seq), greater<T>()); }
+template <class T> ll pow(ll n, T k) {
+    ll now = 1;
+    while (true) {
+        if (k & 1) now *= n;
+        k >>= 1;
+        if (k == 0) break;
+        n *= n;
+    }
+    return now;
+}
+template <class T> ll pow(int n, T k) { return pow((ll)n, k); }
+template <class T> int pow(int n_0, T k, int mod) {
+    if (n_0 >= mod) n_0 %= mod;
+    if (n_0 < 0) n_0 += mod;
+    unsigned long long n = (unsigned long long)n_0, now = 1;
+    while (true) {
+        if (k & 1) now = (now * n) % mod;
+        k >>= 1;
+        if (k == 0) break;
+        n = (n * n) % mod;
+    }
+    return (int)now;
+}
+void yn(bool flag) { PRINT(flag ? "YES" : "NO"); }
+#pragma endregion Template
+
+struct SA_IS {
+    // LSMをそれぞれ0, 1, 2とする
+    string str;
+    int length, seg_size = 1;
+    vector<int> s_array, l_array, s_array_inv, seg_tree;
+    SA_IS(string _str) : str(_str) {
+        length = (int)(str.size());
+        vector<char> t(str.begin(), str.end());
+        t.push_back('$');
+        s_array = induced_sort(t);
+        s_array_inv.assign(length + 1, 0);
+        for (int i = 0; i <= length; ++i) s_array_inv[s_array[i]] = i;
+        calc_l_array();
+        make_l_seg();
+    }
+    template <class T> vector<char> categorize(vector<T>& s) {
+        int n = (int)s.size();
+        vector<char> L_S(n);
+        L_S[n - 1] = 1;
+        for (int i = n - 2; i >= 0; i--) {
+            if (s[i] < s[i + 1]) {
+                L_S[i] = 1;
+            } else if (s[i] > s[i + 1]) {
+                L_S[i] = 0;
+            } else {
+                L_S[i] = L_S[i + 1];
+            }
+        }
+        for (int i = 1; i < n; ++i) {
+            if (L_S[i] == 1 && L_S[i - 1] == 0) L_S[i] = 2;
+        }
+        return L_S;
+    }
+    template <class T>
+    void bucket_sort(vector<T>& s, vector<int>& bucket, vector<char>& cat,
+                     map<T, array<int, 3>>& LSM, vector<int>& is_sort) {
+        int n = (int)(cat.size()), t;
+        if ((int)is_sort.size() > 0) {
+            // ソートしたMをバケツに突っ込む。そのうち置き換える
+            for (int& temp : is_sort) {
+                bucket[LSM[s[temp]][2]] = temp;
+                LSM[s[temp]][2]--;
+            }
+        } else {
+            // M-typeを入れる。
+            for (int i = 0; i < n; ++i) {
+                if (cat[i] == 2) {
+                    bucket[LSM[s[i]][2]] = i;
+                    LSM[s[i]][2]--;
+                }
+            }
+        }
+        // L-typeを入れる。
+        for (int i = 0; i < n; ++i) {
+            t = bucket[i] - 1;
+            if (t >= 0) {
+                if (cat[t] == 0) {
+                    bucket[LSM[s[t]][0]] = t;
+                    ++LSM[s[t]][0];
+                }
+            }
+        }
+        // S-typeを入れる。
+        for (int i = n - 1; i >= 0; i--) {
+            t = bucket[i] - 1;
+            if (t >= 0) {
+                if (cat[t] != 0) {
+                    bucket[LSM[s[t]][1]] = t;
+                    --LSM[s[t]][1];
+                }
+            }
+        }
+    }
+    template <class T> vector<int> induced_sort(vector<T>& s) {
+        int t, t2, before, after;  // temp変数
+        int n = (int)s.size();
+        vector<int> bucket(n, -1), bucket_pre(n, -1);
+        if (n == 1) {
+            bucket = {0};
+            return bucket;
+        }
+        // 出てくる回数を記録
+        map<T, int> counter;
+        for (int i = 0; i < n; ++i) {
+            T c = s[i];
+            if (counter.find(c) == counter.end()) {
+                counter[c] = 1;
+            } else {
+                ++counter[c];
+            }
+        }
+        // バケツに入れる場所を記録するmap
+        map<T, array<int, 3>> LSM, LSM_pre;
+        int sum_count = 0;
+        for (auto& [idx, cnt] : counter) {
+            LSM[idx][0] = sum_count, sum_count += cnt;
+            LSM[idx][1] = sum_count - 1;
+            LSM[idx][2] = sum_count - 1;
+        }
+        LSM_pre = LSM;
+        // L,S,Mに分類
+        vector<char> cat = categorize(s);
+        // 一旦バケットソートでMの順序を決定する
+        vector<int> M_rec(0);
+        map<int, int> M_map;
+        bucket_sort(s, bucket_pre, cat, LSM_pre, M_rec);
+        M_map[bucket_pre[0]] = 0, t = 0, before = n - 1;
+        for (int i = 1; i < n; ++i) {
+            if (cat[bucket_pre[i]] != 2) continue;
+            after = bucket_pre[i];
+            t2 = 0;
+            while (true) {
+                if (s[before] < s[after + t2]) {
+                    ++t;
+                    break;
+                }
+                ++t2, ++before;
+                if (before == n) {
+                    ++t;
+                    break;
+                }
+                if (cat[before] == 2) {
+                    if (cat[after + t2] != 2) ++t;
+                    break;
+                }
+            }
+            M_map[after] = t;
+            before = after;
+        }
+        for (auto& [_, cnt] : M_map) M_rec.push_back(cnt);
+        int m = (int)M_rec.size();
+        // Mのリストを作る
+        vector<int> M_list;
+        for (int i = 0; i < n; ++i) {
+            if (cat[i] == 2) M_list.push_back(i);
+        }
+        // Mについて、再帰的にinduced_sortを行う
+        vector<int> is_sort(m);
+        if (m > 0) {
+            vector<int> is = induced_sort(M_rec);
+            for (int i = 0; i < m; ++i) is_sort[m - i - 1] = M_list[is[i]];
+        }
+        bucket_sort(s, bucket, cat, LSM, is_sort);
+        return bucket;
+    }
+    // lcp_arrayの計算
+    vector<int> calc_l_array() {
+        l_array.resize(length);
+        int h = 0, j;
+        for (int i = 0; i < length; ++i) {
+            j = s_array[s_array_inv[i] - 1];
+            while (i + h < length && j + h < length) {
+                if (str[i + h] == str[j + h]) {
+                    ++h;
+                } else {
+                    break;
+                }
+            }
+            l_array[s_array_inv[i] - 1] = h;
+            if (h > 0) h--;
+        }
+        return l_array;
+    }
+    // セグ木を作る
+    void make_l_seg() {
+        int basesize = (int)l_array.size(), e = 10000000;
+        while (seg_size < basesize) seg_size <<= 1;
+        seg_tree.assign(seg_size << 1, e);
+        for (int i = 0; i < basesize; ++i) seg_tree[i + seg_size] = l_array[i];
+        for (int i = seg_size - 1; i > -1; --i)
+            seg_tree[i] = min(seg_tree[2 * i], seg_tree[2 * i + 1]);
+    }
+    // 存在するかどうか
+    bool find(string s) {
+        int ok = 0, ng = length, n = (int)(s.size()), l = 0, r = 0, mid = 0;
+        while (abs(ok - ng) > 1) {
+            mid = (ok + ng) >> 1;
+            int t = s_array[mid], i = min(l, r);
+            int m = length - t;
+            for (;; ++i) {
+                if (i == n) return true;
+                if (s[i] == str[t + i]) continue;
+                if (s[i] < str[t + i]) {
+                    r = i, ng = mid;
+                } else if (s[i] > str[t + i] || i == m) {
+                    l = i, ok = mid;
+                }
+                break;
+            }
+        }
+        if (ok == mid) ok = ng;
+        int t = s_array[ok], i = min(l, r);
+        int m = length - t;
+        for (;; ++i) {
+            if (i == n) return true;
+            if (s[i] != str[t + i] || i == m) return false;
+        }
+    }
+    // suffix_arrayを返す
+    vector<int> suffix_array() { return s_array; }
+    // suffix_array_invを返す
+    vector<int> suffix_array_inv() { return s_array_inv; }
+    // lcp_arrayを返す
+    vector<int> lcp_array() { return l_array; }
+    // S_xとS_yのlcpを求める
+    int lcp(int x, int y) {
+        int l = s_array_inv[x], r = s_array_inv[y], e = 10000000;
+        if (l == r) return e;
+        if (l > r) swap(l, r);
+        l += seg_size, r += seg_size;
+        int sml = e, smr = e;
+        while (l < r) {
+            if (l & 1) sml = min(sml, seg_tree[l++]);
+            if (r & 1) smr = min(seg_tree[--r], smr);
+            l >>= 1, r >>= 1;
+        }
+        return min(sml, smr);
+    }
+};
+
+int main() {
+    PRE_COMMAND
+    // SA-ISの構築
+    string s;
+    cin >> s;
+    SA_IS sa_is(s);
+
+    // クエリ処理
+    int n;
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+        string t;
+        cin >> t;
+        PRINT(sa_is.find(t));
+    }
+}
+

@@ -1,0 +1,147 @@
+//#include <atcoder/all>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <deque>
+#include <exception>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <iosfwd>
+#include <iostream>
+#include <istream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <locale>
+#include <map>
+#include <memory>
+#include <new>
+#include <numeric>
+#include <ostream>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <stdexcept>
+#include <streambuf>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <valarray>
+#include <vector>
+#include <array>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <forward_list>
+#include <future>
+#include <initializer_list>
+#include <mutex>
+#include <random>
+#include <ratio>
+#include <regex>
+#include <scoped_allocator>
+#include <system_error>
+#include <thread>
+#include <tuple>
+#include <typeindex>
+#include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
+using namespace std;
+typedef long long ll;
+typedef pair<ll,ll> P;
+typedef vector<int> vint;
+typedef vector<vector<int> > vvint;
+typedef vector<long long> vll;
+typedef vector<vector<long long> > vvll;
+typedef vector<pair<ll,ll>> vpll;
+typedef vector<string> vst;
+typedef vector<bool> vbo;
+typedef vector<vector<bool>> vvbo;
+#define rep(i,a) for(int i=0;i<a;i++)
+#define REP(i,a,b) for(int i=a;i<b;i++)
+#define rrep(i,a,b) for(int i=a;i>=b;i--)
+#define ALL(v) (v).begin(),(v).end()
+#define RALL(v) (v).rbegin(),(v).rend()
+ll gcd(ll a,ll b){return a?gcd(b%a,a):b;}
+ll lcm(ll a,ll b){return a / gcd(a,b) * b;}
+void oye(){cout << "Yes" << endl;}
+void ono(){cout << "No"  << endl;}
+//ll mod=998244353;
+//ll mod=1e9+7;
+
+vll dx={1,0,-1,0},dy={0,1,0,-1};
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(0);
+  bool lcant,rcant,Lgoal,Rgoal,key;
+  ll a,b,c,d;
+  ll w,h;
+  set<tuple<ll,ll,ll,ll>> vsd;
+ while(true){
+  key=false;
+  cin>>w>>h;
+  if(!w) break;
+  vsd.clear();
+  vst rol(h),ror(h);
+  rep(i,h){
+    cin>>rol[i]>>ror[i];
+    reverse(ALL(ror[i]));
+  }
+  ll lsx,lsy,rsx,rsy,lx,ly,rx,ry;
+  rep(i,h) rep(j,w){
+    if(rol[i][j]=='L'){lsx=i;lsy=j;}
+    if(ror[i][j]=='R'){rsx=i;rsy=j;}
+  }
+  queue<tuple<ll,ll,ll,ll>> q;
+  q.push({lsx,lsy,rsx,rsy});
+  while(q.size()){
+    if(key) break;
+    tie(lx,ly,rx,ry)=q.front();q.pop();
+    if(vsd.count({lx,ly,rx,ry})) continue;
+    vsd.insert({lx,ly,rx,ry});
+    //cout << lx << " " << ly << " " << rx << " " << ry << endl;
+    rep(i,4){
+      lcant=false;rcant=false;Lgoal=false;Rgoal=false;
+      if(lx+dx[i]<0 || lx+dx[i]>=h || ly+dy[i]<0 || ly+dy[i]>=w){
+        lcant=true;
+      }else{
+        if(rol[lx+dx[i]][ly+dy[i]]=='#'){
+          lcant=true;
+        }else if(rol[lx+dx[i]][ly+dy[i]]=='%'){
+          Lgoal=true;
+        }
+      }
+      if(rx+dx[i]<0 || rx+dx[i]>=h || ry+dy[i]<0 || ry+dy[i]>=w){
+        rcant=true;
+      }else{
+        if(ror[rx+dx[i]][ry+dy[i]]=='#'){
+          rcant=true;
+        }else if(ror[rx+dx[i]][ry+dy[i]]=='%'){
+          Rgoal=true;
+        }
+      }
+      if(Lgoal || Rgoal){
+        if(Lgoal && Rgoal){key=true;break;}
+        continue;
+      }
+      else if(lcant && rcant){
+        continue;
+      }
+      else{
+        a=lcant ? 0 : dx[i];a+=lx;
+        b=lcant ? 0 : dy[i];b+=ly;
+        c=rcant ? 0 : dx[i];c+=rx;
+        d=rcant ? 0 : dy[i];d+=ry;
+        if(vsd.count({a,b,c,d})) continue;
+        q.push({a,b,c,d});
+      }
+    }
+  }
+  if(key) oye();
+  else ono();
+ }
+}

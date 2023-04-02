@@ -1,0 +1,109 @@
+#include<stdio.h>
+#include<iostream>
+#include <stdlib.h>
+
+using namespace std;
+
+struct Node
+{
+    int parent, leftChild, rightChild;
+};
+
+int height[25];
+int depth[25];
+int sibling[25];
+
+Node tree[25];
+
+int n, curNode, leftChildNode, rightChildNode;
+
+int setHeight(int n){
+    if(n == -1) return -1;
+    int leftHeight = setHeight(tree[n].leftChild);
+    int rightHeight = setHeight(tree[n].rightChild);
+    int curHeight = max(leftHeight, rightHeight) + 1;
+    height[n] = curHeight;
+    return curHeight;
+}
+
+void setDepth(int n, int d){
+    if(n == -1) return;
+    depth[n] = d;
+    setDepth(tree[n].leftChild, d + 1);
+    setDepth(tree[n].rightChild, d + 1);
+}
+
+void printNode(int n){
+    cout << "node " << n << ": parent = "<< tree[n].parent << ", sibling = "<< sibling[n] << ", ";
+    int degree = 0;
+    if(tree[n].leftChild == -1 && tree[n].rightChild == -1){
+        degree = 0;
+    } 
+    else if( tree[n].rightChild == -1 || tree[n].leftChild == -1){
+        degree = 1;
+    }else{
+        degree = 2;
+    }
+
+    cout << "degree = " << degree << ", depth = "<< depth[n]<< ", height = " << height[n] << ", ";
+    if(tree[n].parent == -1) cout << "root" << endl;
+    else if(degree == 0) cout << "leaf" << endl;
+    else cout << "internal node" << endl;
+}
+
+int main(){
+
+    scanf("%d", &n);
+    //cout << n << endl;
+
+    for(int i = 0; i < n; i++){
+        tree[i].leftChild = -1;
+        tree[i].rightChild = -1;
+        tree[i].parent = -1;
+        sibling[i] = -1;
+        //if(i == 0) cout << "here :" << tree[0].parent << endl;
+    }
+
+    for(int i = 0; i < n; i++){
+        scanf("%d %d %d", &curNode, &leftChildNode, &rightChildNode);
+        tree[curNode].leftChild = leftChildNode;
+        tree[curNode].rightChild = rightChildNode;
+        if(leftChildNode != -1){
+            tree[leftChildNode].parent = curNode;
+            sibling[leftChildNode] = rightChildNode;
+        }
+
+        if(rightChildNode != -1){
+            tree[rightChildNode].parent = curNode;
+            sibling[rightChildNode] = leftChildNode;
+        }
+
+        // if(i == 0){
+        //     cout << tree[curNode].parent<< " hello "<< curNode<< endl;
+        // }
+    }
+
+    int root = 0;
+    for(int i = 0; i < n; i++){
+        if(tree[i].parent == -1){
+            root = i;
+            break;
+        }
+    }
+    //cout << root <<" root parent" << tree[root].parent << endl;
+
+    setDepth(root, 0);
+    setHeight(root);
+
+    for(int i = 0; i < n; i++){
+        printNode(i);
+    }
+
+
+
+
+
+
+    return 0;
+}
+

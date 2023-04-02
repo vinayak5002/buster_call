@@ -1,0 +1,201 @@
+#pragma GCC optimize("Ofast")
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <queue>
+#include <cstdio>
+#include <ctime>
+#include <assert.h>
+#include <chrono>
+#include <random>
+#include <numeric>
+#include <set>
+#include <deque>
+#include <stack>
+#include <sstream>
+#include <utility>
+#include <cstring>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+#include <array>
+#include <bitset>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long ull;
+
+mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
+ll myRand(ll B) {
+    return (ull)rng() % B;
+}
+inline double time() {
+    return static_cast<long double>(chrono::duration_cast<chrono::nanoseconds>(chrono::steady_clock::now().time_since_epoch()).count()) * 1e-9;
+}
+
+const double eps=1e-8;
+
+struct point{
+    double x,y;
+    point() {}
+    point(double x,double y): x(x), y(y) {}
+    point& operator-=(const point &p){
+        x -= p.x; y -= p.y;
+        return *this;
+    }
+    point& operator+=(const point &p){
+        x += p.x; y += p.y;
+        return *this;
+    }
+    point& operator*=(double d){
+        x *= d; y *= d;
+        return *this;
+    }
+    point& operator/=(double d){
+        x /= d; y /= d;
+        return *this;
+    }
+    const point operator+ (const point& p) const;
+    const point operator- (const point& p) const;
+    const point operator* (double d) const;
+    const point operator/ (double d) const;
+    const bool operator == (const point& p) const;
+};
+const point point::operator+ (const point& p) const{
+    point res(*this); return res += p;
+}
+const point point::operator- (const point& p) const{
+    point res(*this); return res -= p;
+}
+const point point::operator* (double d) const{
+    point res(*this); return res *= d;
+}
+const point point::operator/ (double d) const{
+    point res(*this); return res /= d;
+}
+const bool point::operator == (const point& p) const{
+    point pp(*this);
+    return (p.x == pp.x and p.y == pp.y);
+}
+struct line{
+    point A,B;
+    line() {}
+    line(point A, point B): A(A), B(B) {}
+};
+
+// BOJ-6487
+// 平行判定
+bool is_parallel(line l1, line l2){
+    double dx1 = l1.B.x - l1.A.x;
+    double dy1 = l1.B.y - l1.A.y;
+    double dx2 = l2.B.x - l2.A.x;
+    double dy2 = l2.B.y - l2.A.y;
+    return abs(dy1*dx2 - dy2*dx1) < eps;
+}
+
+point vec(line L){
+    return (L.B - L.A);
+}
+double cross(point a,point b){
+    return a.x*b.y-a.y*b.x;
+}
+// AOJ 2596
+// 直線の交点
+point line_intersection(line l1, line l2){
+    return l1.A + vec(l1) * cross(l2.A - l1.A, vec(l2)) / cross(vec(l1), vec(l2));
+}
+
+int main(){
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    array<point, 3> P,Q;
+    while(cin >> P[0].x >> P[0].y >> P[1].x >> P[1].y >> P[2].x >> P[2].y){
+        cin >> Q[0].x >> Q[0].y >> Q[1].x >> Q[1].y >> Q[2].x >> Q[2].y;
+        int res = 5;
+        auto dfs=[&](auto dfs,array<point,3> s,int cnt)->void{
+
+            auto check=[&]()->int{
+                vector<int> p={0,1,2};
+                int mx = 0;
+                do{
+                    int cnt = 0;
+                    for(int i=0;i<3;i++){
+                        if(s[p[i]] == Q[i])cnt++;
+                    }
+                    mx = max(mx, cnt);
+                }while(next_permutation(p.begin(), p.end()));
+                return mx;
+            };
+
+            int u = check();
+            // 揃った
+            if(u == 3){
+                res = min(res, cnt); return;
+            }
+            // 枝刈り
+            if(cnt+3-u >= res) return;
+
+            // s[i]をQ[j]に揃えたい
+            for(int i=0;i<3;i++){
+                for(int j=0;j<3;j++){
+                    if(s[i] == Q[j])continue;
+
+                    // 直接揃えられる
+                    {
+                        line L1 = {s[i], Q[j]};
+                        line L2;
+                        if(i == 0) L2 = {s[1], s[2]};
+                        else if(i == 1) L2 = {s[0], s[2]};
+                        else L2 = {s[0], s[1]};
+
+                        if(is_parallel(L1, L2)){
+                            auto p = s[i];
+                            s[i] = Q[j];
+                            dfs(dfs,s,cnt+1);
+                            s[i] = p;
+                        }
+                    }
+                    // 1点経由
+                    if(3-u+1 < res){
+                        int k1 = -1, k2 = -1;
+                        for(int k=0;k<3;k++){
+                            if(i == k)continue;
+                            if(k1 == -1) k1 = k;
+                            else k2 = k;
+                        }
+                        // k2をずらす
+                        {
+                            line L1 = {s[k1], Q[j]-s[i]+s[k1]};
+                            line L2 = {s[k2], s[i]-s[k1]+s[k2]};
+                            auto p = line_intersection(L1, L2);
+                            auto pp = s[k2];
+                            s[k2] = p;
+                            dfs(dfs,s,cnt+1);
+                            s[k2] = pp;
+                        }
+                        swap(k1,k2);
+                        // k1をずらす
+                        {
+                            line L1 = {s[k1], Q[j]-s[i]+s[k1]};
+                            line L2 = {s[k2], s[i]-s[k1]+s[k2]};
+                            auto p = line_intersection(L1, L2);
+                            auto pp = s[k2];
+                            s[k2] = p;
+                            dfs(dfs,s,cnt+1);
+                            s[k2] = pp;
+                        }          
+                    }
+                }
+            }
+
+        };
+        dfs(dfs,P,0);
+        if(res >= 5){
+            cout << "Many" << "\n";
+        }
+        else{
+            cout << res << "\n";
+        }
+    }
+}
+

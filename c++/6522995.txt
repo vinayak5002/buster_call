@@ -1,0 +1,137 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <cstdlib>
+#include <cmath>
+#include <algorithm>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <list>
+#include <iterator>
+#include <cassert>
+#include <numeric>
+#include <functional>
+#include <ctime>
+#include <bitset>
+#pragma warning(disable:4996) 
+
+//#define ATCODER
+#ifdef ATCODER
+#include <atcoder/all>
+#endif
+
+typedef long long ll;
+typedef unsigned long long ull;
+#define LINF  9223300000000000000
+#define LINF2 1223300000000000000
+#define LINF3 1000000000000
+#define INF 2140000000
+//const long long MOD = 1000000007;
+const long long MOD = 998244353;
+
+using namespace std;
+#ifdef ATCODER
+using namespace atcoder;
+#endif
+
+typedef pair<ll, int> P;
+vector<ll> dijkstra(int s, const vector<vector<pair<int, int> > >& G) {
+    priority_queue< P, vector<P>, greater<P> > que;
+    vector<ll> d(G.size(), LINF);
+    d[s] = 0;
+    que.push(P(0, s));
+    while (!que.empty()) {
+        int curr = que.top().second;
+        ll  dcurr = que.top().first;
+        que.pop();
+        if (d[curr] < dcurr) continue;
+        int i;
+        for (i = 0; i < (int)G[curr].size(); i++) {
+            int next = G[curr][i].first;
+            ll  dist = G[curr][i].second;
+            if (d[next] > d[curr] + dist) {
+                d[next] = d[curr] + dist;
+                que.push(P(d[next], next));
+            }
+        }
+    }
+    return d;
+}
+
+struct Edge {
+    long long from;
+    long long to;
+    long long cost;
+};
+vector<ll> bellman_ford(int n, int s, const vector<Edge>& edges, bool& badflag )
+{
+    badflag = 0;
+    vector<ll> dist(n, LINF);
+    dist[s] = 0;
+    int cnt = 0;
+    while (cnt < n) {
+        bool flag = 0;
+        for (int i = 0; i < (int)edges.size(); i++) {
+            Edge e = edges[i];
+            if (dist[e.from] != LINF && dist[e.from] + e.cost < dist[e.to]) {
+                dist[e.to] = dist[e.from] + e.cost;
+                flag = true;
+            }
+        }
+        if (!flag) break;
+        cnt++;
+    }
+    if (cnt == n) {
+        badflag = true;
+    }
+    return dist;
+}
+
+void solve()
+{
+    int n, m, r;
+    scanf("%d%d%d", &n, &m, &r);
+    vector<Edge> edges;
+    for (int i = 0; i < m; i++) {
+        int a, b, c;
+        scanf("%d%d%d", &a, &b, &c);
+        edges.push_back({ a, b, c });
+    }
+
+    bool badflag = false;
+    vector<ll> dist = bellman_ford(n, r, edges, badflag);
+
+    if (badflag) {
+        printf("NEGATIVE CYCLE\n");
+    }
+    else {
+        for (int i = 0; i < n; i++) {
+            if (dist[i] == LINF) {
+                printf("INF\n");
+            }
+            else {
+                printf("%lld\n", dist[i]);
+            }
+        }
+    }
+    return;
+}
+
+int main()
+{
+#if 1
+    solve();
+#else
+    int T, t;
+    scanf("%d", &T);
+    for (t = 0; t < T; t++) {
+        //printf("Case #%d: ", t + 1);
+        solve();
+    }
+#endif
+    return 0;
+}
+

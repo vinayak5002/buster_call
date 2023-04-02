@@ -1,0 +1,43 @@
+#include <iostream>
+#include <string>
+#include <map>
+#include <queue>
+#include <algorithm>
+
+using namespace std;
+
+string f(const string& S)
+{
+	string G;
+	map<char, int> SS;
+	for (auto s : S) ++SS[s];
+	for (auto [c, n] : SS) while (--n >= 0) G.push_back(c);
+	return G;
+}
+
+int main()
+{
+	int N, Q;
+	cin >> N;
+	for (cin >> Q; Q > 0; --Q) {
+		string S;
+		cin >> S;
+		auto G = f(S);
+		map<string, int> D;
+		queue<pair<int, string>> Q;
+		for (Q.push({0, S}); !Q.empty(); Q.pop()) {
+			auto [n, T] = Q.front();
+			if (D.count(T) > 0 && D[T] <= n) continue;
+			D[T] = n;
+			if (T == G) break;
+			for (int i = 2; i <= N; ++i) {
+				string U = T;
+				reverse(U.begin(), U.begin() + i);
+				Q.push({n + 1, U});
+			}
+		}
+		cout << D[G] << endl;
+	}
+	return 0;
+}
+

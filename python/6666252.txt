@@ -1,0 +1,98 @@
+    #include <bits/stdc++.h>
+    using std::cin;
+    using std::getline;
+    using std::cout;
+    using std::endl;
+    using std::string;
+    using std::bitset;
+    using std::vector;
+    using std::array;
+    using std::stack;
+    using std::queue;
+    using std::priority_queue;
+    using std::set;
+    using std::map;
+    using std::pair;
+    using llong = long long;
+    template<typename T> using nLimits = std::numeric_limits<T>;
+    #define ALL(a) (a).begin(), (a).end()
+    #define REP(i, n) for (llong i = 0; i < static_cast<llong>(n); ++i)
+    #define RREP(i, n) for (llong i = static_cast<llong>(n) - 1; i >= 0; --i)
+    #define FOR(i, a, b) for (llong i = static_cast<llong>(a); i < static_cast<llong>(b); ++i)
+    #define RFOR(i, a, b) for (llong i = static_cast<llong>(a) - 1; i >= static_cast<llong>(b); --i)
+    constexpr int INF = 1001001001;
+    constexpr llong LINF = 1001001001001001001ll;
+
+    template<typename T> inline bool chMin(T &a, T b) { return ((a > b) ? (a = b, true) : (false)); }
+    template<typename T> inline bool chMax(T &a, T b) { return ((a < b) ? (a = b, true) : (false)); }
+    template<typename T> void printArray(T a, int n = 0);
+
+
+    class Graph {
+    public:
+        Graph(int n_) {
+            n = n_;
+            adj_lists.resize(n);
+            visited.resize(n, -1);
+        }
+        
+        void AddPath(int from, int to, int weight = 1) {
+            adj_lists[from].emplace_back(pair<int, int>(weight, to));
+        }
+
+        int findMST() {
+            // Minimum Spanning Tree
+            using pii = pair<int, int>;
+            priority_queue<pii, vector<pii>, std::greater<pii>> pq;
+            for (auto tmp : adj_lists[0]) pq.push(tmp);
+            vector<bool> status(n, false);
+            status[0] = true;
+            int sum_w = 0;
+            while (!pq.empty()) {
+                auto u = pq.top();
+                pq.pop();
+                if (status[u.second]) continue;
+                status[u.second] = true;
+                sum_w += u.first;
+                for (auto v : adj_lists[u.second]) {
+                    if (!status[v.second]) pq.push(v);
+                }
+            }
+            return sum_w;
+        }
+
+        int n;
+        vector<vector<pair<int, int>>> adj_lists;
+        vector<int> dists;
+        vector<int> visited;  // -1 : false, i : from i
+    };
+
+
+    int main() {
+        std::ios::sync_with_stdio(false);
+        cin.tie(0);
+        cout << std::fixed << std::setprecision(20);
+
+        int N;
+        cin >> N;
+        Graph g(N);
+
+        REP(s, N) {
+            REP(t, N) {
+                int w;
+                cin >> w;
+                if (w != -1) g.AddPath(s, t, w);
+            }
+        }
+        
+        cout << g.findMST() << endl;
+    }
+
+
+    template<typename T> 
+    void printArray(T a, int n) {
+        string s = std::to_string(a[0]);
+        FOR(i, 1, n > 0 ? n : a.size()) s += " " + std::to_string(a[i]);
+        cout << s + "\n";
+    }
+

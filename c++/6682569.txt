@@ -1,0 +1,123 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+struct node{
+  struct node *right;
+  struct node *left;
+  struct node *parent;
+  int key;
+};
+typedef struct node * Node;
+#define NIL NULL //NILにNULLを代入
+
+Node root;
+
+Node find(Node u, int k)//二分探索木の探索
+{
+	while(u!=NIL&&k!=u->key)
+	{
+		if(k<u->key)//節点kより与えられたkeyが小さい場合左の子
+		{
+			u=u->left;
+		}
+		else//それ以外右
+		{
+			u=u->right;
+		}
+	}
+	return u;
+}
+
+void insert(int k)//二分探索に新たに値を挿入
+{
+	Node y = NIL;
+	Node x = root;
+	Node z;
+	
+	z = malloc(sizeof(struct node));//左の子がNIL、右の子がNILである接点を受け取る
+	z->key = k;
+	z->left = NIL;
+	z->right = NIL;
+	
+	while(x!=NIL)
+	{
+		y=x;//親を設定
+		if(z->key<x->key)
+		{
+			x=x->left;//左の子へ
+		}
+		else
+		{
+			x=x->right;//右の子へ
+		}
+	}
+	
+	z->parent=y;
+	if(y==NIL)
+	{
+		root=z;
+	}
+	else
+	{
+		if(z->key<y->key)
+		{
+			y->left=z;//zをyの左の子に
+		}
+		else
+		{
+			y->right=z;//zをyの右の子に
+		}
+	}
+}
+
+void inorder(Node u)//中間順巡回2回目で出力
+{
+	if(u==NIL)
+	{
+		return;
+	}
+	inorder(u->left);
+	printf(" %d",u->key);
+	inorder(u->right);
+	
+}
+void preorder(Node u)//先行順巡回1回目で出力
+{
+	if(u==NIL)
+	{
+		return;
+	}
+	
+	printf(" %d",u->key);
+	preorder(u->left);
+	preorder(u->right);
+}
+
+
+int main(void)
+{
+  int n, i, x;
+  char com[20];
+  scanf("%d", &n);
+
+  for ( i = 0; i < n; i++ )
+	{
+    scanf("%s", com);
+    if ( com[0] == 'i' )
+		{
+			scanf("%d", &x);
+			insert(x);
+		} 
+		else if ( com[0] == 'p' )
+		{
+			inorder(root);
+			printf("\n");
+			preorder(root);
+			printf("\n");
+		} 
+	}
+	
+	return 0;
+}
+
+

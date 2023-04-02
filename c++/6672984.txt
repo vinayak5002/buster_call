@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+int main()
+{
+	//先說會輸入幾個點 
+	int num;
+	scanf("%d",&num);
+	
+	// 找相對最遠的點當作起點
+	int tm1,tm2;
+	int x[num],y[num];
+	int totalx,totaly;
+	totalx=totaly=0;
+	
+	// 分兩個陣列分開討論x和y座標 
+	for(tm1=1;tm1<=num;tm1++)
+	{
+		scanf("%d %d",&x[num-1],&y[num-1]);
+		totalx=totalx+x[num-1];
+		totaly=totaly+y[num-1];
+	}
+	int avgx,avgy;
+	avgx=(totalx/num);
+	avgy=(totaly/num);
+	int max;
+	max=0;
+	
+	int start;
+	for(tm1=1;tm1<=num;tm1++)
+	{
+		if((x[tm1-1]-avgx)*(x[tm1-1]-avgx)+(y[tm1-1]-avgy)*(y[tm1-1]-avgy)>=max)
+		{
+			max=(x[tm1-1]-avgx)*(x[tm1-1]-avgx)+(y[tm1-1]-avgy)*(y[tm1-1]-avgy);
+			start=(tm1-1);
+		}
+	}
+	
+	//做每兩個點 x座標相減絕對值和y座標相減絕對值的陣列 
+	//在每兩個點的 x座標和y座標相減 兩者取大
+	//大的進入pay陣列，待取最小值 
+	int xminus[num][num],yminus[num][num],pay[num][num];
+	for(tm1=1;tm1<=num;tm1++)
+	{
+		for(tm2=1;tm2<=num;tm2++)
+		{
+			xminus[tm1-1][tm2-1]=abs(x[tm1-1]-x[tm2-1]);
+			yminus[tm1-1][tm2-1]=abs(y[tm1-1]-y[tm2-1]);
+			if(xminus[tm1-1][tm2-1]>yminus[tm1-1][tm2-1])
+			{
+				pay[tm1-1][tm2-2]=xminus[tm1-1][tm2-1];
+			}
+			if(yminus[tm1-1][tm2-1]>=xminus[tm1-1][tm2-1])
+			{
+				pay[tm1-1][tm2-2]=yminus[tm1-1][tm2-1];
+			} 	
+		}
+	}
+	// 取pay陣列中非0的最小值 該行該列補0 座標交換的(pay[x][y]和pay[y][x]是一樣的意思，取一次就好)補0
+	// 有num個點，就會有 num-1個間距，所以做num-1次
+	// 假設取到pay[a][b]，代表是從a出發到b，下一次要在pay[b][tm1]中取非0最小 該行該列補0 座標交換補0 
+	int temp[1][1];
+	int xx,yy;
+	int bonus;
+	bonus=0;
+	for(tm1=1;tm1<=num-1;tm1++)
+	{
+		if(pay[start][tm1-1]<=pay[start][tm1]&&pay[start][tm1-1]!=0)
+			{
+				temp[0][0]=pay[start][tm1-1];
+				yy=start;
+				xx=tm1-1;		
+			}
+			pay[xx][yy]=0;
+			bonus=bonus+temp[0][0];
+		
+		for(tm2=1;tm2<=num;tm2++)
+			{
+				pay[yy][tm2-1]=0;
+				pay[tm2-1][xx]=0;
+			}
+			
+			start=xx;	
+	}
+	 
+	printf("%d",bonus);	 
+	
+}

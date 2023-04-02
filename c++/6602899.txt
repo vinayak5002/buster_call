@@ -1,0 +1,107 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < (int)(n); ++i)
+using namespace std;
+using ull = unsigned long long;
+using ll = long long;
+using Graph = vector<vector<int>>;
+const int INF = INT_MAX;
+const ll LLINF = LONG_LONG_MAX;
+const ull ULLINF = ULLONG_MAX;
+template <class T>
+string join(const vector<T>& v, const string& delim) {
+  string s = to_string(v[0]);
+
+  for (int i = 1; i < v.size(); ++i) s += delim + to_string(v[i]);
+
+  return s;
+}
+template <class T>
+void join_out(const vector<T>& v, const char* delim) {
+  cout << v[0];
+
+  for (int i = 1; i < v.size(); ++i) cout << delim << v[i];
+
+  cout << '\n';
+}
+
+int main() {
+  int N, count = 0;
+  cin >> N;
+  vector<string> A(N), B(N), S(N);
+  rep(i, N) {
+    cin >> S[i];
+    A[i] = S[i];
+    B[i] = S[i];
+  }
+
+  rep(i, N) {
+    for (int j = N - 1; j > i; --j) {
+      if (B[j][1] < B[j - 1][1]) {
+        swap(B[j], B[j - 1]);
+      }
+    }
+  }
+
+  rep(i, N) {
+    int minj = i;
+
+    for (int j = i; j < N; ++j) {
+      if (S[j][1] < S[minj][1]) {
+        minj = j;
+      }
+    }
+    swap(S[i], S[minj]);
+  }
+
+  join_out(B, " ");
+  bool stableB = true;
+  rep(i, N - 1) {
+    if (!stableB) break;
+
+    string f = B[i], l = B[i + 1];
+    if (f[1] != l[1]) continue;
+
+    bool fFound = false;
+    rep(j, N) {
+      string c = A[j];
+      if (c == f) {
+        fFound = true;
+      } else if (c == l && !fFound) {
+        stableB = false;
+        break;
+      }
+    }
+  }
+  if (stableB)
+    cout << "Stable"
+         << "\n";
+  else
+    cout << "Not Stable"
+         << "\n";
+
+  join_out(S, " ");
+  bool stableS = true;
+  rep(i, N - 1) {
+    if (!stableS) break;
+
+    string f = S[i], l = S[i + 1];
+    if (f[1] != l[1]) continue;
+
+    bool fFound = false;
+    rep(j, N) {
+      string c = A[j];
+      if (c == f) {
+        fFound = true;
+      } else if (c == l && !fFound) {
+        stableS = false;
+        break;
+      }
+    }
+  }
+  if (stableS)
+    cout << "Stable"
+         << "\n";
+  else
+    cout << "Not Stable"
+         << "\n";
+}

@@ -1,0 +1,52 @@
+import java.util.*;
+
+public class Main {
+    static Scanner sc = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        int n = getInt();
+        Point p1 = new Point(0, 0);
+        Point p2 = new Point(100, 0);
+        System.out.println(p1);
+        koch(n, p1, p2);
+        System.out.println(p2);
+    }
+
+    static int getInt() {
+        return Integer.parseInt(sc.next());
+    }
+
+    static class Point {
+        double x;
+        double y;
+
+        public Point(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%.8f %.8f", x, y);
+        }
+    }
+
+    static void koch(int d, Point p1, Point p2) {
+        if (d == 0) {
+            return;
+        }
+        Point s = new Point((2*p1.x + 1*p2.x) / 3, (2*p1.y + 1*p2.y) / 3);
+        Point t = new Point((1*p1.x + 2*p2.x) / 3, (1*p1.y + 2*p2.y) / 3);
+        Point u = new Point((t.x - s.x) * Math.cos(Math.toRadians(60)) - (t.y - s.y) * Math.sin(Math.toRadians(60)) + s.x,
+                (t.x - s.x) * Math.sin(Math.toRadians(60)) + (t.y - s.y) * Math.cos(Math.toRadians(60)) + s.y);
+
+        koch(d-1, p1, s);
+        System.out.println(s);
+        koch(d-1, s, u);
+        System.out.println(u);
+        koch(d-1, u, t);
+        System.out.println(t);
+        koch(d-1, t, p2);
+    }
+
+}

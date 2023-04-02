@@ -1,0 +1,44 @@
+def eval(lx,rx,x)
+  if $t[x]!=-1 then
+    if x<$n-1 then
+      $t[x*2+1]=$t[x]
+      $t[x*2+2]=$t[x]
+    end
+    $s[x]+=$t[x]*(rx-lx)
+    $t[x]=-1
+  end
+end
+def sum(l,r,lx=0,rx=$n,x=0)
+  eval(lx,rx,x)
+  if rx<=l || r<=lx then
+    0
+  elsif l<=lx && rx<=r then
+    $s[x]
+  else
+    av=(lx+rx)/2
+    sum(l,r,lx,av,x*2+1)+sum(l,r,av,rx,x*2+2)
+  end
+end
+def add(l,r,k,lx=0,rx=$n,x=0)
+  eval(lx,rx,x)
+  if l<=lx && rx<=r then
+    $t[x]=k
+    eval(lx,rx,x)
+  elsif l<rx && lx<r then
+    av=(lx+rx)/2
+    add(l,r,k,lx,av,x*2+1)
+    add(l,r,k,av,rx,x*2+2)
+    $s[x]=$s[x*2+1]+$s[x*2+2]
+  end
+end
+n,q=gets.split.map(&:to_i)
+$n=2**Math.log(n,2).ceil
+$s=Array.new(2*$n-1,0)
+$t=Array.new(2*$n-1,-1)
+q.times do
+  r=gets.split.map(&:to_i)
+  r[1]-=1
+  r[2]-=1
+  add(r[1],r[2]+1,r[3]) if r[0]==0
+  puts sum(r[1],r[2]+1) if r[0]==1
+end

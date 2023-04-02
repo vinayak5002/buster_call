@@ -1,0 +1,159 @@
+#include <bits/stdc++.h>
+using namespace std;
+struct Chess
+{
+    int brd[4][4];
+    bool operator < (Chess others) const
+    {
+        for (int i = 0; i < 4; ++i)
+            for (int j = 0; j < 4; ++j)
+                if (this->brd[i][j]!=others.brd[i][j]) return this->brd[i][j]<others.brd[i][j];
+        return false;
+    }
+    bool operator == (Chess others) const
+    {
+        for (int i = 0; i < 4; ++i)
+            for (int j = 0; j < 4; ++j)
+                if (this->brd[i][j]!=others.brd[i][j]) return false;
+        return true;
+    }
+};
+pair<int,int> finb(Chess x)
+{
+    for (int i = 0; i < 4; ++i)
+        for (int j = 0; j < 4; ++j)
+            if (x.brd[i][j]==0) return make_pair(i,j);
+    return make_pair(0,0);
+}
+map<Chess,int> mpb,mpe;
+Chess beger,ender;
+int toward[2][2]={{-1,1},{-1,1}};
+bool c_mve(Chess ths,int ud,int lr)
+{
+    pair<int,int> ths_m=finb(ths);
+    return ths_m.first+ud>=0&&
+           ths_m.first+ud<4&&
+           ths_m.second+ud>=0&&
+           ths_m.second+ud<4&&
+           ths_m.first+lr>=0&&
+           ths_m.first+lr<4&&
+           ths_m.second+lr>=0&&
+           ths_m.second+lr<4;
+}
+int main() {
+    char ed[4][4]={
+            {1,2,3,4},
+            {5,6,7,8},
+            {9,10,11,12},
+            {13,14,15,0}
+    };
+    for (int i = 0; i < 4; ++i)
+        for (int j = 0; j < 4; ++j)
+            ender.brd[i][j]=ed[i][j];
+    for (int i = 0; i < 4; ++i)
+        for (int j = 0; j < 4; ++j)
+            cin>>beger.brd[i][j];
+    queue<Chess> Qb,Qe;
+    Qb.push(beger);
+    Qe.push(ender);
+    mpb[beger]=0;
+    mpe[ender]=0;
+    while (!Qb.empty()&&!Qe.empty()){
+        pair<int,int> posb= finb(Qb.front());
+        pair<int,int> pose= finb(Qe.front());
+        for (int i = -1; i <=1 ; i+=2) {
+            Chess the;
+            the=Qe.front();
+            if(c_mve(the,0,i))
+            {
+                swap(the.brd[pose.first][pose.second],the.brd[pose.first][pose.second+i]);
+                if(!mpe.count(the))
+                {
+                    Qe.push(the);
+                    mpe[the]=mpe[Qe.front()]+1;
+                }
+                if (mpb.count(the))
+                {
+                    cout<<mpb[the]+mpe[the]<<endl;
+                    return 0;
+                }
+
+            }
+        }
+        for (int i = -1; i <=1 ; i+=2) {
+            Chess the;
+            the=Qe.front();
+            if(c_mve(the,i,0))
+            {
+                swap(the.brd[pose.first][pose.second],the.brd[pose.first+i][pose.second]);
+                if(!mpe.count(the))
+                {
+                    Qe.push(the);
+                    mpe[the]=mpe[Qe.front()]+1;
+                }
+                if (mpb.count(the))
+                {
+                    cout<<mpb[the]+mpe[the]<<endl;
+                    return 0;
+                }
+
+            }
+        }
+        for (int i = -1; i <=1 ; i+=2) {
+            Chess thb;
+            thb=Qb.front();
+            if(c_mve(thb,0,i))
+            {
+                swap(thb.brd[posb.first][posb.second],thb.brd[posb.first][posb.second+i]);
+                if(!mpb.count(thb))
+                {
+                    Qb.push(thb);
+                    mpb[thb]=mpb[Qb.front()]+1;
+                }
+                if (mpe.count(thb))
+                {
+                    cout<<mpb[thb]+mpe[thb]<<endl;
+                    return 0;
+                }
+
+            }
+        }
+        for (int i = -1; i <=1 ; i+=2) {
+            Chess thb;
+            thb=Qb.front();
+            if(c_mve(thb,0,i))
+            {
+                swap(thb.brd[posb.first][posb.second],thb.brd[posb.first+i][posb.second]);
+                if(!mpb.count(thb))
+                {
+                    Qb.push(thb);
+                    mpb[thb]=mpb[Qb.front()]+1;
+                }
+                if (mpe.count(thb))
+                {
+                    cout<<mpb[thb]+mpe[thb]<<endl;
+                    return 0;
+                }
+
+            }
+        }
+        Qb.pop();
+        Qe.pop();
+    }
+    return 0;
+}
+/*
+1 2 0 4
+5 10 3 6
+13 9 15 8
+14 12 7 11
+
+18
+
+1 2 3 4
+5 6 7 8
+9 14 10 11
+13 0 15 12
+
+4
+*/

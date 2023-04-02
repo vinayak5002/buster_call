@@ -1,0 +1,94 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef pair<ll, ll> P;
+#define rep(i, n) for(ll i = 0; i < n; i++)
+
+vector<vector<int>> tree;
+string s;
+
+//non_rootの辺を構築 & non_rootにおける根を返す関数。
+int non_root(string s,int& idx){
+    if(s[idx] == '('){
+        idx++;
+        int n_left  = non_root(s,idx),r_idx = idx+1; idx += 2;
+        int n_right = non_root(s,idx);
+
+        tree[r_idx].push_back(n_left);  tree[n_left].push_back(r_idx);
+        tree[r_idx].push_back(n_right); tree[n_right].push_back(r_idx);
+        idx++;
+        return r_idx;
+    }
+    else return idx;
+}
+
+//式を木構造にし、根の内後半の記号のidxを返す関数。(ex : 1+2+3だったら後半の+のidxである3。)
+int root(string s,int& idx){
+    //最初の3要素のindex保持 & 子ノードの木構築
+    int n1 = non_root(s,idx),r1 = idx+1;  idx += 2;
+    int n2 = non_root(s,idx),r2 = idx+1;  idx += 2;
+    int n3 = non_root(s,idx);
+
+    //3要素と親ノードの接合
+    tree[r1].push_back(n1); tree[n1].push_back(r1);
+    tree[r1].push_back(n2); tree[n2].push_back(r1);
+    tree[r1].push_back(n3); tree[n3].push_back(r1);
+    
+    return r2;
+}
+
+//memo化再起。
+P non_root_calc(int r,int p,map<P,P>& memo){
+    if(memo.count(P(p,r)))return memo[P(p,r)];
+    //s[r]が数字の場合は最大最小どちらもその数しか取りえない。
+    if(isdigit(s[r]))return memo[P(p,r)] = P(s[r]-'0',s[r]-'0');
+
+    //tmpに根の2つにおける最大最小を入れておく。
+    vector<P> tmp;
+    for(auto k:tree[r]){
+        if(k == p)continue;
+        tmp.push_back(non_root_calc(k,r,memo));
+    }
+
+    //根2つの最大最小から自身の最大最小を算出してmemo。
+    auto [ma1,mi1] = tmp[0]; auto [ma2,mi2] = tmp[1];
+    
+    if(s[r] == '+') return memo[P(p,r)] = P(ma1+ma2,mi1+mi2);
+    else return memo[P(p,r)] = P(max(ma1-mi2,ma2-mi1),min(mi1-ma2,mi2-ma1));
+}
+
+int root_calc(int r,map<P,P>& memo){
+    vector<P> ans;
+    rep(i,3)ans.push_back(non_root_calc(tree[r][i],r,memo));
+    sort(ans.begin(),ans.end());
+
+    if(s[r] == '+')return ans[0].first+ans[1].first+ans[2].first;
+    else return ans[2].first-ans[1].second-ans[0].second;
+}
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+    
+    while(true){
+        cin >> s;
+        if(s == "-1")break;
+
+        int idx = 0,size = s.size();
+        tree.assign(size,vector<int>(0));
+        //木構築&木のrootのうち要らない方のindex所持。
+        int r = root(s,idx);
+
+        //r以外の符号を根とした時の木の最大スコアを更新。
+        map<P,P> memo;
+        int ans = -INT_MAX;
+        rep(i,size){
+            if(isdigit(s[i]) || s[i] == '(' || s[i] == ')' || i == r)continue;
+            int cand = root_calc(i,memo);
+            ans = max(ans,cand);
+        }
+
+        cout << ans << endl;
+    }
+    return 0;
+}

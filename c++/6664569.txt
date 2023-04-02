@@ -1,0 +1,149 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+#include <climits>
+#include <cmath>
+using namespace std;
+
+
+struct RangeData {
+	int left;
+	int right;
+	int value;
+	bool is_valid;
+
+	RangeData(int l, int r, int v, bool iv) : left(l), right(r), value(v), is_valid(iv) {}
+};
+
+
+class RangeUpdateSumQuery {
+private:
+	int n_;
+	vector<RangeData> range_data_;
+	vector<int> data_;
+
+private:
+	void eval(int k, int left, int right) {
+		if (!range_data_[k].is_valid) {
+			return;
+		}
+		if (k < n_ - 1) {
+			int k2 = 2 * k;
+			int l_idx = k2 + 1;
+			int r_idx = k2 + 2;
+
+			range_data_[l_idx] = range_data_[k];
+			range_data_[r_idx] = range_data_[k];
+		}
+		if (range_data_[k].left <= left && right <= range_data_[k].right) {
+			data_[k] = range_data_[k].value;
+		}
+		range_data_[k].is_valid = false;
+		return;
+	}
+
+	int get_sum_sub(int s, int t, int k, int left, int right) {
+		eval(k, left, right);
+		if (right <= s || t <= left) {
+			return 0;
+		}
+		if (data_[k] != INT_MIN) {
+			int length = min(right, t) - max(left, s);
+			return data_[k] * length;
+		}
+		int mid = (left + right) / 2;
+		int k2 = 2 * k;
+		int val0 = get_sum_sub(s, t, k2 + 1, left, mid);
+		int val1 = get_sum_sub(s, t, k2 + 2, mid, right);
+		return val0 + val1;
+
+	}
+
+	void update_sub(int s, int t, int x, int k, int left, int right) {
+		eval(k, left, right);
+		if (right <= s || t <= left) {
+			return;
+		}
+		if (s <= left && right <= t) {
+			range_data_[k].is_valid = true;
+			range_data_[k].left = s;
+			range_data_[k].right = t;
+			range_data_[k].value = x;
+			return;
+		}
+		int mid = (left + right) / 2;
+		int k2 = 2 * k;
+
+		data_[k] = INT_MIN;
+		update_sub(s, t, x, k2 + 1, left, mid);
+		update_sub(s, t, x, k2 + 2, mid, right);
+		return;
+	}
+
+public:
+	RangeUpdateSumQuery(int n, int init_val) {
+		int n2 = -1;
+
+		n_ = 1;
+		while (n_ < n) {
+			n_ <<= 2;
+		}
+		n2 = 2 * n_ - 1;
+		data_ = vector<int>(n2, init_val);
+		range_data_ = vector<RangeData>(n2, RangeData(0, 0, 0, false));
+		return;
+	}
+
+	~RangeUpdateSumQuery() {}
+
+	// [s, t), zero-based
+	int get_sum(int s, int t) {
+		return get_sum_sub(s, t, 0, 0, n_);
+	}
+
+	// [s, t), zero-based
+	void update(int s, int t, int x) {
+		update_sub(s, t, x, 0, 0, n_);
+		return;
+	}
+};
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n = -1;
+	int q = -1;
+	int init_val = 0;
+	int op = -1;
+	int s = -1;
+	int t = -1;
+	int x = -1;
+	int val = init_val;
+
+	cin >> n >> q;
+	RangeUpdateSumQuery rusq(n, init_val);
+
+	for (int i = 0; i < q; i++) {
+		cin >> op;
+		if (op == 0) {
+			cin >> s >> t >> x;
+			t++;
+			rusq.update(s, t, x);
+		}
+		else {
+			cin >> s >> t;
+			t++;
+			val = rusq.get_sum(s, t);
+			cout << val << endl;
+		}
+	}
+
+	return 0;
+}

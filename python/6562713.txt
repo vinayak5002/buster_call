@@ -1,0 +1,101 @@
+
+#pragma GCC optimize("Ofast")
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <queue>
+#include <cstdio>
+#include <ctime>
+#include <assert.h>
+#include <chrono>
+#include <random>
+#include <numeric>
+#include <set>
+#include <deque>
+#include <stack>
+#include <sstream>
+#include <utility>
+#include <cstring>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+#include <array>
+#include <bitset>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long ull;
+
+mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
+ll myRand(ll B) {
+    return (ull)rng() % B;
+}
+inline double time() {
+    return static_cast<long double>(chrono::duration_cast<chrono::nanoseconds>(chrono::steady_clock::now().time_since_epoch()).count()) * 1e-9;
+}
+
+int main(){
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    int n,k; cin >> n >> k;
+    vector<vector<int>> g(n);
+    for(int i=1;i<n;i++){
+        int x,y; cin >> x >> y;
+        x--; y--;
+        g[x].push_back(y);
+        g[y].push_back(x);
+    }
+    int res = 0;
+    vector<int> cnt(n);
+    auto dfs=[&](auto dfs,int s,int p)->int{
+        cnt[s] = 1;
+        vector<int> v,vv;
+        for(int t:g[s]){
+            if(t == p)continue;
+            int r = dfs(dfs,t,s);
+            cnt[s] += cnt[t];
+            if(cnt[t] >= k){
+                v.push_back(r);
+            }
+            else{
+                vv.push_back(r);
+            }
+        }
+        sort(v.rbegin(), v.rend());
+        sort(vv.rbegin(), vv.rend());
+        int ad = (n-cnt[s] >= k);
+        int c = v.size();
+
+        // 2つ使う
+        if(v.size() >= 2){
+            res = max(res, v[0]+v[1]+c-2+ad);
+        }
+        if(v.size() and vv.size()){
+            res = max(res, v[0]+vv[0]+c-1+ad);
+        }
+        if(vv.size() >= 2){
+            res = max(res, vv[0]+vv[1]+c+ad);
+        }
+        // 1つ使う
+        if(v.size()){
+            res = max(res, v[0]+c-1+ad);
+        }
+        if(vv.size()){
+            res = max(res, vv[0]+c+ad);
+        }
+
+        int val = c;
+        if(v.size()){
+            val = max(val, v[0]+c-1);
+        }
+        if(vv.size()){
+            val = max(val, vv[0]+c);
+        }
+
+        return val;        
+    };
+    dfs(dfs,0,-1);
+    cout << res << endl;
+}
+
+

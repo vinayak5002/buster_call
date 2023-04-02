@@ -1,0 +1,81 @@
+def solve():
+    rxs = lambda: [*map(int, input().split())]
+    N, Q = rxs()
+    Qs = (rxs() for _ in range(Q))
+    st = segtree(N, sum, default=0)
+    for cmd, x, y in Qs:
+        if cmd == 0:
+            st.put(x, y)
+        else:
+            print(st.query(x, y+1))
+
+class segtree:
+
+    def __init__(self, nelems, op, default=0):
+        n = 1
+        while n < nelems:
+            n *= 2
+        self._n = n
+        self._op = op
+        self._xs = [default] * (2*n-1)
+
+    @classmethod
+    def from_seq(cls, xs, ops, default):
+        from collections.abc import Sequence
+        nelems = len(xs)
+        _op = ops
+        if isinstance(ops, Sequence):
+            _op = lambda ys, zs: tuple(op(y, z) for op, y, z in zip(ops, ys, zs))
+            assert isinstance(default, Sequence) and len(default) == len(ops)
+        self = cls(len(xs), _op, default=default)
+        bgn, end = self._n-1, self._n-1+nelems
+        self._xs[bgn:end] = xs
+        self.update_all()
+        return self
+
+    def update_parents(self, idx):
+        node = self._n-1+idx
+        xs, op = self._xs, self._op
+        while node > 0:
+            node = (node-1) // 2
+            xs[node] = op(xs[node*2+1], xs[node*2+2])
+
+    def update_all(self):
+        op, xs, bgn = self._op, self._xs, self._n-1
+        while bgn > 0:
+            bgn, end = (bgn-1)//2, bgn
+            xs[bgn:end] = (op(xs[i*2+1], xs[i*2+2]) for i in range(bgn, end))
+
+    def exchange(self, idx, op, do_update=True):
+        node = self._n-1+idx
+        xs = self._xs
+        xs[node] = op(xs[node])
+        if do_update:
+            self.update_parents(idx)
+
+    def put(self, idx, val, do_update=True):
+        self.exchange(idx, lambda x: val, do_update=do_update)
+
+    def incr(self, idx, val=1, do_update=True):
+        self.exchange(idx, lambda x: x+val, do_update=do_update)
+
+    def query(self, bgn=0, end=0):
+        end = end or self._n
+        return self._query_sub(bgn, end, 0, 0, self._n)
+
+    def _query_sub(self, bgn, end, node, L, R):
+        if end <= L or R <= bgn:
+            return None
+        if bgn <= L and R <= end:
+            return self._xs[node]
+        l = self._query_sub(bgn, end, node*2+1, L, (L+R)//2)
+        r = self._query_sub(bgn, end, node*2+2, (L+R)//2, R)
+        if l == None:
+            return r
+        if r == None:
+            return l
+        return self._op(l, r)
+
+if __name__ == '__main__':
+    solve()
+

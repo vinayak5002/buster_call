@@ -1,0 +1,44 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+int encode(const string& S)
+{
+	int r = 0;
+	for (int i = (int) S.size(); --i >= 0;) r = r * 3 + S[i] - 'A';
+	return r;
+}
+
+int main()
+{
+	int N, Q, K = 1; cin >> N >> Q;
+	for (int n = 0; n <= N; ++n) K *= 3;
+	vector<int> D(K, K), E(K, K);
+	queue<pair<int, int>> q;
+	for (string A; (int) A.size() <= N; A += 'A') for (string B(A); (int) B.size() <= N; B += 'B') {
+		q.push({encode(B + string(N - (int) B.size(), 'C')), 0});
+	}
+	for (; !q.empty(); q.pop()) {
+		auto [s, d] = q.front();
+		if (D[s] <= d) continue;
+		D[s] = E[s] = d++;
+		for (int t = s % 3, u = s / 3, k = 9; k < K; k *= 3) {
+			int c = u % 3;
+			t = t * 3 + c;
+			u /= 3;
+			int v = u * k + t;
+			if (E[v] <= d) continue;
+			E[v] = d;
+			q.push({v, d});
+		}
+	}
+	while (--Q >= 0) {
+		string S; cin >> S;
+		cout << D[encode(S)] << endl;
+	}
+	return 0;
+}
+

@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+using namespace std;
+using i64 = long long;
+using u64 = unsigned long long;
+
+i64 hashf(string::iterator &s, vector<i64> &a) {
+	if (*s == '[') {
+		s++;
+		i64 op = *s;
+		s++;
+		i64 x = hashf(s, a);
+		i64 y = hashf(s, a);
+
+		i64 res;
+		if (op == '+') {
+			res = x | y;
+		}
+		else if (op == '*') {
+			res = x & y;
+		}
+		else if (op == '^') {
+			res = x ^ y;
+		}
+		s++;
+		return res;
+	}
+	else {
+		i64 idx = *s - 'a';
+		s++;
+		return a[idx];
+	}
+}
+
+// [hashf, num]
+pair<i64, i64> solve(string &s, vector<i64> &a) {
+	auto itr = s.begin();
+	i64 p = hashf(itr, a);
+	i64 ans = 0;
+
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 10; j++) {
+			for (int k = 0; k < 10; k++) {
+				for (int l = 0; l < 10; l++) {
+					a[0] = i;
+					a[1] = j;
+					a[2] = k;
+					a[3] = l;
+					auto itr = s.begin();
+					if (p == hashf(itr, a)) ans++;
+				}
+			}
+		}
+	}
+
+	return {p, ans};
+};
+
+int main() {
+	cin.sync_with_stdio(false);
+	cin.tie(nullptr);
+
+	string s;
+	string p;
+	while (cin >> s, s != ".") {
+		cin >> p;
+		vector<i64> a(4);
+		for (int i = 0; i < 4; i++) {
+			a[i] = p[i] - '0';
+		}
+		auto [p, m] = solve(s, a);
+		cout << p << ' ' << m << endl;;
+	}
+
+	return 0;
+}
+

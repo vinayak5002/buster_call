@@ -1,0 +1,59 @@
+
+import scala.io.StdIn
+import scala.collection.mutable.ListBuffer
+
+object Main {
+
+  class LinkedList {
+    val buf: ListBuffer[Int] = ListBuffer.empty[Int]
+
+    def delete(value: Int): Unit = {
+      if (buf.isEmpty) {
+        throw new RuntimeException("Underflow")
+      }
+      if (buf.contains(value)) buf -= value
+    }
+
+    def insert(value: Int): Unit = {
+      buf.insert(0, value)
+    }
+
+    def deleteFirst(): Unit = {
+      buf.remove(0)
+    }
+
+    def deleteLast(): Unit = {
+      buf.remove(buf.length - 1)
+    }
+
+    def command(line: String): Unit = {
+      if (line.contains("delete ")) {
+        val Array(_, value) = line.split(" ")
+        delete(value.toInt)
+      } else if (line.contains("insert")) {
+        val Array(_, value) = line.split(" ")
+        insert(value.toInt)
+      } else if (line == "deleteFirst") {
+        deleteFirst()
+      } else if (line == "deleteLast") {
+        deleteLast()
+      } else throw new RuntimeException(line + " is not considered.")
+    }
+
+  }
+
+  def main(args: Array[String]): Unit = {
+    val n = StdIn.readInt()
+
+    val link: LinkedList = new LinkedList()
+
+    (0 until n).foreach {_ =>
+      val line = StdIn.readLine()
+      link.command(line)
+    }
+
+    println(link.buf.mkString(" "))
+
+  }
+}
+

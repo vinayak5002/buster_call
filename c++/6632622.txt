@@ -1,0 +1,196 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+#define MAX		101
+
+#define NIL			-1
+#define WHITE		0
+#define	BLACK		1
+#define	GRAY		2
+#define	INFTY		(1 << 21)
+
+typedef struct VALUE{
+	int val;
+	VALUE * next;
+}VAL;
+
+typedef struct LIST_VEC{
+	int size;
+	VAL *array;
+}LISTG;
+
+LISTG GG[MAX];
+int color[MAX];
+int N;
+int M;
+
+int cp = 0;
+
+int STACK_C[MAX];
+
+void push_s(int);
+int pop_s();
+
+void push_listg(int,int);
+void init_gg();
+void push_listg(int,int);
+void input_graph();
+void assighcolor();
+int pop_listg();
+void dfs(int,int);
+void output();
+void debug_output();
+
+int main(){
+
+	init_gg();
+
+	input_graph();
+	//debug_output();
+	assighcolor();
+	output();
+}
+
+void debug_output(){
+
+	VAL *p;
+
+	for(int i = 0;i < N;i++){
+		printf("i = %d, size = %d: ",i,GG[i].size);
+		if(GG[i].size != 0){
+			p = GG[i].array;
+			for(int j = 0;j < GG[i].size;j++){
+				printf(" %d",p->val);
+				p = p->next;
+			}
+		}
+		printf("\n");
+	}
+}
+
+void assighcolor(){
+	int id = 1;
+	for(int i = 0;i < N;i++){
+		if(color[i] == NIL){
+			dfs(i,id);
+			id++;
+		}
+	}
+}
+
+void output(){
+	int n;
+
+	int u,v;
+
+	if(scanf("%d",&n)){
+	}
+
+	for(int i = 0;i < n;i++){
+		if(scanf("%d %d",&u,&v)){
+		}
+
+		//printf("color[%d] = %d,color[%d] = %d\n",u,color[u],v,color[v]);
+
+		if(color[u] == color[v]){
+			printf("yes\n");
+		}
+		else{
+			printf("no\n");
+		}
+	}
+}
+
+void dfs(int r,int id){
+	push_s(r);
+	color[r] = id;
+
+	int u,v;
+	VAL *p;
+
+	//printf(" dfs start(r = %d)\n",r);
+
+	while(cp != 0){
+		u = pop_s();
+		p = GG[u].array;
+		for(int i = 0;i < GG[u].size;i++){
+			v = p->val;
+			//printf("  u = %d,v = %d,i = %d, size = %d\n",u,v,i,GG[u].size);
+			if(color[v] == NIL){
+				color[v] = id;
+				//printf("   push(%d)\n",v);
+				push_s(v);
+			}
+			p = p->next;
+		}
+
+	}
+}
+
+void input_graph(){
+	if(scanf("%d %d",&N,&M)){
+	}
+
+	int s,t;
+	//printf("debug N = %d, M = %d\n",N,M);
+
+	for(int i = 0;i < M;i++){
+		if(scanf("%d %d",&s,&t)){
+		}
+		push_listg(s,t);
+		push_listg(t,s);
+		//printf("debug i = %d,s = %d, t = %d\n",i,s,t);
+	}
+
+}
+
+int pop_s(){
+	int ret;
+	cp--;
+	ret = STACK_C[cp];
+
+	//printf(" [pop]ret = %d,cp = %d\n",ret,cp);
+	return ret;
+}
+
+void push_s(int x){
+
+
+	STACK_C[cp] = x;
+	cp++;
+	//printf(" [push]x = %d,cp = %d\n",x,cp);
+}
+
+void push_listg(int u,int v){
+	VAL *p,*ap;
+	int size;
+
+	p = (VAL*)malloc(sizeof(VAL));
+	p->val = v;
+	p->next = NULL;
+
+
+	if(GG[u].array == NULL){
+		GG[u].array = p;
+	}
+	else{
+		size = GG[u].size;
+		ap = GG[u].array;
+		for(int i = 1;i < size;i++){
+			ap = ap->next;
+		}
+		ap->next = p;
+	}
+	GG[u].size++;
+}
+
+void init_gg(){
+
+	for(int i = 0;i < MAX;i++){
+		GG[i].size = 0;
+		GG[i].array = NULL;
+		color[i] = NIL;
+	}
+}
+
+

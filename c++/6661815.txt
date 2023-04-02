@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+using namespace std;
+using vi = vector<int64_t>;
+using vii = vector<vi>;
+using pii = pair<int, int>;
+
+#define rep(i, n) for (int64_t i = 0; i < (int64_t)(n); i++)
+#define all(v) v.begin(), v.end()
+
+// 以下可変
+template <typename T>
+void upgrade(T &LEFT, const T &RIGHT)
+{
+    if (LEFT < RIGHT)
+        LEFT = RIGHT;
+
+    return;
+}
+template <typename T>
+void downgrade(T &LEFT, const T &RIGHT)
+{
+    if (LEFT > RIGHT)
+        LEFT = RIGHT;
+
+    return;
+}
+
+int64_t inf = 1e18;
+
+int main()
+{
+    int64_t V, E, start;
+    cin >> V >> E >> start;
+
+    vector<vector<pii>> vec(V);
+    vii prt(V, vi(0));
+    vi distance(V, inf);
+    priority_queue<pii, vector<pii>, greater<pii>> que;
+
+    rep(i, E)
+    {
+        int64_t s, t, d;
+        cin >> s >> t >> d;
+        vec[s].push_back(make_pair(d, t));
+    }
+
+    que.emplace(0, start);
+    distance[start] = 0;
+
+    while (!(que.empty()))
+    {
+        pii now = que.top();
+        que.pop();
+        if (distance[now.second] < now.first)
+        {
+            continue;
+        }
+        for (auto next : vec[now.second])
+        {
+            if (distance[next.second] > (distance[now.second] + next.first))
+            {
+                distance[next.second] = (distance[now.second] + next.first);
+                que.emplace(distance[next.second], next.second);
+            }
+        }
+    }
+
+    rep(i, V)
+    {
+        if (distance[i] == inf)
+        {
+            cout << "INF" << endl;
+        }
+        else
+        {
+            cout << distance[i] << endl;
+        }
+    }
+}
+

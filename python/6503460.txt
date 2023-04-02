@@ -1,0 +1,61 @@
+use std::io;
+use std::io::Read;
+
+fn main() {
+    let mut buf = String::new();
+    io::stdin().read_to_string(&mut buf).unwrap();
+    let mut iter = buf.split_whitespace();
+    loop {
+        let n: usize = iter.next().unwrap().parse().unwrap();
+        let m: usize = iter.next().unwrap().parse().unwrap();
+
+        if n == 0 && m == 0 {
+            break;
+        }
+        let mut h: Vec<usize> = Vec::with_capacity(n);
+        let mut w: Vec<usize> = Vec::with_capacity(m);
+
+        for _ in 0..n {
+            let h_i: usize = iter.next().unwrap().parse().unwrap();
+            h.push(h_i);
+        }
+
+        for _ in 0..m {
+            let w_i: usize = iter.next().unwrap().parse().unwrap();
+            w.push(w_i);
+        }
+
+        let h_s = possible_edge_length(h, n);
+        let w_s = possible_edge_length(w, m);
+
+        let mut ans: usize = 0;
+
+        for i in 0..150001 {
+            ans += h_s[i] * w_s[i]
+        }
+
+        println!("{}", ans);
+    }
+}
+
+fn possible_edge_length(h: Vec<usize>, n: usize) -> [usize; 150001] {
+    let mut s = [0; 150001];
+
+    for i in 0..n {
+        for j in i..n {
+            s[vecsum(&h[i..j + 1])] += 1;
+        }
+    }
+
+    return s;
+}
+
+fn vecsum(slice: &[usize]) -> usize {
+    let mut sum: usize = 0;
+
+    for i in slice {
+        sum += i;
+    }
+    return sum;
+}
+

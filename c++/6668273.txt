@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    string S;
+    cin >> S;
+    if (S.size() < 3) {
+        cout << "No" << endl;
+        return 0;
+    }
+
+    auto dfs = [&](auto& dfs, string S) -> bool {
+        string T = "";
+        for (char c : S) {
+            T += c;
+            if (T.size() >= 3 && T.substr(T.size()-3, 3) == "ABC") {
+                rep(_,0,3) T.pop_back();
+                T += '*';
+            }
+        }
+        if (T == S) {
+            if (S.size() != 1) return false;
+            else return true;
+        }
+        rep(c,0,3) {
+            auto t = T;
+            rep(i,0,t.size()) {
+                if (t[i] == '*') t[i] = 'A' + c;
+            }
+            if (dfs(dfs, t)) return true;
+        }
+        return false;
+    };
+
+    cout << (dfs(dfs, S) ? "Yes" : "No") << endl;
+}

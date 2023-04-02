@@ -1,0 +1,69 @@
+#include<bits/stdc++.h>
+using namespace std;
+const int maxn = 1e5 + 5;
+struct Point {
+	int x, y;
+	Point(int x = 0, int y = 0) : x(x), y(y) {}
+	inline bool operator < (const Point &rhs) const {
+		return x == rhs.x ? y < rhs.y : x < rhs.x;
+	}
+	inline Point operator + (const Point &rhs) const {
+		return Point(x + rhs.x, y + rhs.y);
+	}
+	inline Point operator - (const Point &rhs) const {
+		return Point(x - rhs.x, y - rhs.y);
+	}
+	inline long long operator * (const Point &rhs) const {
+		return 1ll * x * rhs.x + 1ll * y * rhs.y;
+	}
+	inline long long operator ^ (const Point &rhs) const {
+		return 1ll * x * rhs.y - 1ll * y * rhs.x;
+	}
+}p[maxn], s[2][maxn];
+inline long long Area(const Point &a, const Point &b, const Point &c) {
+	return abs((b - a) ^ (c - a));
+}
+inline int OnLeft(const Point &a, const Point &b, const Point &c) {
+	return ((a - c) ^ (b - c)) >= 0;
+}
+int n, tp[2];
+inline void Calc(long long f[2][maxn], int rev) {
+	tp[0] = tp[1] = 0;
+	for(int i = 1; i <= n; ++ i) {
+		f[0][i] = f[0][i - 1], f[1][i] = f[1][i - 1];
+		while(tp[0] > 1 && OnLeft(p[i], s[0][tp[0]], s[0][tp[0] - 1]))
+			f[0][i] -= Area(s[0][tp[0]], s[0][tp[0] - 1], s[0][1]), -- tp[0];
+		s[0][++ tp[0]] = p[i];
+		if(tp[0] > 1)
+			f[0][i] += Area(p[i], s[0][tp[0] - 1], s[0][1]);
+// cerr << "????" << endl;
+		while(tp[1] > 1 && OnLeft(s[1][tp[1]], p[i], s[1][tp[1] - 1]))
+			f[1][i] -= Area(s[1][tp[1]], s[1][tp[1] - 1], s[1][1]), -- tp[1];
+		s[1][++ tp[1]] = p[i];
+		if(tp[1] > 1)
+			f[1][i] += Area(p[i], s[1][tp[1] - 1], s[1][1]);
+	}
+	if(rev)
+		for(int l = 1, r = n; l < r; ++ l, -- r)
+			swap(f[0][l], f[0][r]), swap(f[1][l], f[1][r]);
+}
+long long f1[2][maxn], f2[2][maxn];
+int main() {
+	scanf("%d", &n);
+	for(int i = 1; i <= n; ++ i)
+		scanf("%d%d", &p[i].x, &p[i].y);
+	sort(p + 1, p + n + 1);
+	Calc(f1, 0);
+	reverse(p + 1, p + n + 1);
+	Calc(f2, 1);
+	reverse(p + 1, p + n + 1);
+// cerr << "????" << endl;
+	long long ans = f1[0][n] + f1[1][n];
+	for(int i = 1; i < n; ++ i) {
+		if(p[i].x == p[i + 1].x)
+			continue;
+// cerr << p[i].x << " " << p[i].y << " " << p[i + 1].x << " " << p[i + 1].y << " " << f1[0][i] << " " << f1[1][i] << " " << f2[0][i + 1] << " " << f2[1][i + 1] << endl;
+		ans = min(ans, f1[0][i] + f1[1][i] + f2[0][i + 1] + f2[1][i + 1]);
+	}
+	printf("%lld\n", ans / 2 + ans % 2);
+}

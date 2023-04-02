@@ -1,0 +1,107 @@
+use std::io;
+
+pub trait Monoid {
+    type S;
+    fn op(a: &Self::S, b: &Self::S) -> Self::S;
+    fn id() -> Self::S;
+}
+
+pub struct AddMonoid;
+
+impl Monoid for AddMonoid {
+    type S = isize;
+    fn op(a: &Self::S, b: &Self::S) -> Self::S {
+        *a + *b
+    }
+    fn id() -> Self::S {
+        0
+    }
+}
+
+pub struct SegmentTree<M>
+where
+    M: Monoid,
+{
+    size: usize,
+    data: Vec<M::S>,
+}
+
+impl<M> SegmentTree<M>
+where
+    M: Monoid,
+    M::S: Clone,
+{
+    pub fn new(n: usize) -> Self {
+        let size = n.next_power_of_two();
+        SegmentTree::<M> {
+            size,
+            data: vec![M::id(); 2 * size - 1],
+        }
+    }
+
+    pub fn update(&mut self, mut idx: usize, x: M::S) {
+        idx += self.size - 1;
+        self.data[idx] = x;
+        while idx > 0 {
+            idx = (idx - 1) / 2;
+            self.data[idx] = M::op(&self.data[2 * idx + 1], &self.data[2 * idx + 2]);
+        }
+    }
+
+    pub fn get(&self, mut idx: usize) -> M::S {
+        idx += self.size - 1;
+        self.data[idx].clone()
+    }
+
+    // fold op [l, r)
+    pub fn fold(&self, mut l: usize, mut r: usize) -> M::S {
+        l += self.size - 1;
+        r += self.size - 1;
+
+        let mut xl = M::id();
+        let mut xr = M::id();
+
+        while l < r {
+            if l % 2 == 0 {
+                xl = M::op(&xl, &self.data[l]);
+            }
+            if r % 2 == 0 {
+                xr = M::op(&self.data[r - 1], &xr);
+            }
+            l = l / 2;
+            r = (r - 1) / 2;
+        }
+
+        M::op(&xl, &xr)
+    }
+}
+
+fn main() {
+    let mut line = String::new();
+    io::stdin().read_line(&mut line).unwrap();
+    let word_list: Vec<&str> = line.split_whitespace().collect();
+    let n = word_list[0].parse::<usize>().unwrap();
+    let q = word_list[1].parse::<usize>().unwrap();
+
+    let mut segtree = SegmentTree::<AddMonoid>::new(n + 1);
+
+    for _ in 0..q {
+        line = String::new();
+        std::io::stdin().read_line(&mut line).unwrap();
+        let q = {
+            line.split_whitespace()
+                .into_iter()
+                .map(|s| s.parse::<usize>().unwrap())
+                .collect::<Vec<usize>>()
+        };
+        if q[0] == 0 {
+            let (s, t, x) = (q[1] - 1, q[2] - 1, q[3]);
+            segtree.update(s, segtree.get(s) + x as isize);
+            segtree.update(t + 1, segtree.get(t + 1) - x as isize);
+        } else {
+            let i = q[1] - 1;
+            println!("{}", segtree.fold(0, i + 1));
+        }
+    }
+}
+

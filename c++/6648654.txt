@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+#include <string>
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <string.h>
+#include <queue>
+using namespace std;
+//S:union find treeを使用
+vector<int> S;//S[i]=jでj=root(i)を管理
+int root(int a){
+  if(a==S[a])return a;
+  else return root(S[a]);
+}
+void unite(int a, int b){
+  int c=root(a),d=root(b);
+  if(c==d)return;
+  else{
+    if(c>d)S[c]=d;
+    else S[d]=c;
+  }
+}
+
+int main(){
+  int n;
+  cin>>n;
+  vector<vector<int>> G;
+  int a;
+  //Gには{重み、始点、終点}を入れていく。
+  for(int i=0; i<n; i++){
+    for(int j=0; j<n; j++){
+      cin>>a;
+      if(a!=-1){
+        vector<int> X;
+        X.push_back(a);
+        X.push_back(i);
+        X.push_back(j);
+        G.push_back(X);
+      }
+    }
+  }
+  
+  sort(G.begin(), G.end());
+  vector<vector<int>> T;//作りかけの森
+  int m=G.size();//辺の数
+  S.resize(n);
+  for(int i=0; i<n; i++)S[i]=i;
+  
+  for(int i=0; i<m; i++){
+    //頂点1~nに対し、union-findで同グループにいるかどうかによって閉路ができるかを判定
+    if(root(G[i][1])!=root(G[i][2]))T.push_back(G[i]);
+    unite(G[i][1],G[i][2]);
+  }
+  int N=T.size();
+  int ans=0;
+  for(int i=0; i<N; i++)ans+=T[i][0];
+  cout<<ans<<endl;
+}

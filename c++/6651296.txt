@@ -1,0 +1,83 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+typedef int State[8];
+
+const int fac[8]={1,1,2,6,24,120,720,5040};
+int vis[40321];
+
+void init()
+{
+    memset(vis,0,sizeof(vis));
+}
+
+bool insert_table(int* str,int n)
+{
+    int res=0;
+    for(int i=0;i<n;i++){
+        int cnt=0;
+        for(int j=i+1;j<n;j++)
+            if(str[j]<str[i])
+            cnt++;
+        res+=fac[n-i-1]*cnt;
+    }
+    if(vis[res])
+        return false;
+
+    vis[res]=1;
+    return true;
+}
+
+State st[41000];
+int d[41000];
+State goal;
+
+int dr[]={-1,1,0,0};
+int dc[]={0,0,-1,1};
+
+void solve()
+{
+    init();
+
+    int front=1,back=2;
+    d[1]=0;
+    while(front<back)
+    {
+        State& cur=st[front];
+        if(!memcmp(cur,goal,sizeof(cur))){printf("%d\n",d[front]);return ;}
+
+        int z=0;
+        while(cur[z])z++;
+        int r=z/4,c=z%4;
+
+        for(int i=0;i<4;i++)
+        {
+            int newr=r+dr[i],newc=c+dc[i];
+            if(newr<0||newr>1||newc<0||newc>3)continue;
+
+            int newz=newr*4+newc;
+
+            State& t=st[back];
+            memcpy(t,cur,sizeof(t));
+            t[z] =cur[newz];t[newz]=cur[z];
+
+            d[back]=d[front]+1;
+
+            if(insert_table(t,8))back++;
+        }
+        front++;
+    }
+}
+int main()
+{
+    for(int i=0;i<8;i++)goal[i]=i;
+
+    while(~scanf("%d",&st[1][0]))
+    {
+
+
+        for(int i=1;i<8;i++)scanf("%d",&st[1][i]);
+        solve();
+    }
+}
+

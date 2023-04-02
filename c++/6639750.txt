@@ -1,0 +1,61 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <queue>
+#include <algorithm>
+#include <bits/stdc++.h>
+using namespace std;
+int k;
+vector<pair<int,int>> placed_queen;
+bool can_x[8];
+bool can_k[14]; //右上斜め方向に置けるか
+bool can_l[14]; //右下斜め方向に置けるか
+int place_x[8];//indexがx座標
+
+void print_queen() {
+  for(int i=0;i<k;i++) {
+    if(place_x[placed_queen[i].first]!=placed_queen[i].second) return;
+  }
+  for(int i=0;i<8;i++) {//x座標
+    for(int j=0;j<8;j++) {//y座標
+      if(place_x[i]==j) {
+        cout <<"Q";
+      } else {
+        cout <<".";
+      }
+    }
+    cout << endl;
+  }
+}
+
+void place_queen(int y) {
+  if(y==8) {
+    print_queen();
+    return;
+  }
+  for(int xi=0;xi<8;xi++) {//yのxを決める
+    if(!can_x[xi] || !can_k[xi+y] || !can_l[7+xi-y]) continue;
+    can_x[xi]=can_k[xi+y]=can_l[7+xi-y]=false;
+    place_x[xi]=y;
+    place_queen(y+1);
+    can_x[xi]=can_k[xi+y]=can_l[7+xi-y]=true;
+  }
+}
+
+int main() {
+  cin >> k;
+  for(int i=0;i<k;i++) {
+    int r,c; cin >> r >>c;
+    placed_queen.push_back({r,c});
+  }
+  for(int i=0;i<8;i++) {
+    can_x[i]=true;
+  }
+  for(int i=0;i<14;i++) {
+    can_k[i]=true;
+    can_l[i]=true;
+  }
+  place_queen(0);
+  return 0;
+}
+

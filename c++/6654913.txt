@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+typedef pair<int,int>P;
+
+const int maxn=10000+50;
+const int INF=1e9;
+
+struct edge{
+    int to,d,c;
+    edge(int a=0,int b=0,int c=0):to(a),d(b),c(c){}
+};
+
+vector<edge>es[maxn];
+
+int N,M;
+
+int dist[maxn];
+int cost[maxn];
+
+void dijk(){
+    int s=1;
+
+    fill(dist,dist+maxn,INF);
+    fill(cost,cost+maxn,INF);
+    dist[s]=0;
+
+    priority_queue<P,vector<P>,greater<P> >que;
+    que.push(P(0,s));
+
+    cost[s]=0;
+
+    while(!que.empty()){
+        int v=que.top().second;que.pop();
+
+        for(int i=0;i<es[v].size();i++){
+            edge& e=es[v][i];
+
+            if(dist[e.to]>dist[v]+e.d){
+                dist[e.to]=dist[v]+e.d;
+                cost[e.to]=e.c;
+                que.push(P(dist[e.to],e.to));
+            }
+            if(dist[e.to]==dist[v]+e.d)
+                cost[e.to]=min(cost[e.to],e.c);
+        }
+    }
+}
+
+
+void solve(){
+    for(int i=0;i<maxn;i++)es[i].clear();
+    for(int i=0;i<M;i++){
+        int u,v,d,c;
+        scanf("%d%d%d%d",&u,&v,&d,&c);
+        es[u].push_back(edge(v,d,c));
+        es[v].push_back(edge(u,d,c));
+    }
+    dijk();
+
+    int ans=0;
+    for(int i=1;i<=N;i++)
+        ans+=cost[i];
+    printf("%d\n",ans);
+}
+
+int main()
+{
+    while(scanf("%d%d",&N,&M)&&N)
+        solve();
+}
+

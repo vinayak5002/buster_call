@@ -1,0 +1,66 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int check(vector<vector<int>>& grid, pair<int, int>& now) {
+    return grid[now.first][now.second]; 
+}
+
+bool can(vector<pair<int, int>>& a, vector<pair<char, int>>& b) {
+    int n = a.size(), m = b.size();
+    vector<vector<int>> grid(21, vector<int>(21, 0));
+    for (int i = 1 ; i < n + 1; i++) grid[a[i - 1].first][a[i - 1].second] = i;
+
+    pair<int, int> now = {10, 10};
+    vector<int> ok(n, 0);
+
+    for (int i = 0 ; i < m ; i++) {
+        if (b[i].first == 'N') {
+            for (int j = 0 ; j < b[i].second ; j++) {
+                now.second++;
+                if (check(grid, now)) ok[check(grid, now) - 1] = 1;
+            }
+        }
+
+        if (b[i].first == 'E') {
+            for (int j = 0 ; j < b[i].second ; j++) {
+                now.first++;
+                if (check(grid, now)) ok[check(grid, now) - 1] = 1;
+            }
+        }
+
+        if (b[i].first == 'S') {
+            for (int j = 0 ;j < b[i].second ; j++) {
+                now.second--;
+                if (check(grid, now)) ok[check(grid, now) - 1] = 1;
+            }
+        }
+
+        if (b[i].first == 'W') {
+            for (int j = 0 ; j < b[i].second ; j++) {
+                now.first--;
+                if (check(grid, now)) ok[check(grid, now) - 1] = 1;
+            }
+        }
+
+    }
+
+    bool ans = true;
+    for (auto& x : ok) if (!x) ans = false;
+    return ans;
+}
+
+bool solve() {
+    int n; cin >> n;
+    if (n == 0) return false;
+    vector<pair<int, int>> a(n); for(auto& x : a) cin >> x.first >> x.second;
+    int m; cin >> m;
+    vector<pair<char, int>> b(m); for(auto& x : b) cin >> x.first >> x.second;
+    cout << (can(a, b) ? "Yes" : "No") << endl;
+    return true;
+}
+
+int main() {
+    while(1) if (!solve()) return 0; 
+}
+

@@ -1,0 +1,56 @@
+#pragma GCC optimize("Ofast")
+#include <bits/stdc++.h>
+using namespace std;
+#ifdef __LOCAL
+ #include <debug>
+#else
+ #define debug(...) void(0)
+#endif
+
+#define REP(i,n) for(int i=0;i<(n);i++)
+#define ALL(v) v.begin(),v.end()
+
+template<typename T>
+istream& operator>>(istream&is,vector<T>&v){
+  for(T&p:v)is>>p;
+  return is;
+}
+template<typename T>
+ostream& operator<<(ostream&os,const vector<T>&v){
+  if(&os==&cerr)os<<"[";
+  for(int i=0;i<v.size();i++){
+    os<<v[i];
+    if(i+1<v.size())os<<(&os==&cerr?",":" ");
+  }
+  if(&os==&cerr)os<<"]";
+  return os;
+}
+
+using ld=long double;
+
+int main(){
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+
+  int n,m,p;cin>>n>>m>>p;
+  map<vector<int>,ld> P;
+  vector<int> init(n);
+  REP(i,n)init[i]=i;
+  P[init]=1;
+  REP(_,m){
+    int u,v;cin>>u>>v;u--;v--;
+    map<vector<int>,ld> nxt;
+    for(const auto&[ve,val]:P){
+      int a=ve[u],b=ve[v];
+      if(a==b)nxt[ve]+=val;
+      else{
+        auto cpy=ve;
+        nxt[cpy]+=val*p/100.0;
+        for(int&x:cpy)if(x==max(a,b))x=min(a,b);
+        nxt[cpy]+=val*(100.0-p)/100.0;
+      }
+    }
+    P=nxt;
+  }
+  cout<<fixed<<setprecision(12)<<P[vector<int>(n,0)]<<endl;
+}

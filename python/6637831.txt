@@ -1,0 +1,54 @@
+import copy
+from distutils.util import check_environ
+
+pos = [[0, 1, 0], [0, 0, -1], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, -1, 0]]
+
+class Dice:
+
+  def __init__(self, a):
+    self.deme = a
+    self.iti = copy.deepcopy(pos)
+
+  def curFace(self, s):
+    return self.deme[self.iti.index(pos[s])]
+
+  def roll(self, dim):
+    if dim == "E":
+      re, im = 1, 0
+    elif dim == "N":
+      re, im = 1, 2
+    elif dim == "S":
+      re, im = 2, 1
+    elif dim == "W":
+      re, im = 0, 1
+
+    for i in range(6):
+      c = complex(self.iti[i][re], self.iti[i][im]) * 1j
+      self.iti[i][re] = int(c.real)
+      self.iti[i][im] = int(c.imag)
+
+  def checkRight(self, up, front):
+    while(True):
+      self.roll("W")
+      if up == self.curFace(0):
+        break
+      self.roll("N")
+      if up == self.curFace(0):
+        break
+    while(True):
+      self.roll("N")
+      self.roll("W")
+      self.roll("S")
+      if front == self.curFace(1):
+        break
+    return self.curFace(2)
+
+deme = list(map(int, input().split()))
+d = Dice(deme)
+
+n = int(input())
+
+for i in range(n):
+  up, front = list(map(int, input().split()))
+  print(d.checkRight(up, front))
+

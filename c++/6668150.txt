@@ -1,0 +1,169 @@
+#include <cstdio>
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <string>
+#include <map>
+#include <queue>
+#include <bitset>
+#include <vector>
+#include <stack>
+#include <cmath>
+#include <set>
+#include <cstdlib>
+#include <unordered_map>
+#include <random>
+#include <chrono>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/hash_policy.hpp>
+using namespace __gnu_pbds;
+#define mp make_pair
+#define lson tr[now].ls
+#define rson tr[now].rs
+#define pb push_back
+#define debug() cout<<"qwq"<<endl
+#define mem(i,a) memset(i,a,sizeof(i))
+using namespace std;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double db;
+typedef long double ldb;
+#define i128 __int128
+#define pii pair<int,int>
+const db eps=1e-9;
+const ll INF = 0x3f3f3f3f;
+const int siev =1000000+5;
+const int inf = 0x3f3f3f3f;
+const int DMAX = 1000000 + 100;
+const ll MOD = 32768;
+const ll LMOD = 1000000007;
+const int hmod = 202010923;
+mt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());
+template<class T> inline void print(T x){
+    if(x<0){
+        putchar('-');
+        x=-x;
+    }
+    int a[20];
+    int cnt=0;
+    do{
+        a[++cnt]=x%10;
+        x/=10;
+    }while(x>0);
+    for(int i=cnt;i>=1;i--){
+        putchar(a[i]+'0');
+    }
+    putchar('\n');
+    // puts("");
+}
+template<class T> inline void read(T &x){
+    x=0;
+    T f=1;
+    char ch=getchar();
+    while(ch<'0' || ch>'9'){
+        if(ch=='-'){
+            f=-1;
+        }
+        ch=getchar();
+    }
+    while(ch<='9' && ch>='0'){
+        x=x*10+(ch-'0');
+        ch=getchar();
+    }
+    x*=f;
+}
+struct Point{
+    double x,y;
+    Point(){}
+    Point(double x,double y): x(x),y(y){}
+    Point operator +(Point P){
+        return Point(x+P.x,y+P.y);
+    }
+    Point operator -(Point P){
+        return Point(x-P.x,y-P.y);
+    }
+    Point operator *(double k){
+        return Point(x*k,y*k);
+    }
+    Point operator /(double k){
+        return Point(x/k,y/k);
+    }
+    bool operator ==(Point P){
+        return (x==P.x) && (y==P.y);
+    }
+};
+struct Line{
+    Point A,B;
+    Line(){}
+    Line(Point A,Point B): A(A),B(B){}
+};
+Point vec(Line L){
+    return L.B-L.A;
+}
+double abs(Point P){
+    return sqrt(P.x*P.x+P.y*P.y);
+}  
+double dot(Point A,Point B){
+    return A.x*B.x+A.y*B.y;
+} 
+double cross(Point A,Point B){
+    return A.x*B.y-A.y*B.x;
+}
+Point projection(Point P,Line L){
+    return L.A+vec(L)/abs(vec(L))*dot(P-L.A,vec(L))/abs(vec(L));
+}
+Point reflection(Point P,Line L){
+    Point H=projection(P,L);
+    Point R;
+    R=Point(2*H.x-P.x,2*H.y-P.y);
+    return R;
+}
+bool Parallel(Line L1,Line L2){
+    if(cross(vec(L1),vec(L2))==0){
+        return 1;
+    }
+    return 0;
+}
+bool Orthogonal(Line L1,Line L2){
+    if(dot(vec(L1),vec(L2))==0){
+        return 1;
+    }
+    return 0;
+}
+bool Intersection(double l1,double r1,double l2,double r2){
+    if(l1>r1){
+        swap(l1,r1);
+    }
+    if(l2>r2){
+        swap(l2,r2);
+    }
+    if(max(l1,l2)<=min(r1,r2)){
+        return 1;
+    }
+    return 0;
+}
+bool Intersection(Line L1,Line L2){
+    if(Intersection(L1.A.x,L1.B.x,L2.A.x,L2.B.x) && 
+        Intersection(L1.A.y,L1.B.y,L2.A.y,L2.B.y) &&
+        cross(vec(L1),L2.A-L1.A)*cross(vec(L1),L2.B-L1.A)<=eps &&
+        cross(vec(L2),L1.A-L2.A)*cross(vec(L2),L1.B-L2.A)<=eps){
+        return 1;
+    }
+    return 0;
+}
+int q;
+int main(){
+    read(q);
+    while(q--){
+        Line L1,L2;
+        cin>>L1.A.x>>L1.A.y>>L1.B.x>>L1.B.y;
+        cin>>L2.A.x>>L2.A.y>>L2.B.x>>L2.B.y;
+        if(Intersection(L1,L2)){
+            printf("1\n");
+        }
+        else{
+            printf("0\n");
+        }
+    }
+    return 0;
+}

@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define REP(i,n) for(int i=0;i<int(n);i++)
+typedef long long ll;
+typedef pair<int,int> P;
+
+int a[100010];
+
+int main(void){
+	int i,j,k;
+ 
+	cin.tie(0);  ios_base::sync_with_stdio(false);
+
+
+	for(i=0;;i++){
+		int n;
+		cin >> n;
+		if(n==0) break;
+
+		for(j=1;j<=n;j++) cin >> a[j];
+
+		if(n==1){
+			if(a[1]==0) cout << 1 << endl;
+			else cout << 0 << endl;
+			continue;
+		}
+
+		a[n+1]=-1;
+		vector<int> b,c;
+		b.push_back(0);
+		c.push_back(-1);
+		int d=1;
+		for(j=1;j<=n;j++){
+			if(a[j]==a[j+1]) d++;
+			else{
+				b.push_back(d);
+				d=1;
+				c.push_back(a[j]);
+			}
+		}
+
+		int p=1,q=-1,m=b.size();
+		for(j=1;j<m;j++){
+
+
+			if(p%2==1){
+
+
+				p+=b[j];
+				q++;
+			}
+			else{
+
+				p+=b[j];
+				if(c[j]!=c[j-1]){
+
+					c[j-1]=-1;
+					b[j]+=b[j-1];
+					b[j-1]=0;
+					if(q>=1){
+						b[j]+=b[q];
+						b[q]=0;
+						c[q]=-1;
+						q--;
+					}
+
+				}
+
+			}
+
+
+		}
+
+
+		int ans=0;
+		for(j=1;j<m;j++) if(c[j]==0) ans+=b[j];
+
+		cout << ans << endl;
+
+
+	}
+
+
+	return 0;
+}
+

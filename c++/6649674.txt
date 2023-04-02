@@ -1,0 +1,55 @@
+#include<iostream>
+#include<stdio.h>
+using namespace std;
+int w,h;
+char room[102][102];
+int tick[102][102];
+int dx[]={1,-1,0,0};
+int dy[]={0,0,1,-1};
+int ans=0;
+char mych;
+void dfs(int x,int y)
+{
+    if(tick[x][y] ||room[x][y]!=mych) return;  //特征判断
+    tick[x][y]=ans;
+    for(int i=0;i<4;i++)
+    {
+        int xx=x+dx[i],yy=y+dy[i];
+        if(xx>=1 && x<=h && yy>=1 && yy<=w)//边界判断
+            dfs(xx,yy);
+    }
+}
+int main()
+{
+    ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+    
+    while(scanf("%d %d",&h,&w))
+    {
+        if(!h && !w) break;
+        char ch;
+        for(int i=1;i<=h;i++)
+        for(int j=1;j<=w;j++)
+        {
+            ch=getchar();
+            while(ch!='*' && ch!='@' &&ch!='#') ch=getchar();
+            room[i][j]=ch;
+        }
+        for(int i=1;i<=h;i++)
+        for(int j=1;j<=w;j++)
+        {
+            if(tick[i][j])continue;
+            else 
+            {
+                ans++;
+                mych=room[i][j];
+                dfs(i,j);
+                for(int ii=1;ii<=h;ii++){
+                for(int jj=1;jj<=w;jj++)
+                { cout<<tick[ii][jj]<<" ";}
+                cout<<endl;
+                }
+            }
+        }
+        printf("%d\n",ans);
+    }
+}

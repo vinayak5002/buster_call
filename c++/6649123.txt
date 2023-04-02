@@ -1,0 +1,101 @@
+#include<stdio.h>
+
+#define SIZE 40//n<=25から(and space for -1(nil))
+
+typedef struct
+{
+    int parent;
+    int left;
+    int right;
+}node_t;//nodeの構造体を定義
+
+node_t tree[SIZE];//二分木の実現配列
+
+void pre(int x)//preorder巡回
+{
+    if( x == -1 )//もし葉であれば返す
+    {
+        return;
+    }
+
+    printf(" %d", x);//先に節点出力して、左部分木巡回、右部分木巡回に進む
+    pre(tree[x].left);
+    pre(tree[x].right);
+}
+
+void in(int x)
+{
+    if( x == -1 )//もし葉であれば返す
+    {
+        return;
+    }
+
+    in(tree[x].left);//先に左部分木を巡回して、節点を出力して、右部分木巡回に進む
+    printf(" %d", x);
+    in(tree[x].right);
+}
+
+void post(int x)
+{
+    if( x == -1 )//もし葉であれば返す
+    {
+        return;
+    }
+    
+    post(tree[x].left);//先に左部分木を巡回して、右部分木巡回して、節点を出力する
+    post(tree[x].right);
+    printf(" %d", x);
+}
+
+void nodePrint(int root)//出力用関数
+{
+    printf("Preorder\n");
+    pre(root);
+    printf("\n");
+    printf("Inorder\n");
+    in(root);
+    printf("\n");
+    printf("Postorder\n");
+    post(root);
+    printf("\n");
+}
+
+int main(void)
+{
+    int i;//for loop
+    int n;//nodeの数量
+    int id, left, right, root;//idは処理中のnode、leftは左の子、rightは右の子、rootは根の値
+
+    scanf("%d", &n);//nを読み込む
+
+    for(i = 0; i < n; i++)//二分木の初期化
+    {
+        tree[i].parent = -1;
+        tree[i].right = -1;
+        tree[i].left = -1;//子の初期化は省略してもいい、入力を代入すると同じ結果(next line)
+    }
+
+    for(i = 0; i < n; i++)
+    {
+        scanf("%d %d %d", &id, &left, &right);//データを読み込む
+        tree[id].left = left;
+        tree[id].right = right;//子を代入
+        if(left != -1){//もし左の子があれば、左の子の親はid
+            tree[left].parent = id;
+        }
+        if(right != -1){//もし右の子があれば、右の子の親はid
+            tree[right].parent = id;
+        }
+    }
+
+    for(i = 0 ; i < n ; i++)//rootを探す
+    {
+        if(tree[i].parent == -1)
+        {
+            root = i;
+        }
+    }
+
+    nodePrint(root);//出力する
+
+}

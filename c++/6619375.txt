@@ -1,0 +1,443 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// template {{{
+using i32 = int;
+using u32 = unsigned int;
+using i64 = long long;
+using u64 = unsigned long long;
+
+#define  range(i, l, r) for (i64 i = (i64)(l); i < (i64)(r); (i) += 1)
+#define rrange(i, l, r) for (i64 i = (i64)(r) - 1; i >= (i64)(l); (i) -= 1)
+
+#define  whole(f, x, ...) ([&](decltype((x)) container) { return (f)(  begin(container),  end(container), ## __VA_ARGS__); })(x)
+#define rwhole(f, x, ...) ([&](decltype((x)) container) { return (f)( rbegin(container), rend(container), ## __VA_ARGS__); })(x)
+
+#define debug(x) cerr << "(" << __LINE__ << ")" << #x << ": " << (x) << endl
+
+constexpr i32 inf   = 1001001001;
+constexpr i64 infll = 1001001001001001001ll;
+
+constexpr i32 dx[] = {0, -1, 1, 0, -1, 1, -1, 1}; 
+constexpr i32 dy[] = {-1, 0, 0, 1, -1, -1, 1, 1};
+
+struct IoSetup { IoSetup(i32 x = 15){ cin.tie(0); ios::sync_with_stdio(0); cout << fixed << setprecision(x); cerr << fixed << setprecision(x); } } iosetup;
+
+template <typename T = i64> T input() { T x; cin >> x; return x; }
+
+template <typename T> ostream &operator<<(ostream &os, vector<T> &v) { range(i, 0, v.size()) { os << v[i] << (i + 1 != (int)v.size() ? " " : ""); } return os; } 
+template <typename T> istream &operator>>(istream &is, vector<T> &v) { for (T &in : v) is >> in; return is; }
+
+template <typename T1, typename T2> ostream &operator<<(ostream &os, pair<T1, T2> p) { os << "(" << p.first << ", " << p.second << ")"; return os; }
+template <typename T1, typename T2> istream &operator>>(istream &is, pair<T1, T2> &p) { is >> p.first >> p.second; return is; }
+
+template <typename T> vector<T> make_vector(size_t a, T b) { return vector<T>(a, b); }
+template <typename... Ts> auto make_vector(size_t a, Ts... ts) { return vector<decltype(make_vector(ts...))>(a, make_vector(ts...)); }
+
+template <typename T1, typename T2> inline bool chmax(T1 &a, T2 b) { return a < b && (a = b, true); }
+template <typename T1, typename T2> inline bool chmin(T1 &a, T2 b) { return a > b && (a = b, true); }
+// }}}
+
+// base
+namespace geometry {
+  using namespace std;
+  using real_number = long double;
+
+  const real_number PI = acosl(-1);
+
+  inline static real_number &eps() {
+    static real_number EPS = 1e-10;
+    return EPS;
+  }
+
+  static void set_eps(real_number EPS) {
+    eps() = EPS;
+  }
+
+  inline int sign(real_number r) {
+    set_eps(1e-10);
+    if (r < -eps()) return -1;
+    if (r > +eps()) return +1;
+    return 0;
+  }
+
+  inline bool equals(real_number r1, real_number r2) {
+    return sign(r1 - r2) == 0;
+  }
+}
+
+// point
+namespace geometry {
+  using point = complex< real_number >;
+  using points = vector< point >;
+
+  istream &operator>>(istream &is, point &p) {
+    real_number x, y;
+    is >> x >> y;
+    p = point(x, y);
+    return is;
+  }
+
+  ostream &operator<<(ostream &os, const point &p) {
+    return os << p.real() << " " << p.imag();
+  }
+
+  point operator*(const point &p, const real_number &k) {
+    return point(p.real() * k, p.imag() * k);
+  }
+
+  point rotate(const real_number &theta, const point &p) {
+    return point(cos(theta) * p.real() + sin(-theta) * p.imag(),
+                 sin(theta) * p.real() + cos(-theta) * p.imag());
+  }
+
+  bool equals(const point &a, const point &b) {
+    return equals(a.real(), b.real()) and equals(a.imag(), b.imag());
+  }
+}
+
+using geometry::operator>>;
+using geometry::operator<<;
+
+// angle
+namespace geometry {
+  real_number radian_to_degree(real_number theta) {
+    return theta * 180.0 / PI;
+  }
+
+  real_number degree_to_radian(const real_number deg) {
+    return deg * PI / 180.0;
+  }
+
+  real_number get_angle(const point &a, const point &b, const point &c) {
+    const point u(a - b), v(c - b);
+    auto fix = [](real_number theta) {
+      if (theta < 0) theta += 2 * PI;
+      return theta;
+    };
+    real_number alpha = fix(atan2(u.imag(), u.real()));
+    real_number beta  = fix(atan2(v.imag(), v.real()));
+    return fix(beta - alpha);
+  }
+
+  real_number get_smaller_angle(const point &a, const point &b, const point &c) {
+    const point v(b - a), w(c - b);
+    real_number alpha = atan2(v.imag(), v.real());
+    real_number beta = atan2(w.imag(), w.real());
+    if (alpha > beta) swap(alpha, beta);
+    real_number theta = beta - alpha;
+    return min(theta, 2 * PI - theta);
+  }
+}
+
+// polygon
+namespace geometry {
+  using polygon = vector< point >;
+  using polygons = vector< polygon >;
+}
+
+namespace geometry {
+  bool compare_x(const point &a, const point &b) {
+    return !equals(a.real(), b.real()) ? a.real() < b.real() : a.imag() < b.imag();
+  }
+
+  bool compare_y(const point &a, const point &b) {
+    return !equals(a.imag(), b.imag()) ? a.imag() < b.imag() : a.real() < b.real();
+  }
+}
+
+// product
+namespace geometry {
+  real_number cross(const point &a, const point &b) {
+    return a.real() * b.imag() - a.imag() * b.real();
+  }
+
+  real_number dot(const point &a, const point &b) {
+    return a.real() * b.real() + a.imag() * b.imag();
+  }
+}
+
+// convex_hull
+namespace geometry {
+  pair< polygon, vector< int > > convex_hull_with_index(const points &pts) {
+    int n = pts.size();
+    // if (n <= 2) {
+    //   vector< int > idxs(n);
+    //   iota(idxs.begin(), idxs.end(), 0);
+    //   return {pts, idxs};
+    // }
+
+    vector< pair< point, int > > ps;
+    ps.reserve(n);
+    for (int i = 0; i < n; i++) {
+      ps.emplace_back(pts[i], i);
+    }
+
+    auto extension_compare_x = [](const pair<point, int> &a, const pair<point, int> &b) {
+      return compare_x(a.first, b.first);
+    };
+    sort(ps.begin(), ps.end(), extension_compare_x);
+
+    vector< int > idxs(2 * n);
+    polygon poly(2 * n);
+    int k = 0, i = 0;
+
+    auto check = [&](int i) {
+      return sign(cross(poly[k - 1] - poly[k - 2], ps[i].first - poly[k - 1])) == -1;
+    };
+
+    while (i < n) {
+      while (k >= 2 and check(i)) k--;
+
+      tie(poly[k], idxs[k]) = ps[i];
+      k++; i++;
+    }
+
+    i = n - 2;
+    int t = k + 1;
+    while (i >= 0) {
+      while (k >= t and check(i)) k--;
+
+      tie(poly[k], idxs[k]) = ps[i];
+      k++; i--;
+    }
+
+    poly.resize(k - 1);
+    idxs.resize(k - 1);
+    return {poly, idxs};
+  }
+
+  polygon convex_hull(points pts) {
+    int n = pts.size(), k = 0;
+    if (n <= 2) return pts;
+
+    sort(pts.begin(), pts.end(), compare_x);
+    polygon res(2 * n);
+
+    auto check = [&](int i) {
+      return sign(cross(res[k - 1] - res[k - 2], pts[i] - res[k - 1])) == -1;
+    };
+
+    for (int i = 0; i < n; res[k++] = pts[i++]) {
+      while (k >= 2 and check(i)) --k;
+    }
+
+    for (int i = n - 2, t = k + 1; i >= 0; res[k++] = pts[i--]) {
+      while (k >= t and check(i)) --k;
+    }
+
+    res.resize(k - 1);
+    return res;
+  }
+}
+
+// line 
+namespace geometry {
+  struct line {
+    point a, b;
+
+    line() = default;
+    line(point a, point b) : a(a), b(b) {}
+  };
+
+  using lines = vector< line >;
+}
+
+// segment
+namespace geometry {
+  struct segment : line {
+    segment() = default;
+    using line::line;
+  };
+
+  using segments = vector< segment >;
+}
+
+// ccw
+namespace geometry {
+  constexpr int COUNTER_CLOCKWISE = +1;
+  constexpr int CLOCKWISE         = -1;
+  constexpr int ONLINE_BACK       = +2; // c-a-b
+  constexpr int ONLINE_FRONT      = -2; // a-b-c
+  constexpr int ON_SEGMENT        =  0; // a-c-b
+  int ccw(const point &a, point b, point c) {
+    b = b - a, c = c - a;
+    if (sign(cross(b, c)) == +1) return COUNTER_CLOCKWISE;
+    if (sign(cross(b, c)) == -1) return CLOCKWISE;
+    if (sign(dot(b, c)) == -1) return ONLINE_BACK;
+    if (norm(b) < norm(c)) return ONLINE_FRONT;
+    return ON_SEGMENT;
+  }
+}
+
+// intersect
+namespace geometry {
+  bool is_intersect(const segment &s1, const segment &s2) {
+    return ccw(s1.a, s1.b, s2.a) * ccw(s1.a, s1.b, s2.b) <= 0 &&
+           ccw(s2.a, s2.b, s1.a) * ccw(s2.a, s2.b, s1.b) <= 0;
+  }
+}
+
+// projection
+namespace geometry {
+  point projection(const line &l, const point &p) {
+    real_number t = dot(p - l.a, l.a - l.b) / norm(l.a - l.b);
+    return l.a + (l.a - l.b) * t;
+  }
+}
+
+namespace geometry {
+  real_number distance_sp(const segment &s, const point &p) {
+    point pr = projection(s, p);
+    if (ccw(s.a, s.b, pr) == 0) return abs(pr - p);
+    return min(abs(s.a - p), abs(s.b - p));
+  }
+}
+
+// distance
+namespace geometry {
+  real_number distance_ss(const segment &s1, const segment &s2) {
+    if (is_intersect(s1, s2)) return 0;
+    real_number r1 = distance_sp(s1, s2.a);
+    real_number r2 = distance_sp(s1, s2.b);
+    real_number r3 = distance_sp(s2, s1.a);
+    real_number r4 = distance_sp(s2, s1.b);
+    return min({r1, r2, r3, r4});
+  }
+}
+
+namespace geometry {
+  /// O(N)
+  /// 0 : point out the polygon
+  /// 1 : point on the polygon edge
+  /// 2 : point in the polygon
+  constexpr int OUT     = 0;
+  constexpr int ON_EDGE = 1;
+  constexpr int IN      = 2;
+  int contains(const polygon &poly, const point &p) {
+    bool in = false;
+    int n = poly.size();
+    for (int i = 0; i < n; ++i) {
+      int j = (i + 1 == n ? 0 : i + 1);
+      point a = poly[i] - p, b = poly[j] - p;
+      if (a.imag() > b.imag()) swap(a, b);
+      if (a.imag() <= 0 && 0 < b.imag() && cross(a, b) < 0) in = !in;
+      if (sign(cross(a, b)) == 0 && sign(dot(a, b)) <= 0) {
+        return ON_EDGE;
+      }
+    }
+
+    return in ? IN : OUT;
+  }
+}
+using namespace geometry;
+
+void solve(int n) {
+  polygons polys(n);
+  vector< int > hs(n);
+
+  range(i, 0, n) {
+    int k = input();
+    cin >> hs[i];
+
+    polygon &poly = polys[i];
+    range(j, 0, k) {
+      int x = input(), y = input();
+      poly.emplace_back(point(x, y));
+    }
+  }
+
+  int theta = input(), phy = input();
+  point e = rotate(degree_to_radian(theta), point(-1, 0));
+
+  range(i, 0, n) {
+    points pts = polys[i];
+
+    real_number x = hs[i] / tanl(degree_to_radian(phy));
+    for (auto &p: polys[i]) {
+      pts.emplace_back(e * x + p);
+    }
+
+    polys[i] = convex_hull(pts);
+  }
+      
+  { // s
+    int x = input(), y = input();
+    point p(x, y);
+    polys.emplace_back();
+    polys.back().emplace_back(p);
+  }
+  { // g
+    int x = input(), y = input();
+    point p(x, y);
+    polys.emplace_back();
+    polys.back().emplace_back(p);
+  }
+
+  int s = polys.size() - 2;
+  int g = polys.size() - 1;
+  int V = polys.size();;
+  auto ds = make_vector(V, V, (real_number)10101010);
+  range(i, 0, V) range(j, 0, i + 1) {
+    const auto p1 = polys[i];
+    const auto p2 = polys[j];
+    if (i == j) {
+      ds[i][j] = ds[j][i] = 0;
+      continue;
+    }
+    
+    if (contains(p1, p2.front()) or contains(p2, p1.front())) {
+      ds[i][j] = ds[j][i] = 0;
+      continue;
+    }
+
+    if (i >= s) continue;
+
+    range(u, 0, p1.size()) {
+      segment s1(p1[u], p1[(u+1)%p1.size()]);
+      range(v, 0, p2.size()) {
+        segment s2(p2[v], p2[(v+1)%p2.size()]);
+        real_number d = distance_ss(s1, s2);
+        chmin(ds[i][j], d);
+        chmin(ds[j][i], d);
+      }
+    }
+  }
+
+  range(i, 0, V - 2) {
+    const auto p = polys[i];
+
+    if (contains(p, polys[s].front())) {
+      ds[s][i] = ds[i][s] = 0;
+    }
+    if (contains(p, polys[g].front())) {
+      ds[g][i] = ds[i][g] = 0;
+    }
+
+    range(u, 0, p.size()) {
+      segment seg(p[u], p[(u+1)%p.size()]);
+      real_number sd = distance_sp(seg, polys[s].front());
+      chmin(ds[s][i], sd);
+      chmin(ds[i][s], sd);
+
+      real_number gd = distance_sp(seg, polys[g].front());
+      chmin(ds[g][i], gd);
+      chmin(ds[i][g], gd);
+    }
+  }
+
+  range(k, 0, V) range(i, 0, V) range(j, 0, V) {
+    chmin(ds[i][j], ds[i][k] + ds[k][j]);
+  }
+
+  cout << ds[s][g] << endl;
+}
+
+signed main() {
+  int n;
+
+  while (cin >> n, n) {
+    solve(n);
+  }
+}
+

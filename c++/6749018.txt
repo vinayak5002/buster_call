@@ -1,0 +1,64 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+template<class T> inline bool chmin(T& a,T b){
+    if(a > b){
+        a = b;
+        return true;
+    }
+    else return false;
+}
+
+int main(){
+    int n, k;
+    cin >> n >> k;
+    vector<pair<long long, long long> > taxi(n);
+    for(int i = 0;i < n;++i){
+        long long c, r;
+        cin >> c >> r;
+        taxi[i] = make_pair(c, r);
+    }
+    vector<vector<int>> g(n);
+    for(int i = 0;i < k;++i){
+        int a, b;
+        cin >> a >> b;
+        --a;--b;
+        g[a].push_back(b);
+        g[b].push_back(a);
+    }
+    const long long INF = 1LL<<60;
+    vector<long long> cost(n, INF);
+    priority_queue<pair<long long, int>, 
+                        vector<pair<long long,int> >,
+                            greater<pair<long long,int> > > que;
+    que.push(make_pair(0, 0));
+    cost[0] = 0;
+    while(!que.empty()){
+        int v = que.top().second;
+        long long d = que.top().first;
+        que.pop();
+        if(d > cost[v]) continue;
+        queue<int> nque;
+        vector<int> dist(n, -1);
+        nque.push(v);
+        dist[v] = 0;
+
+        while(!nque.empty()){
+            int mv = nque.front();
+            nque.pop();
+            for(auto nx: g[mv]){
+                if(dist[nx] != -1) continue;
+                dist[nx] = dist[mv] + 1;
+                if(dist[nx] > taxi[v].second) continue;
+                if(chmin(cost[nx], cost[v] + taxi[v].first)){
+                    que.push(make_pair(cost[nx], nx));
+                }
+                nque.push(nx);
+            }
+        }
+
+    }
+
+    cout << cost[n-1] << endl;
+}

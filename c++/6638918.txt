@@ -1,0 +1,30 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+using Int = int_fast64_t;
+
+int main()
+{
+	int N; cin >> N;
+	Int D, K; cin >> D >> K;
+	vector<pair<Int, int>> SP(N); for (auto& [S, P] : SP) cin >> P >> S;
+	sort(SP.begin(), SP.end());
+	vector<vector<int>> dp(N, vector<int>(3, 0));
+	dp[0][SP[0].second] = 1;
+	for (int i = 1; i < N; ++i) {
+		auto [Si, Pi] = SP[i];
+		dp[i] = dp[i - 1];
+		for (int j = dp[i][Pi]; j < i; ++j) {
+			if (SP[j].first + D + K * dp[j][3 - Pi] < SP[i].first && dp[i][Pi] < dp[j][3 - Pi]) {
+				dp[i][Pi] = dp[j][3 - Pi];
+			}
+		}
+		++dp[i][Pi];
+	}
+	cout << max(dp.back()[1], dp.back()[2]) << endl;
+	return 0;
+}
+

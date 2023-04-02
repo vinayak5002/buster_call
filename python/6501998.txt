@@ -1,0 +1,164 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
+public class Main {
+	public static void main(String[] args) throws Exception {
+		// 入力準備
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		// 配列の宣言
+		//ary[0] = 頂 ary[1] = 下 ary[2] = 右 ary[3] = 上 ary[4] = 左 ary[5] = 底
+		int[] ary1 = new int[6];
+		String str = br.readLine();
+		for (int i = 0; i < ary1.length; i++) {
+			ary1[i] = Integer.parseInt(str.split(" ")[i]);
+		}
+		int[] distinct = new int[6];
+		int cnt = 0;
+		for (int i = 0; i < ary1.length; i++) {
+			boolean isDistinct = true;
+			for (int j = 0; j < ary1.length; j++) {
+				if (i == j) {
+
+				} else if (ary1[i] == ary1[j]) {
+					isDistinct = false;
+					break;
+				}
+			}
+			if (isDistinct) {
+				distinct[cnt] = ary1[i];
+				cnt++;
+			}
+		}
+		if (distinct[0] != 0 && distinct[1] == 0) {
+			System.out.println("Yes");
+			return;
+		}
+
+		int[] ary2 = new int[6];
+		str = br.readLine();
+		for (int i = 0; i < ary2.length; i++) {
+			ary2[i] = Integer.parseInt(str.split(" ")[i]);
+		}
+
+		// 対象変数の宣言
+		int up = 0;
+		int front = 0;
+
+		for (int i = 0; i < ary1.length; i++) {
+			boolean distinctFlg = false;
+			for (int j = 0; j < ary2.length; j++) {
+				if (ary1[i] == ary2[j]) {
+					if (i == 0) {
+						up = j;
+					}
+					distinctFlg = true;
+					break;
+				}
+			}
+			if (!distinctFlg) {
+				System.out.println("No");
+				return;
+			}
+		}
+
+		int[] newAry = changeUp(ary2, up);
+
+		for (int i = 0; i < newAry.length; i++) {
+			if (ary1[1] == newAry[i]) {
+				front = i;
+				break;
+			}
+		}
+		newAry = changeFront(newAry, front);
+
+		for (int i = 0; i < ary1.length / 2; i++) {
+			if (ary1[i] != newAry[i]) {
+				System.out.println("No");
+				return;
+			}
+		}
+
+		System.out.println("Yes");
+	}
+
+	public static int[] changeUp(int[] ary, int num) {
+		int tmp;
+		switch (num) {
+		case 1:
+			// ary[底]->ary[下] ary[下]→ary[頂] ary[頂]→ary[上] ary[上]->ary[底]
+			tmp = ary[5];
+			ary[5] = ary[4];
+			ary[4] = ary[0];
+			ary[0] = ary[1];
+			ary[1] = tmp;
+			break;
+		case 2:
+			// ary[底]->ary[右] ary[右]→ary[頂] ary[頂]→ary[左] ary[右]->ary[左]
+			tmp = ary[5];
+			ary[5] = ary[3];
+			ary[3] = ary[0];
+			ary[0] = ary[2];
+			ary[2] = tmp;
+			break;
+		case 3:
+			// ary[底]->ary[左] ary[左]→ary[頂] ary[頂]→ary[右] ary[右]->ary[底]
+			tmp = ary[5];
+			ary[5] = ary[2];
+			ary[2] = ary[0];
+			ary[0] = ary[3];
+			ary[3] = tmp;
+			break;
+		case 4:
+			// ary[頂]->ary[上] ary[上]→ary[底] ary[底]→ary[下] ary[下]->ary[頂]
+			tmp = ary[5];
+			ary[5] = ary[1];
+			ary[1] = ary[0];
+			ary[0] = ary[4];
+			ary[4] = tmp;
+			break;
+		case 5:
+			// ary[底]->ary[頂] ary[頂]m->ary[底] ary[上]→ary[下] ary[下]→ary[上]
+			tmp = ary[5];
+			ary[5] = ary[0];
+			ary[0] = tmp;
+			tmp = ary[1];
+			ary[1] = ary[4];
+			ary[4] = tmp;
+			break;
+		}
+		return ary;
+	}
+
+	public static int[] changeFront(int[] ary, int num) {
+		int tmp;
+		switch (num) {
+		case 2:
+			// ary[下]->ary[左] ary[左]→ary[上] ary[上]→ary[右] ary[右]->ary[下]
+			tmp = ary[1];
+			ary[1] = ary[2];
+			ary[2] = ary[4];
+			ary[4] = ary[3];
+			ary[3] = tmp;
+			break;
+		case 3:
+			// ary[左]->ary[下] ary[下]→ary[右] ary[右]→ary[上] ary[上]->ary[左]
+			tmp = ary[1];
+			ary[1] = ary[3];
+			ary[3] = ary[4];
+			ary[4] = ary[2];
+			ary[2] = tmp;
+			break;
+		case 4:
+			// ary[左]->ary[右] ary[右]→ary[左] ary[下]→ary[上] ary[上]->ary[下]
+			tmp = ary[2];
+			ary[2] = ary[3];
+			ary[3] = tmp;
+			tmp = ary[1];
+			ary[1] = ary[4];
+			ary[4] = tmp;
+			break;
+		}
+		return ary;
+	}
+}
+

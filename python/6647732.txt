@@ -1,0 +1,15 @@
+import Data.Maybe ( fromJust )
+import qualified Data.ByteString.Char8 as B
+import qualified Data.IntMap as IM
+import qualified Data.List as L
+
+main :: IO ()
+main = getLine >> B.getLine >>=
+  putStrLn . unwords . map show
+  . csort . map (fst . fromJust . B.readInt) . B.words
+
+csort :: [IM.Key] -> [IM.Key]
+csort as = concatMap (\(i,v) -> replicate v i) (L.sortOn fst pairs)
+  where pairs = IM.toList $ generateIM as
+generateIM = foldr (flip (IM.insertWith (+)) 1) IM.empty
+

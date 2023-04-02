@@ -1,0 +1,79 @@
+#pragma GCC optimize("Ofast")
+#include <bits/stdc++.h>
+using namespace std;
+#ifdef __LOCAL
+ #include <debug>
+#else
+ #define debug(...) void(0)
+#endif
+
+#define REP(i,n) for(int i=0;i<(n);i++)
+#define ALL(v) v.begin(),v.end()
+
+template<typename T>
+istream& operator>>(istream&is,vector<T>&v){
+  for(T&p:v)is>>p;
+  return is;
+}
+template<typename T>
+ostream& operator<<(ostream&os,const vector<T>&v){
+  if(&os==&cerr)os<<"[";
+  for(int i=0;i<v.size();i++){
+    os<<v[i];
+    if(i+1<v.size())os<<(&os==&cerr?",":" ");
+  }
+  if(&os==&cerr)os<<"]";
+  return os;
+}
+
+bool in(const long long S,const int a){
+  return (S>>a)&1;
+}
+
+using ld=long double;
+
+int main(){
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  cout<<fixed<<setprecision(12);
+
+  int n,m,p;cin>>n>>m>>p;
+  ld P=p/100.0;
+  vector<ld> f(1<<n,1);
+  //f(S):生存辺の端点集合が S 以内の確率
+
+  REP(_,m){
+    int u,v;cin>>u>>v;u--;v--;
+    REP(S,1<<n)if(!in(S,u) or !in(S,v))f[S]*=P;
+  }
+
+  auto g=f;
+  //g(S):生存辺の端点集合がちょうど S の確率
+  REP(k,n){
+    REP(S,1<<n){
+      if(in(S,k)){
+        g[S]-=g[S-(1<<k)];
+      }
+    }
+  }
+
+  const int ALL=(1<<n)-1;
+
+  vector<ld> h(1<<n,0);
+  REP(S,1<<n){
+    if(!in(S,0))continue;
+    if(g[ALL-S]!=0)h[S]=g[S]*f[ALL-S]/g[ALL-S];
+    else h[S]=g[S];
+  }
+  debug(h);
+
+  //h(S):0の連結成分がちょうど S の確率
+  REP(S,1<<n){
+    if(!in(S,0))continue;
+    for(int T=(S-1)&S;T>0;(--T)&=S){
+      if(!in(T,0))continue;
+      h[S]-=h[T]*(g[S^T]/f[S^T]);
+    }
+  }
+  cout<<h[ALL]<<endl;
+}

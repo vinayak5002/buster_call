@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void my_bubble_sort(int n, vector<string> &card , vector<int> A){
+    int flag = 1;
+    int j=0;
+    while(flag){
+        flag=0;
+        for(int i=n-1; i>j; i--){
+            if(A.at(i)<A.at(i-1)){
+                int buf;
+                buf = A.at(i);
+                A.at(i)=A.at(i-1);
+                A.at(i-1)=buf;
+                string bufst;
+                bufst = card.at(i);
+                card.at(i)=card.at(i-1);
+                card.at(i-1)=bufst;
+                flag=1;
+            }
+        }
+        j++;
+    }
+}
+void my_selection_sort(int n, vector<string> &card , vector<int> A){
+    int minv, buf;
+    for(int i=0; i<n-1; i++){
+        minv = i;
+        for(int j=i+1; j<n; j++){
+            if(A.at(minv)>A.at(j)){
+                minv = j;
+            }
+        }
+        if(minv!=i){
+          buf = A.at(i);
+          A.at(i) = A.at(minv);
+          A.at(minv) = buf;
+          string bufst;
+          bufst = card.at(i);
+          card.at(i) = card.at(minv);
+          card.at(minv) = bufst;
+        }
+    }
+}
+
+bool stable_judge(int n, vector<string> card, vector<string> card2){
+	  for(int i=0; i<n; i++){
+	      if(card2.at(i).at(0)!=card.at(i).at(0)) return false;
+	  }
+	  return true;
+}
+
+int main(){
+    int n;
+    cin >> n;
+    vector<string> card(n), card_bub(n);
+    vector<int> num(n); 
+    for(int i=0; i<n; i++){
+        cin >> card.at(i);
+        num.at(i) = card.at(i).at(1) - '0';
+    } 
+    for(int i=0; i<n; i++) card_bub.at(i) = card.at(i);
+    my_bubble_sort(n, card_bub, num);
+    
+    for(int i=0; i<n; i++){
+      cout << card_bub.at(i);
+      if(i!=n-1) cout << " ";
+    }
+    cout << endl;
+    cout << "Stable" << endl;
+    my_selection_sort(n, card, num);
+    for(int i=0; i<n; i++){
+      cout << card.at(i);
+      if(i!=n-1) cout << " ";
+    }
+    cout << endl;
+    if (stable_judge(n, card, card_bub)) cout << "Stable" << endl;
+    else cout << "Not stable" << endl;
+    
+    
+    
+    
+}

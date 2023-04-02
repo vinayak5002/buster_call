@@ -1,0 +1,85 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// 环形链表（双向链表）
+struct Node {
+    int key;
+    Node *prev, *next;
+};
+
+Node* nil;
+
+void init() {
+    nil = (Node*)malloc(sizeof(Node));
+    nil->next = nil;
+    nil->prev = nil;
+}
+
+void insert(int key) {  // 添加节点到开头
+    Node* x = (Node*)malloc(sizeof(Node));
+    x->key = key;
+    x->next = nil->next;
+    nil->next->prev = x;
+    nil->next = x;
+    x->prev = nil;
+}
+
+Node* listSearch(int key) {
+    Node* now = nil->next;
+    while (now->next != nil && now->key != key) {
+        now = now->next;
+    }
+    return now;
+}
+
+void deleteNode(Node* n) {
+    if (n == nil) return;  // 一般是特殊情况写在if里面
+    n->prev->next = n->next;
+    n->next->prev = n->prev;
+    free(n);
+}
+void deleteKey(int key) {
+    deleteNode(listSearch(key));
+}
+
+void deleteFirst() {
+    deleteNode(nil->next);
+}
+
+void deleteLast() {
+    deleteNode(nil->prev);
+}
+
+int main()
+{
+    int n, key;
+    char O[20];
+
+    init();
+
+    scanf("%d", &n);
+
+    for (int i = 0; i < n; ++i) {
+        scanf("%s%d", O, &key);
+        if (O[0] == 'i') {
+            insert(key);
+        } else if (O[6] == 'F') {
+            deleteFirst();
+        } else if (O[6] == 'L') {
+            deleteLast();
+        } else deleteKey(key);
+    }
+
+    Node* now = nil->next;
+    int s = 0;
+
+    while (1) {
+        if (now == nil) break;
+        if (s++ > 0) printf(" ");
+        printf("%d", now->key);
+        now = now->next;
+    }
+    printf("\n");
+
+    return 0;
+}

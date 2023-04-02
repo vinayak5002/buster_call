@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int N, M;
+        cin >> N >> M;
+        if (N == 0) break;
+        vector<ll> s(N), d(M);
+        for (auto& x : s) cin >> x;
+        for (auto& x : d) cin >> x;
+        sort(all(d));
+        vector<vector<ll>> dp(1<<N, vector<ll>(M+1, 1e18));
+        ll sum = 0;
+        rep(j,0,M+1) {
+            dp[0][j] = sum;
+            if (j < M) sum += d[j];
+        }
+        rep(S,0,1<<N) {
+            dp[S][0] = 0;
+            ll sum = 0;
+            rep(i,0,N) {
+                if (S>>i&1) sum += s[i];
+            }
+            rep(i,0,N) {
+                if (S>>i&1) continue;
+                sum += s[i];
+                vector<ll> cumcost(M+1);
+                rep(j,0,M) cumcost[j+1] = cumcost[j] + abs(d[j]-sum);
+                rep(j,1,M+1) {
+                    rep(k,0,j+1) {
+                        chmin(dp[S|(1<<i)][j], dp[S][k] + cumcost[j] - cumcost[k]);
+                    }
+                }
+                sum -= s[i];
+            }
+        }
+        cout << dp.back()[M] << endl;
+    }
+}

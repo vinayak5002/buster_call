@@ -1,0 +1,139 @@
+#include<bits/stdc++.h>
+
+
+#define pb push_back
+
+#define all(x) begin(x), end(x)
+#define sz(x) (int)(x).size()
+#define fori(i,a,b) for(int i=(a);i<(b);i++)
+#define fore(e,v) for(auto& e : v)
+#define forb(i,a,b) for(int i=(a-1);i>=(b);i--)
+#define fastio ios_base::sync_with_stdio(false);cin.tie(0);cout.tie(0)
+#define order(v) sort(all(v))
+
+
+#define rt(_t,_x) _t _x; cin >> _x;
+#define ri(_x) rt(int, _x)
+#define rd(_x) rt(double, _x)
+#define rs(_x) rt(string, _x)
+#define rl(_x) rt(ll, _x)
+#define ru(_x) rt(ull, _x)
+#define rvt(_t, _x, _n) vector<_t> _x(_n); fori(_i,0,_n) {rt(_t, _xx) _x[_i] = _xx;}
+#define rvi(_x, _n) rvt(int, _x, _n)
+#define rvd(_x, _n) rvt(double, _x, _n)
+#define rvs(_x, _n) rvt(string, _x, _n)
+#define rmt(_t, _x, _n, _m) vector<vector<_t>> _x(_n); fori(_ii,0,_n){ rvt(_t, _xxx, _m) _x[_ii] = _xxx;}
+#define rmi(_x, _n, _m) rmt(int, _x, _n, _m)
+#define rmd(_x, _n, _m) rmt(double, _x, _n, _m)
+#define rms(_x, _n, _m) rmt(string, _x, _n, _m)
+#define runtil(_t, _x, _xx, _f) _t _x; cin>>_x; while(_x != _xx) {_f cin>>_x;}
+#define rtokens(_t, _x) _t _x; while(cin>>_x)
+#define rlines(_x) str _x; while(getline(cin, _x))
+#define rchars(_x) char _x; while(cin.get(_x))
+#define pr(_x) cout << _x;
+#define pv(_x, _s) for(auto const& _e : _x) cout << _e << _s;
+#define pm(_x, _ns, _ms) for(auto const& _n : _x) {for(auto const& _m : _n) cout << _m << _ms; cout << _ns;}
+#define MIN(a,b) (a<b) ? a : b
+#define MAX(a,b) (a>b) ? a : b
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+typedef unsigned long long ull;
+typedef string str;
+struct pii{int x, y;};
+struct pll{ll x, y;};
+typedef vector<int> vi;
+typedef vector<ll> vll;
+typedef vector<char> vc;
+typedef vector<bool> vb;
+typedef vector<bool> vb;
+typedef vector<double> vd;
+typedef vector<str> vs; 
+
+#define kmax(x,y) x = max(x, y)
+#define kmin(x,y) x = min(x, y)
+
+
+//q
+
+
+
+
+/*
+
+    Este problema es como TSP solo ue no es un grafo completamente
+    conectado. Frente a la falta de arista, se pone un numero grandes
+    INF para hacer ue esa opcion sea inviable de escoger.
+
+    Después de eso, se resuleve el problema como si fuese TSP,
+    teniendo en cuenta que se puede empezar de cualqier nodo, se
+    repite el TSP para posible nodo inicial.
+
+    El algoritmo para hacer TSP en tiempo O(n^2*2^n) consiste en
+    iterar por todos los subconjuntos posibles. Para cada subconjunto
+    se prueban con todos los elementos y para cada elemento se 
+    prueba con todo el resto.
+
+    Abajo se puede ver dos intentos, el primero es top-down
+    el segundo es botton up (dentro del main), al final me quede
+    con el botton up porque daba mejores resultados. 
+
+*/
+
+
+#define N 10
+#define INF 1e7
+int n;
+int dp[N][1<<N];
+int cost[N][N];
+
+/* Intento recursivo con memoization: menos correctos*/
+int solve(int i, int mask){
+    if(i == n) return 0;
+    if(mask == ((1<<n)-1)) return (cost[i][0] < INF) ? cost[i][0] : INF;
+    if(dp[i][mask]) return dp[i][mask];
+    dp[i][mask] = INT_MAX;
+    fori(j, 0, n) if(!(mask & 1<<j)){
+        kmin(dp[i][mask], cost[i][j] + solve(j, mask | 1<<j));
+    }
+    return dp[i][mask];
+}
+
+
+int main(int argc, char const *argv[]) {
+    int t = 1;
+    int k;
+    fori(_t, 0, t){
+        cin >> n >> k;
+        fori(i, 0, n) fori(j, 0, n) cost[i][j] = INF;
+        fori(i, 0, k){
+            int a, b, d;
+            cin >> a >> b >> d;
+            cost[a][b] = d;
+        }
+        fori(i, 0, n) cost[i][i] = 0;
+        //memset(dp, 0, sizeof(int)*n*(1<<n));
+        
+        forb(m, (1<<n), 0){
+            fori(i, 0, n){
+                if(m == ((1<<n)-1)){
+                    dp[i][m] = (cost[i][0] < INF) ? cost[i][0] : INF;
+                    continue;
+                }
+                dp[i][m] = INT_MAX;
+                fori(j, 0, n) if(!(m & 1<<j)){
+                    kmin(dp[i][m], cost[i][j] + dp[j][m | 1<<j]);
+                }
+            }
+        }
+
+        int best = INF;
+        fori(i, 0, n) kmin(best, dp[i][0]);
+        //fori(i, 0, n) kmin(best, solve(i, i<<1));
+        if(best >= INF) cout << -1 << endl;
+        else cout << best - 1<< endl;
+    }
+    return 0;
+}

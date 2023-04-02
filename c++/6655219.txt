@@ -1,0 +1,99 @@
+#include <stdio.h>
+# define N 25
+
+
+
+typedef struct{
+  int parent;
+  int left;
+  int right;
+}node;
+
+
+
+node no[N]={0};
+int H[N];
+
+int getDepth(int nu){
+  int a =0;
+  while(no[nu].parent!=-1){
+    nu =no[nu].parent;
+    a++;
+  }
+  return a;
+}
+
+int getDegree(int nu){
+  if(no[nu].left==-1&&no[nu].right==-1){
+    return 0;
+  }
+  if(no[nu].left!=-1&&no[nu].right!=-1){
+    return 2;
+  }
+  return 1;
+}
+
+int getSibling(int nu){
+  int parent;
+  parent = no[nu].parent;
+  if(parent==-1){
+    return -1;
+  }
+  if(no[parent].right==nu){
+    return no[parent].left;
+  }
+  return no[parent].right;
+}
+
+int getHeight(int nu){
+  int h1=0,h2=0;
+  if(no[nu].right!=-1){
+    h1=getHeight(no[nu].right)+1;
+  }
+  if(no[nu].left!=-1){
+    h2=getHeight(no[nu].left)+1;
+  }
+  return (h1>h2) ? h1:h2;
+}
+
+void show(int nu){
+  int parent = no[nu].parent;
+  if(parent==-1){
+    printf("node %d: parent = %d, sibling = %d, degree = %d, depth = %d, height = %d, root\n", nu, no[nu].parent, getSibling(nu), getDegree(nu), getDepth(nu), getHeight(nu));
+  }
+  else if(no[nu].left==-1&&no[nu].right==-1){
+    printf("node %d: parent = %d, sibling = %d, degree = %d, depth = %d, height = %d, leaf\n", nu, no[nu].parent, getSibling(nu), getDegree(nu), getDepth(nu), getHeight(nu));
+  }
+  else {
+      printf("node %d: parent = %d, sibling = %d, degree = %d, depth = %d, height = %d, internal node\n", nu, no[nu].parent, getSibling(nu), getDegree(nu), getDepth(nu), getHeight(nu));
+  }
+  return;
+}
+
+int main(void){
+  int n;
+  int i,t;
+  node int_node;
+  int_node.parent=int_node.right=int_node.left=-1;
+  for(i=0;i<N;i++){
+    no[i] = int_node;
+}
+
+  scanf("%d",&n);
+  for(i=0;i<n;i++){
+    scanf("%d",&t);
+    scanf("%d",&no[t].left);
+    scanf("%d",&no[t].right);
+    if(no[t].left!=-1){
+      no[no[t].left].parent=t;
+    }
+    if(no[t].right!=-1){
+      no[no[t].right].parent=t;
+    }
+  }
+  for(i=0;i<n;i++){
+    getHeight(i);
+    show(i);
+  }
+  return 0;
+}

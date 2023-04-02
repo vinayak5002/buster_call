@@ -1,0 +1,25 @@
+N, W = map(int, input().split())
+info = [list(map(int, input().split())) for _ in range(N)]
+
+dp = [[1 << 60] * (100 * 100 + 1) for _ in range(N + 1)]
+dp[0][0] = 0
+
+for i in range(N):
+    
+    for j in range(100 * 100 + 1):
+        
+        if dp[i][j] == 1 << 60:
+            continue
+        
+        dp[i + 1][j] = min(dp[i + 1][j], dp[i][j])
+        
+        if dp[i][j] + info[i][1] <= W:
+            v = info[i][0]
+            dp[i + 1][j + v] = min(dp[i + 1][j + v], dp[i][j] + info[i][1])
+
+
+for i in range(100 * 100, -1, -1):
+    
+    if dp[N][i] < 1 << 59:
+        print(i)
+        exit()

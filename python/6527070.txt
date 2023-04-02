@@ -1,0 +1,69 @@
+import sys
+from math import inf
+
+class segtree:
+    def __init__(self, n):
+        self.n = n
+        m = 1
+        while m < n: m *= 2
+        self.m = m
+        self.xs = [0] * (2*m - 1)
+    def incr(self, idx, val):
+        k = self.m-1+idx
+        self.xs[k] += val
+        while k >= 1:
+            k = (k-1)//2
+            self.xs[k] = min(self.xs[k*2+1], self.xs[k*2+2])
+    def getmin(self, s, t):
+        def _getmin(node, lft, rht):
+            if t <= lft or rht <= s: return inf
+            if s <= lft and rht <= t: return self.xs[node]
+            mid = (lft+rht)//2
+            return min(
+                _getmin(node*2+1, lft, mid),
+                _getmin(node*2+2, mid, rht),
+            )
+        return _getmin(0, 0, self.m)
+
+def main(io_i):
+    rxs = lambda: map(int, io_i.readline().split())
+    N, K = rxs()
+    As = [*rxs()]
+    lft, rht = 0, 0
+    seg = segtree(K)
+    if As[rht] <= K: seg.incr(As[rht]-1, 1)
+
+    if seg.getmin(0, K) != 0:
+        return 1
+
+    #import ipdb; ipdb.set_trace()
+    ans = inf
+    while not (lft == rht >= N-1):
+        while seg.getmin(0, K) == 0 and rht+1<=N-1:
+            rht += 1
+            if As[rht] <= K: seg.incr(As[rht]-1, +1)
+        if seg.getmin(0, K) == 0:
+            return ans if ans != inf else 0
+        while seg.getmin(0, K) != 0 and lft+1<=rht:
+            if As[lft] <= K: seg.incr(As[lft]-1, -1)
+            lft += 1
+        ans = min(ans, rht-lft+2)
+        if ans == 1: return 1
+        if As[lft] <= K: seg.incr(As[lft]-1, -1)
+        lft += 1
+        if rht < lft < N:
+            rht += 1
+            if As[rht] <= K: seg.incr(As[rht]-1, +1)
+    return ans if ans != inf else 0
+
+print(main(sys.stdin))                
+            
+from io import StringIO
+# print(main(StringIO("""6 2
+# 4 1 2 1 3 5
+# """)))
+# print(main(StringIO("""3 4
+# 1 2 3            
+# """)))
+
+

@@ -1,0 +1,74 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll=long long;
+
+ll solve(int n,int m){
+    vector<ll> a(n),w(m);
+    for(int i=0;i<n;i++){
+        cin>>a[i];
+    }
+    for(int i=0;i<m;i++){
+        cin>>w[i];
+    }
+    set<ll> sumw;
+    for(int bit=0;bit<(1<<m);bit++){
+        vector<ll> usew;
+        for(int i=0;i<m;i++){
+            if(bit&(1<<i)){
+                usew.push_back(w[i]);
+            }
+        }
+        int s=usew.size();
+        for(int code=0;code<(1<<s);code++){
+            ll sum=0;
+            for(int i=0;i<s;i++){
+                if(code&(1<<i)){
+                    sum+=usew[i];
+                }else{
+                    sum-=usew[i]; 
+                } 
+            }
+            sumw.insert(sum);
+        }
+    }
+    set<ll> st;
+    map<ll,int> mp;
+    int cnt=0;
+    for(int i=0;i<n;i++){
+        if(sumw.find(a[i])!=sumw.end()) continue;
+        if(cnt==0){
+            for(ll sum:sumw){
+                st.insert(abs(sum+a[i]));
+                if(mp[abs(sum+a[i])]==cnt) mp[abs(sum+a[i])]++;
+            }
+        }else{
+            for(ll sum:sumw){
+                if(st.find(abs(sum+a[i]))!=st.end()){
+                    if(mp[abs(sum+a[i])]==cnt) mp[abs(sum+a[i])]++;
+                }
+            }
+        }
+        cnt++;
+    }
+    if(st.size()==0) return 0;
+    for(ll b:st){
+        if(mp[b]==cnt){
+            return b;
+        }
+    }
+    return -1;
+}
+
+int main(){
+    vector<ll> ans;
+    while(1){
+        int n,m;
+        cin>>n>>m;
+        if(n==0&&m==0) break;
+        ll a=solve(n,m);
+        ans.push_back(a);
+    }
+    for(ll a:ans){
+        cout<<a<<endl;
+    }
+}

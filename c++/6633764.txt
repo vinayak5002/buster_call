@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+#ifdef MY_DEBUG
+  #include "dprint.cpp"
+  # define dprint(a, ...);\
+      do {\
+          printf("line : %d, func : %s\n",\
+                __LINE__, __func__);\
+          dprint(#a,a,##__VA_ARGS__ );\
+      } while (0)
+#else
+  #define dprint(a,...) 
+#endif
+using namespace std;
+
+int main() {
+
+while(true){
+  int n,m;
+  cin >>n>>m;
+  if(n==0 && m==0)break;
+  vector<long long> a(n);
+  for (int i = 0; i < n; i++) cin >> a[i];
+  vector<long long> w(m);
+  for (int i = 0; i < m; i++) cin >> w[i];
+  
+  unordered_set<long long >st;
+  st.insert(0);
+  for (int i = 0; i < m; i++){
+    unordered_set<long long >new_st;
+    for (long long v :st){
+    //載せない
+    new_st.insert(v);
+    //+W[i]
+    new_st.insert(v+w[i]);
+    //-W[i]
+    new_st.insert(v-w[i]);
+    }
+    st=new_st;
+  }
+
+bool is_first=true;
+unordered_set<long long>needs;
+
+for (int  i = 0; i < n; i++){
+  bool flag0 =false;
+  unordered_set<long long>temp_needs;
+  for (long long v :st){
+    long long sa =abs(v-a[i]);//必要な重りの重さ
+    temp_needs.insert(sa);
+    if(sa==0){//最初から条件を満たしてる。
+      flag0=true;
+      break;
+    }
+  }
+  if(flag0==false){
+    //別で分銅が必要
+    if(is_first==true){
+      needs=temp_needs;//初期セットの設定
+      is_first=false;
+    }else{
+      //前のセットの中で存在するものだけ残す。
+      unordered_set<long long>temp_needs2;
+      for (long long v :needs){
+        if(temp_needs.find(v)!=temp_needs.end()){
+          //同じものが必要
+          temp_needs2.insert(v);
+        }
+      }
+      needs=temp_needs2;
+    }
+  }
+
+}
+
+if(is_first==true){
+  cout << 0 << endl;//一個も追加しなくてよい。
+}else if(needs.empty()==true){
+  cout << -1 << endl;//無理
+}else{
+  //最小のneedsを見つける
+  long long res=LONG_LONG_MAX;
+  for (long long v :needs){
+    res=min(res,v);
+  }
+  cout << res << endl;
+}
+
+
+}
+return 0;
+}

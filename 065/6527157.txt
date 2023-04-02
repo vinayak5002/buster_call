@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+typedef long long ll;
+#define rep(i,n) for(int i=0;i<(int)n;i++)
+using namespace std;
+vector<vector<ll>> t(100);
+vector<ll> dsc(100,-1),fin(100,-1),dst(100,-1);
+ll tmp=1;
+void dfs(ll x){
+    rep(i,t[x].size()){
+        ll y=t[x][i];
+        if(dsc[y]!=-1)continue;
+        dsc[y]=tmp;tmp++;
+        dfs(y);
+        
+    }
+    fin[x]=tmp;tmp++;
+    return;
+}
+
+int main(void){
+ ll n;cin>>n;
+    rep(i,n){
+        ll x,k;cin>>x;x--;
+        cin>>k;
+        rep(j,k){
+            ll y;cin>>y;y--;
+            t[x].push_back(y);
+        }
+    }
+    queue<ll> que;que.push(0);
+    /*
+    rep(i,n)if(dsc[i]==-1){
+        dsc[i]=tmp;tmp++;
+        dfs(i);
+    }
+    */
+    dst[0]=0;
+    
+    while(que.size()){
+        ll x=que.front();que.pop();
+        rep(i,t[x].size()){
+            ll y=t[x][i];
+            if(dst[y]!=-1)continue;
+            que.push(y);
+            dst[y]=dst[x]+1;
+        }
+    }
+    rep(i,n){
+        cout<<i+1<<" ";
+        //cout<<dsc[i]<<" "<<fin[i]<<" "<<dst[i]<<endl;
+        //cout<<dsc[i]<<" "<<fin[i]<<endl;
+        cout<<dst[i]<<endl;
+    }
+}
+

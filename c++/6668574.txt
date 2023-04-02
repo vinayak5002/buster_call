@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+
+#define rep(i, x, n) for (int i = (x); i < (n); i++)
+#define reps(i, x, n) for (int i = (x); i <= (n); i++)
+#define lol long long
+#define SUM(n) ((n) + 1) * (n) / 2 // 1〜nまでの総和を求める式
+#define mp make_pair
+#define fi first
+#define se second
+#define pu push_back
+#define SYOU(x) fixed << setprecision(x + 1) //小数点桁数を指定する
+#define abs(x, y) max(x, y) - min(x, y)
+#define all(v) v.begin(), v.end()
+#define UPDigit(a, b) (a + b - 1) / b //小数点切り上げ
+const int INF = 0x3f3f3f3f;
+const long long LINF = 0x3f3f3f3f3f3f3f3fLL;
+const int mod = int(998244353);
+const int MOD = int(1e9 + 7);
+using namespace std;
+using pii = pair<int, int>;
+typedef vector<int> vit;
+//八方向を見るのに使うと便利(楽)
+const int dy[] = {0, 1, 0, -1, -1, 1, 1, -1};
+const int dx[] = {1, 0, -1, 0, 1, 1, -1, -1};
+
+signed main(void)
+{
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    int n, add[] = {5, 2};
+    while(cin >> n, n != 1){
+        int cnt = 0;
+        vector<int> MonSutNum;
+        MonSutNum.emplace_back(n);
+        for(int i = 6;i * i <= n;i += add[cnt % 2]){
+            cnt ++;
+            if(n % i == 0){
+                MonSutNum.emplace_back(i);
+                if(i * i != n){
+                    MonSutNum.emplace_back(n / i);
+                }
+            }
+        }
+        sort(all(MonSutNum));
+        set<lol> memo;
+        rep(i, 0, MonSutNum.size()){
+            rep(j, i, MonSutNum.size()){
+                memo.emplace(MonSutNum[i] * MonSutNum[j]);
+            }
+        }
+        // 解答
+        cout << n << ":";
+        for(auto x : MonSutNum){
+            if(memo.find(x) == memo.end()){
+                cout << " " << x;
+            }
+        }
+        cout << '\n';
+    }
+    return 0;
+}

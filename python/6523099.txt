@@ -1,0 +1,55 @@
+import java.util.Scanner
+
+object Main extends App { 
+  val sc = new Scanner(System.in)
+  val N  = sc.nextInt()
+  val ar = (for (i <- 0 until N) yield sc.nextInt()).toArray
+  
+  def getGS(n:Int):Array[Int] = {
+    def iter(i:Int, gs:List[Int]):Array[Int] = i match {
+      case 1 => (1::gs).reverse.toArray
+      case i if i > n => iter(i / 3, gs )
+      case _ => iter(i / 3, i::gs)
+    }
+    iter(797161, List())    
+  }
+
+  val gs = getGS(N)
+  val m = gs.length
+
+  def insertionSort(g:Int, ac:Int):Int = {
+    def iter(i:Int, ac:Int):Int = {
+      def iter1(j:Int, v:Int, ac:Int):(Int, Int) = {
+        if (j < 0 || ar(j) <= v) (j, ac)
+        else {
+          ar(j+g) = ar(j)
+          iter1(j-g, v, ac +1)
+        }
+      }
+
+      if (i >= N) ac
+      else {
+        val v = ar(i)
+        val (j, c) = iter1(i-g, v, ac)
+        ar(j+g) = v
+        iter(i+1, c)
+      }
+    }
+
+    iter(g, ac)
+  }
+
+  def solver(i:Int, ac:Int):Int = {
+    if (i == m) ac
+    else {
+      val c = insertionSort(gs(i), ac)
+      solver(i+1, c)
+    }
+  }
+
+  println(m)  
+  println(gs.mkString(" "))
+  println(solver(0, 0))
+  println(ar.mkString("\n"))
+}
+

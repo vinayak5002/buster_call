@@ -1,0 +1,112 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+#define N 16
+
+int str_key(char str[])
+{
+	int key=0;
+	
+	for(int i=0; i<strlen(str);i ++) key += str[i]*i;
+	
+	key += strlen(str);
+	
+	return key;
+}
+
+int h1(int key, int n) { return key%n; }
+int h2(int key, int n) { return 1 + (key%(n-1)); }
+
+int hash(int key, int n, int i)
+{
+	return (h1(key, n) + i*h2(key, n))%(10*n);
+}
+
+void insert_find(char **dictionary, char str[], int n, int code)
+{
+	//code:insert=0, find=1
+	int end=1; //ループ条件
+	int i=0;
+	int h; //ハッシュ値
+	int tmp_k = str_key(str);
+	
+	while(end){
+		h = hash(tmp_k, n, i);
+		//printf("hash = %d\n", h);
+		
+		if(dictionary[h][0] == '\0' && code == 0){
+			end=0;
+			strcpy(dictionary[h], str);
+			
+		}else if(dictionary[h][0] != '\0' && code == 1){
+			if(strcmp(dictionary[h], str)==0){
+				end=0;
+				printf("yes\n");
+			}
+			
+		}else if(dictionary[h][0] == '\0' && code == 1){
+			end=0;
+			printf("no\n");
+		}
+		i++;
+	}
+}
+
+int main(void)
+{
+	char s[32]; //fgetsで入力を受け取り
+	int n; //命令数
+	char com[10]; //insert,findの命令を格納
+	char str[N]; //入力された文字列を格納
+	char *p, *tok_p;
+	int i;
+	char **dictionary; //dictionaryは10*n×N(16)の二次元配列
+	
+	fgets(s, sizeof(s)-1, stdin);
+	sscanf(s, "%d", &n);
+	
+	//printf("n = %d\n", n);
+	
+	dictionary = malloc(sizeof(char *)*10*n);
+	
+	//printf("0\n");
+	
+	for(i=0; i<10*n; i++) dictionary[i] = malloc(sizeof(char)*N);
+	
+	//printf("1\n");
+	
+	for(i=0; i<10*n; i++) dictionary[i][0] = '\0';
+	
+	//printf("2\n");
+	
+	for(i=0; i<n; i++){
+		//printf("i = %d, ", i);
+		fgets(s, sizeof(s)-1, stdin);
+		//strtokで文字列を分割
+		p=s;
+		tok_p = strtok(p, " ");
+		strcpy(com, tok_p);
+		p = NULL;
+		tok_p = strtok(p, " ");
+		strcpy(str, tok_p);
+		p = str;
+		while(1){
+			if(*p == '\0') break;
+			if(*p == 0x0d || *p == 0x0a){
+				*p = '\0';
+				break;
+			}p++;
+		}
+		//printf("com = %s, str = %s\n", com, str);
+		
+		if(com[0] == 'i'){
+			insert_find(dictionary, str, n, 0);
+		}else{
+			insert_find(dictionary, str, n, 1);
+		}
+	}
+	
+	return 0;
+}
+

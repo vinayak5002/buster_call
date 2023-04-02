@@ -1,0 +1,384 @@
+use lazy_segment_tree::{Monoid, Additive, MapMonoid};
+
+#[allow(clippy::module_inception)]
+/// LazySegmentTree is copied from ac-library-rs
+pub mod lazy_segment_tree {
+    pub trait Monoid {
+        type S: Clone;
+        fn identity() -> Self::S;
+        fn binary_operation(a: &Self::S, b: &Self::S) -> Self::S;
+    }
+    pub trait MapMonoid {
+        type M: Monoid;
+        type F: Clone + PartialEq;
+        fn identity_element() -> <Self::M as Monoid>::S {
+            Self::M::identity()
+        }
+        fn binary_operation(
+            a: &<Self::M as Monoid>::S,
+            b: &<Self::M as Monoid>::S,
+        ) -> <Self::M as Monoid>::S {
+            Self::M::binary_operation(a, b)
+        }
+        fn identity_map() -> Self::F;
+        fn mapping(f: &Self::F, x: &<Self::M as Monoid>::S) -> <Self::M as Monoid>::S;
+        fn composition(f: &Self::F, g: &Self::F) -> Self::F;
+    }
+    /// max(x1, x2, x3, ...)
+    pub struct Max<S>(S);
+    /// min(x1, x2, x3, ..., xn)
+    pub struct Min<S>(S);
+    /// x1 + x2 + x3 + ... + xn
+    pub struct Additive<S>(S);
+    /// x1 *x2 * x3 * ... * xn
+    pub struct Multiplicative<S>(S);
+    /// Implementation macros
+    macro_rules ! impl_monoid {($ ($ ty : ty ) ,* ) => {$ (impl Monoid for Max <$ ty > {type S = $ ty ; fn identity () -> Self :: S {Self :: S :: min_value () } fn binary_operation (a : & Self :: S , b : & Self :: S ) -> Self :: S {std :: cmp :: max (* a , * b ) } } impl Monoid for Min <$ ty > {type S = $ ty ; fn identity () -> Self :: S {Self :: S :: max_value () } fn binary_operation (a : & Self :: S , b : & Self :: S ) -> Self :: S {std :: cmp :: min (* a , * b ) } } impl Monoid for Additive <$ ty > {type S = $ ty ; fn identity () -> Self :: S {0 } fn binary_operation (a : & Self :: S , b : & Self :: S ) -> Self :: S {* a + * b } } impl Monoid for Multiplicative <$ ty > {type S = $ ty ; fn identity () -> Self :: S {1 } fn binary_operation (a : & Self :: S , b : & Self :: S ) -> Self :: S {* a * * b } } ) * } ; }
+    impl_monoid!(i8, i16, i32, i64, u8, u16, u32, usize, u64);
+    pub struct LazySegMentTree<F>
+    where
+        F: MapMonoid,
+    {
+        n: usize,
+        log: usize,
+        size: usize,
+        d: Vec<<F::M as Monoid>::S>,
+        lz: Vec<F::F>,
+    }
+    impl<F: MapMonoid> From<Vec<<F::M as Monoid>::S>> for LazySegMentTree<F> {
+        fn from(v: Vec<<F::M as Monoid>::S>) -> Self {
+            let n = v.len();
+            let mut log = 0;
+            let mut size = 1;
+            while size <= n {
+                size <<= 1;
+                log += 1;
+            }
+            let mut d = vec![F::identity_element(); 2 * size];
+            let lz = vec![F::identity_map(); size];
+            d[size..(size + n)].clone_from_slice(&v);
+            let mut ret = LazySegMentTree {
+                n,
+                size,
+                log,
+                d,
+                lz,
+            };
+            for i in (1..size).rev() {
+                ret.update(i);
+            }
+            ret
+        }
+    }
+    impl<F> LazySegMentTree<F>
+    where
+        F: MapMonoid,
+    {
+        pub fn new(n: usize) -> Self {
+            vec![F::identity_element(); n].into()
+        }
+        fn update(&mut self, k: usize) {
+            self.d[k] = F::binary_operation(&self.d[2 * k], &self.d[2 * k + 1]);
+        }
+        fn all_apply(&mut self, k: usize, f: F::F) {
+            self.d[k] = F::mapping(&f, &self.d[k]);
+            if k < self.size {
+                self.lz[k] = F::composition(&f, &self.lz[k]);
+            }
+        }
+        fn push(&mut self, k: usize) {
+            self.all_apply(2 * k, self.lz[k].clone());
+            self.all_apply(2 * k + 1, self.lz[k].clone());
+            self.lz[k] = F::identity_map();
+        }
+        /// data[p] = x
+        /// O(logN)
+        pub fn set(&mut self, mut p: usize, x: <F::M as Monoid>::S) {
+            assert!(p < self.n);
+            p += self.size;
+            for i in (1..=self.log).rev() {
+                self.push(p >> i);
+            }
+            self.d[p] = x;
+            for i in 1..=self.log {
+                self.update(p >> i);
+            }
+        }
+        /// get data[p]
+        /// O(logN)
+        pub fn get(&mut self, mut p: usize) -> <F::M as Monoid>::S {
+            assert!(p < self.n);
+            p += self.size;
+            for i in (1..=self.log).rev() {
+                self.push(p >> i);
+            }
+            self.d[p].clone()
+        }
+        /// [l, r)
+        /// binary_operation(l,l+1,l+2,...r-1)
+        pub fn prod(&mut self, mut l: usize, mut r: usize) -> <F::M as Monoid>::S {
+            assert!(l <= r && r <= self.n);
+            if l == r {
+                return F::identity_element();
+            }
+            l += self.size;
+            r += self.size;
+            for i in (1..=self.log).rev() {
+                if ((l >> i) << i) != l {
+                    self.push(l >> i);
+                }
+                if ((r >> i) << i) != r {
+                    self.push(r >> i);
+                }
+            }
+            let mut sml = F::identity_element();
+            let mut smr = F::identity_element();
+            while l < r {
+                if l & 1 != 0 {
+                    sml = F::binary_operation(&sml, &self.d[l]);
+                    l += 1;
+                }
+                if r & 1 != 0 {
+                    r -= 1;
+                    smr = F::binary_operation(&self.d[r], &smr);
+                }
+                l >>= 1;
+                r >>= 1;
+            }
+            F::binary_operation(&sml, &smr)
+        }
+        /// [l, r)
+        /// binary_operation(a[0], ..., a[n - 1])
+        pub fn all_prod(&self) -> <F::M as Monoid>::S {
+            self.d[1].clone()
+        }
+        /// data[p] = f(data[p])
+        pub fn apply(&mut self, mut p: usize, f: F::F) {
+            assert!(p < self.n);
+            p += self.size;
+            for i in (1..=self.log).rev() {
+                self.push(p >> i);
+            }
+            self.d[p] = F::mapping(&f, &self.d[p]);
+            for i in 1..=self.log {
+                self.update(p >> i);
+            }
+        }
+        /// [l, r)
+        /// data[p] = f(data[p]) p=l,l+1,...r-1
+        pub fn apply_range(&mut self, mut l: usize, mut r: usize, f: F::F) {
+            assert!(l <= r && r <= self.n);
+            if l == r {
+                return;
+            }
+            l += self.size;
+            r += self.size;
+            for i in (1..=self.log).rev() {
+                if ((l >> i) << i) != l {
+                    self.push(l >> i);
+                }
+                if ((r >> i) << i) != r {
+                    self.push((r - 1) >> i);
+                }
+            }
+            {
+                let l2 = l;
+                let r2 = r;
+                while l < r {
+                    if l & 1 != 0 {
+                        self.all_apply(l, f.clone());
+                        l += 1;
+                    }
+                    if r & 1 != 0 {
+                        r -= 1;
+                        self.all_apply(r, f.clone());
+                    }
+                    l >>= 1;
+                    r >>= 1;
+                }
+                l = l2;
+                r = r2;
+            }
+            for i in 1..=self.log {
+                if ((l >> i) << i) != l {
+                    self.update(l >> i);
+                }
+                if ((r >> i) << i) != r {
+                    self.update((r - 1) >> i);
+                }
+            }
+        }
+    }
+    use std::fmt::{Debug, Error, Formatter};
+    impl<F> Debug for LazySegMentTree<F>
+    where
+        F: MapMonoid,
+        F::F: Debug,
+        <F::M as Monoid>::S: Debug,
+    {
+        fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), Error> {
+            for i in 0..self.log {
+                f.write_fmt(format_args!("{:?}\t", self.d[self.log + i]))?;
+            }
+            Ok(())
+        }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
+struct UpdateAndSumValue {
+    value: i64,
+    size: i64,
+}
+impl Monoid for Additive<UpdateAndSumValue> {
+    type S = UpdateAndSumValue;
+    fn identity() -> Self::S {
+        UpdateAndSumValue { value: 0, size: 0 }
+    }
+    fn binary_operation(a: &Self::S, b: &Self::S) -> Self::S {
+        UpdateAndSumValue {
+            value: a.value + b.value,
+            size: a.size + b.size,
+        }
+    }
+}
+
+impl MapMonoid for UpdateAndSumValue {
+    type M = Additive<UpdateAndSumValue>;
+    type F = i64;
+    fn identity_map() -> Self::F {
+        1i64 << 62
+    }
+    fn mapping(&f: &Self::F, &x: &UpdateAndSumValue) -> UpdateAndSumValue {
+        if f == UpdateAndSumValue::identity_map() {
+            x
+        } else {
+            UpdateAndSumValue {
+                value: x.size * f,
+                size: x.size,
+            }
+        }
+    }
+    fn composition(f: &Self::F, g: &Self::F) -> Self::F {
+        if *f == UpdateAndSumValue::identity_map() {
+            *g
+        } else {
+            *f
+        }
+    }
+}
+
+#[derive(Default)]
+/// NOTE
+/// declare variables to reduce the number of parameters for dp and dfs etc.
+pub struct Solver {}
+impl Solver {
+    pub fn solve(&mut self) {
+        let stdin = std::io::stdin();
+        #[allow(unused_mut, unused_variables)]
+        let mut scn = fastio::Scanner::new(stdin.lock());
+        let n: usize = scn.read();
+        let q: usize = scn.read();
+        let mut seg = lazy_segment_tree::LazySegMentTree::<UpdateAndSumValue>::new(n);
+        for i in 0..n {
+            seg.set(i, UpdateAndSumValue{value: 0, size: 1});
+        }
+        for i in 0..q {
+            let t: usize = scn.read();
+            if t == 0 {
+                let s: usize = scn.read();
+                let t: usize = scn.read();
+                let x: i64 = scn.read();
+                seg.apply_range(s, t + 1, x);
+            } else {
+                let s: usize = scn.read();
+                let t: usize = scn.read();
+                let result = seg.prod(s, t + 1);
+                println!("{}", result.value);
+            }
+        }
+    }
+}
+#[allow(clippy::module_inception)]
+pub mod fastio {
+    use std::collections::VecDeque;
+    use std::io::BufWriter;
+    use std::io::Write;
+    pub struct Writer<W: std::io::Write> {
+        writer: std::io::BufWriter<W>,
+    }
+    impl<W: std::io::Write> Writer<W> {
+        pub fn new(write: W) -> Writer<W> {
+            Writer {
+                writer: BufWriter::new(write),
+            }
+        }
+        pub fn flush(&mut self) {
+            self.writer.flush().unwrap();
+        }
+        pub fn write<S: std::string::ToString>(&mut self, s: S) {
+            self.writer.write_all(s.to_string().as_bytes()).unwrap();
+        }
+        pub fn writeln<S: std::string::ToString>(&mut self, s: S) {
+            self.write(s);
+            self.write('\n');
+        }
+    }
+    pub struct Scanner<R> {
+        stdin: R,
+        buffer: VecDeque<String>,
+    }
+    impl<R: std::io::BufRead> Scanner<R> {
+        pub fn new(s: R) -> Scanner<R> {
+            Scanner {
+                stdin: s,
+                buffer: VecDeque::new(),
+            }
+        }
+        pub fn read<T: std::str::FromStr>(&mut self) -> T {
+            while self.buffer.is_empty() {
+                let line = self.read_line();
+                for w in line.split_whitespace() {
+                    self.buffer.push_back(String::from(w));
+                }
+            }
+            self.buffer.pop_front().unwrap().parse::<T>().ok().unwrap()
+        }
+        pub fn read_line(&mut self) -> String {
+            let mut line = String::new();
+            let _ = self.stdin.read_line(&mut line);
+            line.trim_end().to_string()
+        }
+        pub fn vec<T: std::str::FromStr>(&mut self, n: usize) -> Vec<T> {
+            (0..n).map(|_| self.read()).collect()
+        }
+        pub fn chars(&mut self) -> Vec<char> {
+            self.read::<String>().chars().collect()
+        }
+    }
+}
+#[allow(clippy::module_inception)]
+pub mod macros {
+    #[macro_export]
+    #[allow(unused_macros)]
+    macro_rules ! max {($ x : expr ) => ($ x ) ; ($ x : expr , $ ($ y : expr ) ,+ ) => {std :: cmp :: max ($ x , max ! ($ ($ y ) ,+ ) ) } }
+    #[macro_export]
+    #[allow(unused_macros)]
+    macro_rules ! min {($ x : expr ) => ($ x ) ; ($ x : expr , $ ($ y : expr ) ,+ ) => {std :: cmp :: min ($ x , min ! ($ ($ y ) ,+ ) ) } }
+    #[macro_export]
+    #[allow(unused_macros)]
+    /// Display a line of variables
+    macro_rules ! echo {() => {{use std :: io :: {self , Write } ; writeln ! (io :: stderr () , "{}:" , line ! () ) . unwrap () ; } } ; ($ e : expr , $ ($ es : expr ) ,+ $ (, ) ? ) => {{use std :: io :: {self , Write } ; write ! (io :: stderr () , "{}:" , line ! () ) . unwrap () ; write ! (io :: stderr () , " {} = {:?}" , stringify ! ($ e ) , $ e ) . unwrap () ; $ (write ! (io :: stderr () , " {} = {:?}" , stringify ! ($ es ) , $ es ) . unwrap () ; ) + writeln ! (io :: stderr () ) . unwrap () ; } } ; ($ e : expr ) => {{use std :: io :: {self , Write } ; let result = $ e ; writeln ! (io :: stderr () , "{}: {} = {:?}" , line ! () , stringify ! ($ e ) , result ) . unwrap () ; result } } ; }
+    #[macro_export]
+    #[allow(unused_macros)]
+    /// Display a line of variables with colors
+    macro_rules ! cecho {() => {{use std :: io :: {self , Write } ; writeln ! (io :: stderr () , "\x1b[31;1m{}\x1b[m:" , line ! () ) . unwrap () ; } } ; ($ e : expr , $ ($ es : expr ) ,+ $ (, ) ? ) => {{use std :: io :: {self , Write } ; write ! (io :: stderr () , "\x1b[31;1m{}\x1b[m:" , line ! () ) . unwrap () ; write ! (io :: stderr () , " \x1b[92;1m{}\x1b[m = {:?}" , stringify ! ($ e ) , $ e ) . unwrap () ; $ (write ! (io :: stderr () , " \x1b[92;1m{}\x1b[m = {:?}" , stringify ! ($ es ) , $ es ) . unwrap () ; ) + writeln ! (io :: stderr () ) . unwrap () ; } } ; ($ e : expr ) => {{use std :: io :: {self , Write } ; let result = $ e ; writeln ! (io :: stderr () , "\x1b[31;1m{}\x1b[m: \x1b[92;1m{}\x1b[m = {:?}" , line ! () , stringify ! ($ e ) , result ) . unwrap () ; result } } ; }
+}
+fn main() {
+    std::thread::Builder::new()
+        .stack_size(64 * 1024 * 1024)
+        .spawn(|| Solver::default().solve())
+        .unwrap()
+        .join()
+        .unwrap();
+}
+

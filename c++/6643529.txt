@@ -1,0 +1,90 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <queue>
+#include <stack>
+#include <map>
+#include <set>
+#include <bitset>
+using namespace std;
+using ll = long long;
+template<class T> void sv(vector<T> v) {for (auto x:v) cout << x << " "; cout << endl;}
+
+int main() {
+    while (true) {
+        int w, h;
+        cin >> w >> h;
+        if (w == 0 && h == 0) break;
+        vector<vector<int>> maze(h, vector<int>(w, 0));
+        for (int i = 0; i < h; i++) maze[i][0] |= 8;
+        for (int i = 0; i < h; i++) maze[i][w-1] |= 2;
+        for (int i = 1; i < w; i++) maze[0][i] |= 1;
+        for (int i = 0; i < w-1; i++) maze[h-1][i] |= 4;
+
+        for (int i = 0; i < 2*h-1; i++) {
+            if (i%2 == 0) {
+                for (int j = 1; j < w; j++) {
+                    int wall; cin >> wall;
+                    if (wall == 1) {
+                        maze[i/2][j-1] |= 2;
+                        maze[i/2][j] |= 8;
+                    }
+                }
+            } else {
+                for (int j = 0; j < w; j++) {
+                    int wall; cin >> wall;
+                    if (wall == 1) {
+                        maze[i/2][j] |= 4;
+                        maze[i/2+1][j] |= 1;
+                    }
+                }
+            }
+        }
+
+        vector<vector<int>> dist(h, vector<int>(w, -1));
+        dist[0][0] = 1;
+        queue<pair<int, int>> que;
+        que.emplace(0, 0);
+
+        while (!que.empty()) {
+            int x = que.front().first;
+            int y = que.front().second;
+            int c = maze[x][y];
+            que.pop();
+            if (!(c&(1<<0)) && x > 0 && dist[x-1][y] == -1) {
+                dist[x-1][y] = dist[x][y] + 1;
+                que.emplace(x-1,  y);
+            }
+            if (!(c&(1<<1)) && y < w-1 && dist[x][y+1] == -1) {
+                dist[x][y+1] = dist[x][y] + 1;
+                que.emplace(x,  y+1);
+            }
+            if (!(c&(1<<2)) && x < h-1 && dist[x+1][y] == -1) {
+                dist[x+1][y] = dist[x][y] + 1;
+                que.emplace(x+1,  y);
+            }
+            if (!(c&(1<<3)) && y > 0 && dist[x][y-1] == -1) {
+                dist[x][y-1] = dist[x][y] + 1;
+                que.emplace(x,  y-1);
+            }
+        }
+
+/*
+        for (int i = 0; i < h; i++) {
+            for (int j = 0; j < w; j++) {
+                cout << dist[i][j] << " ";
+                // string s = bitset<4>(maze[i][j]).to_string();
+                // reverse(s.begin(), s.end());
+                // cout << s << " ";
+            }
+            cout << endl;
+        }
+        */
+
+        int ans = dist[h-1][w-1];
+        if (ans != -1) cout << ans << endl;
+        else cout << 0 << endl;
+    }
+    return 0;
+}
+

@@ -1,0 +1,39 @@
+fn main() {
+    let mut alpabet = std::collections::HashMap::new();
+    let alp = "abcdefghijklmnopqrstuvwxyz";
+    for c in alp.chars() {
+        alpabet.insert(c, 0);
+    }
+    loop {
+        let s = match read::<String>() {
+            Ok(v) => v,
+            Err(_) => break,
+        };
+        for c in s.to_lowercase().chars() {
+            if !c.is_ascii_alphabetic() {
+                continue;
+            }
+            let count = alpabet.entry(c).or_insert(0);
+            *count += 1;
+        }
+    }
+    for c in alp.chars() {
+        println!("{} : {}", c, alpabet.get(&c).unwrap());
+    }
+}
+
+fn read<T: std::str::FromStr>() -> Result<T, &'static str> {
+    let mut s = String::new();
+    let byte = match std::io::stdin().read_line(&mut s) {
+        Ok(v) => v,
+        Err(_) => return Err("read error"),
+    };
+    if byte == 0 {
+        return Err("eof");
+    }
+    match s.trim().parse() {
+        Ok(v) => Ok(v),
+        Err(_) => return Err("parse error"),
+    }
+}
+

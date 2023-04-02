@@ -1,0 +1,76 @@
+#include <stdio.h>
+#define MAX 100001
+#define N -1
+
+int A[MAX];
+
+struct Node{
+  int parent;
+  int left;
+  int right;
+}B[MAX];
+
+void Depth(int a,int b){
+  A[a]=b;
+  if(B[a].right!=N){
+    Depth(B[a].right,b);
+  }
+  if(B[a].left!=N){
+    Depth(B[a].left,b+1);
+  }
+}
+
+void print(int a){
+  printf("node %d: parent = %d, depth = %d,",a,B[a].parent,A[a]);
+
+  if(B[a].parent==N){
+    printf("root,");
+  }
+  else if(B[a].left==N){
+    printf("leaf,");
+  }
+  else{
+    printf("internal node, ");
+  }
+
+  for(int i=0,c=B[a].left;c!=N;i++,c=B[c].right){
+    if(i){
+      printf(",");
+    }
+    printf("%d", c);
+  }
+  
+}
+
+int main(void){
+  int n,d,c,k,l,root;
+  scanf("%d",&n);
+  for(int i=0;i<n;i++)
+    B[i].parent=B[i].left=B[i].right=N;
+
+  for(int i=0;i<n;i++){
+    scanf("%d",&d);
+    scanf("%d",&k);
+    for(int j=0;j<k;j++){
+      scanf("%d",&c);
+      B[c].parent=d;
+      if(j==0)
+        B[d].left=c;
+
+      else
+        B[l].right=c;
+        l=c;
+    }
+  }
+
+  for(int i=0;i<n;i++)
+    if(B[i].parent==N)
+    root = i;
+    Depth(root, 0);
+
+  for(int i=0;i<n;i++)
+    print(i);
+    return 0;
+
+  }
+

@@ -1,0 +1,726 @@
+#include <iostream>
+#include <iomanip>
+#include <cassert>
+#include <cmath>
+#include <complex>
+#include <iostream>
+#include <utility>
+#include <cmath>
+namespace sapphre15 {
+namespace geometry {
+using Real = double;
+constexpr Real EPS = 1e-10;
+const Real PI = std::acos(Real(-1.0));
+constexpr int sgn(Real a) {
+    return (a < -EPS) ? -1 : (a > EPS) ? 1 : 0;
+}
+bool eq(Real a, Real b) {
+    if (std::abs(a) > 1.0)
+        return std::abs((a - b) / a) < EPS;
+    else
+        return std::abs(a - b) < EPS;
+}
+bool le(Real a, Real b) {
+    return a < b || eq(a, b);
+}
+class Point;
+namespace internal { class LineBase; };
+class Line;
+class Ray;
+class Segment;
+class Circle;
+class Polygon;
+}
+}
+namespace sapphre15 {
+namespace geometry {
+class Point {
+  public:
+    using value_type = Real;
+    constexpr Point() : _x(0), _y(0) {
+    }
+    constexpr Point(const value_type &xval, const value_type &yval)
+        : _x(xval), _y(yval) {
+    }
+    constexpr value_type x() const {
+        return _x;
+    }
+    constexpr void x(value_type val) {
+        _x = std::move(val);
+    }
+    constexpr value_type y() const {
+        return _y;
+    }
+    constexpr void y(value_type val) {
+        _y = std::move(val);
+    }
+    constexpr Point &operator+=(const Point &rhs) {
+        _x += rhs._x;
+        _y += rhs._y;
+        return *this;
+    }
+    constexpr Point &operator-=(const Point &rhs) {
+        _x -= rhs._x;
+        _y -= rhs._y;
+        return *this;
+    }
+    constexpr Point &operator*=(const Point &rhs) {
+        _x *= rhs._x;
+        _y *= rhs._y;
+        return *this;
+    }
+    constexpr Point &operator*=(const value_type &rhs) {
+        _x *= rhs;
+        _y *= rhs;
+        return *this;
+    }
+    constexpr Point &operator/=(const Point &rhs) {
+        _x /= rhs._x;
+        _y /= rhs._y;
+        return *this;
+    }
+    constexpr Point &operator/=(const value_type &rhs) {
+        _x /= rhs;
+        _y /= rhs;
+        return *this;
+    }
+    void rotate(const Real &theta) {
+        auto tmpx = _x, tmpy = _y;
+        _x = tmpx * std::cos(theta) - tmpy * std::sin(theta);
+        _y = tmpx * std::sin(theta) + tmpy * std::cos(theta);
+    }
+    Real distance(const Point &q) const {
+        return std::hypot(_x - q._x, _y - q._y);
+    }
+    Real distance() const {
+        return std::hypot(_x, _y);
+    }
+    Real xdist(const Point &q) const {
+        return std::abs(_x - q._x);
+    }
+    Real ydist(const Point &q) const {
+        return std::abs(_y - q._y);
+    }
+    static Point polar(const Real &theta) {
+        return Point(std::cos(theta), std::sin(theta));
+    }
+    static Point polar(const Real &theta, const Real &rho) {
+        return Point(rho * std::cos(theta), rho * std::sin(theta));
+    }
+  private:
+    value_type _x, _y;
+};
+Point::value_type abs(const Point &p) {
+    return p.distance();
+}
+Point::value_type arg(const Point &p) {
+    return std::atan2(p.y(), p.x());
+}
+Point::value_type norm(const Point &p) {
+    return p.x() * p.x() + p.y() * p.y();
+}
+constexpr Point operator+(const Point &lhs) {
+    return lhs;
+}
+constexpr Point operator-(const Point &lhs) {
+    return Point(lhs) *= -1;
+}
+constexpr Point operator+(const Point &lhs, const Point &rhs) {
+    return Point(lhs) += rhs;
+}
+constexpr Point operator-(const Point &lhs, const Point &rhs) {
+    return Point(lhs) -= rhs;
+}
+constexpr Point operator*(const Point &lhs, const Point &rhs) {
+    return Point(lhs) *= rhs;
+}
+constexpr Point operator*(const Point &lhs, const Point::value_type &rhs) {
+    return Point(lhs) *= rhs;
+}
+constexpr Point operator/(const Point &lhs, const Point &rhs) {
+    return Point(lhs) /= rhs;
+}
+constexpr Point operator/(const Point &lhs, const Point::value_type &rhs) {
+    return Point(lhs) /= rhs;
+}
+bool operator==(const Point &lhs, const Point &rhs) {
+    return eq(lhs.x(), rhs.x()) && eq(lhs.y(), rhs.y());
+}
+bool operator!=(const Point &lhs, const Point &rhs) {
+    return !(lhs == rhs);
+}
+std::istream &operator>>(std::istream &is, Point &p) {
+    Real a, b;
+    is >> a >> b;
+    p = Point(a, b);
+    return is;
+}
+std::ostream &operator<<(std::ostream &os, Point &p) {
+    return os << '(' << p.x() << ',' << p.y() << ')';
+}
+Point rotate(const Point &p, const Real &theta) {
+    Point ret(p);
+    ret.rotate(theta);
+    return ret;
+}
+Real distance(const Point &p, const Point &q) {
+    return p.distance(q);
+}
+Real xdist(const Point &p, const Point &q) {
+    return p.xdist(q);
+}
+Real ydist(const Point &p, const Point &q) {
+    return p.ydist(q);
+}
+Real dot(const Point &p, const Point &q) {
+    return p.x() * q.x() + p.y() * q.y();
+}
+Real cross(const Point &p, const Point &q) {
+    return p.x() * q.y() - p.y() * q.x();
+}
+Point internal_div(const Point &p, const Point &q, const Real &a, const Real &b) {
+    assert(0 <= a);
+    assert(0 <= b);
+    assert(0 <= a + b);
+    return (p * b + q * a) / (a + b);
+}
+Point mid_point(const Point &p, const Point &q) {
+    return internal_div(p, q, 1.0, 1.0);
+}
+Point external_div(const Point &p, const Point &q, const Real &a, const Real &b) {
+    assert(0 <= a);
+    assert(0 <= b);
+    assert(!eq(a, b));
+    return (q * a - p * b) / (a - b);
+}
+Real co_circle_internal1(Point p, Point q, Point r, const Point &s) {
+    p -= s;
+    q -= s;
+    r -= s;
+    return cross(p, q) * norm(r) + 
+           cross(q, r) * norm(p) +
+           cross(r, p) * norm(q);
+}
+Real co_circle_internal2(Point p, Point q, Point r, const Point &s) {
+    p -= s;
+    q -= s;
+    r -= s;
+    return cross(p, q) + 
+           cross(q, r) +
+           cross(r, p);
+}
+bool in_circle(const Point &p, const Point &q, const Point &r, const Point &s) {
+    return sgn(co_circle_internal1(p, q, r, s)) == sgn(co_circle_internal2(p, q, r, s));
+}
+bool on_circle(const Point &p, const Point &q, const Point &r, const Point &s) {
+    return eq(co_circle_internal1(p, q, r, s), 0);
+}
+bool out_circle(const Point &p, const Point &q, const Point &r, const Point &s) {
+    return sgn(co_circle_internal1(p, q, r, s)) == sgn(co_circle_internal2(p, q, r, s)) * -1;
+}
+enum ClockWise {
+    ONLINE_FRONT = -2,
+    CLOCKWISE = -1,
+    ON_SEGMENT = 0,
+    COUNTER_CLOCKWISE = +1,
+    ONLINE_BACK = +2,
+};
+ClockWise ccw(const Point &a, Point b, Point c) {
+    b -= a, c -= a;
+    if(sgn(cross(b, c)) > 0) return COUNTER_CLOCKWISE;
+    if(sgn(cross(b, c)) < 0) return CLOCKWISE;
+    if(sgn(dot(b, c)) < 0)   return ONLINE_BACK;
+    if(le(abs(c), abs(b))) return ON_SEGMENT;
+    return ONLINE_FRONT;
+}
+bool colinear(const Point &p, const Point &q, const Point &r) {
+    ClockWise state = ccw(p, q, r);
+    return state != COUNTER_CLOCKWISE && state != CLOCKWISE;
+}
+}
+}
+#include <algorithm>
+#include <initializer_list>
+#include <iterator>
+#include <memory>
+#include <vector>
+#include <cmath>
+#include <utility>
+#include <cmath>
+#include <cassert>
+#include <utility>
+#include <vector>
+namespace sapphre15 {
+namespace geometry {
+Point projection(const internal::LineBase &l, const Point &p);
+Real angle(const internal::LineBase &a, const internal::LineBase &b);
+bool parallel(const internal::LineBase &a, const internal::LineBase &b);
+bool orthogonal(const internal::LineBase &a, const internal::LineBase &b);
+namespace internal {
+namespace PARENT = ::sapphre15::geometry;
+class LineBase {
+    protected:
+    Point _a, _b;
+    public:
+    virtual ~LineBase() {}
+    LineBase() : _a(1, 0), _b(0, 1) {}
+    LineBase(const Point &a, const Point &b)
+    : _a(a), _b(b) {}
+    LineBase(const Real &a, const Real &b, const Real &c) {
+        assert(!eq(a, 0.0) || !eq(b, 0.0));
+        if(eq(a, 0.0)) {
+            _a = Point(0.0, -c/b);
+            _b = Point(1.0, -c/b);
+        } else {
+            _a = Point(-c/a, 0.0);
+            _b = Point(-(c + b)/a, 1.0);
+        }
+    }
+    LineBase(const Point &p, const Real theta)
+    : _a(p), _b(p + Point::polar(theta)) {}
+    bool on_line(const Point &p) const {
+        ClockWise val = ccw(_a, _b, p);
+        return val != CLOCKWISE && val != COUNTER_CLOCKWISE;
+    }
+    Point direction() const  {
+        return (_b - _a) / abs(_b - _a);
+    }
+    virtual bool on_object(const Point &p) const {
+        return on_line(p);
+    }
+    Real slope() const {
+        return (_a.y() - _b.y()) / (_a.x() - _b.x());
+    }
+    bool is_horizontal() const {
+        return eq(_a.y(), _b.y()); 
+    }
+    bool is_vertical() const {
+        return eq(_a.x(), _b.x()); 
+    }
+    friend Point PARENT::projection(const LineBase &l, const Point &p);
+    friend Real PARENT::angle(const LineBase &a, const LineBase &b);
+    friend bool PARENT::parallel(const LineBase &a, const LineBase &b);
+    friend bool PARENT::orthogonal(const LineBase &a, const LineBase &b);
+};
+}
+class Line : public internal::LineBase {
+    public:
+    Line() : internal::LineBase() {}
+    Line(const Point &a, const Point &b) : internal::LineBase(a, b) {}
+    Line(const Real &a, const Real &b, const Real &c)
+    : internal::LineBase(a, b, c) {}
+    Line(const Point &p, const Real theta)
+    : internal::LineBase(p, theta) {}
+    Line(const internal::LineBase &l)
+    : internal::LineBase(l) {}
+    Line translation(const Point &v) const {
+        return Line(_a + v, _b + v);
+    }
+    Line moveX(const Real &dist) const {
+        return translation(Point(dist, 0.0));
+    }
+    Line moveY(const Real &dist) const {
+        return translation(Point(0.0, dist));
+    }
+    friend std::vector<Point> cross_point(const Line &a, const Line &b);
+    friend bool intersection(const Segment &a, const Line &b);
+    friend Real distance(const Line &a, const Point &b);
+    friend Real distance(const Line &a, const Line &b);
+};
+Point projection(const internal::LineBase &l, const Point &p) {
+    const Point a = p - l._a, b = l._b - l._a;
+    return l._a + b * dot(a, b) / norm(b);
+}
+Point reflection(const internal::LineBase &l, const Point &p) {
+    Point q = projection(l, p);
+    return q * 2 - p;
+}
+Real angle(const internal::LineBase &a, const internal::LineBase &b) {
+    static const Real HALF_OF_SQRT2 = 0.70710678;
+    Point u = a._a - a._b, v = b._a - b._b;
+    Real val = std::abs(dot(u, v)) / abs(u) / abs(v);
+    if(val < HALF_OF_SQRT2) return std::acos(val);
+    else return std::asin(std::abs(cross(u, v)) / abs(u) / abs(v));
+}
+bool parallel(const internal::LineBase &a, const internal::LineBase &b) {
+    return eq(cross(a._a - a._b, b._a - b._b), 0.0);
+}
+bool orthogonal(const internal::LineBase &a, const internal::LineBase &b) {
+    return eq(dot(a._a - a._b, b._a - b._b), 0.0);
+}
+Real distance(const Line &l, const Point &p) {
+    return std::abs(cross(l._a - p, l._b - p)) / abs(l._a - l._b);
+}
+Real distance(const Point &p, const Line &l) {
+    return distance(l, p);
+}
+}
+}
+namespace sapphre15 {
+namespace geometry {
+class Segment : public internal::LineBase {
+    public:
+    Segment() : internal::LineBase() {}
+    Segment(const Point &_start, const Point &_end)
+    : internal::LineBase(_start, _end) {}
+    Segment(const Point &_start, const Real _theta, const Real _length)
+    : internal::LineBase(_start, _start + Point::polar(_theta, _length)) {}
+    Point start() const {
+        return _a;
+    }
+    Point end() const {
+        return _b;
+    }
+    double x1() const {
+        return _a.x();
+    }
+    double y1() const {
+        return _a.y();
+    }
+    double x2() const {
+        return _b.x();
+    }
+    double y2() const {
+        return _b.y();
+    }
+    double dx() const {
+        return std::abs(_a.x() - _b.x());
+    }
+    double dy() const {
+        return std::abs(_a.y() - _b.y());
+    }
+    double length() {
+        return abs(_a - _b);
+    }
+    bool on_object(const Point &p) const {
+        return ccw(_a, _b, p) == ON_SEGMENT;
+    }
+    std::pair<Point, Point> end_points() const {
+        return std::make_pair(_a, _b);
+    }
+    Segment translation(const Point &v) const {
+        return Segment(_a + v, _b + v);
+    }
+    Segment moveX(const Real &dist) const {
+        return translation(Point(dist, 0.0));
+    }
+    Segment moveY(const Real &dist) const {
+        return translation(Point(0.0, dist));
+    }
+    Segment moveV(const Real &dist) const {
+        return translation(geometry::rotate(direction(), PI/2) * dist);
+    }
+    Segment rotate(const Real &theta) const {
+        return Segment(_a, _a + geometry::rotate(_b - _a, theta));
+    }
+};
+}
+}
+#include <utility>
+#include <type_traits>
+#include <cassert>
+#include <cmath>
+namespace sapphre15 {
+namespace geometry {
+class Circle {
+    public:
+    Circle() : _center(), _radius(1.0) {}
+    Circle(const Point &c, const Real &r)
+    : _center(c), _radius(r) {
+        assert(r >= 0);
+    }
+    Circle(const Point &c, const Point &a)
+    : _center(c), _radius(abs(c - a)) {}
+    Circle(const Point &a, Point b, Point c) {
+        b -= a;
+        c -= a;
+        _center = Point(norm(b) * c.y() - norm(c) * b.y(),
+                        norm(c) * b.x() - norm(b) * c.x())
+                  / cross(b, c) / 2.0;
+        _center += a;
+        _radius = distance(_center, a);
+    }
+    Point center() const {
+        return _center;
+    }
+    Real radius() const {
+        return _radius;
+    }
+    bool inside(const Point &p) const {
+        return le(distance(_center, p), _radius);
+    }
+    bool outside(const Point &p) const {
+        return !le(distance(_center, p), _radius);
+    }
+    bool on_object(const Point &p) const {
+        return eq(_radius, distance(_center, p));
+    }
+    public:
+    Point _center;
+    Real _radius;
+};
+Circle incircle(const Point &a, const Point &b, const Point &c) {
+    Real ab = distance(a, b),
+         bc = distance(b, c),
+         ca = distance(c, a),
+         _s = std::abs(cross(a - c, b - c));
+    return Circle((a * bc + b * ca + c * ab) / (ab + bc + ca),
+                   _s / (ab + bc + ca));
+}
+}
+}
+namespace sapphre15 {
+namespace geometry {
+bool intersection(const Line &a, const Line &b) {
+    return !parallel(a, b);
+}
+bool intersection(const Segment &a, const Line &b) {
+    std::pair<Point, Point> p = a.end_points();
+    if(b.on_object(p.first) || b.on_object(p.second)) return true;
+    return ccw(b._a, b._b, p.first) * ccw(b._a, b._b, p.second) < 0;
+}
+bool intersection(const Line &a, const Segment &b) {
+    return intersection(b, a);
+}
+bool intersection(const Segment &a, const Segment &b) {
+    return intersection(a, (internal::LineBase)b) && 
+           intersection(b, (internal::LineBase)a);
+}
+enum class IntersectionCC {
+    NOT_CROSS    = 4,
+    CIRCUMSCRIBE = 3,
+    INTERSECT    = 2,
+    INSCRIBE     = 1,
+    INCLUDE      = 0,
+};
+IntersectionCC intersection(const Circle &a, const Circle &b) {
+    Real d1 = distance(a.center(), b.center()),
+         d2 = a.radius() + b.radius(),
+         d3 = std::abs(a.radius() - b.radius());
+    if(eq(d1, d2)) return IntersectionCC::CIRCUMSCRIBE;
+    else if(eq(d1, d3)) return IntersectionCC::INSCRIBE;
+    else if(le(d2, d1)) return IntersectionCC::NOT_CROSS;
+    else if(le(d1, d3)) return IntersectionCC::INCLUDE;
+    else return IntersectionCC::INTERSECT;
+}
+enum IntersectionCL {
+    NOT_CROSS    = 2,
+    TOUCH        = 1,
+    CROSS        = 0,
+};
+IntersectionCL intersection(const Circle &c, const Line &l) {
+    Real _d = distance(c.center(), l);
+    if(eq(_d, c.radius())) return IntersectionCL::TOUCH;
+    else if(le(_d, c.radius())) return IntersectionCL::CROSS;
+    else return IntersectionCL::NOT_CROSS;
+}
+IntersectionCL intersection(const Line &l, const Circle &c) {
+    return intersection(c, l);
+}
+}
+}
+namespace sapphre15 {
+namespace geometry {
+class PolygonIterator;
+class Polygon {
+    public:
+    Polygon(const std::vector<Point> &points_list)
+    : _num(points_list.size()) {
+        _points.reset(new Point[_num]);
+        std::copy(std::begin(points_list),
+                  std::end(points_list),
+                  _points.get());
+        if(sgn(area()) < 0) {
+            std::reverse(_points.get(), _points.get() + _num);
+        }
+    }
+    Polygon(std::initializer_list<Point> init)
+    : Polygon(std::vector<Point>(std::begin(init), std::end(init))) {}
+    Real area() const {
+        Real val = cross(_points[_num-1], _points[0]);
+        for(size_t i = 0; i < _num - 1; i++) {
+            val += cross(_points[i], _points[i+1]);
+        }
+        return val / 2.0;
+    }
+    bool inside(const Point &p) {
+        bool ret = false;
+        Point _a, _b = _points[_num-1];
+        for(size_t i = 0; i < _num; i++) {
+            _a = std::move(_b);
+            _b = _points[i];
+            if(_a.y() < _b.y()) std::swap(_a, _b);
+            if(!le(_a.y(), p.y()) &&
+                le(_b.y(), p.y())  &&
+               ccw(_a, p, _b) == COUNTER_CLOCKWISE) {
+                ret = ret ^ true;
+            }
+            _b = _points[i];
+        }
+        return ret;
+    }
+    bool on_object(const Point &p) {
+        for(size_t i = 1; i < _num; i++) {
+            if(ccw(_points[i-1], _points[i], p) == ON_SEGMENT) {
+                return true;
+            }
+        }
+        return ccw(_points[0], _points[_num-1], p) == ON_SEGMENT;
+    }
+    bool outside(const Point &p) {
+        return !inside(p);
+    }
+    bool is_simple() {
+        for(size_t i = 1; i < _num; i++) {
+            for(size_t j = 1; j < i; j++) {
+                if(intersection(Segment(_points[i-1], _points[i]),
+                                Segment(_points[j-1], _points[j]))) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    bool is_convex() {
+        ClockWise init = ccw(_points[_num-1], _points[0], _points[1]);
+        for(size_t i = 2; i < _num; i++) {
+            if(init != ccw(_points[i-2], _points[i-1], _points[i])) {
+                return false;
+            }
+        }
+        return init == ccw(_points[_num-2],
+                           _points[_num-1],
+                           _points[0]);
+    }
+    const Point& operator[](size_t _n) const {
+        assert(_n < _num);
+        return _points[_n];
+    }
+    size_t size() const noexcept {
+        return _num;
+    }
+    
+    PolygonIterator begin() const;
+    PolygonIterator end() const;
+    friend PolygonIterator;
+    private:
+    const size_t _num;
+    std::shared_ptr<Point[]> _points;
+};
+class PolygonIterator {
+    public:
+    using size_type         = std::size_t;
+    using diff_type         = std::ptrdiff_t;
+    using value_type        = Point;
+    using refernce          = Point&;
+    using pointer           = std::shared_ptr<Point[]>;
+    using iterator_category = std::random_access_iterator_tag;
+    refernce operator*() {
+        return _ptr[_idx];
+    }
+    const refernce operator*() const {
+        return _ptr[_idx];
+    }
+    PolygonIterator& operator++() {
+        ++_idx;
+        if(_idx == _length) _idx = 0;
+        assert(check_idx());
+        return *this;
+    }
+    PolygonIterator operator++(int) {
+        auto ret = *this;
+        ++*this;
+        return ret;
+    }
+    PolygonIterator& operator--() {
+        if(_idx == 0) _idx = _length;
+        --_idx;
+        assert(check_idx());
+        return *this;
+    }
+    PolygonIterator operator--(int) {
+        auto ret = *this;
+        --*this;
+        return ret;
+    }
+    PolygonIterator& operator+=(diff_type _n) {
+        if(_n < 0) _n = _n % _length + _length;
+        _idx += _n;
+        if(_length <= _idx) _idx -= _length;
+        assert(check_idx());
+        return *this;
+    }
+    PolygonIterator  operator+(diff_type _n) const {
+        auto ret = *this;
+        ret += _n;
+        return ret;
+    }
+    PolygonIterator& operator-=(diff_type _n) {
+        return operator+=(-_n);
+    }
+    PolygonIterator  operator-(diff_type _n) const {
+        auto ret = *this;
+        ret -= _n;
+        return ret;
+    }
+    size_type operator- (const PolygonIterator &i) const {
+        auto ret = _idx - i._idx;
+        return ret < 0 ? ret + _length : ret;
+    }
+    bool operator==(const PolygonIterator &i) const noexcept {
+        return _ptr == i._ptr;
+    }
+    bool operator!=(const PolygonIterator &i) const noexcept {
+        return !(*this == i);
+    }
+    Point* operator->() const noexcept {
+        return &_ptr[_idx];
+    }
+    friend Polygon;
+    private:
+    size_type _idx;
+    const size_type _length;
+    pointer _ptr;
+    PolygonIterator(const Polygon *_parent, size_type _n = 0)
+    : _idx(_n),
+      _length(_parent->_num),
+      _ptr(_parent->_points) {
+        assert(check_idx());
+    }
+    bool check_idx() const noexcept {
+        return _idx <= _length;
+    }
+};
+PolygonIterator operator+(PolygonIterator::diff_type _n,
+                          const PolygonIterator& _p) {
+    return _p + _n;
+}
+PolygonIterator operator-(PolygonIterator::diff_type _n,
+                          const PolygonIterator& _p) {
+    return _p - _n;
+}
+PolygonIterator Polygon::begin() const {
+        return PolygonIterator(this);
+}
+PolygonIterator Polygon::end() const {
+        return PolygonIterator(this);
+}
+}
+}
+using namespace std;
+using namespace sapphre15::geometry;
+int main() {
+    int n; cin >> n;
+    vector<Point> buff(n);
+    for(auto &p : buff) cin >> p;
+    Polygon pl(buff);
+    int q; cin >> q;
+    vector<int> ans(q);
+    for(auto &i : ans) {
+        Point p; cin >> p;
+        if(pl.on_object(p)) i = 1;
+        else if(pl.inside(p)) i = 2;
+        else i = 0;
+    }
+    for(auto &i : ans) cout << i << endl;
+}

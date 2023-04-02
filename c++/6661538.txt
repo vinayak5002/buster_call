@@ -1,0 +1,61 @@
+#pragma GCC optimize("Ofast")
+#include <bits/stdc++.h>
+using namespace std;
+#ifdef __LOCAL
+ #include <debug>
+#else
+ #define debug(...) void(0)
+#endif
+
+#define REP(i,n) for(int i=0;i<(n);i++)
+#define ALL(v) v.begin(),v.end()
+
+template<typename T>
+istream& operator>>(istream&is,vector<T>&v){
+  for(T&p:v)is>>p;
+  return is;
+}
+template<typename T>
+ostream& operator<<(ostream&os,const vector<T>&v){
+  if(&os==&cerr)os<<"[";
+  for(int i=0;i<v.size();i++){
+    os<<v[i];
+    if(i+1<v.size())os<<(&os==&cerr?",":" ");
+  }
+  if(&os==&cerr)os<<"]";
+  return os;
+}
+
+
+bool in(const long long S,const int a){
+  return (S>>a)&1;
+}
+
+using ld=long double;
+const ld EPS=1e-10;
+
+int main(){
+  ios::sync_with_stdio(false);
+  cin.tie(nullptr);
+  cout<<fixed<<setprecision(12);
+
+  int n,m,p;cin>>n>>m>>p;
+  vector<int> u(m),v(m);
+  REP(i,m){
+    cin>>u[i]>>v[i];
+    u[i]--;v[i]--;
+  }
+  vector<ld> f(1<<n,1);//f[S]:Sが連結になる確率
+  REP(S,1<<n){
+    if(!in(S,0))continue;
+    for(int T=(S-1)&S;T>0;(--T)&=S){
+      if(!in(T,0))continue;
+      ld now=f[T];
+      REP(i,m)if(in(S,u[i]) and in(S,v[i]) and (in(T,u[i])^in(T,v[i])))
+        now*=ld(p)/100.0;
+      f[S]-=now;
+    }
+  }
+  debug(f);
+  cout<<f.back()<<endl;
+}

@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+template <class T> T prim(vector<vector<pair<int, T>>> &G) {
+    int N = (int)G.size();
+    vector<bool> used(N, false);
+    T res = 0;
+    priority_queue<pair<T, int>, vector<pair<T, int>>, greater<pair<T, int>>> que;
+    que.push({0, 0});  // {cost, vertex}
+    while (!que.empty()) {
+        auto [c, v] = que.top();
+        que.pop();
+        if (used[v]) continue;  // v is already in Tree
+        used[v] = true;
+        res += c;
+        for (auto &[nex, cost] : G[v]) {
+            que.push({cost, nex});
+        }
+    }
+    return res;
+}
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N, M;
+    cin >> N >> M;
+    V<V<pair<int, ll>>> G(N);
+    rep(i, M) {
+        int a, b;
+        ll c;
+        cin >> a >> b >> c;
+        G[a].push_back({b, c});
+        G[b].push_back({a, c});
+    }
+    ll res = prim<ll>(G);
+    cout << res << '\n';
+    return 0;
+}
+

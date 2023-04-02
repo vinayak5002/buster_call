@@ -1,0 +1,46 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+using ll = long long;
+using namespace std;
+ll MOD = pow(10, 9) + 7;
+ll modpow(ll a, ll n) {
+	ll val = 1;
+	while (n > 0) {
+		if (n & 1) val = val * a % MOD;
+		a = a * a % MOD;
+		n >>= 1;
+	}
+	return val;
+}
+ll doubling_modpow(ll a, ll n) {
+	ll logk = 1;
+	while (pow(2, logk) < n) logk++;
+	// doubling[k] : a^(2^k)
+	vector<ll> doubling(logk+1, 1);
+	doubling[0] = a;
+	for (ll i = 0; i <= logk; i++) {
+		if (i+1 > logk) continue;	
+		doubling[i+1] = doubling[i] * doubling[i] % MOD;
+	}
+	ll now = 1;
+	for (ll i = 0; n > 0; i++) {
+		if (n & 1) now = now * doubling[i] % MOD;
+		n >>= 1;
+	}
+	return now;
+}
+ll modpow2(ll a, ll n) {
+	if (n == 0) return 1;
+	ll temp = modpow2(a, n/2);
+	ll val = temp * temp % MOD;
+	if (n & 1) return val * a % MOD;
+	else return val;
+}
+int main() {
+	ll m, n; cin >> m >> n;
+	// cout << modpow(m, n) << endl;
+	cout << modpow2(m, n) << endl;
+	// cout<< doubling_modpow(m, n) << endl;
+}
+

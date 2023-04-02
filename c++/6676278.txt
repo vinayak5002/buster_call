@@ -1,0 +1,57 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+#include <bitset>
+#include <algorithm>
+using namespace std;
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n, k, b;
+	bitset<18> flag;
+	int num_all_subsets = 0;
+	vector<int> t;
+
+	cin >> n >> k;
+	for (int i = 0; i < k; i++) {
+		cin >> b;
+		t.push_back(b);
+	}
+
+	num_all_subsets = pow(2, n);
+	if (t.empty()) {
+		cout << "0:" << endl;
+	}
+	for (int i = 1; i < num_all_subsets; i++) {
+		flag = bitset<18>(i);
+		int num_subsets = flag.count();
+		vector<int> s;
+
+		for (int j = 0; j < 18; j++) {
+			bitset<18> mask;
+
+			mask.set(j);
+
+			if (flag.test(j) && mask.test(j)) {
+				s.push_back(j);
+			}
+		}
+		if (includes(s.begin(), s.end(), t.begin(), t.end())) {
+			cout << i << ":";
+			for (int j = 0; j < s.size(); j++) {
+				cout << " " << s[j];
+			}
+			cout << endl;
+		}
+	}
+	return 0;
+}

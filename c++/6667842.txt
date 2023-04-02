@@ -1,0 +1,149 @@
+#include <cstdio>
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <string>
+#include <map>
+#include <queue>
+#include <bitset>
+#include <vector>
+#include <stack>
+#include <cmath>
+#include <set>
+#include <cstdlib>
+#include <unordered_map>
+#include <random>
+#include <chrono>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/hash_policy.hpp>
+using namespace __gnu_pbds;
+#define lson tr[now].ls
+#define rson tr[now].rs
+#define debug() cout<<"qwq"<<endl
+#define mem(i,a) memset(i,a,sizeof(i))
+using namespace std;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double db;
+#define stop system("pause")
+typedef long double ldb;
+#define i128 __int128
+#define pii pair<int,int>
+const db eps=1e-10;
+const ll INF = 0x3f3f3f3f;
+const int siev =1000000+5;
+const int inf = 0x3f3f3f3f;
+const int DMAX = 1000000 + 100;
+const ll MOD = 32768;
+const ll LMOD = 1000000007;
+const int hmod = 202010923;
+mt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());
+template<class T> inline void print(T x){
+    if(x<0){
+        putchar('-');
+        x=-x;
+    }
+    int a[20];
+    int cnt=0;
+    do{
+        a[++cnt]=x%10;
+        x/=10;
+    }while(x>0);
+    for(int i=cnt;i>=1;i--){
+        putchar(a[i]+'0');
+    }
+    putchar('\n');
+    // puts("");
+}
+template<class T> inline void read(T &x){
+    x=0;
+    T f=1;
+    char ch=getchar();
+    while(ch<'0' || ch>'9'){
+        if(ch=='-'){
+            f=-1;
+        }
+        ch=getchar();
+    }
+    while(ch<='9' && ch>='0'){
+        x=x*10+(ch-'0');
+        ch=getchar();
+    }
+    x*=f;
+}
+struct Point{
+    double x,y;
+    Point(){}
+    Point(double x,double y): x(x),y(y){}
+    Point operator +(Point P){
+        return Point(x+P.x,y+P.y);
+    }
+    Point operator -(Point P){
+        return Point(x-P.x,y-P.y);
+    }
+    Point operator *(double k){
+        return Point(x*k,y*k);
+    }
+    Point operator /(double k){
+        return Point(x/k,y/k);
+    }
+};
+struct Line{
+    Point A,B;
+    Line(){}
+    Line(Point A,Point B): A(A),B(B){}
+};
+Point vec(Line L){
+    return L.B-L.A;
+}
+double abs(Point P){
+    return sqrt(P.x*P.x+P.y*P.y);
+}  
+double dot(Point A,Point B){
+    return A.x*B.x+A.y*B.y;
+} 
+double cross(Point A,Point B){
+    return A.x*B.y-A.y*B.x;
+}
+Point projection(Point P,Line L){
+    return L.A+vec(L)/abs(vec(L))*dot(P-L.A,vec(L))/abs(vec(L));
+}
+Point reflection(Point P,Line L){
+    Point H=projection(P,L);
+    Point R;
+    R=Point(2*H.x-P.x,2*H.y-P.y);
+    return R;
+}
+int main(){
+    Point P0,P1,P2;
+    cin>>P0.x>>P0.y;
+    cin>>P1.x>>P1.y;
+    int q;
+    read(q);
+    while(q--){
+        cin>>P2.x>>P2.y;
+        if(cross(P1-P0,P2-P0)>0){
+            printf("COUNTER_CLOCKWISE\n");
+            continue;
+        }
+        if(cross(P1-P0,P2-P0)<0){
+            printf("CLOCKWISE\n");
+            continue;
+        }
+        if(cross(P1-P0,P2-P0)==0){
+            if(dot(P1-P0,P2-P0)<0){
+                printf("ONLINE_BACK\n");
+                continue;
+            }
+            if(abs(P1-P0)<abs(P2-P0)){
+                printf("ONLINE_FRONT\n");
+                continue;
+            }
+            if(abs(P1-P0)>=abs(P2-P0)){
+                printf("ON_SEGMENT\n");
+                continue;
+            }
+        }
+    }
+    return 0;
+}

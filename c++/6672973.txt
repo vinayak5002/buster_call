@@ -1,0 +1,145 @@
+#include<iostream>
+using namespace std;
+#include<map>
+struct temper
+{
+    int pos[4][4];
+    int aimPos_i,aimPos_j;
+    string step =" ";
+    int steps=0;
+    bool operator < (const temper &next) const{
+        for (int i = 1; i < 4; i++)
+            for (int j = 1; j < 4; j++)
+            {
+                if (this->pos[i][j] == next.pos[i][j])
+                    continue;
+                return this->pos[i][j] < next.pos[i][j];
+            }
+        return false;
+    }
+};
+
+typedef struct QNode
+{
+    temper data;
+    struct QNode *next;
+}QNode,* QueuePtr;
+typedef struct
+{
+    QueuePtr front;
+    QueuePtr rear;
+}LinkQueue;
+void InitQueue(LinkQueue &S){
+    S.front = S.rear = new QNode;
+    S.front->next = NULL;
+}
+void Push(LinkQueue &S,temper e){
+    QNode *p = new QNode;
+    p->data = e;
+    p->next = NULL;S.rear->next = p;
+    S.rear = p;
+}
+bool DeQueue(LinkQueue &S,temper &e){
+    if (S.front == S.rear) return false;
+    QNode *p = S.front->next;
+    e = p->data;
+    S.front->next = p->next;
+    if (S.rear == p) S.rear = S.front;
+    delete p;
+    return true;
+}
+bool IsEmpty(LinkQueue S){
+    if (S.front == S.rear) return true;
+    return false;
+}
+int di[4] =  {1,-1,0,0};
+int dj[4] =  {0,0,-1,1};
+char fx[4] = {'D','U','L','R'};
+
+
+void CreatAns(temper &ans){
+    int n=1;
+    for (int i = 1; i < 4; i++)
+    {
+        for (int j = 1; j < 4; j++){
+            ans.pos[i][j] = n++;
+        }
+    }
+    ans.pos[3][3] = 0;
+};
+
+bool IsTrue(temper now,const temper ans){
+    for (int i = 1; i < 4; i++)
+        for (int j = 1; j < 4; j++)
+        {
+            if (now.pos[i][j] != ans.pos[i][j]) return false;
+        }
+
+    return true;
+};
+
+temper BFS(temper &init,temper ans){
+  
+    map<temper,bool> repeatintion;
+    LinkQueue S;
+    InitQueue(S);              
+    repeatintion[init] = true; 
+    Push(S,init);             
+    while (!IsEmpty(S))     
+    {
+        temper now; 
+        DeQueue(S,now);             
+        if (IsTrue(now,ans))   
+        {   cout << now.step.size() - 1 << endl;
+        return now;
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            temper next = now;  
+            next.aimPos_i = now.aimPos_i + di[i];
+            next.aimPos_j = now.aimPos_j + dj[i];
+            
+            if (next.aimPos_i < 1 || next.aimPos_i > 3 || next.aimPos_j > 3 ||next.aimPos_j < 1 )   
+            {
+            continue;
+            }
+
+            next.pos[now.aimPos_i][now.aimPos_j] = next.pos[next.aimPos_i][next.aimPos_j];
+            next.pos[next.aimPos_i][next.aimPos_j] = 0;
+            
+            if ((repeatintion[next]) != true){        //保存在hash里面的是next，还是next.pos  应该判断的是pos，所以这样保存到hash中对吗
+   
+        
+                next.step += fx[i];
+                Push(S,next);
+                repeatintion[next] = true;
+                }
+        }
+    }
+
+    return  init;
+};
+
+int main(){
+    temper init;
+    temper ans;
+    temper  end;
+
+    for (int i = 1; i < 4; i++)
+    {
+        for (int j = 1; j < 4; j++)
+        {
+            cin>>init.pos[i][j];
+            if (init.pos[i][j] == 0)
+            {
+                init.aimPos_i = i;
+                init.aimPos_j = j;
+            }
+        }
+    }
+    CreatAns(ans);
+ BFS(init,ans);
+
+
+    return 0;
+}

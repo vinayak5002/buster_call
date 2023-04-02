@@ -1,0 +1,51 @@
+// #define _GLIBCXX_DEBUG
+
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define LLMAX numeric_limits<ll>::max()
+#define LLMIN numeric_limits<ll>::min()
+#define INTMAX numeric_limits<int>::max()
+#define INTMIN numeric_limits<int>::min()
+#define rep(i, n) for (decltype(n) i = 0; i < (n); i++)
+#define rep1(i, n) for (decltype(n) i = 1; i <= (n); i++)
+#define rep2(i, k, n) for (decltype(n) i = k; i <= (n); i++)
+#define repr(i, n) for (decltype(n) i = (n)-1; i >= 0; i--)
+#define repr1(i, n) for (decltype(n) i = (n); i > 0; i--)
+#define repr2(i, k, n) for (decltype(n) i = n; i >= k; i--)
+auto chmax = [](auto& a, auto b) {bool ret=a<b; if(ret)a=b; return ret;};
+auto chmin = [](auto& a, auto b) {bool ret=a>b; if(ret)a=b; return ret;};
+template<typename T> using pq_inv = priority_queue<T, vector<T>, greater<T>>;
+
+
+
+struct Solver{
+    void solve(){
+        int n,m;
+        cin >> n >> m;
+        vector<vector<int>> dp(m+1,vector<int>(n+1,1<<30));
+        dp[0][0]=0;
+        vector<int>C(m);
+        rep(i,m) cin >> C[i];
+        for(int i=0; i<m; i++){
+            for(int j=0; j<=n; j++){
+                chmin(dp[i+1][j], dp[i][j]);
+                if(j+C[i]<=n){
+                    chmin(dp[i][j+C[i]], dp[i][j]+1);
+                    chmin(dp[i+1][j+C[i]], dp[i][j]+1);
+                }
+            }
+        }
+        cout << dp[m][n] << endl;
+        
+    };
+};
+
+int main() {
+    std::cin.tie(nullptr);
+    Solver solver;
+    solver.solve();
+    return 0;
+}
+
+

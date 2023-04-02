@@ -1,0 +1,163 @@
+#include "iostream"
+#include "climits"
+#include "list"
+#include "queue"
+#include "stack"
+#include "set"
+#include "functional"
+#include "algorithm"
+#include "string"
+#include "map"
+#include "unordered_map"
+#include "unordered_set"
+#include "iomanip"
+#include "cmath"
+#include "random"
+#include "bitset"
+#include "cstdio"
+#include "numeric"
+#include "cassert"
+#include "ctime"
+
+using namespace std;
+
+//constexpr long long int MOD = 1000000007;
+constexpr long long int MOD = 998244353;
+constexpr double EPS = 1e-8;
+
+//int N, M, K, T, H, W, L, R;
+long long int N, M, K, T, H, W, L, R;
+
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(0);
+
+	while (cin >> N, N) {
+		vector<int>x(N);
+		vector<int>y(N);
+		vector<int>h(N);
+		cin >> M >> H >> L;
+		map<int, int>xp;
+		map<int, int>yp;
+		for (int i = 0; i < N; i++) {
+			cin >> x[i] >> y[i] >> h[i];
+			xp[x[i]] = 0;
+			yp[y[i]] = 0;
+		}
+		vector<int>l(M);
+		vector<int>r(M);
+		vector<int>d(M);
+		vector<int>u(M);
+		vector<int>up(M);
+		for (int i = 0; i < M; i++) {
+			cin >> l[i] >> d[i] >> r[i] >> u[i] >> up[i];
+			xp[l[i]] = 0;
+			xp[r[i]] = 0;
+			yp[d[i]] = 0;
+			yp[u[i]] = 0;
+		}
+		vector<int>X;
+		vector<int>Y;
+		for (auto i : xp) {
+			for (auto j : yp) {
+				X.push_back(i.first);
+				Y.push_back(j.first);
+			}
+		}
+		for (auto i : xp) {
+			for (int j = 0; j < M; j++) {
+				{
+					bool ok = true;
+					int ny = d[j] - 1;
+					if (ny <= 0)ok = false;
+					for (int k = 0; k < M; k++) {
+						ok &= !(up[k] == H && l[k] <= i.first && i.first <= r[k] && d[k] <= ny && ny <= u[k]);
+					}
+					if (ok) {
+						X.push_back(i.first);
+						Y.push_back(ny);
+					}
+				}
+				{
+					bool ok = true;
+					int ny = u[j] + 1;
+					if (ny > L)ok = false;
+					for (int k = 0; k < M; k++) {
+						ok &= !(up[k] == H && l[k] <= i.first && i.first <= r[k] && d[k] <= ny && ny <= u[k]);
+					}
+					if (ok) {
+						X.push_back(i.first);
+						Y.push_back(ny);
+					}
+				}
+			}
+		}
+		for (auto i : yp) {
+			for (int j = 0; j < M; j++) {
+				{
+					bool ok = true;
+					int nx = l[j] - 1;
+					if (nx <= 0)ok = false;
+					for (int k = 0; k < M; k++) {
+						ok &= !(up[k] == H && d[k] <= i.first && i.first <= u[k] && l[k] <= nx && nx <= r[k]);
+					}
+					if (ok) {
+						Y.push_back(i.first);
+						X.push_back(nx);
+					}
+				}
+				{
+					bool ok = true;
+					int nx = r[j] + 1;
+					if (nx > L)ok = false;
+					for (int k = 0; k < M; k++) {
+						ok &= !(up[k] == H && d[k] <= i.first && i.first <= u[k] && l[k] <= nx && nx <= r[k]);
+					}
+					if (ok) {
+						Y.push_back(i.first);
+						X.push_back(nx);
+					}
+				}
+			}
+		}
+		vector<long long>sum(X.size());
+		for (int i = 0; i < N; i++) {
+			vector<vector<int>>dis(K + 1, vector<int>(X.size(), MOD));
+			priority_queue<pair<long long, pair<int, int>>, vector<pair<long long, pair<int, int>>>, greater<pair<long long, pair<int, int>>>>PQ;
+			for (int j = 0; j < X.size(); j++) {
+				if (X[j] == x[i] && Y[j] == y[i]) {
+					dis[h[i]][j] = 0;
+					PQ.push({ 0,{h[i],j} });
+				}
+			}
+			while (!PQ.empty()) {
+				long long c = PQ.top().first;
+				int ch = PQ.top().second.first;
+				int cp = PQ.top().second.second;
+				PQ.pop();
+				if (dis[ch][cp] < c)continue;
+				for (int j = 0; j < X.size(); j++) {
+					int add = abs(X[cp] - X[j]) + abs(Y[cp] - Y[j]);
+					if (dis[ch][j] > c + add) {
+						dis[ch][j] = c + add;
+						PQ.push({ dis[ch][j],{ch,j} });
+					}
+				}
+				bool ok = false;
+				for (int j = 0; j < M; j++) {
+					if (up[j] == ch + 1 && l[j] <= X[cp] && X[cp] <= r[j] && d[j] <= Y[cp] && Y[cp] <= u[j]) {
+						ok = true;
+						break;
+					}
+				}
+				if (ok) {
+					if (dis[ch + 1][cp] > c + 100) {
+						dis[ch + 1][cp] = c + 100;
+						PQ.push({ c + 100,{ch + 1,cp} });
+					}
+				}
+			}
+		}
+		cout << *min_element(sum.begin(), sum.end()) << endl;
+	}
+}

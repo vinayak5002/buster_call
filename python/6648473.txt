@@ -1,0 +1,87 @@
+/*
+    Idea: aplicar el algoritmo de TSP
+    Para ello:
+        - Leemos los costos de viajar desde i a j (escapamos los casos cuando i==j)
+        - Sea m una mascara de 2^(n+1) bits
+        - construimos el dp[u][m] que es el costo minimo de viajar hasta u y volver a 0 sin tomar en cuenta los
+        elementos de m
+
+    Complejidad: O(2^n *n^2)
+*/
+
+
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef vector<int> vi;
+typedef vector<pii> vpii;
+
+#define F first
+#define S second
+#define PB push_back
+#define MP make_pair
+#define read(x) int x; cin >> x
+#define mem(a,b) memset(a, b, sizeof(a)); // matrix a value b 
+#define SQ(a) (a)*(a)
+#define all(x) begin(x), end(x)
+#define sz(x) (ll)(x).size()
+#define FOR(i,a,b) for(ll i=(a);i<(b);i++)
+#define ROF(i,a,b) for(ll i=(a);i>(b);i--)
+#define FORE(i,a,b) for(ll i=(a);i<=(b);i++)
+#define ROFE(i,a,b) for(ll i=(a);i>=(b);i--)
+#define FASTIO ios_base::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+
+const int N = 15+1;
+const int INF = 1e9;
+int nv, ne, limit;
+int cost[N][N];
+ll dp[N][1<<N]; //dp termina en i
+ll best, u_b;
+
+int main() {
+    
+    cin >> nv >> ne;
+
+    FOR(i, 0, nv) FOR(j, 0, nv) cost[i][j] = INF;
+    
+    FOR(i, 0, ne) {
+        int a, b, c;
+        cin >> a >> b >> c;
+        cost[a][b] = c;
+    }
+    limit = (1<< nv);
+    best = INF;
+    FOR (s, 0, nv) {
+        ROFE(m, limit-1, 0) {
+            FOR(u, 0, nv) {
+                if (m == (limit -1)) {
+                    dp[u][m] = cost[u][s];
+                    continue;
+                }
+                dp[u][m] = INF;
+                FOR(op, 0, nv) {
+                    if (m & (1<<op)) continue; // si esta en la lista de los prohibidos
+                    dp[u][m] = min(dp[u][m], dp[op][m | (1<<op)] + cost[op][u]);
+                }
+            }
+        }
+        // FOR(i, 0, nv) {
+        //     FOR(j, 0, limit) {
+        //         if (dp[i][j] >= INF) cout << "IN ";
+        //         else cout << dp[i][j] << " ";
+        //     }
+        //     cout << "\n";
+        // }
+        // cout << "---\n";
+        best = min (best, dp[s][1]);
+
+    }
+
+    
+    // best = INF;
+
+
+    if (best >= INF) cout << "-1\n";
+    else cout << best << "\n";
+}

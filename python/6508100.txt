@@ -1,0 +1,40 @@
+rxs = lambda: map(int, input().split())
+N, Q = rxs()
+Qs = [tuple(rxs()) for _ in range(Q)]
+
+m = 1
+while m < N:
+    m *= 2
+
+tree = [None] * (2*m-1)
+tree[0] = (1<<31)-1
+
+def update(s, t, x, node=0, lft=0, rht=m):
+    assert s != t, f"{2*m-1}, {node}, {(lft,rht)}, {(s, t)}"
+    assert lft != rht, f"{2*m-1}, {node}, {(lft,rht)}, {(s, t)}"
+    if rht <= s or t <= lft: return
+    if s <= lft and rht <= t:
+        tree[node] = x
+        return
+    assert lft + 1 < rht, f"{2*m-1}, {node}, {(lft,rht)}, {(s, t)}"
+    mid = (lft+rht)//2
+    if tree[node] != None:
+        update(lft, mid, tree[node], 2*node+1, lft, mid)
+        update(mid, rht, tree[node], 2*node+2, mid, rht)
+        tree[node] = None
+    update(s, t, x, 2*node+1, lft, mid)
+    update(s, t, x, 2*node+2, mid, rht)
+    return
+
+def find(s, node=0, lft=0, rht=m):
+    if s < lft or rht <= s: return None
+    if tree[node] != None: return tree[node]
+    mid = (lft+rht)//2
+    a = find(s, node*2+1, lft, mid)
+    return a if a is not None else find(s, node*2+2, mid, rht)
+
+for q in Qs:
+    if q[0] == 0: update(q[1], q[2]+1, q[3])
+    else: print(find(q[1]))
+
+

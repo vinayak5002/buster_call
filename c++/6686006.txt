@@ -1,0 +1,56 @@
+#include<stdio.h>
+#include<string.h>
+#include<ctype.h>
+
+void shift(char *arr);
+
+int check(char *arr1,char *arr2);
+
+int main(){
+	char line[81]={"\0"},lines[20][81]={"\0"},The[4]="the",This[5]="this",That[5]="that";
+	int count=0,i=0,time=0;
+	
+	while(fgets(line,80,stdin)!=NULL){
+		while((check(line,The)==0)&&(check(line,This)==0)&&(check(line,That)==0)){
+			shift(line);
+		}
+		strcpy(lines[count],line);
+		count++;
+	}
+	for(int i=0;i<=count;i++){
+		puts(lines[i]);
+	}
+}
+
+void shift(char *arr){
+	char alphabet[28]="abcdefghijklmnopqrstuvwxyza";
+	int length=strlen(arr);
+	
+	for(int i=0;i<length;i++){
+		if(isalpha(arr[i])!=0){
+			for(int j=0;j<26;j++){
+				if(arr[i]==alphabet[j]){
+					arr[i]=alphabet[j+1];
+					break;
+				}
+			}
+		}
+	}
+}
+
+int check(char *arr1,char *arr2){
+	int length1=strlen(arr1),length2=strlen(arr2),outcome=0;
+	char test[length2+1];
+	for(int i=0;i<length1;i++){
+		if((arr1[i]=='t')&&(isalpha(arr1[i-1])==0)&&(isalpha(arr1[i+length2])==0)){
+			for(int j=0;j<length2;j++){
+				test[j]=arr1[i+j];
+			}
+			if(strcmp(test,arr2)==1){
+				outcome=1;
+				break;
+			}
+		}
+	}
+	return outcome;
+}

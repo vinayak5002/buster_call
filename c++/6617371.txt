@@ -1,0 +1,184 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <queue>
+#include <array>
+#include <algorithm>
+#include <numeric>
+#include <unordered_map>
+#include <unordered_set>
+#include <map>
+#include <set>
+#include <cassert>
+#include <iterator>
+#include <random>
+#include <stack>
+
+long long int solve(const int n, const int m, const std::vector<std::tuple<int, int, int>> edges) {
+	std::vector<std::tuple<int, int, int>> unused;
+	std::vector<std::vector<std::pair<int, int>>> tree(n);
+	std::vector<bool> visit(n, false);
+	std::vector<int> depth(n, 0);
+	{
+		std::vector<std::vector<std::pair<int, int>>> graph(n);
+		for (const auto [a, b, c] : edges) {
+			graph[a].emplace_back(b, c);
+		}
+		std::queue<int> queue;
+		visit[0] = true;
+		queue.push(0);
+		while (!queue.empty()) {
+			const auto top = queue.front(); queue.pop();
+			for (const auto [to, c] : graph[top]) {
+				if (visit[to]) {
+					unused.emplace_back(top, to, c);
+				}
+				else {
+					tree[top].emplace_back(to, c);
+					visit[to] = true;
+					depth[to] = depth[top] + c;
+					queue.push(to);
+				}
+			}
+		}
+	}
+	std::vector<int> all_unused;
+	for (const auto [a, b, _] : unused) {
+		all_unused.push_back(a);
+		all_unused.push_back(b);
+	}
+	std::sort(all_unused.begin(), all_unused.end()); all_unused.erase(std::unique(all_unused.begin(), all_unused.end()), all_unused.end());
+	std::vector<int> in_order(n), out_order(n), nearest_unuse(n, -1);
+	{
+		for (auto i = 0; i < all_unused.size(); ++i) {
+			nearest_unuse[all_unused[i]] = i;
+		}
+		int order{ 0 };
+		std::stack<int> stack;
+		std::fill(visit.begin(), visit.end(), false);
+		stack.push(0);
+		while (!stack.empty()) {
+			const auto top = stack.top(); stack.pop();
+			if (top >= 0) {
+				if (visit[top]) continue;
+				visit[top] = true;
+				in_order[top] = order++;
+				stack.push(-1 - top);
+				for (const auto [to, c] : tree[top]) {
+					if (visit[to]) continue;
+					stack.push(to);
+					if (nearest_unuse[to] >= 0 && all_unused[nearest_unuse[to]] == to) continue;
+					nearest_unuse[to] = nearest_unuse[top];
+				}
+			}
+			else {
+				out_order[-1 - top] = order;
+			}
+		}
+	}
+	const auto is_parent = [&in_order, &out_order](const int a, const int b) {
+		return in_order[a] <= in_order[b] && out_order[b] <= out_order[a];
+	};
+	std::vector<std::vector<long long int>> unused_distance(all_unused.size(), std::vector<long long int>(all_unused.size(), LLONG_MAX));
+	{
+		std::vector<std::vector<std::pair<int, int>>> graph(all_unused.size());
+		for (const auto [a, b, c] : unused) {
+			const auto i = std::distance(all_unused.begin(), std::lower_bound(all_unused.begin(), all_unused.end(), a));
+			const auto j = std::distance(all_unused.begin(), std::lower_bound(all_unused.begin(), all_unused.end(), b));
+			graph[i].emplace_back(j, c);
+		}
+		for (auto i = 0; i < all_unused.size(); ++i) {
+			int parent{ -1 };
+			for (auto j = 0; j < all_unused.size(); ++j) {
+				if (i == j) continue;
+				if (!is_parent(all_unused[j], all_unused[i])) continue;
+				if (parent == -1 || depth[all_unused[parent]] < depth[all_unused[j]]) {
+					parent = j;
+				}
+			}
+			if (parent >= 0)
+				graph[parent].emplace_back(i, depth[all_unused[i]] - depth[all_unused[parent]]);
+		}
+		const auto comparator = [](const auto a, const auto b) {return a.second > b.second; };
+		std::priority_queue<std::pair<int, long long int>, std::vector<std::pair<int, long long int>>, decltype(comparator)> queue(comparator);
+		for (auto i = 0; i < all_unused.size(); ++i) {
+			auto& min_distance = unused_distance[i];
+			min_distance[i] = 0;
+			queue.emplace(i, 0);
+			while (!queue.empty()) {
+				const auto [top, cost] = queue.top(); queue.pop();
+				if (min_distance[top] < cost) continue;
+				for (const auto [to, c] : graph[top]) {
+					if (min_distance[to] > cost + c) {
+						min_distance[to] = cost + c;
+						queue.emplace(to, cost + c);
+					}
+				}
+			}
+		}
+	}
+	long long int result{ 0 };
+	for (auto i = 0; i < n; ++i) {
+		const auto j = (i + 1) % n;
+		long long int current{ LLONG_MAX };
+		if (is_parent(i, j)) {
+			current = std::min<long long int>(current, depth[j] - depth[i]);
+		}
+		if (nearest_unuse[j] >= 0) {
+			const auto k = nearest_unuse[j];
+			const long long int k_to_j = depth[j] - depth[all_unused[k]];
+			for (auto l = 0; l < all_unused.size(); ++l) {
+				const auto m = all_unused[l];
+				if (!is_parent(i, m) || unused_distance[l][k] == LLONG_MAX) continue;
+				const auto i_to_l = depth[m] - depth[i];
+				const auto cost = i_to_l + unused_distance[l][k] + k_to_j;
+				current = std::min(current, cost);
+			}
+		}
+		if (current == LLONG_MAX) {
+			return -1;
+		}
+		result += current;
+	}
+	return result;
+}
+
+long long int brute(const int n, const int m, const std::vector<std::tuple<int, int, int>> edges) {
+	std::vector<std::vector<std::pair<int, int>>> graph(n);
+	for (const auto [a, b, c] : edges) {
+		graph[a].emplace_back(b, c);
+	}
+	const auto comparator = [](const auto a, const auto b) {return a.second > b.second; };
+	std::priority_queue<std::pair<int, long long int>, std::vector<std::pair<int, long long int>>, decltype(comparator)> queue(comparator);
+	long long int result{ 0 };
+	for (auto i = 0; i < n; ++i) {
+		const auto j = (i + 1) % n;
+		std::vector<long long int> min_distance(n, LLONG_MAX);
+		min_distance[i] = 0;
+		queue.emplace(i, 0);
+		while (!queue.empty()) {
+			const auto [top, cost] = queue.top(); queue.pop();
+			if (min_distance[top] < cost) continue;
+			for (const auto [to, c] : graph[top]) {
+				if (min_distance[to] > cost + c) {
+					min_distance[to] = cost + c;
+					queue.emplace(to, cost + c);
+				}
+			}
+		}
+		if (min_distance[j] == LLONG_MAX) {
+			return -1;
+		}
+		result += min_distance[j];
+	}
+	return result;
+}
+int main() {
+	int n, m; std::cin >> n >> m;
+	std::vector<std::tuple<int, int, int>> edges(m);
+	for (auto& [a, b, c] : edges) {
+		std::cin >> a >> b >> c; --a; --b;
+	}
+	std::cout << solve(n, m, edges) << '\n';
+}
+

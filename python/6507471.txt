@@ -1,0 +1,71 @@
+import java.util.*;
+
+public class Main {
+    static Scanner sc = new Scanner(System.in);
+    static Map<Integer, List<Character>> stableMap = new HashMap<>();
+    public static void main(String[] args) {
+        int n = getInt();
+        Card[] cards = new Card[n];
+        Arrays.setAll(cards, dummy -> new Card(sc.next().charAt(0), getInt()));
+        for (Card card : cards) {
+            stableMap.putIfAbsent(card.num, new ArrayList<>());
+            stableMap.get(card.num).add(card.mark);
+        }
+        quickSort(cards, 0, cards.length-1);
+        System.out.println(isStable(cards) ? "Stable" : "Not Stable");
+        Arrays.stream(cards).forEach(System.out::println);
+    }
+
+    static int getInt() {
+        return Integer.parseInt(sc.next());
+    }
+
+    static boolean isStable(Card[] A) {
+        Map<Integer, List<Character>> checkMap = new HashMap<>();
+        boolean res = true;
+        for (Card card : A) {
+            checkMap.putIfAbsent(card.num, new ArrayList<>());
+            checkMap.get(card.num).add(card.mark);
+        }
+        for (int key : checkMap.keySet()) {
+            res = res && checkMap.get(key).equals(stableMap.get(key));
+        }
+        return res;
+    }
+
+    static class Card {
+        char mark;
+        int num;
+        public Card(char mark, int num) {
+            this.mark = mark;
+            this.num = num;
+        }
+        @Override
+        public String toString() {
+            return String.format("%c %d", mark, num);
+        }
+    }
+
+    static void quickSort(Card[] A, int p, int r) {
+        if (p < r) {
+            int q = partition(A, p, r);
+            quickSort(A, p, q-1);
+            quickSort(A, q+1, r);
+        }
+    }
+
+    static int partition(Card[] A, int p, int r) {
+        int store = p;
+        for (int i = p; i < r; i++) {
+            if (A[i].num <= A[r].num) {
+                Card tmp = A[i];
+                A[i] = A[store];
+                A[store++] = tmp;
+            }
+        }
+        Card tmp = A[store];
+        A[store] = A[r];
+        A[r] = tmp;
+        return store;
+    }
+}

@@ -1,0 +1,72 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <string>
+#include <vector>
+#include <queue>
+using namespace std;
+
+
+void bfs(const vector<vector<int> > &adjacency_list, vector<int> &component_number, int i, int c){
+	queue<int> que;
+
+	que.push(i);
+	component_number[i] = c;
+	while(!que.empty()){
+		int v = que.front(); que.pop();
+		
+		for(const int& u : adjacency_list[v]){
+			if(component_number[u] < 0){
+				component_number[u] = c;
+				que.push(u);
+			}
+		}
+	}
+	return;
+}
+
+
+int main(){
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n, m, u, v, q, s, t;
+	vector<vector<int> > adjacency_list;
+	vector<int> component_number;
+	int c = 0;
+
+	cin >> n >> m;
+	adjacency_list.resize(n);
+	component_number.resize(n, -1);
+	for(int i = 0; i < m; i++){
+		cin >> u >> v;
+		adjacency_list[u].push_back(v);
+		adjacency_list[v].push_back(u);
+	}
+
+	for(int i = 0; i < n; i++){
+		if(component_number[i] < 0){
+			bfs(adjacency_list, component_number, i, c);
+			c++;
+		}
+	}
+
+	cin >> q;
+	for(int i = 0; i < q; i++){
+		cin >> s >> t;
+		if(component_number[s] == component_number[t]){
+			cout << "yes" << endl;
+		}
+		else{
+			cout << "no" << endl;
+		}
+	}
+	return 0;
+}
+
+

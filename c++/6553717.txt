@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using P=pair<int,int>;
+int n,m;
+vector<P> g[16];
+int dis[16][16];
+bool memo[16];
+const int INF=1<<30;
+
+int rec(int v,int l,int cnt){
+    if(cnt==n){
+        if(dis[v][0]) return dis[v][0]+l;
+        return INF;
+    }
+    int ans=INF;
+    for(P p:g[v]){
+        int u=p.first;
+        if(memo[u])continue;
+        memo[u]=1;
+        ans=min(ans,rec(u,l+p.second,cnt+1));
+        memo[u]=0;
+    }
+    return ans;
+}
+
+int main() {
+    cin>>n>>m;
+    for(int i=0;i<m;i++){
+        int x,y,w;
+        cin>>x>>y>>w;
+        g[x].emplace_back(y,w);
+        dis[x][y]=w;
+    }
+    memo[0]=1;
+    int ans=rec(0,0,1);
+    if(ans==INF)cout<<-1<<endl;
+    else cout<<ans<<endl;
+}

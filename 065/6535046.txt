@@ -1,0 +1,52 @@
+use std::io;
+use std::io::Read;
+
+fn main() {
+    let mut buf = String::new();
+    io::stdin().read_to_string(&mut buf).unwrap();
+    let mut iter = buf.split_whitespace();
+
+    let n: usize = iter.next().unwrap().parse().unwrap();
+    let p: i32 = iter.next().unwrap().parse().unwrap();
+    let q: i32 = iter.next().unwrap().parse().unwrap();
+
+    let mut c: Vec<i32> = Vec::with_capacity(n);
+    let mut c_iq_p: Vec<(i32, usize)> = Vec::with_capacity(n);
+
+    for i in 0..n {
+        let c_i: i32 = iter.next().unwrap().parse().unwrap();
+        c.push(c_i);
+        c_iq_p.push((c_i + (i as i32 - q) * p, i));
+    }
+
+    c_iq_p.sort();
+
+    let mut jisui: Vec<bool> = Vec::with_capacity(n);
+    jisui.resize(n, false);
+
+    for d in 0..n {
+        if c_iq_p[d].0 > 2 * (d as i32 + 1) * p {
+            break;
+        } else {
+            jisui[c_iq_p[d].1] = true;
+        }
+    }
+
+    println!("{}", calc(n, p, q, &c, &jisui));
+}
+
+fn calc(n: usize, p: i32, q: i32, c: &Vec<i32>, jisui: &Vec<bool>) -> i32 {
+    let mut ans = 0;
+    let mut q_ = q;
+    for i in 0..n {
+        if jisui[i] {
+            ans += q_ * p;
+            q_ += 1
+        } else {
+            ans += c[i];
+            q_ -= 1
+        }
+    }
+    return ans;
+}
+

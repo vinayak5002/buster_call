@@ -1,0 +1,41 @@
+// 全点対間最短経路
+// 2022 04 27
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i,n) for (int i = 0; i < (n); ++i)
+template<class t,class u> bool chmin(t&a,u b){if(b<a){a=b;return true;}else return false;}
+
+const int INF = 1001001001;
+const ll LINF = 1001001001001001001;
+
+int main(){
+    int V, E;
+    cin >> V >> E;
+    vector<vector<int>> G(V, vector<int>(V, INF)); // 隣接行列
+    rep(i,V) G[i][i] = 0;
+    rep(i,E) {
+        int s, t;
+        int d;
+        cin >> s >> t >> d;
+        G[s][t] = d;
+    }
+
+    rep(k,V) rep(i,V) rep(j,V) {
+        if (G[i][k] == INF || G[k][j] == INF) continue;
+        chmin(G[i][j], G[i][k] + G[k][j]);
+    }
+    
+    rep(i,V) if (G[i][i] < 0) {
+        cout << "NEGATIVE CYCLE" << endl;
+        return 0;
+    }
+
+    rep(i,V) rep(j,V) {
+        if (G[i][j] < INF) cout << G[i][j];
+        else cout << "INF";
+        if (j == V-1) cout << endl;
+        else cout << " ";
+    }
+    return 0;
+} 

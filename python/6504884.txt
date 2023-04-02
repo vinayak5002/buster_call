@@ -1,0 +1,90 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+
+	const n = parseInt(si[0].split("\n"));
+	let array = si[1].split(" ");
+	let input_array = '';
+	let before_array = '';
+	let after_array = '';
+	
+	//set input_array
+	for (let i = 0; i < n; i++) {
+		input_array += array[i];
+		if (i < n - 1) {
+			input_array += ' ';
+		}
+	}
+	
+	//find before_array
+	let head_array = array.slice();
+	let tail_array = [];
+	for (let i = n - 1; i > 0; i--) {
+		if (array[i - 1] < array[i]) {
+			tail_array.push(head_array.splice(i,1));
+		} else {
+			tail_array.push(head_array.splice(i,1));
+			tail_array.sort(function(a, b) {	//降順ソート
+				return b - a;
+			});
+			for (let j = 0; j < tail_array.length; j++) {
+				if (head_array[i - 1] > tail_array[j]) {
+					head_array[i - 1] = tail_array[j];
+					tail_array[j] = array[i - 1];
+					break;
+				}
+			}
+			head_array = head_array.concat(tail_array);
+			for (let j = 0; j < n; j++) {
+				before_array += head_array[j];
+				if (j < n - 1) {
+					before_array += ' ';
+				}
+			}
+			break;
+		}
+	}
+	
+	//find after_array
+	head_array = array.slice();
+	tail_array = [];
+	for (let i = n - 1; i > 0; i--) {
+		if (array[i - 1] > array[i]) {
+			tail_array.push(head_array.splice(i,1));
+		} else {
+			tail_array.push(head_array.splice(i,1));
+			tail_array.sort(function(a, b) {	//昇順ソート
+				return  a - b;
+			});
+			for (let j = 0; j < tail_array.length; j++) {
+				if (head_array[i - 1] < tail_array[j]) {
+					head_array[i - 1] = tail_array[j];
+					tail_array[j] = array[i - 1];
+					break;
+				}
+			}
+			head_array = head_array.concat(tail_array);
+			for (let j = 0; j < n; j++) {
+				after_array += head_array[j];
+				if (j < n - 1) {
+					after_array += ' ';
+				}
+			}
+			break;
+		}
+	}
+	
+	let ans = '';
+	if (before_array) {
+		ans += before_array + '\n';
+	}
+	ans += input_array + '\n';
+	if (after_array) {
+		ans += after_array + '\n';
+	}
+	
+	so.write(ans);
+	
+}

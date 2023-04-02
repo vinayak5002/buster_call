@@ -1,0 +1,145 @@
+import sys
+from collections import Counter
+from string import ascii_letters, digits
+readline = sys.stdin.readline
+write = sys.stdout.write
+
+S = digits + ascii_letters
+
+class RollingHash():
+    def __init__(self, s, base, mod):
+        self.mod = mod
+        self.pw = pw = [1]*(len(s)+1)
+
+        l = len(s)
+        self.h = h = [0]*(l+1)
+
+        v = 0
+        for i in range(l):
+            h[i+1] = v = (v * base + S.index(s[i])) % mod
+        v = 1
+        for i in range(l):
+            pw[i+1] = v = v * base % mod
+    def get(self, l, r):
+        return (self.h[r] - self.h[l] * self.pw[r-l]) % self.mod
+
+def chr_compression(s):
+    uniq = list(set(s))
+    uniq.sort()
+    return list(map({e: i+1 for i, e in enumerate(uniq)}.__getitem__, s)), len(uniq)
+def SAIS(lst, num):
+    l = len(lst)
+    if l < 2:
+        return lst + [0]
+    lst = lst + [0]
+    l += 1
+    res = [-1] * l
+    t = [1] * l
+    for i in range(l-2, -1, -1):
+        t[i] = 1 if (lst[i] < lst[i+1] or (lst[i] == lst[i+1] and t[i+1])) else 0
+    isLMS = [t[i-1]<t[i] for i in range(l)]
+    LMS = [i for i in range(1, l) if t[i-1] < t[i]]
+    LMSn = len(LMS)
+
+    cbase = Counter(lst)
+    count = cbase.copy()
+    tmp = 0
+    cstart = [0]*(num+1); cend = [0]*(num+1)
+    for key in range(num+1):
+        cstart[key] = tmp
+        count[key] += tmp
+        cend[key] = tmp = count[key]
+
+    cs_it = [iter(range(s, e)) for s, e in zip(cstart, cend)]
+    ce_it = [iter(range(e-1, s-1, -1)) for s, e in zip(cstart, cend)]
+
+    for e in reversed(LMS):
+        count[lst[e]] -= 1
+        res[count[lst[e]]] = e
+
+    for e in res:
+        if e > 0 and not t[e-1]:
+            res[next(cs_it[lst[e-1]])] = e-1
+    for e in reversed(res):
+        if e > 0 and t[e-1]:
+            res[next(ce_it[lst[e-1]])] = e-1
+
+    name = 0; prev = -1
+    pLMS = {}
+    for e in res:
+        if isLMS[e]:
+            if prev == -1 or lst[e] != lst[prev]:
+                name += 1; prev = e
+            else:
+                for i in range(1, l):
+                    if lst[e+i] != lst[prev+i]:
+                        name += 1; prev = e
+                        break
+                    if isLMS[e+i] or isLMS[prev+i]:
+                        break
+            pLMS[e] = name-1
+
+    if name < LMSn:
+        sublst = [pLMS[e] for e in LMS if e < l-1]
+        ret = SAIS(sublst, name-1)
+
+        LMS = list(map(LMS.__getitem__, reversed(ret)))
+    else:
+        LMS = [e for e in reversed(res) if isLMS[e]]
+
+    res = [-1]*l
+    count = cbase
+    tmp = 0
+    for key in range(num+1):
+        cstart[key] = tmp
+        count[key] += tmp
+        cend[key] = tmp = count[key]
+
+    for e in LMS:
+        count[lst[e]] -= 1
+        res[count[lst[e]]] = e
+
+    cs_it = [iter(range(s, e)) for s, e in zip(cstart, cend)]
+    ce_it = [iter(range(e-1, s-1, -1)) for s, e in zip(cstart, cend)]
+
+    for e in res:
+        if e > 0 and not t[e-1]:
+            res[next(cs_it[lst[e-1]])] = e-1
+    for e in reversed(res):
+        if e > 0 and t[e-1]:
+            res[next(ce_it[lst[e-1]])] = e-1
+    return res
+
+def solve():
+    T = readline().strip()
+    T0 = T + "$"
+    L = len(T)
+    ha = RollingHash(T, 67, 10**9+9)
+    sa = SAIS(*chr_compression(T))
+    Q = int(readline())
+    for i in range(Q):
+        p = readline().strip()
+        p0 = p + "$"
+        hb = RollingHash(p, 67, 10**9+9)
+        L1 = len(p)
+        l0 = -1; r0 = L
+        while l0+1 < r0:
+            m0 = (l0 + r0) >> 1
+            k = sa[m0]
+            l1 = 0; r1 = min(L-k, L1)+1
+            while l1+1 < r1:
+                m1 = (l1 + r1) >> 1
+                if ha.get(k, k+m1) == hb.get(0, m1):
+                    l1 = m1
+                else:
+                    r1 = m1
+            if T0[k+l1] < p0[l1]:
+                l0 = m0
+            else:
+                r0 = m0
+        k = sa[r0]
+        if L1 <= L-k and ha.get(k, k+L1) == hb.get(0, L1):
+            write("1\n")
+        else:
+            write("0\n")
+solve()

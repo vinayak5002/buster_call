@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+
+#define rep(i, to) for (int i=0; i<to; i++)
+#define repr(i, from, to) for (int i=from; i<to; i++)
+#define in(x, from, to) (from <= x && x < to)
+
+using namespace std;
+using ll = long long;
+using P = pair<int, int>;
+
+#ifdef DEBUG
+#include "debug.hpp"
+#else
+template<class T> void print(T v) { cout << v << endl; }
+void _main(); int main() { _main(); }
+#endif
+
+// ================================================================================ //
+
+using Graph = vector<vector<int>>;
+int W, H;
+
+void dfs(int x, int y, Graph &field) {
+    field[y][x] = 0;
+
+    repr(dx, x-1, x+2) repr(dy, y-1, y+2) if (in(dx, 0, W) && in(dy, 0, H) && field[dy][dx]) {
+        dfs(dx, dy, field);
+    }
+}
+
+void _main() {
+    while (true) {
+        cin >> W >> H;
+        if (W == 0 && H == 0) return;
+        auto field = vector(H, vector<int>(W)); rep(y, H) rep(x, W) cin >> field[y][x];
+        
+        int res = 0;
+        rep(y, H) rep(x, W) if (field[y][x]) {
+            dfs(x, y, field); res++;
+        }
+        print(res);
+    }
+}
+

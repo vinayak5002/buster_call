@@ -1,0 +1,188 @@
+#include <iostream>
+#include <cstdio>
+#include <iterator>
+#include <string>
+#include <sstream>
+#include <bitset>
+#include <vector>
+#include <array>
+#include <stack>
+#include <queue>
+#include <map>
+#include <set>
+#include <memory>
+#include <algorithm>
+#include <numeric>
+#define _USE_MATH_DEFINES  // for M_PI
+#include <cmath>
+using std::cin;
+using std::cout;
+using std::endl;
+using std::string;
+using std::bitset;
+using std::vector;
+using std::array;
+using std::stack;
+using std::queue;
+using std::set;
+using std::map;
+using std::pair;
+#define REP(i, n) for (int i = 0; i < static_cast<int>(n); ++i)
+#define FOR(i, a, b) for (int i = static_cast<int>(a); i < static_cast<int>(b); ++i)
+
+
+void PrintArray(const int* a, const size_t n);
+bool IsPrime(const unsigned int a);
+long long Pow(long long a, long long n, long long mod_prime);
+long long InvMod(long long a, long long mod);
+
+
+class DoublyLinkedList {
+private:
+    struct Node {
+        Node(int v) : value(v), prev{nullptr}, next{nullptr} {}
+        int value;
+        std::shared_ptr<Node> prev, next;
+    };
+    std::shared_ptr<Node> dummy_;
+    int size_ = 0;
+
+public:
+    DoublyLinkedList() {
+        dummy_ = std::make_shared<Node>(0);
+        dummy_->prev = dummy_;
+        dummy_->next = dummy_;
+    }
+
+    void Insert(int v) {
+        auto tmp = std::make_shared<Node>(v);
+        tmp->next = dummy_->next;
+        dummy_->next->prev = tmp;
+        dummy_->next = tmp;
+        tmp->prev = dummy_;
+    }
+
+    void Delete(int v){
+        auto tmp = dummy_->next;
+        while (tmp != dummy_ && tmp->value != v) {
+            tmp = tmp->next;
+        }
+        if (tmp != dummy_) {
+            tmp->prev->next = tmp->next;
+            tmp->next->prev = tmp->prev;
+            tmp.reset();
+        }
+    }
+
+    void DeleteFirst() {
+        auto tmp = dummy_->next;
+        dummy_->next = dummy_->next->next;
+        dummy_->next->prev = dummy_;
+        tmp.reset();
+    }
+
+    void DeleteLast() {
+        auto tmp = dummy_->prev;
+        dummy_->prev = dummy_->prev->prev;
+        dummy_->prev->next = dummy_;
+        tmp.reset();
+    }
+
+    void Show() {
+        auto tmp = dummy_->next;
+        string s;
+        while(tmp != dummy_) {
+            s += std::to_string(tmp->value) + " ";
+            tmp = tmp->next;
+        }
+        cout << s.substr(0, s.size()-1) << endl;
+    }
+};
+
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    cin.tie(0);
+    
+    int n;
+    cin >> n;
+    DoublyLinkedList dll;
+    REP(i, n) {
+        string s;
+        cin >> s;
+        if (s == "insert") {
+            int c;
+            cin >> c;
+            dll.Insert(c);
+        }
+        else if (s == "delete") {
+            int c;
+            cin >> c;
+            dll.Delete(c);
+        }
+        else if (s == "deleteFirst") {
+            dll.DeleteFirst();
+        }
+        else {
+            dll.DeleteLast();
+        }
+    }
+    dll.Show();
+}
+
+
+void PrintArray(const int* a, const size_t n) {
+    REP(i, n) {
+        cout << a[i];
+        if (i != static_cast<int>(n)-1) cout << " ";
+    }
+    cout << endl;
+}
+
+
+bool IsPrime(const unsigned int a) {
+    if (a <= 1) return false;
+    if (a <= 3) return true;
+    if (a % 2 == 0 || a % 3 ==0) return false;
+
+    for (uint i = 5; i * i <= a; i += 6) {
+        if (a % i == 0) return false;  // x6 - 1
+        if (a % (i + 2) == 0) return false;  // x6 + 1
+    }
+    return true;
+}
+
+
+long long Pow(long long a, long long n, long long mod_prime=1) {
+    long long ret = 1;
+    if (mod_prime > 1) {
+        while (n > 0) {
+            if (n & 1) ret = ret * a % mod_prime;
+            a = a * a % mod_prime;
+            n >>= 1;
+        }
+    }
+    else {
+        while (n > 0) {
+            if (n & 1) ret *= a;
+            a *= a;
+            n >>= 1;
+        }
+    }
+    return ret;
+}
+
+
+long long InvMod(long long a, long long mod) {
+    long long b = mod, u = 1, v = 0;
+    while (b) {
+        long long t = a / b;
+        a -= t * b; std::swap(a, b);
+        u -= t * v; std::swap(u, v);
+    }
+    u %= mod;
+    if (u < 0) u += mod;
+    return u;
+}
+
+

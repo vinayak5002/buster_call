@@ -1,0 +1,33 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for(int i=0; i<(n); i++)
+#define INF ((1LL<<62)-(1LL<<31))
+#define all(a)  (a).begin(),(a).end()
+#define rall(a)  (a).rbegin(),(a).rend()
+typedef long long ll;
+typedef pair<ll,ll> pl;
+
+int main() {
+    while(true) {
+        int n;
+        cin >> n;
+        if(n==0) break;
+        vector<ll> w(n);
+        rep(i,n) cin >> w[i];
+        vector<vector<ll>> dp(n,vector<ll> (n,0));
+        for(int i=1;i<n;i++) {
+            for(int l=0;l<n;l++) {
+                int r=l+i;
+                if(r>=n) continue;
+                if(i==1){
+                    if(abs(w[l]-w[r])<=1) dp[l][r]=2;
+                } else {
+                    for(int k=l;k<r;k++) dp[l][r]=max(dp[l][r],dp[l][k]+dp[k+1][r]);
+                    if(dp[l+1][r-1]==r-l-1) if(abs(w[l]-w[r])<=1) dp[l][r]=r-l+1;
+                }  
+            }
+        }
+        cout << dp[0][n-1] << endl;
+    }
+    return 0;
+}

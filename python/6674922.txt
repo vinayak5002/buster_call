@@ -1,0 +1,83 @@
+from heapq import heappop,heappush
+
+N=4
+
+a,b,c,d=map(int,input().split())
+e,f,g,h=map(int,input().split())
+i,j,k,l=map(int,input().split())
+m,n,o,p=map(int,input().split())
+
+
+X=(a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p)
+GOAL=(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0)
+
+def hash(X):
+    score=0
+    for i in range(16):
+        score+=(16**i)*X[i]
+    return score
+
+def manh(X):
+    score=0
+    for i in range(16):
+        x=X[i]
+        if x==0:
+            x=16
+        score+=abs(i//N-(x-1)//N) + abs(i%N-(x-1)%N)
+    return score
+
+for i in range(16):
+    if X[i]==0:
+        zero=i
+
+Q=[(manh(X),manh(X),X,-10,zero)]
+
+USE=set()
+USE.add(hash(X))
+
+while Q:
+    dis_score,dis,NOW,fr,zero=heappop(Q)
+
+    if dis==0:
+        print(dis_score-dis)
+        break
+
+    for i in [1,-1,N,-N]:
+        if i==fr:
+            continue
+
+        if i==1:
+            if zero%N==N-1:
+                continue
+        elif i==-1:
+            if zero%N==0:
+                continue
+        elif i==N or i==-N:
+            if zero+i<0 or zero+i>=N*N:
+                continue
+
+        manh_dis=dis
+        x=NOW[zero+i]
+
+        manh_dis-=abs(zero//N-(15)//N) + abs(zero%N-(15)%N)
+        manh_dis-=abs((zero+i)//N-(x-1)//N) + abs((zero+i)%N-(x-1)%N)
+
+        manh_dis+=abs((zero+i)//N-(15)//N) + abs((zero+i)%N-(15)%N)
+        manh_dis+=abs(zero//N-(x-1)//N) + abs(zero%N-(x-1)%N)
+        
+
+        NOW_LIST=list(NOW)
+        NOW_LIST[zero],NOW_LIST[zero+i]=NOW_LIST[zero+i],NOW_LIST[zero]
+
+        NOW_tuple=tuple(NOW_LIST)
+
+        if hash(NOW_tuple) in USE:
+            continue
+        
+        USE.add(hash(NOW_tuple))
+        heappush(Q,(manh_dis+dis_score-dis+1,manh_dis,NOW_tuple,-i,zero+i))
+                
+            
+
+    
+

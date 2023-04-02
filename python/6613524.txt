@@ -1,0 +1,137 @@
+/*  Yixian-Wu 110033203 PME */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void scan_array( int n, int **a);
+void print_array(int n, int **a);
+
+
+int main()
+{
+    int n;
+    int **a;
+    while(scanf("%d", &n) != EOF){
+        a = malloc(n * sizeof(int*));
+        int i, j, k;
+        for(i=0;i<n;i++){
+            a[i] = (int*) malloc(n * sizeof(int));
+        }
+        
+        scan_array(n, a);
+        int max = 0, continuous;
+        /*right*/
+        for(i=0;i<n;i++){
+            j=0;
+            continuous = 0;
+            while(j<n){
+                if(a[i][j] == 49){
+                    continuous++;
+                    j++;
+                }else{
+                    continuous = 0;
+                    j++;
+                }
+                if(continuous >= max){
+                    max = continuous;
+                }
+            }
+        }
+        /*down*/
+        for(j=0;j<n;j++){
+            i=0;
+            continuous = 0;
+            while(i<n){
+                if(a[i][j] == 49){
+                    continuous++;
+                    i++;
+                }else{
+                    continuous = 0;
+                    i++;
+                }
+                if(continuous >= max){
+                    max = continuous;
+                }
+            }
+        }
+        /*right-oblique*/
+        for(i=0;i<n;i++){
+            k = i;
+            j = 0;
+            continuous = 0;
+            int count = 0;
+            while((j<n) && (k<n)){
+                if(a[k][j] == 49){
+                    continuous++;
+                    k++;
+                    j++;
+                    count++;
+                }else{
+                    continuous = 0;
+                    j = j - count + 1;
+                    k = i;
+                    count = 0;
+                }
+                if(continuous >= max){
+                    max = continuous;
+                }
+            }
+        }
+        /*left-oblique*/
+        for(i=0;i<n;i++){
+            k = i;
+            j = n-1;
+            continuous = 0;
+            int count = 0;
+            while((j>=0) && (k<n)){
+                if(a[k][j] == 49){
+                    continuous++;
+                    k++;
+                    j--;
+                    count++;
+                }else{
+                    continuous = 0;
+                    j = j + count - 1;
+                    k = i;
+                    count = 0;
+                }
+                if(continuous >= max){
+                    max = continuous;
+                }
+            }
+        }
+        
+        printf("%d\n", max);
+
+        for(i=0;i<n;i++){
+            free(a[i]);
+        }
+        free(a);
+    }
+    return 0;
+}
+
+void scan_array(int n, int **a){
+    int i, j;
+    char *s;
+    s = malloc(n * sizeof(char) + sizeof(char));
+    for(i=0;i<n;i++){
+        scanf("%s", s);
+        for(j=0;j<n;j++){
+            a[i][j] = s[j];
+        }
+    }
+    free(s);
+}
+
+void print_array(int n, int **a){
+    int i, j;
+    for(i=0;i<n;i++){
+        for(j=0;j<n;j++){
+            printf("%d ", a[i][j]);
+        }
+        printf("\n");
+    }
+}
+

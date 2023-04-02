@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct vector{
+	int x;
+	struct vector *next;
+};
+
+struct vector* n_vector(int x){
+	struct vector* vectorREI = (struct vector *)malloc(sizeof(struct vector));
+	vectorREI->x = x;
+	vectorREI->next = NULL;
+	return vectorREI;
+}
+
+int main(void) {
+	int n, q, query, t, x, i, j;
+	struct vector *tail, *sn, *head[500000], *point[500000], *point2;
+
+	scanf("%d %d", &n, &q);
+	tail = n_vector(1000000001);
+
+	for (i = 0; i < n; i++){
+		head[i] = tail;
+		point[i] = tail;
+	}
+
+	for (i = 0; i < q; i++){
+		scanf("%d %d", &query, &t);
+		if (query == 0){
+			scanf("%d", &x);
+			sn = n_vector(x);
+			sn->next = tail;
+			if (head[t]->x == 1000000001){
+				head[t] = sn;
+			}
+			else {
+				point[t]->next = sn;
+			}
+			point[t] = sn;
+		}
+
+		else if (query == 1){
+			point2 = point[t];
+			point[t] = head[t];
+			while (point[t]->x != 1000000001){
+				printf("%d", point[t]->x);
+				point[t] = point[t]->next;
+				if (point[t]->x != 1000000001)
+					printf(" ");
+			}
+			printf("\n");
+			point[t] = point2;
+		}
+
+		else if (query == 2){
+			if (head[t] != tail){
+				point[t] = head[t];
+				head[t] = tail;
+				while (point[t]->x != 1000000001){
+					point2 = point[t]->next;
+					free(point[t]);
+					point[t] = point2;
+				}
+			}
+		}
+	}
+	
+	return 0;
+}

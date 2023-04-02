@@ -1,0 +1,87 @@
+#include <iostream>
+using namespace std;
+
+#ifdef COMP
+#define MAXLEN 1000
+// T[a][b]: (X[a],..) と (X[b],.) の LCS の長さ、未定の場合は -1
+int T[MAXLEN + 1][MAXLEN + 1];
+
+// 遅い
+int lcs(string X, string Y, int a, int b)
+{
+#ifdef DBG
+    cout << "lcs:  a = " << a << ", b = " << b << endl;
+#endif
+    if (T[a][b] >= 0)
+	return T[a][b];
+    if (a >= X.length() || b >= Y.length())
+	return T[a][b] = 0;
+    else if (X[a] == Y[b])
+	return T[a][b] = 1 + lcs(X, Y, a + 1, b + 1);
+    else
+	return T[a][b] = max(lcs(X, Y, a + 1, b), lcs(X, Y, a, b + 1));
+}
+#endif
+
+int lcs(string X, string Y)
+{
+    int lX = X.length();
+    int lY = Y.length();
+    int L[lX + 1][lY +1];
+    for (int a = 0; a <= lX; a++)
+	L[a][lY] = 0;
+    for (int b = 0; b <= lY; b++)
+	L[lX][b] = 0;
+    for (int a = lX - 1; a >= 0; a--) 
+	for (int b = lY - 1; b >= 0; b--) 
+	    if (X[a] == Y[b])
+		L[a][b] = L[a+1][b+1] + 1;
+	    else
+		L[a][b] = max(L[a+1][b], L[a][b+1]);
+    return L[0][0];
+}	
+
+int main()
+{
+    int q;
+    cin >> q;
+    for (int i = 0; i < q; i++) {
+	string X, Y;
+	cin >> X >> Y;
+#ifdef COMP
+	// 記録表を初期化
+	for (int a = 0; a <= X.length(); a++)
+	    for (int b = 0; b <= Y.length(); b++)
+		T[a][b] = -1;
+#ifdef CLOCK
+	clock_t start_clock = clock();
+#endif	
+	cout << lcs(X, Y, 0, 0) << endl;
+#ifdef CLOCK
+	clock_t end_clock = clock();
+	cout << 1000 * (end_clock - start_clock) / CLOCKS_PER_SEC << " ms"
+	      << endl;
+#endif
+#endif
+	
+#ifdef CLOCK
+	clock_t clock_start = clock();
+#endif	
+	cout << lcs(X, Y) << endl;
+#ifdef CLOCK
+	clock_t clock_end = clock();
+	cout << 1000 * (clock_end - clock_start) / CLOCKS_PER_SEC << " ms"
+	      << endl;
+#endif
+	
+#ifdef DBG
+	for (int a = 0; a <= X.length(); a++) {
+	    for (int b = 0; b <= Y.length(); b++)
+		cout << " " << T[a][b];
+	    cout << endl;
+	}
+#endif
+    }
+    return 0;
+}
+

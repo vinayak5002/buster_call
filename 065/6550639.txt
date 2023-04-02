@@ -1,0 +1,651 @@
+#line 1 "main.cpp"
+#define PROBLEM "https://onlinejudge.u-aizu.ac.jp/problems/GRL_5_D"
+
+#include <cstdint>
+#include <utility>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#line 1 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/lazysegtree.hpp"
+
+
+
+#line 5 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/lazysegtree.hpp"
+#include <cassert>
+#line 8 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/lazysegtree.hpp"
+
+#line 1 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/internal_bit.hpp"
+
+
+
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+
+namespace atcoder {
+
+namespace internal {
+
+// @param n `0 <= n`
+// @return minimum non-negative `x` s.t. `n <= 2**x`
+int ceil_pow2(int n) {
+    int x = 0;
+    while ((1U << x) < (unsigned int)(n)) x++;
+    return x;
+}
+
+// @param n `1 <= n`
+// @return minimum non-negative `x` s.t. `(n & (1 << x)) != 0`
+constexpr int bsf_constexpr(unsigned int n) {
+    int x = 0;
+    while (!(n & (1 << x))) x++;
+    return x;
+}
+
+// @param n `1 <= n`
+// @return minimum non-negative `x` s.t. `(n & (1 << x)) != 0`
+int bsf(unsigned int n) {
+#ifdef _MSC_VER
+    unsigned long index;
+    _BitScanForward(&index, n);
+    return index;
+#else
+    return __builtin_ctz(n);
+#endif
+}
+
+}  // namespace internal
+
+}  // namespace atcoder
+
+
+#line 10 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/lazysegtree.hpp"
+
+namespace atcoder {
+
+template <class S,
+          S (*op)(S, S),
+          S (*e)(),
+          class F,
+          S (*mapping)(F, S),
+          F (*composition)(F, F),
+          F (*id)()>
+struct lazy_segtree {
+  public:
+    lazy_segtree() : lazy_segtree(0) {}
+    explicit lazy_segtree(int n) : lazy_segtree(std::vector<S>(n, e())) {}
+    explicit lazy_segtree(const std::vector<S>& v) : _n(int(v.size())) {
+        log = internal::ceil_pow2(_n);
+        size = 1 << log;
+        d = std::vector<S>(2 * size, e());
+        lz = std::vector<F>(size, id());
+        for (int i = 0; i < _n; i++) d[size + i] = v[i];
+        for (int i = size - 1; i >= 1; i--) {
+            update(i);
+        }
+    }
+
+    void set(int p, S x) {
+        assert(0 <= p && p < _n);
+        p += size;
+        for (int i = log; i >= 1; i--) push(p >> i);
+        d[p] = x;
+        for (int i = 1; i <= log; i++) update(p >> i);
+    }
+
+    S get(int p) {
+        assert(0 <= p && p < _n);
+        p += size;
+        for (int i = log; i >= 1; i--) push(p >> i);
+        return d[p];
+    }
+
+    S prod(int l, int r) {
+        assert(0 <= l && l <= r && r <= _n);
+        if (l == r) return e();
+
+        l += size;
+        r += size;
+
+        for (int i = log; i >= 1; i--) {
+            if (((l >> i) << i) != l) push(l >> i);
+            if (((r >> i) << i) != r) push((r - 1) >> i);
+        }
+
+        S sml = e(), smr = e();
+        while (l < r) {
+            if (l & 1) sml = op(sml, d[l++]);
+            if (r & 1) smr = op(d[--r], smr);
+            l >>= 1;
+            r >>= 1;
+        }
+
+        return op(sml, smr);
+    }
+
+    S all_prod() { return d[1]; }
+
+    void apply(int p, F f) {
+        assert(0 <= p && p < _n);
+        p += size;
+        for (int i = log; i >= 1; i--) push(p >> i);
+        d[p] = mapping(f, d[p]);
+        for (int i = 1; i <= log; i++) update(p >> i);
+    }
+    void apply(int l, int r, F f) {
+        assert(0 <= l && l <= r && r <= _n);
+        if (l == r) return;
+
+        l += size;
+        r += size;
+
+        for (int i = log; i >= 1; i--) {
+            if (((l >> i) << i) != l) push(l >> i);
+            if (((r >> i) << i) != r) push((r - 1) >> i);
+        }
+
+        {
+            int l2 = l, r2 = r;
+            while (l < r) {
+                if (l & 1) all_apply(l++, f);
+                if (r & 1) all_apply(--r, f);
+                l >>= 1;
+                r >>= 1;
+            }
+            l = l2;
+            r = r2;
+        }
+
+        for (int i = 1; i <= log; i++) {
+            if (((l >> i) << i) != l) update(l >> i);
+            if (((r >> i) << i) != r) update((r - 1) >> i);
+        }
+    }
+
+    template <bool (*g)(S)> int max_right(int l) {
+        return max_right(l, [](S x) { return g(x); });
+    }
+    template <class G> int max_right(int l, G g) {
+        assert(0 <= l && l <= _n);
+        assert(g(e()));
+        if (l == _n) return _n;
+        l += size;
+        for (int i = log; i >= 1; i--) push(l >> i);
+        S sm = e();
+        do {
+            while (l % 2 == 0) l >>= 1;
+            if (!g(op(sm, d[l]))) {
+                while (l < size) {
+                    push(l);
+                    l = (2 * l);
+                    if (g(op(sm, d[l]))) {
+                        sm = op(sm, d[l]);
+                        l++;
+                    }
+                }
+                return l - size;
+            }
+            sm = op(sm, d[l]);
+            l++;
+        } while ((l & -l) != l);
+        return _n;
+    }
+
+    template <bool (*g)(S)> int min_left(int r) {
+        return min_left(r, [](S x) { return g(x); });
+    }
+    template <class G> int min_left(int r, G g) {
+        assert(0 <= r && r <= _n);
+        assert(g(e()));
+        if (r == 0) return 0;
+        r += size;
+        for (int i = log; i >= 1; i--) push((r - 1) >> i);
+        S sm = e();
+        do {
+            r--;
+            while (r > 1 && (r % 2)) r >>= 1;
+            if (!g(op(d[r], sm))) {
+                while (r < size) {
+                    push(r);
+                    r = (2 * r + 1);
+                    if (g(op(d[r], sm))) {
+                        sm = op(d[r], sm);
+                        r--;
+                    }
+                }
+                return r + 1 - size;
+            }
+            sm = op(d[r], sm);
+        } while ((r & -r) != r);
+        return 0;
+    }
+
+  private:
+    int _n, size, log;
+    std::vector<S> d;
+    std::vector<F> lz;
+
+    void update(int k) { d[k] = op(d[2 * k], d[2 * k + 1]); }
+    void all_apply(int k, F f) {
+        d[k] = mapping(f, d[k]);
+        if (k < size) lz[k] = composition(f, lz[k]);
+    }
+    void push(int k) {
+        all_apply(2 * k, lz[k]);
+        all_apply(2 * k + 1, lz[k]);
+        lz[k] = id();
+    }
+};
+
+}  // namespace atcoder
+
+
+#line 1 "/home/anqooqie/.proconlib/tools/hld.hpp"
+
+
+
+#line 5 "/home/anqooqie/.proconlib/tools/hld.hpp"
+#include <cstddef>
+#line 8 "/home/anqooqie/.proconlib/tools/hld.hpp"
+#include <limits>
+#include <stack>
+#line 11 "/home/anqooqie/.proconlib/tools/hld.hpp"
+#include <iterator>
+#line 1 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/dsu.hpp"
+
+
+
+#line 7 "/home/anqooqie/.proconlib/lib/ac-library/atcoder/dsu.hpp"
+
+namespace atcoder {
+
+// Implement (union by size) + (path compression)
+// Reference:
+// Zvi Galil and Giuseppe F. Italiano,
+// Data structures and algorithms for disjoint set union problems
+struct dsu {
+  public:
+    dsu() : _n(0) {}
+    explicit dsu(int n) : _n(n), parent_or_size(n, -1) {}
+
+    int merge(int a, int b) {
+        assert(0 <= a && a < _n);
+        assert(0 <= b && b < _n);
+        int x = leader(a), y = leader(b);
+        if (x == y) return x;
+        if (-parent_or_size[x] < -parent_or_size[y]) std::swap(x, y);
+        parent_or_size[x] += parent_or_size[y];
+        parent_or_size[y] = x;
+        return x;
+    }
+
+    bool same(int a, int b) {
+        assert(0 <= a && a < _n);
+        assert(0 <= b && b < _n);
+        return leader(a) == leader(b);
+    }
+
+    int leader(int a) {
+        assert(0 <= a && a < _n);
+        if (parent_or_size[a] < 0) return a;
+        return parent_or_size[a] = leader(parent_or_size[a]);
+    }
+
+    int size(int a) {
+        assert(0 <= a && a < _n);
+        return -parent_or_size[leader(a)];
+    }
+
+    std::vector<std::vector<int>> groups() {
+        std::vector<int> leader_buf(_n), group_size(_n);
+        for (int i = 0; i < _n; i++) {
+            leader_buf[i] = leader(i);
+            group_size[leader_buf[i]]++;
+        }
+        std::vector<std::vector<int>> result(_n);
+        for (int i = 0; i < _n; i++) {
+            result[i].reserve(group_size[i]);
+        }
+        for (int i = 0; i < _n; i++) {
+            result[leader_buf[i]].push_back(i);
+        }
+        result.erase(
+            std::remove_if(result.begin(), result.end(),
+                           [&](const std::vector<int>& v) { return v.empty(); }),
+            result.end());
+        return result;
+    }
+
+  private:
+    int _n;
+    // root node: -1 * component size
+    // otherwise: parent
+    std::vector<int> parent_or_size;
+};
+
+}  // namespace atcoder
+
+
+#line 1 "/home/anqooqie/.proconlib/tools/less_by.hpp"
+
+
+
+namespace tools {
+
+  template <class F>
+  class less_by {
+  private:
+    F selector;
+
+  public:
+    less_by(const F& selector) : selector(selector) {
+    }
+
+    template <class T>
+    bool operator()(const T& x, const T& y) const {
+      return selector(x) < selector(y);
+    }
+  };
+}
+
+
+#line 14 "/home/anqooqie/.proconlib/tools/hld.hpp"
+
+namespace tools {
+  class hld {
+  private:
+    bool m_built;
+    ::std::vector<::std::vector<::std::size_t>> m_graph;
+    ::std::vector<::std::size_t> m_edges;
+    ::std::vector<::std::size_t> m_parent;
+    ::std::vector<::std::size_t> m_depth;
+    ::atcoder::dsu m_dsu;
+    ::std::vector<::std::size_t> m_vid2dfs;
+    ::std::vector<::std::size_t> m_dfs2vid;
+    ::std::vector<::std::size_t> m_eid2dfs;
+    ::std::vector<::std::size_t> m_dfs2eid;
+
+  public:
+    hld() = default;
+    hld(const ::tools::hld&) = default;
+    hld(::tools::hld&&) = default;
+    ~hld() = default;
+    ::tools::hld& operator=(const ::tools::hld&) = default;
+    ::tools::hld& operator=(::tools::hld&&) = default;
+
+    explicit hld(const ::std::size_t n) : m_built(false), m_graph(n) {
+      assert(n >= 1);
+    }
+
+    ::std::size_t size() const {
+      return this->m_graph.size();
+    }
+    const ::std::vector<::std::size_t>& vid2dfs() const {
+      assert(this->m_built);
+      return this->m_vid2dfs;
+    }
+    const ::std::vector<::std::size_t>& dfs2vid() const {
+      assert(this->m_built);
+      return this->m_dfs2vid;
+    }
+    const ::std::vector<::std::size_t>& eid2dfs() const {
+      assert(this->m_built);
+      return this->m_eid2dfs;
+    }
+    const ::std::vector<::std::size_t>& dfs2eid() const {
+      assert(this->m_built);
+      return this->m_dfs2eid;
+    }
+
+    void add_edge(const ::std::size_t u, const ::std::size_t v) {
+      assert(!this->m_built);
+      assert(u < this->size());
+      assert(v < this->size());
+      this->m_graph[u].push_back(this->m_edges.size());
+      this->m_graph[v].push_back(this->m_edges.size());
+      this->m_edges.push_back(u ^ v);
+    }
+
+    void build(const ::std::size_t root) {
+      assert(!this->m_built);
+      assert(root < this->size());
+      assert(this->m_edges.size() + 1 == this->size());
+
+      this->m_parent.resize(this->size());
+      this->m_depth.resize(this->size());
+      this->m_dsu = ::atcoder::dsu(this->size());
+      this->m_vid2dfs.resize(this->size());
+      this->m_dfs2vid.resize(this->size());
+      this->m_eid2dfs.resize(this->m_edges.size());
+      this->m_dfs2eid.resize(this->m_edges.size());
+
+      ::std::vector<::std::size_t> subtree_size(this->size());
+      this->m_parent[root] = ::std::numeric_limits<::std::size_t>::max();
+      this->m_depth[root] = 0;
+      {
+        ::std::stack<::std::pair<::std::size_t, bool>> stack;
+        stack.emplace(root, false);
+        stack.emplace(root, true);
+        while (!stack.empty()) {
+          const auto [here, pre] = stack.top();
+          stack.pop();
+          if (pre) {
+            for (const auto eid : this->m_graph[here]) {
+              const auto next = this->m_edges[eid] ^ here;
+              if (here == root || next != (this->m_edges[this->m_parent[here]] ^ here)) {
+                this->m_parent[next] = eid;
+                this->m_depth[next] = this->m_depth[here] + 1;
+                stack.emplace(next, false);
+                stack.emplace(next, true);
+              }
+            }
+          } else {
+            subtree_size[here] = 1;
+            for (const auto eid : this->m_graph[here]) {
+              const auto child = this->m_edges[eid] ^ here;
+              if (here == root || child != (this->m_edges[this->m_parent[here]] ^ here)) {
+                subtree_size[here] += subtree_size[child];
+              }
+            }
+          }
+        }
+      }
+
+      for (::std::size_t v = 0; v < this->size(); ++v) {
+        if (v != root) {
+          this->m_graph[v].erase(::std::find(this->m_graph[v].begin(), this->m_graph[v].end(), this->m_parent[v]));
+        }
+        ::std::iter_swap(
+          this->m_graph[v].begin(),
+          ::std::max_element(
+            this->m_graph[v].begin(),
+            this->m_graph[v].end(),
+            ::tools::less_by([&](const ::std::size_t eid) { return subtree_size[this->m_edges[eid] ^ v]; })
+          )
+        );
+      }
+
+      {
+        ::std::size_t dfs_order = 0;
+        ::std::stack<::std::size_t> stack;
+        stack.push(root);
+        while (!stack.empty()) {
+          const auto here = stack.top();
+          stack.pop();
+
+          this->m_vid2dfs[here] = dfs_order;
+          this->m_dfs2vid[dfs_order] = here;
+          if (here != root) {
+            this->m_eid2dfs[this->m_parent[here]] = dfs_order - 1;
+            this->m_dfs2eid[dfs_order - 1] = this->m_parent[here];
+          }
+          ++dfs_order;
+
+          if (!this->m_graph[here].empty()) {
+            this->m_dsu.merge(here, this->m_edges[this->m_graph[here].front()] ^ here);
+          }
+          for (auto it = this->m_graph[here].rbegin(); it != this->m_graph[here].rend(); ++it) {
+            stack.push(this->m_edges[*it] ^ here);
+          }
+        }
+      }
+
+      this->m_built = true;
+    }
+    void build() {
+      this->build(0);
+    }
+
+    ::std::vector<::std::pair<::std::size_t, ::std::size_t>> vquery(::std::size_t u, ::std::size_t v) {
+      assert(this->m_built);
+      assert(u < this->size());
+      assert(v < this->size());
+
+      ::std::vector<::std::pair<::std::size_t, ::std::size_t>> head, tail;
+      while (!this->m_dsu.same(u, v)) {
+        if (this->m_depth[this->m_dsu.leader(u)] >= this->m_depth[this->m_dsu.leader(v)]) {
+          head.emplace_back(this->m_vid2dfs[u] + 1, this->m_vid2dfs[this->m_dsu.leader(u)]);
+          u = this->m_edges[this->m_parent[this->m_dsu.leader(u)]] ^ this->m_dsu.leader(u);
+        } else {
+          tail.emplace_back(this->m_vid2dfs[this->m_dsu.leader(v)], this->m_vid2dfs[v] + 1);
+          v = this->m_edges[this->m_parent[this->m_dsu.leader(v)]] ^ this->m_dsu.leader(v);
+        }
+      }
+      if (this->m_depth[u] >= this->m_depth[v]) {
+        head.emplace_back(this->m_vid2dfs[u] + 1, this->m_vid2dfs[v]);
+      } else {
+        head.emplace_back(this->m_vid2dfs[u], this->m_vid2dfs[v] + 1);
+      }
+
+      ::std::copy(tail.rbegin(), tail.rend(), ::std::back_inserter(head));
+      return head;
+    }
+
+    ::std::vector<::std::pair<::std::size_t, ::std::size_t>> equery(::std::size_t u, ::std::size_t v) {
+      assert(this->m_built);
+      assert(u < this->size());
+      assert(v < this->size());
+
+      ::std::vector<::std::pair<::std::size_t, ::std::size_t>> head, tail;
+      while (!this->m_dsu.same(u, v)) {
+        if (this->m_depth[this->m_dsu.leader(u)] >= this->m_depth[this->m_dsu.leader(v)]) {
+          head.emplace_back(this->m_eid2dfs[this->m_parent[u]] + 1, this->m_eid2dfs[this->m_parent[this->m_dsu.leader(u)]]);
+          u = this->m_edges[this->m_parent[this->m_dsu.leader(u)]] ^ this->m_dsu.leader(u);
+        } else {
+          tail.emplace_back(this->m_eid2dfs[this->m_parent[this->m_dsu.leader(v)]], this->m_eid2dfs[this->m_parent[v]] + 1);
+          v = this->m_edges[this->m_parent[this->m_dsu.leader(v)]] ^ this->m_dsu.leader(v);
+        }
+      }
+      if (this->m_depth[u] > this->m_depth[v]) {
+        head.emplace_back(this->m_eid2dfs[this->m_parent[u]] + 1, this->m_eid2dfs[this->m_graph[v].front()]);
+      } else if (this->m_depth[u] < this->m_depth[v]) {
+        head.emplace_back(this->m_eid2dfs[this->m_graph[u].front()], this->m_eid2dfs[this->m_parent[v]] + 1);
+      }
+
+      ::std::copy(tail.rbegin(), tail.rend(), ::std::back_inserter(head));
+      return head;
+    }
+  };
+}
+
+
+#line 1 "/home/anqooqie/.proconlib/tools/group.hpp"
+
+
+
+namespace tools {
+  namespace group {
+    template <typename Type>
+    struct plus {
+      using T = Type;
+      static T op(const T lhs, const T rhs) {
+        return lhs + rhs;
+      }
+      static T e() {
+        return T(0);
+      }
+      static T inv(const T v) {
+        return -v;
+      }
+    };
+
+    template <typename Type>
+    struct bit_xor {
+      using T = Type;
+      static T op(const T lhs, const T rhs) {
+        return lhs ^ rhs;
+      }
+      static T e() {
+        return T(0);
+      }
+      static T inv(const T v) {
+        return v;
+      }
+    };
+  }
+}
+
+
+#line 11 "main.cpp"
+
+using i64 = std::int_fast64_t;
+
+std::pair<i64, i64> op(const std::pair<i64, i64> e1, const std::pair<i64, i64> e2) {
+  return std::make_pair(e1.first + e2.first, e1.second + e2.second);
+}
+std::pair<i64, i64> e() {
+  return std::make_pair(0, 1);
+}
+std::pair<i64, i64> mapping(const i64 f, const std::pair<i64, i64> e) {
+  return std::make_pair(e.first + f * e.second, e.second);
+}
+
+int main() {
+  std::cin.tie(nullptr);
+  std::ios_base::sync_with_stdio(false);
+
+  i64 n;
+  std::cin >> n;
+  std::vector<i64> parent(n, -1);
+  for (i64 i = 0; i < n; ++i) {
+    i64 k;
+    std::cin >> k;
+    for (i64 j = 0; j < k; ++j) {
+      i64 c;
+      std::cin >> c;
+      parent[c] = i;
+    }
+  }
+
+  tools::hld hld(n);
+  for (i64 i = 1; i < n; ++i) {
+    hld.add_edge(parent[i], i);
+  }
+  hld.build();
+  atcoder::lazy_segtree<std::pair<i64, i64>, op, e, i64, mapping, tools::group::plus<i64>::op, tools::group::plus<i64>::e> lazy_segtree(n - 1);
+  i64 q;
+  std::cin >> q;
+  for (i64 i = 0; i < q; ++i) {
+    i64 t;
+    std::cin >> t;
+    if (t == 0) {
+      i64 v, w;
+      std::cin >> v >> w;
+      for (const auto& [from, to] : hld.equery(0, v)) {
+        const auto [l, r] = std::minmax(from, to);
+        lazy_segtree.apply(l, r, w);
+      }
+    } else {
+      i64 u;
+      std::cin >> u;
+      i64 sum = 0;
+      for (const auto& [from, to] : hld.equery(0, u)) {
+        const auto [l, r] = std::minmax(from, to);
+        sum += lazy_segtree.prod(l, r).first;
+      }
+      std::cout << sum << '\n';
+    }
+  }
+
+  return 0;
+}

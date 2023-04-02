@@ -1,0 +1,54 @@
+import sys
+import math
+from heapq import heappush, heappop
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def dijkstra(num_vertexes, adjacency_list, start):
+    cost_from_s = [math.inf] * num_vertexes
+    h_q = [(0, start)]
+    cost_from_s[start] = 0
+
+    while h_q:
+        v = heappop(h_q)[1]
+        for edge in adjacency_list[v]:
+            u = edge[0]
+            c = edge[1]
+            cost = cost_from_s[v] + c
+            if cost_from_s[u] > cost:
+                cost_from_s[u] = cost
+                heappush(h_q, (cost, u))
+
+    return cost_from_s
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    num_vertexes, num_edges, start = list(map(int, f.readline().split()))
+    adjacency_list = [[] for _ in range(num_vertexes)]
+    for _ in range(num_edges):
+        s, t, d = list(map(int, f.readline().split()))
+        adjacency_list[s].append([t, d])
+
+    cost_from_s = dijkstra(num_vertexes, adjacency_list, start)
+    for i in range(num_vertexes):
+        cost = cost_from_s[i]
+        if cost == math.inf:
+            print('INF')
+        else:
+            print(cost)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

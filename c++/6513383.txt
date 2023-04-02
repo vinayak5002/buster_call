@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct node{
+    int x;
+    struct node *n;
+}node;
+
+int main(){
+    int n,q,s,t,x,op;
+
+    scanf("%d %d", &n, &q);
+    node **list = (node**)malloc(sizeof(node*)*n);
+    node **llast = (node**)malloc(sizeof(node*)*n);
+    for(int i = 0; i < n; i++){
+        list[i] = malloc(sizeof(node));
+    }
+    int *lsize = (int*)calloc(n, sizeof(int));
+
+    node *tmp;
+
+    while(q--){
+        scanf("%d", &op);
+        if(op == 0){
+            scanf("%d %d", &t, &x);
+            if(lsize[t] == 0){
+                list[t] = (node*)malloc(sizeof(node));
+                list[t]->x = x;
+                list[t]->n = NULL;
+                lsize[t]++;
+                llast[t] = list[t];
+            }else{
+                llast[t]->n = (node*)malloc(sizeof(node));
+                llast[t] = llast[t]->n;
+                llast[t]->x = x;
+                llast[t]->n = NULL;
+                lsize[t]++;
+            }
+        }else if(op == 1){
+            scanf("%d", &t);
+            if(lsize[t] == 0){
+                puts("");
+                continue;
+            }
+            if(lsize[t] > 1) printf("%d ", list[t]->x); 
+            else{
+                printf("%d\n", list[t]->x); 
+                continue;
+            }
+            node *p = list[t]->n;
+            for(int i = 1; i < lsize[t]; i++){
+                if(i == lsize[t]-1) printf("%d\n", p->x); else printf("%d ", p->x);
+                p = p->n;
+            }
+        }else{
+            scanf("%d %d", &s, &t);
+            if(lsize[t] == 0){
+                list[t] = list[s];
+                llast[t] = llast[s];
+            }else{
+                llast[t]->n = list[s];
+                llast[t] = llast[s];
+            }
+            lsize[t] += lsize[s];
+            lsize[s] = 0;
+        }
+    }
+}

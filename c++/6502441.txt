@@ -1,0 +1,31 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <cassert>
+using namespace std;
+
+// clang-format off
+
+int main() {
+    int n, m; cin >> n >> m;
+    vector<queue<int>> lanes(n);
+    for(int _ = 0 ; _ < m ; _++) {
+
+        int query; cin >> query;
+        if (query == 0) {
+            int x; cin >> x; x--;
+            assert(lanes[x].size());
+            int out = lanes[x].front();
+            cout << out << endl;
+            lanes[x].pop();
+        }
+
+        if (query == 1) {
+            int x; cin >> x;
+            pair<int, int> in = {-1, (int)1e9};
+            for (int i = 0 ; i < n ; i++) if (lanes[i].size() < in.second) in = {i, lanes[i].size()};
+            assert(0 <= in.first and in.first < n);
+            lanes[in.first].push(x);
+        }
+    }
+}

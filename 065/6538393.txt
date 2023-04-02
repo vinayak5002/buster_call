@@ -1,0 +1,101 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define sz(x) (int)x.size()
+#define fi first
+#define se second
+
+typedef long long lli;
+typedef pair<int, int> pii;
+
+const int maxn = 505;
+const int inf = 1e9 + 9;
+
+int n;
+int a[maxn], b[maxn];
+vector<int> gr[maxn];
+
+int sub[maxn], f[maxn][maxn], g[maxn][maxn];
+
+void read_input() {
+    cin >> n;
+    for(int i = 1; i <= n; ++i) {
+        cin >> a[i];
+    }
+    for(int i = 1; i <= n; ++i) {
+        cin >> b[i];
+    }
+    for(int i = 1; i < n; ++i) {
+        int u, v;
+        cin >> u >> v;
+        gr[u].push_back(v);
+        gr[v].push_back(u);
+    }
+}
+
+void dfs_modify(int u, int par) {
+    vector<int> childs;
+    for(auto&v: gr[u]) {
+        if(v != par) {
+            childs.push_back(v);
+            dfs_modify(v, u);
+        }
+    }
+    gr[u] = childs;
+}
+
+void dfs(int u) {
+    sub[u] = 1;
+    f[u][0] = a[u]; f[u][1] = a[u];
+    g[u][0] = 0; g[u][1] = b[u] - a[u];
+
+    for(auto&v: gr[u]) {
+        dfs(v);
+        for(int i = sub[u]; i >= 0; --i) {
+            for(int j = sub[v]; j >= 0; --j) {
+                int t = f[u][i];
+                if(f[v][j] >= 0)
+                    f[u][i + j] = max(f[u][i + j], t + f[v][j]);
+                f[u][i + j] = max(f[u][i + j], t - max(0, g[v][j]));
+
+                t = g[u][i];
+                g[u][i + j] = min(g[u][i + j], t + max(0, g[v][j]));
+                if(f[v][j] >= 0)
+                    g[u][i + j] = min(g[u][i + j], t - f[v][j]);
+            }
+        }
+        sub[u] += sub[v];
+    }
+}
+
+void solve() {
+    dfs_modify(1, 0);
+    fill_n(&f[0][0], sizeof(f) / sizeof(f[0][0]), -inf);
+    fill_n(&g[0][0], sizeof(g) / sizeof(g[0][0]), inf);
+    dfs(1);
+    int ans = 0;
+    for(int k = 1; k <= n; ++k) {
+        if(f[1][k] >= 0 || g[1][k] <= 0) ans = k;
+    }
+    cout << ans << '\n';
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    #ifdef LOCAL
+        freopen("test.inp", "r", stdin);
+        freopen("test.out", "w", stdout);
+    #endif // LOCAL
+
+    int ntest = 1;
+    //cin >> ntest;
+
+    while(ntest--) {
+        read_input();
+        solve();
+    }
+}
+

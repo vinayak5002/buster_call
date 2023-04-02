@@ -1,0 +1,52 @@
+
+class Node:
+    def __init__(self):#コンストラクタ
+        self.parent = -1
+        self.children = []
+
+
+def depth(node, d = 0):#深さ探索(再帰)
+    tree[node].depth = d
+    for child in tree[node].children:
+        depth(child, d+1)  
+N = int(input())
+tree = [Node() for i in range(N)]#とりあえずn個のノードを作る
+
+
+
+#木を作る
+for i in range(N):
+    tree_info = list(map(int, input().split()))#文字列を入力しint型に変換してから配列を作る
+    node = tree_info[0]#nodeは節点の番号とする
+    k = tree_info[1]#kは子供の数とする
+
+
+    if k==0:#子供なし
+        tree[node].type = "leaf"
+
+
+
+    elif k > 0:#子供あり
+        tree[node].type = "internal node"
+        children = tree_info[2:]#スライス(配列の要素の2番目以降にchildrenとして数字を入れていく)
+        tree[node].children = children
+        
+    
+        
+    for child in tree[node].children:
+        tree[child].parent = node#親と子どもという関係を結びつける
+
+#根の探索(何でもかんでも内部節点か葉かとしていたので根っこを作る)
+for i,t in enumerate(tree) :
+    if t.parent == -1:
+        root_number =[i][0]
+tree[root_number].type = "root"
+depth(root_number)
+
+
+#要素と番号の出力(t=tree)
+for i, t in enumerate(tree):
+    print("node {}: parent = {:d}, depth = {:d}, {:d}, {:d}".format(i, t.parent, t.depth, t.type, t.children))
+
+
+

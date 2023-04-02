@@ -1,0 +1,110 @@
+#include <stdio.h>
+
+#define M 100001
+#define N -1
+
+typedef struct
+{
+    int parent;
+    int left;
+    int right;
+} Node_t;
+
+Node_t a[M];
+
+int n;
+
+void preParse(int u)
+{
+    if (u == N)
+    {
+        return;
+    }
+
+    printf(" %d", u);
+
+    preParse(a[u].left);
+
+    preParse(a[u].right);
+}
+
+void inParse(int u)
+{
+    if (u == N)
+    {
+        return;
+    }
+
+    inParse(a[u].left);
+
+    printf(" %d", u);
+
+    inParse(a[u].right);
+}
+
+void postParse(int u)
+{
+    if (u == N)
+    {
+        return;
+    }
+
+    postParse(a[u].left);
+
+    postParse(a[u].right);
+
+    printf(" %d", u);
+}
+
+int main()
+{
+    int i, x, l, r;
+    int root;
+
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++)
+    {
+        a[i].parent = N;
+    }
+
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d %d %d", &x, &l, &r);
+
+        a[x].left = l;
+        a[x].right = r;
+
+        if (l != N)
+        {
+            a[l].parent = x;
+        }
+
+        if (r != N)
+        {
+            a[r].parent = x;
+        }
+    }
+
+    for (i = 0; i < n; i++)
+    {
+        if (a[i].parent == N)
+        {
+            root = i;
+        }
+    }
+
+    printf("Preorder\n");
+    preParse(root);
+    printf("\n");
+
+    printf("Inorder\n");
+    inParse(root);
+    printf("\n");
+
+    printf("Postorder\n");
+    postParse(root);
+    printf("\n");
+
+    return 0;
+}

@@ -1,0 +1,36 @@
+import kotlin.math.max
+
+class Alogorithm {
+    fun dp(){
+        val (n, w)  = readLine()!!.split(" ").map { it.toInt() }
+        val scores = (0 until n).map { readLine()!!.split(" ").map { it.toInt() } }
+        var memo = mutableMapOf<Pair<Int, Int>, Int>()
+
+        fun rec(index: Int, weight: Int): Int {
+            if (memo.contains(Pair(index, weight))){
+               return memo[Pair(index, weight)]!!
+            }
+            var res: Int
+            if (index == n) {
+                res = 0
+            } else if (weight < scores[index][1]){
+                res = rec(index + 1, weight)
+            } else {
+                var added = rec(index+1, weight - scores[index][1]) + scores[index][0]
+                var notAdded = rec(index+1, weight)
+                res = max(added, notAdded)
+            }
+            memo[Pair(index, weight)] = res
+            return res
+        }
+
+        val answer = rec(0, w)
+        println(answer)
+    }
+
+}
+
+fun main() {
+    val algo = Alogorithm()
+    algo.dp()
+}

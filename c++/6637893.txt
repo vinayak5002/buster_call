@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+/*
+	dp[i][j]为 1~i 个物品，背包容量为 j 时的最大价值
+	dp[i][j] = max{dp[i-1][j], dp[i-1][j-Wi]}
+
+ */
+struct item {
+	int v, w;
+} items[100];
+
+int n, w;
+
+int main() {
+	cin >> n >> w;
+	int dp[n][w + 1];
+	for (int i = 0; i < n; i++) {
+		cin >> items[i].v >> items[i].w;
+	}
+	int w0 = items[0].w;
+	for (int j = 0; j <= w; j++) {
+		if (j >= w0) dp[0][j] = items[0].v;
+		else dp[0][j] = 0;
+	}
+	for (int i = 0; i < n; i++) {
+		dp[i][0] = 0;
+	}
+	for (int i = 1; i < n; i++) {
+		for (int j = 1; j <= w; j++) {
+			if (j < items[i].w) dp[i][j] = dp[i-1][j];
+			else dp[i][j] = max(dp[i-1][j], dp[i-1][j - items[i].w] + items[i].v);
+		}
+	}
+	cout << dp[n - 1][w] << endl;
+	return 0;
+}

@@ -1,0 +1,185 @@
+#include <cstdio>
+#include <iostream>
+#include <algorithm>
+#include <cstring>
+#include <string>
+#include <map>
+#include <queue>
+#include <bitset>
+#include <vector>
+#include <stack>
+#include <cmath>
+#include <set>
+#include <cstdlib>
+#include <unordered_map>
+#include <random>
+#include <chrono>
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/hash_policy.hpp>
+using namespace __gnu_pbds;
+#define mp make_pair
+#define lson tr[now].ls
+#define rson tr[now].rs
+#define pb push_back
+#define debug() cout<<"qwq"<<endl
+#define mem(i,a) memset(i,a,sizeof(i))
+using namespace std;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef double db;
+typedef long double ldb;
+#define i128 __int128
+#define pii pair<int,int>
+const db eps=1e-9;
+const ll INF = 0x3f3f3f3f;
+const int siev =1000000+5;
+const int inf = 0x3f3f3f3f;
+const int DMAX = 100000 + 100;
+const ll MOD = 32768;
+const ll LMOD = 1000000007;
+const int hmod = 202010923;
+const double PI=acos(-1.0);
+mt19937 rnd(chrono::steady_clock::now().time_since_epoch().count());
+template<class T> inline void print(T x){
+    if(x<0){
+        putchar('-');
+        x=-x;
+    }
+    int a[20];
+    int cnt=0;
+    do{
+        a[++cnt]=x%10;
+        x/=10;
+    }while(x>0);
+    for(int i=cnt;i>=1;i--){
+        putchar(a[i]+'0');
+    }
+    putchar('\n');
+    // puts("");
+}
+template<class T> inline void read(T &x){
+    x=0;
+    T f=1;
+    char ch=getchar();
+    while(ch<'0' || ch>'9'){
+        if(ch=='-'){
+            f=-1;
+        }
+        ch=getchar();
+    }
+    while(ch<='9' && ch>='0'){
+        x=x*10+(ch-'0');
+        ch=getchar();
+    }
+    x*=f;
+}
+int n;
+struct Point{
+    int x,y;
+};
+struct Line{
+    Point A,B; 
+};
+Line a[DMAX];
+int b[DMAX<<2],top=0;
+vector<int> add[DMAX<<2],del[DMAX<<2],ask[DMAX<<2];
+struct SegTree{
+    int l,r;
+    ll sum;
+};
+SegTree tr[DMAX<<4];
+void pushup(int p){
+    tr[p].sum=tr[p<<1].sum+tr[p<<1|1].sum;
+}
+void build(int p,int l,int r){
+    tr[p].l=l,tr[p].r=r;
+    if(l==r){
+        tr[p].sum=0;
+        return ;
+    }
+    int mid=(l+r)>>1;
+    build(p<<1,l,mid);
+    build(p<<1|1,mid+1,r);
+    pushup(p);
+}
+void modify(int p,int x,ll val){
+    if(tr[p].l==tr[p].r){
+        tr[p].sum+=val;
+        return ;
+    }
+    int mid=(tr[p].l+tr[p].r)>>1;
+    if(x<=mid){
+        modify(p<<1,x,val);
+    }
+    if(x>mid){
+        modify(p<<1|1,x,val);
+    }
+    pushup(p);
+}
+ll query(int p,int l,int r){
+    if(l<=tr[p].l && tr[p].r<=r){
+        return tr[p].sum;
+    }
+    int mid=(tr[p].l+tr[p].r)>>1;
+    ll res=0;
+    if(l<=mid){
+        res+=query(p<<1,l,r);
+    }
+    if(r>mid){
+        res+=query(p<<1|1,l,r);
+    }
+    return res;
+}
+int main(){
+    read(n);
+    for(int i=1;i<=n;i++){
+        read(a[i].A.x),read(a[i].A.y);
+        read(a[i].B.x),read(a[i].B.y);
+        b[++top]=a[i].A.x,b[++top]=a[i].A.y;
+        b[++top]=a[i].B.x,b[++top]=a[i].B.y;
+    }
+    sort(b+1,b+top+1);
+    int len=unique(b+1,b+top+1)-b-1;
+    for(int i=1;i<=n;i++){
+        a[i].A.x=lower_bound(b+1,b+len+1,a[i].A.x)-b;
+        a[i].A.y=lower_bound(b+1,b+len+1,a[i].A.y)-b;
+        a[i].B.x=lower_bound(b+1,b+len+1,a[i].B.x)-b;
+        a[i].B.y=lower_bound(b+1,b+len+1,a[i].B.y)-b;
+        // cout<<a[i].A.x<<" "<<a[i].A.y<<" "<<a[i].B.x<<" "<<a[i].B.y<<endl;
+    }
+    for(int i=1;i<=n;i++){
+        if(a[i].A.x==a[i].B.x){
+            if(a[i].A.y>a[i].B.y){
+                add[a[i].B.y].pb(i);
+                del[a[i].A.y].pb(i);
+            }
+            else{
+                add[a[i].A.y].pb(i);
+                del[a[i].B.y].pb(i);
+            }
+        }
+        else{
+            ask[a[i].A.y].pb(i);
+        }
+    }
+    build(1,1,len);
+    ll ans=0;
+    for(int i=1;i<=len;i++){
+        for(auto sub:add[i]){
+            modify(1,a[sub].A.x,1);
+        }
+        for(auto sub:ask[i]){
+            if(a[sub].A.x<a[sub].B.x){
+                ans+=query(1,a[sub].A.x,a[sub].B.x);
+            }
+            else{
+                ans+=query(1,a[sub].B.x,a[sub].A.x);
+            }
+        }
+        for(auto sub:del[i]){
+            modify(1,a[sub].A.x,-1);
+        }
+    }
+    print(ans);
+    return 0;
+}

@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using VI = vector<vector<int>>;
+
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+    int h, w;
+    cin >> h >> w;
+    vector<string> s(h);
+    for (int i = 0; i < h; ++i) {
+        cin >> s[i];
+    }
+
+    VI o_cnt(h, vector<int>(w, 0));  // s[h][w]の各点における'O'の残り個数
+    VI i_cnt(h, vector<int>(w, 0));  // s[h][w]の各点における'I'の残り個数
+    // 'O'の累積和を求める
+    for (int i = 0; i < h; ++i) {
+        for (int j = w - 1; j >= 0; --j) {
+            if (s[i][j] == 'O') {
+                if (j == w - 1) {
+                    o_cnt[i][j] = 1;
+                } else {
+                    o_cnt[i][j] = o_cnt[i][j + 1] + 1;
+                }
+            } else {
+                if (j < w - 1) o_cnt[i][j] = o_cnt[i][j + 1];
+            }
+        }
+    }
+    // 'I'の累積和を求める
+    for (int i = 0; i < w; ++i) {
+        for (int j = h - 1; j >= 0; --j) {
+            if (s[j][i] == 'I') {
+                if (j == h - 1) {
+                    i_cnt[j][i] = 1;
+                } else {
+                    i_cnt[j][i] = i_cnt[j + 1][i] + 1;
+                }
+            } else {
+                if (j < h - 1) i_cnt[j][i] = i_cnt[j + 1][i];
+            }
+        }
+    }
+    long long count = 0;
+    for (int i = 0; i < h; ++i) {
+        string::size_type j_pos = s[i].find('J');
+        while (j_pos != string::npos) {
+            count += o_cnt[i][j_pos] * i_cnt[i][j_pos];
+            j_pos = s[i].find('J', ++j_pos);
+        }
+    }
+    cout << count << endl;
+    return 0;
+}
+

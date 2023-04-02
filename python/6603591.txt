@@ -1,0 +1,65 @@
+t = int(input())
+for ti in range(t):
+    h, w = map(int, input().split())
+    F = [list(input()) for _ in range(h)]
+    for i in range(h):
+        for j in range(w):
+            if F[i][j] in ['^', 'v', '<', '>']:
+                ci = i
+                cj = j
+                state = F[i][j]
+                F[i][j] = '.'
+    n = int(input())
+    op = input()
+    for idx in range(n):
+        if op[idx] == 'S':
+            if state == '^':
+                for i in range(ci, -1, -1):
+                    if F[i][cj] == '*':
+                        F[i][cj] = '.'
+                        break
+                    if F[i][cj] == '#':
+                        break
+            elif state == 'v':
+                for i in range(ci, h):
+                    if F[i][cj] == '*':
+                        F[i][cj] = '.'
+                        break
+                    if F[i][cj] == '#':
+                        break
+            elif state == '<':
+                for j in range(cj, -1, -1):
+                    if F[ci][j] == '*':
+                        F[ci][j] = '.'
+                        break
+                    if F[ci][j] == '#':
+                        break
+            elif state == '>':
+                for j in range(cj, w):
+                    if F[ci][j] == '*':
+                        F[ci][j] = '.'
+                        break
+                    if F[ci][j] == '#':
+                        break
+        elif op[idx] == 'U':
+            state = '^'
+            if ci - 1 >= 0 and F[ci - 1][cj] == '.':
+                ci -= 1
+        elif op[idx] == 'D':
+            state = 'v'
+            if ci + 1 < h and F[ci + 1][cj] == '.':
+                ci += 1
+        elif op[idx] == 'L':
+            state = '<'
+            if cj - 1 >= 0 and F[ci][cj - 1] == '.':
+                cj -= 1
+        elif op[idx] == 'R':
+            state = '>'
+            if cj + 1 < w and F[ci][cj + 1] == '.':
+                cj += 1
+    F[ci][cj] = state
+    for i in range(h):
+        print(''.join(F[i]))
+    if ti < t - 1:
+        print()
+

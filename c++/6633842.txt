@@ -1,0 +1,70 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll n, k, l, r;
+  cin >> n >> k >> l >> r;
+  vector<ll> a(n);
+  rep(i, 0, n) cin >> a[i];
+
+  ll m = n / 2;
+  ll m2 = n - m;
+  vector<vector<ll>> vec(m + 1);
+  ll ans = 0;
+
+  for(ll bi = 0; bi < (1 << m); bi++){
+      bitset<32> bits(bi);
+      ll cnt = 0;
+      ll sum = 0;
+      rep(i, 0, m){
+          if(bits[i]){
+              sum += a[i];
+              cnt++;
+          }
+      }
+      vec[cnt].push_back(sum);
+  }
+  rep(i, 0, m + 1) sort(ALL(vec[i]));
+
+  for(ll bi = 0; bi < (1 << m2); bi++){
+      bitset<32> bits(bi);
+      ll cnt = 0;
+      ll sum = 0;
+
+      rep(i, 0, m2){
+          if(bits[i]){
+              sum += a[m + i];
+              cnt++;
+          }
+      }
+      if(k - cnt < 0 || k - cnt > m) continue;
+
+      auto tmp = vec[k - cnt];
+      ll lef = upper_bound(ALL(tmp), l - 1 - sum) - tmp.begin();
+      ll rig = lower_bound(ALL(tmp), r - sum) - tmp.begin();
+      ans += (rig - lef);
+  }
+
+  cout << ans << endl;
+
+  return 0;
+}

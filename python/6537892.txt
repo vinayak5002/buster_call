@@ -1,0 +1,35 @@
+import sys
+from operator import itemgetter
+
+def main(ioi):
+    rxs = lambda: map(int, ioi.readline().split())
+    N, Q = rxs()
+    As = [*rxs()]
+    Xs = [*rxs()]
+    Ys = [0]*Q
+    Zs = [0]*Q
+    lft_over = 0
+    Bs = [0]
+
+    acc = 0
+    for a in As:
+        acc += a
+        Bs.append(acc)
+
+    #import ipdb; ipdb.set_trace()
+    for i, x in enumerate(Xs):
+        for lft in range(N+1):
+            rht = Ys[i]
+            while rht < N+1 and Bs[rht]-Bs[lft] <= x: rht += 1
+            Zs[i] += rht-lft-(1 if Bs[rht]-Bs[lft] > x else 0)
+
+    return "\n".join([str(z) for z in Zs])
+
+print(main(sys.stdin))
+
+# import io
+# print(main(io.StringIO("""6 5
+# 1 2 3 4 5 6
+# 6 9 12 21 15
+# """)))
+

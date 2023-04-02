@@ -1,0 +1,162 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+typedef vector<int> vi;
+typedef vector<ll> vl;
+typedef vector<vector<int>> vvi;
+typedef vector<vector<ll>> vvl;
+
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+typedef vector<pii> vpii;
+typedef vector<pll> vpll;
+
+#define FOR(i, a, b) for(ll i=(a); i<(b); ++i)
+#define REP(i, n) FOR(i, 0, n)
+#define NREP(i, n) FOR(i, 1, n+1)
+
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return 1; } return 0; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return 1; } return 0; }
+
+using SimpleGraph = vector<vector<ll>>;
+struct Edge{
+	ll to, cost;
+	Edge(ll t, ll c) : to(t), cost(c) { }
+};
+using Graph = vector<vector<Edge>>;
+struct Edge3{
+	ll from, to, cost;
+	Edge3(ll f, ll t, ll c) : from(f), to(t), cost(c) { }
+};
+
+const ll INF = 1e15;
+ll isfin = 0;
+ll H, W;
+
+// 0, 1, 2, 3 -> r, d, l, u
+
+ll comb(ll x, ll y, ll dir) {
+	if(x < 0 || H <= x || y < 0 || W <= y) {return -1;}
+	
+	ll pos = x * W + y;
+	return pos * 4 + dir;
+}
+
+ll aft(ll x, ll y, ll dir, ll order) {
+	if(order == 4) {return -1;}
+	
+	dir = (dir + order) % 4;
+	ll nx = x, ny = y;
+	
+	if(dir == 0) {ny++;}
+	if(dir == 1) {nx++;}
+	if(dir == 2) {ny--;}
+	if(dir == 3) {nx--;}
+	
+	return comb(nx, ny, dir);
+}
+
+void calc() {
+	cin >> H >> W;
+	swap(H, W);
+	if(H == 0 && W == 0) {
+		isfin = 1;
+		return;
+	}
+	
+	vvl B(H, vl(W, 0));
+	REP(i, H) {
+		REP(j, W) {
+			cin >> B[i][j];
+		}
+	}
+	vl C(4, 0);
+	REP(i, 4) {cin >> C[i];}
+	
+	ll S = 0, E = 4*H*W;
+	
+	Graph G(E+1);
+	REP(x, H) {
+		REP(y, W) {
+			ll s = B[x][y];
+			REP(dir, 4) {
+				REP(order, 4) {
+					ll cst = C[order];
+					if(order == s) {cst = 0;}
+					
+					ll v = comb(x, y, dir);
+					ll nv = aft(x, y, dir, order);
+					if(nv == -1) {nv = E;}
+					
+					if(nv > E) {
+					    cout << x << " " << y << " " << dir << " " << order << endl;
+					}
+					
+					// assert(nv <= E);
+					
+					G[v].push_back({nv, cst});
+				}
+			}
+		}
+	}
+	
+	vl dist(E+1, INF);
+	priority_queue<pll, vpll, greater<pll>> pq;
+	dist[S] = 0;
+	pq.emplace(0, S);
+	vl pre(E+1, 0);
+	
+	while(pq.size()) {
+		auto [d, v] = pq.top();
+		pq.pop();
+		
+		if(dist[v] < d) {continue;}
+		
+		for(auto e:G[v]) {
+			ll nv = e.to, cst = e.cost;
+			if(chmin(dist[nv], dist[v] + cst)) {
+			    pre[nv] = v;
+				pq.emplace(dist[nv], nv);
+			}
+		}
+	}
+	
+	/*REP(d, 4) {
+	    REP(x, 2) {
+    	    REP(y, 2) {
+    	        ll v = comb(x, y, d);
+    	        cout << dist[v] << " ";
+    	    }
+    	    cout << endl;
+    	}
+    	cout << endl;
+	}
+	
+	REP(y, 8) {
+	    ll p = comb(0, y, 0);
+	    cout << pre[p] << " ";
+	}
+	cout << endl;*/
+	
+	ll res = INF;
+	REP(dir, 4) {
+		ll v = comb(H-1, W-1, dir);
+		chmin(res, dist[v]);
+	}
+	cout << res << endl;
+	
+	return;
+}
+
+int main(void){
+	while(1) {
+		calc();
+		if(isfin) {break;}
+	}
+	
+	return 0;
+ }
+

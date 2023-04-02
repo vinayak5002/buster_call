@@ -1,0 +1,163 @@
+import copy
+import heapq
+
+class Node:
+    def __init__(self, state, g, h, parent):
+        self.state = state
+        self.g = g
+        self.h = h
+        self.parent = parent
+        
+    def cost(self):
+        return self.g + self.h
+
+    def __lt__(self, other):
+        if (self.g + self.h) < (other.g + other.h):
+            return True
+        elif (self.g + self.h) == (other.g + other.h):
+            return self.h < other.h
+        else:
+            return False
+
+class State:
+    def __init__(self, pos):
+        '''
+        state: panel position in 4x4 integer list
+        '''
+        self.pos = pos
+
+    def __str__(self):
+        string = ""
+        for i in range(4):
+            for j in range(4):
+                string += str(self.pos[i][j])
+            string += '\n'
+        return string
+
+    def __eq__(self, other):
+        return self.pos == other.pos
+
+    def get_position(self, num):
+        for i in range(4):
+            for j in range(4):
+                if self.pos[i][j] == num:
+                    return (i, j)
+        # should throw exception
+        return None
+
+    def expand(self,gg):
+
+        global cnt_expand
+
+        children = []
+        init_pos = State([[0,1,3],[4,5,6],[7,8,2]])
+
+        i,j = self.get_position(0)
+        for di,dj in [(0,1),(0,-1),(1,0),(-1,0)]:
+            ni,nj = i+di, j+dj
+            if 0<=ni<4 and 0<=nj<4:
+                new_state = copy.deepcopy(self.pos)
+                new_state[ni][nj],new_state[i][j] = new_state[i][j],new_state[ni][nj]
+                next_node = Node(State(new_state), gg+1, Puzzle(init_pos).heuristic(State(new_state)), self.pos)
+                if next_node.g + next_node.h >45:
+                    continue
+                children.append(next_node)
+                cnt_expand += 1
+        '''
+        return children state list
+        この関数を実装せよ
+        '''
+        return children
+
+
+class Puzzle:
+    def __init__(self, init_pos):
+        self.start = State(init_pos)
+        self.goal = State([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 0]])
+
+    def heuristic(self,state):
+
+        location_dict = {1:(0,0), 2:(0,1), 3:(0,2), 4:(0,3), 5:(1,0), 6:(1,1), 7:(1,2), 8:(1,3), 9:(2,0), 10:(2,1), 11:(2,2), 12:(2,3), 13:(3,0), 14:(3,1), 15:(3,2), 0:(3,3)}
+
+        h_value = 0
+        for num in range(16):
+            p,q = state.get_position(num)
+            r,s = location_dict[num]
+            h_value += abs(p-r) + abs(q-s)
+
+        return h_value
+                
+
+class AStar:
+    def __init__(self, puzzle):
+        self.puzzle = puzzle
+        self.closed_list = { }
+
+    def solution_path(self, goal):
+        '''
+        この関数はこのまま使っても良いし適当に変更しても良い
+        たとえば expand の回数や closed_list の要素数などを表示するなど
+        '''
+        solution = []
+        node = goal
+        while True:
+            solution = [str(node.state)] + solution
+            if node.parent.pos[0][0] < 0:
+                break
+            node = self.closed_list[str(node.parent)]
+        sol_str = "len: " + str(goal.g) + '\n'
+        for pos in solution:
+            sol_str += pos + '\n'
+        return sol_str
+
+    def search(self):
+        '''
+        以下はあくまで一例で、dummy_stateの定義などは適宜変更せよ
+        '''
+        start_state = self.puzzle.start
+        dummy_state = State([[-1, -1, -1, -1], [-1, -1, -1, -1], [-1, -1, -1, -1]])
+        start_node = Node(start_state, 0, self.puzzle.heuristic(start_state), dummy_state)
+        
+        # open_list の初期化
+        open_queue = [ start_node ]
+        heapq.heapify(open_queue)
+        
+        # ハッシュ表の初期化。ここではハッシュ表のキーとしてStateの文字列を使っている
+        self.closed_list = { }
+        self.closed_list[str(start_state)] = start_node
+
+        if start_state == self.puzzle.goal:
+            return 0
+
+        while len(open_queue) != 0:
+
+            n = heapq.heappop(open_queue)
+
+            if n.g + n.h > 45 :
+              continue
+
+            if n.state == self.puzzle.goal:
+                return n.g
+                # return cnt_expand,len(self.closed_list)
+
+            child_nodes = n.state.expand(n.g)
+
+            for c in child_nodes:
+                if c.g+c.h > 45:
+                  continue
+                if (str(c.state) not in self.closed_list) or (c.g + c.h < self.closed_list[str(c.state)].g + self.closed_list[str(c.state)].h):
+                    self.closed_list[str(c.state)] = c
+                    heapq.heappush(open_queue, c)
+            '''
+            以前の課題とほぼ同じはずだがq、ここを実装せよ。
+            '''
+            
+        return None
+        
+cnt_expand = 0
+L = [list(map(int,input().split())) for _ in range(4)]
+pz = Puzzle(L) 
+solver = AStar(pz)
+ans = solver.search()
+print(ans)
+

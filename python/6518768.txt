@@ -1,0 +1,38 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+
+	const num = si[0].split(" ");
+	let a = Number(num[0]).toString(2);
+	let b = Number(num[1]).toString(2);
+	
+	const BIT_NUM = 32;
+	
+	a = (Array(BIT_NUM).join('0') + a).slice(-BIT_NUM);
+	b = (Array(BIT_NUM).join('0') + b).slice(-BIT_NUM);
+	
+	let and = '';
+	let or = '';
+	let xor = '';
+	
+	//AND(論理積)
+	for (let i = 0; i < BIT_NUM; i++) {
+		and += a[i] & b[i];
+	}
+	
+	//OR(論理和)
+	for (let i = 0; i < BIT_NUM; i++) {
+		or += a[i] | b[i];
+	}
+	
+	//XOR(排他的論理和)
+	for (let i = 0; i < BIT_NUM; i++) {
+		xor += a[i] ^ b[i];
+	}
+	
+	let ans = and + '\n' + or + '\n' + xor + '\n';
+	so.write(ans);
+
+}

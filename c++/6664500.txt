@@ -1,0 +1,131 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+#include <climits>
+#include <cmath>
+using namespace std;
+
+
+class RangeUpdateMinimumQuery {
+private:
+	int n_;
+	vector<int> lazy_;
+	vector<int> data_;
+
+private:
+	void eval(int k) {
+		if (lazy_[k] < 0) {
+			return;
+		}
+		if (k < n_ - 1) {
+			int k2 = 2 * k;
+
+			lazy_[k2 + 1] = lazy_[k];
+			lazy_[k2 + 2] = lazy_[k];
+		}
+		data_[k] = lazy_[k];
+		lazy_[k] = -1;
+		return;
+	}
+
+	int find_sub(int s, int t, int k, int left, int right) {
+		eval(k);
+		if (right <= s || t <= left) {
+			return INT_MAX;
+		}
+		if (s <= left && right <= t) {
+			return data_[k];
+		}
+		int mid = (left + right) / 2;
+		int k2 = 2 * k;
+		int val0 = find_sub(s, t, k2 + 1, left, mid);
+		int val1 = find_sub(s, t, k2 + 2, mid, right);
+		return min(val0, val1);
+	}
+
+	int update_sub(int s, int t, int x, int k, int left, int right) {
+		eval(k);
+
+		if (right <= s || t <= left) {
+			return data_[k];
+		}
+		if (s <= left && right <= t) {
+			lazy_[k] = x;
+			return x;
+		}
+		int mid = (left + right) / 2;
+		int k2 = 2 * k;
+		int val_l = update_sub(s, t, x, k2 + 1, left, mid);
+		int val_r = update_sub(s, t, x, k2 + 2, mid, right);
+		data_[k] = min(val_l, val_r);
+		return data_[k];
+	}
+
+public:
+	RangeUpdateMinimumQuery(int n, int init_val) {
+		int n2 = -1;
+
+		n_ = 1;
+		while (n_ < n) {
+			n_ <<= 2;
+		}
+		n2 = 2 * n_ - 1;
+
+		data_ = vector<int>(n2, init_val);
+		lazy_ = vector<int>(n2, -1);
+		return;
+	}
+
+	~RangeUpdateMinimumQuery() {}
+
+	// [s, t), zero-based
+	int find(int s, int t) {
+		return find_sub(s, t, 0, 0, n_);
+	}
+
+	// [s, t), zero-based
+	void update(int s, int t, int x) {
+		update_sub(s, t, x, 0, 0, n_);
+		return;
+	}
+};
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n = -1;
+	int q = -1;
+	int init_val = pow(2, 31) - 1;
+	int op = -1;
+	int s = -1;
+	int t = -1;
+	int x = -1;
+	int val = init_val;
+
+	cin >> n >> q;
+	RangeUpdateMinimumQuery rumq(n, init_val);
+
+	for (int i = 0; i < q; i++) {
+		cin >> op;
+		if (op == 0) {
+			cin >> s >> t >> x;
+			t++;
+			rumq.update(s, t, x);
+		}
+		else {
+			cin >> s >> t;
+			t++;
+			val = rumq.find(s, t);
+			cout << val << endl;
+		}
+	}
+
+	return 0;
+}

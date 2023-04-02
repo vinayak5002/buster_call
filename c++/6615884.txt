@@ -1,0 +1,149 @@
+#include <bits/stdc++.h>
+
+// clang-format off
+
+using namespace std;
+#define all(a) a.begin(), a.end()
+#define int long long
+#define over_load_(_1, _2, _3, _4, NAME, ...) NAME
+#define rep(...) over_load_(__VA_ARGS__, rep4, rep3, rep2)(__VA_ARGS__)
+#define rep2(i, r) for (int i = 0; i < static_cast<int>(r); (i) += 1)
+#define rep3(i, l, r) for (int i = static_cast<int>(l); i < static_cast<int>(r); (i) += 1)
+#define rep4(i, l, r, stride) for (int i = static_cast<int>(l); i < static_cast<int>(r); (i) += (stride))
+#define rrep(...) over_load_(__VA_ARGS__, rrep4, rrep3, rrep2)(__VA_ARGS__)
+#define rrep2(i, r) for (int i = static_cast<int>(r) - 1; i >= 0; (i) -= 1)
+#define rrep3(i, l, r) for (int i = static_cast<int>(r) - 1; i >= static_cast<int>(l); (i) -= 1)
+#define rrep4(i, l, r, stride) for (int i = static_cast<int>(r) - 1; i >= static_cast<int>(l); (i) -= (stride))
+#define fore(i, a) for (auto &i : a)
+template <typename T1, typename T2>
+inline bool chmax(T1 &a, T2 b)
+{
+    return a < b && (a = b, true);
+}
+template <typename T1, typename T2>
+inline bool chmin(T1 &a, T2 b)
+{
+    return a > b and (a = b, true);
+}
+constexpr char newl = '\n';
+
+long long pow2(int x) {return x * x;}
+bool isupper(char c) {return ('A' <= c and c <= 'Z');}
+bool islower(char c) {return ('a' <= c and c <= 'z');}
+bool isnumber(char c) {return ('0' <= c and c <= '9');}
+
+// O(logX)
+int getdigit(long long x) {
+    int res = 0;
+    while(x > 0) {
+        res++;
+        x /= 10;
+    }
+    return res;
+}
+
+using ll = long long;
+using vi = vector<int>;
+using vll = vector<ll>;
+using vvi = vector<vi>;
+using vvll = vector<vll>;
+using vp = vector<pair<int, int>>;
+using vs = vector<string>;
+
+const ll sup = LONG_LONG_MAX / 2 - 1;
+const double pi = 3.141592653589793;
+
+using namespace std;
+// clang-format off
+template <typename T>
+class seg_tree {
+    using F = function<T(T, T)>;
+private:
+    int n;
+    T elem;
+    vector<T> container;
+    F func; 
+
+    void set_n(int n) {
+        this->n = 1;
+        while(this->n < n) this->n <<= 1;
+    }
+
+    void build(vector<T>& input, int elem) {
+        container = vector<T>(2 * n + 1, elem);
+        this->elem = elem;
+        for (int i = 0 ; i < input.size() ; i++) container[n + i] = input[i];
+        for (int i = n - 1 ; i >= 1 ; i--) container[i] = func(container[2 * i], container[2 * i + 1]);
+    }
+
+    T rec(int index, int l, int r, int a, int b) {
+        // 完全に内部に含まれている場合
+        if (l <= a and b <= r) return container[index];
+        // 完全に外部の時
+        if (b <= l or r <= a) return elem;
+        // またがっている時
+        return func(rec(2 * index, l, r, a, (a + b) / 2), rec(2 * index + 1, l, r, (a + b) / 2, b));
+    }
+
+public:
+    int getn() {return n;}
+    T get(int index) {return container[index];}
+
+    seg_tree(vector<T>& input) {
+        set_n(input.size());
+        build(input, 0);
+    }
+
+    seg_tree(vector<T>& input, int elem) {
+        set_n(input.size());
+        func = [](T a, T b){return a + b;};
+        build(input, elem);
+    }
+
+    seg_tree(vector<T>& input, F func, int elem) {
+       set_n(input.size());
+       this->func = func;
+       build(input, elem);
+    }
+
+    void update(int index, int value) {
+        index += n;
+        container[index] = value;
+        while(index > 1) {
+            index /= 2;
+            container[index] = func(container[2 * index], container[2 * index + 1]);
+        }
+    }
+    
+    // 半開区間
+    T query(int l, int r) {
+        return rec(1, l + 1, r + 1, 1, n + 1);        
+    }
+
+};
+
+int n, q;
+vi a;
+
+void solve() {
+   auto f = [](int a, int b){return (a+b);}; 
+   seg_tree<int> seg(a, f, 0);
+   rep(_, q) {
+       int t, x, y; cin >> t >> x >> y;
+       if (t == 0) {
+           a[x - 1] += y;
+           seg.update(x - 1, a[x - 1]);
+       }
+       if (t == 1) {
+           if (x > y) swap(x, y);
+           cout << seg.query(x - 1, y) << newl;
+       }
+   }
+}
+
+signed main() {
+    cin >> n >> q;
+    a = vi(n, 0);
+    solve();
+}
+

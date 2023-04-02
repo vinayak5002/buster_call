@@ -1,0 +1,199 @@
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <vector>
+using namespace std;
+
+const double eps = 1e-8;
+
+struct Vector
+{
+    double x, y;
+
+    Vector(double x = 0, double y = 0) : x(x), y(y) {}
+
+    Vector operator+(Vector p) const { return Vector(x + p.x, y + p.y); }
+    Vector operator-(Vector p) const { return Vector(x - p.x, y - p.y); }
+    Vector operator*(double k) const { return Vector(x * k, y * k); }
+    Vector operator/(double k) const { return Vector(x / k, y / k); }
+
+    bool operator==(Vector p) const
+    {
+        return fabs(x - p.x) < eps && fabs(y - p.y) < eps;
+    }
+
+    bool operator<(Vector p) const
+    {
+        if (fabs(x - p.x) > eps)
+            return x < p.x;
+        return y < p.y;
+    }
+
+    double dot(Vector p) const { return x * p.x + y * p.y; }
+    double cross(Vector p) const { return x * p.y - p.x * y; }
+    double norm() const { return sqrt(x * x + y * y); }
+};
+
+struct Seg
+{
+    Vector a, b;
+
+    Seg(Vector a = Vector(), Vector b = Vector()) : a(a), b(b) {}
+
+    Vector project(Vector p)
+    {
+        Vector v = b - a;
+        double t = (p - a).dot(v) / v.dot(v);
+        return a + v * t;
+    }
+};
+
+double getDisLP(Seg s, Vector p)
+{
+    Vector proj = s.project(p);
+    return (proj - p).norm();
+}
+
+int sign(double x)
+{
+    if (fabs(x) <= eps)
+        return 0;
+    else if (x > 0)
+        return 1;
+    return -1;
+}
+
+struct Circle
+{
+    Vector c;
+    double r;
+
+    Circle(Vector c = Vector(), double r = 0) : c(c), r(r) {}
+
+    Vector getCrossPointCL(Seg x)
+    {
+        Vector pr = x.project(c);
+        Vector e = (x.b - x.a) / (x.b - x.a).norm();
+        Vector a, b;
+        if (fabs(getDisLP(x, c) - r) < eps)
+            a = b = pr;
+        else
+        {
+            double base = sqrt(r * r - (pr - c).dot(pr - c));
+            a = pr + e * base;
+            b = pr - e * base;
+        }
+        if (a == x.a || a == x.b)
+            return b;
+        else
+            return a;
+    }
+    vector<Vector> getCrossPointsCL(Seg x)
+    {
+        vector<Vector> res;
+        Vector pr = x.project(c);
+        Vector e = (x.b - x.a) / (x.b - x.a).norm();
+        Vector a, b;
+        if (fabs(getDisLP(x, c) - r) < eps)
+            res.push_back(pr);
+        else
+        {
+            double base = sqrt(r * r - (pr - c).dot(pr - c));
+            a = pr + e * base;
+            b = pr - e * base;
+            res.push_back(b);
+            res.push_back(a);
+        }
+        // sort(res.begin(), res.end());
+        return res;
+    }
+};
+
+double getDisPP(const Vector &p, const Vector &q)
+{
+    return (p - q).norm();
+}
+
+double getDisPL(const Vector &p, const Seg &l)
+{
+    return fabs((l.b - l.a).cross(p - l.a)) / (l.b - l.a).norm();
+}
+
+double getDisSP(const Seg &s, const Vector &p)
+{
+    if ((s.b - s.a).dot(p - s.a) < 0) // 点p在a点那一侧的外面
+        return getDisPP(p, s.a);
+    if ((s.a - s.b).dot(p - s.b) < 0) // 点p在b点那一侧的外面
+        return getDisPP(p, s.b);
+    return getDisPL(p, s); // 可以取p到s的垂线段距离
+}
+double TriCirInterction(Circle c, Vector a, Vector b)
+{
+    Vector oa = a - c.c, ob = b - c.c;
+    Vector ba = a - b, bc = c.c - b;
+    Vector ab = b - a, ac = c.c - a;
+    double doa = oa.norm(), dob = ob.norm(), dab = ab.norm(), r = c.r;
+    if (fabs(oa.cross(ob)) < eps)
+        return 0; //三点一线 无三角形
+
+    else if (doa - r < -eps && dob - r < -eps)
+        return oa.cross(ob) / 2; // 三点在圆内
+
+    else if (dob - r < -eps && doa - r >= -eps)
+    {
+        double x = (ba.dot(bc) + sqrt(r * r * dab * dab - ba.cross(bc) * ba.cross(bc))) / dab;
+        double TS = oa.cross(ob) / 2;
+        return asin(TS * (1 - x / dab) * 2 / r / doa) * r * r * 0.5 + TS * x / dab;
+    }
+    else if (dob - r >= -eps && doa - r < -eps)
+    {
+        double y = (ab.dot(ac) + sqrt(r * r * dab * dab - ab.cross(ac) * ab.cross(ac))) / dab;
+        double TS = oa.cross(ob) / 2;
+        return asin(TS * (1 - y / dab) * 2 / r / dob) * r * r * 0.5 + TS * y / dab;
+    }
+    else if (fabs(oa.cross(ob)) >= r * dab || fabs(ab.dot(ac)) <= eps || fabs(ba.dot(bc)) < eps)
+    { //两点外 单扇形
+        double angle = acos(oa.dot(ob) / doa / dob);
+        return sign(oa.cross(ob)) * angle * r * r * 0.5;
+    }
+    else
+    {
+        double x = (ba.dot(bc) + sqrt(r * r * dab * dab - ba.cross(bc) * ba.cross(bc))) / dab;
+        double y = (ab.dot(ac) + sqrt(r * r * dab * dab - ab.cross(ac) * ab.cross(ac))) / dab;
+        double TS = oa.cross(ob) * 0.5;
+        return (asin(TS * (1 - x / dab) * 2 / r / doa) + asin(TS * (1 - y / dab) * 2 / r / dob)) * r * r * 0.5 + TS * ((x + y) / dab - 1);
+    }
+}
+
+int n;
+
+double PolyonCirArea(Circle c, vector<Vector> &p)
+{
+    double ans = 0;
+    for (int i = 0; i < n; ++i)
+        ans += TriCirInterction(c, p[i], p[(i + 1) % n]);
+    return fabs(ans);
+}
+
+int main()
+{
+    double r;
+    cin >> n >> r;
+    vector<Vector> v;
+    Circle c;
+    c.r = r;
+
+    double s = 0;
+    Vector x;
+    for (int i = 0; i < n; ++i)
+    {
+        cin >> x.x >> x.y;
+        v.push_back(x);
+    }
+    double ans = PolyonCirArea(c, v);
+    if (ans < eps)
+        ans = 0;
+    printf("%.10lf\n", ans);
+
+    return 0;
+}

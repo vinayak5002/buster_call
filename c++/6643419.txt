@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define REP(i,n) for(int i=0;i<int(n);i++)
+typedef long long ll;
+typedef pair<ll,ll> P;
+
+ll const INF=1e18;
+ll d[100010],r[200010],q[100010],t[2][200010],N,M,Q;
+vector<P> g[100010];
+
+void djk(){
+
+	for(ll i=1;i<=N;i++){
+		if(i==1) d[i]=0;
+		else d[i]=INF;
+	}
+
+	priority_queue<P,vector<P>,greater<P> > q;
+
+	q.push(P(0,1));
+
+	while(!q.empty()){
+
+		P p=q.top();  q.pop();
+
+		ll x=p.second;
+		if(d[x]<p.first) continue;
+
+		for(auto t : g[x]){
+			if(d[t.second]>d[x]+t.first){
+				d[t.second]=d[x]+t.first;
+				q.push(P(d[t.second],t.second));
+			}
+		}
+	}
+
+}
+
+int main(void){
+	ll i,j,k;
+ 
+	cin.tie(0);  ios_base::sync_with_stdio(false);
+
+	cin >> N >> M >> Q;
+	for(i=1;i<=M;i++){
+		ll a,b;
+		cin >> a >> b;
+		t[0][i]=a;
+		t[1][i]=b;
+		t[0][i]=b;
+		t[1][i]=a;
+		g[a].push_back(P(1,b));
+		g[b].push_back(P(1,a));
+	}
+
+	for(i=1;i<=Q;i++) cin >> r[i];
+
+	djk();
+	for(i=1;i<=N;i++) q[i]=d[i];
+
+
+	for(i=1;i<=Q;i++){
+		ll c=r[i];
+		for(j=0;j<(ll)g[t[0][c]].size();j++){
+			if(t[1][c]==g[t[0][c]][j].second){
+			g[t[0][c]][j].first=2;
+	    	break;
+			}
+		}
+		for(j=0;j<(ll)g[t[1][c]].size();j++){
+			if(t[0][c]==g[t[1][c]][j].second){
+			g[t[1][c]][j].first=2;
+			break;
+			}
+		}
+
+		djk();
+
+		ll ans=0;
+		for(j=1;j<=N;j++) if(d[j]>q[j]) ans++;
+
+		cout << ans << endl;
+
+	}
+
+
+	return 0;
+}
+

@@ -1,0 +1,250 @@
+#include <bits/extc++.h>
+
+using namespace std;
+
+#define rep(i,n) for(int i=0;i<(n);++i)
+#define reps(i,s,n) for(int i=(s);i<=(n);++i)
+#define all(x) begin(x), end(x)
+#define Fixed fixed << setprecision(12)
+#define updiv(a,b) ((a + b - 1) / b)
+constexpr int32_t INF  = 0x3f3f3f3f;
+constexpr int64_t LINF = 0x3f3f3f3f3f3f3f3fLL;
+constexpr int mod = 1e9+7;
+// constexpr int mod = 998244353;
+
+template <class Func>
+class FixPoint : Func {
+public:
+    explicit constexpr FixPoint(Func&& f) noexcept : Func(forward<Func>(f)) {}
+
+    template <class... Args>
+    constexpr decltype(auto) operator()(Args&&... args) const {
+        return Func::operator()(*this, std::forward<Args>(args)...);
+    }
+};
+
+template <class Func>
+static inline constexpr decltype(auto) makeFixPoint(Func&& f) noexcept {
+    return FixPoint<Func>{forward<Func>(f)};
+}
+
+template <class A, class B> inline bool chmax(A &a, const B &b) { return b > a && (a = b, true); }
+template <class A, class B> inline bool chmin(A &a, const B &b) { return b < a && (a = b, true); }
+
+template <class T> using max_heap = priority_queue<T>;
+template <class T> using min_heap = priority_queue<T,vector<T>,greater<T> >;
+template <class A, class B> using umap = unordered_map<A,B>;
+template <class A, class B> using uset = unordered_set<A,B>;
+
+template <class T> using Set = __gnu_pbds::tree<T, __gnu_pbds::null_type, less<T>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
+
+template <class T> inline void bye(T x) { cout << x << '\n'; exit(0); }
+
+constexpr int dx[] = {1, 0, -1, 0, 1, 1, -1, -1};
+constexpr int dy[] = {0, -1, 0, 1, 1, -1, -1, 1};
+
+struct UnionFind{
+    int n;
+    vector<int> data;
+
+    UnionFind(int sz) : n(sz), data(sz, -1){}
+
+    bool unite(int x, int y){
+        x = find(x), y = find(y);
+        if(x == y) return (false);
+        if(data[x] > data[y]) swap(x, y);
+        data[x] += data[y];
+        data[y] = x;
+        return (true);
+    }
+
+    int find(int k){
+        if(data[k] < 0) return (k);
+        return (data[k] = find(data[k]));
+    }
+
+    int size(int k){
+        return (-data[find(k)]);
+    }
+
+    bool same(int x, int y){
+        return (find(x) == find(y));
+    }
+
+    vector<vector<int> > groups(){
+        vector<int> leader_buf(n), group_size(n);
+        for(int i = 0; i < n; ++i){
+            leader_buf[i] = find(i);
+            group_size[leader_buf[i]]++;
+        }
+        vector<vector<int> > res(n);
+        for(int i = 0; i < n; ++i){
+            res[i].reserve(group_size[i]);
+        }
+        for(int i = 0; i < n; ++i){
+            res[leader_buf[i]].emplace_back(i);
+        }
+        res.erase(
+            remove_if(res.begin(), res.end(),
+                    [&](const vector<int>& v){ return (v.empty()); }),
+            res.end());
+        return (res);
+    }
+};
+
+signed main() {
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+
+    int d;
+    cin >> d;
+
+    for (int loop = 0; loop < d; ++loop) {
+        int n;
+        cin >> n;
+
+        vector<int> b(n), h(n), len(n + 1), maxv(n + 1);
+
+        for (int i = 0; i < n; ++i) {
+            cin >> b[i] >> h[i];
+        }
+
+        len[0] = b[0];
+        maxv[0] = len[0] * h[0];
+        for (int i = 1; i < n; ++i) {
+            len[i] = b[i] - b[i - 1];
+            maxv[i] = len[i] * min(h[i - 1], h[i]);
+        }
+        len[n] = 100 - b[n - 1];
+        maxv[n] = len[n] * h[n - 1];
+
+        int m;
+        cin >> m;
+
+        vector<int> f(m), a(m);
+
+        for (int i = 0; i < m; ++i) {
+            cin >> f[i] >> a[i];
+        }
+
+        int l;
+        cin >> l;
+
+        vector<tuple<int, int, int> > queries;
+
+        for (int i = 0; i < l; ++i) {
+            int p, t;
+            cin >> p >> t;
+            queries.emplace_back(t, p, i);
+        }
+
+        UnionFind uf(n + 1);
+
+        vector<int> vh(n + 1);
+
+        auto LR = [&](int k) {
+            k = uf.find(k);
+            int left = n, right = 0;
+            for (int i = 0; i <= n; ++i) {
+                if (uf.same(i, k)) {
+                    chmin(left, i);
+                    chmax(right, i);
+                }
+            }
+            return (make_pair(left, right));
+        };
+
+        auto LEN = [&](int k) {
+            k = uf.find(k);
+            int sum = 0;
+            for (int i = 0; i <= n; ++i) {
+                if (uf.same(i, k)) {
+                    sum += len[i];
+                }
+            }
+            return (sum);
+        };
+
+        auto H = [&](int k) {
+            auto [left, right] = LR(k);
+            int lh = (left == 0 ? 50 : h[left - 1]);
+            int rh = (right == n ? 50 : h[right]);
+            return (make_pair(lh, rh));
+        };
+
+        auto MAXVH = [&](int k) {
+            auto hk = H(k);
+            return (LEN(k) * min(hk.first, hk.second) * 30);
+        };
+
+        auto unite = [&](int k) {
+            auto [lk, rk] = LR(k);
+            if (vh[uf.find(k)] != MAXVH(k)) return;
+            if (lk != 0) {
+                if (vh[uf.find(lk - 1)] == MAXVH(lk - 1) && (long long) vh[uf.find(k)] * LEN(lk - 1) == (long long) vh[uf.find(lk - 1)] * LEN(uf.find(k))) {
+                    auto vhk = vh[uf.find(k)];
+                    auto vhl = vh[uf.find(lk - 1)];
+                    if (uf.unite(k, lk - 1)) {
+                        vh[uf.find(k)] = vhk + vhl;
+                    }
+                }
+            }
+            if (rk != n) {
+                if (vh[uf.find(rk + 1)] == MAXVH(rk + 1) && (long long) vh[uf.find(k)] * LEN(rk + 1) == (long long) vh[uf.find(rk + 1)] * LEN(uf.find(k))) {
+                    auto vhk = vh[uf.find(k)];
+                    auto vhr = vh[uf.find(rk + 1)];
+                    if (uf.unite(k, rk + 1)) {
+                        vh[uf.find(k)] = vhk + vhr;
+                    }
+                }
+            }
+        };
+
+        auto add = makeFixPoint([&](auto rec, int k, int v) {
+            if (v == 0) return;
+            k = uf.find(k);
+            unite(k);
+            k = uf.find(k);
+            int curv = vh[k];
+            int maxvhk = MAXVH(k);
+            if (vh[k] < maxvhk) {
+                vh[k] += min(maxvhk - vh[k], v);
+                v -= vh[k] - curv;
+                unite(k);
+                k = uf.find(k);
+                rec(k, v);
+            } else if (vh[k] == maxvhk) {
+                auto [lk, rk] = LR(k);
+                if (lk == 0 && rk == n) return;
+                auto [lh, rh] = H(k);
+                if (lk == 0) rec(rk + 1, v);
+                else if (rk == n) rec(lk - 1, v);
+                else if (lh < rh) rec(lk - 1, v);
+                else rec(rk + 1, v);
+            }
+        });
+
+        sort(all(queries));
+
+        vector<double> ans(l);
+
+        int pre = 0;
+        for (auto [t, p, idx] : queries) {
+            for (int i = 0; i < m; ++i) {
+                add(lower_bound(all(b), f[i]) - b.begin(), (t - pre) * a[i]);
+            }
+            pre = t;
+            int k = uf.find(lower_bound(all(b), p) - b.begin());
+            // cout << k << ' ' << vh[k] << ' ' << LEN(k) << '\n';
+            // cout << fixed << (double) vh[k] / LEN(k) / 30 << '\n';
+            ans[idx] = (double) vh[k] / LEN(k) / 30;
+            // cout.flush();
+        }
+
+        for (auto e : ans) {
+            cout << Fixed << e << '\n';
+        }
+    }
+
+    return(0);
+}

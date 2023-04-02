@@ -1,0 +1,156 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define NIL NULL
+
+struct node{   
+  	int key;
+  	int pri;
+  	struct node *parent;
+  	struct node *right;
+  	struct node *left;
+};
+typedef struct node *Node;
+Node t;
+
+Node rightRotate(Node t){
+	Node s;
+	
+	s=t->left;
+	t->left=s->right;
+	s->right=t;
+	
+	return s;
+}
+
+Node leftRotate(Node t){
+	Node s;
+	
+	s=t->right;
+	t->right=s->left;
+	s->left=t;
+	
+	return s;
+}
+
+Node Insert(Node t,int key,int pri){
+  	Node s;
+  	
+  	if(t==NIL){
+  		s=malloc(sizeof(struct node));
+  		s->key=key;
+  		s->pri=pri;
+  		return s;
+	}
+	if(key==t->key)
+		return t;
+	
+	if(key<t->key){
+		t->left=Insert(t->left,key,pri);
+		if(t->pri<t->left->pri)
+			t=rightRotate(t);
+	}
+	else{
+		t->right=Insert(t->right,key,pri);
+		if(t->pri<t->right->pri)
+			t=leftRotate(t);
+	}	
+}
+
+void Find(int key){
+	Node s;
+	
+  	s=t;
+  	while(s!=NULL&&s->key!=key){
+    	if(key<s->key)
+			s=s->left;
+    	else
+			s=s->right;
+  	}
+  	if(s==NULL)
+	  	puts("no");
+  	else
+	  	puts("yes");
+}
+
+Node _Delete(Node,int);
+
+Node Delete(Node t,int key){
+	if(t==NULL)
+		return NULL;
+	if(key<t->key)
+		t->left=Delete(t->left,key);
+	else if(key>t->key)
+		t->right=Delete(t->right,key);
+	else
+		return _Delete(t,key);
+	
+	return t;
+}
+
+Node _Delete(Node t,int key){
+	if(t->left==NULL&&t->right==NULL)
+		return NULL;
+	else if(t->left==NULL)
+		t=leftRotate(t);
+	else if(t->right==NULL)
+		t=rightRotate(t);
+	else{
+		if(t->left->pri>t->right->pri)
+			t=rightRotate(t);
+		else
+			t=leftRotate(t);
+	}
+	return Delete(t,key);
+}
+
+void Preorder(Node t){
+    if(t!=NULL){
+        printf(" %d",t->key);
+        Preorder(t->left);
+        Preorder(t->right);
+    }
+}
+
+void Inorder(Node t){
+    if (t!=NULL){
+        Inorder(t->left);
+        printf(" %d",t->key);
+        Inorder(t->right);
+    }
+}
+
+int main(void){
+  	int n,key,pri;
+  	int i;
+  	char command[10];
+
+  	scanf("%d",&n);
+
+  	for(i=0;i<n;i++){
+    	scanf("%s",command);
+    	if(command[0]=='i'){
+      		scanf("%d%d",&key,&pri);
+      		t=Insert(t,key,pri);
+    	}
+    	else if(command[0]=='p'){
+      		Inorder(t);
+      		puts("");
+      		Preorder(t);
+      		puts("");
+    	}
+    	else if(command[0]=='f'){
+    		scanf("%d",&key);
+			Find(key);
+		}
+		else if(command[0]=='d'){
+    		scanf("%d",&key);
+			t=Delete(t,key);
+		}
+    	else{
+    		puts("error");
+    		return 0;
+		}
+  	}
+  	return 0;
+}

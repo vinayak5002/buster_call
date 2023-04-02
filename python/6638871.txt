@@ -1,0 +1,24 @@
+n, m = map(int, input().split())
+
+distance = [0] * (n + 1)  # 都市間の距離
+for i in range(1, n + 1):
+    distance[i] = int(input())
+
+weather = [0] * (m + 1)  # 日毎の天気の悪さ
+for i in range(1, m + 1):
+    weather[i] = int(input())
+
+travel = [[0] * (n + 1) for _ in range(m + 1)]  # m日目に都市nに着いた時の疲労度
+
+for day in range(1, m + 1):
+    for city in range(1, n + 1):
+        if city == 0:  # 都市0に居続けている場合
+            continue
+        elif day > city:  # 途中で待機した日があった場合
+            travel[day][city] = min(travel[day - 1][city - 1] + distance[city] * weather[day],
+                                    travel[day - 1][city])
+        elif day == city:  # 休まず移動した場合
+            travel[day][city] = travel[day - 1][city - 1] + distance[city] * weather[day]
+
+print(travel[m][n])
+

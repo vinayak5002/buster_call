@@ -1,0 +1,64 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def calc_length(v):
+    length = 0
+    for element in v:
+        length += element ** 2
+    return math.sqrt(length)
+
+
+def v_diff(v0, v1):
+    dif = []
+    for i in range(len(v0)):
+        dif.append(v1[i] - v0[i])
+    return dif
+
+
+def calc_distance(p0, p1):
+    v = v_diff(p0, p1)
+    return calc_length(v)
+
+
+def calc_tangent_points(circle, p):
+    r = circle[2]
+    circle = (circle[0], circle[1])
+    v = v_diff(circle, p)
+    d = calc_distance(circle, p)
+    v[0] /= d
+    v[1] /= d
+    cos_theta = r / d
+    sin_theta = math.sqrt(1 - cos_theta ** 2)
+    r_vx0 = r * (v[0] * cos_theta - v[1] * sin_theta)
+    r_vy0 = r * (v[0] * sin_theta + v[1] * cos_theta)
+    r_vx1 = r * (v[0] * cos_theta + v[1] * sin_theta)
+    r_vy1 = r * (-v[0] * sin_theta + v[1] * cos_theta)
+    pt_list = [(circle[0] + r_vx0, circle[1] + r_vy0), (circle[0] + r_vx1, circle[1] + r_vy1)]
+    pt_list.sort()
+    return pt_list
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    p = tuple(map(int, f.readline().split()))
+    circle = tuple(map(int, f.readline().split()))
+    pt_list = calc_tangent_points(circle, p)
+    for pt in pt_list:
+        print(f'{pt[0]:.5f} {pt[1]:.5f}')
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

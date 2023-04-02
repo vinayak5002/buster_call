@@ -1,0 +1,40 @@
+from collections import deque
+import sys
+
+N = int(input())
+data_deq = deque()
+sub_deq = {}
+for cmd in sys.stdin.readlines():
+    if cmd == 'deleteFirst\n':
+        while data_deq:
+            data = data_deq.pop()
+            if data[1]:
+                data[1] = 0
+                break
+    elif cmd == 'deleteLast\n':
+        while data_deq:
+            data = data_deq.popleft()
+            if data[1]:
+                data[1] = 0
+                break
+    else:
+        cmd, val = cmd.split()
+        if cmd == 'insert':
+            data = [val, 1]
+            data_deq.append(data)
+            if val not in sub_deq:
+                sub_deq[val] = [data]
+            else:
+                sub_deq[val].append(data)
+        elif cmd == 'delete':
+            if val in sub_deq:
+                deq_val = sub_deq[val]
+                while deq_val:
+                    data = deq_val.pop()
+                    if data[1]:
+                        data[1] = 0
+                        break
+
+sys.stdout.write(" ".join(data[0] for data in reversed(data_deq) if data[1]))
+sys.stdout.write('\n')
+

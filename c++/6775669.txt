@@ -1,0 +1,209 @@
+#include <algorithm>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+#include <random>
+#include <complex>
+#include <bitset>
+#include <iomanip>
+#include <memory>
+#include <functional>
+#include <stack>
+#include <limits>
+
+#define rep(i, n, s) for (int i = (s); i < int(n); i++)
+#define per(i, n, s) for (int i = (n) - 1; i >= int(s); i--)
+#define MM << " " <<
+#define all(x) begin(x), end(x)
+#define rall(x) rbegin(x), rend(x)
+
+template <class T>
+using MinHeap = std::priority_queue<T, std::vector<T>, std::greater<T>>;
+template <class T>
+using MaxHeap = std::priority_queue<T>;
+
+using ll = long long;
+using Pii = std::pair<int, int>;
+using Pll = std::pair<ll, ll>;
+using Pdd = std::pair<double, double>;
+
+template <class T>
+bool chmin(T &a, const T b) {
+    if (b < a) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <class T>
+bool chmax(T &a, const T b) {
+    if (a < b) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <class T>
+void vdeb(const std::vector<T> &da) {
+    auto n = da.size();
+    for (size_t i = 0; i < n; i++) {
+        if (i == n - 1)
+            std::cout << da[i];
+        else
+            std::cout << da[i] << " ";
+    }
+    std::cout << std::endl;
+}
+template<class T>
+void vdeb(const std::vector<std::vector<T>> &da) {
+    auto n = da.size();
+    for (size_t i = 0; i < n; i++) {
+        std::cout << i << " : ";
+        vdeb(da[i]);
+    }
+    std::cout << std::endl;
+}
+
+using namespace std;
+
+using Real = long double;
+
+int n;
+const Real nil = -(1e20);
+const Real EPS = 1e-12;
+const Real infi = 1e10;
+
+struct Para {
+    ll coeff[3];
+    Para() {
+        fill(all(coeff), 0.0);
+    }
+    Real solve() const {
+        // cerr << coeff[0] MM coeff[1] MM coeff[2] << endl;
+        if(abs(coeff[2]) == 0) {
+            if(abs(coeff[1]) == 0) return nil;
+            else return (Real) -coeff[0] / coeff[1];
+        } else {
+            __int128_t a(coeff[2]), b(coeff[1]), c(coeff[0]);
+            if(b*b - a * c * 4 < 0) return nil;
+            else {
+                // Real x = -100000;
+                // rep(i,50,0) x += (x*x*coeff[2] + x*coeff[1] + coeff[0]) / (2 * coeff[2] * x + coeff[1]);
+                // return x;
+                Real tmp = (-coeff[1] - sqrt((Real)coeff[1] * coeff[1] - (Real)coeff[2] * coeff[0] * 4.0)) / (coeff[2] * 2);
+                // cerr << "!" MM tmp << endl;
+                return tmp;
+            }
+        }
+    }
+};
+
+Para add(const Para &x, const Para& y) {
+    Para ret;
+    rep(i,3,0) ret.coeff[i] = x.coeff[i] + y.coeff[i];
+    return ret;
+}
+
+Para myminus(const Para &x, const Para& y) {
+    Para ret;
+    rep(i,3,0) ret.coeff[i] = x.coeff[i] - y.coeff[i];
+    return ret;
+}
+
+Para times(const Para &x, const Para& y) {
+    Para ret;
+    rep(i,3,0) {
+        rep(j,i+1,0) ret.coeff[i] += x.coeff[j] * y.coeff[i-j];
+    }
+    return ret;
+}
+
+struct Star {
+    vector<Para> p;
+    Para r;
+    Star() : p(3), r() {}
+};
+
+double judge(const Star &x, const Star &y) {
+    Star z;
+    Para f;
+    rep(i,3,0) {
+        z.p[i] = myminus(x.p[i], y.p[i]);
+        z.p[i] = times(z.p[i], z.p[i]);
+        f = add(f, z.p[i]);
+        // rep(j,3,0) {
+            // cerr<< x.p[i].coeff[j] MM y.p[i].coeff[j]  << endl;
+        // }
+    }
+    {
+        z.r = add(x.r, y.r);
+        f = myminus(f, times(z.r, z.r));
+        // cerr<< z.r.coeff[2] << endl;
+    }
+    return f.solve();
+}
+
+ll normalize(Real x) {
+    if(x >= 0.0) return ll(x * 100000 + 1) / 10;
+    else return ll(x * 100000 - 1) / 10;
+}
+
+void solve() {
+    vector<Star> da(n);
+    rep(i,n,0) {
+        rep(j,2,0) rep(k,3,0) {
+            Real x; cin >> x;
+            da[i].p[k].coeff[j] = normalize(x);
+        }
+        rep(j,2,0) {
+            Real x; cin >> x;
+            da[i].r.coeff[j] = normalize(x);
+        }
+        da[i].r.coeff[1] *= -1;
+    }
+    vector<pair<Real, Pii>> event;
+    rep(i,n,0) {
+        event.emplace_back(da[i].r.solve(), make_pair(i, -1));
+    }
+    rep(i,n,0) rep(j,i,0) {
+        auto now = judge(da[i], da[j]);
+        if(now < 0.0) continue;
+        event.emplace_back(now, make_pair(i, j));
+    }
+    sort(all(event));
+    vector<Real> ans(n, infi);
+    for(auto &i : event) {
+        // cerr << i.first MM i.second.first MM i.second.second << endl;
+        if(i.second.second == -1) {
+            chmin(ans[i.second.first], i.first);
+        } else {
+            if(ans[i.second.first] == infi && ans[i.second.second] == infi) {
+                ans[i.second.first] = i.first;
+                ans[i.second.second] = i.first;
+            }
+        }
+    }
+    for(auto &i : ans) cout << i << endl;
+}
+
+int main() {
+    cout << setprecision(10) << fixed;
+    while(1) {
+        cin >> n;
+        if(n == 0) break;
+        solve();
+    }
+}

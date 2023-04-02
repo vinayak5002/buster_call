@@ -1,0 +1,41 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def count_not_zero_bit(state):
+    result = 0
+    while state > 0:
+        result += (state & 1)
+        state = (state >> 1)
+    return result
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, k = map(int, f.readline().split())
+
+    max_state = (1 << n)
+    for state in range(max_state):
+        if count_not_zero_bit(state) == k:
+            print(str(state) + ':', end='')
+            j = 0
+            while j <= n - 1:
+                if state & (1 << j) > 0:
+                    print(' ' + str(j), end='')
+                j += 1
+            print()
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

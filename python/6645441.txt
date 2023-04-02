@@ -1,0 +1,132 @@
+
+import java.util.Scanner;
+
+public class Main {
+	
+	static int point = 1;
+	
+	static class Number{
+		int left;
+		int right;
+		int top;
+		int under;
+		Number(int left,int right,int top,int under){
+			this.left = left;
+			this.right = right;
+			this.top = top;
+			this.under = under;
+		}
+	}
+	
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+//		Number[] num = new Number[7];
+//		num[1] = new Number(4,3,5,2); 
+//		num[2] = new Number(4,3,1,6); 
+//		num[3] = new Number(1,4,5,2); 
+//		num[4] = new Number(3,1,5,2); 
+//		num[5] = new Number(4,3,6,1); 
+//		num[6] = new Number(4,3,2,5); 
+		
+		while(true) {
+			int con = 1;
+			int n = sc.nextInt();
+			if(n == 0) {
+				break;
+			}else {
+				Number[] num = new Number[7];
+				num[1] = new Number(4,3,5,2); 
+				num[2] = new Number(4,3,1,6); 
+				num[3] = new Number(1,6,5,2); 
+				num[4] = new Number(6,1,5,2); 
+				num[5] = new Number(4,3,6,1); 
+				num[6] = new Number(4,3,2,5); 
+				
+				for(int i=0;i<n;i++) {
+					String str = sc.next();
+					switch(str) {
+					case "North":
+						con += North(num);
+						break;
+					case "East":
+						con += East(num);
+						break;
+					case "West":
+						con += West(num);
+						break;
+					case"South":
+						con += South(num);
+						break;
+					case "Right":
+						Right(num);
+						con += point;
+						break;
+					case "Left":
+						Left(num);
+						con += point;
+						break;
+					}
+					//System.out.println(con);
+				}
+			}
+			
+			System.out.println(con);
+			point = 1;
+		}
+		
+	}
+	
+	static int North(Number[] num) {
+		int memory = point;
+		point = num[point].under;
+		while(num[point].top != memory) {
+			Left(num);
+		}
+		return point;
+	}
+	
+	static int East(Number[] num) {
+		int memory = point;
+		point = num[point].left;
+		while(num[point].right != memory) {
+			Left(num);
+		}
+		return point;
+	}
+	static int West(Number[] num) {
+		int memory = point;
+		point = num[point].right;
+		while(num[point].left != memory) {
+			Left(num);
+		}
+		return point;
+	}
+	static int South(Number[] num) {
+		int memory = point;
+		point = num[point].top;
+		while(num[point].under != memory) {
+			Left(num);
+		}
+		return point;
+	}
+	
+	static void Right(Number[] num) {
+		int tmp;
+		tmp = num[point].left;
+		num[point].left = num[point].under;
+		num[point].under = num[point].right;
+		num[point].right = num[point].top;
+		num[point].top = tmp;
+	}
+	
+	static void Left(Number[] num) {
+		int tmp;
+		tmp = num[point].left;
+		num[point].left = num[point].top;
+		num[point].top = num[point].right;
+		num[point].right = num[point].under;
+		num[point].under = tmp;
+	}
+
+}
+

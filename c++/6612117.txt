@@ -1,0 +1,45 @@
+#include <iostream>
+#include <string>
+#include <unordered_map>
+using namespace std;
+typedef long long ll;
+constexpr ll MOD = 1'000'000'007;
+constexpr ll B = 1'234'567;
+
+unordered_map<ll, ll> Tab;
+ll Pow(ll x, ll n)
+{
+    if (Tab.find(x) != Tab.end()) return Tab[x];
+    if (n == 0) return 1;
+    if (x % 2) return Tab[x] = x * Pow(x, n - 1) % MOD;
+    return Tab[x] = Pow(x, n / 2) * Pow(x, n / 2) % MOD;
+}
+
+int main(int argc, const char * argv[]) {
+    string T, P;
+    cin >> T >> P;
+    if (P.size() > T.size()) return 0;
+    
+    ll HP = 0;
+    for (int n = 0; n < P.size(); ++n) {
+        (HP *= B) %= MOD;
+        (HP += P[n]) %= MOD;
+    }
+    ll H = 0;
+    for (int n = 0; n < P.size(); ++n) {
+        (H *= B) %= MOD;
+        (H += T[n]) %= MOD;
+    }
+    if (H == HP) cout << "0\n";
+    
+    for (int i = 1; i <= T.size() - P.size(); ++i) {
+        (H -= T[i - 1] * Pow(B, P.size() - 1)) %= MOD;
+        (H += MOD) %= MOD;
+        (H *= B) %= MOD;
+        (H += T[i + P.size() - 1]) %= MOD;
+        if (H == HP) cout << i << '\n';
+    }
+    
+    return 0;
+}
+

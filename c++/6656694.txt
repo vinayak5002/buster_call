@@ -1,0 +1,72 @@
+#include <iostream>
+
+using namespace std;
+
+struct Node{
+  int parent, left, right;
+};
+
+int n;
+Node T[30];
+int D[30], H[30];
+
+void depth(int u, int d){
+  if(u == -1) return;
+  D[u] = d;
+  depth(T[u].left, d+1);
+  depth(T[u].right, d+1);
+}
+
+int height(int u){
+  int ret1 = 0, ret2 = 0;
+  if(T[u].left != -1) ret1 = height(T[u].left) + 1;
+  if(T[u].right != -1) ret2 = height(T[u].right) + 1;
+  return (H[u] = max(ret1, ret2));
+}
+
+signed main(){
+  cin >> n;
+  int u, l, r;
+
+  for(int i = 0 ; i < 30 ; i++){
+    T[i].parent = T[i].left = T[i].right = -1;
+  }
+
+  for(int i = 0 ; i < n ; i++){
+    cin >> u >> l >> r;
+    T[u].left = l;
+    T[u].right = r;
+    if(l != -1) T[l].parent = u;
+    if(r != -1) T[r].parent = u;
+  }
+
+  int root;
+  for(int i = 0 ; i < n ; i++){
+    if(T[i].parent == -1) root = i;
+  }
+  
+  depth(root, 0);
+  height(root);
+  
+  for(int i = 0 ; i < n ; i++){
+    cout << "node " << i << ": ";
+    cout << "parent = " << T[i].parent << ", ";
+    cout << "sibling = ";
+    if(T[i].parent == -1){
+      cout << -1 << ", ";
+    }else if(T[T[i].parent].left != -1 && T[T[i].parent].left != i){
+      cout << T[T[i].parent].left << ", ";
+    }else if(T[T[i].parent].right != -1 && T[T[i].parent].right != i){
+      cout << T[T[i].parent].right << ", ";
+    }else{
+      cout << -1 << ", ";
+    }
+    cout << "degree = " << (T[i].left!=-1?1:0)+(T[i].right!=-1?1:0) << ", ";
+    cout << "depth = " << D[i] << ", ";
+    cout << "height = " << H[i] << ", ";
+    if(root == i) cout << "root" << endl;
+    else if(T[i].left != -1 || T[i].right != -1) cout << "internal node" << endl;
+    else cout << "leaf" << endl;
+  }
+
+}

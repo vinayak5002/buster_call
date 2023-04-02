@@ -1,0 +1,90 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef long double ld;
+typedef pair<ll, ll> pll;
+#define rep(i, n) for(ll i = (ll)0; i < (ll)n; i++)
+#define ALL(a)  (a).begin(),(a).end()
+ll dx[8] = {-1, 1, 0, 0, -1, -1, 1, 1};
+ll dy[8] = {0, 0, -1, 1, -1, 1, -1, 1};
+
+
+/*
+ * aとbのうち小さいものをaに代入
+ */
+template<class T> inline bool chmin(T& a, T b) {
+  if (a > b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+
+/*
+ * aとbのうち大きいものをaに代入
+ */
+template<class T> inline bool chmax(T& a, T b) {
+  if (a < b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+
+/*
+ * Dijkstra法
+ */
+const ll MAX_V = 100010;
+const ll INF = 1e16;
+struct edge {
+  ll to, cost;
+};
+
+vector<edge> graph[MAX_V];
+ll dist[MAX_V];
+ll pre[MAX_V];
+
+void dijkstra(ll s){
+  priority_queue<pll, vector<pll>, greater<pll>> que; //小さい順に格納
+  fill(dist, dist + MAX_V, INF);
+  fill(pre, pre + MAX_V, -1);
+  dist[s] = 0;
+  que.push(pll(0, s)); //pll(距離, 到着点)
+  while(!que.empty()){
+    auto p = que.top(); que.pop();
+    ll v = p.second;
+    if(dist[v] < p.first) continue;
+    for(auto e: graph[v]){
+      if(dist[e.to] > dist[v] + e.cost){
+        dist[e.to] = dist[v] + e.cost;
+        pre[e.to] = v;
+        que.push(pll(dist[e.to], e.to));
+      }
+    }
+  }
+}
+
+
+
+/*
+ * メイン関数
+ */
+int main() {
+  // 入力
+  ll V, E, r; cin >> V >> E >> r;
+  rep(i, E) {
+    ll s, t, d; cin >> s >> t >> d;
+    graph[s].push_back(edge{t, d});
+  }
+  
+  // Dijkstra法
+  dijkstra(r);
+  
+  rep(i, V) {
+    if(dist[i] == INF) cout << "INF" << "\n";
+    else cout << dist[i] << "\n";
+  }
+  return 0;
+}

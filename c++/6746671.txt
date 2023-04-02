@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+constexpr ll inf = (1LL << 62);
+struct edge {
+    ll from;
+    ll to;
+    ll cost;
+};
+using Graph = vector<vector<edge>>;
+void dijkstra(const Graph& g, ll start, vector<ll>& dis)
+{
+    dis.assign(g.size(), inf);
+    using P = pair<ll, ll>;
+    priority_queue<P, vector<P>, greater<P>> que;
+    dis[start] = 0;
+    que.push(P{0, start});
+    while (!que.empty()) {
+        auto p = que.top();
+        que.pop();
+        ll d = p.first;
+        ll v = p.second;
+        if (dis[v] < d)
+            continue;
+        for (auto& e : g[v]) {
+            if (dis[e.to] > dis[e.from] + e.cost) {
+                dis[e.to] = dis[e.from] + e.cost;
+                que.push(P{dis[e.to], e.to});
+            }
+        }
+    }
+}
+int main()
+{
+    ll v, e, r;
+    cin >> v >> e >> r;
+    Graph g(v);
+    for (ll i = 0; i < e; ++i) {
+        ll s, t, d;
+        cin >> s >> t >> d;
+        g[s].push_back(edge{s, t, d});
+    }
+    vector<ll> dis;
+    dijkstra(g, r, dis);
+    for (ll i = 0; i < v; ++i) {
+        if (dis[i] == inf) {
+            cout << "INF" << endl;
+        } else {
+            cout << dis[i] << endl;
+        }
+    }
+}

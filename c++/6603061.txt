@@ -1,0 +1,212 @@
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <set>
+#include <unordered_set>
+#include <queue>
+#include <stack>
+#include <numeric>
+#include <cassert>
+
+//Binary Indexed Tree
+// #include<ext/pb_ds/assoc_container.hpp>
+// #include<ext/pb_ds/tree_policy.hpp>
+// #include<ext/pb_ds/tag_and_trait.hpp>
+// using namespace __gnu_pbds;
+//Binary Indexed Tree
+
+using ll = long long;
+using ull = unsigned long long;
+using ld = long double;
+using namespace std;
+
+#define all(x) x.begin(),x.end()
+#define rall(x) x.rbegin(),x.rend()
+
+//iostream operator
+template <typename T> istream &operator>>(istream &is, vector<T> &x){for (auto &y:x){is >> y;} return is;}
+template <typename T> ostream &operator<<(ostream &os, vector<T> &x){
+    for (long long e = 0; e < (int)x.size(); e++){
+        if (e == (int)x.size()-1) os << x[e];
+        else os << x[e] << " ";
+    }
+    return os;
+}
+template <class T, class S> istream &operator>>(istream &is, pair<T, S> &x){is >> x.first >> x.second; return is;}
+template <class T, class S> ostream &operator<<(ostream &os, pair<T, S> &x){os << x.first << " " << x.second; return os;}
+//iostream operator
+
+template<typename T> vector<T> sorted(vector<T> ary, bool reversed = false){if (!reversed){sort(all(ary));}else{sort(rall(ary));} return ary;}
+template<typename string> string sorted(string ary, bool reversed = false){if (!reversed){sort(all(ary));} else {sort(rall(ary));} return ary;}
+
+namespace cpio{
+    //Debug out
+    void dout(){cerr << "\n";}
+    template<typename T, typename... Ts> void dout(const T& a, const Ts&... b){cerr << a; (cerr << ... << (cerr << ' ', b)); cerr << "\n";}
+
+    //Yes or No
+    void yon(bool yorn, string Y = "Yes", string N = "No"){cout << (yorn?Y:N) << endl;}
+} using namespace cpio;
+
+namespace cpmath{
+    //Math library for Competitive-Programming
+    constexpr const ll mod97 = 1000000007;
+    constexpr const ll mod99 = 1000000009;
+    constexpr const ll mod89 = 998244353;
+    constexpr double pi = acos(-1);
+
+    constexpr const int DX4[4] = {1, 0, -1, 0};
+    constexpr const int DY4[4] = {0, 1, 0, -1};
+    constexpr const int DX8[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
+    constexpr const int DY8[8] = {-1, -1, -1, 0, 0, 1, 1, 1};
+
+    ll factorial(ll a, ll b = -1, const ll fmod = -1){
+        ll ans = 1;
+        if (fmod > 1) {
+            if (b == -1) for (ll i = a; i > 1; i--) ans = ((ans%fmod)*(i%fmod))%fmod;
+            else for (ll i = a; i >= b; i--) ans = ((ans%fmod)*(i%fmod))%fmod;
+        }
+        else{
+            if (b == -1) for (ll i = a; i > 1; i--) ans = ans*i;
+            else for(ll i = a; i >= b; i--) ans = ans*i;
+        }
+        return ans;
+    }
+
+    ll fastpow(ll m, ll p){
+        if (p == 0) return 1;
+        if (p%2 == 0){ll t = fastpow(m, p/2); return t*t;}
+        return m*fastpow(m, p-1);
+    }
+
+    ll modpow(ll m, ll p, const ll fmod){
+        if (p == 0) return 1;
+        if (p%2 == 0){ll t = modpow(m, p/2, fmod); return (t*t)%fmod;}
+        return (m*modpow(m, p-1, fmod))%fmod;
+    }
+
+    ld dtor(const ld deg){return deg*(pi/(ld)180);}
+
+    template<class T> double median(vector<T> a){return (static_cast<double>(a[((int(a.size())+1)/2)-1])+static_cast<double>(a[(int(a.size())/2)]))/2;}
+
+    template<long long mod = cpmath::mod97>
+    class modint{
+    private:
+        long long num;
+    public:
+        //Constructer
+        modint(): num(0LL){}
+        modint(long long n){num = static_cast<ll>(n);} 
+        //Constructer:END
+    
+        modint &operator+(modint right){num = ((num+right.raw())%mod+mod)%mod; return *this;}
+        modint &operator+(long long x){num = ((num+x)%mod+mod)%mod; return *this;}
+        modint &operator-(modint right){num = ((num-right.raw())%mod+mod)%mod; return *this;}
+        modint &operator-(long long x){num = ((num-x)%mod+mod)%mod; return *this;}
+        modint &operator*(modint right){num = ((num*right.raw())%mod+mod)%mod; return *this;}
+        modint &operator*(long long x){num = ((num*x)%mod+mod)%mod; return *this;}
+        modint &operator/(modint right){return *this * this->inversed(right.raw());}
+        modint &operator/(long long x){return *this * this->inversed(x);}
+
+        modint &operator=(long long x){num = x; return *this;}
+        friend ostream& operator<<(ostream &os, modint o){os << o.raw(); return os;}
+        friend istream& operator>>(istream &is, modint &i){long long t; cin >> t; i = t; return is;}
+
+        long long inversed(ll n){return cpmath::modpow(n, mod-2, mod);}
+           long long raw(){return this->num;}
+    }; //modint
+}
+
+using cpmath::mod89;
+using cpmath::mod97;
+using cpmath::mod99;
+using cpmath::modint;
+
+using cpmath::DX4;
+using cpmath::DY4;
+//using cpmath::DX8;
+//using cpmath::DY8;
+
+//GNU Binary Indexed Tree
+// template<typename T>
+// using gtree = tree<T, null_type, greater<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+
+int main(){
+    int n;
+    while (1){
+        cin >> n;
+        if (n == 0) break;
+
+
+        vector<vector<int>> grid(n, vector<int>(5, -1));
+
+        for (int i = 0; i < n; i++){
+            for (int j = 0; j < 5; j++){
+                int ai; cin >> ai;
+                grid[i][j] = ai;
+            }
+        }
+        ll ans = 0;
+        while(1){
+            bool erased = false;
+
+            for (int i = 0; i < n; i++){
+                for (int j = 0; j < 5; j++){
+                    int count = 0;
+                    if (grid[i][j] != -1) {
+                        for (int k = j; k < 5; k++){
+                            if (grid[i][k] == grid[i][j]) count++;
+                            if (grid[i][k] != grid[i][j]) break;
+                        }
+                    }
+
+                    if (count >= 3){
+                        ans += grid[i][j]*count;
+                        for (int jback = j; jback < j+count; jback++) grid[i][jback] = -1;
+                        //for (int iback = i-1; iback >= 0; iback--){
+                        //    for (int jback = j; jback < j+count; jback++){
+                        //        grid[iback+1][jback] = grid[iback][jback];
+                        //    }
+                        //}
+
+                        //for (int jback = j; jback < j+count; jback++) grid[0][jback] = -1;
+                        erased = true;
+                    }
+                }
+            }
+
+            if (erased == true){
+                while(1){
+                    bool swaped = false;
+                    //cerr << "Before--------------------------------------" << endl;
+                    //for (auto x : grid) cerr << x << endl;
+                    //cerr << "--------------------------------------------" << endl;
+                    for (int iback = n-1; iback > 0; iback--){
+                        for (int jback = 0; jback < 5; jback++){
+                            if (grid[iback][jback] == -1 && grid[iback-1][jback] != -1){
+                                swap(grid[iback][jback], grid[iback-1][jback]);
+                                swaped = true;
+                            }
+                        }
+                    }
+
+                    if (swaped == false) break;
+                }
+            }
+
+            //cerr << "After----------------------------------------" << endl;
+            //for (auto x : grid) cerr << x << endl;
+            //cerr << "--------------------------------------------" << endl;
+            
+            if (erased == false) break;
+        }
+        cout << ans << endl;
+    }
+}
+

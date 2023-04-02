@@ -1,0 +1,53 @@
+import sys
+from collections import deque
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def bfs(num_vertexes, adjacent_list):
+    q = deque([(0, 0)])
+    min_dist_from0 = [-1] * num_vertexes
+
+    while q:
+        v, c_dist = q.popleft()
+        if min_dist_from0[v] < 0:
+            min_dist_from0[v] = c_dist
+        else:
+            continue
+        for u in adjacent_list[v]:
+            if min_dist_from0[u] >= 0:
+                continue
+            n_dist = c_dist + 1
+            q.append((u, n_dist))
+    return min_dist_from0
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    num_vertexes = int(f.readline())
+    adjacent_list = [[] for _ in range(num_vertexes)]
+    for _ in range(num_vertexes):
+        adjacent = list(map(int, f.readline().split()))
+        v = adjacent[0] - 1
+        adjacent = adjacent[2:]
+        for i in range(len(adjacent)):
+            adjacent[i] -= 1
+        adjacent_list[v] += adjacent
+
+    min_dist_from0 = bfs(num_vertexes, adjacent_list)
+    for i in range(num_vertexes):
+        print(i + 1, min_dist_from0[i])
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

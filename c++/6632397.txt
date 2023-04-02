@@ -1,0 +1,157 @@
+#include <bits/stdc++.h>
+
+#define ll long long
+
+const int MAX_N = 1e5 + 10 , MAX_M = 2e5 + 10 , INF = 0x3f3f3f3f ;
+
+struct data {
+    int x , y , v , idx ;
+    bool ud ;
+}eg[MAX_M] ;
+struct Link {
+    int num ;
+    Link *next ;
+}list[MAX_N << 1] ;
+
+Link *head[MAX_N] ;
+ll res , ans[MAX_M] ;
+int n , m , cur , fa[MAX_N] ;
+
+bool cmp(data a , data b) {return a.v < b.v ;}
+
+int findset(int x) {return fa[x] == -1 ? x : (fa[x] = findset(fa[x])) ;}
+
+void ins(int x , int y) {
+    list[cur].num = y ;
+    list[cur].next = head[x] ;
+    head[x] = &list[cur++] ;
+}
+
+int ti , dfn[MAX_N] , dep[MAX_N] , siz[MAX_N] , pre[MAX_N] , lfa[MAX_N] , tre[MAX_N << 2] ;
+
+void build(int t , int x , int y) {
+    tre[t] = INF ;
+    if (x == y) return ;
+
+    int mid = (x + y) >> 1 ;
+    build(t << 1 , x , mid) ; build(t << 1 | 1 , mid + 1 , y) ;
+}
+
+void modify(int t , int x , int y , int fx , int fy , int v) {
+    if (y < fx || fy < x) return ;
+    if (fx <= x && y <= fy) {
+        tre[t] =  std::min(tre[t] , v) ;
+        return ;
+    }
+
+    int mid = (x + y) >> 1 ;
+    modify(t << 1 , x , mid , fx , fy , v) ;
+    modify(t << 1 | 1 , mid + 1 , y , fx , fy , v) ;
+}
+
+int find(int t , int x , int y , int f) {
+    if (f < x || y < f) return INF ;
+    if (x == y) return tre[t] ;
+
+    int mid = (x + y) >> 1 ,
+        s1 = find(t << 1 , x , mid , f) , s2 = find(t << 1 | 1 , mid + 1 , y , f) ;
+    return std::min(tre[t] , std::min(s1 , s2)) ;
+}
+
+void dfs1(int x , int f) {
+    pre[x] = f ; siz[x] = 1 ;
+    for (Link *h = head[x] ; h ; h = h->next) {
+        int nx = h->num ;
+        if (nx == f) continue ;
+
+        dep[nx] = dep[x] + 1 ;
+        dfs1(nx , x) ;
+        siz[x] += siz[nx] ;
+    }
+}
+
+void dfs2(int x , int f) {
+    lfa[x] = f ; dfn[x] = ++ti ;
+
+    int hson = -1 , msiz = -1 ;
+    for (Link *h = head[x] ; h ; h = h->next) {
+        int nx = h->num ;
+        if (nx == pre[x]) continue ;
+
+        if (siz[nx] > msiz) msiz = siz[nx] , hson = nx ;
+    }
+
+    if (hson != -1) dfs2(hson , f) ;
+
+    for (Link *h = head[x] ; h ; h = h->next) {
+        int nx = h->num ;
+        if (nx == pre[x] || nx == hson) continue ;
+
+        dfs2(nx , nx) ;
+    }
+}
+
+void update(int x , int y , int val) {
+    for (; lfa[x] != lfa[y] ;) {
+        if (dep[lfa[x]] > dep[lfa[y]]) std::swap(x , y) ;
+        modify(1 , 1 , n , dfn[lfa[y]] , dfn[y] , val) ;
+        y = pre[lfa[y]] ;
+    }
+
+    if (dep[x] > dep[y]) std::swap(x , y) ;
+    if (x != y) modify(1 , 1 , n , dfn[x] + 1 , dfn[y] , val) ;
+}
+
+int main() {
+    scanf("%d %d" , &n , &m) ;
+    for (int i = 0 ; i < m ; ++i) {
+        int x , y , v ;
+        scanf("%d %d %d" , &x , &y , &v) ;
+        eg[i] = (data){x , y , v , i , 0} ;
+    }
+    std::sort(eg + 0 , eg + m , cmp) ;
+    for (int i = 1 ; i <= n ; ++i) fa[i] = -1 ;
+
+    int lk = 0 ;
+    for (int i = 0 ; i < m ; ++i) {
+        data *p = &eg[i] ;
+        int fx = findset(p->x) , fy = findset(p->y) ;
+        if (fx == fy) continue ;
+
+        ins(p->x , p->y) ; ins(p->y , p->x) ;
+        p->ud = 1 ; fa[fx] = fy ; res += p->v ; ++lk ;
+    }
+
+    if (lk + 1 != n) {
+        for (int i = 0 ; i < m ; ++i) printf("-1\n") ;
+        return 0 ;
+    }
+
+    ///
+
+    dep[1] = 1 ;
+    dfs1(1 , 1) ;
+    dfs2(1 , 1) ;
+
+    build(1 , 1 , n) ;
+    for (int i = 0 ; i < m ; ++i) {
+        data *p = &eg[i] ;
+        if (p->ud) continue ;
+        
+        ans[p->idx] = res ;
+        update(p->x , p->y , p->v) ;
+    }
+
+    for (int i = 0 ; i < m ; ++i) {
+        data *p = &eg[i] ;
+        if (!p->ud) continue ;
+
+        if (dep[p->x] > dep[p->y]) std::swap(p->x , p->y) ;
+        ans[p->idx] = find(1 , 1 , n , dfn[p->y]) ;
+        if (ans[p->idx] == INF) ans[p->idx] = -1 ;
+        else ans[p->idx] = res - p->v + ans[p->idx] ;
+    }
+    for (int i = 0 ; i < m ; ++i) printf("%lld\n" , ans[i]) ;
+
+    return 0 ;
+}

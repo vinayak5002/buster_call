@@ -1,0 +1,66 @@
+import Control.Monad ( when )
+import Control.Monad.ST ( runST )
+import Data.Char ( isSpace )
+import qualified Data.ByteString.Char8 as B
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as VM
+main :: IO ()
+main = do
+  n <- readLn
+  xvv <- V.replicateM n (fmap (V.unfoldr (B.readInt . B.dropWhile isSpace)) B.getLine)
+  V.mapM_ printT $ solve n xvv
+
+printT xv = print $
+  "node " ++ show i
+  ++ ": parent = " ++ show p
+  ++ ", sibling = " ++ show s
+  ++ ", degree = " ++ show deg
+  ++ ", depth = " ++ show d
+  ++ ", height = " ++ show h
+  ++ ", " ++ nt
+  where (i,p,s,deg,d,h,nt) = xv
+
+solve n xvv = V.map f (V.fromList [0..n-1])
+  where
+    f i = (i, pv V.! i, sv V.! i, degv V.! i, dv V.! i, hv V.! i, nodeType (pv V.! i) (degv V.! i))
+    (_,_,sv,pv,degv) = getTree n xvv
+    dv = V.map (\n -> depth pv n 0) (V.fromList [0..n-1])
+    hv = V.map (\n -> height xvv n) (V.fromList [0..n-1])
+
+nodeType pi dgi = if pi==(-1) then "root" else if dgi==0 then "leaf" else "internal node"
+
+getTree n xvv = runST $ do
+  lmv <- V.thaw $ V.replicate n (-1)
+  rmv <- V.thaw $ V.replicate n (-1)
+  smv <- V.thaw $ V.replicate n (-1)
+  pmv <- V.thaw $ V.replicate n (-1)
+  degmv <- V.thaw $ V.replicate n 0
+  V.iforM_ xvv $ \i xv -> do
+    let (i,l,r) = (xv V.! 0, xv V.! 1, xv V.! 2)
+    VM.write lmv i l
+    VM.write rmv i r
+    when (l /= -1) $ do
+      VM.write pmv l i
+      VM.modify degmv (+1) i
+    when (r /= -1) $ do
+      VM.write pmv r i
+      VM.modify degmv (+1) i
+    when (l /= -1 && r /= -1) $ do
+      VM.write smv l r
+      VM.write smv r l
+  lv <- V.freeze lmv
+  rv <- V.freeze rmv
+  sv <- V.freeze smv
+  pv <- V.freeze pmv
+  degv <- V.freeze degmv
+  return (lv,rv,sv,pv,degv)
+
+depth pv n d = if pid == -1 then d else depth pv pid (d+1)
+  where pid = pv V.! n
+height xvv (-1) = -1
+height xvv n = max (height xvv y) (height xvv z) + 1
+  where
+    xv = V.head $ V.filter (\xv -> xv V.! 0 == n) xvv
+    y = xv V.! 1
+    z = xv V.! 2
+

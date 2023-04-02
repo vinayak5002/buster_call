@@ -1,0 +1,51 @@
+//#define _GLIBCXX_DEBUG
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cmath>
+#include <cstdio>
+#include <ctime>
+#include <deque>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+int n;
+vector<int> w;
+vector<vector<int>> dp;
+
+int calc(int l, int r) {
+  if (dp[l][r] != -1) return dp[l][r];
+  if (r - l == 1) return dp[l][r] = 0;
+  if (r - l == 2) return dp[l][r] = (abs(w[r - 1] - w[l]) <= 1) ? 2 : 0;
+  if (abs(w[r - 1] - w[l]) <= 1 && calc(l + 1, r - 1) == r - l - 2)
+    return dp[l][r] = r - l;
+  for (int i = l + 1; i < r; ++i) {
+    dp[l][r] = max(dp[l][r], calc(l, i) + calc(i, r));
+  }
+  return dp[l][r];
+}
+
+int main() {
+  while (1) {
+    cin >> n;
+    if (!n) break;
+    dp.assign(n + 1, vector<int>(n + 1, -1));
+    w.resize(n);
+    for (int &v : w) cin >> v;
+    cout << calc(0, n) << '\n';
+  }
+  return 0;
+}

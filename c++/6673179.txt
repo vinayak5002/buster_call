@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define llint int64_t
+struct node{
+    llint x;
+    string name;
+    struct node *next;
+    node(){
+        next = nullptr;
+    }
+};
+int add(struct node *&New, struct node *&L){
+    L->next = New;
+    L = New;
+    return 0;
+}
+int main(){
+    llint n, q;
+    cin >> n >> q;
+    struct node *F = (struct node*)malloc(sizeof(struct node));
+    struct node *L = (struct node*)malloc(sizeof(struct node));
+    /*F = (struct node*)malloc(sizeof(struct node));
+    L = (struct node*)malloc(sizeof(struct node));*/
+    F = nullptr;
+    L = nullptr;
+    //if(F == nullptr) cout << "Here" << endl;
+    while(n--){
+        struct node *New;
+        New = (struct node*)malloc(sizeof(struct node));
+        string s;
+        llint a;
+        cin >> s >> a;
+        New->x = a;
+        New->name = s;
+        if(F == nullptr){
+            //cout << "NUll" << endl;
+            F = New;
+            L = New;
+        } else add(New, L);
+        //cout << L->x << endl;
+    }
+    llint T = 0;
+    struct node *aF = (struct node*)malloc(sizeof(struct node));
+    struct node *aL = (struct node*)malloc(sizeof(struct node));
+    aF = nullptr;
+    aL = nullptr;
+    while(F != nullptr){
+        if(F->x > q){
+            T += q;
+            struct node *New = (struct node*)malloc(sizeof(struct node));
+            New->name = F->name;
+            New->x = F->x - q;
+            add(New, L);
+            F = F->next;
+        } else if(F->x <= q){
+            T += F->x;
+            struct node *New = (struct node*)malloc(sizeof(struct node));
+            New->name = F->name;
+            New->x = T;
+            if(aF == nullptr){
+                aF = New;
+                aL = New;
+            } else add(New, aL);
+            F = F->next;
+        }
+    }
+    //cout << current->x << endl;
+    struct node *current = (struct node*)malloc(sizeof(struct node));
+    current = aF;
+    while(current != nullptr){
+        cout << current->name << " " << current->x << endl;
+        current = current->next;
+    }
+    return 0;
+}
+

@@ -1,0 +1,106 @@
+# include<stdio.h>
+# include<stdlib.h>
+# include<string.h>
+
+typedef struct Node
+{
+    int key;
+    struct Node *prev, *next;
+}NODE;  //NODE等价于struct Node
+
+NODE *nil;  // 定义一个struct Node 类型的变量 *nil， 做为头节点
+
+void init()   //  头节点初始化
+{
+    nil = malloc(sizeof(NODE)); // 开辟内存空间
+    nil->next = nil;
+    nil->prev = nil;
+}
+
+NODE * listSearch(int key)
+{
+    NODE * cur;
+    cur = nil -> next; // 从头结点后面的元素开始访问
+    while(cur!=nil && cur->key!=key)
+        cur = cur->next;
+    return cur;
+}
+void insert(int t)
+{
+    NODE *x;
+    x = malloc(sizeof(NODE));  // 新建节点
+    x->key = t;   // 节点的数值为 t， 即：要插入的数
+    x->next = nil->next;
+    nil->next->prev = x;
+    nil->next = x;
+    x->prev = nil;
+}
+
+void deleteNode(NODE *t)
+{
+    if(t==nil)
+        return;   // 若t是头节点，则不做处理
+    t->prev->next = t->next;
+    t->next->prev = t->prev;
+    free(t);   // 释放t节点的内存
+
+}
+
+void deleteFirst()
+{
+    deleteNode(nil->next); // nil->next 表示第一个非空节点
+}
+
+void deleteLast()
+{
+    deleteNode(nil->prev); // nil->prev 表示最后一个非空节点
+}
+
+
+void deleteKey(int key)
+{
+    deleteNode ( listSearch ( key ) );
+}
+void printList()
+{
+    NODE * cur;
+    cur = nil->next;
+    while(1)
+    {
+        if(cur==nil)
+            break;
+        printf("%d",cur->key);
+        printf(" ");
+        cur = cur->next;
+
+    }
+    printf("\n");
+}
+int main()
+{
+    int n,key;
+    char com[20];
+    scanf("%d",&n);  // 操作指令的数目
+	init();
+	for(int i=0;i<n;i++)
+    {
+        scanf("%s%d",com,&key);
+        if(com[0]=='i')
+            insert(key);
+        else if(com[0]=='d')
+        {
+            if(strlen(com)>6)
+            {
+                if(com[6]=='F') deleteFirst();
+                else if(com[6]=='L') deleteLast();
+            }
+            else
+                deleteKey(key);
+
+        }
+
+    }
+    printList();
+    return 0;
+}
+

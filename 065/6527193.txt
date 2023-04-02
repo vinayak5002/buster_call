@@ -1,0 +1,32 @@
+inf = 10**18
+import sys
+sys.setrecursionlimit(10**6)
+
+def detect_bridge(G):
+    pre = [-1]*len(G)
+    low = [inf]*len(G)
+    ret = []
+    def dfs(x, par=-1, cnt=0):
+        pre[x] = low[x] = cnt
+        for nx in G[x]:
+            if nx==par: continue
+            if pre[nx]==-1:
+                dfs(nx, x, cnt+1)
+                low[x] = min(low[x], low[nx])
+                if pre[x]<low[nx]: ret.append(sorted([x, nx]))
+            else:
+                low[x] = min(low[x], pre[nx])
+    dfs(0)
+    return ret
+
+def main():
+    V, E = map(int, input().split())
+    G = [[] for _ in range(V)]
+    for _ in range(E):
+        s, t= map(int, input().split())
+        G[s].append(t)
+        G[t].append(s)
+    s = sorted(detect_bridge(G))
+    for i in s:
+        print(i)
+main()

@@ -1,0 +1,78 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+using namespace std;
+
+#define all(x) (x).begin(),(x).end()
+#define print(x) cout << (x) << '\n'
+typedef long long ll;
+typedef long double ld;
+using P = pair<int,int>;
+using pll = pair<ll,ll>;
+using Graph = vector<vector<int>>;
+
+const ll MOD = 1000000007;
+//const ll MOD = 998244353;
+
+template <typename T> inline bool chmax(T &a, T b) {return a < b ? a = b, true : false;}
+template <typename T> inline bool chmin(T &a, T b) {return a > b ? a = b, true : false;}
+
+template <typename T>
+void vin(vector<T> &v) {
+    int l = v.size();
+    for(int i = 0; i < l; i++) cin >> v[i];
+}
+
+template <typename T>
+void vout(vector<T> &v) {
+    int l = v.size();
+    for(int i = 0; i < l; i++) cout << v[i] << (i < l - 1 ? ' ' : '\n');
+}
+
+const int MAX = 200005;
+ll fac[MAX], finv[MAX], inv[MAX];
+
+void COMinit() {
+    fac[0] = fac[1] = 1;
+    finv[0] = finv[1] = 1;
+    inv[1] = 1;
+    for (int i = 2; i < MAX; i++){
+        fac[i] = fac[i - 1] * i % MOD;
+        inv[i] = MOD - inv[MOD%i] * (MOD / i) % MOD;
+        finv[i] = finv[i - 1] * inv[i] % MOD;
+    }
+}
+
+ll COM(ll n, ll k){
+    if (n < k) return 0;
+    if (n < 0 || k < 0) return 0;
+    return fac[n] * (finv[k] * finv[n - k] % MOD) % MOD;
+}
+
+// x ^ n mod m
+ll pom(ll x, ll n, ll m) {
+    ll u = x % m;
+    if(u == 0LL && n == 0LL) return 0;
+    ll ret = 1LL;
+    while (n > 0LL) {
+        if (n & 1LL) ret = ret * u % m;
+        u = u * u % m;
+        n >>= 1LL;
+    }
+    return ret;
+}
+
+int main() {
+    cin.tie(0); cout.tie(0);
+    ios::sync_with_stdio(false);
+    cout << fixed << setprecision(18);
+
+    COMinit();
+    ll n, k;    cin >> n >> k;
+    if(n > k) {
+        print(0);
+    } else {
+        print(COM(k, n));
+    }
+
+    return 0;
+}

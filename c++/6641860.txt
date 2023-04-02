@@ -1,0 +1,63 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll n, k;
+  cin >> n >> k;
+  ll kmax = 1e5;
+  vector<ll> a(n);
+  rep(i, 0, n) cin >> a[i];
+
+  vector<ll> cnt(kmax + 1, 0);
+  ll kind = 0;
+
+  ll ans = INF;
+
+  for(ll i = 0, j = 0; i < n; i++){
+      if(i == j){
+          cnt[a[j]]++;
+          if(1 <= a[j] && a[j] <= k && cnt[a[j]] != 0){
+              kind++;
+          }
+          j++;
+      }
+      while(j < n && kind < k){
+          cnt[a[j]]++;
+          if(1 <= a[j] && a[j] <= k && cnt[a[j]] != 0){
+              kind++;
+          }
+          j++;
+      }
+
+      if(kind == k) ans = min(ans, j - i);
+
+      cnt[a[i]]--;
+      if(cnt[a[i]] == 0) kind--;
+  }
+
+
+  cout << (ans == INF ? 0 : ans) << endl;
+
+
+
+  return 0;
+}

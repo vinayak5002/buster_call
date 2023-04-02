@@ -1,0 +1,73 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+ll n;
+vector<vector<ll>> G;
+vector<ll> par, dep;
+
+void print_lis(ll i){
+    cout << "[";
+    rep(j, 0, G[i].size()){
+        if(j) cout << ", ";
+        cout << G[i][j];
+    }
+    cout << "]" << endl;
+}
+
+void print(ll i){
+    vector<string> str = {"node ", ": parent = ", ", depth = ", ", ", ", "};
+    string tmp;
+    if(par[i] == -1) tmp = "root";
+    else if(G[i].size() == 0) tmp = "leaf";
+    else tmp = "internal node";
+    string res = str[0] + to_string(i) + str[1] + to_string(par[i]) + str[2] + to_string(dep[i]) + str[3] + tmp + str[4];
+    cout << res;
+    print_lis(i);
+}
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll n;
+  cin >> n;
+  G.resize(n);
+  par.resize(n, -1);
+  dep.resize(n);
+
+  rep(i, 0, n){
+      ll a, m;
+      cin >> a >> m;
+      if(i == 0) dep[a] = 0;
+      rep(j, 0, m){
+          ll b;
+          cin >> b;
+          par[b] = a;
+          G[a].push_back(b);
+          dep[b] = dep[a] + 1;
+      }
+  }
+
+
+  rep(i, 0, n) print(i);
+
+
+
+  return 0;
+}

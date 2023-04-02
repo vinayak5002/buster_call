@@ -1,0 +1,66 @@
+#include<stdio.h>
+#define White 0
+#define Gray 1
+#define Black 2
+#define N 100
+#define INF 1<<21
+
+int n,color[N],m[N][N],d[N];
+
+void Dijkstra(){
+  int i,j,u,v,minv;
+
+  for(i=0 ;i<n ;i++){
+    color[i] = White;
+    d[i] = INF;
+  }
+
+  d[0] = 0;
+
+  while(1){
+    minv = INF;
+    u = -1;
+    for(i=0 ;i<n ;i++){
+      if(minv > d[i] && color[i] != Black){
+	minv = d[i];
+	u = i;
+      }
+    }
+    if(u == -1) break;
+    color[u] = Black;
+    for(v=0 ;v<n ;v++){
+      if(color[v] != Black && m[u][v] != INF){
+	if(d[v] > d[u] + m[u][v]){
+	  d[v] = d[u] + m[u][v];
+	  color[v] = Gray;
+	}
+      }
+    }
+  }
+
+  for(i=0 ;i<n ;i++)
+  printf("%d %d\n",i,d[i]);
+}
+
+int main(){
+  int i,j,u,v,k,t;
+  scanf("%d",&n);
+
+  for(i=0 ;i<n ;i++){
+    for(j=0 ;j<n ;j++)
+      m[i][j] = INF;
+  }
+  
+  for(i=0 ;i<n ;i++){
+    scanf("%d%d",&u,&v);
+    for(j=0 ;j<v ;j++){
+      scanf("%d%d",&k,&t);
+      m[u][k] = t;
+    }
+  }
+
+  Dijkstra();
+
+  return 0;
+}
+

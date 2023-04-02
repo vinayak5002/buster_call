@@ -1,0 +1,39 @@
+rxs = lambda: list(map(int, input().split()))
+N, Q = rxs()
+Qs = [rxs() for _ in range(Q)]
+
+m = 1
+while m < N: m *= 2
+
+seg0 = [0]*(2*m-1)
+seg1 = [0]*(2*m-1)
+
+def add(s, t, x):
+    def _add(node, lft, rht):
+        if s <= lft and rht <= t:
+            seg0[node] += x
+        elif lft < t and s < rht:
+            mid = (lft+rht)//2
+            seg1[node] = min(_add(node*2+1, lft, mid), _add(node*2+2, mid, rht))
+        return seg0[node] + seg1[node]
+    return _add(0, 0, m)
+
+def find(s, t):
+    def _find(node, lft, rht):
+        if t <= lft or  rht <= s: return float('inf')
+        if s <= lft and rht <= t: return seg0[node]+seg1[node]
+        mid = (lft+rht)//2
+        return seg0[node] + min(_find(node*2+1, lft, mid), _find(node*2+2, mid, rht))
+    return _find(0, 0, m)
+
+ans = []
+for q, *params in Qs:
+    if q:
+        s, t = params
+        ans.append(find(s, t+1))
+    else:
+        s, t, x = params
+        add(s, t+1, x)
+
+print("\n".join(map(str, ans)))
+

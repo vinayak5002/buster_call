@@ -1,0 +1,47 @@
+#include<bits/stdc++.h>
+using namespace std;
+static const int INF = 0x3f3f3f3f;
+vector<vector<pair<int,int>>> adj(100001);
+int V, E, r;
+
+void read_graph() {
+	cin >> V >> E >> r;
+	for(int i=0; i<E; i++) {
+		int from, to, weight;
+		cin >> from >> to >> weight;
+		adj[from].push_back({to,weight});
+	}
+}
+
+
+void dijkstra(){
+	vector<int> dis(V+1, INF);
+	vector<bool> vis(V+1,false);
+	priority_queue< pair<int,int> > q;
+	dis[r] = 0;
+	q.push({0,r});
+	while(!q.empty()) {
+		int a = q.top().second ; q.pop();
+		if(vis[a]) continue;
+		vis[a] = true;
+		for(auto node : adj[a]){
+			int b = node.first , w = node.second;
+			if(dis[b] > dis[a] + w){
+				dis[b] = dis[a] + w;
+				q.push({-dis[b] , b});
+			}
+		}
+	}
+	
+	for(int i = 0; i < V; i++){
+		if(dis[i]!=INF) cout << dis[i] << "\n";
+		else cout << "INF\n";
+	}
+	return ;
+}
+
+int main() {
+	read_graph();
+	dijkstra();
+	return 0;
+}

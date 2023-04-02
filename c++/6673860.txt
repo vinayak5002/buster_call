@@ -1,0 +1,51 @@
+#include<iostream>
+#include<algorithm>
+#include<cstring>
+using namespace std;
+const int size = 150;
+int n, Preorder[size], Inorder[size];
+struct data 
+{
+	int k, i;
+	data() 
+	{
+	}
+	data(int a, int b) 
+	{
+		k = a; i = b;
+	}
+} temp[size];
+bool cmp(data a, data b)
+{
+	return a.k < b.k;
+}
+void make_Postorder(int l1, int r1, int l2, int r2)
+{
+	if (l1 == r1) cout << Preorder[l1] << ' ';
+	else 
+	{
+		int root = Preorder[l1];
+		int divide = temp[root].i;
+		int size1 = divide - l2;
+		make_Postorder(l1 + 1, l1 + size1, l2, divide - 1);
+		make_Postorder(l1 + size1 + 1, r1, divide + 1, r2);
+		cout << root << ' ';
+	}
+	return;
+}
+int main() 
+{
+	memset(Preorder, 0, sizeof(Preorder));
+	memset(Inorder, 0, sizeof(Inorder));
+	cin >> n;
+	for (int i = 1; i <= n; i++)
+		cin >> Preorder[i];
+	for (int i = 1; i <= n; i++)
+	{
+		cin >> Inorder[i];
+		temp[i] = data(Inorder[i], i);
+	}
+	sort(temp + 1, temp + 1 + n, cmp);
+	make_Postorder(1, n, 1, n);
+	return 0;
+}

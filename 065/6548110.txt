@@ -1,0 +1,124 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+typedef struct Node{
+  int key;
+ struct Node *left,*right,*parent;
+}Node;
+
+Node *root;
+
+void insert(int k){
+  Node *y = NULL;
+  Node *x = root;
+  Node *z;
+
+  z = (Node *)malloc(sizeof(Node));
+  z->key = k;
+  z->left = NULL;
+  z->right = NULL;
+  
+  while(x != NULL){
+    y = x;
+    if(x->key < z->key)
+      x = x->right;
+    else x = x->left;
+  }
+
+  z->parent = y;
+
+  if(y == NULL) root = z;
+  else{
+    if(z->key < y->key) y->left = z;
+    else y->right = z;
+  }
+}
+
+void inorder(Node *u){
+  if(u == NULL) return;
+  inorder(u->left);
+  printf(" %d",u->key);
+  inorder(u->right);
+}
+
+void preorder(Node *u){
+  if(u == NULL) return;
+  printf(" %d",u->key);
+  preorder(u->left);
+  preorder(u->right);
+}
+
+Node *find(Node *x,int k){
+  while(x != NULL && k != x->key){
+    if(k > x->key) x = x->right;
+    else x = x->left;
+  }
+  return x;
+}
+
+Node *succesor(Node *x){
+      if(x->right != NULL) return minimum(x->right);
+      Node y = x->parent;
+      while(y != NULL && x == y->right){
+            x = y;
+            y = y->parent;
+      }
+      return y;
+}
+
+void delete(Node *z){
+      Node *x;
+      Node *y;
+      
+      if(z->left == NULL || z->right == NULL) y = z;
+      else y = succesor(z);
+      
+      if(y->left != NULL) x = y->left;
+      else x = y->right;
+      
+      if(x != NULL) x->parent = y->parent;
+      
+      if(y->parent == NULL) root = x;
+      else{
+            if(y == y->parent->left) y->parent->left = x;
+            else y->parent->right = x;
+      }
+      
+      if(y != z) z->key = y->key;
+      
+      free(y);
+}
+
+int main(){
+  int i,n,a,b,c;
+  char com[7];
+  Node *t;
+
+  scanf("%d",&n);
+  for(i=0 ;i<n ;i++){
+    scanf("%s",com);
+    if(com[0] == 'i'){
+      scanf("%d",&a);
+      insert(a);
+    }
+    else if(com[0] == 'f'){
+      scanf("%d",&b);
+      t = find(root,b);
+      if(t != NULL) printf("yes\n");
+      else printf("no\n");
+    }
+    else if(com[0] == 'd'){
+      scanf("%d",&c);
+      delete(find(root,c));
+    }
+    else{
+      inorder(root);
+      printf("\n");
+      preorder(root);
+      printf("\n");
+    }
+  }
+
+    return 0;
+}

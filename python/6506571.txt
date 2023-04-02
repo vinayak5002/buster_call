@@ -1,0 +1,71 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let pair = si[0].split(" ");
+	let n = Number(pair[0]);
+	let q = Number(pair[1]);
+	const Minimum = -1000000000 - 1
+
+	let array = new Array(n);
+	for (let i = 0; i < n; i++) {// 二次元配列をn個作成
+		let tmp = [];
+		array[i] = tmp;
+		array[i][0] = Minimum;// heapの計算のために, 初項はnullで埋めておく. 以降array[][0]は無視
+	}
+	
+	for (let i = 0; i < q; i++) {// q回命令を実行.
+		pair = si[i + 1].split(" ");
+		let leftN = Number(pair[0]);
+		let midN = Number(pair[1]);
+		let rightN = Number(pair[2]);
+
+		switch (leftN) {
+			case 0:
+				array[midN].push(rightN);
+				break;
+
+			case 1:
+				//console.log("at line " + (i + 1) + " [" + array[midN] + "] length = " + array[midN].length)// forDebug
+				max_heap(array[midN]);
+				if (array[midN].length == 1) {
+					// 要素がない場合はなにもしない
+				} else if (array[midN][1] != Minimum) {
+					so.write(array[midN][1] + "\n");
+				} 
+				break;
+
+			case 2:
+				//console.log("at line " + (i + 1) + " " + array[midN] + " length = " + array[midN].length)// forDebug
+				max_heap(array[midN]);
+				if (array[midN].length == 1) {
+					// 要素がない場合はなにもしない
+				} else if (array[midN][1] != Minimum) {
+					array[midN][1] = Minimum;
+				}
+				break;
+		}
+	}
+
+	function max_heap(array) {// rootを最大値とする2分木を作成
+		let len = array.length - 1;
+		/* 親が子より小さい場合、子と親のキーを入れ替える処理を行う
+		子を持つ親の個数　=　配列の長さの半分(余り切り捨て)*/
+		for (let i = Math.floor(len / 2); i > 0; i--) {
+			let largest = i;
+			if (array[i] < array[i * 2]) {
+				largest = i * 2;
+			}
+			if (array[largest] < array[i * 2 + 1]) {
+				largest = i * 2 + 1
+			}
+			if (largest != i) {
+				let tmp = array[i];
+				array[i] = array[largest];
+				array[largest] = tmp;
+			}
+		}
+	}
+}
+

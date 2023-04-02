@@ -1,0 +1,158 @@
+#include <iostream>
+#ifdef _WIN32
+#define getchar_unlocked _getchar_nolock
+#define putchar_unlocked _putchar_nolock
+#endif
+
+struct in {
+    operator char() const noexcept {
+        char c = getchar_unlocked();
+        while (c == ' ' || c == '\n' || c == '\r' || c == EOF) {
+            c = getchar_unlocked();
+        }
+        return c;
+    }
+    template<typename T> operator T() const noexcept {
+        T n = 0;
+        int sign = 1;
+        char c = operator char();
+        if (c == '-') sign = -1, c = getchar_unlocked();
+        while ('0' <= c && c <= '9') {
+            n = n * 10 + (c - '0');
+            c = getchar_unlocked();
+        }
+        return n * sign;
+    }
+    operator std::string() const noexcept {
+        std::string s;
+        char c = operator char();
+        while (c != ' ' && c != '\n' && c != '\r' && c != EOF) {
+            s += c;
+            c = getchar_unlocked();
+        }
+        return s;
+    }
+    friend std::string& operator<<(std::string& lhs, const in& rhs) noexcept {
+        return lhs = rhs.operator std::string();
+    }
+};
+
+namespace output_wrapper {
+    bool is_line_head = true;
+    void put() noexcept { }
+    template<class T, class...Args> void put(T&& t, Args&&...args) noexcept {
+        if (!is_line_head) putchar_unlocked(' ');
+        std::cout << t;
+        is_line_head = false;
+        put(std::forward<Args>(args)...);
+    }
+    template<class...Args> void out(Args&&...args) noexcept {
+        put(std::forward<Args>(args)...);
+        putchar_unlocked('\n');
+        is_line_head = true;
+    }
+    template<class Iterator>
+    void dump(Iterator first, Iterator last, char c = ' ') noexcept {
+        while (first != last) put(*(first++));
+        if (c == '\n') out();
+    }
+}
+using output_wrapper::put;
+using output_wrapper::out;
+using output_wrapper::dump;
+
+template<int B, int NODE_SIZE> class binary_trie {
+    using ull = unsigned long long;
+    int sum[NODE_SIZE] = {}, ch[2][NODE_SIZE] = {}, new_node = 2;
+public :
+    template<typename T> void insert(T n, int x) noexcept {
+        int k = 1;
+        sum[k] += x;
+        for (int i = B - 1; i >= 0; i--) {
+            if (!ch[n >> i & 1][k]) ch[n >> i & 1][k] = new_node++;
+            sum[k = ch[n >> i & 1][k]] += x;
+        }
+    }
+    template<typename T> void erase(T n, int x) noexcept {
+        int k = 1;
+        sum[k] -= x;
+        for (int i = B - 1; i >= 0; i--) sum[k = ch[n >> i & 1][k]] -= x;
+    }
+    template<typename T> int count(T n) const noexcept {
+        int k = 1;
+        for (int i = B - 1; i >= 0; i--) if (!sum[k = ch[n >> i & 1][k]]) return 0;
+        return sum[k];
+    }
+    ull operator[](int n) const noexcept {
+        int k = 1;
+        ull ret = 0;
+        for (int i = B - 1; i >= 0; i--) {
+            if (n < sum[ch[0][k]]) k = ch[0][k];
+            else n -= sum[ch[0][k]], ret |= 1ULL << i, k = ch[1][k];
+        }
+        return ret;
+    }
+    template<typename T> int lower_bound(T n) const noexcept {
+        int k = 1, ret = 0;
+        for (int i = B - 1; i >= 0; i--) {
+            if (n >> i & 1) ret += sum[ch[0][k]], k = ch[1][k];
+            else if (sum[ch[0][k]]) k = ch[0][k];
+            else return ret;
+        }
+        return ret;
+    }
+    template<typename T> int upper_bound(T n) const noexcept {
+        return lower_bound(n + 1);
+    }
+    template<typename T> ull xor_argmin(T n) const noexcept {
+        int k = 1;
+        ull ret = 0;
+        for (int i = B - 1; i >= 0; i--) {
+            bool a = n >> i & 1, b = sum[ch[a][k]];
+            ull c = !a ^ b;
+            ret |= c << i;
+            k = ch[c][k];
+        }
+        return ret;
+    }
+    int size() const noexcept { return sum[1]; }
+};
+
+constexpr int node_size(int bit_size, int query_size) {
+    int ret = 1, m = 1, cnt = 0;
+    while (1) {
+        ret += m;
+        cnt++;
+        if (m >= query_size) break;
+        m <<= 1;
+    }
+    return ret + (bit_size - cnt) * query_size;
+}
+#define NODE_SIZE(x, y) x, node_size(x, y)
+
+binary_trie<NODE_SIZE(32, 200000)> bt;
+
+int main() {
+    int q = in();
+
+    while (q--) {
+        int t = in();
+        if (t == 0) {
+            int x = in();
+            bt.insert(x, 1);
+            out(bt.size());
+        } else if (t == 1) {
+            int x = in();
+            out(bt.count(x));
+        } else if (t == 2) {
+            int x = in();
+            bt.erase(x, bt.count(x));
+        } else {
+            int L = in(), R = in();
+            L = bt.lower_bound(L);
+            R = bt.upper_bound(R);
+            while (L < R) out(bt[L++]);
+        }
+    }
+}
+

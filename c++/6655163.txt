@@ -1,0 +1,91 @@
+#include<stdio.h>
+#define MAX 10000
+#define NIL -1
+
+typedef struct
+{
+    int parent;
+    int left;
+    int right;
+} Node;
+
+Node Tree[MAX];
+int n, Dep[MAX], Hei[MAX];
+
+int Hei_s(int n_point)
+{
+    int x, y;
+    x=y=0;
+    if(Tree[n_point].left != NIL) x = Hei_s(Tree[n_point].left)+1;
+    if(Tree[n_point].right != NIL) y = Hei_s(Tree[n_point].right)+1;
+
+    return Hei[n_point] = ( x>y?x:y);
+}
+
+int sibling(int n_point)
+{
+    if(Tree[n_point].parent==NIL) return NIL;
+    if(Tree[Tree[n_point].parent].left != n_point && Tree[Tree[n_point].parent].left != NIL) return Tree[Tree[n_point].parent].left;
+    if(Tree[Tree[n_point].parent].right != n_point && Tree[Tree[n_point].parent].right != NIL) return Tree[Tree[n_point].parent].right;
+
+    return NIL;
+}
+
+void dep(int n_point, int depth)
+{
+    if(n_point == NIL) return;
+    Dep[n_point] = depth;
+    dep(Tree[n_point].left, depth+1);
+    dep(Tree[n_point].right, depth+1);
+}
+
+void print(int n_point)
+{
+    int deg;
+
+    printf("node %d: ", n_point);
+    printf("parent = %d, ", Tree[n_point].parent);
+    printf("sibling = %d, ", sibling(n_point));
+
+    deg=0;
+    if(Tree[n_point].left != NIL) deg++;
+    if(Tree[n_point].right != NIL) deg++;
+    printf("degree = %d, ", deg);
+    printf("depth = %d, ", Dep[n_point]);
+    printf("height = %d, ", Hei[n_point]);
+
+    if(Tree[n_point].parent == NIL) printf("root\n");
+    else if(Tree[n_point].left==NIL && Tree[n_point].right==NIL) printf("leaf\n");
+    else printf("internal node\n");
+}
+
+int main(void)
+{
+    int i, left, right, u, root=0;
+
+    scanf("%d", &n);
+    for(i=0;i<n;i++)
+    {
+        Tree[i].parent=NIL;
+    }
+    for(i=0;i<n;i++)
+    {
+        scanf("%d %d %d", &u, &left, &right);
+        Tree[u].right=right;
+        Tree[u].left=left;
+        if(right != NIL) Tree[right].parent = u;
+        if(left != NIL) Tree[left].parent = u;
+    }
+    for(i=0;i<n;i++)
+    {
+        if(Tree[i].parent==NIL)
+        {
+            root = i;
+        }
+    }
+    dep(root, 0);
+    Hei_s(root);
+    for(i=0;i<n;i++) print(i);
+
+    return 0;
+}

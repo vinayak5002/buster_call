@@ -1,0 +1,52 @@
+### ALDS1_14_B
+T = input()
+P = input()
+
+q = 1000000007
+d = 10+26+26
+
+def Char2Num():
+    char2num = [0 for x in range(128)]
+    t = 0
+    for i in range(10):
+        char2num[ord('0') + i] = t
+        t = t + 1
+    for i in range(26):
+        char2num[ord('A') + i] = t
+        t = t + 1
+    for i in range(26):
+        char2num[ord('a') + i] = t
+        t = t + 1
+    return char2num 
+
+
+char2num = Char2Num()
+T_len = len(T)
+P_len = len(P)
+h = 1
+valid_shift = [False for i in range(T_len)]
+
+for i in range(P_len):
+    h = h*d%q
+p = 0
+t0 = 0
+for i in range(P_len):
+    p = (d*p + char2num[ord(P[i])])%q
+    t0 = (d*t0 + char2num[ord(T[i])])%q
+ts = t0
+
+for i in range(T_len - P_len + 1):
+    if(p == ts):
+        valid_shift[i] = True
+    if i + P_len < T_len:
+        ts = (d*ts%q - char2num[ord(T[i])]*h%q + char2num[ord(T[i+P_len])])%q
+        ts = (ts+q)%q
+
+for i in range(T_len):
+    if valid_shift[i]:
+        print(i)
+
+
+
+### aabbcacabdab
+# ab

@@ -1,0 +1,110 @@
+#https://onlinejudge.u-aizu.ac.jp/courses/lesson/2/ITP1/11/ITP1_11_D
+#
+#2022-04-30
+
+# ---- program -----
+def f(i,s,w):
+  if("S"==i):
+    st=[s[-1],s[0],7-s[-1],7-s[0]]
+    wt=[st[0],w[1],7-st[0],7-w[1]]
+  else:
+    pass
+    wt=[w[1],w[2],7-w[1],7-w[2]]
+    st=[wt[0],s[1],7-wt[0],7-s[1]]
+
+  # print(i,st,wt)
+  return st,wt
+
+def r(a1,a2,s,w):
+  # 両方にある→上か下
+  if (a2 in s) and (a2 in w):
+    if s.index(a2)==0:
+      s,w=f("S",s,w)
+    else:
+      s,w=f("S",s,w)
+      s,w=f("S",s,w)
+      s,w=f("S",s,w)
+  elif (a2 in s) and (a2 not in w ):
+    if s.index(a2)==1:
+      pass
+    else:
+      s,w=f("S",s,w)
+      s,w=f("S",s,w)
+  elif (a2 not in s) and (a2 in w):
+    if w.index(a2)==1:
+      s,w=f("W",s,w)
+      s,w=f("S",s,w)
+    else:
+      s,w=f("W",s,w)
+      s,w=f("W",s,w)
+      s,w=f("W",s,w)
+      s,w=f("S",s,w)
+
+  # -----
+  # s[1]にa2がある。あとはw回転すればOK
+
+  if (a1 in s) and (a1 in w):
+    if s.index(a1)==0:
+      pass
+    else:
+      s,w=f("W",s,w)
+      s,w=f("W",s,w)
+  elif (a1 not in s) and (a1 in w):
+    if w.index(a1)==1:
+      s,w=f("W",s,w)
+    else:
+      s,w=f("W",s,w)
+      s,w=f("W",s,w)
+      s,w=f("W",s,w)
+
+  return s,w
+
+# サイコロが同じか判定
+def c():
+  pass
+
+# ----------------------
+# 処理
+# ----------------------
+n=int(input())
+*a,=map(int,input().split())
+s=[]
+for _ in range(n-1):
+  row=list(map(int,input().split()))
+  s.append(row)
+
+
+for i in s:
+
+  # *a,=map(int,input().split())
+  # *b,=map(int,input().split())
+
+  # a=[11,12,13,14,15,16]
+  # b=[16,12,14,13,15,11]
+
+  s=[1,2,6,5]
+  w=[1,3,6,4]
+
+  a1=a.index(i[0])+1
+  a2=a.index(i[1])+1
+
+  sa,wa=[],[]
+  sa,wa=r(a1,a2,s,w)
+
+  aans=[a[sa[0]-1],a[sa[1]-1],a[wa[1]-1],a[wa[3]-1],a[sa[3]-1],a[sa[2]-1]]
+  # print(aans)
+  # print(b)
+
+  ans=True
+  for j in range(6):
+    if(aans[j]!=i[j]):
+      ans=False
+      break
+  if (ans):
+    break
+
+
+if ans:print("No")
+else:print("Yes")
+
+# ---- collect -----

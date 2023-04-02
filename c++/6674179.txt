@@ -1,0 +1,104 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+#ifdef DBG
+void printVec(vector<int> *V)
+{
+    int n = V->size();
+    cout << "(";
+    if (n > 0)
+	cout << (*V)[0];
+    for (int i = 1; i < n; i++)
+	cout << ", " << (*V)[i];
+    cout << ")";
+}
+#endif
+
+//  U の点で S から距離１にある点の集合 N を返す。 また U から N を取り除く
+vector<int> *getNbh(vector<int> *S, vector<int> *U, vector<int> *AL[])
+{
+    vector<int> *N = new vector<int>;
+ 
+    // U の各元 u について、ある S の元 s からの距離が１であれば、
+    // U から u を取り除いて、 N に加える
+    for (auto u = U->begin(); u != U->end(); u++) {
+	for (auto s = S->begin(); s != S->end(); s++) {
+	    vector<int> *A = AL[*s];       //  A: S の元 s に隣接する頂点たち
+	    if (find(A->begin(), A->end(), *u) != A->end()) {
+		N->push_back(*u);
+		break;
+	    }
+	}
+    }
+    for (auto t = N->begin(); t != N->end(); t++)
+	U->erase(find(U->begin(), U->end(), *t));
+    return N;
+}
+
+void initD(vector<int> *D[], int n)
+{
+    for (int i = 0; i <= n; i++)
+	D[i] = new vector<int>;
+    D[0]->push_back(1);
+    for (int u = 2; u <= n; u++)
+	D[n]->push_back(u);
+}
+
+void setAL(vector<int> *AL[], int n)
+{
+    for (int i = 0; i < n; i++) {
+	int u;   // 頂点
+	int k;   // u に隣接する頂点の数
+	cin >> u >> k;
+	AL[u] = new vector<int>;
+	for (int i = 0; i < k; i++) {
+	    int v;
+	    cin >> v;
+	    AL[u]->push_back(v);
+	}
+    }
+}
+
+int main()
+{
+    int n;                    //  頂点数
+    cin >> n;
+    //  D[i]: D[0] からの距離 i の頂点たち, D[n] は D[0] から不連結な頂点たち
+    vector<int> *D[n+1];
+
+    initD(D, n);
+
+    vector<int> *AL[n + 1];   //  AL[v]:  頂点 v の隣接リスト
+    setAL(AL, n);
+#ifdef DBG
+    for (int i = 1; i <= n; i++) {
+	cout << "AL[" << i << "] --> ";
+	printVec(AL[i]);
+	cout << endl;
+    }
+#endif
+    for (int i = 1; i < n; i++)
+	D[i] = getNbh(D[i-1], D[n], AL);
+    
+    int d[n];
+    for (int i = 0; i <= n; i++)
+	for (auto v = D[i]->begin(); v != D[i]->end(); v++)
+	    d[*v] = i;
+
+#ifdef DBG
+    for (int i = 0; i <= n; i++) {
+	cout << "D[" << i << "] --> ";
+	printVec(D[i]);
+	cout << endl;
+    }
+#endif
+
+    //  d[] を印字
+    for (int v = 1; v <= n; v++)
+	cout << v << ' ' << (d[v] + 1) % (n + 1) - 1  << endl;
+
+    return 0;
+}

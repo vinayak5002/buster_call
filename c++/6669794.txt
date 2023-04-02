@@ -1,0 +1,178 @@
+#include <stdio.h>
+
+int main()
+{
+    int n1, m1, w1, h1;
+    int sum=0;
+    int ovlap1=0;
+    int ovlap2=0;
+    int n2, m2, w2, h2;
+    int temp;
+    while(scanf("%d%d%d%d%d%d%d%d", &n1, &m1, &w1, &h1, &n2, &m2, &w2, &h2)!=EOF)
+    {
+        if(n1 > n2)
+        {
+            temp = n1;
+            n1 = n2;
+            n2 = temp;
+            temp = m1;
+            m1 = m2;
+            m2 = temp;
+            temp = w1;
+            w1 = w2;
+            w2 = temp;
+            temp = h1;
+            h1 = h2;
+            h2 = temp;
+        }
+        if(n2 > n1 && n2 <=(n1+w1-1))
+        {
+            if(m2 > m1 && m2 <= (m1+h1-1) && w1 > (n2+w2) && h1 > (m2+h2))   /* b2 is in the upper right corner of b1 and b2 inside b1 */
+            {
+                sum = (w1*h1)-(w2*h2);
+            }
+            else if(m2 > m1 && m2 <=(m1+h1-1))    /* b2 is in the upper right corner of b1 but not inside */
+            {
+                for(int i=n2; i<(n1+w1) && i<(n2+w2); i++)
+                {
+                    ovlap1++;
+                }
+                for(int j=m2; j<(m1+h1) && j<(m2+h2); j++)
+                {
+                    ovlap2++;
+                }
+                sum = (w1*h1)+(w2*h2)-(ovlap1*ovlap2*2);
+            }
+            else if(m2 == m1)
+            {
+                for(int i=n2; i<(n1+w1) && i<(n2+w2); i++)
+                {
+                    ovlap1++;
+                }
+                if(h1 <= h2)
+                {
+                    ovlap2 = h1;
+                }
+                else ovlap2 = h2;
+                sum = (w1*h1)+(w2*h2)-(ovlap1*ovlap2*2);
+            }
+            else if(m2 < m1)
+            {
+                if(m2+h2>m1 && m2+h2<m1+h1 && n2+w2<n1+w1)
+                {
+                    for(int i=m1; i<m2+h2; i++)
+                    {
+                        ovlap2++;
+                    }
+                    for(int j=n2; j<n2+w2; j++)
+                    {
+                        ovlap1++;
+                    }
+                    sum = (w1*h1)+(w2*h2)-(ovlap1*ovlap2*2);
+                }
+                else if(m2+h2>m1 && m2+h2<m1+h1)
+                {
+                    for(int i=m1; i<m2+h2; i++)
+                    {
+                        ovlap2++;
+                    }
+                    for(int j=n2; j<n1+w1; j++)
+                    {
+                        ovlap1++;
+                    }
+                    sum = (w1*h1)+(w2*h2)-(ovlap1*ovlap2*2);
+                }
+                else if(m2+h2>m1+h1)
+                {
+                    if(n2+w2>n1+w1)
+                    {
+                        for(int i=n2; i<n1+w1; i++)
+                        {
+                            ovlap1++;
+                        }
+                        for(int j=m1; j<m1+h1; j++)
+                        {
+                            ovlap2++;
+                        }
+                        sum = (w1*h1)+(w2*h2)-(ovlap1*ovlap2*2);
+                    }
+                    else if(n2+w2<n1+w1)
+                    {
+                        for(int i=n2; i<n2+w2; i++)
+                        {
+                            ovlap1++;
+                        }
+                        for(int j=m1; j<m1+h1; j++)
+                        {
+                            ovlap2++;
+                        }
+                        sum = (w1*h1)+(w2*h2)-(ovlap1*ovlap2*2);
+                    }
+                }
+                else if(m2+h2<=m1)
+                {
+                    sum = (w1*h1)+(w2*h2);
+                }
+            }
+        }
+        else if(n2 > (n1+w1) && m2 > (m1+h1))
+        {
+            sum = (w1*h1) + (w2*h2);
+        }
+        else if(n2 > (n1+w1) && (m2+h2) < m1)
+        {
+            sum = (w1*h1) + (w2*h2);
+        }
+        if(n2 == n1)
+        {
+            if(m2 == m1)
+            {
+                if(w1<w2)
+                {
+                    ovlap1 = w1;
+                }
+                else ovlap1 = w2;
+                if(h1<h2)
+                {
+                    ovlap2 = h1;
+                }
+                else ovlap2 = h2;
+                if(w1 == w2 && h1 == h2)
+                {
+                    sum = 0;
+                }
+                sum = (w1*h1)+(w2*h2)-(ovlap1*ovlap2*2);
+            }
+            else if(m2>m1)
+            {
+                for(int i=n2; i<(n1+w1) && i<(n2+w2); i++)
+                {
+                    ovlap1++;
+                }
+                for(int j=m2; j<(m1+h1) && j<(m2+h2); j++)
+                {
+                    ovlap2++;
+                }
+                sum = (w1*h1)+(w2*h2)-(ovlap1*ovlap2*2);
+            }
+            else if(m2<m1)
+            {
+                for(int i=n1; i<(n2+w2) && i<(n1+w1); i++)
+                {
+                    ovlap1++;
+                }
+                for(int j=m1; j<(m2+h2) && j<(m1+h1); j++)
+                {
+                    ovlap2++;
+                }
+                sum = (w1*h1)+(w2*h2)-(ovlap1*ovlap2*2);
+            }
+        }
+        printf("%d\n", sum);
+        sum=0;
+        ovlap1=0;
+        ovlap2=0;
+    }
+    return 0;
+}
+

@@ -1,0 +1,41 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+
+vector<vector<int> > dp_lcs (string s1, string s2) {
+    int n = s1.size();
+    int m = s2.size();
+    vector<vector<int> > lcs(n+1, vector<int>(m+1));
+  
+	for (int i=0; i<n+1; i++) {
+        lcs.at(i).at(0) = 0;
+    }
+	for (int j=1; j<m+1; j++) {
+        lcs.at(0).at(j) = 0;
+    }
+    for (int i=1; i<n+1; i++) {
+        for (int j=1; j<m+1; j++) {
+            if (s1[i-1] == s2[j-1]) {
+                lcs.at(i).at(j) = lcs.at(i-1).at(j-1) + 1;
+            }
+            else {
+                lcs.at(i).at(j) = max(lcs.at(i).at(j-1), lcs.at(i-1).at(j)); 
+            }
+        }
+    }
+    return lcs;     
+}
+
+
+
+int main() {
+    int q;
+    cin >> q;
+    string s1, s2;
+    for (int i=0; i<q; i++) {
+        cin >> s1;
+        cin >> s2;
+        cout << dp_lcs (s1, s2).at(s1.size()).at(s2.size()) << endl;
+    }
+    return 0;
+}

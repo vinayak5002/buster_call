@@ -1,0 +1,121 @@
+import java.io.*;
+import java.util.*;
+import java.math.BigDecimal;
+import java.lang.Object;
+import java.util.function.*;
+
+public class Main {
+  public static void main(String[] args){
+      int n,m,w,h,s=0,t,ans=0,mx,mn,sum,cnt;
+      int[] a=new int[100000],b=new int[8];
+      int[][] c = new int[100][100];
+      boolean flag;
+      String str;
+      Scanner scanner =new Scanner(System.in);
+      ArrayList<Integer>vec=new ArrayList<Integer>();
+      Pair<Integer,Integer> S = new Pair<Integer,Integer>(), G = new Pair<Integer,Integer>();
+      while(true){
+        w=Integer.parseInt(scanner.next());
+        h=Integer.parseInt(scanner.next());
+        if(w==0&&h==0)break;
+        for(int i=0;i<h;i++){
+          for(int j=0;j<w;j++){
+            c[i][j]=Integer.parseInt(scanner.next());
+            if(c[i][j]==2){
+              S.first=i;
+              S.second=j;
+              c[i][j]=0;
+            }
+            if(c[i][j]==3){
+              G.first=i;
+              G.second=j;
+              c[i][j]=3;
+            }
+          }
+        }
+        ans=dfs(S,c,w,h,0);
+        if(ans==11)System.out.println(-1);
+        else System.out.println(ans);
+      }
+  }
+  static int dfs(Pair<Integer,Integer> pos,int[][] map,int w,int h,int cnt) {
+    if(cnt==10)return 11;
+    int ret=11;
+    int x=pos.first,y=pos.second;
+    if(x<h-1&&map[x+1][y]!=1)
+      while(x<h-1){
+        if(map[x+1][y]==1){
+          map[x+1][y]=0;
+          ret=Math.min(ret,dfs(new Pair<Integer,Integer>(x,y), map,w,h,cnt+1));
+          map[x+1][y]=1;
+          break;
+        }
+        x++;
+        if(map[x][y]==3)return cnt+1;
+      }
+    x=pos.first;y=pos.second;
+    if(x>=1&&map[x-1][y]!=1)
+    while(x>=1){
+      if(map[x-1][y]==1){
+        map[x-1][y]=0;
+        ret=Math.min(ret,dfs(new Pair<Integer,Integer>(x,y), map,w,h,cnt+1));
+        map[x-1][y]=1;
+        break;
+      }
+      x--;
+      if(map[x][y]==3)return cnt+1;
+    }
+    x=pos.first;y=pos.second;
+    if(y<w-1&&map[x][y+1]!=1)
+    while(y<w-1){
+      if(map[x][y+1]==1){
+        map[x][y+1]=0;
+        ret=Math.min(ret,dfs(new Pair<Integer,Integer>(x,y), map,w,h,cnt+1));
+        map[x][y+1]=1;
+        break;
+      }
+      y++;
+      if(map[x][y]==3)return cnt+1;
+    }
+    x=pos.first;y=pos.second;
+    if(y>=1&&map[x][y-1]!=1)
+    while(y>=1){
+      if(map[x][y-1]==1){
+        map[x][y-1]=0;
+        ret=Math.min(ret,dfs(new Pair<Integer,Integer>(x,y), map,w,h,cnt+1));
+        map[x][y-1]=1;
+        break;
+      }
+      y--;
+      if(map[x][y]==3)return cnt+1;
+    }
+    return ret;
+  }
+  public interface Compare<T>{
+	  public boolean func(T x,T y);
+  }
+  static String swap(String str, int i, int j){
+      char ch[] = str.toCharArray();
+      char tempo = ch[i];
+      ch[i] = ch[j];
+      ch[j] = tempo;
+      return new String(ch);
+  }
+}   
+class Pair<T,E>{
+    T first;
+    E second;
+    public Pair(T a,E b){
+      first=a;
+      second=b;
+    }
+    public Pair(Pair<T,E>x){
+      first=x.first;
+      second=x.second;
+    }
+    public Pair(){}
+    void print(){
+      System.out.println("first:"+first+" second:"+second);
+    }
+  }
+  

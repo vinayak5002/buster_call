@@ -1,0 +1,60 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+struct arr{
+    char str[40];
+    int n;
+};
+int compare(const void *a,const void *b);
+
+
+int compare(const void *a,const void *b){
+    struct arr *pa=(struct arr *)a;
+    struct arr *pb=(struct arr *)b;
+    return( strcmp((char *)(pa->str),(char *)(pb->str)) );
+}
+int main (){
+    int k=0;
+    struct arr ans[200];
+    while(scanf("%s",&ans[k].str)!=EOF){
+        scanf("%d",&ans[k].n);
+    }
+    /*for(int i=0;i<8;i++){
+        k++;
+        scanf("%s",&ans[i].str);
+        scanf("%d",&ans[i].n);
+    }*/
+    qsort((void *)ans,k,sizeof(ans[0]), compare);
+
+    for(int i=0;i<k;i++){
+        int j=i+1;
+        int m=0;
+        while(strcmp(ans[i].str,ans[j].str)==0){
+            int a,b;
+            a=i;
+            b=j;
+            while(ans[a].n>ans[b].n&&strcmp(ans[a].str,ans[b].str)==0){
+                int temp;
+                temp =ans[i].n;
+                ans[i].n = ans[j].n;
+                ans[j].n = temp;
+                a--;
+                b--;
+            }
+            m++;
+            i++;
+            j++;
+        }
+        printf("%s\n",ans[i].str);
+        while(1){
+            if(m==0){
+                printf("%d\n",ans[i].n);
+                break;
+            }else{
+                printf("%d ",ans[i-m].n);
+            }
+            m--;
+        }
+    }
+}
+

@@ -1,0 +1,73 @@
+//#define _GLIBCXX_DEBUG
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <cmath>
+#include <cstdio>
+#include <ctime>
+#include <deque>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <list>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <stack>
+#include <string>
+#include <tuple>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+const int inf = 16001;
+int v, start;
+vector<vector<int>> dist;
+vector<vector<vector<int>>> dp;
+
+int calc(int b, int end) {
+  if (dp[b][start][end] != -1) return dp[b][start][end];
+  int pb = b & ~(1 << end), result = inf;
+  for (int i = 0; i < v; ++i) {
+    if (start == v) continue;
+    if (pb & (1 << i)) {
+      result = min(result, calc(pb, i) + dist[i][end]);
+    }
+  }
+  return dp[b][start][end] = result;
+}
+
+int main() {
+  int e;
+  cin >> v >> e;
+  dist.resize(v, vector<int>(v, inf));
+  for (int i = 0; i < e; ++i) {
+    int s, t, d;
+    cin >> s >> t >> d;
+    dist[s][t] = d;
+  }
+
+  dp.assign((1 << v), vector<vector<int>>(v, vector<int>(v, -1)));
+  for (int i = 0; i < v; ++i) {
+    for (int j = 0; j < v; ++j) {
+      dp[(1 << i) | (1 << j)][i][j] = dist[i][j];
+    }
+  }
+  int ans = inf;
+  for (start = 0; start < v; ++start) {
+    for (int j = 0; j < v; ++j) {
+      if (dist[j][start] == inf) continue;
+      ans = min(ans, calc((1 << v) - 1, j) + dist[j][start]);
+    }
+  }
+  if (ans == inf) {
+    cout << -1 << '\n';
+  } else {
+    cout << ans << '\n';
+  }
+  return 0;
+}
+
+

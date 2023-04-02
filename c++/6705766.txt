@@ -1,0 +1,210 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+
+typedef struct node{
+	struct node *r;
+	struct node *l;
+	struct node *p;
+	int key;
+}Node;
+
+Node *KI,*NIL;
+
+void Ins(int);
+void Ino(Node *x);
+void Pre(Node *x);
+int Find(Node *x,int y);
+void Dle(int y);
+Node * SearchNode(Node *x,int y);
+Node * SearchMinNode(Node *x);
+
+int main(void){
+	int i,n,g,u;
+	char t[9];
+	
+	scanf("%d",&n);
+	
+	for(i=0;i<n;i++){
+		scanf("%s",t);
+		if(t[0]=='i'){
+			scanf("%d",&g);
+			Ins(g);
+		}
+		else if(t[0]=='p'){
+			Ino(KI);
+			printf("\n");
+			Pre(KI);
+			printf("\n");
+		}
+		else if(t[0]=='f'){
+			scanf("%d",&g);
+			u=Find(KI,g);
+			if(u==0)printf("no\n");
+			if(u==1)printf("yes\n");
+		}
+		else if(t[0]=='d'){
+			scanf("%d",&g);
+			Dle(g);
+		}
+	}
+	
+	
+	return 0;
+}
+
+void Ins( int x ){
+	Node *a=NIL,*b=KI,*c;
+	
+	c=(Node*)malloc(sizeof(Node));
+	c->key=x;
+	c->l=NIL;
+	c->r=NIL;
+	
+	while( b != NIL){
+		a=b;
+		if( b->key > c->key){
+			b=b->l;
+		}
+		else{
+			b=b->r;
+		}
+		c->p=a;
+	}
+	if(a==NIL){
+		KI=c;
+	}
+	else{
+		if(a->key < c->key){
+			a->r=c;
+		}
+		else{
+			a->l=c;
+		}
+	}
+	
+	free(c);
+}
+
+void Ino( Node *x ){
+	if(x == NIL){
+		return;
+	}
+	if( x->l != NIL ){
+		Ino(x->l);
+	}
+	printf(" %d",x->key);
+	if( x->r != NIL ){
+		Ino(x->r);
+	}
+}
+
+void Pre( Node *x ){
+	if(x == NIL){
+		return;
+	}
+	printf(" %d",x->key);
+	if( x->l != NIL ){
+		Pre(x->l);
+	}
+	if( x->r != NIL ){
+		Pre(x->r);
+	}
+}
+
+int Find( Node *x , int y){
+	if(x == NIL){
+		return 0;
+	}
+	else if(y == x->key){
+		return 1;
+	}
+	else if( y > x->key){
+		Find(x->r,y);
+	}
+	else if( y < x->key){
+		Find(x->l,y);
+	}
+	else{
+		return 0;
+	}
+}
+
+Node * SearchNode( Node *x,int y ){
+	if(x == NIL){
+		return NIL;
+	}
+	else if(y == x->key){
+		return x;
+	}
+	else if( y > x->key){
+		SearchNode(x->r,y);
+	}
+	else if( y < x->key){
+		SearchNode(x->l,y);
+	}
+}
+
+Node * SearchMinNode( Node *x ){
+	if( x->l == NIL){
+		return x;
+	}
+	else{
+		SearchMinNode(x->l);
+	}
+}
+
+void Dle(int y){
+	Node *a,*par,*ch;
+	int s;
+	
+	a=SearchNode( KI,y );
+	if( a==NIL ){
+		return;
+	}
+	else{
+		if(a->l == NIL && a->r == NIL){
+			par=a->p;
+			if(par->l == a){
+				par->l=NIL;
+			}
+			else{
+				par->r=NIL;
+			}
+			a->p=NIL;
+		}
+		else if(a->l == NIL || a->r == NIL){
+			par=a->p;
+			if(a->l != NIL)ch=a->r;
+			else{
+				ch=a->l;
+			}
+			if(par->l == a){
+				par->l=ch;
+			}
+			else{
+				par->r=ch;
+			}
+			ch->p=par;
+			a->p=NIL;
+		}
+		else{
+			ch=SearchMinNode(a->r);
+			s=ch->key;
+			ch->key=a->key;
+			a->key=s;
+			par=ch->p;
+			if(par->l == ch){
+				par->l=NIL;
+			}
+			else{
+				par->r=NIL;
+			}
+			a->p=NIL;
+		}
+	}
+	free(a);
+	free(par);
+	free(ch);
+}
+

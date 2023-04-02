@@ -1,0 +1,77 @@
+import java.util.Scanner;
+class Main {
+    private static int cmd,number;
+    private static int rennum ,N;
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        rennum = sc.nextInt();
+        N = sc.nextInt();
+        GasRen[] Ren = new GasRen[10];
+        for(int i = 0;i<rennum;i++){
+            Ren[i] = new GasRen();
+        }
+
+        for(int i =0;i<N;i++){
+            cmd = sc.nextInt();
+            number = sc.nextInt();
+            if(cmd == 0){
+                //pull
+                System.out.println(Ren[number-1].pull());
+            }else if(cmd == 1){
+                //Serch aiteru ren
+                int renmin = 0;
+                int carmin =Ren[0].cntData();
+
+                for(int j = 0;j<rennum;j++){
+                    int cntCar = Ren[j].cntData();
+                    if(carmin > cntCar){
+                        renmin = j;
+                        carmin = cntCar;
+                    }
+                }
+                // put car
+                Ren[renmin].put(number);
+
+            }
+        }
+
+
+    }
+    
+}
+
+class GasRen {
+    private static final int MAX = 10000;
+    private int[] data = new int[MAX];
+    private int head, tail;
+    GasRen(){
+        head = 0;
+        tail=0;
+        for(int i=0;i<MAX;i++){
+            data[0] = 0;
+        }
+    }
+
+    void put(int num){
+        tail++;
+        if(tail == MAX){
+            //overflow?
+            tail = 0;
+        }
+        data[tail] = num;
+    }
+
+    int pull(){
+        head++;
+        if(head == MAX){
+            //overflow?
+            head = 0;
+        }
+        return data[head];
+    }
+
+    int cntData(){
+        return ( tail - head );
+    }
+}
+

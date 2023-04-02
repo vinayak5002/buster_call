@@ -1,0 +1,120 @@
+#include <stdio.h>
+
+#define MAX 100001
+
+typedef struct
+{
+    int right;
+    int left;
+    int parent;
+} node;
+
+//構造体変数の宣言
+node Node[MAX];
+
+//グローバル変数の宣言
+int D[MAX];
+
+//深さを再帰的に探索
+int setDepth(int u, int p)
+{
+    D[u] = p;
+    if (Node[u].right != -1)
+    {
+        setDepth(Node[u].right, p);
+    }
+    if (Node[u].left != -1)
+    {
+        setDepth(Node[u].left, p + 1);
+    }
+}
+
+int main(void)
+{
+    //変数宣言
+    int i, j, n, s, pla, num, root, x, left;
+
+    //データ数の取得
+    scanf("%d", &n);
+
+    //構造体変数の初期化
+    for (i = 0; i < n; i++)
+    {
+        Node[i].right = -1;
+        Node[i].left = -1;
+        Node[i].parent = -1;
+    }
+
+    //各節点の情報の取得
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d %d", &pla, &num);
+        for (j = 0; j < num; j++)
+        {
+            scanf("%d", &s);
+            if (j == 0)
+            {
+                Node[pla].left = s;
+            }
+
+            //兄弟の右側に挿入
+            else
+            {
+                Node[left].right = s;
+            }
+
+            //一回目の値をleftに挿入
+            left = s;
+
+            //それぞれの親の値を挿入
+            Node[s].parent = pla;
+        }
+    }
+
+    //根の場所の探索
+    for (i = 0; i < n; i++)
+    {
+        if (Node[i].parent == -1)
+        {
+            root = i;
+        }
+    }
+
+    //深さの探索
+    setDepth(root, 0);
+
+    //データの表示
+    for (i = 0; i < n; i++)
+    {
+        // node,parent,depthの出力
+        printf("node %d: parent = %d, depth = %d, ", i, Node[i].parent, D[i]);
+
+        //根,節点,葉の判別の出力
+        if (Node[i].parent == -1)
+        {
+            printf("root, ");
+        }
+        else if (Node[i].left == -1)
+        {
+            printf("leaf, ");
+        }
+        else
+        {
+            printf("internal node, ");
+        }
+
+        //子があるときのこの場所の出力
+        printf("[");
+        for (j = 0, x = Node[i].left; x != -1; j++, x = Node[x].right)
+        {
+            if (j != 0)
+            {
+                printf(", ");
+            }
+            printf("%d", x);
+        }
+        printf("]\n");
+    }
+
+    return 0;
+}

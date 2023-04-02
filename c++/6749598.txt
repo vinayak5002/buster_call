@@ -1,0 +1,111 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000001
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 1001
+#define MAXM 1
+typedef long long int ll;
+ll n ;
+int weight, v, w;
+ll t = 0;
+int ins = 0;
+int upd = 0;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+
+long long int res;
+const long long int infty = (1LL<<31) - 1;
+const long long int M = 998244353777789;
+const long long int N = 499122177;
+
+vector<int> S;
+vector<int> A; // i番目に入る数列の要素を格納する
+char CH1[MAXN] ;  int len1=0;
+char CH2[MAXN] ;  int len2=0;
+char CHX[MAXN] ;
+
+int length;
+///////////計算量を減らす工夫///////////////
+// i番目までの荷物で重さjまででの最大価値をA[i][j]に保管
+// A[i][j] = max (A[i-1][j], A[i-1][j-W[i]] + VAL[i] )
+/////////////////////////////
+void init(){
+    t=0;
+}
+void insert(int k, char w){
+    CHX[k]=w;
+    ins++;
+}
+void updt(int k, char w){
+    CHX[k]=w;
+    upd++;
+}
+void shori(int k){
+    //CH1のk文字めを処理するルーチン
+    //CH2にinsertまたはreplaceしてCH1に変更していこう。
+    //ins:insertした回数を記録する。
+    //upd:updateした回数を記録する。
+
+    if(CH1[k]==CH2[k+ins]) {
+        CHX[k] ==CH1[k];
+    }
+    else{
+        if (strlen(CH1) > strlen(CH2) + ins ) {
+            insert(k,CH1[k]);
+        } else {
+            updt(k,CH1[k]);
+        }
+    }
+    return ;
+}
+
+
+int main(){
+    scanf("%s", CH1);  len1 = strlen(CH1);
+    scanf("%s", CH2);  len2 = strlen(CH2);
+    if (len1 < len2) { swap(CH1,CH2); swap(len1,len2); }
+    n = len1;
+    init();
+
+    for (int i=0; i<n ; i++) {
+        // S[i]に対応させている。
+        shori(i);
+    }
+    printf ("%d\n", ins+upd);
+    //for (int i=1; i<=n ; i++) {
+    //    printf ( "%d " , A[i] );
+    //}
+
+    return 0;
+}
+
+/*
+
+編集距離
+２つの文字列 s1、s2 の編集距離（レーベンシュタイン距離）を求めて下さい。
+
+編集距離とは、以下３種類の操作によって、１つの文字列を別の文字列に変形するのに必要な手順の最小回数です：
+
+挿入: 文字列に１つの文字を挿入する。
+削除: 文字列から１つの文字を削除する。
+置換: 文字列の中の１文字を別な文字に置き換える。
+入力
+s1
+s2
+２つの文字列 s1, s2 がそれぞれ１行目と２行目に与えられる。文字列はアルファベットの小文字で構成されている。
+
+出力
+編集距離を１行に出力する。
+
+制約
+1 ≤ s1 の長さ ≤ 1000
+1 ≤ s2 の長さ ≤ 1000
+入力例 1
+acac
+acm
+出力例 1
+2
+
+
+*/

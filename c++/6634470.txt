@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>  
+using namespace std;
+typedef long long ll;
+vector<bool> is_prime(10000000 + 100, true);
+vector<int> prime(10000000 + 100, 0);
+
+void solve(){
+    is_prime[0] = false;
+    is_prime[1] = false;
+    for (int i = 2; i <= 10000010; i++) {
+        if (!is_prime[i]) {
+            continue;
+        } 
+        for (int j = i * 2; j <= 10000010; j += i) {
+            is_prime[j] = false;
+        }
+    }
+
+    prime[13] = 13;
+    int cur = 13;
+    int cur_prime = 13;
+    while (cur <= 10000010) {
+        if (!is_prime[cur]) {
+            cur++;
+            prime[cur] = cur_prime;
+            continue;
+        }
+        if (is_prime[cur - 8] && is_prime[cur - 6]
+         && is_prime[cur - 2] && is_prime[cur]) {
+             cur_prime = max(cur_prime, cur);
+         }
+         prime[++cur] = cur_prime;
+    }
+}
+
+void foo(int a) {
+    cout << prime[a] <<  endl;
+}
+
+
+
+
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    solve();
+    while (true) {
+        int a = 0;
+        cin >> a;
+        if (a == 0) {
+            break;
+        }
+        foo(a);
+    }
+    solve();
+    return 0;
+}

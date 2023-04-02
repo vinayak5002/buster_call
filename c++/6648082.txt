@@ -1,0 +1,148 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include <math.h>
+
+void addition(int x[], int y[], int sum[]);
+void subtraction(int x[], int y[], int sum[]);
+void multiplication(int x[], int y[], int sum[]);
+
+int main()
+{
+    int num, rule;
+    int sum[12],temp[12];
+    int chance[100000], calorie[100000];
+    int A[100000], B[100000], C[100000];
+    int x[7],y[7],z[12],f[12],g[12];
+
+    while(scanf("%d %d", &num, &rule) != EOF)
+    {
+        for(int i = 0; i < num; i++)
+            scanf("%d %d", &chance[i], &calorie[i]);
+        for(int i = 0; i < rule; i++)
+            scanf("%d %d %d", &A[i], &B[i], &C[i]);
+        
+        
+        for(int k = 0; k < rule; k++){
+            for(int j = 0; j < 7; j++)z[j] = 0,f[j] = 0,g[j] = 0;
+            for(int j = 0; j < 6; j++)x[j] = 0,y[j] = 0;
+            int a = 0, b = 0, c = 0;
+            a = chance[A[k]-1], b = chance[B[k]-1], c = C[k];
+            for(int j = 0; j < 7; j++){
+                f[j] = a % 10;
+                a /= 10;
+                x[j] = b % 10;
+                b /= 10; 
+                y[j] = c%10;
+                c /= 10;
+            }
+            addition(x, y, z);  //x+y=z f<z
+            subtraction(f, z, g);
+            
+            if(g[6] != 9){
+                int m[12] = {0};
+                m[0] = 1;
+                for(int j = 0; j < 7; j++)f[j] = 0;
+                subtraction(z, m, f);
+            }
+
+            chance[A[k]-1] = 0;
+            for(int j = 0; j < 7; j++){
+                chance[A[k]-1] += f[j]*pow(10,j);
+            }
+            for(int j = 0; j < k; j++){
+                for(int i = 0; i < 7; i++)x[i] = 0,y[i] = 0;
+                for(int i = 0; i < 7; i++)z[i] = 0,f[i] = 0,g[i] = 0;
+                int a = 0, b = 0, c = 0;
+                a = chance[A[j]-1], b = chance[B[j]-1], c = C[j];
+                for(int i = 0; i < 7; i++){
+                    f[i] = a % 10;
+                    a /= 10;
+                }
+                for(int i = 0; i < 6; i++){
+                    x[i] = b % 10;
+                    b /= 10; 
+                    y[i] = c%10;
+                    c /= 10;
+                }
+                addition(x, y, z);  //x+y=z f<z
+                subtraction(f, z, g);
+                if(g[6] != 9) k = -1;
+            }
+        }
+        
+        for(int i = 0; i < 12; i++)sum[i] = 0, temp[i] = 0;
+        
+        for(int i = 0; i < num; i++){
+            for(int j = 0; j < 12; j++)z[j] = 0;
+            for(int j = 0; j < 6; j++)x[j] = 0,y[j] = 0;
+            for(int j = 0; j < 6; j++){
+                x[j] = chance[i]%10;
+                chance[i] /= 10; 
+                y[j] = calorie[i]%10;
+                calorie[i] /= 10;
+            }
+            multiplication(x, y, z);
+            addition(z, temp, sum);
+            for(int j = 0; j < 12; j++)temp[j] = sum[j];
+        }
+
+        for(int j = 11; j >= 0; j--){
+            if(sum[j] != 0){
+                for(int i = j; i >= 0; i--){
+                    printf("%d", sum[i]);
+                }
+                printf("\n");
+                break;
+            }
+        }
+    }
+}
+
+void addition(int x[], int y[], int sum[])
+{
+    int carry = 0;
+
+    for(int j = 0; j < 12; j++)
+    {
+        sum[j] = x[j] + y[j] + carry;
+        if(sum[j] >= 10)
+        {
+            sum[j] %= 10;
+            carry = 1;
+        }
+        else carry = 0;
+    }
+}
+
+void subtraction(int x[], int y[], int sum[])
+{
+    int carry = 0;
+
+    for(int j = 0; j < 12; j++)
+    {
+        sum[j] = x[j] - y[j] - carry;
+        if(sum[j] < 0)
+        {
+            sum[j] += 10;
+            carry = 1;
+        }
+        else carry = 0;
+    }
+}
+
+void multiplication(int x[], int y[], int z[])
+{
+    for(int i = 0; i < 6; i++)
+    {
+        for(int j = 0; j < 6; j++)
+        {
+            z[i+j] +=  x[i] * y[j];
+            if(z[i+j] >= 10)
+            {
+                z[i+j+1] += (x[i] * y[j])/10;
+                z[i+j] = (x[i] * y[j])%10;
+            }
+        }
+    }
+}

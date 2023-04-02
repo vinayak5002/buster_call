@@ -1,0 +1,227 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// template {{{
+using i32 = int;
+using u32 = unsigned int;
+using i64 = long long;
+using u64 = unsigned long long;
+
+#define  range(i, l, r) for (i64 i = (i64)(l); i < (i64)(r); (i) += 1)
+#define rrange(i, l, r) for (i64 i = (i64)(r) - 1; i >= (i64)(l); (i) -= 1)
+
+#define  whole(f, x, ...) ([&](decltype((x)) container) { return (f)(  begin(container),  end(container), ## __VA_ARGS__); })(x)
+#define rwhole(f, x, ...) ([&](decltype((x)) container) { return (f)( rbegin(container), rend(container), ## __VA_ARGS__); })(x)
+
+#define debug(x) cerr << "(" << __LINE__ << ")" << #x << ": " << (x) << endl
+
+constexpr i32 inf   = 1001001001;
+constexpr i64 infll = 1001001001001001001ll;
+
+constexpr i32 dx[] = {0, -1, 1, 0, -1, 1, -1, 1}; 
+constexpr i32 dy[] = {-1, 0, 0, 1, -1, -1, 1, 1};
+
+struct IoSetup { IoSetup(i32 x = 15){ cin.tie(0); ios::sync_with_stdio(0); cout << fixed << setprecision(x); cerr << fixed << setprecision(x); } } iosetup;
+
+template <typename T = i64> T input() { T x; cin >> x; return x; }
+
+template <typename T> ostream &operator<<(ostream &os, vector<T> &v) { range(i, 0, v.size()) { os << v[i] << (i + 1 != (int)v.size() ? " " : ""); } return os; } 
+template <typename T> istream &operator>>(istream &is, vector<T> &v) { for (T &in : v) is >> in; return is; }
+
+template <typename T1, typename T2> ostream &operator<<(ostream &os, pair<T1, T2> p) { os << "(" << p.first << ", " << p.second << ")"; return os; }
+template <typename T1, typename T2> istream &operator>>(istream &is, pair<T1, T2> &p) { is >> p.first >> p.second; return is; }
+
+template <typename T> vector<T> make_vector(size_t a, T b) { return vector<T>(a, b); }
+template <typename... Ts> auto make_vector(size_t a, Ts... ts) { return vector<decltype(make_vector(ts...))>(a, make_vector(ts...)); }
+
+template <typename T1, typename T2> inline bool chmax(T1 &a, T2 b) { return a < b && (a = b, true); }
+template <typename T1, typename T2> inline bool chmin(T1 &a, T2 b) { return a > b && (a = b, true); }
+// }}}
+
+namespace luz {
+template <typename T1, typename T2> inline bool chmax(T1 &a, T2 b) { return a < b && (a = b, true); }
+template <typename T1, typename T2> inline bool chmin(T1 &a, T2 b) { return a > b && (a = b, true); }
+} // namespace luz
+
+namespace luz {
+using isize = std::ptrdiff_t;
+using usize = std::size_t;
+
+using i32 = std::int32_t;
+using i64 = std::int64_t;
+using u32 = std::uint32_t;
+using u64 = std::uint64_t;
+} // namespace luz
+
+namespace luz {
+
+template< typename cost_type >
+class Edge {
+ public:
+  usize from, to;
+  cost_type cost;
+  usize id;
+  Edge() = default;
+  Edge(usize from_, usize to_, cost_type cost_, usize id_):
+    from(from_), to(to_), cost(cost_), id(id_) {}
+};
+
+template< typename cost_type >
+using Edges = std::vector< Edge<cost_type> >;
+
+template< typename cost_type >
+class Graph {
+  std::vector< std::vector<Edge<cost_type>> > g;
+  usize edge_count;
+
+ public:
+  Graph() = default;
+  explicit Graph(usize n): g(n), edge_count(0) {}
+
+  usize size() const {
+    return g.size();
+  }
+
+  void add_directed_edge(usize from, usize to, cost_type cost = 1) {
+    g[from].emplace_back(from, to, cost, edge_count++);
+  }
+
+  void add_undirected_edge(usize u, usize v, cost_type cost = 1) {
+    g[u].emplace_back(u, v, cost, edge_count);
+    g[v].emplace_back(v, u, cost, edge_count++);
+  }
+
+  inline std::vector< Edge<cost_type> > &operator[](const usize &v) {
+    return g[v];
+  }
+
+  inline const std::vector< Edge<cost_type> > &operator[](const usize &v) const {
+    return g[v];
+  }
+};
+
+}
+
+namespace luz {
+
+template< typename cost_type >
+class ResultDijikstra {
+ public:
+  std::vector< cost_type > ds;
+  std::vector< usize > from, ids;
+};
+
+template< typename cost_type >
+ResultDijikstra< cost_type > dijkstra(const Graph< cost_type > &g, usize s) {
+  constexpr usize undefined = std::numeric_limits<usize>::max();
+  constexpr cost_type inf = std::numeric_limits<cost_type>::max();
+
+  const usize n = g.size();
+  std::vector< cost_type > ds(n, inf);
+  std::vector< usize > from(n, undefined), ids(n, undefined);
+
+  using pq_type = std::pair< cost_type, usize >;
+  std::priority_queue< pq_type, std::vector<pq_type>, std::greater<pq_type> > pq;
+
+  ds[s] = 0;
+  pq.emplace(ds[s], s);
+
+  while (not pq.empty()) {
+    auto [cost, v] = pq.top();
+    pq.pop();
+
+    if (ds[v] < cost) continue;
+    for (auto &e: g[v]) {
+      if (chmin(ds[e.to], cost + e.cost)) {
+        pq.emplace(ds[e.to], e.to);
+        from[e.to] = v;
+        ids[e.to] = e.id;
+      }
+    }
+  }
+
+  return {ds, from, ids};
+}
+
+}
+
+void solve(int n, int m, int h, int k) {
+  struct edge {
+    int to, cost, time, r;
+    edge() {}
+    edge(int to, int cost, int time, int r) : to(to), cost(cost), time(time), r(r) {}
+  };
+  auto G = make_vector(n, 0, edge());
+  vector< int > as(m), bs(m), cs(m), hs(m), rs(m);
+  range(i, 0, m) {
+    int a = input() - 1, b = input() - 1;
+    int cost = input();
+    int time = input();
+    int r = input() - 1;
+    G[a].emplace_back(b, cost, time, r);
+    G[b].emplace_back(a, cost, time, r);
+  }
+
+  int s = input() - 1, t = input() - 1;
+  int p = input();
+  vector< int > ds(p), bits(p);
+  range(i, 0, p) {
+    int l = input();
+    ds[i] = input();
+    range(j, 0, l) {
+      int k = input() - 1;
+      bits[i] |= (1 << k);
+    }
+  }
+
+  auto dp = make_vector(1 << k, inf);
+  dp[0] = 0;
+  range(pi, 0, p) {
+    range(bit, 0, 1 << k) {
+      int nbit = bit | bits[pi];
+      chmin(dp[nbit], dp[bit] + ds[pi]);
+    }
+  }
+
+  int ans = inf;
+  range(bit, 0, 1 << k) {
+    auto to_v = [&](int v, int time) {
+      return v * (h + 1) + time;
+    };
+
+    int g_size = n * (h + 1);
+    luz::Graph< int > g(g_size);
+    range(v, 0, n) {
+      range(time, 0, h + 1) {
+        for (auto &e: G[v]) {
+          int u = e.to;
+          int ntime = time + e.time;
+          if (ntime > h) continue;
+
+          int a = to_v(v, time);
+          int b = to_v(u, ntime);
+          int cost = ((1 << e.r) & bit) ? 0 : e.cost;
+          g.add_directed_edge(a, b, cost);
+        }
+      }
+    }
+
+    auto res = dijkstra(g, to_v(s, 0)).ds;
+    range(time, 0, h + 1) {
+      if (res[to_v(t, time)] > inf) continue;
+      chmin(ans, res[to_v(t, time)] + dp[bit]);
+    }
+  }
+
+  if (ans == inf) ans = -1;
+  cout << ans << endl;
+}
+
+signed main() {
+  int n, m, h, k;
+
+  while (cin >> n >> m >> h >> k, n) {
+    solve(n, m, h, k);
+  }
+}
+

@@ -1,0 +1,98 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct cell {
+    cell *prev;
+    cell *next;
+    long value;
+};
+
+class Doubly_linked_list {
+    cell *nil;
+
+  public:
+    Doubly_linked_list() {
+        nil = new cell;
+        nil->prev = nil;
+        nil->next = nil;
+    }
+
+    cell *list_search(int x) {
+        cell *c = nil->next;
+        while(c != nil && c->value != x) {
+            c = c->next;
+        }
+        return c;
+    }
+
+    void print_list() {
+        cell *c = nil->next;
+        bool is_flag = true;
+        while(true) {
+            if(c == nil) {
+                break;
+            }
+            if(is_flag == false) {
+                cout << " ";
+            }
+            cout << c->value;
+            c = c->next;
+            is_flag = false;
+        }
+        cout << endl;
+    }
+
+    void insert(int x) {
+        cell *c = new cell;
+        c->value = x;
+        c->prev = nil;
+        c->next = nil->next;
+        nil->next->prev = c;
+        nil->next = c;
+    }
+
+    void delete_cell(cell *c) {
+        if(c == nil) {
+            return;
+        }
+        c->prev->next = c->next;
+        c->next->prev = c->prev;
+        delete c;
+    }
+
+    void delete_first() {
+        delete_cell(nil->next);
+    }
+
+    void delete_last() {
+        delete_cell(nil->prev);
+    }
+
+    void delete_value(int x) { delete_cell(list_search(x)); }
+};
+
+int main() {
+    long n;
+    cin >> n;
+    Doubly_linked_list l;
+    string str;
+    for(int i = 0; i < n; i++) {
+        cin >> str;
+        if(str[0] == 'i') {
+			int x;
+			cin >> x;	
+            l.insert(x);
+        } else if(str[6] == 'F') {
+            l.delete_first();
+		} else if (str[6] == 'L') {
+			l.delete_last();
+        } else {
+			int x;
+			cin >> x;
+            l.delete_value(x);
+        }
+    }
+
+    l.print_list();
+    return 0;
+}

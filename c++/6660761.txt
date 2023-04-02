@@ -1,0 +1,77 @@
+#include <vector>
+#include <iostream>
+#include <string>
+#include <utility>
+#include <queue>
+#include <map>
+
+
+using namespace std;
+using ll = long double ;
+using vec_ll = vector<ll>;
+using vec_i = vector<int>;
+using vec_map_i = vector<map<int, bool>>;
+
+
+enum class node_color{
+    white, gray, black
+};
+node_color color[100000];
+int n;
+vec_i group{};
+
+
+void dfs_init(vec_map_i &g, queue<int> &que){
+    map<int, bool> &current=g[que.front()];
+    for(auto i=current.cbegin(); i!=current.cend(); ++i){
+        int num=i->first;
+        if(color[num]==node_color::white){
+            que.push(num);
+            color[num]=node_color::gray;
+        }
+    }
+    color[que.front()]=node_color::black;
+    que.pop();
+} 
+bool dfs(vec_map_i &g, int p1, int p2){
+    group.clear();
+    for(int i=0; i<n; ++i){
+        color[i]=node_color::white;
+    }
+    queue<int> que;
+    que.push(p1);
+    group.push_back(p1);
+    color[p1]=node_color::gray;
+    while(color[p2]==node_color::white && !que.empty()){
+        dfs_init(g, que);
+    }
+    for(int i=0; i<group.size(); i++){
+        int num=group[i];
+        for(int k=0; k<i; k++){
+            g[k].insert(make_pair(num, true));
+        }
+        for(int k=i+1; k<group.size(); ++k){
+            g[k].insert(make_pair(num, true));
+        }
+    }
+    return color[p2]!=node_color::white;
+}
+int main(){
+    cin>>n;
+    vec_map_i g(n);
+    int m;
+    cin>>m;
+    for(int i=0; i<m; ++i){
+        int p1, p2;
+        cin>>p1>>p2;
+        g[p1].insert(make_pair(p2, true));
+        g[p2].insert(make_pair(p1, true));
+    }
+    int q;
+    cin>>q;
+    for(int i=0; i<q; ++i){
+        int p1, p2;
+        cin>>p1>>p2;
+        cout<<(dfs(g, p1, p2) ? "yes" : "no")<<endl;
+    }
+}

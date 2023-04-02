@@ -1,0 +1,128 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+/*
+ll timer;
+vll pre, par, low, seen;
+vvll graph;
+
+void init(ll N){
+  pre.resize(N); par.resize(N);
+  low.resize(N); seen.resize(N,0);
+  graph.resize(N,vll());
+  timer = 1;
+}
+void dfs(ll cur, ll pas){
+
+  pre[cur] = low[cur] = timer;
+  timer++;
+
+  seen[cur] = 1;
+
+  for(ll i=0;i<graph[cur].size();i++){
+    ll next = graph[cur][i];
+    if(!seen[next]){
+      par[next] =  cur;
+
+      dfs(next, cur);
+      low[cur] = min(low[cur], low[next]);
+    }
+    else if(next != pas){
+      low[cur] = min(low[cur], pre[next]);
+    }
+  }
+}
+
+void art_point(ll N, set<ll> &arp){
+  seen.resize(N,0);
+  timer = 1;
+  dfs(0,-1);
+
+  ll np = 0;
+  for(ll i=1;i<N;i++){
+    ll p = par[i];
+    if(p == 0) np++;
+    else if(pre[p] <= low[i]) arp.insert(p);
+  }
+  if(np > 1) arp.insert(0);
+
+}*/
+
+void dfs(ll u, ll pre, vector<vector<ll>> &G, vector<ll> &seen, vector<ll> &prenum, vector<ll> &par, vector<ll> &lowest, ll timer){
+  prenum[u] = lowest[u] = timer;
+  timer++;
+
+  seen[u] = 1;
+
+  for(ll i = 0; i < G[u].size(); i++){
+    ll v = G[u][i];
+    if(seen[v] == 0){
+      par[v] = u;
+      dfs(v, u, G, seen, prenum, par, lowest, timer);
+      lowest[u] = min(lowest[u], lowest[v]);
+    }
+    else if(u != pre){
+      // back-edgeのとき
+      lowest[u] = min(lowest[u], prenum[v]);
+    }
+  }
+}
+
+void art_points(vector<vector<ll>> &G, vector<ll> &apt){
+  ll n = G.size();
+  apt.clear();
+  vector<ll> seen(n, 0), prenum(n), par(n), lowest(n);
+
+  dfs(0, -1, G, seen, prenum, par, lowest, 1); // 0をrootとする
+  ll rch = 0; // 0(root)がart_pointか(rootの子の数が2以上ならapt)
+
+  for(ll i = 1; i < n; i++){
+    ll p = par[i];
+    if(p == 0) rch++;
+    else if(prenum[p] <= lowest[i]) apt.push_back(p);
+  }
+  if(rch >= 2) apt.push_back(0);
+  sort(apt.begin(), apt.end());
+}
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll v, e;
+  cin >> v >> e;
+  vector<vector<ll>> G(v);
+  rep(i, 0, e){
+    ll s, t;
+    cin >> s >> t;
+    G[s].push_back(t);
+    G[t].push_back(s);
+  }
+  vector<ll> ans;
+  art_points(G, ans);
+
+  rep(i, 0, SZ(ans)){
+    cout << ans[i] << endl;
+  }
+
+
+
+
+
+  return 0;
+}

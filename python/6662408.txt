@@ -1,0 +1,49 @@
+import Control.Monad.ST ( runST )
+import Data.Char (isSpace)
+import qualified Data.List as L
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as VM
+import qualified Data.IntMap.Strict as M
+import qualified Data.ByteString.Char8 as B
+
+main :: IO ()
+main = do
+  _ <- getLine
+  inputs <- fmap (V.unfoldr (B.readInt . B.dropWhile isSpace)) B.getLine
+  print $ solve inputs
+
+solve :: V.Vector Int -> Int
+solve wv = V.sum . V.map (getCost (V.minimum wv)) $ cycles where
+  flags = getFlags wv
+  cycles = getCycles wv flags
+
+getFlags :: V.Vector Int -> V.Vector Bool
+getFlags inputs = runST $ do
+  flags <- VM.replicate 10000 True
+  V.forM_ inputs $ \i  -> do
+    VM.write flags i False
+  V.freeze flags
+
+getCycles :: V.Vector Int -> V.Vector Bool -> V.Vector (V.Vector Int)
+getCycles costs flags = V.map V.fromList $ runST $ do
+  flagsM <- V.thaw flags
+  mapM (getCycle costs sorted flagsM []) costs
+  where sorted = M.fromList $ zip (L.sort $ V.toList costs) [0..]
+
+getCycle costs sorted flags cycle c = do
+  isValid <- VM.read flags c
+  if isValid then return cycle
+  else do
+    VM.write flags c True
+    getCycle costs sorted flags (c:cycle) (costs V.! (sorted M.! c))
+
+getCost :: Int -> V.Vector Int -> Int
+getCost minV costs = case n of
+  0 -> 0
+  1 -> 0
+  _ -> if minV `V.elem` costs then sum1 else min sum1 sum2
+  where
+    sum1 = V.sum costs + (n - 2) * mc
+    sum2 = V.sum costs + mc + (n + 1) * minV
+    n = V.length costs
+    mc = V.minimum costs

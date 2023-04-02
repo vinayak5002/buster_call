@@ -1,0 +1,194 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def calc_length2(v):
+    length = 0
+    for element in v:
+        length += element ** 2
+    return length
+
+
+def calc_length(v):
+    return math.sqrt(calc_length2(v))
+
+
+def normalize(v):
+    length = calc_length(v)
+    nv = []
+    for element in v:
+        nv.append(element / length)
+    return nv
+
+
+def v_diff(v0, v1):
+    dif = []
+    for i in range(len(v0)):
+        dif.append(v1[i] - v0[i])
+    return dif
+
+
+def calc_distance(p0, p1):
+    v = v_diff(p0, p1)
+    return calc_length(v)
+
+
+def inner_product(v0, v1):
+    ip = 0
+    for i in range(len(v0)):
+        ip += v0[i] * v1[i]
+    return ip
+
+
+def cross_product2d(v0, v1):
+    return v0[0] * v1[1] - v0[1] * v1[0]
+
+
+def intersects(p0, p1, p2, p3):
+    v01 = v_diff(p0, p1)
+    v02 = v_diff(p0, p2)
+    v03 = v_diff(p0, p3)
+
+    cp0 = cross_product2d(v01, v02)
+    cp1 = cross_product2d(v01, v03)
+
+    if cp0 == cp1 == 0.0:
+        ip0 = inner_product(v01, v02)
+        ip1 = inner_product(v01, v03)
+
+        if ip0 > ip1:
+            ip0, ip1 = ip1, ip0
+
+        return ip0 <= calc_length2(v01) and 0 <= ip1
+
+    v23 = v_diff(p2, p3)
+    v20 = v_diff(p2, p0)
+    v21 = v_diff(p2, p1)
+
+    cp2 = cross_product2d(v23, v20)
+    cp3 = cross_product2d(v23, v21)
+
+    return cp0 * cp1 <= 0 and cp2 * cp3 <= 0
+
+
+def _calc_cross_point_sub(a, p0, v01):
+    pc = []
+    for i in range(len(p0)):
+        pc.append(a * v01[i] + p0[i])
+    return pc
+
+
+def calc_cross_point(p0, p1, p2, p3):
+    v01 = v_diff(p0, p1)
+    v20 = v_diff(p2, p0)
+    v23 = v_diff(p2, p3)
+    d01 = calc_length(v01)
+    d20 = calc_length(v20)
+    d23 = calc_length(v23)
+
+    if d20 == 0.0:
+        return p0
+
+    for i in range(len(p0)):
+        v01[i] /= d01
+        v20[i] /= d20
+        v23[i] /= d23
+
+    cp0 = -cross_product2d(v01, v20)
+    cp1 = cross_product2d(v20, v23)
+
+    if cp1 == 0.0:
+        cp2 = cross_product2d(v20, v01)
+        if cp2 == 0.0:
+            a = (p2[0] - p0[0]) / v01[0] if v01[0] != 0.0 else (p2[1] - p0[1]) / v01[1]
+            return _calc_cross_point_sub(a, p0, v01)
+        else:
+            return p0
+
+    r = cp0 / cp1
+    d = (v01[0] - r * v23[0])
+    if d != 0.0:
+        a = (p2[0] - p0[0]) / d
+    else:
+        d = (v01[1] - r * v23[1])
+        a = (p2[1] - p0[1]) / d
+
+    return _calc_cross_point_sub(a, p0, v01)
+
+
+def calc_area(p_list):
+    n = len(p_list)
+
+    total_area = 0
+    for i in range(n):
+        p0 = p_list[i - 1]
+        p1 = p_list[i]
+        area = cross_product2d(p0, p1)
+        total_area += area
+    return total_area / 2
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n = int(f.readline())
+    p_list = []
+    for _ in range(n):
+        x, y = map(int, f.readline().split())
+        p_list.append((x, y))
+
+    min_xy = [-10000, -10000]
+    max_xy = [10000, 10000]
+
+    q = int(f.readline())
+    for _ in range(q):
+        x0, y0, x1, y1 = map(int, f.readline().split())
+        p0 = (x0, y0)
+        p1 = (x1, y1)
+        v01 = normalize(v_diff(p0, p1))
+
+        s_min = math.inf
+        for i in range(2):
+            if v01[i] != 0.0:
+                s = (-p0[i] + min_xy[i]) / v01[i]
+                s_min = min(s_min, s)
+
+        s_max = -math.inf
+        for i in range(2):
+            if v01[i] != 0.0:
+                s = (-p1[i] + max_xy[i]) / v01[i]
+                s_max = max(s_max, s)
+
+        p0 = (x0 + s_min * v01[0], y0 + s_min * v01[1])
+        p1 = (x1 + s_max * v01[0], y1 + s_max * v01[1])
+        cut_p_list = []
+
+        for i in range(n):
+            p2 = p_list[i - 1]
+            p3 = p_list[i]
+            v03 = v_diff(p0, p3)
+            cp = cross_product2d(v01, v03)
+
+            if intersects(p0, p1, p2, p3):
+                cross_point = calc_cross_point(p0, p1, p2, p3)
+                cut_p_list.append(cross_point)
+
+            if cp > 0:
+                cut_p_list.append(p3)
+
+        print(f'{calc_area(cut_p_list):.5f}')
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

@@ -1,0 +1,68 @@
+import java.util.Scanner;
+public class test{
+    public static int MAX = 1000;
+    public static int N; // the number of lanes
+    public static int M; // the number of infomation 
+    public static int[] amount;
+    public static int[] head;
+    public static int[] tale;
+    public static int[][] queue;// Lane arrays of the number of cars 
+    
+    public static void main(String args[])
+    {
+        Scanner sc = new Scanner(System.in);
+        N = sc.nextInt(); // the number of lanes
+        M = sc.nextInt(); // the number of infomation 
+        head =  new int[N + 1];//each head 
+        tale =  new int[N + 1];//each tale
+        amount =  new int[N + 1];//each number of lane 
+        queue = new int[N + 1][MAX];// queue[] is 1 origine
+        for(int i = 0 ; i <= N ; i++){
+            head[i] = tale[i] = 1;
+            amount[i] = 0;
+        }
+        
+        for(int i = 0 ; i < M ; i++)
+        {
+            int cmd = sc.nextInt(); // the number of lanes
+            int nm = sc.nextInt(); // the number of infomation: 0 means to refuell 1 means to add a car to the fewest number lane
+            switch(cmd)
+            {
+                case 0:
+                System.out.println(dequeue(nm));
+                break;
+                
+                case 1:// enter the car into queue
+                enqueue(nm);
+                break;
+            }
+        }
+    }
+    public static int dequeue(int lane)
+    {
+        int tmp = queue[lane][head[lane]];
+        head[lane] = (head[lane] + 1 ) % MAX;
+        amount[lane]--;
+        return tmp;
+    }
+
+    public static void enqueue(int carNumber)
+    {
+        //carNumber enters most fewest queue[]
+        int lane = 1;// 1 origine and from 1 to N+1
+        int fewestLane = amount[1];
+        for(int i = 2 ; i <= N ; i++)// search fewest lane
+        {
+            if(fewestLane > amount[i])
+            {
+                lane = i;//fewestLane;
+                fewestLane = amount[i];
+                if(amount[i] == 0 )break;
+            }
+        }
+        amount[lane]++;
+        queue[lane][tale[lane]] = carNumber;
+        tale[lane] = (tale[lane] + 1) % MAX;
+        //System.out.println(lane + " "+ tale[lane] + " "+ carNumber +" "+ amount[lane]);
+    }
+}

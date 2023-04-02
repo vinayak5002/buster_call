@@ -1,0 +1,89 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+const vector<int> dx_2d = {1,-1,0,0};
+const vector<int> dy_2d = {0,0,1,-1};
+
+void Yyy(){
+  cout << "Yes" << endl;
+}
+
+void Nnn(){
+  cout << "No" << endl;
+}
+
+void fixprecision(){
+  cout << fixed << setprecision(20);
+}
+
+template<class T> bool chmin(T& a,T b){
+  if(a > b){
+    a = b;
+    return true;
+  }
+  else return false;
+}
+
+template<class T> bool chmax(T& a,T b){
+  if(a < b){
+    a = b;
+    return true;
+  }
+  else return false;
+}
+
+int main(){
+  int H,W,N;
+  cin >> H >> W >> N;
+  vector<vector<char>> field(H,vector<char>(W));
+  for(int i=0;i<H;i++){
+    string S;
+    cin >> S;
+    for(int j=0;j<W;j++) field[i][j] = S[j];
+  }
+  int INF = 1000000000;
+  vector<vector<int>> Max(H,vector<int>(W,0));
+  for(int i=0;i<N;i++){
+    int r,c;
+    cin >> r >> c;
+    r--;
+    c--;
+    vector<vector<int>> cnt(H,vector<int>(W,INF));
+    cnt[r][c] = 0;
+    priority_queue<pair<int,pair<int,int>>,vector<pair<int,pair<int,int>>>,greater<pair<int,pair<int,int>>>> que;
+    que.push(make_pair(0,make_pair(r,c)));
+    while(!que.empty()){
+      int d = que.top().first;
+      int x = que.top().second.first;
+      int y = que.top().second.second;
+      que.pop();
+      if(d > cnt[x][y]) continue;
+      for(int j=0;j<4;j++){
+        int nx = x+dx_2d[j];
+        int ny = y+dy_2d[j];
+        if(nx < 0 || nx >= H || ny < 0 || ny >= W) continue;
+        if(field[nx][ny] == '#') continue;
+        int ncnt = d;
+        if(field[nx][ny] == '@') ncnt++;
+        if(chmin(cnt[nx][ny],ncnt)) que.push(make_pair(ncnt,make_pair(nx,ny)));
+      }
+    }
+    for(int j=0;j<H;j++) for(int k=0;k<W;k++) chmax(Max[j][k],cnt[j][k]);
+  }
+  int Min = INF;
+  for(int i=0;i<H;i++) for(int j=0;j<W;j++) chmin(Min,Max[i][j]);
+  if(Min == INF) cout << -1 << " " << -1 << endl;
+  else{
+    for(int i=0;i<H;i++){
+      bool b = false;
+      for(int j=0;j<W;j++){
+        if(Max[i][j] == Min){
+          cout << i+1 << " " << j+1 << endl;
+          b = true;
+          break;
+        }
+      }
+      if(b) break;
+    }
+  }
+}

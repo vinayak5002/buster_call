@@ -1,0 +1,79 @@
+#include <stdio.h>
+
+int main() {
+    int n, i, j, k;
+    while (scanf("%d", &n) && n != 0) {
+        int max = 0;
+        char c;
+        int grid[n][n];
+        int horz[n];
+        int vert[n];
+        int lfdiag[(n*2)-1];
+        int rtdiag[(n*2)-1];
+
+        for (i = 0; i < n; i++) {
+            for (j = 0; j < n; j++) {
+                scanf(" %c", &c);
+                grid[i][j] = c - 48;
+            }
+        }
+
+        for (i = 0; i < n; i++) {
+            horz[i] = 0;
+            vert[i] = 0;
+            for (j = 0; j < n; j++) {
+                horz[i] += grid[i][j];
+                vert[i] += grid[j][i];
+            }
+            if (horz[i] > max) max = horz[i];
+            if (vert[i] > max) max = vert[i];
+        }
+
+        for (i = 0; i < n; i++) {
+            lfdiag[i] = 0;
+            for (j = 0; j <= i; j++) {
+                int x = j;
+                int y = i - j;
+                lfdiag[i] += grid[x][y];
+            }
+            if (lfdiag[i] > max) max = lfdiag[i];
+        }
+        for (j = 1; j < n; j++) {
+            lfdiag[i] = 0;
+            int x = j;
+            int y = n - (j - 1) - 1;
+            while (x != n) {
+                lfdiag[i] += grid[y][x];
+                x++;
+                y--;
+            }
+            if (lfdiag[i] > max) max = lfdiag[i];
+            i++;
+        }
+
+        for (i = 0; i < n; i++) {
+            rtdiag[i] = 0;
+            for (j = 0; j <= i; j++) {
+                int x = n - j - 1;
+                int y = i - j;
+                rtdiag[i] += grid[x][y];
+            }
+            if (rtdiag[i] > max) max = rtdiag[i];
+        }
+        for (j = 1; j < n; j++) {
+            rtdiag[i] = 0;
+            int x = j;
+            int y = 0;
+            while (x != n) {
+                rtdiag[i] += grid[y][x];
+                x++;
+                y++;
+            }
+            if (rtdiag[i] > max) max = rtdiag[i];
+            i++;
+        }
+        printf("%d\n",max);
+    }
+    return 0;
+}
+

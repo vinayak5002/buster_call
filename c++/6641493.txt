@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+#define rep(i,s,n) for(long long (i) = (s);(i) < (n);++i)
+using namespace std;
+using ll = long long;
+using P = pair<ll,ll>;
+
+int main() {
+  int n;
+  cin >> n;
+  vector<vector<P>> G(n);
+  rep(i,0,n){
+    int p;
+    cin >> p;
+    if (p == 0){
+      rep(j,1,7){
+        if(i + j < n){
+          G[i].emplace_back(i+j,1);
+        }
+      }
+    }else{
+      G[i].emplace_back(i+p,0);
+    }
+  }
+  priority_queue<P,vector<P>,greater<P>> pq;
+  pq.emplace(0,0);
+  vector<int> dis(n,INT_MAX);
+  while(!pq.empty()){
+    P l = pq.top();
+    pq.pop();
+    if (dis[l.second] != INT_MAX) continue;
+    dis[l.second] = l.first;
+    for(auto i:G[l.second]){
+      if (dis[i.first] != INT_MAX) continue;
+      pq.emplace(l.first+i.second,i.first);
+    }  
+  }
+  cout << dis[n-1] << endl;
+  return 0;
+}

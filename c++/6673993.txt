@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+using namespace std;
+#if __has_include(<atcoder/all>)
+    #include <atcoder/all>
+using namespace atcoder;
+#endif
+typedef long long ll;
+typedef pair<ll, ll> P;
+typedef tuple<ll, ll, ll> T;
+#define rep(i, n) for(ll i = 0; i < n; i++)
+
+int n,m; 
+vector<int> a,w;
+void dfs(int now,int cnt,set<int>& possible){
+    if(cnt != m){
+        dfs(now+w[cnt],cnt+1,possible);
+        dfs(abs(now-w[cnt]),cnt+1,possible);
+        dfs(now,cnt+1,possible);
+    }
+    possible.insert(now);
+}
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+    
+    while(true){
+        cin >> n >> m;
+        if(n == 0 && m == 0)break;
+        a.assign(n,0);
+        w.assign(m,0);
+        rep(i,n)cin >> a[i];
+        rep(i,m)cin >> w[i];
+        
+        set<int> possible;
+        dfs(0,0,possible);
+
+        vector<int> ng;
+        rep(i,n){
+            if(!possible.count(a[i])){
+                ng.push_back(a[i]);
+            }
+        }
+        if(ng.size() == 0){
+            cout << 0 << endl;
+            continue;
+        }
+
+        
+        set<int> cand;
+        for(auto k:possible){
+            cand.insert(k+ng[0]);
+            cand.insert(abs(k-ng[0]));
+        }
+
+        map<int,int> cnt;
+        int size = ng.size();
+        for(int i=1;i<size;i++){
+            for(auto k:cand){
+                if(possible.count(ng[i]+k) || possible.count(abs(ng[i]-k)))cnt[k]++;
+            }
+        }
+        
+        bool flag = true;
+        for(auto k:cand){
+            if(cnt[k] == size-1){
+                cout << k << endl;
+                flag = false;
+                break;
+            }
+        }
+        if(flag)cout << -1 << endl;
+    }
+
+    return 0;
+}

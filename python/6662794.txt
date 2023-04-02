@@ -1,0 +1,62 @@
+use proconio::input;
+use std::cmp::Reverse;
+use std::collections::{BinaryHeap, HashMap};
+
+const INF: usize = 1e18 as usize;
+
+fn main() {
+    let graph = Graph::new();
+    let distances = graph.dijkstra(graph.root);
+    for i in 0..graph.n {
+        if distances[i] == INF {
+            println!("INF");
+        } else {
+            println!("{}", distances[i]);
+        }
+    }
+}
+
+struct Graph {
+    n: usize,
+    root: usize,
+    adj: HashMap<usize, Vec<(usize, usize)>>,
+}
+
+impl Graph {
+    fn new() -> Self {
+        input! {
+            v: usize,
+            e: usize,
+            r: usize,
+            edges: [(usize, usize, usize); e],
+        }
+        let mut adj: HashMap<usize, Vec<(usize, usize)>> = HashMap::new();
+        for &(a, b, c) in &edges {
+            adj.entry(a).or_default().push((b, c));
+            adj.entry(b).or_insert(vec![]);
+        }
+        Self {
+            n: v,
+            root: r,
+            adj: adj,
+        }
+    }
+
+    fn dijkstra(&self, start: usize) -> Vec<usize> {
+        let mut dists = vec![INF; self.n];
+        dists[start] = 0;
+        let mut heapq = BinaryHeap::new();
+        heapq.push((Reverse(0), start));
+        while let Some((Reverse(dist), pos)) = heapq.pop() {
+            for &(next, cost) in &self.adj[&pos] {
+                let next_dist = dist + cost;
+                if next_dist < dists[next] {
+                    heapq.push((Reverse(next_dist), next));
+                    dists[next] = next_dist;
+                }
+            }
+        }
+        dists
+    }
+}
+

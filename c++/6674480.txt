@@ -1,0 +1,200 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+#include<string.h>
+#define MAX 2000000000
+
+struct node{
+    int key;
+    struct node *right;
+    struct node *left;
+    struct node *parent;
+};
+
+typedef struct node *Node;
+
+
+// Node root;
+
+Node Tree_insert(Node root,int num){
+    Node x = root;
+    Node y = NULL;
+    Node z;
+    z = malloc(sizeof(struct node));
+    z->key = num;
+    z->left= NULL;
+    z->right = NULL;
+
+    while(x != NULL){
+        y = x;
+        if(x->key < z->key){
+            x = x->right;
+        }else{
+            x = x->left;
+        }
+    }
+    z->parent = y;
+
+    if(y==NULL){
+        root = z;
+    }else if(z->key < y->key){
+        y->left = z;
+    }else{
+        y->right = z;
+    }
+
+    return root;
+
+}
+void inorder(Node aa){
+
+    if(aa == NULL){
+        return;
+    }
+
+    
+    
+    inorder(aa->left);
+    printf(" %d",aa->key);
+    inorder(aa->right);
+
+
+
+}
+
+void preorder(Node aa){
+
+    if(aa == NULL){
+        return;
+    }
+
+    
+    printf(" %d",aa->key);
+    preorder(aa->left);
+    preorder(aa->right);
+
+}
+
+void find(Node aa, int num){
+    Node head;
+    head = aa;
+
+    while(head != NULL){
+        if(head->key == num){
+            printf("yes\n");
+            return;
+        }else if(head->key > num){
+            head = head->left;
+        }else{
+            head = head ->right;
+        }
+    }
+
+    printf("no\n");
+    return;
+
+}
+
+Node delete(Node root, int num){
+    Node tmp;
+    tmp = root;
+    Node find;
+    while(tmp != NULL){
+        if(tmp->key == num){
+            if(tmp->left == NULL && tmp->right == NULL){
+                if(tmp == tmp->parent->left){
+                    tmp->parent->left = NULL;
+                }else{ 
+                    tmp->parent->right= NULL;
+                }
+                tmp->parent = NULL;
+            }else if(tmp->left != NULL && tmp->right != NULL){
+                find = tmp;
+                find = find->right;
+                // printf("tmp%d\n",tmp->key);
+                // printf("find%d\n",find->key);
+                while(find->left != NULL){
+                    find = find->left;
+                }
+                if(tmp == tmp->parent->left){
+                    tmp->parent->left = find;
+                }else{
+                    tmp->parent->right = find;
+                }
+                // printf("tmp%d\n",tmp->key);
+                // printf("tmpright%d\n",tmp->right->key);
+                // printf("find%d\n",find->key);
+
+                //tmp = tmp->right;
+                //find->right = tmp->right;
+                tmp->right = NULL;
+                tmp->left = NULL;
+                tmp->parent = NULL;
+            }else{
+                if(tmp->left == NULL){
+                    find = tmp->right;
+                }else{
+                    find = tmp->left;
+                }
+
+                if(tmp == tmp->parent->left){
+                    tmp->parent->left = find;
+                }else{
+                    tmp->parent->right = find;
+                }
+                find->parent = tmp->parent;
+                tmp->parent = NULL;
+            }
+            return root;
+
+        }else if(tmp->key > num){
+            tmp = tmp->left;
+        }else{
+            tmp = tmp ->right;
+        }
+
+    }
+
+    return root;
+}
+
+
+
+int main(){
+    int i,j,k;
+    int n;
+    Node root =NULL;
+    char com[30];
+    int num;
+
+    scanf("%d",&n);
+    
+    for(i=0;i<n;i++){
+        scanf("%s",&com);
+        if(com[0] == 'i'){
+        scanf("%d",&num);
+        root = Tree_insert(root,num);
+        //printf("a%d",root->key);
+
+        }else if(com[0] == 'p'){
+            inorder(root);
+            printf("\n");
+            preorder(root);
+            printf("\n");
+        }else if(com[0] == 'f'){
+            scanf("%d",&num);
+            find(root,num);
+        }else if(com[0] == 'd'){
+            scanf("%d",&num);
+            root = delete(root,num);
+        }
+    }
+
+
+    return 0;
+}
+
+
+
+
+

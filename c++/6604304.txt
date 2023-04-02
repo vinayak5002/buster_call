@@ -1,0 +1,83 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+template<typename T>
+struct node{
+    T key;
+    node *parent, *left, *right;
+    node(T k):key{k}, parent{nullptr}, left{nullptr}
+    , right{nullptr}{}
+};
+template<typename T>
+node<T>* search_node(node<T> *parent, T key){
+    if(parent->key<=key&&parent->right!=nullptr){
+        return search_node(parent->right, key);
+    }
+    if(parent->key>key&&parent->left!=nullptr){
+        return search_node(parent->left, key);
+    }
+    return parent;
+}
+template<typename T>
+void insert(node<T> *&root, node<T> *child){
+    if(root==nullptr){
+        root=child;
+        return;
+    }
+    auto parent=search_node(root, child->key);
+    child->parent=parent;
+    if(parent->key<=child->key){
+        parent->right=child;
+    }else{
+        parent->left=child;
+    }
+}
+template<class T>
+void inorder(node<T> *root, vector<T> &vec){
+    if(root==nullptr)return;
+    inorder(root->left, vec);
+    vec.push_back(root->key);
+    inorder(root->right, vec);
+}
+template<class T>
+void preorder(node<T> *root, vector<T> &vec){
+    if(root==nullptr)return;
+    vec.push_back(root->key);
+    preorder(root->left, vec);
+    preorder(root->right, vec);
+}
+template<class T>
+void print(node<T> *root){
+    vector<T> in{}, pre{};
+    inorder(root, in);
+    preorder(root, pre);
+    for(auto x : in){
+        cout<<" "<<x;
+    }
+    cout<<endl;
+    for(auto x : pre){
+        cout<<" "<<x;
+    }
+    cout<<endl;
+}
+int main(){
+    long int n;
+    cin>>n;
+    node<long long> *root=nullptr;
+    for(long i=0; i<n; ++i){
+        string st;
+        cin>>st;
+        if(st[0]=='i'){
+            long long  key;
+            cin>>key;
+            node<long long>* p= new node(key);
+            insert(root, p);
+        }
+        if(st[0]=='p'){
+            print(root);
+        }
+    }
+}

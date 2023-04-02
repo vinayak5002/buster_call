@@ -1,0 +1,121 @@
+#include <stdio.h>
+
+#define MAX 100000
+
+//構造体の宣言
+typedef struct
+{
+    int parent;
+    int right;
+    int left;
+} node;
+
+//構造体変数の宣言
+node N[MAX];
+
+// Preorder
+void Preorder(int r)
+{
+    printf(" %d", r);
+
+    if (N[r].left != -1)
+    {
+        Preorder(N[r].left);
+    }
+
+    if (N[r].right != -1)
+    {
+        Preorder(N[r].right);
+    }
+}
+
+// Inorder
+void Inorder(int r)
+{
+    if (N[r].left != -1)
+    {
+        Inorder(N[r].left);
+    }
+
+    printf(" %d", r);
+
+    if (N[r].right != -1)
+    {
+        Inorder(N[r].right);
+    }
+}
+
+// Postorder
+void Postorder(int r)
+{
+    if (N[r].left != -1)
+    {
+        Postorder(N[r].left);
+    }
+
+    if (N[r].right != -1)
+    {
+        Postorder(N[r].right);
+    }
+    
+    printf(" %d", r);
+}
+
+int main(void)
+{
+    int n, pla, i, root = 0, l, r;
+
+    //節点の個数を取得
+    scanf("%d", &n);
+
+    //構造体の初期化
+    for (i = 0; i < n; i++)
+    {
+        N[i].parent = -1;
+    }
+
+    //節点の場所と子の情報の取得
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d %d %d", &pla, &l, &r);
+
+        N[pla].left = l;
+        N[pla].right = r;
+
+        if (l != -1)
+        {
+            N[l].parent = pla;
+        }
+        if (r != -1)
+        {
+            N[r].parent = pla;
+        }
+    }
+
+    // rootの場所特定
+    for (i = 0; i < n; i++)
+    {
+        if (N[i].parent == -1)
+        {
+            root = i;
+        }
+    }
+
+    // Preorder
+    printf("Preorder\n");
+    Preorder(root);
+    printf("\n");
+
+    // Inorder
+    printf("Inorder\n");
+    Inorder(root);
+    printf("\n");
+
+    // Postorder
+    printf("Postorder\n");
+    Postorder(root);
+    printf("\n");
+
+    return 0;
+}
+

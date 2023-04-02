@@ -1,0 +1,106 @@
+#include <bits/stdc++.h>
+using namespace std;
+struct strongly_connected_components{
+  vector<vector<int>> scc;
+  vector<int> c;
+  void dfs1(vector<vector<int>> &E, vector<bool> &used, vector<int> &t, int v){
+    for (int w : E[v]){
+      if (!used[w]){
+        used[w] = true;
+        dfs1(E, used, t, w);
+      }
+    }
+    t.push_back(v);
+  }
+  void dfs2(vector<vector<int>> &E, vector<bool> &used, int v){
+    scc.back().push_back(v);
+    for (int w : E[v]){
+      if (!used[w]){
+        used[w] = true;
+        dfs2(E, used, w);
+      }
+    }
+  }
+  strongly_connected_components(vector<vector<int>> G){
+    int V = G.size();
+    vector<vector<int>> E1(V), E2(V);
+    for (int i = 0; i < V; i++){
+      for (int j : G[i]){
+        E1[i].push_back(j);
+        E2[j].push_back(i);
+      }
+    }
+    vector<bool> used(V, false);
+    vector<int> t;
+    for (int i = 0; i < V; i++){
+      if (!used[i]){
+        used[i] = true;
+        dfs1(E1, used, t, i);
+      }
+    }
+    reverse(t.begin(), t.end());
+    vector<bool> used2(V, false);
+    for (int i = 0; i < V; i++){
+      if (!used2[t[i]]){
+        used2[t[i]] = true;
+        scc.push_back(vector<int>());
+        dfs2(E2, used2, t[i]);
+      }
+    }
+    c = vector<int>(V);
+    int sz = scc.size();
+    for (int i = 0; i < sz; i++){
+      for (int j : scc[i]){
+        c[j] = i;
+      }
+    }
+  }
+  int size(){
+    return scc.size();
+  }
+  int operator [](int k){
+    return c[k];
+  }
+};
+int main(){
+  cout << fixed << setprecision(9);
+  while (1){
+    int N;
+    cin >> N;
+    if (N == 0){
+      break;
+    }
+    vector<double> p(N);
+    vector<vector<int>> E(N);
+    for (int i = 0; i < N; i++){
+      cin >> p[i];
+      int m;
+      cin >> m;
+      for (int j = 0; j < m; j++){
+        int a;
+        cin >> a;
+        a--;
+        E[i].push_back(a);
+      }
+    }
+    strongly_connected_components S(E);
+    int sz = S.size();
+    vector<bool> ok(sz, false);
+    vector<double> q(sz, 1);
+    for (int i = 0; i < N; i++){
+      for (int j : E[i]){
+        if (S[i] != S[j]){
+          ok[S[j]] = true;
+        }
+      }
+      q[S[i]] *= p[i];
+    }
+    double ans = 1;
+    for (int i = 0; i < sz; i++){
+      if (!ok[i]){
+        ans *= 1 - q[i];
+      }
+    }
+    cout << ans << endl;
+  }
+}

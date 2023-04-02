@@ -1,0 +1,56 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def dfs(num_nodes, dist_matrix, e_state, c_state, n, dp):
+    if (c_state, n) in dp:
+        return dp[(c_state, n)]
+
+    if c_state == e_state:
+        return dist_matrix[n][0]
+
+    result = math.inf
+    for nn in range(num_nodes):
+        if nn == n:
+            continue
+        if c_state & (1 << nn) == 0:
+            n_state = c_state | (1 << nn)
+            n_cost = dfs(num_nodes, dist_matrix, e_state, n_state, nn, dp) + dist_matrix[n][nn]
+            result = min(result, n_cost)
+
+    dp[(c_state, n)] = result
+    return result
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    num_nodes, num_edges = list(map(int, f.readline().split()))
+    dist_matrix = [[math.inf] * num_nodes for _ in range(num_nodes)]
+    for _ in range(num_edges):
+        s, t, d = list(map(int, f.readline().split()))
+        dist_matrix[s][t] = d
+
+    dp = {}
+    e_state = (1 << num_nodes) - 1
+    result = dfs(num_nodes, dist_matrix, e_state, 1, 0, dp)
+
+    if result != math.inf:
+        print(result)
+    else:
+        print(-1)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

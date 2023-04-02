@@ -1,0 +1,126 @@
+#include<stdio.h>
+#define MAX 1000000
+#define NIL -1
+
+/*根付き木のノード（親、右兄弟（同じ列の要素）、左（子））*/
+typedef struct{
+    int parent;
+    int left_child;
+    int right_bro;
+} Node;
+
+Node T[MAX]; /*ツリーの要素配列*/
+int n, D[MAX]; /*要素数nと根付き木の深さD*/
+
+void print(int);
+void recursive(int, int);
+
+/*出力関数(ノード番号uを与える)*/
+void print(int u){
+    int i, child_node;
+
+    printf("node %d: ", u);
+    printf("parent = %d, ", T[u].parent);
+    printf("depth = %d, ", D[u]);
+
+    /*ノードが根、葉、内部節点かどうかの判別*/
+    if(T[u].parent == NIL){
+        printf("root, "); /*親がいなければ根*/
+    }
+    else if(T[u].left_child == NIL){
+        printf("leaf, ");/*子がいなければ葉*/
+    }
+    else{
+        printf("internal node, ");/*根でも葉でもなければ内部節点*/
+    }
+
+    /*子の要素を表示していく*/
+    printf("[");
+    
+    /*初期値として子のノード(child_node)の値をTのu番目のノードの子にする。そこから兄弟の値にしていく*/
+    for(i = 0, child_node = T[u].left_child; child_node != NIL; i++, child_node = T[child_node].right_bro){
+        
+        if(i)
+        {
+            printf(", ");
+        }
+
+        printf("%d", child_node);
+
+    }
+
+    printf("]\n");
+}
+
+/*再帰的に深さを求める*/
+void recursive(int node_point, int depth){
+    D[node_point] = depth;
+
+    /*右の兄弟に同じ深さを設定*/
+    if (T[node_point].right_bro != NIL)
+    recursive(T[node_point].right_bro, depth);
+
+    /* 最も左の子に自分の深さ+1を設定 */
+    if (T[node_point].left_child != NIL)
+    recursive(T[node_point].left_child, depth + 1);
+}
+
+
+
+int main(void){
+    int i, j, n_child, node_num, left_child, child_num, root;
+
+    scanf("%d", &n);
+
+    /*ツリーの初期化*/
+
+    for(i=0; i<n; i++){
+        T[i].parent = NIL;
+        T[i].left_child = NIL;
+        T[i].right_bro = NIL;
+    }
+
+    /*ここから値の格納を行っていく*/
+
+    for(i=0; i<n; i++){
+
+        /*ノード番号と持つ子の数*/
+        scanf("%d %d", &node_num, &n_child);
+
+            /*子の関係を格納する*/
+        for(j=0; j<n_child; j++){
+
+            scanf("%d", &child_num);
+
+            /*最初の子ノードはleft_childに格納し、次からはその兄弟となるのでright_broに格納*/
+
+            if(j==0){
+                T[node_num].left_child = child_num;
+            }
+            else{
+                T[left_child].right_bro = child_num;
+            }
+
+            /*親ノードの番号を入れる*/
+            left_child = child_num;
+            T[child_num].parent = node_num;
+        }
+    }
+
+    /*rootノードを見つける*/
+    for(i=0;i<n;i++){
+        if(T[i].parent == NIL){
+            root = i;
+        }
+    }
+
+    /*深さDに格納*/
+    recursive(root, 0);
+
+    for(i=0;i<n;i++){
+        print(i);
+    }
+
+    return 0;
+
+}

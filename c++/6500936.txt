@@ -1,0 +1,84 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define NIL -1000000000
+
+
+void max_heapify (vector<long long> &CBT, int i, int n) {
+    int left_id = 2*(i+1)-1; 
+    int right_id = 2*(i+1);
+    int largest_id = i;
+    long long largest = CBT.at(largest_id);
+
+    if (right_id<n) {
+        if (CBT.at(right_id) > largest) {
+            largest = CBT.at(right_id);
+            largest_id = right_id;
+        }
+    }
+    if (left_id<n) {
+        if (CBT.at(left_id) > largest) {
+            largest = CBT.at(left_id);
+            largest_id = left_id;
+        }
+    }
+    if (largest_id != i) {
+        iter_swap(CBT.begin()+i, CBT.begin()+largest_id);
+        max_heapify(CBT, largest_id, n);
+    }
+}
+
+
+void build_max_heap (vector<long long> &CBT, int n) {
+    for (int i=n/2-1; i>=0; i--) {
+        max_heapify (CBT, i, n);
+    }
+}
+
+
+void heap_increase_key(vector<long long> &CBT, int key) {
+    int i = CBT.size()-1;
+    
+    while (i > 0 && CBT.at((i+1)/2 -1) < CBT.at(i)) {
+        iter_swap(CBT.begin()+i, CBT.begin()+(i+1)/2 -1);
+        i = (i+1)/2 -1;
+    }
+
+}
+
+
+void insert (vector<long long> &CBT, int key) {
+    CBT.push_back(key);
+    heap_increase_key(CBT, key);
+}
+
+long long heap_extract_max(vector<long long> &CBT) {
+    if (CBT.size() >= 1) {
+        long long max = CBT.at(0);
+        CBT.pop_back();
+        return max;
+    } 
+    return NIL;
+}
+
+
+int main() {
+    vector<long long> CBT;
+    string cmd;
+    long long key;
+    while (1) {
+        cin >> cmd;
+        if (cmd == "insert") {
+            cin >> key;
+            insert (CBT, key);
+        }
+        else if (cmd == "extract") {
+            cout << heap_extract_max(CBT) << endl;
+        }
+        else if (cmd == end) {
+            break;
+        }
+        
+    }
+
+    return 0;
+}

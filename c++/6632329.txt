@@ -1,0 +1,155 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+typedef string::const_iterator State; 
+long long expression_1(State &begin,vector<vector<char>> &p); 
+long long expression_2(State &begin,vector<vector<char>> &p); 
+long long expression_3(State &begin,vector<vector<char>> &p);
+long long factor(State &begin,vector<vector<char>> &p); 
+long long number(State &begin); 
+
+
+long long expression_1(State &begin,vector<vector<char>> &p) { 
+  long long ret;
+  if (p[1].size() != 0){ 
+    ret = expression_2(begin,p);
+  } else{
+    ret = factor(begin,p);
+  }
+  for (;;) { 
+    if (find(p[0].begin(),p[0].end(),*begin) != p[0].end()){
+      if (*begin == '+') { 
+        begin++;
+        if (p[1].size() != 0){ 
+          ret += expression_2(begin,p);
+        } else{
+          ret += factor(begin,p);
+        }
+      } else if (*begin == '-') { 
+        begin++; 
+        if (p[1].size() != 0){ 
+          ret -= expression_2(begin,p);
+        } else{
+          ret -= factor(begin,p);
+        }
+      } else if (*begin == '*') {
+        begin++;
+        if (p[1].size() != 0){ 
+          ret *= expression_2(begin,p);
+        } else{
+          ret *= factor(begin,p);
+        }
+      }
+    } else {
+      break;
+    }
+  } 
+  return ret; 
+} 
+
+long long expression_2(State &begin,vector<vector<char>> &p) { 
+  long long ret;
+  if (p[2].size() != 0){ 
+    ret = expression_3(begin,p);
+  } else{
+    ret = factor(begin,p);
+  }
+  for (;;) { 
+    if (find(p[1].begin(),p[1].end(),*begin) != p[1].end()){
+      if (*begin == '+') { 
+        begin++;
+        if (p[2].size() != 0){ 
+          ret += expression_3(begin,p);
+        } else{
+          ret += factor(begin,p);
+        }
+      } else if (*begin == '-') { 
+        begin++; 
+        if (p[2].size() != 0){ 
+          ret -= expression_3(begin,p);
+        } else{
+          ret -= factor(begin,p);
+        }
+      } else if (*begin == '*') {
+        begin++;
+        if (p[2].size() != 0){ 
+          ret *= expression_3(begin,p);
+        } else{
+          ret *= factor(begin,p);
+        }
+      }
+    } else {
+      break;
+    }
+  } 
+  return ret; 
+} 
+
+long long expression_3(State &begin,vector<vector<char>> &p) { 
+  long long ret = factor(begin,p); 
+  for (;;) { 
+    if (find(p[2].begin(),p[2].end(),*begin) != p[2].end()){
+      if (*begin == '+') { 
+        begin++;
+        ret += factor(begin,p);
+      } else if (*begin == '-') { 
+        begin++; 
+        ret -= factor(begin,p);
+        
+      } else if (*begin == '*') {
+        begin++;
+        ret *= factor(begin,p);
+      }
+    } else {
+      break;
+    }
+  } 
+  return ret; 
+} 
+
+// 括弧か数をパースして、その評価結果を返す。 
+long long factor(State &begin,vector<vector<char>> &p) { 
+  if (*begin == '(') { 
+    begin++;
+    long long ret = expression_1(begin,p); 
+    begin++; 
+    return ret; 
+  } else { 
+    return number(begin); 
+  } 
+} 
+// 数字の列をパースして、その数を返す。 
+long long number(State &begin) { 
+  long long ret = 0; 
+  while (isdigit(*begin)) { 
+    ret *= 10; 
+    ret += *begin - '0'; 
+    begin++; 
+  } 
+  return ret; 
+} 
+
+int main(){
+  vector<vector<vector<char>>> a = {{{'+','-','*'},{},{}}
+                                    ,{{'+','-'},{'*'},{}}
+                                    ,{{'-','*'},{'+'},{}}
+                                    ,{{'+','*'},{'-'},{}}
+                                    ,{{'+'},{'-','*'},{}}
+                                    ,{{'-'},{'+','*'},{}}
+                                    ,{{'*'},{'+','-'},{}}
+                                    ,{{'+'},{'-'},{'*'}}
+                                    ,{{'+'},{'*'},{'-'}}
+                                    ,{{'-'},{'+'},{'*'}}
+                                    ,{{'-'},{'*'},{'+'}}
+                                    ,{{'*'},{'+'},{'-'}}
+                                    ,{{'*'},{'-'},{'+'}}};
+  string s;
+  cin >> s;
+  long long ans = LONG_LONG_MIN;
+  for (auto i:a){
+    State begin = s.begin();
+    ans = max(ans,expression_1(begin,i));
+  }
+  cout << ans << endl;
+  return 0;
+}

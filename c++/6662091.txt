@@ -1,0 +1,50 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+vector<vector<int>> G;
+vector<int> d, f;
+vector<bool> seen;
+int cur_time = 0;
+
+void dfs(int v){
+  seen[v] = true;
+  d[v] = cur_time;
+  cur_time++;
+  for(auto nv : G[v]){
+    if(seen[nv]) continue;
+    dfs(nv);
+  }
+  f[v] = cur_time;
+  cur_time++;
+}
+int main(){
+  int n;
+  cin >> n;
+ 
+  G.resize(n);
+  d.resize(n);
+  f.resize(n);
+  seen.assign(n, false);
+
+  for(int i = 0; i < n; i++){
+    int u, k;
+    cin >> u >> k;
+    u--;
+    for(int j = 0; j < k; j++){
+      int v;
+      cin >> v;
+      v--;
+      G[u].push_back(v);
+    }
+  }
+  for(int i = 0; i < n; i++){
+    if(!seen[i]) dfs(i);
+  }
+ 
+  
+  for(int i = 0; i < n; i++){
+    cout << i+1 << " " << d[i]+1 << " " << f[i]+1 << endl;
+  }
+  return 0;
+}
+

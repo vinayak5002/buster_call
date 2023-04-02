@@ -1,0 +1,69 @@
+#include <vector>
+#include <cstdio>
+#include <cmath>
+
+using namespace std;
+
+template<typename T>
+int search_l(vector<T>& S, vector<T>& D){
+    int counter{};
+    for(auto b : D){
+        for(auto c : S){
+            if(b==c){
+                ++counter;
+                break;
+            }
+        }
+    }
+    return counter;
+}
+template<typename A>
+int search(vector<A>& S, vector<A>& T){
+    int counter{};
+    for(auto t : T){
+        unsigned int x=1;
+        int p=S.size()/pow(2, x);
+        bool flag=true;
+        while(flag){
+            if(S[p]==t){
+                ++counter;
+                flag=false;
+                break;
+            }else if(S.size()/pow(2, x)<4){
+                for(int i=-6;i<6;++i){
+                    if(p+i<0||p+i>=S.size()){
+                        //do nothing
+                    }else if(S[p+i]==t){
+                        ++counter;
+                        flag=false;
+                        break;
+                    }
+                }
+                flag=false;
+            }else if(S[p]<t){
+                p+=static_cast<int>(S.size()/pow(2, ++x));
+            }else{
+                p-=static_cast<int>(S.size()/pow(2, ++x));
+            }
+        }
+    }
+    return counter;
+}
+int main(){
+    int n, q;
+    unsigned long temp;
+    vector<unsigned long> S{}, T{};
+    scanf("%u", &n);
+    for(int i=0; i<n; ++i){
+        scanf("%lu", &temp);
+        S.push_back(temp);
+    }
+    scanf("%u", &q);
+    for(int i=0; i<q; ++i){
+        scanf("%lu", &temp);
+        T.push_back(temp);
+    }
+    int ans = search(S, T);
+    printf("%d", ans);
+    printf("\n");
+}

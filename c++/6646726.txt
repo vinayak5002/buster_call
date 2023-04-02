@@ -1,0 +1,81 @@
+#include <iostream>
+#include <stack>
+using namespace std;
+
+int n;                           //  頂点数
+#define MAX_n  100               //  n の最大数
+int d[MAX_n + 1];                //  d[v]: 頂点 v の 1 からの深さ
+int Adj[MAX_n + 1][MAX_n + 1];   //  Adj[v]:  頂点 v の隣接リスト
+
+// 頂点v が 集合Sに属する時 S[v] = 1, 属さないとき S[v] = 0
+// N[0]: 集合 S, N[i]: S の i近傍 
+int N[MAX_n][MAX_n + 1];
+
+// S の 1-近傍 S1 を作成
+void oneNbhd(int S1[], int S[])
+{
+    for (int u = 1; u <= n; u++) {
+	if (S[u] == 0)
+	    continue;
+	S1[u] = 1;     // S1 は S を含む
+	for (int i = 0; i < n; i++) {
+	    int v = Adj[u][i];
+	    if (v == 0)
+		break;
+	    S1[v] = 1;
+	}
+    }
+}
+    
+int main()
+{
+    //  入力
+    cin >> n;
+    for (int i = 0; i < n; i++) {
+	int u;
+	cin >> u;
+	int k;     // u に隣接する頂点の数
+	cin >> k;
+	for (int j = 0; j < k; j++)
+	    cin >> Adj[u][j];
+    }
+
+    // d の初期化
+    for (int i = 1; i <= n; i++)
+	d[i] = -1;
+
+    //  0 近傍をセット
+    N[0][1] = 1;   // 最初の集合は { (1, 0,..,0) }
+
+    //  i 近傍をセット
+    for (int i = 1; i < n; i++)
+	oneNbhd(N[i], N[i-1]);
+    
+#ifdef DBG
+    //  N を印字
+    for (int i = 0; i < n; i++) {
+	for (int u = 1; u < n; u++) 
+	    cout << " " << N[i][u];
+	cout << " " << N[i][n] << endl;
+    }
+#endif
+
+    //  d を求める
+    for (int u = 1; u <= n; u++) {
+	if (N[0][u] == 1)
+	    d[u] = 0;
+	for (int i = 1; i < n; i++) { 
+	    if (N[i][u] == 1 && N[i-1][u] == 0) {
+		d[u] = i;
+		break;
+	    }
+	}
+    }
+
+    //  d を印字
+    for (int v = 1; v <= n; v++)
+	cout << v << ' ' << d[v] << endl;
+
+    return 0;
+}
+

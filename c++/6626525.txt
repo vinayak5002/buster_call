@@ -1,0 +1,93 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <vector>
+#include <algorithm>
+#include<iostream>
+using namespace std;
+const int maxn = 1e3 + 5;
+
+// -------------------- 通用基本常数 --------------------
+
+const double eps = 1e-8;
+const double pi = acos(-1.0);
+static const int COUNTER_CLOCKWISE = 1;
+static const int CLOCKWISE = -1;
+static const int ONLINE_BACK = 2;
+static const int ONLINE_FRONT = -2;
+static const int ON_SEGMENT = 0;
+
+// -------------------- 二维点（向量）类 --------------------
+
+struct Point {
+    double x, y;
+    Point() {}
+    Point(double x, double y) : x(x), y(y) {}
+    // 输入一个点
+    void input() {
+        scanf("%lf%lf", &x, &y);
+    };
+    double norm() {
+    	return sqrt(x * x + y * y);
+    };
+    friend Point operator + (const Point& a, const Point& b) {
+        return Point(a.x + b.x, a.y + b.y);
+    }
+    friend Point operator - (const Point& a, const Point& b) {
+        return Point(a.x - b.x, a.y - b.y);
+    }
+    friend Point operator * (const Point& a, const double& b) {
+        return Point(a.x * b, a.y * b);
+    }
+    friend Point operator * (const double& a, const Point& b) {
+        return Point(a * b.x, a * b.y);
+    }
+    friend Point operator / (const Point& a, const double& b) {
+        return Point(a.x / b, a.y / b);
+    }
+};
+
+// -------------------- 向量与向量运算 --------------------
+
+// 计算两个向量的叉积
+double det(const Point& a, const Point& b) {
+    return a.x * b.y - a.y * b.x;
+}
+
+// 计算两个向量的点积
+double dot(const Point& a, const Point& b) {
+    return a.x * b.x + a.y * b.y;
+}
+
+struct Circle
+{
+    Point o;
+    double r;
+    Circle() {};
+    Circle(Point _o, double _r)
+        :o(_o), r(_r) {};
+};
+
+Circle a,b;
+
+int main() {
+	Point o1,o2;
+	double r1,r2;
+	cin>>o1.x>>o1.y>>r1;
+	cin>>o2.x>>o2.y>>r2;
+	a = Circle(o1,r1);
+	b = Circle(o2,r2);
+	if(r1 < r2)
+		swap(a,b);
+
+	if((a.o - b.o).norm() - (a.r+b.r) > eps)
+		cout<<4<<endl;
+	else if(abs((a.o - b.o).norm() - (a.r+b.r)) <= eps)
+		cout<<3<<endl;
+	else if((a.o - b.o).norm() - (a.r+b.r) < -eps && (a.o - b.o).norm() - (a.r-b.r) > eps)
+		cout<<2<<endl;
+	else if(abs(a.r - b.r - (a.o - b.o).norm())<eps)
+		cout<<1<<endl;
+	else cout<<0<<endl;
+
+}

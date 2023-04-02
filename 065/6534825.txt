@@ -1,0 +1,84 @@
+# coding: utf-8
+# Your code here!
+
+import sys
+
+
+def input_mulitiple_line_numbers():
+    input_list = []
+    # [num, num1 num1' num1'' ... , num2 num2' num2'', ...]
+    for l in sys.stdin:
+        input_list.append(l)
+    line_num = int(input_list[0])
+    list_in_list = []
+    # [[num1, num1', num1'', ...], [num2, num2', num2'', ...], ...]
+    for i in range(1, len(input_list)):
+        digit_list = list(map(int, input_list[i].split()))
+        list_in_list.append(digit_list)
+    return line_num, list_in_list
+    
+
+def set_nums(A, length):
+    T = []
+    for i in range(length):
+        T.append({'parent': -1, 'left': -1, 'right': -1})
+    for i in range(length):
+        id = A[i][0]
+        left, right = A[i][1], A[i][2]
+        T[id]['left'] = left
+        T[id]['right'] = right
+        if left != -1:
+            T[left]['parent'] = id
+        if right != -1:
+            T[right]['parent'] = id
+    return T
+    
+    
+def pre_parse(T, pre_parse_list, u):
+    if u == -1:
+        return None
+    pre_parse_list.append(u)
+    pre_parse(T, pre_parse_list, T[u]['left'])
+    pre_parse(T, pre_parse_list, T[u]['right'])
+    
+    
+def in_parse(T, in_parse_list, u):
+    if u == -1:
+        return None
+    in_parse(T, in_parse_list, T[u]['left'])
+    in_parse_list.append(u)
+    in_parse(T, in_parse_list, T[u]['right'])
+    
+    
+def post_parse(T, post_parse_list, u):
+    if u == -1:
+        return None
+    post_parse(T, post_parse_list, T[u]['left'])
+    post_parse(T, post_parse_list, T[u]['right'])
+    post_parse_list.append(u)
+    
+    
+def print_for_tree_walk(pre_parse_list, in_parse_list, post_parse_list, length):
+    print('Preorder')
+    for i in range(length):
+        print(f' {pre_parse_list[i]}', end='')
+    print("")
+    print('Inorder')
+    for i in range(length):
+        print(f' {in_parse_list[i]}', end='')
+    print("")
+    print('Postorder')
+    for i in range(length):
+        print(f' {post_parse_list[i]}', end='')
+        
+
+if __name__ == "__main__":
+    length, A = input_mulitiple_line_numbers()
+    T = set_nums(A, length)
+    pre_parse_list = []
+    in_parse_list = []
+    post_parse_list = []
+    pre_parse(T, pre_parse_list, 0)
+    in_parse(T, in_parse_list, 0)
+    post_parse(T, post_parse_list, 0)
+    print_for_tree_walk(pre_parse_list, in_parse_list, post_parse_list, length)

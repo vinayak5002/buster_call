@@ -1,0 +1,80 @@
+#include<stdio.h>
+
+#define MAX 50000
+#define N -1
+
+struct Node{
+    int p,lft,rgt;
+};
+
+struct Node T[MAX];
+
+//先行順巡回
+int print_preorder(int root){
+    if(root==N){
+        return 0;
+    }
+    printf(" %d",root);
+    print_preorder(T[root].lft);
+    print_preorder(T[root].rgt);
+}
+
+//中行順巡回
+int print_inorder(int root){
+    if(root==N){
+        return 0;
+    }
+    print_inorder(T[root].lft);
+    printf(" %d",root);
+    print_inorder(T[root].rgt);
+}
+
+//後行順巡回
+int print_postorder(int root){
+    if(root==N){
+        return 0;
+    }
+    print_postorder(T[root].lft);
+    print_postorder(T[root].rgt);
+    printf(" %d",root);
+}
+
+
+int main(void){
+    int i, n, ri,le,val,root;
+
+    scanf("%d",&n);
+
+    for(i=0;i<n;i++){
+        T[i].p=N;
+        }
+
+    for(i=0;i<n;i++){
+        scanf("%d %d %d",&val,&le,&ri);
+        T[val].lft=le;
+        T[val].rgt=ri;
+        if(le!=N){
+            T[le].p=val;//左の子の親
+        }
+        if(ri!=N){
+            T[ri].p=val;//右の子の親
+        }
+    }
+
+    root = 0;
+    //根を探索
+    while(T[root].p!=N){
+      root++;
+    }
+
+
+
+    printf("Preoder\n");
+    print_preorder(root);
+    printf("\nInorder\n");
+    print_inorder(root);
+    printf("\nPostorder\n");
+    print_postorder(root);
+
+    return 0;
+}

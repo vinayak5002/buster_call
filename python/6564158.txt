@@ -1,0 +1,169 @@
+// g++ -std=c++17 -D DEV=1 main.cpp
+#include <stdio.h>
+#include <cassert>
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <string>
+#include <map>
+#include <deque>
+#include <queue>
+#include <tuple>
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <functional>
+#include <set>
+
+using std::cin;
+using std::cout;
+using std::endl;
+using std::istream;
+using std::ostream;
+using std::terminate;
+using std::vector;
+using std::string;
+using std::map;
+using std::pair;
+using std::make_pair;
+using std::deque;
+using std::queue;
+using std::priority_queue;
+using std::tuple;
+using std::make_tuple;
+using std::tie;
+using std::abs;
+using std::sort;
+using std::lower_bound;
+using std::upper_bound;
+using std::distance;
+using std::to_string;
+using std::greater;
+using std::multiset;
+using std::set;
+using std::function;
+
+using namespace std::chrono;
+
+#define rep(i, a, n) for (int i = (a); i < (n); ++i)
+#define bit(n, k) ((n >> k) & 1)
+#define yes { cout << "Yes" << endl; return ; }
+#define no { cout << "No" << endl; return ; }
+
+template <class T>
+bool min(T &a, const T b) {
+    if (a > b) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template<class T>
+istream& operator>>(istream& i, vector<T>& v) {
+    rep(j, 0, v.size()) i >> v[j];
+    return i;
+}
+
+template<class T>
+ostream& operator<<(ostream& o, vector<T>& v) {
+    rep(j, 0, v.size()) {
+        if (j == 0) o << v[j];
+        else o << " " << v[j];
+    }
+    return o;
+}
+
+template <class T>
+using Point = pair<T, T>;
+
+double triangle(const Point<long>& a, const Point<long>& b) {
+    auto [x1, y1] = a;
+    auto [x2, y2] = b;
+    return abs(x2*y1 - y2*x1) / 2.0;
+}
+
+double base(const Point<long>& a, const Point<long>& b) {
+    auto [x1, y1] = a;
+    auto [x2, y2] = b;
+    return std::sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+}
+
+template <class T>
+T dot(const Point<T>& a, const Point<T>& b) {
+    auto [x1, y1] = a;
+    auto [x2, y2] = b;
+    return x1*x2 + y1*y2;
+}
+
+Point<double> projection(const Point<long>& p, const Point<long>& q) {
+    auto [x, y] = p;
+    double ratio = 1.0 * dot(p, q) / dot(p, p);
+    return Point<double>(ratio * x, ratio * y);
+}
+
+Point<double> rejection(const Point<long>& p, const Point<long>& q) {
+    auto [px, py] = projection(p, q);
+    auto [x, y] = q;
+    return Point<double>(px-x, py-y);
+}
+
+class Solver {
+private:
+
+    Point<long> o, p;
+
+public:
+
+    Solver() {
+        auto& [x0, y0] = o;
+        cin >> x0 >> y0;
+        auto& [x1, y1] = p;
+        cin >> x1 >> y1;
+    }
+
+    void solve() {
+        auto [x0, y0] = o;
+        auto& [x1, y1] = p;
+
+        x1 -= x0; y1 -= y0;
+        int n; cin >> n;
+        rep(i, 0, n) {
+            Point<long> q;
+            auto& [x2, y2] = q;
+            cin >> x2 >> y2;
+            x2 -= x0; y2 -= y0;
+
+            auto [px, py] = projection(p, q);
+            auto [rx, ry] = rejection(p, q);
+
+            printf("%.8f %.8f\n", rx+px+x0, ry+py+y0);
+        }
+
+    }
+};
+
+int main(int argc, char **argv) {
+
+#ifdef DEV
+    std::ifstream in("input");
+    cin.rdbuf(in.rdbuf());
+
+
+    int t; cin >> t;
+    for (int x = 1; x <= t; ++x) {
+        auto start = system_clock::now();
+        Solver s;
+        s.solve();
+        auto end = system_clock::now();
+        cout << "time:" << duration_cast<microseconds>(end - start).count() << endl;
+    }
+#else
+    Solver s;
+    s.solve();
+#endif
+
+    return 0;
+}
+

@@ -1,0 +1,60 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+
+typedef long long LL;
+const int maxn = 1E5 + 10;
+int p[maxn], fa[maxn], n, m, mt[maxn], x[maxn];
+char op[maxn][5];
+int find(int x)//并查集
+{return p[x] == x ? x : p[x] =  find(p[x]);}
+void merge(int u, int v)//并
+{
+    u = find(u), v = find(v);
+    p[u] = v;
+}
+
+void show(int a[], int l, int r)
+{
+    for(int i = l; i <= r; i++)
+        cout << a[i] << ' ';
+    puts("");
+}
+
+int main()
+{
+    fa[1] = p[1] = 1;
+    while(scanf("%d %d", &n, &m) && n + m)
+    {
+        for(int i = 2; i <= n; i++)
+        {
+            mt[i] = m;
+            p[i] = i;
+            scanf("%d", &fa[i]);
+        }
+        for(int i = 0; i < m; i++)
+        {
+            scanf("%s %d", op[i], &x[i]);
+            if(op[i][0] == 'M')
+                mt[x[i]] = min(mt[x[i]], i);
+        }
+        for(int i = 2; i <= n; i++)
+            if(mt[i] == m)
+                merge(i, fa[i]);
+        LL ans = 0;
+        for(int i = m-1; i >= 0; i--)
+        {
+            if(op[i][0] == 'Q')
+                ans += find(x[i]);
+            else if(mt[x[i]] == i)
+                merge(x[i], fa[x[i]]);
+            // show(p, 1, n);
+            
+        }
+        cout << ans << endl;
+    }
+    
+    return 0;
+}

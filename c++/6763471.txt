@@ -1,0 +1,111 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+bool is_digit(char c) {
+    return '0' <= c and c <= '9';
+}
+
+pair<optional<int>, int> read_int(const string &s, int i) {
+    int j = i;
+    while (is_digit(s[j])) ++j;
+    while (s[i] == '0' and j - i > 1) ++i;
+    if (j - i > 5 or abs(stoi(s.substr(i, j - i)) > 10000)) {
+        return { nullopt, j };
+    } else {
+        return { stoi(s.substr(i, j - i)), j };
+    }
+}
+
+int main() {
+    string s;
+    while (cin >> s) {
+        int n = s.size();
+
+        vector<int> rp(n, -1);
+        {
+            vector<int> st;
+            for (int pos = 0; pos < n; ++pos) {
+                if (s[pos] == '(') {
+                    st.push_back(pos);
+                } else if (s[pos] == ')') {
+                    rp[st.back()] = pos;
+                    st.pop_back();
+                }
+            }
+        }
+        
+        auto check_overflow = [](const pair<int, int> &c) {
+            return max(abs(c.first), abs(c.second)) > 10000;
+        };
+
+        auto mul = [](const pair<int, int> &p1, const pair<int, int> &p2) -> pair<int, int> {
+            int re = p1.first * p2.first - p1.second * p2.second;
+            int im = p1.first * p2.second + p1.second * p2.first;
+            return { re, im };
+        };
+
+        auto scan = [&](auto scan, int l, int r) -> optional<pair<int, int>> {
+            vector<pair<int, int>> terms;
+            char op = '\0';
+            for (int i = l; i < r;) {
+                int re = 0, im = 0;
+                if (s[i] == '(') {
+                    int j = rp[i];
+                    auto opt_val = scan(scan, i + 1, j);
+                    if (not opt_val.has_value()) return nullopt;
+                    tie(re, im) = *opt_val;
+                    i = j + 1;
+                } else if (s[i] == 'i') {
+                    re = 0, im = 1;
+                    i = i + 1;
+                } else {
+                    auto [opt_val, j] = read_int(s, i);
+                    if (not opt_val.has_value()) return nullopt;
+                    re = *opt_val;
+                    i = j;
+                }
+                if (op == '-') {
+                    re = -re, im = -im;
+                    op = '+';
+                }
+                if (op == '+') {
+                    terms.emplace_back(re, im);
+                } else if (op == '*') {
+                    terms.back() = mul(terms.back(), { re, im });
+                    if (check_overflow(terms.back())) {
+                        return nullopt;
+                    }
+                } else {
+                    assert(op == '\0');
+                    terms.emplace_back(re, im);
+                }
+                if (i < r) {
+                    op = s[i++];
+                }
+            }
+            int re = 0, im = 0;
+            for (auto [re2, im2] : terms) {
+                re += re2;
+                im += im2;
+                if (check_overflow({ re, im })) {
+                    return nullopt;
+                }
+            }
+            return pair { re, im };
+        };
+        auto opt_ans = scan(scan, 0, n);
+        if (opt_ans.has_value()) {
+            auto [re, im] = *opt_ans;
+            if (im == 0) {
+                cout << re << endl;
+            } else if (re == 0) {
+                cout << im << "i" << endl;
+            } else {
+                cout << re << "+" << im << "i" << endl;
+            }
+        } else {
+            cout << "overflow" << endl;
+        }
+    }
+}

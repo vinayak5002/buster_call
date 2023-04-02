@@ -1,0 +1,85 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def warshall_floyd(num_vertexes, cost_matrix):
+    for k in range(num_vertexes):
+        for i in range(num_vertexes):
+            for j in range(num_vertexes):
+                if cost_matrix[i][j] == math.inf:
+                    if cost_matrix[i][k] != math.inf and cost_matrix[k][j] != math.inf:
+                        cost_matrix[i][j] = cost_matrix[i][k] + cost_matrix[k][j]
+                elif cost_matrix[i][k] != math.inf and cost_matrix[k][j] != math.inf:
+                    cost_matrix[i][j] = min(cost_matrix[i][j], cost_matrix[i][k] + cost_matrix[k][j])
+
+    return
+
+
+def minimum_matching_of_perfect_graph(num_vertexes, cost_matrix):
+    ef = 1 << num_vertexes
+    dp = [math.inf] * ef
+    dp[0] = 0
+
+    for f in range(ef):
+        for i in range(num_vertexes):
+            for j in range(i + 1, num_vertexes):
+                if f >> i & 1 == 0 and f >> j & 1 == 0:
+                    c = cost_matrix[i][j]
+                    nf = f | 1 << i | 1 << j
+                    dp[nf] = min(dp[nf], dp[f] + c)
+
+    return dp[ef - 1]
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    num_vertexes, num_edges = map(int, f.readline().split())
+    cost_matrix = [[math.inf] * num_vertexes for _ in range(num_vertexes)]
+    adjacency_list = [[] for _ in range(num_vertexes)]
+    sum_d = 0
+    for _ in range(num_edges):
+        s, t, d = map(int, f.readline().split())
+        sum_d += d
+        adjacency_list[s].append(t)
+        adjacency_list[t].append(s)
+        cost_matrix[s][t] = min(cost_matrix[s][t], d)
+        cost_matrix[t][s] = min(cost_matrix[t][s], d)
+
+    for i in range(num_vertexes):
+        cost_matrix[i][i] = 0
+    warshall_floyd(num_vertexes, cost_matrix)
+
+    odd_degree_vertex_list = []
+    for i in range(num_vertexes):
+        if len(adjacency_list[i]) % 2 != 0:
+            odd_degree_vertex_list.append(i)
+
+    p_num_vertexes = len(odd_degree_vertex_list)
+    p_cost_matrix = [[0] * p_num_vertexes for _ in range(p_num_vertexes)]
+
+    for i in range(p_num_vertexes):
+        for j in range(i + 1, p_num_vertexes):
+            s = odd_degree_vertex_list[i]
+            t = odd_degree_vertex_list[j]
+            d = cost_matrix[s][t]
+            p_cost_matrix[i][j] = d
+            p_cost_matrix[j][i] = d
+
+    p_cost = minimum_matching_of_perfect_graph(p_num_vertexes, p_cost_matrix)
+    print(sum_d + p_cost)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

@@ -1,0 +1,109 @@
+import java.util.Scanner;
+
+public class Main {
+    static int Maxdis = 99999;
+    public static void main(String[] args) {
+        Main main = new Main();
+
+        //creat graph
+        Scanner scan = new Scanner(System.in);
+        int v = scan.nextInt();
+        int e = scan.nextInt();
+        int r = scan.nextInt();
+
+        int[][] Mgraph = new int[v][v];
+        //insert edge
+        for(int i = 0 ; i < e ; i++)
+        {
+            int s = scan.nextInt();
+            int t = scan.nextInt();
+            int d = scan.nextInt();
+            Mgraph[s][t] = d;
+        }
+        //Dijkstra
+        for(int i = 0 ; i < v ;i ++)
+        {
+            int res = main.Dijkstra(Mgraph , r , v , i);
+            if(res == -1)
+                System.out.println("INF");
+            else
+                System.out.println(res);
+
+
+        }
+
+
+
+
+
+
+    }
+
+    public int Dijkstra(int[][] Mgraph , int r , int v , int target)
+    {
+
+
+
+            int[] dis = new int[v];
+            int[] path = new int[v];
+            boolean[] collected = new boolean[v];
+
+            for(int i = 0 ; i <v ;i++)
+            {
+                dis[i] = Maxdis;
+                path[i] = -1;
+                collected[i] = false;
+            }
+            dis[r] = 0;
+            //------------
+        while(true)
+        {
+            int vertex = min_uncollected( dis,collected);
+            if(vertex == target)
+                return dis[vertex];
+            if(vertex == -1)
+                return -1;
+
+            for(int i = 0 ; i< v ;i++)
+            {
+                if(Mgraph[vertex][i] != 0 && dis[vertex]+Mgraph[vertex][i]< dis[i])
+                {
+                    dis[i] = dis[vertex]+Mgraph[vertex][i];
+                    path[i] = vertex;
+                }
+            }
+
+        }
+
+
+    }
+
+    public int min_uncollected(int[] dis,boolean[] collected)
+    {
+        int temp = Maxdis;
+        int res = -1;
+        int i ;
+        boolean flag = false;
+        for(i = 0 ; i< dis.length;i++)
+        {
+
+            if(dis[i]<= temp && !collected[i] )
+            {
+                temp = dis[i];
+                res = i;
+                flag = true;
+
+            }
+        }
+        if(flag)
+            collected[res] = true;
+        else
+            return -1;
+
+        return res;
+    }
+
+
+
+}
+

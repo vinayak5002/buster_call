@@ -1,0 +1,55 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let array = si[1].split(" ").map(function(value) {
+		return Number(value)
+		})
+	let queryNum = si[2]
+	
+	for(let i = 0; i < queryNum; i++){
+		let target = Number(si[i + 3])
+		let start = 0
+		let end = array.length - 1
+		let lower = BinarySearch.lowerSearch(start, end, target, array)
+		end = array.length - 1
+		let upper = BinarySearch.upperSearch(start, end, target,array)
+		so.write(lower + " " + upper + "\n")
+	}
+}
+
+class BinarySearch{
+	
+	static lowerSearch (start, end, target, array){
+		do {
+			let middle = Math.trunc((start + end) / 2)
+			if (target < array[middle]) {
+				end = middle - 1
+			} else if (array[middle] < target) {
+				// 配列の真ん中より目的の値が大きいとき、探索のスタートを中央の一つ右の要素にする
+				start = middle + 1
+			} else {
+				// 配列の真ん中より目的の値が小さいとき、探索のエンドを中央の一つ左の要素にする
+				end = middle - 1
+			}
+		}while (start <= end)
+		return start
+	}
+	
+	static upperSearch (start, end, target, array){
+		do {
+			let middle = Math.trunc((start + end) / 2)
+			if (array[middle] <= target) {
+				start = middle + 1
+			} else if (array[middle] < target) {
+				// 配列の真ん中より目的の値が大きいとき、探索のスタートを中央の一つ右の要素にする
+				start = middle + 1
+			} else {
+				// 配列の真ん中より目的の値が小さいとき、探索のエンドを中央の一つ左の要素にする
+				end = middle - 1
+			}
+		}while (start <= end)
+		return start
+	}
+}

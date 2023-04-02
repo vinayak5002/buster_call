@@ -1,0 +1,54 @@
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<map>
+#include<set>
+#include<cmath>
+#include<queue>
+#include<stack>
+#include<string>
+
+#define rep(i,n) for(int i=0;i<(n);i++)
+
+using ll = long long;
+using namespace std;
+
+int main() {
+	int n;
+	cin >> n;
+	vector<int> s(n + 1), l(n + 1), p(n + 1);
+	rep(i, n) cin >> s[i + 1] >> l[i + 1] >> p[i + 1];
+
+	int m;
+	const int INF = (1 << 30);
+	vector<int> ans;
+	cin >> m;
+	rep(i, m) {
+		int w;
+		cin >> w;
+		vector<int> dp(w + 1, INF);
+		dp[0] = 0;
+		for (int i = 1; i <= n; i++) {
+			for (int j = 0; j <= w; j++) {
+				for (int k = s[i]; k <= l[i]; k++) {
+					if (j + k > w) break;
+					if (dp[j] == INF) continue;
+					if (dp[j + k] == INF) dp[j + k] = dp[j] + p[i];
+					else dp[j + k] = max(dp[j + k], dp[j] + p[i]);
+				}
+			}
+		}
+		if (dp[w] == INF) {
+			cout << -1 << endl;
+			return 0;
+		}
+		else {
+			ans.push_back(dp[w]);
+		}
+	}
+
+	rep(i, m) cout << ans[i] << endl;
+
+
+	return 0;
+}

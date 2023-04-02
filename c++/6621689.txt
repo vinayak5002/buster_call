@@ -1,0 +1,98 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+ll partition(vector<pair<char, ll>> &a, ll lef, ll rig){
+    ll x = a[rig].second;
+    ll i = lef - 1;
+    rep(j, lef, rig){
+        if(a[j].second <= x){
+            i++;
+            swap(a[i], a[j]);
+        }
+    }
+    swap(a[i + 1], a[rig]);
+    return i + 1;
+}
+
+void quick_sort(vector<pair<char, ll>> &a, ll lef, ll rig){
+    if(lef < rig){
+        ll q = partition(a, lef, rig);
+        quick_sort(a, lef, q - 1);
+        quick_sort(a, q + 1, rig);
+    }
+}
+
+void print(vector<pair<char, ll>> &a){
+    rep(i, 0, SZ(a)) cout << a[i].first << " " << a[i].second << endl;
+}
+
+void merge(vector<pair<char, ll>> &a, ll lef, ll rig){
+    ll mid = (lef + rig) / 2;
+    ll n1 = mid - lef, n2 = rig - mid;
+    vector<pair<char, ll>> l(n1), r(n2);
+    rep(i, 0, n1) l[i] = a[lef + i];
+    rep(i, 0, n2) r[i] = a[mid + i];
+    l.push_back({'0', INF});
+    r.push_back({'0', INF});
+    ll i = 0, j = 0;
+    rep(k, lef, rig){
+        if(l[i].second <= r[j].second){
+            a[k] = l[i];
+            i++;
+        }
+        else{
+            a[k] = r[j];
+            j++;
+        }
+    }
+}
+
+void merge_sort(vector<pair<char, ll>> &a, ll lef, ll rig){
+    if(rig - lef > 1){
+        ll mid = (lef + rig) / 2;
+        merge_sort(a, lef, mid);
+        merge_sort(a, mid, rig);
+        merge(a, lef, rig);
+    }
+}
+
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll n;
+  cin >> n;
+  vector<pair<char, ll>> a(n);
+  rep(i, 0, n) cin >> a[i].first >> a[i].second;
+  auto b = a;
+
+  quick_sort(a, 0, n - 1);
+  merge_sort(b, 0, n);
+  if(a == b) cout << "Stable" << endl;
+  else cout << "Not stable" << endl;
+  
+  
+  print(a);
+
+
+
+
+  return 0;
+}

@@ -1,0 +1,303 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+// Q021 反転数 https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_5_D&lang=jp
+class Program
+{
+    static string InputPattern = "InputX";
+
+    static List<string> GetInputList()
+    {
+        var WillReturn = new List<string>();
+
+        if (InputPattern == "Input1") {
+            WillReturn.Add("5");
+            WillReturn.Add("3 5 2 1 4");
+            //6
+        }
+        else if (InputPattern == "Input2") {
+            WillReturn.Add("3");
+            WillReturn.Add("3 1 2");
+            //2
+        }
+        else {
+            string wkStr;
+            while ((wkStr = Console.ReadLine()) != null) WillReturn.Add(wkStr);
+        }
+        return WillReturn;
+    }
+
+    static void Main()
+    {
+        List<string> InputList = GetInputList();
+        int[] AArr = InputList[1].Split(' ').Select(X => int.Parse(X)).ToArray();
+
+        var Ins_AVL_Set_MultiSet = new AVL_Set_MultiSet<int>();
+        long TentouCnt = 0;
+
+        foreach (int EachA in AArr) {
+            int UpperBound = Ins_AVL_Set_MultiSet.UpperBound(EachA);
+            if (UpperBound > -1) {
+                int UB = Ins_AVL_Set_MultiSet.Count - 1;
+                TentouCnt += (UB - UpperBound + 1);
+            }
+            Ins_AVL_Set_MultiSet.Add(EachA);
+        }
+        Console.WriteLine(TentouCnt);
+    }
+}
+
+#region AVL_Set_MultiSet
+/// <summary>
+/// 要素の追加、削除、検索、取得が可能な集合を表します．
+/// </summary>
+/// <typeparam name="T">優先度付きキュー内の要素の型を指定します．</typeparam>
+/// <remarks>内部的にはAVL木によって実装されています．</remarks>
+internal class AVL_Set_MultiSet<T>
+{
+    Node root;
+    readonly IComparer<T> comparer;
+    readonly Node nil;
+
+    /// <summary>
+    /// 多重集合かどうかを表します．
+    /// </summary>
+    internal bool IsMultiSet { get; set; }
+    internal AVL_Set_MultiSet(IComparer<T> comparer)
+    {
+        nil = new Node(default(T));
+        root = nil;
+        this.comparer = comparer;
+    }
+
+    internal AVL_Set_MultiSet() : this(Comparer<T>.Default) { }
+
+    /// <summary>
+    /// 要素をコレクションに追加します．
+    /// </summary>
+    /// <remarks>この操作は計算量 O(log N) で実行されます．</remarks>
+    internal bool Add(T v)
+    {
+        return insert(ref root, v);
+    }
+
+    /// <summary>
+    /// v が存在するならコレクションから削除します．
+    /// </summary>
+    /// <remarks>この操作は計算量 O(log N) で実行されます．</remarks>
+    internal bool Remove(T v)
+    {
+        return remove(ref root, v);
+    }
+
+    /// <summary>
+    /// 0-indexed で index 番目の要素をコレクションから取得します．．
+    /// </summary>
+    /// <remarks>この操作は計算量 O(log N) で実行されます．</remarks>
+    internal T this[int index] { get { return find(root, index); } }
+    internal int Count { get { return root.Count; } }
+
+    internal void RemoveAt(int k)
+    {
+        if (k < 0 || k >= root.Count) throw new ArgumentOutOfRangeException();
+        removeAt(ref root, k);
+    }
+
+    /// <summary>
+    /// このコレクションに含まれる要素を昇順に並べて返します．
+    /// </summary>
+    /// <remarks>この操作は計算量 O(N) で実行されます．</remarks>
+    internal T[] Items
+    {
+        get
+        {
+            T[] ret = new T[root.Count];
+            int k = 0;
+            walk(root, ret, ref k);
+            return ret;
+        }
+    }
+
+    private void walk(Node t, T[] a, ref int k)
+    {
+        if (t.Count == 0) return;
+        walk(t.lst, a, ref k);
+        a[k++] = t.Key;
+        walk(t.rst, a, ref k);
+    }
+
+    private bool insert(ref Node t, T key)
+    {
+        if (t.Count == 0) { t = new Node(key); t.lst = t.rst = nil; t.Update(); return true; }
+        int cmp = comparer.Compare(t.Key, key);
+        bool res;
+        if (cmp > 0)
+            res = insert(ref t.lst, key);
+        else if (cmp == 0) {
+            if (IsMultiSet) res = insert(ref t.lst, key);
+            else return false;
+        }
+        else res = insert(ref t.rst, key);
+        balance(ref t);
+        return res;
+    }
+
+    private bool remove(ref Node t, T key)
+    {
+        if (t.Count == 0) return false;
+        int cmp = comparer.Compare(key, t.Key);
+        bool ret;
+        if (cmp < 0) ret = remove(ref t.lst, key);
+        else if (cmp > 0) ret = remove(ref t.rst, key);
+        else {
+            ret = true;
+            var k = t.lst.Count;
+            if (k == 0) { t = t.rst; return true; }
+            if (t.rst.Count == 0) { t = t.lst; return true; }
+
+            t.Key = find(t.lst, k - 1);
+            removeAt(ref t.lst, k - 1);
+        }
+        balance(ref t);
+        return ret;
+    }
+
+    private void removeAt(ref Node t, int k)
+    {
+        int cnt = t.lst.Count;
+        if (cnt < k) removeAt(ref t.rst, k - cnt - 1);
+        else if (cnt > k) removeAt(ref t.lst, k);
+        else {
+            if (cnt == 0) { t = t.rst; return; }
+            if (t.rst.Count == 0) { t = t.lst; return; }
+
+            t.Key = find(t.lst, k - 1);
+            removeAt(ref t.lst, k - 1);
+        }
+        balance(ref t);
+    }
+
+    private void balance(ref Node t)
+    {
+        int balance = t.lst.Height - t.rst.Height;
+        if (balance == -2) {
+            if (t.rst.lst.Height - t.rst.rst.Height > 0) { rotR(ref t.rst); }
+            rotL(ref t);
+        }
+        else if (balance == 2) {
+            if (t.lst.lst.Height - t.lst.rst.Height < 0) rotL(ref t.lst);
+            rotR(ref t);
+        }
+        else t.Update();
+    }
+
+    private T find(Node t, int k)
+    {
+        if (k < 0 || k > root.Count) throw new ArgumentOutOfRangeException();
+        while (true) {
+            if (k == t.lst.Count) return t.Key;
+            else if (k < t.lst.Count) t = t.lst;
+            else { k -= t.lst.Count + 1; t = t.rst; }
+        }
+    }
+    /// <summary>
+    /// コレクションに含まれる要素であって、 v 以上の最小の要素の番号を返します。
+    /// </summary>
+    /// <remarks>この操作は計算量 O(log N) で実行されます．</remarks>
+    internal int LowerBound(T v)
+    {
+        int k = 0;
+        Node t = root;
+        while (true) {
+            if (t.Count == 0) return k;
+            if (comparer.Compare(v, t.Key) <= 0) t = t.lst;
+            else { k += t.lst.Count + 1; t = t.rst; }
+        }
+    }
+    /// <summary>
+    /// コレクションに含まれる要素であって、 v より真に大きい、最小の要素の番号を返します。
+    /// </summary>
+    /// <remarks>この操作は計算量 O(log N) で実行されます．</remarks>
+    internal int UpperBound(T v)
+    {
+        int k = 0;
+        Node t = root;
+        while (true) {
+            if (t.Count == 0) return k;
+            if (comparer.Compare(t.Key, v) <= 0) { k += t.lst.Count + 1; t = t.rst; }
+            else t = t.lst;
+        }
+    }
+
+    // 追加機能 V未満で最大の要素の番号を返す
+    internal int Lower_Max(T v)
+    {
+        int UpperB = UpperBound(v);
+        if (IsValidInd(UpperB - 1)) {
+            return UpperB - 1;
+        }
+        return -1;
+    }
+
+    // 追加機能 V以下で最大の要素の番号を返す
+    internal int LowerOrEqual_Max(T v)
+    {
+        int LowerB = LowerBound(v);
+        if (IsValidInd(LowerB - 1)) {
+            return LowerB - 1;
+        }
+        return -1;
+    }
+
+    // 追加機能 LowerBoundなどで返したIndが、有効範囲かを判定
+    internal bool IsValidInd(int pInd)
+    {
+        if (pInd < 0) return false;
+        if (this.Count <= pInd) return false;
+        return true;
+    }
+
+    private void rotR(ref Node t)
+    {
+        Node l = t.lst;
+        t.lst = l.rst;
+        l.rst = t;
+        t.Update();
+        l.Update();
+        t = l;
+    }
+
+    private void rotL(ref Node t)
+    {
+        Node r = t.rst;
+        t.rst = r.lst;
+        r.lst = t;
+        t.Update();
+        r.Update();
+        t = r;
+    }
+
+    class Node
+    {
+        internal Node(T key)
+        {
+            Key = key;
+        }
+        internal int Count { get; private set; }
+        internal int Height { get; private set; }
+        internal T Key { get; set; }
+        internal Node lst, rst;
+        internal void Update()
+        {
+            Count = 1 + lst.Count + rst.Count;
+            Height = 1 + Math.Max(lst.Height, rst.Height);
+        }
+        public override string ToString()
+        {
+            return string.Format("Count = {0}, Key = {1}", Count, Key);
+        }
+    }
+}
+#endregion
+

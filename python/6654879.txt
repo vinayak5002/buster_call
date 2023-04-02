@@ -1,0 +1,58 @@
+import sys
+from bisect import bisect_left
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def make_sum_dic(a_list, b_list):
+    sum_dic = {}
+    for a in a_list:
+        for b in b_list:
+            s = a + b
+            if s not in sum_dic:
+                sum_dic[s] = 1
+            else:
+                sum_dic[s] += 1
+
+    return sum_dic
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, v = map(int, f.readline().split())
+    a_list = list(map(int, f.readline().split()))
+    b_list = list(map(int, f.readline().split()))
+    c_list = list(map(int, f.readline().split()))
+    d_list = list(map(int, f.readline().split()))
+
+    sum_dic0 = make_sum_dic(a_list, b_list)
+    sum_dic1 = make_sum_dic(c_list, d_list)
+
+    sum_list0 = list(sum_dic0.items())
+    sum_list1 = list(sum_dic1.items())
+
+    sum_list1.sort()
+    tmp_sum_list1 = [s for s, _ in sum_list1]
+
+    counter = 0
+    for s0, c0 in sum_list0:
+        d = v - s0
+        idx = bisect_left(tmp_sum_list1, d)
+        if idx < len(tmp_sum_list1) and tmp_sum_list1[idx] == d:
+            counter += c0 * sum_list1[idx][1]
+
+    print(counter)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

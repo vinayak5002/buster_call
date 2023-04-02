@@ -1,0 +1,27 @@
+#include<bits/stdc++.h>
+using namespace std;
+int main(){
+    int n, q;
+    cin >> n;
+    vector<int> a(n);
+    for(auto&&e:a) cin >> e;
+    cin >> q;
+    vector<int> b(q);
+    for(auto&&e:b) cin >> e;
+
+    
+    int ans = 0;
+    for(auto&&e:b){
+        int ok = 0, ng = n; // e 以下の値を持つindexならok。[0, ok], [ng, n)が確定済み領域。
+        while(ng -ok > 1){ // (ok, ng)が未確定で、これが空集合になるまで回す。
+            int mid = (ng + ok) / 2;
+            if(a[mid] <= e) ok = mid; // midがok側に含まれることが確定
+            else ng = mid; // midがng側に含まれることが確定
+        }
+        // ok がe以下の値を持つ最大のindexを持つようになる。
+        // よって、a[ok] == eのみを確認すればよい。(aはsortedなので) 
+        ans += a[ok] == e;
+    }
+    cout << ans << endl;
+}
+

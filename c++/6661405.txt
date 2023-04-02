@@ -1,0 +1,158 @@
+# doubly_linked_list.py
+class Cell:
+    #valueとnextとprevはインスタンス変数
+    def __init__(self, value):
+        self.value = value 
+        self.next = None
+        self.prev = None
+ 
+class DoublyLinkedList:
+    def __init__(self):
+        self.head = None
+ 
+    def insert(self, value):
+        new = Cell(value)
+        
+        
+        # self.head=new
+        tmp = self.head #アドレスで区別されている。アドレスごとコピーされるから、tmp変更したらself.headも変更される。
+        if not tmp:
+            new.next = new
+            new.prev = new
+            self.head = new
+            return #関数の実行終わり
+        # print(self.head.value)
+        # print(self.head.next.value)
+        # print(self.head.prev.value)
+        while not tmp == self.head: #deleteの時とか用？
+            tmp = tmp.next
+        tmp.prev.next = new
+        new.prev = tmp.prev
+        new.next = tmp
+        tmp.prev = new
+        # new.prev=tmp.prev
+        # new.next=tmp
+        # tmp.prev.next=new
+        # tmp.prev=new
+        self.head=new
+        # print(self.head.value)
+        #ぐるぐるしてる。
+        # print(self.head.value)
+        # print(self.head.next.value)
+        # print(self.head.prev.value)
+        
+        # print(new.value)
+        # print(new.next.value)
+        # print(new.prev.value)
+        
+ 
+    def delete(self, value):
+        tmp = self.head
+        # if not tmp:
+        #     print("[*] List is empty.")
+        #     return
+        # print(tmp.value)
+        if tmp == tmp.next:
+            self.head = tmp = None #1個しかないやつを削除しようとしたら全削除
+            return
+        
+        if tmp.value == value: #self.headを削除しようとしたら
+            tmp.prev.next=tmp.next
+            tmp.next.prev=tmp.prev
+            self.head = tmp.next #次をheadに。
+            tmp = None
+            return
+            
+        if tmp.prev.value==value:
+            tmp.prev.prev.next=tmp
+            tmp.prev=tmp.prev.prev
+            return
+            
+        
+        isfound = False
+        tmp = tmp.next
+        while not tmp == self.head:
+            if tmp.value == value:
+                isfound = True
+                break
+            tmp = tmp.next
+        if isfound:
+            tmp.prev.next = tmp.next
+            tmp.next.prev = tmp.prev
+            tmp = None
+            
+        # else:
+        #     print("[*] Data not found")
+ 
+    def show(self):
+        ans=[]
+        tmp = self.head
+        while tmp:
+            # print(tmp.value,end=" ")
+            tmp = tmp.next
+            ans.append(tmp.value)
+            if tmp == self.head:
+                break
+        
+        for i in range(0,len(ans)):
+            if(i==len(ans)-1):
+                print(ans[i])
+                break
+            print(ans[i],end=" ")
+            
+            # else:
+            #     print(tmp.value,end=" ")
+        # else:
+        #     print('[*] List is empty.')
+            
+    def deleteFirst(self):
+        tmp = self.head
+        if tmp == tmp.next:
+            self.head = tmp = None #1個しかないやつを削除しようとしたら全削除
+            return
+        tmp.prev.next=tmp.next
+        tmp.next.prev=tmp.prev
+        self.head = tmp.next #次をheadに。
+        tmp = None
+        # print(self.head.value)
+        # print(self.head.next.value)
+        # print(self.head.prev.value)
+            # print(tmp)
+            # print(self.head)
+    def deleteLast(self):
+        tmp=self.head
+        if tmp == tmp.next:
+            self.head = tmp = None #1個しかないやつを削除しようとしたら全削除
+            return
+        tmp.prev.prev.next=tmp
+        tmp.prev=tmp.prev.prev
+        
+        
+ 
+l = DoublyLinkedList()
+# print('insert 1, 2, 3...')
+# l.insert(1)
+# l.insert(2)
+# l.insert(3)
+# print('print data')
+# l.show()
+# print('delete 2...')
+# l.delete(2)
+# print('print data')
+# l.show()
+
+N=int(input())
+command=[]
+for i in range(N):
+    command.append(input().split())
+
+for i in range(N):
+    if(command[i][0]=="insert"):
+        l.insert(int(command[i][1]))
+    if(command[i][0]=="delete"):
+        l.delete(int(command[i][1]))
+    if(command[i][0]=="deleteFirst"):
+        l.deleteFirst()
+    if(command[i][0]=="deleteLast"):
+        l.deleteLast()
+l.show()

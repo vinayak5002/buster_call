@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+template <typename T>
+ostream& operator<<(ostream& os, const vector<T>& v) {
+    for (int i = 0; i < (int) v.size(); ++i) os << v[i] << " ";
+    return os;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    int n, m;
+    cin >> n >> m;
+    vector<int> pts = {5, 3, 2};
+    vector<vector<int>> val(n, vector<int>(3));
+    for (auto& v : val) for (auto& x : v) cin >> x;
+    vector<vector<double>> diff(3, vector<double>(m+1));
+
+    // probability of appealing i times
+    vector<double> prob(m+1);
+    rep(j,0,m+1) {
+        double num = pow(2, m-j), den = pow(3, m);
+        rep(i,0,j) {
+            num *= (m-i);
+            den *= i+1;
+        }
+        prob[j] = num/den;
+    }
+    vector<double> cum(m+2);
+    rep(j,0,m+1) cum[j+1] = cum[j] + prob[j];
+
+    rep(k,0,3) {
+        rep(j,0,m+1) {
+            vector<double> p(n);
+            rep(i,1,n) {
+                // probability of the idol i beating the idol 0
+                int c = (val[0][k]*j+val[i][k]-1)/val[i][k];
+                // appeal k, >= c times
+                if (c <= m) p[i] = cum[m+1] - cum[c];
+            }
+            vector<double> q(3);
+            q[0] = 1;
+            double alllose = 1;
+            rep(i,1,n) {
+                alllose *= p[i];
+                vector<double> nq(3);
+                rep(l,0,3) {
+                    if (l+1 < 3) nq[l+1] += q[l] * p[i];
+                    nq[l] += q[l] * (1-p[i]);
+                }
+                q.swap(nq);
+            }
+            diff[k][j] = accumulate(all(q), 0.0) * pts[k] - alllose;
+        }
+    }
+
+    double ans = -1e18;
+    rep(x,0,m+1) rep(y,0,m+1-x) {
+        int z = m - (x + y);
+        chmax(ans, diff[0][x] + diff[1][y] + diff[2][z]);
+    }
+    cout << ans << endl;
+}

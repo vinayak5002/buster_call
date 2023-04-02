@@ -1,0 +1,35 @@
+mod = 10 ** 9 + 7
+N = 10000
+fact = [1]*(N+1)
+factinv = [1]*(N+1)
+
+for i in range(2, N+1):
+	fact[i] = fact[i-1] * i % mod
+
+factinv[-1] = pow(fact[-1], mod-2, mod)
+for i in range(N-1, 1, -1):
+	factinv[i] = factinv[i+1] * (i+1) % mod
+
+def cmb(a, b):
+	if (a < b) or (b < 0):
+		return 0
+	return fact[a] * factinv[b] % mod * factinv[a-b] % mod
+
+n,k = map(int,input().split())
+
+dp = [[0] * (max(n,k)+1) for j in range(n+1)]
+
+for i in range(k+1):
+	dp[0][i] = 1
+
+for i in range(n):
+	for j in range(k):
+		if i-j >= 0:
+			dp[i+1][j+1] += dp[i-j][j+1]
+		dp[i+1][j+1] += dp[i+1][j]
+		dp[i+1][j+1] %= mod
+		
+if n-k >= 0:
+	print(dp[n-k][k])
+else:
+	print(0)

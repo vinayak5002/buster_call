@@ -1,0 +1,56 @@
+import java.util.Scanner;
+import java.util.Stack;
+
+public class Main {
+    static class AreaWithStartPoint {
+        int area;
+        int left;
+
+        AreaWithStartPoint(int area, int left) {
+            this.area = area;
+            this.left = left;
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+        String inputs = s.next();
+
+        Stack<Integer> startPoints = new Stack<>();
+        Stack<AreaWithStartPoint> puddles = new Stack<>();
+        for (int i = 0; i < inputs.length(); i++) {
+            char c = inputs.charAt(i);
+            if (c == '/') {
+                if (startPoints.empty()) {
+                    continue;
+                }
+                int startPoint = startPoints.pop();
+                int puddleArea = (i - startPoint);
+                while (!puddles.empty() && puddles.peek().left > startPoint) {
+                    puddleArea += puddles.pop().area;
+                } 
+                puddles.push(new AreaWithStartPoint(puddleArea, i));
+            } else if (c == '\\') {
+                startPoints.push(i);
+            }
+        }
+
+        int totalArea = 0;
+        int puddleNum = puddles.size();
+        Stack<Integer> printStack = new Stack<>();
+        while (!puddles.empty()) {
+            int area = puddles.pop().area;
+            totalArea += area;
+            printStack.push(area);
+        }
+        System.out.println(totalArea);
+        System.out.print(puddleNum);
+        for (int i = 0; i < puddleNum; i++) {
+            System.out.print(" " + printStack.pop());
+        }
+        System.out.println();
+
+        s.close();
+    }    
+}
+

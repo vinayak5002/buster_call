@@ -1,0 +1,34 @@
+#include<bits/stdc++.h>
+using namespace std;
+using ll = long long;
+
+int main(){
+    string s;
+    cin >> s;
+    set<string> S;
+    queue<string> nxt;
+    S.insert(s);
+    nxt.push(s);
+    while(!nxt.empty()){
+        s = nxt.front();
+        nxt.pop();
+        if(s == "ABC"){
+            cout << "Yes\n";
+            return 0;
+        }
+        string t;
+        for(int i = 0; i < s.size(); i++){
+            t += s[i];
+            if(t.size() >= 3 && t.substr(t.size() - 3, 3) == "ABC"){
+                for(char c = 'A'; c <= 'C'; c++){
+                    string u = t.substr(0, t.size() - 3) + c;
+                    if(i + 1 < s.size())u += s.substr(i + 1, s.size() - i - 1);
+                    if(S.count(u))continue;
+                    S.insert(u);
+                    nxt.push(u);
+                }
+            }
+        }
+    }
+    cout << "No" << '\n';
+}

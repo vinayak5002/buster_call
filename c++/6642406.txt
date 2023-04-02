@@ -1,0 +1,61 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct Cake {
+    int w, d;
+    Cake() {}
+    Cake(int _w, int _d) : w(_w), d(_d) {}
+    friend bool operator<(const Cake& L, const Cake& R) {
+        return L.w * L.d < R.w * R.d;
+    }
+};
+
+int main(int argc, const char * argv[]) {
+    while (1) {
+        int N, W, D;
+        cin >> N >> W >> D;
+        if (N == 0 && W == 0 && D == 0) break;
+        vector<Cake> V;
+        V.emplace_back(W, D);
+        
+        for (int n = 0; n < N; ++n) {
+            int P, S;
+            cin >> P >> S;
+            --P;
+            Cake p = V[P];
+            int w = p.w;
+            int d = p.d;
+            int t = S % (2 * (w + d));
+            Cake c1, c2;
+            if (t < w) {
+                c1.d = d; c1.w = t;
+                c2.d = d; c2.w = w - t;
+            } else if (t < w + d){
+                c1.d = t - w; c1.w = w;
+                c2.d = d - c1.d; c2.w = w;
+            } else if (t < 2 * w + d) {
+                c1.d = d; c1.w = t - w - d;
+                c2.d = d; c2.w = w - c1.w;
+            } else {
+                c1.d = t - 2 * w - d; c1.w = w;
+                c2.d = d - c1.d; c2.w = w;
+            }
+            if (c2 < c1) swap(c1, c2);
+            V.erase(V.begin() + P);
+            V.emplace_back(c1);
+            V.emplace_back(c2);
+        }
+        
+        sort(V.begin(), V.end());
+        for (int i = 0; i < V.size(); ++i) {
+            if (i != 0) cout << ' ';
+            cout << V[i].w * V[i].d;
+        }
+        cout << endl;
+    }
+    
+    return 0;
+}
+

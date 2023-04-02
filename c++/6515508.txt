@@ -1,0 +1,65 @@
+#include<stdio.h>
+#include<string.h>
+
+typedef struct qtimr
+{
+    char name[100];
+    int time;
+}T;
+
+T Q[100000];
+int head, tail, n;
+
+T dequeue()
+{
+    T x = Q[head];
+    head=(head+1)%100000;
+    return x;
+}
+
+void enqueue(T x)
+{
+    Q[tail]=x;
+    tail=(tail+1)%100000;
+}
+
+int min(int x, int y)
+{
+    if(x<y) {return x;}
+    return y;
+}
+
+int main(void)
+{
+    int times, x, y;
+    T t;
+    
+    scanf("%d %d", &n, &y);
+
+    head=1;
+    tail=n+1;
+    for(int i=1;i<=n;i++)
+    {
+        scanf("%s %d", Q[i].name, &Q[i].time);
+    }
+
+    times=0;
+    for(;;)
+    {
+        if(head==tail){break;}
+        t=dequeue();
+        x=min(y, t.time);
+        t.time=t.time-x;
+        times+=x;
+
+        if(t.time>0)
+        {
+            enqueue(t);
+        }
+        else
+        {
+            printf("%s %d\n", t.name, times);
+        }
+    }
+    return 0;
+}

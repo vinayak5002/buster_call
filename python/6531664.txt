@@ -1,0 +1,104 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Scanner;
+
+public class Main {
+    static final int N = 9;
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int T = sc.nextInt();
+        int[] ans = new int[T];
+        ArrayList<Integer> R = new ArrayList<Integer>();
+        ArrayList<Integer> G = new ArrayList<Integer>();
+        ArrayList<Integer> B = new ArrayList<Integer>();
+        for (int i = 0; i < T; i++) {
+            // 2行分読み取り
+            int[] num = new int[N];
+            for (int j = 0; j < N; j++) {
+                num[j] = sc.nextInt();
+            }
+            char[] col = new char[N];
+            for (int j = 0; j < N; j++) {
+                col[j] = sc.next().charAt(0);
+            }
+
+            // 色ごとのリストに入れる
+            for (int j = 0; j < N; j++) {
+                switch (col[j]) {
+                    case 'R':
+                        R.add(num[j]);
+                        break;
+                    case 'G':
+                        G.add(num[j]);
+                        break;
+                    case 'B':
+                        B.add(num[j]);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // 色ごとにソート
+            Collections.sort(R);
+            Collections.sort(G);
+            Collections.sort(B);
+
+            // 色ごとにまず3の倍数枚あるか確認し，次に連番か一致しているかを確認する
+            boolean judge = true;
+            if (R.size() % 3 != 0 || G.size() % 3 != 0 || B.size() % 3 != 0) {
+                judge = false;
+            } else if (!check(R) || !check(G) || !check(B)) {
+                judge = false;
+            }
+            ans[i] = judge ? 1 : 0;
+
+            // 色ごとのリストを空にする
+            R.clear();
+            G.clear();
+            B.clear();
+        }
+
+        for (int i = 0; i < T; i++) {
+            System.out.println(ans[i]);
+        }
+
+        sc.close();
+    }
+
+    static boolean check(ArrayList<Integer> list) {
+        boolean res1 = true;
+
+        for (int i = 0; i < list.size() / 3; i++) {
+            boolean a = (list.get(3 * i) == list.get(3 * i + 1) && list.get(3 * i + 1) == list.get(3 * i + 2));
+            boolean b = (list.get(3 * i) + 2 == list.get(3 * i + 1) + 1
+                    && list.get(3 * i + 1) + 1 == list.get(3 * i + 2));
+            if (!a && !b) {
+                res1 = false;
+                break;
+            }
+        }
+
+        boolean res2 = false;
+        switch (list.size()) {
+            case 9:
+                boolean d = true;
+                for (int i = 0; i < 3; i++) {
+                    d &= list.get(i)+2 == list.get(i + 3)+1 && list.get(i + 3)+1 == list.get(i + 6);
+                }
+                res2 |= d;
+            case 6:
+                boolean c = true;
+                for (int i = 0; i < 2; i++) {
+                    c &= list.get(i)+2 == list.get(i + 2)+1 && list.get(i + 2)+1 == list.get(i + 4);
+                }
+                res2 |= c;
+                break;
+            default:
+                break;
+        }
+
+        return res1 || res2;
+    }
+}

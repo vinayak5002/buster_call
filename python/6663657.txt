@@ -1,0 +1,68 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def calc_pow_table(base, mod, n):
+    pow_table = [1] * (n + 2)
+    for i in range(n + 1):
+        pow_table[i + 1] = pow_table[i] * base % mod
+    return pow_table
+
+
+def rolling_hash(input_str, width, height, base_x, base_y, mod):
+    rh = [[0] * (width + 1) for _ in range(height + 1)]
+    for y in range(height):
+        crh_row = rh[y]
+        nrh_row = rh[y + 1]
+        cs = input_str[y]
+        srh = 0
+        for x in range(width):
+            srh = (srh * base_x + cs[x]) % mod
+            nrh_row[x + 1] = (srh + crh_row[x + 1] * base_y) % mod
+    return rh
+
+
+def calc_hash(input_str, pow_table_x, pow_table_y, mod, x0, y0, x1, y1):
+    pbx = pow_table_x[x1 - x0]
+    pby = pow_table_y[y1 - y0]
+    i_hash = (input_str[y1][x1] - input_str[y1][x0] * pbx -
+              input_str[y0][x1] * pby + input_str[y0][x0] * (pbx * pby) % mod) % mod
+    return i_hash
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    mod = 1000_000_000 + 9
+    base_x = 13
+    base_y = 19
+    max_hw = 1000
+    pow_table_x = calc_pow_table(base_x, mod, max_hw)
+    pow_table_y = calc_pow_table(base_y, mod, max_hw)
+
+    height, width = map(int, f.readline().split())
+    input_str = [list(map(ord, f.readline().strip())) for _ in range(height)]
+    p_height, p_width = map(int, f.readline().split())
+    pattern_str = [list(map(ord, f.readline().strip())) for _ in range(p_height)]
+
+    rh = rolling_hash(input_str, width, height, base_x, base_y, mod)
+    rh0 = rolling_hash(pattern_str, p_width, p_height, base_x, base_y, mod)
+    v = rh0[-1][-1]
+    for y in range(height - p_height + 1):
+        for x in range(width - p_width + 1):
+            if v == calc_hash(rh, pow_table_x, pow_table_y, mod, x, y, x + p_width, y + p_height):
+                print(str(y) + ' ' + str(x))
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

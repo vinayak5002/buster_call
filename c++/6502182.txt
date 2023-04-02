@@ -1,0 +1,93 @@
+#include<bits/stdc++.h>
+#define x first
+#define y second
+#define bug(x) cerr<<#x<<'='<<x<<' '
+#define debug(x) cerr<<#x<<'='<<x<<'\n'
+#define FOR(a,b,c) for(int a=(b),a##_end=(c);a<=a##_end;++a)
+#define ROF(a,b,c) for(int a=(b),a##_end=(c);a>=a##_end;--a)
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> PII;
+const int INF=0x3f3f3f3f,N=5010;
+const double EPS=1e-6;
+template<class T>inline bool chkmin(T &x,const T &y){return y<x?x=y,1:0;}
+template<class T>inline bool chkmax(T &x,const T &y){return x<y?x=y,1:0;}
+struct Point{
+	double x,y;
+	void scan(){
+		scanf("%lf%lf",&x,&y);
+	}
+	void print(){
+		printf("%.8lf %.8lf\n",x,y);
+	}
+	double abs2(){
+		return x*x+y*y;
+	}
+	double abs(){
+		return sqrt(x*x+y*y);
+	}
+	double arg(){
+		return atan2(y,x);
+	}
+	Point turn(double th){
+		double c=cos(th),s=sin(th);
+		return {x*c-y*s,x*s+y*c};
+	}
+	bool operator < (const Point &p)const{
+		if(fabs(x-p.x)<EPS)
+			return y<p.y;
+		return x<p.x-EPS;
+	}
+	Point operator + (const Point &p)const{
+		return {x+p.x,y+p.y};
+	}
+	Point operator - (const Point &p)const{
+		return {x-p.x,y-p.y};
+	}
+	Point operator - ()const{
+		return {-x,-y};
+	}
+	Point operator * (double t)const{
+		return {x*t,y*t};
+	}
+	Point operator / (double t)const{
+		return {x/t,y/t};
+	}
+	Point unit(){
+		double l=abs();
+		return {x/l,y/l};
+	}
+};
+double dot(Point p1,Point p2){
+	return p1.x*p2.x+p1.y*p2.y;
+}
+double cross(Point p1,Point p2){
+	return p1.x*p2.y-p2.x*p1.y;
+}
+double dist(Point p1,Point p2){
+	return (p1-p2).abs();
+}
+struct Line{
+	Point p[2];
+	Point& operator [] (int k){return p[k];}
+	Point unit(){
+		return (p[1]-p[0]).unit();
+	}
+};
+Point proj(Line k,Point p){//chui zu
+	return k[0]+k.unit()*dot(p-k[0],k.unit());
+}
+int main(){
+	Line L;
+	L[0].scan();
+	L[1].scan();
+	int q;
+	scanf("%d",&q);
+	while(q--){
+		Point p;
+		p.scan();
+		p=proj(L,p);
+		p.print();
+	}
+	return 0;
+}

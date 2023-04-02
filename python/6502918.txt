@@ -1,0 +1,124 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let q = si[0];
+	let ll = new LinkedList();
+	for (let i = 0; i < q; i++){
+		let pair = si[i + 1].split(" ");
+		leftN = Number(pair[0]);
+		rightN = Number(pair[1]);
+		
+		if (leftN === 0){
+			ll.insert(rightN);
+		} else if (leftN === 1){
+			ll.move(rightN);
+		} else {
+			ll.erase();
+		}
+	}
+	
+	ll.println_list();
+
+}
+
+
+class Node {
+	constructor(data) {
+		this.data = data;
+		this.next = null;
+		this.prev = null;
+	}
+}
+
+class LinkedList {
+	constructor() {
+		this.length = 0;
+		this.head = new Node(null);
+		this.end = new Node(null);
+		this.end.prev = this.head;
+		this.head.next = this.end;
+		this.cur = this.end
+	}
+
+	insert(x) {//　カーソルの指す要素の直前に, 整数を挿入する.
+		let node = new Node(x);
+		// 前後のリンクを繋ぎ替える.
+		node.prev = this.cur.prev;// 挿入された要素からのリンク
+		node.next = this.cur;
+		this.cur.prev.next = node;// 挿入された要素へのリンク
+		this.cur.prev = node;
+		// カーソルを挿入された要素へと移動させる.
+		this.cur = node;
+		this.length++;
+	}
+
+	move(d) {	
+		if (d > 0){// カーソルを右に動かすパターン
+			for (let i = 0; i < d; i++){
+			this.cur = this.cur.next;
+			}
+		} else {// カーソルを左に動かすパターン.
+			for (let i = 0; i < Math.abs(d); i++){
+			this.cur = this.cur.prev;
+			}
+		}
+	}
+	
+	erase(){
+		this.cur.prev.next = this.cur.next;// 前後の要素のリンクを繋ぐ.
+		this.cur.next.prev = this.cur.prev;
+		
+		if (this.cur.prev){
+			this.cur = this.cur.next;
+		} else {
+			this.cur = this.end;
+		}
+		this.length--;
+	}
+	
+	println_list(){
+		let current = this.head.next;
+		
+		for (let i = 0; i < this.length; i++){// リスト内要素を改行出力
+			console.log(current.data);
+			current = current.next
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+// Helper Methods
+	indexOf(data) {// 要素の番地を返す. 見つからなかった場合, -1を返す.
+		let count = 0;
+		let current = this.head;
+		while (current != null) {// 末端まで要素を探索する.
+			if (current.data === data) {
+				return count;
+			}
+			count++;
+			current = current.next;
+		}
+		return -1;
+	}
+
+	isEmpty() {// 要素が空の時。trueを返す
+		return this.length == 0;
+	}
+
+	printList() {// 要素一覧を出力する
+		let current = this.head.next;
+		let str = "";
+		while (current != this.end) {
+			str += current.data + " ";
+			current = current.next;
+		}
+		console.log(str);
+	}
+}
+

@@ -1,0 +1,105 @@
+import copy
+from distutils.util import check_environ
+
+pos = [[0, 1, 0], [0, 0, -1], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, -1, 0]]
+
+class Dice:
+
+  def __init__(self, a):
+    self.deme = a
+    self.iti = copy.deepcopy(pos)
+
+  def cur_face(self, s):
+    return self.deme[self.iti.index(pos[s])]
+
+  def roll(self, dim):
+    if dim == "E":
+      re, im = 1, 0
+    elif dim == "N":
+      re, im = 1, 2
+    elif dim == "S":
+      re, im = 2, 1
+    elif dim == "W":
+      re, im = 0, 1
+    elif dim == "R":
+      re, im = 0, 2
+    elif dim == "L":
+      re, im = 2, 0
+
+    for i in range(6):
+      c = complex(self.iti[i][re], self.iti[i][im]) * 1j
+      self.iti[i][re] = int(c.real)
+      self.iti[i][im] = int(c.imag)
+
+  def check_right(self, up, front):
+    while(True):
+      self.roll("W")
+      if up == self.cur_face(0):
+        break
+      self.roll("N")
+      if up == self.cur_face(0):
+        break
+    while(True):
+      self.roll("N")
+      self.roll("W")
+      self.roll("S")
+      if front == self.cur_face(1):
+        break
+    return self.cur_face(2)
+
+  def check_same(self, d2):
+    for i in range(3):
+      if self.cur_face(0) == d2.cur_face(0):
+        break
+      self.roll("W")
+      if self.cur_face(0) == d2.cur_face(0):
+        break
+      self.roll("N")
+    print(self.cur_face(0) is d2.cur_face(0))
+
+def check_same(d1, d2):
+  flag = False
+  for i in range(3):
+    if d1.cur_face(0) == d2.cur_face(0):
+      flag = True
+      break
+    d1.roll("W")
+    if d1.cur_face(0) == d2.cur_face(0):
+      flag = True
+      break
+    d1.roll("N")
+
+  if not(flag):
+    return "No"
+
+  flag = False
+  for i in range(4):
+    if d1.cur_face(1) == d2.cur_face(1):
+      flag = True
+      break
+    d1.roll("R")
+
+  if not(flag):
+    return "No"
+
+  for i in range(2, 6):
+    if d1.cur_face(i) != d2.cur_face(i):
+      flag = False
+      break
+
+  if flag:
+    return "Yes"
+  else:
+    return "No"
+
+
+deme1 = list(map(int, input().split()))
+d1 = Dice(deme1)
+deme2 = list(map(int, input().split()))
+d2 = Dice(deme2)
+
+# d1 = Dice([1, 2, 3, 4, 5, 6])
+# d2 = Dice([6, 5, 4, 3, 2, 1])
+
+print(check_same(d1, d2))
+

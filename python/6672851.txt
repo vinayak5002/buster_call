@@ -1,0 +1,35 @@
+n=int(input())
+A=list(map(int,input().split()))
+
+# 転倒数
+LEN=len(A)
+MAX=max(A)
+MIN=min(A)
+
+BIT=[0]*(MAX-MIN+2) # 出現回数をbit indexed treeの形でもっておく.
+
+def update(v,w): # index vにwを加える
+    while v<=MAX-MIN+1:
+        BIT[v]+=w
+        v+=(v&(-v)) # 自分を含む大きなノードへ. たとえばv=3→v=4
+
+def getvalue(v): # MIN～vの区間の和を求める
+    ANS=0
+    while v!=0:
+        ANS+=BIT[v]
+        v-=(v&(-v)) # たとえばv=3→v=2へ
+    return ANS
+
+ANS=0        
+for i in range(LEN): # A[0],A[1],...とBITを更新しながら,各A[i]について転倒数を求める.
+    bit_ai=A[i]-MIN+1 # A[i]がBITの中で何番目か
+
+    ANS+=i # 今まで出現した個数.
+    ANS-=getvalue(bit_ai) # 今まで出現した中で,MIN～bit_aiの個数を減らす.
+    # bit_ai～MAXの出現個数が転倒数
+
+    update(bit_ai,1)
+
+print(*sorted(A))
+print(ANS)
+

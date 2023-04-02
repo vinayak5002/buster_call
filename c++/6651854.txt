@@ -1,0 +1,98 @@
+#include <bits/stdc++.h>
+using std::cin;
+using std::getline;
+using std::cout;
+using std::endl;
+using std::string;
+using std::bitset;
+using std::vector;
+using std::array;
+using std::stack;
+using std::queue;
+using std::priority_queue;
+using std::set;
+using std::map;
+using std::pair;
+using llong = long long;
+template<typename T> using nLimits = std::numeric_limits<T>;
+#define ALL(a) (a).begin(), (a).end()
+#define REP(i, n) for (int i = 0; i < static_cast<int>(n); ++i)
+#define RREP(i, n) for (int i = static_cast<int>(n) - 1; i >= 0; --i)
+#define FOR(i, a, b) for (int i = static_cast<int>(a); i < static_cast<int>(b); ++i)
+#define RFOR(i, a, b) for (int i = static_cast<int>(a) - 1; i >= static_cast<int>(b); --i)
+constexpr int INF = 1001001001;
+constexpr llong LINF = 1001001001001001001ll;
+
+template<typename T> inline bool chMin(T &a, T b) { return ((a > b) ? (a = b, true) : (false)); }
+template<typename T> inline bool chMax(T &a, T b) { return ((a < b) ? (a = b, true) : (false)); }
+template<typename T> void printArray(const T* a, const size_t n);
+
+
+class DisjointSet {
+public:
+    // rank (parent is higher)
+    vector<int> rank, parent;
+
+    DisjointSet() {}
+    DisjointSet(int size) {
+        rank.resize(size, 0);
+        parent.resize(size, 0);
+        REP(i, size) makeSet(i);
+    }
+
+    void makeSet(int x) {
+        parent[x] = x;
+        rank[x] = 0;
+    }
+
+    bool same(int x, int y) {
+        return findSet(x) == findSet(y);
+    }
+
+    void unite(int x, int y) {
+        link(findSet(x), findSet(y));
+    }
+
+    void link(int x, int y) {
+        if (rank[x] > rank[y]) parent[y] = x;
+        else {
+            parent[x] = y;
+            if (rank[x] == rank[y]) rank[y]++;
+        }
+    }
+
+    int findSet(int x) {
+        if (x != parent[x]) parent[x] = findSet(parent[x]);
+        return parent[x];
+    }
+};
+
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout << std::fixed << std::setprecision(20);
+
+    int n, q;
+    cin >> n >> q;
+    DisjointSet ds(n);
+
+    REP(i, q) {
+        int t, a, b;
+        cin >> t >> a >> b;
+        if (t == 0) ds.unite(a, b);
+        else if (t == 1) {
+            if (ds.same(a, b)) cout << 1 << endl;
+            else cout << 0 << endl;
+        }
+    }
+}
+
+
+template<typename T> 
+void printArray(const T* a, const size_t n) {
+    string s = std::to_string(a[0]);
+    FOR(i, 1, n) s += " " + std::to_string(a[i]);
+    cout << s + "\n";
+}
+

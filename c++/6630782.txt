@@ -1,0 +1,75 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+void print(vector<ll> &vec){
+    rep(i, 0, SZ(vec)){
+        if(i) cout << " ";
+        cout << vec[i];
+    }
+    cout << endl;
+}
+
+vector<ll> a, ans;
+
+
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll n;
+  cin >> n;
+
+  a.resize(n);
+  ans.resize(n + 1, -1);
+
+  rep(i, 0, n) cin >> a[i];
+  sort(ALL(a));
+  reverse(ALL(a));
+
+  ans.back() = a.back();
+
+  deque<ll> deq;
+  ll j = 0;
+  deq.push_back(1);
+
+  while(!deq.empty()){
+      ll pos = deq.front();
+      deq.pop_front();
+      if(ans[pos] == -1){
+          ans[pos] = a[j];
+          j++;
+      }
+      ll lef = 2 * pos, rig = 2 * pos + 1;
+      if(rig < ans.size() - 1) deq.push_front(rig);
+      if(lef < ans.size() - 1) deq.push_back(lef);
+  }
+
+  rep(i, 0, n){
+      ans[i] = ans[i + 1];
+  }
+  ans.pop_back();
+
+
+  print(ans);
+
+
+  return 0;
+}
+

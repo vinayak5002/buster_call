@@ -1,0 +1,37 @@
+import sys
+while True:
+  N = int(input())
+  if N == 0:
+    sys.exit()
+  else:
+    List1 = list(map(int,input().split()))
+    countL = [[] for _ in range(1003)]
+    for i in range(N):
+      countL[List1[i]].append(i)
+    DP = [[0 for j in range(N)] for i in range(N)]
+    for i in range(N-1,-1,-1):
+      for j in range(N-i):
+        if j == 0:
+          pass
+        elif j == 1:
+          if abs(List1[i]-List1[i+j]) <= 1:
+            DP[i][j] = 2
+          else:
+            pass
+        else:
+          ans = DP[i+1][j-1]
+          for n in [List1[i]-1,List1[i],List1[i]+1]:
+            for x in countL[n]:
+              if i <= x <= i+j:
+                if x-i == 0:
+                  pass
+                elif x-i == 1:
+                  ans = max(ans,DP[i+2][j-2]+2)
+                else:
+                  if DP[i+1][x-i-2] == x-i-1:
+                    ans = max(ans,DP[min(N-1,x+1)][max(0,i+j-x-1)]+x-i+1)
+          DP[i][j] = ans
+    print(DP[0][N-1])      
+      
+    
+    

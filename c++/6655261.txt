@@ -1,0 +1,72 @@
+#include<stdio.h>
+#define MAX 10000
+#define NIL -1
+
+typedef struct{
+    int parent;
+    int left;
+    int right;
+} Node;
+int n;
+Node Tree[MAX];
+
+void p_first(int node_point)
+{
+    if(node_point==NIL) return;
+    printf(" %d", node_point);
+    p_first(Tree[node_point].left);
+    p_first(Tree[node_point].right);
+}
+
+void i_second(int node_point)
+{
+    if(node_point==NIL) return;
+    i_second(Tree[node_point].left);
+    printf(" %d", node_point);
+    i_second(Tree[node_point].right);
+}
+
+void p_last(int node_point)
+{
+    if(node_point==NIL) return;
+    p_last(Tree[node_point].left);
+    p_last(Tree[node_point].right);
+    printf(" %d", node_point);
+}
+
+int main(void)
+{
+    int i, value, left, right, root;
+
+    scanf("%d", &n);
+    for(i=0;i<n;i++)
+    {
+        Tree[i].parent=NIL;
+    }
+    for(i=0;i<n;i++)
+    {
+        scanf("%d %d %d", &value, &left, &right);
+        Tree[value].left=left;
+        Tree[value].right=right;
+        if(right!=NIL) Tree[right].parent=value;
+        if(left!=NIL) Tree[left].parent=value;
+    }
+    for(i=0;i<n;i++)
+    {
+        if(Tree[i].parent==NIL)
+        {
+            root=i;
+        }
+    }
+    printf("Preorder\n");
+    p_first(root);
+    printf("\n");
+    printf("Inorder\n");
+    i_second(root);
+    printf("\n");
+    printf("Postorder\n");
+    p_last(root);
+    printf("\n");
+
+    return 0;
+}

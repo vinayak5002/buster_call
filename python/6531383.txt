@@ -1,0 +1,58 @@
+package Main;
+
+import java.util.Scanner;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Deque;
+
+public class Main {
+	static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+	public static void main(String[] args) throws Exception{
+		int u = Integer.parseInt(br.readLine());
+		ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
+		for(int i = 0; i < u; ++i) list.add(new ArrayList<>());
+		for(int i = 0; i < u; ++i) {
+			String[] s = br.readLine().split(" ");
+			int k = Integer.parseInt(s[0]) - 1;
+			for(int j = 0; j < s.length-1; ++j) {
+				list.get(k).add(Integer.parseInt(s[j+1])-1);
+			}
+		}
+		
+		Deque<Integer> stack = new ArrayDeque<>();
+		boolean[] isVisited = new boolean[u];
+		int[][] ans = new int[u][2];
+		stack.add(0);
+		int time = 0;
+		while(stack.peek() != null) {
+			time++;
+			int tv = stack.pop();
+			if(isVisited[tv]) {
+				ans[tv][1] = time;
+				continue;
+			} else {
+				ans[tv][0] = time;
+				isVisited[tv] = true;
+				stack.push(tv);
+			}
+			
+			for(Integer i : list.get(tv)) {
+				if(isVisited[i]) continue;
+				stack.push(i);
+			}
+		}
+		for(int[] i : ans) {
+			for(int j : i) {
+				System.out.print(j+" ");
+			}
+			System.out.println();
+		}
+	}
+}

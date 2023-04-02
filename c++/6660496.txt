@@ -1,0 +1,90 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define PR "print"      // print   a b   : strのa文字目からb文字目までを出力する
+#define RV "reverse"    // reverse a b   : strのa文字目からb文字目までを逆順にする
+#define RP "replace"    // replace a b p : strのa文字目からb文字目までをpに置き換える
+
+typedef struct {
+    char *meirei;
+    int start;
+    int end;
+    char *rep;
+}QUEST;
+
+int main(void) {
+
+    /* 変数 */
+    char *str    ,    // 文字列
+         *buf    ;
+    char  dt[100];    // 入力データセット
+    int   q      ,    // 命令の数
+          i      ,    // for文カウンタ
+          j      ,    // for文カウンタ
+          cnt    ,    // 文字数
+          pos    ;    // 現在地
+    QUEST sets   ;    // 命令セット
+
+    /* 初期化 */
+    str         = (char *)malloc(sizeof(char) * 1000);
+    sets.meirei = (char *)malloc(sizeof(char) * 10  );
+    sets.rep    = (char *)malloc(sizeof(char) * 1000);
+    cnt = 0;
+    pos = 0;
+
+    /* 文字列取得 */
+    scanf("%s", str);
+    scanf("%d", &q);
+
+
+    //printf("【文字列 : %s】\n", str);
+    /* データセットループ */
+    for (i = 0; i < q; i++) {
+        //printf("[ %3d 回目 ]\n", i + 1);
+
+        /* 命令取得 */
+        scanf("%s", sets.meirei);
+        /* 命令分岐 */
+        if (0 == strcmp(PR, sets.meirei)) {
+            scanf("%d %d", &sets.start, &sets.end);
+            //printf(" -> %d 文字目から %d 文字目までを出力する\n", sets.start, sets.end);
+            for (j = sets.start; j <= sets.end; j++) {
+                printf("%c", str[j]);
+            }
+            printf("\n");
+        } else if (0 == strcmp(RV, sets.meirei)) {
+            scanf("%d %d", &sets.start, &sets.end);
+            //printf(" -> %d 文字目から %d 文字目までを逆順にする\n", sets.start, sets.end);
+            cnt = sets.end - sets.start + 1;
+            buf = (char *)malloc(sizeof(char) * cnt);
+            pos = 0;
+            /* 退避 */
+            for (j = sets.start; j <= sets.end; j++) {
+                buf[pos] = str[j];
+                pos++;
+            }
+            /* 入替 */
+            for (j = sets.start; j <= sets.end; j++) {
+                pos--;
+                str[j] = buf[pos];
+            }
+            //printf("%s\n", str);
+        } else {
+            scanf("%d %d %s", &sets.start, &sets.end, sets.rep);
+            //printf(" -> %d 文字目から %d 文字目までを %s に置き換える\n", sets.start, sets.end, sets.rep);
+            /* 文字列長取得 */
+            cnt = strlen(sets.rep);
+            pos = 0;
+            /* 置換 */
+            for (j = sets.start; j <= sets.end; j++) {
+                str[j] = sets.rep[pos];
+                pos++;
+            }
+            //printf("%s\n", str);
+        }
+    }
+
+    return 0;
+}
+

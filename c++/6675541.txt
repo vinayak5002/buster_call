@@ -1,0 +1,96 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <cstring>
+#include <vector>
+using namespace std;
+
+
+template<class T>
+class Vector {
+private:
+	T* data_;
+	int size_;
+	int capacity_;
+
+public:
+	Vector() : data_(NULL), size_(0), capacity_(0) {
+		return;
+	}
+
+	~Vector() {
+		if (data_ != NULL) {
+			delete[] data_;
+		}
+		return;
+	}
+
+	void reserve(int n) {
+		if (n > capacity_) {
+			T* tmp = data_;
+			T* new_data = new int[n];
+
+			capacity_ = n;
+			memcpy(new_data, data_, sizeof(T) * size_);
+			data_ = new_data;
+			delete[] tmp;
+		}
+		return;
+	}
+
+	void push_back(const T& x) {
+		if (size_ == capacity_) {
+			reserve(capacity_ == 0 ? 1 : 2 * capacity_);
+		}
+		data_[size_++] = x;
+		return;
+	}
+
+	T random_access(int p) const {
+		return data_[p];
+	}
+
+	void pop_back() {
+		size_--;
+		return;
+	}
+
+};
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	string buf;
+	int q = -1;
+	Vector<int> vec;
+
+	cin >> q;
+	for (int i = 0; i < q; i++) {
+		int op = -1;
+
+		cin >> op;
+		if (op == 0) {
+			int x = -1;
+
+			cin >> x;
+			vec.push_back(x);
+		}
+		else if (op == 1) {
+			int p = -1;
+
+			cin >> p;
+			cout << vec.random_access(p) << endl;
+		}
+		else {
+			vec.pop_back();
+		}
+	}
+	return 0;
+}

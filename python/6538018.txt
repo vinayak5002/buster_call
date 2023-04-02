@@ -1,0 +1,31 @@
+from bisect import bisect
+
+n,k = map(int,input().split())
+w = [int(input()) for _ in range(n)]
+
+
+def can_it(x):
+    cnt = 1
+    track = 0
+    for i in w:
+        if track + i < x:
+            track += i
+        elif track + i == x:
+            cnt += 1
+            track = 0
+        else:
+            cnt += 1
+            track = i
+    return cnt <= k
+
+# 二分探索を行う
+ok = sum(w) + 1
+ng = max(w) - 1
+while ok - ng > 1:
+    mid = (ok + ng)//2
+    if can_it(mid):
+        ok = mid
+    else:
+        ng = mid
+
+print(ok)

@@ -1,0 +1,57 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace _20220416_AOJ
+{
+    class ITP2_5D
+    {
+        static int ReadInt() { return int.Parse(Console.ReadLine()); }
+        static double ReadDouble() { return double.Parse(Console.ReadLine()); }
+        static int[] ReadIntArr(char dlm = ' ') { return Console.ReadLine().Split(dlm).Select(x => int.Parse(x)).ToArray(); }
+        static double[] ReadDoubleArr(char dlm = ' ') { return Console.ReadLine().Split(dlm).Select(x => double.Parse(x)).ToArray(); }
+        static string[] ReadStringArr(char dlm = ' ') { return Console.ReadLine().Split(dlm).ToArray(); }
+
+        static List<int[]> permutations;
+        static void Main(string[] args)
+        {
+            permutations = new List<int[]>();
+            string line = Console.ReadLine();
+            int n = int.Parse(line);
+            int[] arr = new int[n];
+            HashSet<int> set = new HashSet<int>(Enumerable.Range(1, n));
+            CreateAllPermutation(arr, set);
+
+            StringBuilder sb = new StringBuilder();
+            foreach(var v in permutations)
+            {
+                sb.AppendLine(string.Join(" ", v));
+            }
+
+            Console.Write(sb);
+        }
+
+        static void CreateAllPermutation(int[] arr, HashSet<int> vs)
+        {
+            if (vs.Count == 0)
+            {
+                permutations.Add(arr);
+                return;
+            }
+
+            foreach (var v in vs)
+            {
+                int[] tempArr = new int[arr.Length];
+                Array.Copy(arr, tempArr, arr.Length);
+                tempArr[arr.Length - vs.Count] = v;
+                HashSet<int> tempHS = vs.ToHashSet();
+                tempHS.Remove(v);
+                CreateAllPermutation(tempArr, tempHS);
+            }
+        }
+    }
+}
+

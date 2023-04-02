@@ -1,0 +1,186 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+#include<string.h>
+
+typedef struct card_{
+    char c;
+    int value;
+
+}Card;
+
+void bubble(Card *card, int n){
+    int flag,j,i;
+    int tmp;
+    char c_tmp;
+    flag = 1;
+    while(flag){
+        flag = 0;
+        for(j=n-1;j>=1;j--){
+            if(card[j].value < card[j-1].value){
+                tmp = card[j-1].value;
+                card[j-1].value = card[j].value;
+                card[j].value = tmp;
+
+                c_tmp = card[j-1].c;
+                card[j-1].c = card[j].c;
+                card[j].c = c_tmp;
+
+
+                flag = 1;
+            }
+        }
+    }
+}
+
+void Select(Card *card, int n){
+    int i,j,flag,tmp;
+    int min;
+    char c_tmp;
+    for(i=0;i<n;i++){
+        min = i;
+        flag = 0;
+        for(j = i;j<n;j++){
+            if(card[j].value < card[min].value){
+                min = j;
+                flag = 1;
+            }
+        }
+        if(flag == 1){
+            tmp = card[i].value;
+            card[i].value = card[min].value;
+            card[min].value = tmp;
+
+            c_tmp = card[i].c;
+            card[i].c = card[min].c;
+            card[min].c = c_tmp;
+        }
+        
+    }
+}
+
+void print(Card *card, int n){
+    int i;
+    for(i=0;i<n;i++){
+        if(i==n-1){
+            printf("%c%d",card[i].c,card[i].value);
+        }else{
+            printf("%c%d ",card[i].c,card[i].value);
+        }
+    }
+    printf("\n");
+}
+
+int main(){
+    int i,j,k;
+    int min,max;
+    int diff_max;
+    int A[101];
+    int n;
+    int count;
+    int tmp;
+    int flag;
+    int cnt[10];
+    char diff[10][5];
+    Card card[60];
+
+    Card origin[60];
+
+    for(i=0;i<10;i++){
+        cnt[i] = 0;
+    }
+   
+
+    scanf("%d\n",&n);
+
+    for(i=0;i<n;i++){
+        scanf("%c%d ",&origin[i].c,&origin[i].value);
+        card[i].c = origin[i].c;
+        card[i].value = origin[i].value;
+    }
+
+
+    for(i=0;i<n;i++){
+        diff[origin[i].value][cnt[origin[i].value]] = origin[i].c;
+        cnt[origin[i].value]++;
+    }
+
+
+    
+    
+    
+
+
+
+    bubble(card,n);
+    print(card,n);
+
+    for(i=0;i<10;i++){
+        cnt[i] = 0;
+    }
+    flag = 0;
+    for(i=0;i<n;i++){
+        if(diff[card[i].value][cnt[card[i].value]] != card[i].c){
+            flag = 1;
+            break;
+        }
+        cnt[card[i].value]++;
+    }
+
+    if(flag ==1){
+        printf("Not stable\n");
+    }else{
+        printf("Stable\n");
+    }
+    
+    
+
+
+
+
+    for(i=0;i<n;i++){
+        card[i].c = origin[i].c;
+        card[i].value = origin[i].value;
+    }
+
+
+
+    Select(card,n);
+
+    print(card,n);
+
+
+    for(i=0;i<10;i++){
+        cnt[i] = 0;
+    }
+    flag = 0;
+    for(i=0;i<n;i++){
+        if(diff[card[i].value][cnt[card[i].value]] != card[i].c){
+            flag = 1;
+            break;
+        }
+        cnt[card[i].value]++;
+    }
+
+    if(flag ==1){
+        printf("Not stable\n");
+    }else{
+        printf("Stable\n");
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+

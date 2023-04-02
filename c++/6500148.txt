@@ -1,0 +1,30 @@
+#include<iostream>
+
+using namespace std;
+
+int main()
+{
+    int x[10000], count =0, i;
+
+    for( i=0; ;i++){
+
+        cin>>x[i];
+
+        if(x[i]!=0 && x[i]<=10000){
+
+            count++;
+        }
+        else 
+          break;
+
+    }
+
+     for(i = 0; i<=count-1; i++){
+
+        cout<<"Case "<<i+1<<": "<<x[i]<<endl;
+    
+    
+     }
+
+    return 0;
+}

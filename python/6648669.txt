@@ -1,0 +1,88 @@
+/*********************************DOCUMENTACIÓN*********************************
+
+Preprocesar la matriz de adyacencia del grafo dirigido. Utilizando dp y bitmask
+calcular la distancia mínima que recorre todos los vértices tomando en cuenta
+la distancia de la matriz de adyacencia.
+
+Complejidad de tiempo = O(n^2*2^n) con n=|V|
+
+*******************************************************************************/
+
+#include <bits/stdc++.h>
+
+#define F first
+#define S second
+#define PB push_back
+#define MP make_pair
+#define INF 1e9
+
+#define all(x) begin(x), end(x)
+#define sz(x) (int)(x).size()
+#define FOR(i, a, b) for (int i = (a); i <= (b); i++)
+#define ROF(i, a, b) for (int i = (a); i >= (b); i--)
+#define FASTIO                        \
+    ios_base::sync_with_stdio(false); \
+    cin.tie(0);                       \
+    cout.tie(0);
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+typedef unsigned long long ull;
+typedef pair<int, int> pii;
+typedef pair<double,double> pdd;
+typedef pair<ll, ll> pll;
+typedef vector<int> vi;
+typedef vector<double> vd;
+typedef vector<ll> vll;
+typedef vector<char> vc;
+typedef vector<bool> vb;
+int graph[16][16];
+
+int main(int argc, char const *argv[])
+{
+    FASTIO;
+    int n,e;
+    cin >> n >> e;
+    FOR(i,0,n-1){
+        FOR(j,0,n-1){
+            graph[i][j] = INF;
+            graph[j][i] = INF;
+        }
+    }
+    int s,t,d;
+    FOR(i,0,e-1){
+        cin >> s >> t >> d;
+        graph[s][t] = d;
+    }
+
+    int dp[n][(1<<n)];
+    int ans_min = INT_MAX;
+    bool found = false;
+    ROF(m,(1<<n)-1,0){
+      FOR(u,0,n-1){
+        if(m == ((1<<n)-1)) dp[u][m] = 0;
+        else{
+            dp[u][m] = INF;
+            FOR(o,0,n-1){
+                if((m&(1<<o))==0 && graph[u][o]!=INF){
+                    dp[u][m] = min(dp[u][m],dp[o][m|(1<<o)] + graph[u][o]);
+                }
+            }
+
+            if(m==0 && dp[u][m]<ans_min && !found){
+                ans_min = dp[u][m];
+                found = true;
+            }
+            //cout << ans_min<<"\n";
+        }
+      }
+    }
+
+    if(ans_min == INF) cout << -1 <<"\n";
+    else cout << ans_min <<"\n";
+    
+    return 0;
+}
+

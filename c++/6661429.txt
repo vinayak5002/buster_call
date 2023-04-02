@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+using namespace std;
+using i64 = long long;
+using u64 = unsigned long long;
+
+int main() {
+	cin.sync_with_stdio(false);
+	cin.tie(nullptr);
+
+	i64 n, width, height;
+	cin >> n >> width >> height;
+	vector<i64> x(n), y(n), w(n);
+
+	for (int i = 0; i < n; i++) {
+		cin >> x[i] >> y[i] >> w[i];
+	}
+
+	vector<i64> y_axis(height + 2);
+	vector<i64> x_axis(width + 2);
+	for (int i = 0; i < n; i++) {
+		y_axis[max(y[i] - w[i], 0ll)]++;
+		y_axis[min(y[i] + w[i] + 1, height + 1)]--;
+
+		x_axis[max(x[i] - w[i], 0ll)]++;
+		x_axis[min(x[i] + w[i] + 1, width + 1)]--;
+	}
+
+	for (int i = 0; i < height; i++) {
+		y_axis[i + 1] += y_axis[i];
+	}
+	for (int i = 0; i < width; i++) {
+		x_axis[i + 1] += x_axis[i];
+	}
+
+	if (find(x_axis.begin(), x_axis.end() - 1, 0) == x_axis.end() - 1 ||
+		find(y_axis.begin(), y_axis.end() - 1, 0) == y_axis.end() - 1 ) {
+		cout << "Yes" << endl;
+	}
+	else {
+		cout << "No" << endl;
+	}
+
+	return 0;
+}
+

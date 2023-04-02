@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define llint int64_t
+struct l{
+    int x;
+    struct l *fore;
+    struct l *back;
+    l(){
+        fore = NULL;
+        back = NULL;
+    }
+};
+int insert(struct l *&F, struct l *&L){
+    struct l *New = (struct l*)malloc(sizeof(struct l));
+    int a;
+    cin >> a;
+    New->x = a;
+    if(F != NULL){
+        New->fore = F;
+        F->back = New;
+    } else if(F == NULL) L = New;
+    F = New;
+    return 0;
+}
+struct l* d(struct l *&F, llint a){
+    struct l *c = (struct l*)malloc(sizeof(struct l));
+    c = F;
+    while(c->fore != NULL && c->x != a) c = c->fore;
+    return c;
+}
+int main(){
+    int n;
+    cin >> n;
+    struct l *F = (struct l*)malloc(sizeof(struct l));
+    struct l *L = (struct l*)malloc(sizeof(struct l));
+    F = NULL;
+    L = NULL;
+    int a;
+    string s;
+    while(n--){
+        cin >> s;
+        if(s == "insert") insert(F, L);
+        else if(s == "delete"){
+            struct l *da = (struct l*)malloc(sizeof(struct l));
+            cin >> a;
+            da = d(F, a);
+            if(da->x != a) continue;
+            if(da->back == NULL){
+                F = da->fore;
+                F->back = NULL;
+            }else if(da->fore == NULL){
+                L = da->back;
+                L->fore = NULL;
+            }else {
+                struct l *next = (struct l*)malloc(sizeof(struct l));
+                // check if da is L or F
+                next = da->fore;
+                da = da->back;
+                da->fore = next;
+                next->back = da;
+            }
+        } else if(s == "deleteFirst"){
+            if(F->fore == NULL){
+                F = NULL;
+                L = NULL;
+            } else if(F->fore != NULL){
+                F = F->fore;
+                F->back = NULL;
+            }
+        } else if(s == "deleteLast"){
+            if(L->back == NULL){
+                L = NULL;
+                F = NULL;
+            } else if(L->back != NULL){
+                L = L->back;
+                L->fore = NULL;
+            }
+        }
+        //cout << n << endl;
+        /*if(s == "deleteFirst") deleteF(F, L);
+        if(s == "deleteLast") deleteL(F, L);*/
+    }
+    //cout << "Here" << endl;
+    struct l *current = (struct l*)malloc(sizeof(struct l));
+    current = F;
+    while(current->fore != NULL){
+        cout << current->x << " ";
+        current = current->fore;
+    }
+    cout << current->x << endl;
+    return 0;
+}

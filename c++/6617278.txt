@@ -1,0 +1,179 @@
+#include <bits/stdc++.h>
+#define rep(i,s,n) for(long long (i) = (s);(i) < (n);++i)
+using namespace std;
+using ll = long long;
+using P = pair<ll,ll>;
+
+
+typedef string::const_iterator State;
+class ParseError {};
+
+ll expression(State &begin,vector<int> &pri);
+ll pl(State &begin,string &s,vector<int> &pri,int index);
+ll mi(State &begin,string &s,vector<int> &pri,int index);
+ll by(State &begin,string &s,vector<int> &pri,int index);
+ll number(State &begin);
+
+// 括弧か数をパースして、その評価結果を返す。
+ll factor(State &begin,vector<int> &pri) {
+  if (*begin == '(') {
+    ++begin;
+    ll ret = expression(begin,pri);
+    ++begin;
+    return ret;
+  } else {
+    return number(begin);
+  }
+}
+
+// 四則演算の式をパースして、その評価結果を返す。
+ll expression(State &begin,vector<int> &pri) {
+  string s = "+-*";
+  ll ret;
+  if (s[pri[0]] == '+'){
+    ret = pl(begin,s,pri,0);
+  }else if (s[pri[0]] == '-'){
+    ret = mi(begin,s,pri,0);
+  }else{
+    ret = by(begin,s,pri,0);
+  }
+  return ret;
+}
+
+ll pl(State &begin,string &s,vector<int> &pri,int index){
+  ll ret;
+  if (index == 2){
+    ret = factor(begin,pri);
+    for(;;){
+      if(*begin == '+'){
+        ++begin;
+        ret += factor(begin,pri);
+      }else{
+        break;
+      }
+    }
+  } else{
+    if (s[pri[index+1]] == '-'){
+      ret = mi(begin,s,pri,index+1);
+      for(;;){
+        if(*begin == '+'){
+          ++begin;
+          ret += mi(begin,s,pri,index+1);
+        }else{
+          break;
+        }
+      }
+    }else{
+      ret = by(begin,s,pri,index+1);
+      for(;;){
+        if(*begin == '+'){
+          ++begin;
+          ret += by(begin,s,pri,index+1);
+        }else{
+          break;
+        }
+      }
+    }
+  }
+  return ret;
+}
+
+ll mi(State &begin,string &s,vector<int> &pri,int index){
+  ll ret;
+  if (index == 2){
+    ret = factor(begin,pri);
+    for(;;){
+      if(*begin == '-'){
+        ++begin;
+        ret -= factor(begin,pri);
+      }else{
+        break;
+      }
+    }
+  } else{
+    if (s[pri[index+1]] == '+'){
+      ret = pl(begin,s,pri,index+1);
+      for(;;){
+        if(*begin == '-'){
+          ++begin;
+          ret -= pl(begin,s,pri,index+1);
+        }else{
+          break;
+        }
+      }
+    }else{
+      ret = by(begin,s,pri,index+1);
+      for(;;){
+        if(*begin == '-'){
+          ++begin;
+          ret -= by(begin,s,pri,index+1);
+        }else{
+          break;
+        }
+      }
+    }
+  }
+  return ret;
+}
+
+ll by(State &begin,string &s,vector<int> &pri,int index){
+  ll ret;
+  if (index == 2){
+    ret = factor(begin,pri);
+    for(;;){
+      if(*begin == '*'){
+        ++begin;
+        ret *= factor(begin,pri);
+      }else{
+        break;
+      }
+    }
+  } else{
+    if (s[pri[index+1]] == '+'){
+      ret = pl(begin,s,pri,index+1);
+      for(;;){
+        if(*begin == '*'){
+          ++begin;
+          ret *= pl(begin,s,pri,index+1);
+        }else{
+          break;
+        }
+      }
+    }else{
+      ret = mi(begin,s,pri,index+1);
+      for(;;){
+        if(*begin == '*'){
+          ++begin;
+          ret *= mi(begin,s,pri,index+1);
+        }else{
+          break;
+        }
+      }
+    }
+  }
+  return ret;
+}
+
+// 数字の列をパースして、その数を返す。
+ll number(State &begin) {
+  ll ret = 0;
+  while (isdigit(*begin)) {
+    ret *= 10;
+    ret += *begin - '0';
+    begin++;
+  }
+  return ret;
+}
+
+int main() {
+  string s;
+  cin >> s;
+  vector<int> p = {0,1,2};
+  ll ans = LONG_LONG_MIN;
+  do{
+    State b = s.begin();
+    ans = max(expression(b,p),ans);
+  }while(next_permutation(p.begin(),p.end()));
+  cout << ans << endl;
+  return 0;
+}

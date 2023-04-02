@@ -1,0 +1,136 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace _20220416_AOJ
+{
+    class ITP2_3B
+    {
+        static int ReadInt() { return int.Parse(Console.ReadLine()); }
+        static double ReadDouble() { return double.Parse(Console.ReadLine()); }
+        static int[] ReadIntArr(char dlm = ' ') { return Console.ReadLine().Split(dlm).Select(x => int.Parse(x)).ToArray(); }
+        static double[] ReadDoubleArr(char dlm = ' ') { return Console.ReadLine().Split(dlm).Select(x => double.Parse(x)).ToArray(); }
+        static string[] ReadStringArr(char dlm = ' ') { return Console.ReadLine().Split(dlm).ToArray(); }
+
+        static SortedList<int, Segment> segments;
+        static int n;
+        static int[] arr;
+        static void Main(string[] args)
+        {
+            string line = Console.ReadLine();
+            segments = new SortedList<int, Segment>();
+            n = int.Parse(line);
+            arr = ReadIntArr();
+            int q = ReadInt();
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < q; i++)
+            {
+                int[] query = ReadIntArr();
+                int com = query[0];
+                int b = query[1];
+                int e = query[2];
+                int result = Search(com == 0, b, e);
+                sb.AppendLine(result.ToString());
+            }
+
+            Console.Write(sb);
+        }
+
+        static int Search(bool _toFindMin, int _b, int _e)
+        {
+            int rv = -1;
+            foreach (var v in segments)
+            {
+                Segment s = v.Value;
+                int evalIndex = (_toFindMin ? s.MinIndex : s.MaxIndex);
+                int evalValue = (_toFindMin ? s.MinValue : s.MaxValue);
+
+                if (s.Begin <= _b && s.End >= _e - 1 && evalIndex >= _b && evalIndex < _e)
+                {
+                    rv = evalValue;
+                    break;
+                }
+            }
+
+            if (rv == -1)
+            {
+                Segment nextSeg = null;
+                foreach(var v in segments)
+                {
+                    if(v.Value.MinIndex >= _b && v.Value.MaxIndex >= _b && v.Value.MinIndex < _e && v.Value.MaxIndex < _e)
+                    {
+                        nextSeg = v.Value;
+                    }
+                }
+
+                Segment tempSeg = new Segment();
+                tempSeg.Begin = _b;
+                tempSeg.End = _e - 1;
+                for (int i=_b;i<_e;i++)
+                {
+                    if (nextSeg == null || i < nextSeg.Begin)
+                    {
+                        if (arr[i] < tempSeg.MinValue)
+                        {
+                            tempSeg.MinIndex = i;
+                            tempSeg.MinValue = arr[i];
+                        }
+                        if (arr[i] > tempSeg.MaxValue)
+                        {
+                            tempSeg.MaxIndex = i;
+                            tempSeg.MaxValue = arr[i];
+                        }
+                    }
+                    else
+                    {
+                        if(tempSeg.MinValue > nextSeg.MinValue)
+                        {
+                            tempSeg.MinIndex = nextSeg.MinIndex;
+                            tempSeg.MinValue = nextSeg.MinValue;
+                        }
+                        if (tempSeg.MaxValue < nextSeg.MaxValue)
+                        {
+                            tempSeg.MaxIndex = nextSeg.MaxIndex;
+                            tempSeg.MaxValue = nextSeg.MaxValue;
+                        }
+
+                        try
+                        {
+                            nextSeg = segments.First(v => v.Value.MinIndex > i && v.Value.MaxIndex > i && v.Value.MinIndex < _e && v.Value.MaxIndex < _e).Value;
+                            i = nextSeg.End;
+                        }
+                        catch(InvalidOperationException)
+                        {
+                            nextSeg = null;
+                        }
+                    }
+                }
+
+                if(!segments.ContainsKey(tempSeg.Begin))
+                {
+                    segments.Add(tempSeg.Begin, tempSeg);
+                }
+
+                rv = (_toFindMin ? tempSeg.MinValue : tempSeg.MaxValue);
+            }
+
+            return rv;
+        }
+    }
+
+    class Segment
+    {
+        public int Begin { get; set; }
+        public int End { get; set; }
+        public int MinIndex { get; set; } = -1;
+        public int MaxIndex { get; set; } = -1;
+        public int MinValue { get; set; } = int.MaxValue;
+        public int MaxValue { get; set; } = int.MinValue;
+    }
+}
+

@@ -1,0 +1,214 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef pair<int, int> pii;
+typedef pair<double, double> pdd;
+typedef pair<long long, long long> pll;
+typedef long long ll;
+
+#define YESNO(bool)            \
+    if (bool) {                \
+        cout << "YES" << endl; \
+    } else {                   \
+        cout << "NO" << endl;  \
+    }
+#define yesno(bool)            \
+    if (bool) {                \
+        cout << "yes" << endl; \
+    } else {                   \
+        cout << "no" << endl;  \
+    }
+#define YesNo(bool)            \
+    if (bool) {                \
+        cout << "Yes" << endl; \
+    } else {                   \
+        cout << "No" << endl;  \
+    }
+#define REP(i, n) for (ll i = 0; i < ll(n); i++)
+#define REPD(i, n) for (ll i = n - 1; i >= 0; i--)
+#define FOR(i, a, b) for (ll i = a; i <= ll(b); i++)
+#define FORD(i, a, b) for (ll i = a; i >= ll(b); i--)
+#define FORA(i, I) for (const auto& i : I)
+
+#define ALL(x) x.begin(), x.end()
+#define SIZE(x) ll(x.size())
+
+#define INF32 2147483647
+#define INF64 9223372036854775807
+#define MOD 1000000007
+#define INF 1000000000
+
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+
+#define OP(m) cout << m << endl;
+ll myceil(ll a, ll b) { return (a + (b - 1)) / b; }
+ll myfloor(ll a, ll b) { return a / b; }
+
+int dx4[4] = {1, 0, -1, 0};
+int dy4[4] = {0, 1, 0, -1};
+int dx8[8] = {-1, -1, 0, 1, 1, 1, 0, -1};
+int dy8[8] = {0, -1, -1, -1, 0, 1, 1, 1};
+// cout<<fixed<<setprecision(10);
+
+template <typename T>
+struct edge {
+    int from;
+    int to;
+    T cost;
+    bool operator>(const edge& other) const { return cost > other.cost; }
+    bool operator<(const edge& other) const { return cost < other.cost; }
+};
+
+template <typename T>
+struct link {
+    int to;
+    T cost;
+    bool operator>(const link& other) const { return cost > other.cost; }
+    bool operator<(const link& other) const { return cost < other.cost; }
+};
+
+template <typename T>
+class graph {
+   public:
+    vector<edge<T>> edges;
+    vector<vector<link<T>>> adj;
+    int n;
+    graph(int sz) : n(sz) { adj.resize(n); }
+    virtual void add(int from, int to, T cost) = 0;
+};
+
+template <typename T>
+class undigraph : public graph<T> {
+   public:
+    using graph<T>::edges;
+    using graph<T>::adj;
+    using graph<T>::n;
+
+    undigraph(int sz) : graph<T>(sz) {}
+
+    void add(int from, int to, T cost = 1) {
+        assert(0 <= from && from < n && 0 <= to && to < n);
+        edges.push_back({from, to, cost});
+        adj[from].push_back({to, cost});
+        adj[to].push_back({from, cost});
+    }
+};
+
+template <typename T>
+class digraph : public graph<T> {
+   public:
+    using graph<T>::edges;
+    using graph<T>::adj;
+    using graph<T>::n;
+
+    digraph(int sz) : graph<T>(sz) {}
+
+    void add(int from, int to, T cost = 1) {
+        assert(0 <= from && from < n && 0 <= to && to < n);
+        edges.push_back({from, to, cost});
+        adj[from].push_back({to, cost});
+    }
+
+    digraph<T> reverse() const {
+        digraph<T> rev(n);
+        for (auto& e : edges) {
+            rev.add(e.to, e.from, e.cost);
+        }
+        return rev;
+    }
+};
+
+template <typename T>
+vector<T> dijkstra(const graph<T>& g, int start) {
+    assert(0 <= start && start < g.n);
+    priority_queue<link<T>, vector<link<T>>, greater<link<T>>> Q;
+    vector<T> dist(g.n, INF);
+    dist[start] = static_cast<T>(0);
+    Q.push({start, static_cast<T>(0)});
+    while (!Q.empty()) {
+        link<T> node = Q.top();
+        Q.pop();
+        int to = node.to;
+        if (node.cost > dist[to]) {
+            continue;
+        }
+        for (link<T> neighbor : g.adj[to]) {
+            T newCost = dist[to] + neighbor.cost;
+            if (newCost < dist[neighbor.to]) {
+                Q.push({neighbor.to, newCost});
+                dist[neighbor.to] = newCost;
+            }
+        }
+    }
+    return dist;
+}
+
+template <typename T>
+vector<T> lowlink(const graph<T>& g, int root) {
+    assert(0 <= root && root < g.n);
+    vector<T> low(g.n, INF32), ord(g.n, INF32), art_point;
+
+    int pre = 0;
+    auto dfs = [&](auto self, int current, int parent) -> void {
+        ord[current] = low[current] = pre++;
+
+        int cnt = 0;
+        bool isArt = false;
+
+        for (link<T> v : g.adj[current]) {
+            if (ord[v.to] == INF) {
+                cnt++;
+                self(self, v.to, current);
+                low[current] = min(low[current], low[v.to]);
+
+                if (current != -1 && ord[current] <= low[v.to]) isArt = true;
+            } else if (v.to != parent) {
+                low[current] = min(low[current], ord[v.to]);
+            }
+        }
+        if (current == -1 && cnt > 1) isArt = true;  // check root is art
+        if (isArt) art_point.push_back(current);
+    };
+
+    dfs(dfs, root, -1);
+
+    return art_point;
+}
+
+int visited[100000];
+int low[100000], ord[100000], parent[100000], timer = 1;
+undigraph<int> g(100000);
+// void dfs(int current, int par) {
+//     visited[current] = true;
+//     ord[current] = low[current] = timer++;
+
+//     link<int> next;
+//     REP(i, g.adj[current].size()) {
+//         next = g.adj[current][i];
+//         if (!visited[next.to]) {
+//             parent[next.to] = current;
+//             dfs(next.to, current);
+//             low[current] = min(low[current], low[next.to]);
+//         } else if (next.to != par) {
+//             low[current] = min(low[current], ord[next.to]);
+//         }
+//     }
+// }
+
+signed main() {
+    int V, E;
+    cin >> V >> E;
+
+    REP(i, E) {
+        int s, t;
+        cin >> s >> t;
+
+        g.add(s, t);
+    }
+
+    vector<int> ap = lowlink(g, 0);
+    sort(ALL(ap));
+    for (auto x : ap) OP(x);
+}

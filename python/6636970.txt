@@ -1,0 +1,138 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+)
+
+type Heap struct {
+	values  []int
+	size    int
+	maxsize int
+}
+
+func newHeap(maxsize int) *Heap {
+	return &Heap{
+		values:  []int{},
+		size:    0,
+		maxsize: maxsize,
+	}
+}
+
+func (h *Heap) leaf(index int) bool {
+	return index >= (h.size/2) && index <= h.size
+}
+
+func (h *Heap) parent(index int) int {
+	return (index - 1) / 2
+}
+
+func (h *Heap) leftChild(index int) int {
+	return 2*index + 1
+}
+
+func (h *Heap) rightChild(index int) int {
+	return 2*index + 2
+}
+
+func (h *Heap) insert(item int) error {
+	if h.size >= h.maxsize {
+		return fmt.Errorf("Heap is full")
+	}
+
+	h.values = append(h.values, item)
+	h.size++
+	h.upHeapify(h.size - 1)
+
+	return nil
+}
+
+func (h *Heap) swap(first, second int) {
+	temp := h.values[first]
+	h.values[first] = h.values[second]
+	h.values[second] = temp
+}
+
+func (h *Heap) upHeapify(index int) {
+	for h.values[index] > h.values[h.parent(index)] {
+		h.swap(index, h.parent(index))
+	}
+}
+
+func (h *Heap) downHeapify(current int) {
+	if h.leaf(current) {
+		return
+	}
+
+	largest := current
+	lChildIndex := h.leftChild(current)
+	rChildIndex := h.rightChild(current)
+
+	if lChildIndex < h.size && h.values[lChildIndex] > h.values[largest] {
+		largest = lChildIndex
+	}
+	if rChildIndex < h.size && h.values[rChildIndex] > h.values[largest] {
+		largest = rChildIndex
+	}
+
+	if largest != current {
+		h.swap(current, largest)
+		h.downHeapify(largest)
+	}
+	return
+}
+
+func (h *Heap) remove() int {
+	top := h.values[0]
+
+	h.values[0] = h.values[h.size-1]
+	h.values = h.values[:(h.size)-1]
+
+	h.size--
+	h.downHeapify(0)
+	return top
+}
+
+func (h *Heap) buildMaxHeap() {
+	for index := ((h.size / 2) - 1); index >= 0; index-- {
+		h.downHeapify(index)
+	}
+}
+
+func heapSort(n []int) []int {
+	h := newHeap(len(n))
+
+	for _, v := range n {
+		h.insert(v)
+	}
+
+	h.buildMaxHeap()
+
+	var r []int
+	for i := 0; i < len(n); i++ {
+		r = append(r, h.remove())
+	}
+	return r
+}
+
+func main() {
+	sc := bufio.NewScanner(os.Stdin)
+	sc.Split(bufio.ScanWords)
+
+	sc.Scan()
+
+	n, _ := strconv.Atoi(sc.Text())
+
+	var s []int
+	for i := 0; i < n; i++ {
+		sc.Scan()
+		t, _ := strconv.Atoi(sc.Text())
+		s = append(s, t)
+	}
+
+	ans := fmt.Sprint(heapSort(s))
+	fmt.Println(ans[1 : len(ans)-1])
+}
+

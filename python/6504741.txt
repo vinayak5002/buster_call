@@ -1,0 +1,86 @@
+<?php
+
+class Node
+{
+    public $id = -1;
+    public $parent = -1;
+    public $left = -1;
+    public $right = -1;
+
+    function __construct($id){
+        $this->id = $id;
+    }
+
+    function getDepth(){
+        $cnt = 0;
+        $tmp = $this->parent;
+        while($tmp !== -1){
+            $cnt++;
+            $tmp = $tmp->parent;
+        }
+
+        return $cnt;
+    }
+}
+
+$nodeArray = array();
+fscanf(STDIN, '%d', $N);
+for ($i=0; $i < $N; $i++) { 
+    $nodeArray[] = new Node($i);
+}
+
+for ($i=0; $i < $N; $i++) { 
+    $tmp = explode(' ', trim(fgets(STDIN)));
+    for ($j=2; $j < $tmp[1] + 2; $j++) { 
+        $child = $nodeArray[$tmp[$j]];
+        $parent = $nodeArray[$tmp[0]];
+        if($j === 2) $parent->left = $child;
+        else $nodeArray[$l]->right = $child;
+        $l = $tmp[$j];
+        $nodeArray[$l]->parent = $parent;
+    }
+}
+
+$D = array();
+function rec($u,$p){
+    global $nodeArray,$D;
+    $D[$u] = $p;
+
+    if($nodeArray[$u]->right !== -1){
+        rec($nodeArray[$u]->right->id,$p);
+    }
+    
+    if($nodeArray[$u]->left !== -1){
+        rec($nodeArray[$u]->left->id,$p+1);
+    }
+}
+
+rec(0,0);
+
+for ($i=0; $i < $N; $i++) { 
+    $nodeId = $nodeArray[$i]->id;
+    $parentId = $nodeArray[$i]->parent !== -1 ? $nodeArray[$i]->parent->id : -1;
+    // $depth = $nodeArray[$i]->getDepth();
+    $depth = $D[$i];
+    if($nodeArray[$i]->parent === -1){
+        $type = "root";
+    }
+    elseif($nodeArray[$i]->left !== -1){
+        $type = "internal node";
+    }
+    elseif($nodeArray[$i]->left === -1){
+        $type = "leaf";
+    }
+
+    printf("node %d: parent = %d, depth = %d, %s, ",$nodeId,$parentId,$depth,$type);
+
+    printf("[");
+    $cnt = 0;
+    $right = $nodeArray[$i]->left;
+    while($right !== -1){
+        if($cnt++ > 0) printf(", ");
+        printf("%d",$right->id);
+        $right = $right->right;
+    }
+    printf("]\n");
+}

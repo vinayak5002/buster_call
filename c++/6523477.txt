@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+bool isPrimes(int n) {
+    if (n == 1) {
+        return false;
+    } else {
+        for (int i = 2; i < n; i++) {
+            if (n % i == 0) return false;
+        }
+        return true;
+    }
+}
+
+double ratioNum(int a, int b) {
+    if (a < b)
+        return (double)a / (double)b;
+    else
+        return (double)b / (double)a;
+}
+
+int main() {
+    vector<int> resultP, resultQ;
+    int i = 0;
+
+    while (1) {
+        int m, a, b;
+        cin >> m >> a >> b;
+        if(m == 0 && a == 0 && b == 0) break;
+
+        resultP.push_back(1);
+        resultQ.push_back(1);
+
+        for (int q = 1; q <= m / 2 + 1; q++) {
+            if (isPrimes(q)) {
+                for (int p = 0; p * q <= m; p++) {
+                    if (isPrimes(p)) {
+                        if ((ratioNum(a, b) <= ratioNum(p, q) &&
+                             ratioNum(p, q) <= 1.0) &&
+                            (resultP.at(i) * resultQ.at(i) <= p * q && p * q <= m)) {
+                            resultP.at(i) = p;
+                            resultQ.at(i) = q;
+                        }
+                    }
+                }
+            }
+        }
+
+        i++;
+    }
+
+    for (int k = 0; k < i; k++){
+        cout << resultP.at(k) << " " << resultQ.at(k) << endl;
+    }
+
+    return 0;
+}
+

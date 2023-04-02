@@ -1,0 +1,77 @@
+import java.util.Objects;
+import java.util.Scanner;
+
+public class Main {
+    static Scanner sc = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        int n = getInt();
+        StringBuilder res = new StringBuilder();
+        Dictionary dic = new Dictionary(n);
+        for (int i = 0; i < n; i++) {
+            String com = sc.next();
+            String param = sc.next();
+            if (com.equals("insert")) {
+                dic.insert(param);
+            }
+            if (com.equals("find")) {
+                res.append(dic.find(param) ? "yes" : "no").append('\n');
+            }
+        }
+        System.out.print(res);
+    }
+
+    static int getInt() {
+        return Integer.parseInt(sc.next());
+    }
+
+    static class Dictionary {
+        Value[] vals;
+        int size;
+        int max;
+        Dictionary(int max) {
+            this.max = max;
+            vals = new Value[max];
+        }
+        void insert(String val) {
+            size++;
+            int key = getKey(val);
+            Value res = vals[key];
+            if (res == null) {
+                vals[key] = new Value(val);
+                return;
+            }
+            while (res.next !=null) res = res.next;
+            res.next = new Value(val);
+        }
+        boolean find(String val) {
+            if (size == 0) {
+                return false;
+            }
+            int key = getKey(val);
+            Value tmp = vals[key];
+            while (tmp != null) {
+                if (Objects.equals(tmp.val, val)) {
+                    return true;
+                }
+                tmp = tmp.next;
+            }
+            return false;
+        }
+        int getKey(String val) {
+            int res = 0;
+            for (char c : val.toCharArray()) {
+                res = res + (c - 'A') * 31;
+                res *= 13;
+            }
+            return res % max;
+        }
+    }
+    static class Value {
+        String val;
+        Value next;
+        Value(String val) {
+            this.val = val;
+        }
+    }
+}

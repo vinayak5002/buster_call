@@ -1,0 +1,294 @@
+class ConvexHull2D:
+    def __init__(self, vectors):
+        self.vectors = list(map(Vector2D, vectors))
+        self.build()
+        return
+
+    def __len__(self):
+        return len(self.vectors)
+
+    def __getitem__(self, item):
+        return self.vectors[item]
+
+    def __setitem__(self, item, value):
+        self.vectors[item] = Vector2D(value)
+        self.build()
+        return
+
+    def __str__(self):
+        return str(self.vectors)
+
+    def __repr__(self):
+        return self.__str__()
+
+    def build(self):
+        vectors = self.vectors
+        if not vectors:
+            return []
+        vectors.sort()
+        n = len(vectors)
+        k = 0
+        convex_hull = [None]*(n+2)
+        for i in range(n):
+            while k > 1 and (convex_hull[k-1]-convex_hull[k-2]).cross(vectors[i]-convex_hull[k-1]) < 0:
+                k -= 1
+            convex_hull[k] = vectors[i]
+            k += 1
+        t = k
+        for i in range(n-1)[::-1]:
+            while k > t and (convex_hull[k-1]-convex_hull[k-2]).cross(vectors[i]-convex_hull[k-1]) < 0:
+                k -= 1
+            convex_hull[k] = vectors[i]
+            k += 1
+        convex_hull = convex_hull[:min(n,k-1)]
+        self.vectors = convex_hull
+        return convex_hull
+
+    def is_include(self, vector):
+        vectors = self.vectors
+        sign = None
+        for i,p in enumerate(vectors):
+            q = vectors[i-1]
+            det = (vector-p).cross(q-p)
+            if det == 0:
+                continue
+            sign_i = det > 0
+            if sign is None:
+                sign = sign_i
+            elif sign != sign_i:
+                return False
+        return True
+
+    def intersection(self, other):
+        if type(other) != ConvexHull2D:
+            other = ConvexHull2D(other)
+
+        self_vectors = self.vectors
+        other_vectors = other.vectors
+        res = set()
+        for p in self_vectors:
+            if other.is_include(p):
+                res.add(p)
+        for p in other_vectors:
+            if self.is_include(p):
+                res.add(p)
+
+        for i,self_a in enumerate(self_vectors):
+            self_b = self_vectors[i-1]
+            self_line = Line2D(self_a, self_b)
+            for j,other_a in enumerate(other_vectors):
+                other_b = other_vectors[j-1]
+                other_line = Line2D(other_a, other_b)
+                p = self_line.intersection(other_line)
+                if p is not None:
+                    res.add(p)
+        res = ConvexHull2D(res)
+        return res
+
+    def size(self):
+        vectors = self.vectors
+        res = 0
+        for i,p in enumerate(vectors):
+            q = vectors[i-1]
+            res += p.cross(q)
+        if res < 0:
+            res = -res
+        return res / 2
+
+
+class Line2D:
+    def __init__(self, a, b):
+        self.a = Vector2D(a)
+        self.b = Vector2D(b)
+        return
+
+    def __len__(self):
+        return 2
+
+    def __getitem__(self, item):
+        if item == "a" or item == 0:
+            return self.a
+        elif item == "b" or item == 1:
+            return self.b
+        raise KeyError(item)
+
+    def __setitem__(self, item, value):
+        if item == "a" or item == 0:
+            self.a = value
+        elif item == "b" or item == 1:
+            self.b = value
+        raise KeyError(item)
+
+    def __str__(self):
+        return str((self.a, self.b))
+
+    def __repr__(self):
+        return self.__str__()
+
+    def length(self):
+        return abs(a-b)
+
+    def square_length(self):
+        return square_abs(a-b)
+
+    def is_intersect(self, other):
+        v = self.b-self.a
+        if v.cross(other.a-self.a)*v.cross(other.b-self.a) > 0:
+            return False
+        v = other.b-other.a
+        if v.cross(self.a-other.a)*v.cross(self.b-other.a) > 0:
+            return False
+        return True
+
+    def intersection(self, other):
+        if not self.is_intersect(other):
+            return None
+        det = (self.a-self.b).cross(other.b-other.a)
+        if det == 0:
+            if (other.a-self.a).dot(other.b-self.a) <= 0:
+                return self.a
+            elif (other.a-self.b).dot(other.b-self.b) <= 0:
+                return self.b
+            else:
+                return None
+        t = (other.b-self.b).cross(other.b-other.a) / det
+        return t*self.a+(1-t)*self.b
+
+
+class Vector2D:
+    def __init__(self, *args):
+        if len(args) == 1:
+            args = args[0]
+        assert len(args) == 2
+        self.y, self.x = args
+        return
+
+    def __str__(self):
+        return str((self.y, self.x))
+
+    def __repr__(self):
+        return self.__str__()
+
+    def __hash__(self):
+        return hash((self.y, self.x))
+
+    def __getitem__(self, item):
+        if item == "y" or item == 0:
+            return self.y
+        elif item == "x" or item == 1:
+            return self.x
+        raise KeyError(item)
+
+    def __setitem__(self, item, value):
+        if item == "y" or item == 0:
+            self.y = value
+        elif item == "x" or item == 1:
+            self.x = value
+        raise KeyError(item)
+
+    def __len__(self):
+        return 2
+
+    def __iter__(self):
+        return iter((self.y, self.x))
+
+    def __neg__(self):
+        return Vector2D(-self.y, -self.x)
+
+    def __eq__(self, other):
+        if type(other) != Vector2D:
+            other = Vector2D(other)
+        return self.y == other.y and self.x == other.x
+
+    def __ne__(self, other):
+        return self.__eq__(other)^True
+
+    def __le__(self, other):
+        if type(other) != Vector2D:
+            other = Vector2D(other)
+        return self.y < other.y or (self.y == other.y and self.x <= other.x)
+
+    def __lt__(self, other):
+        if type(other) != Vector2D:
+            other = Vector2D(other)
+        return self.y < other.y or (self.y == other.y and self.x < other.x)
+
+    def __ge__(self, other):
+        return self.__lt__(other)^True
+
+    def __gt__(self, other):
+        return self.__le__(other)^True
+
+    def __add__(self, other):
+        if type(other) != Vector2D:
+            other = Vector2D(other)
+        return Vector2D(self.y+other.y, self.x+other.x)
+
+    def __sub__(self, other):
+        if type(other) != Vector2D:
+            other = Vector2D(other)
+        return Vector2D(self.y-other.y, self.x-other.x)
+
+    def __mul__(self, other):
+        return Vector2D(self.y*other, self.x*other)
+
+    def __truediv__(self, other):
+        return Vector2D(self.y/other, self.x/other)
+
+    def __floordiv__(self, other):
+        return Vector2D(self.y//other, self.x//other)
+
+    def __radd__(self, other):
+        return Vector2D(other).__add__(self)
+
+    def __rsub__(self, other):
+        return Vector2D(other).__sub__(self)
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __iadd__(self, other):
+        return self.__add__(other)
+
+    def __isub__(self, other):
+        return self.__sub__(other)
+
+    def __imul__(self, other):
+        return self.__mul__(other)
+
+    def __itruediv__(self, other):
+        return self.__truediv__(other)
+
+    def __ifloordiv__(self, other):
+        return self.__floordiv__(other)
+
+    def dot(self, other):
+        if type(other) != Vector2D:
+            other = Vector2D(other)
+        return self.y*other.y+self.x*other.x
+
+    def cross(self, other):
+        if type(other) != Vector2D:
+            other = Vector2D(other)
+        return self.x*other.y-self.y*other.x
+
+    def square_abs(self):
+        return self.dot(self)
+
+    def __abs__(self):
+        return self.square_abs()**0.5
+
+
+def main():
+    n = int(input())
+    ps = [list(map(int,input().split()))[::-1] for _ in range(n)]
+    ps = ConvexHull2D(ps)
+    print(len(ps))
+    for x,y in ps:
+        print(y,x)
+    return
+
+
+if __name__ == "__main__":
+    main()
+

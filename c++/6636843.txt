@@ -1,0 +1,138 @@
+#include <iostream>
+#include <string>
+
+typedef struct {
+    int id;
+    int left;
+    int right;
+    int parent = -1;
+    int sibling = -1;
+    int degree = 0;
+    int depth = 0;
+    int height = 0;
+    std::string type;
+} Node;
+
+void load_nodes(int n, Node* nodes)
+{
+    int id, left, right;
+
+    for (int i = 0 ; i < n ; ++i)
+    {
+        std::cin >> id >> left >> right;
+        nodes[id].id = id;
+        nodes[id].left = left;
+        nodes[id].right = right;
+
+        if (left != -1)
+        {
+            nodes[left].parent = id;
+            nodes[left].sibling = right;
+            ++(nodes[id].degree);
+        }
+        if (right != -1)
+        {
+            nodes[right].parent = id;
+            nodes[right].sibling = left;
+            ++(nodes[id].degree);
+        }
+    }
+
+    return;
+}
+
+int calc_depth(Node* nodes, int id)
+{
+    int depth = 0;
+
+    Node* node = &nodes[id];
+    while (node->parent != -1)
+    {
+        node = &nodes[node->parent];
+        ++depth;
+    }
+
+    return depth;
+}
+
+int calc_height(Node* nodes, int id)
+{
+    int id_l = nodes[id].left;
+    int id_r = nodes[id].right;
+
+    int height_l = (id_l == -1) ? -1 : calc_height(nodes, id_l);
+    int height_r = (id_r == -1) ? -1 : calc_height(nodes, id_r);
+    int height_child = std::max(height_l, height_r);
+
+    return height_child + 1;
+}
+
+std::string calc_type(Node* nodes, int id)
+{
+    std::string type;
+
+    if (nodes[id].parent == -1)
+    {
+        type = "root";
+    }
+    else if (nodes[id].degree == 0)
+    {
+        type = "leaf";
+    }
+    else
+    {
+        type = "internal node";
+    }
+
+    return type;
+}
+
+void calc_info(int n, Node* nodes)
+{
+    for (int i = 0 ; i < n ; ++i)
+    {
+        nodes[i].depth = calc_depth(nodes, i);
+        nodes[i].height = calc_height(nodes, i);
+        nodes[i].type = calc_type(nodes, i);
+    }
+
+    return;
+}
+
+void print_node(Node* node)
+{
+    std::cout << "node " << node->id << ": ";
+    std::cout << "parent = " << node->parent << ", ";
+    std::cout << "sibling = " << node->sibling << ", ";
+    std::cout << "degree = " << node->degree << ", ";
+    std::cout << "depth = " << node->depth << ", ";
+    std::cout << "height = " << node->height << ", ";
+    std::cout << node->type << std::endl;
+
+    return;
+}
+
+void print_nodes(int n, Node* nodes)
+{
+    for (int i = 0 ; i < n ; ++i)
+    {
+        print_node(&nodes[i]);
+    }
+
+    return;
+}
+
+int main()
+{
+    int n;
+
+    std::cin >> n;
+
+    Node nodes[n];
+
+    load_nodes(n, nodes);
+    calc_info(n, nodes);
+    print_nodes(n, nodes);
+
+    return 0;
+}

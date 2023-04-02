@@ -1,0 +1,38 @@
+import kotlin.math.max
+
+// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DPL_1_B&lang=ja
+/*
+* rec(index, 制約変数)による再帰関数を作成する
+* recを返り値は(index, 制約変数)の木の根を探索したときの最善の値
+* recは再帰的に木の根を探索するが、制約変数の違反あるいは葉まで到達したときに、固定値を返す
+*
+* */
+class Alogorithm {
+    fun dp(){
+        val (n, w)  = readLine()!!.split(" ").map { it.toInt() }
+        val scores = (0 until n).map { readLine()!!.split(" ").map { it.toInt() } }
+        var memo = mutableMapOf<Pair<Int, Int>, Int>()
+
+        fun rec(index: Int, weight: Int, value: Int): Int {
+            if (index >= n) return value
+            if (weight + scores[index][1] > w) return value
+            if (memo.contains(Pair(index, weight))){
+                return memo[Pair(index, weight)]!!
+            } else {
+                memo[Pair(index, weight)] = max(
+                    rec(index+1, weight, value),
+                    rec(index+1, weight + scores[index][1], value + scores[index][0]) )
+                return memo[Pair(index, weight)]!!
+            }
+        }
+
+        val answer = rec(0, 0, 0)
+        print(answer)
+    }
+
+}
+
+fun main() {
+    val algo = Alogorithm()
+    algo.dp()
+}

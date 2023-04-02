@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+#define INF 1001001001
+#define LINF (1LL<<60)
+#define rep(i,n) for (int i = 0; i < (n); ++i)
+using namespace std;
+using ll = long long;
+using ld = long double;
+using P = pair<int,int>;
+template<typename T1,typename T2> inline bool chmin(T1 &a,T2 b){ return a > b && (a = b, true); }
+template<typename T1,typename T2> inline bool chmax(T1 &a,T2 b){ return a < b && (a = b, true); }
+template<typename T1,typename T2, typename T3> inline bool in(T1 val, T2 l, T3 r){return l <= val && val < r;}
+
+const int MOD = 1000000007;
+
+vector<vector<int>> calc_next(const string &s) {
+    int n = (int) s.size();
+    vector<vector<int>> res(n+1, vector<int>(26, n));
+    for (int i = n-1; 0 <= i; --i) {
+        rep(j, 26) {
+            res[i][j] = res[i+1][j];
+        }
+        res[i][s[i]-'a'] = i;
+    }
+    return res;
+}
+
+void add(ll &a, ll b) {
+    a += b;
+    if (MOD <= a) a -= MOD;
+}
+
+int main() {
+    string s;
+    cin >> s;
+    string t = s;
+    int n = (int) s.size();
+    reverse(t.begin(), t.end());
+    auto ns = calc_next(s);
+    auto nt = calc_next(t);
+    vector<vector<ll>> dp(n+1, vector<ll>(n+1, 0));
+    dp[0][0] = 1;
+    rep(i,n) rep(j,n) rep(k,26) {
+        int ni = ns[i][k];
+        int nj = nt[j][k];
+        if (n < ni + nj + 2) continue;
+        add(dp[ni+1][nj+1], dp[i][j]);
+    }
+    ll res = 0;
+    for (int i = 0; i <= n; ++i) {
+        for (int j = 0; i+j <= n; ++j) {
+            int num = 1;
+            rep(k,26) {
+                if (ns[i][k] + 1 + j <= n) ++num;
+            }
+            res = (res + dp[i][j] * num % MOD) % MOD;
+        }
+    }
+    cout << res - 1 << endl;
+    return 0;
+}

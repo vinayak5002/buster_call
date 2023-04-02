@@ -1,0 +1,62 @@
+#include <iostream>
+#include <set>
+using namespace std;
+
+struct edge{
+	int from,to,cost;
+};
+typedef pair<int,int> P;
+edge es[100];
+int d[10];
+int V,E;
+set<int> s;
+int INF=0x3f3f3f3f;
+P shortest_path(int s){
+	for(int i=0;i<V;i++) d[i]=INF;
+	d[s]=0;
+	int ans=0;
+	while(true){
+		bool update=false;
+		for(int i=0;i<E;i++){
+			edge e=es[i];
+			if(d[e.from]!=INF&&d[e.to]>d[e.from]+e.cost){
+				d[e.to]=d[e.from]+e.cost;
+				update=true;
+			}
+		}
+		if(!update) break;  
+	}
+	for(int i=0;i<V;i++) ans+=d[i];
+	cout<<s<<endl;
+	return P(s,ans);
+}  
+int main(){
+	while(scanf("%d",&E),E){
+		s.clear();
+		P ans;
+		int a,b,c;
+		V=0;
+		for(int i=0;i<E;i++){
+			scanf("%d%d%d",&a,&b,&c);
+			es[i].from=a;
+			es[i].to=b;
+			s.insert(a);
+			s.insert(b);
+			es[i].cost=c;
+			es[i+E].from=b;
+			es[i+E].to=a;
+			es[i+E].cost=c;
+		}
+		V=s.size();
+		E=E*2;
+		ans.second=INF;
+		ans.first=0;
+		P temp;
+		for(int i=0;i<V;i++){
+			temp=shortest_path(i);
+			if(ans.second>temp.second) ans=temp; 
+		}
+		printf("%d %d\n",ans.first,ans.second);
+	}
+	return 0;
+}

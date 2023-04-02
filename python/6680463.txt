@@ -1,0 +1,32 @@
+import scala.annotation.tailrec
+import scala.io.StdIn
+
+object Main extends App {
+  def hash(key:String):Int = {
+    def iterate(key:String, h:Int):Int = key.headOption match {
+      case Some('A') => iterate(key.tail, (h << 2) | 0)
+      case Some('C') => iterate(key.tail, (h << 2) | 1)
+      case Some('G') => iterate(key.tail, (h << 2) | 2)
+      case Some('T') => iterate(key.tail, (h << 2) | 3)
+      case None => h
+    }
+    iterate(key, 0)
+  }
+  val table = Array.fill[Boolean](1 << 24 -1)(false)
+  val N  = StdIn.readInt()
+  val S = for (_ <- 0 until N) yield StdIn.readLine().split(" ").toList
+
+  @tailrec
+  def solver(ll:List[List[String]], ac:List[String]):List[String] = {
+    ll match {
+      case List("insert", s)::xs =>
+        table(hash(s)) = true
+        solver(xs, ac)
+      case List("find", s)::xs => if (table(hash(s))) solver(xs, "yes"::ac) else solver(xs, "no"::ac)
+      case _ => ac.reverse
+    }
+  }
+
+  val C = solver(S.toList, List())
+  println(s"${C.mkString("\n")}")
+}

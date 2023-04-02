@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+/*--------------------------------------------------------------------*/
+#define INF 3*100*1000 + 5
+#define MAX 1000000
+#define pb push_back
+#define fi first
+#define se second
+#define pii pair<int, int>
+#define vi vector<int>
+#define vvi vector<vector<int>>
+#define intt int64_t
+#define piic pair<int64_t, int64_t>
+#define forn(i, n) for(int i = 1; i <= n; ++i)
+typedef long long ll;
+using namespace std;
+
+const int64_t mod = 1e9 + 7;
+const int N = 2*1e5 + 20;
+int64_t minval = -1e14;
+void setIO(string s) {
+	freopen((s + ".in").c_str(), "r", stdin);
+	freopen((s + ".out").c_str(), "w", stdout);
+}
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace __gnu_pbds;
+template <class T>
+using ordered_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
+
+/*--------------------------------------------------------------------*/
+
+int t, n, m, q;
+int cnt = 1;
+vector<vi> g;
+vector<int> h, first, last, euler;
+vector<pii> queries;
+
+void dfs(int v, int par, int curH = 0){
+    h[v] = curH;
+    euler.pb(v);
+    first[v] = euler.size() - 1;
+    for(auto child : g[v]){
+        if(child == par) continue;
+        dfs(child, v, curH + 1);
+        euler.pb(v);
+    }
+    euler.pb(v);
+    last[v] = euler.size() - 1;
+}
+
+int main(int argc, const char * argv[]) {
+    ios::sync_with_stdio(0); cin.tie(0);
+
+
+        queries.clear();
+        cin >> n;
+        g.resize(n + 1); first.resize(n + 1); last.resize(n + 1); h.resize(n + 1);
+
+        for(int i = 1; i <= n; ++i){
+            cin >> m;
+            for(int j = 1; j <= m; ++j){
+                int x; cin >> x;
+                g[i].pb(x);
+            }
+        }
+
+        cin >> q;
+        for(int i = 0; i < q; ++i){
+            int a, b; cin >> a >> b;
+            queries.pb({a, b});
+        }
+        cout << "Case " << cnt++ << ":\n";
+        dfs(1, -1, 0);
+       // for(int i = 1; i<= n; ++i) cout << h[i] << '\n';
+        int ans, minh;
+        for(auto& [a, b] : queries){
+            minh = INT_MAX;
+            if(first[a] > first[b]) swap(a, b);
+            for(int i = first[a]; i <= first[b]; ++i){
+                if(h[euler[i]] < minh){
+                    minh = h[euler[i]];
+                    ans = euler[i];
+                }
+            }
+            cout << ans - 1 << '\n';
+        }
+
+
+    return 0;
+
+}
+

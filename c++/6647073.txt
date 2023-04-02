@@ -1,0 +1,88 @@
+#include <iostream>
+#include <stack>
+using namespace std;
+
+int n;                       //  頂点数
+#define MAX_n  1000000       //  n の最大数
+int d[MAX_n][MAX_n];         //  d[v]: 頂点 v の 1 からの深さ
+int M[MAX_n][MAX_n];         //  隣接行列
+
+// 頂点v が 集合Sに属する時 S[v] = 1, 属さないとき S[v] = 0
+// N[0]: 集合 S, N[i]: S の i近傍 
+int N[MAX_n][MAX_n];
+
+// S の 1-近傍 S1 を作成
+void oneNbhd(int S1[], int S[])
+{
+    for (int u = 0; u < n; u++)
+	S1[u] = S[u];
+    for (int u = 0; u < n; u++) {
+	if (S[u] == 0)
+	    continue;
+	for (int v = 0; v < n; v++) {
+	    if (M[u][v] == 1) 
+		S1[v] = 1;
+	    
+    }
+}
+
+// s からの深さを求める
+void getDepth(int s)
+{
+    for (int u = 0; u < n; u++) {
+	if (u == s)
+	    N[0][u] = 1;
+	else
+       	    N[0][u] = 0;
+    }
+    
+    //  i 近傍をセット
+    for (int i = 1; i < n; i++) {
+	oneNbhd(N[i], N[i-1]);
+	//  d を求める
+	for (int u = 1; u <= n; u++) 
+	    for (int i = 1; i < n; i++) 
+		if (N[i][u] == 1 && N[i-1][u] == 0) {
+		    d[s][u] = i;
+		    break;
+		}
+    }
+}
+
+int main()
+{
+    //  友達関係の入力  
+    cin >> n;
+    int m;    //  友達関係の数
+    cin >> m;
+    
+    for (int i = 0; i < m; i++) {
+	int s, t;
+	cin >> s >> t;
+	M[s][t] = M[t][s] = 1;
+    }
+
+    // d の初期化
+    for (int i = 0; i < n; i++) 
+	for (int j = 0; j < n; j++) 
+	d[i][j] = -1; 
+    
+    int q;    // 質問の数
+    cin >> q;
+    for (int i = 0; i < q; i++) {
+	int s, t;
+	cin >> s >> t;
+	// d の作成
+	if (d[s][s] == -1) {    //  まだ d[s][] が計算されていない
+	    d[s][s] = 0;
+	    getDepth(s);
+	}
+	if (d[s][t] >= 0)
+	    cout << "yes" << endl;
+	else
+	    cout << "no" << endl;
+    }
+		       
+    return 0;
+}
+

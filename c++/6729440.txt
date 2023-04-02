@@ -1,0 +1,116 @@
+#pragma region template
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+// clang-format off
+using ll  = long long;    using vl   = vector<ll>;  using vvl   = vector<vl>;
+using ld  = long double;  using vld  = vector<ld>;  using vvld  = vector<vld>;
+using pll = pair<ll, ll>; using vpll = vector<pll>; using vvpll = vector<vpll>;
+using vb = vector<bool>; using vvb = vector<vector<bool>>;
+using vs = vector<string>;
+using mll = map<ll, ll>;
+template <class T> using V = vector<T>; template <class T> using VV = V<V<T>>; template <class T> using VVV = V<VV<T>>;
+template <class T> using max_heap = priority_queue<T>;
+template <class T> using min_heap = priority_queue<T, vector<T>, greater<T>>;
+constexpr ll inf = 3001001000100100100LL;
+#define endl '\n'
+
+#define  _overload(_1, _2, _3, name, ...) name
+#define   rep(...) _overload(__VA_ARGS__,   _rep,   _rep2,)(__VA_ARGS__)
+#define  repc(...) _overload(__VA_ARGS__,  _repc,  _repc2,)(__VA_ARGS__)
+#define  repr(...) _overload(__VA_ARGS__,  _repr,  _repr2,)(__VA_ARGS__)
+#define reprc(...) _overload(__VA_ARGS__, _reprc, _reprc2,)(__VA_ARGS__)
+#define   _rep(i,k,n) for(ll i=(k)  , i##_xxxx=(n); i < i##_xxxx; ++i)
+#define  _repc(i,k,n) for(ll i=(k)  , i##_xxxx=(n); i <=i##_xxxx; ++i)
+#define  _repr(i,k,n) for(ll i=(n)-1, i##_xxxx=(k); i >=i##_xxxx; --i)
+#define _reprc(i,k,n) for(ll i=(n)  , i##_xxxx=(k); i >=i##_xxxx; --i)
+#define   _rep2(i,n)   _rep(i,0,n)
+#define  _repc2(i,n)  _repc(i,1,n)
+#define  _repr2(i,n)  _repr(i,0,n)
+#define _reprc2(i,n) _reprc(i,1,n)
+
+#define rall(o) rbegin(o), rend(o)
+#define  all(o)  begin(o),  end(o)
+template <class C> ll sz(const C& c) { return static_cast<ll>(c.size()); }
+template <class T, class U> common_type_t<T, U> min(const T& a, const U& b){ return std::min<common_type_t<T, U>>(a,b); }
+template <class T, class U> common_type_t<T, U> max(const T& a, const U& b){ return std::max<common_type_t<T, U>>(a,b); }
+template <class T, class U> bool chmax(T& m, const U& v){ assert(numeric_limits<T>::max() > v); if (m < v){ m = v; return true; } return false; }
+template <class T, class U> bool chmin(T& m, const U& v){ assert(numeric_limits<T>::min() < v); if (v < m){ m = v; return true; } return false; }
+template <class T, class U> common_type_t<T, U> cdiv(const T& a, const U& b){ return (a + b - 1) / b; }
+template <class T, class U> common_type_t<T, U> rdiv(const T& a, const T& b){ return (a + b / 2) / b; }
+
+template <class T, class S>             string join(const T& v, const S& sep                  ){ stringstream ss; bool f = false; for (const auto& e : v){ if (f) ss << sep; f = true; ss << e;} return ss.str(); }
+template <class T, class S, class... U> string join(const T& v, const S& sep, const U& ...args){ stringstream ss; bool f = false; for (const auto& c : v){ if (f) ss << sep; f = true; ss << join(c, args...); } return ss.str(); }
+template <class T>            ostream& operator<<(ostream& os, const vector<T>&            seq){ os << '[' << join(seq, ",") << ']'; return os; } template <class T>            ostream& operator<<(ostream& os, const vector<vector<T>>&    seq){ os << '[' << join(seq, ",\n ") << ']'; return os; }
+template <class T>            ostream& operator<<(ostream& os, const deque<T>&             seq){ os << '[' << join(seq, ",") << ']'; return os; }
+template <class T>            ostream& operator<<(ostream& os, const set<T>&               seq){ os << '{' << join(seq, ",") << '}'; return os; }
+template <class T , class TH> ostream& operator<<(ostream& os, const unordered_set<T, TH>& seq){ os << '{' << join(seq, ",") << '}'; return os; }
+template <class TK, class TV> ostream& operator<<(ostream& os, const map<TK, TV>&          seq){ os << '{'; bool f = false; for (const auto& e : seq){ if (f) os << ','; f = true; os << e.first << ":" << e.second; } os << '}'; return os; }
+template <class T1, class T2> ostream& operator<<(ostream& os, const pair<T1, T2>&          pa){ os << '(' << pa.first << ',' << pa.second << ')'; return os; }
+
+#if LOCAL
+#define debug(...) _debug(__VA_ARGS__, __LINE__)
+#else
+#define debug(...)
+#endif
+void print() { std::cout << '\n'; }
+template <class S>             void  print(const S& a){ std::cout << a << '\n'; }
+template <class S>             void _debug(const S& a){ std::cerr << "(L:" << std::setw(3) << a << ")\n"; }
+template <class S, class... T> void  print(const S& a, const T&... args){ std::cout << a << ' ';  print(args...); }
+template <class S, class... T> void _debug(const S& a, const T&... args){ std::cerr << a << ' '; _debug(args...); }
+
+struct setup_main { setup_main() { std::cin.tie(nullptr); std::ios::sync_with_stdio(false); std::cout << fixed << setprecision(15); } } setup_main_;
+// clang-format on
+#pragma endregion
+
+/*/
+再帰的に計算していく
+idx: 行数
+d: 再帰の深さ('.'の数)
+
+<digit> ::= ['1' - '9']
+/*/
+
+
+ll solve(ll& idx, ll d, vs& S) {
+    char c = S[idx][d];
+    debug(idx, d, c, S);
+    if (isdigit(c)) {
+        idx++;
+        return c - '0';
+    }
+
+    if (c == '+') {
+        idx++;
+        ll ret = 0;
+        while (S[idx].size() > d + 1) {
+            ret += solve(idx, d + 1, S);
+        }
+        return ret;
+    }
+    if (c == '*') {
+        idx++;
+        ll ret = 1;
+        while (S[idx].size() > d + 1) {
+            ret *= solve(idx, d + 1, S);
+        }
+        return ret;
+    }
+    assert(true);
+}
+
+
+signed main() {
+    while (true) {
+        ll N;
+        cin >> N;
+        if (N == 0) break;
+        vs S(N + 1);
+        rep(i, N) cin >> S[i];
+        ll idx = 0;
+        cout << solve(idx, 0, S) << endl;
+    }
+}
+

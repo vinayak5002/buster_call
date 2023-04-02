@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+constexpr ll inf = (1LL << 62);
+constexpr ll MOD = (998244353);
+template <typename T>
+bool chmax(T& a, const T& b)
+{
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+template <typename T>
+bool chmin(T& a, const T& b)
+{
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+struct edge {
+    ll from, to, cost;
+};
+bool bellman_ford(const vector<edge>& edges, ll v, ll s, vector<ll>& d)
+{
+    //edgesは辺情報、vは頂点数、sは始点、dはそこまでの最短距離
+    // 閉路がある場合にtrueを返す
+    d.resize(v, inf);
+    d[s] = 0;
+    ll cnt;
+    for (cnt = 0; cnt < v; ++cnt) {
+        bool update = false;
+        for (auto& e : edges) {
+            if (d[e.from] != inf && d[e.to] > d[e.from] + e.cost) {
+                d[e.to] = d[e.from] + e.cost;
+                update = true;
+            }
+        }
+        if (!update)
+            break;
+    }
+    return cnt == v;
+}
+
+int main()
+{
+    ll V, E, r;
+    cin >> V >> E >> r;
+    vector<edge> edges;
+    for (ll i = 0; i < E; ++i) {
+        ll s, t, d;
+        cin >> s >> t >> d;
+        edges.push_back(edge{s, t, d});
+    }
+    vector<ll> d;
+    if (bellman_ford(edges, V, r, d)) {
+        cout << "NEGATIVE CYCLE" << endl;
+    } else {
+        for (auto& x : d) {
+            if (x == inf) {
+                cout << "INF" << endl;
+            } else {
+                cout << x << endl;
+            }
+        }
+    }
+}

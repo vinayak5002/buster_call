@@ -1,0 +1,39 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using P=pair<int,int>;
+const int INF=1<<30;
+struct edge{int to,cost;};
+
+int main() {
+    int n,m,s;
+    cin>>n>>m>>s;
+    vector<edge> G[100005];
+    for(int i=0;i<m;i++){
+        int x;
+        edge e;
+        cin>>x>>e.to>>e.cost;
+        G[x].push_back(e);
+    }
+    int d[100005];
+    fill(d,d+n,INF);
+    d[s]=0;
+    priority_queue<P> pq;
+    pq.push(P(0,s));
+    while(!pq.empty()){
+        P p=pq.top(); pq.pop();
+        int v=p.second;
+        if(d[v]<p.first)continue;
+        for(auto e:G[v]){
+            int c=e.cost,u=e.to;
+            if(d[u]>d[v]+c){
+                d[u]=d[v]+c;
+                pq.push(P(d[u],u));
+            }
+        }
+    }
+    for(int i=0;i<n;i++){
+        if(d[i]==INF)cout<<"INF"<<endl;
+        else cout<<d[i]<<endl;
+    }
+}

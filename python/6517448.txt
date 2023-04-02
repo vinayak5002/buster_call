@@ -1,0 +1,92 @@
+import java.util.Scanner;
+
+/**
+ * Mian
+ */
+public class Mian {
+
+    private static int[][][] dicenomens = 
+        {
+            {{5, 3}, {3, 1}, {2, 0}, {4, 3}},//1
+            {{1, 0}, {3, 0}, {6, 0}, {4, 0}},//2
+            {{1, 3}, {5, 0}, {6, 1}, {2, 0}},//3
+            {{1, 1}, {2, 0}, {6, 3}, {5, 0}},//4
+            {{1, 3}, {4, 0}, {6, 2} ,{3, 0}},//5
+            {{2, 0}, {3, 3}, {5, 2}, {4, 1}}//6
+        };
+    
+    private static int[] donomen(int[] current_menstatus, char houkou){
+        int houkou_num=0;
+
+        switch (houkou){
+            case 'N':
+                houkou_num = (0+current_menstatus[1])%4;
+                break;
+
+            case 'E':
+                houkou_num = (1+current_menstatus[1])%4;
+                break;
+
+            case 'S':
+                houkou_num = (2+current_menstatus[1])%4;
+                break;
+
+            case 'W':
+                houkou_num = (3+current_menstatus[1])%4;
+                break;
+
+            default:
+                break;
+        }
+
+        //後の面の向き
+        //元の面の向きを0とした場合
+        int af_mennnomuki = (dicenomens[current_menstatus[0]-1][(houkou_num+2)%4][1] + current_menstatus[1]) % 4;
+        /*
+        switch (houkou_num){
+
+            case 0:
+                af_mennnomuki = 0 + dicenomens[current_menstatus[0]-1][houkou_num][1];
+                break;
+
+            case 1:
+                af_mennnomuki = 3 + dicenomens[current_menstatus[0]-1][houkou_num][1];
+                break;
+
+            case 2:
+                af_mennnomuki = 2 + dicenomens[current_menstatus[0]-1][houkou_num][1];
+                break;
+
+            case 3:
+                af_mennnomuki = 1 + dicenomens[current_menstatus[0]-1][houkou_num][1];
+                break;
+
+            default:
+                break;
+        }
+        */
+
+
+        int[] re = 
+        {
+            dicenomens[current_menstatus[0]-1][(houkou_num+2)%4][0],
+            af_mennnomuki
+        };
+        return re;
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String line = sc.nextLine();
+        String[] raw_nums = line.split(" ");
+        String houkous = sc.nextLine();
+        sc.close();
+        
+        int current_menstatus[] = {1, 0};
+        for (int i=0; i<houkous.length(); i++){
+            current_menstatus = donomen(current_menstatus, houkous.charAt(i));
+        }
+
+        System.out.println(raw_nums[current_menstatus[0]-1]);
+    }
+}

@@ -1,0 +1,45 @@
+import java.util.*;
+
+public class Main {
+    static Scanner sc = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        int n = getInt(), k = getInt();
+        int[] W = new int[n];
+        int wmax = 0;
+        for (int i = 0; i < W.length; i++) {
+            W[i] = getInt();
+            wmax = Math.max(wmax, W[i]);
+        }
+        System.out.println(binarySearch(W, 0, wmax * n, k));
+    }
+
+    static int getInt() {
+        return Integer.parseInt(sc.next());
+    }
+
+    static boolean check (int p, int k, int[] W) {
+        int i = 0;
+        for (int j = 0; j < k; j++) {
+            int s = 0;
+            while (s + W[i] <= p) {
+                s += W[i];
+                i++;
+                if (i == W.length) return true;
+            }
+        }
+        return false;
+    }
+
+    static int binarySearch(int[] W, int left, int right, int k) {
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (check(mid, k, W)) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+}

@@ -1,0 +1,71 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+void dump(deque<ll> deq){
+    rep(i, 0, SZ(deq)){
+        if(i) cout << " ";
+        cout << deq[i];
+    }
+    cout << endl;
+}
+
+vector<ll> sliding_minimum_element(vector<ll> &vec, ll k){
+  ll n = vec.size();
+  vector<ll> res(n - k + 1);
+  deque<ll> deq;
+
+  for(ll i = 0; i < k; i++){
+    while(!deq.empty() && vec[deq.back()] >= vec[i]){
+      deq.pop_back();
+    }
+    deq.push_back(i);
+  }
+
+  for(ll i = k; i < n; i++){
+    res[i - k] = vec[deq.front()];
+    while(!deq.empty() && vec[deq.back()] >= vec[i]){
+      deq.pop_back();
+    }
+    if(deq.front() == i - k) deq.pop_front();
+    deq.push_back(i);
+  }
+  res[n - k] = vec[deq.front()];
+  
+  return res;
+}
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll n, l;
+  cin >> n >> l;
+  vector<ll> a(n);
+  rep(i, 0, n) cin >> a[i];
+
+  auto ans = sliding_minimum_element(a, l);
+  rep(i, 0, SZ(ans)){
+      if(i) cout << " ";
+      cout << ans[i];
+  }
+  cout << endl;
+
+
+  return 0;
+}

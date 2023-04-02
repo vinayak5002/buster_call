@@ -1,0 +1,56 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def dfs(num_vertexes, cost_matrix, e_state, c_state, v, dp):
+    if (c_state, v) in dp:
+        return dp[(c_state, v)]
+
+    if c_state == e_state:
+        return cost_matrix[v][0]
+
+    result = math.inf
+    for u in range(num_vertexes):
+        if u == v:
+            continue
+        if c_state & (1 << u) == 0:
+            n_state = c_state | (1 << u)
+            n_cost = dfs(num_vertexes, cost_matrix, e_state, n_state, u, dp) + cost_matrix[v][u]
+            result = min(result, n_cost)
+
+    dp[(c_state, v)] = result
+    return result
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    num_vertexes, num_edges = list(map(int, f.readline().split()))
+    cost_matrix = [[math.inf] * num_vertexes for _ in range(num_vertexes)]
+    for _ in range(num_edges):
+        s, t, d = list(map(int, f.readline().split()))
+        cost_matrix[s][t] = d
+
+    dp = {}
+    e_state = (1 << num_vertexes) - 1
+    result = dfs(num_vertexes, cost_matrix, e_state, 1, 0, dp)
+
+    if result != math.inf:
+        print(result)
+    else:
+        print(-1)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

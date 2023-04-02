@@ -1,0 +1,115 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+#include <climits>
+#include <cmath>
+using namespace std;
+
+
+class RangeAddMinimumQuery {
+private:
+	int n_;
+	vector<int> add_data_;
+	vector<int> min_data_;
+
+private:
+	int find_sub(int s, int t, int k, int left, int right) {
+		if (right <= s || t <= left) {
+			return INT_MAX;
+		}
+		if (s <= left && right <= t) {
+			return min_data_[k] + add_data_[k];
+		}
+		int mid = (left + right) / 2;
+		int k2 = 2 * k;
+		int val0 = find_sub(s, t, k2 + 1, left, mid);
+		int val1 = find_sub(s, t, k2 + 2, mid, right);
+		return min(val0, val1) + add_data_[k];
+	}
+
+	void add_sub(int s, int t, int x, int k, int left, int right) {
+		if (right <= s || t <= left) {
+			return;
+		}
+		if (s <= left && right <= t) {
+			add_data_[k] += x;
+			return;
+		}
+		int mid = (left + right) / 2;
+		int k2 = 2 * k;
+		int l_idx = k2 + 1;
+		int r_idx = k2 + 2;
+
+		add_sub(s, t, x, l_idx, left, mid);
+		add_sub(s, t, x, r_idx, mid, right);
+		min_data_[k] = min(min_data_[l_idx] + add_data_[l_idx], min_data_[r_idx] + add_data_[r_idx]);
+		return;
+	}
+
+public:
+	RangeAddMinimumQuery(int n, int init_val) {
+		int n2 = -1;
+
+		n_ = 1;
+		while (n_ < n) {
+			n_ <<= 2;
+		}
+		n2 = 2 * n_ - 1;
+		min_data_ = vector<int>(n2, init_val);
+		add_data_ = vector<int>(n2, init_val);
+		return;
+	}
+
+	~RangeAddMinimumQuery() {}
+
+	// [s, t), zero-based
+	int find(int s, int t) {
+		return find_sub(s, t, 0, 0, n_);
+	}
+
+	// [s, t), zero-based
+	void add(int s, int t, int x) {
+		add_sub(s, t, x, 0, 0, n_);
+		return;
+	}
+};
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n = -1;
+	int q = -1;
+	int init_val = 0;
+	int op = -1;
+	int s = -1;
+	int t = -1;
+	int x = -1;
+	int val = init_val;
+
+	cin >> n >> q;
+	RangeAddMinimumQuery ramq(n, init_val);
+
+	for (int i = 0; i < q; i++) {
+		cin >> op;
+		if (op == 0) {
+			cin >> s >> t >> x;
+			t++;
+			ramq.add(s, t, x);
+		}
+		else {
+			cin >> s >> t;
+			t++;
+			val = ramq.find(s, t);
+			cout << val << endl;
+		}
+	}
+
+	return 0;
+}

@@ -1,0 +1,62 @@
+import java.util.Scanner;
+
+class GasStation{
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        int N = sc.nextInt();
+        int M = sc.nextInt();
+        GasProcess[] q = new GasProcess[N];
+
+        int i;
+        for(i = 0 ; i < N ; i++) q[i] = new GasProcess();
+
+        for(i = 0 ; i < M ; i++){
+            int f = sc.nextInt();
+            int in = sc.nextInt();
+            if(f == 0){
+                System.out.println(q[in - 1].dequeue());
+            }
+            else{
+                int lane = 0;
+                for(int j = 0 ; j < N ; j++){
+                    if(q[j].count() < q[lane].count()){
+                        lane = j;
+                    }
+                }
+                q[lane].enqueue(in);
+            }
+        }
+    }
+}
+
+class GasProcess{
+    private int head = 0;
+    private int tail = 0;
+    private int size = 5;
+    private int[] q;
+
+    GasProcess(){
+        this.head = 0;
+        this.tail = 0;
+        this.size = 5;
+        this.q = new int[5];
+    }
+
+    void enqueue(int x){
+        q[tail] = x;
+        if(tail == size -1) tail = 0;
+        else tail++;
+    }
+
+    int dequeue(){
+        int x = q[head];
+        if(head == size - 1) head = 0;
+        else head++;
+        return x;
+    }
+
+    int count(){
+        if(tail < head) return tail - head + size;
+        else return tail - head;
+    }
+}

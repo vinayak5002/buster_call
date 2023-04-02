@@ -1,0 +1,85 @@
+/*********************************DOCUMENTACIÓN*********************************
+
+Complejidad de tiempo = O(n^3 * 2^n)
+
+Explicación: Es un problema TSP donde se pide el circuito hamiltoniano de costo mínimo, el cual resolvemos con dp y bitmask. 
+Cada bit de la máscara representa un vértice. Recorremos la máscara desde 11...11 (n vértices) hasta 0. En el caso base,
+la distancia es del vértice a 0 (como es ciclo, podemos empezar en el vértice 0), sino, busca el camino encontrado sin el
+vértice (buscamos en la máscara cambiando el bit de 0 a 1) y sumamos su distancia a la opción. La mínima de estas 
+opciones será la elegida. La respuesta estaría en dp[0][0]. Dentro del bucle de 0 a 2^n, hay dos bucles de n, por ello
+la complejidad O(n^2 * 2^n)
+
+*******************************************************************************/
+
+#include <bits/stdc++.h>
+using namespace std;
+#define fastio ios_base::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+#define all(a) a.begin(), a.end()
+#define ALL(a) a.begin(), a.end()
+#define PB push_back
+#define pb push_back
+#define MP make_pair
+#define mp make_pair
+#define F first
+#define S second
+#define PI 3.1415926535897932384626433832795
+#define MOD 1000000007
+#define INF (int)1e9
+#define INFLL numeric_limits<ll>::max()
+#define FO(i, j, k, in) for (i = j; i < k; i += in)
+#define RFO(i, j, k, in) for (i = j; i >= k; i -= in)
+#define FOR(i, j, k) for (i = j; i < k; i++)
+#define RFOR(i, j, k) for (i = j; i >= k; i--)
+#define REP(i, j) FOR(i, 0, j)
+#define RREP(i, j) RFOR(i, j, 0)
+typedef long long ll;typedef unsigned long long ull;typedef vector<int> vi;typedef vector<vi> vvi;typedef vector<ll> vll;
+typedef vector<char> vc;typedef vector<string> vs;typedef vector<vs> vvs;typedef vector<vll> vvll;typedef vector<vc> vvc;
+typedef pair<int, int> pii;typedef pair<ll, ll> pll;typedef pair<string, string> pss;typedef pair<double, double> pdd;
+typedef map<ll, ll> mapll;typedef unordered_map<ll, ll> umapll;typedef unordered_map<string, ll> umapsll;
+typedef set<int> seti;typedef set<ll> setll;typedef unordered_set<int> useti;typedef unordered_set<ll> usetll;
+typedef set<char> setc;typedef set<string> sets;typedef unordered_set<char> usetc;typedef unordered_set<string> usets;
+ll powe(ll x, ll y){ x = x%MOD, y=y%(MOD-1);ll ans = 1;while(y>0){if (y&1){ans = (1ll * x * ans)%MOD;}y>>=1;x = (1ll * x * x)%MOD;}return ans;}
+ll pown(ll x, ll y){ ll res = 1; while(y > 0){if(y & 1) res = (res * x); x = (x * x); y >>= 1;}return res;}
+ll i, j, k;
+ll n, m, q, ans = 0;
+ll a, b, c, d, e, t, u, op;
+ll x, y, z;
+const ll N = 5 * 1e6 + 1;
+string s = "", str = "";
+
+void solve(){
+    cin >> n >> m;
+    vector<vll> dist(n, vll (n, INF));
+    FOR(i, 0, n) dist[i][i] = 0;
+    FOR(i, 0, m){
+        cin >> a >> b >> d;
+        dist[a][b] = d;
+    }
+
+    ll start;
+    ll limit = (1 << n);
+    ans = INF;
+    FOR(start, 0, n){
+        vector<vll> dp(n, vll (limit, INF));
+        for(m = limit - 1; m >= 0; m--){
+            FOR(u, 0, n){
+                if(m == limit - 1) {dp[u][m] = dist[u][start]; continue;}
+                FOR(op, 0, n){
+                    if(m & (1 << op)) continue;
+                    dp[u][m] = min(dp[u][m], dist[u][op] + dp[op][m | (1 << op)]);
+                }
+            }
+        }
+        ans = min(ans, dp[start][0]);
+    }
+    if(ans == INF)
+        cout << -1 << "\n";
+    else
+        cout << ans << "\n";
+}
+
+int main(int argc, char const *argv[]){
+    fastio;
+    solve();
+    return 0;
+}

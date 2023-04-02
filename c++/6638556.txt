@@ -1,0 +1,126 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// template {{{
+using i32 = int;
+using u32 = unsigned int;
+using i64 = long long;
+using u64 = unsigned long long;
+
+#define  range(i, l, r) for (i64 i = (i64)(l); i < (i64)(r); (i) += 1)
+#define rrange(i, l, r) for (i64 i = (i64)(r) - 1; i >= (i64)(l); (i) -= 1)
+
+#define  whole(f, x, ...) ([&](decltype((x)) container) { return (f)(  begin(container),  end(container), ## __VA_ARGS__); })(x)
+#define rwhole(f, x, ...) ([&](decltype((x)) container) { return (f)( rbegin(container), rend(container), ## __VA_ARGS__); })(x)
+
+#define debug(x) cerr << "(" << __LINE__ << ")" << #x << ": " << (x) << endl
+
+constexpr i32 inf   = 1001001001;
+constexpr i64 infll = 1001001001001001001ll;
+
+constexpr i32 dx[] = {0, -1, 1, 0, -1, 1, -1, 1}; 
+constexpr i32 dy[] = {-1, 0, 0, 1, -1, -1, 1, 1};
+
+struct IoSetup { IoSetup(i32 x = 15){ cin.tie(0); ios::sync_with_stdio(0); cout << fixed << setprecision(x); cerr << fixed << setprecision(x); } } iosetup;
+
+template <typename T = i64> T input() { T x; cin >> x; return x; }
+
+template <typename T> ostream &operator<<(ostream &os, vector<T> &v) { range(i, 0, v.size()) { os << v[i] << (i + 1 != (int)v.size() ? " " : ""); } return os; } 
+template <typename T> istream &operator>>(istream &is, vector<T> &v) { for (T &in : v) is >> in; return is; }
+
+template <typename T1, typename T2> ostream &operator<<(ostream &os, pair<T1, T2> p) { os << "(" << p.first << ", " << p.second << ")"; return os; }
+template <typename T1, typename T2> istream &operator>>(istream &is, pair<T1, T2> &p) { is >> p.first >> p.second; return is; }
+
+template <typename T> vector<T> make_vector(size_t a, T b) { return vector<T>(a, b); }
+template <typename... Ts> auto make_vector(size_t a, Ts... ts) { return vector<decltype(make_vector(ts...))>(a, make_vector(ts...)); }
+
+template <typename T1, typename T2> inline bool chmax(T1 &a, T2 b) { return a < b && (a = b, true); }
+template <typename T1, typename T2> inline bool chmin(T1 &a, T2 b) { return a > b && (a = b, true); }
+// }}}
+
+void solve(int w, int h) {
+  vector< string > ss(h);
+  cin >> ss;
+
+  auto to_v = [&](int y, int x) {
+    return y * w + x;
+  };
+
+  auto inside = [&](int y, int x) {
+    return (0 <= y and y < h) and (0 <= x and x < w);
+  };
+
+  int n = w * h;
+  auto ds = make_vector(n, n, infll);
+  range(v, 0, n) ds[v][v] = 0;
+  range(y, 0, h) range(x, 0, w) {
+    if (ss[y][x] == 'x') continue;
+
+    int v = to_v(y, x);
+    range(i, 0, 4) {
+      int ny = y + dy[i];
+      int nx = x + dx[i];
+      if (not inside(ny, nx)) continue;
+      if (ss[ny][nx] == 'x') continue;
+
+      int u = to_v(ny, nx);
+      ds[v][u] = 1;
+    }
+  }
+
+  range(k, 0, n) range(i, 0, n) range(j, 0, n) {
+    chmin(ds[i][j], ds[i][k] + ds[k][j]);
+  }
+
+  int S = -1;
+  vector< int > vs;
+  range(y, 0, h) range(x, 0, w) {
+    if (ss[y][x] == 'o') {
+      S = to_v(y, x);
+    }
+    if (ss[y][x] == '*') {
+      vs.emplace_back(to_v(y, x));
+    }
+  }
+
+  int V = vs.size();
+  auto dp = make_vector(V, 1 << V, infll);
+  range(i, 0, V) {
+    int v = vs[i];
+    if (ds[S][v] == infll) { // unreachable
+      cout << -1 << endl;
+      return;
+    }
+
+    dp[i][1 << i] = ds[S][v];
+  }
+
+  range(bit, 1, 1 << V) {
+    range(p, 0, V) {
+      if (not (bit & (1 << p))) continue;
+
+      range(nx, 0, V) {
+        if (bit & (1 << nx)) continue;
+        int nbit = bit | (1 << nx);
+
+        chmin(dp[nx][nbit], dp[p][bit] + ds[vs[p]][vs[nx]]);
+      }
+    }
+  }
+
+  i64 ans = infll;
+  range(v, 0, V) {
+    chmin(ans, dp[v][(1 << V) - 1]);
+  }
+
+  cout << ans << endl;
+}
+
+signed main() {
+  int w, h;
+
+  while (cin >> w >> h, h) {
+    solve(w, h);
+  }
+}
+

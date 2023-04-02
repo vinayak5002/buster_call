@@ -1,0 +1,63 @@
+import sys
+
+def input_mulitiple_line_numbers():
+    input_list = []
+    # [num, num1 num1' num1'' ... , num2 num2' num2'', ...]
+    for l in sys.stdin:
+        input_list.append(l)
+    line_num = int(input_list[0])
+    list_in_list = []
+    # [[num1, num1', num1'', ...], [num2, num2', num2'', ...], ...]
+    for i in range(1, len(input_list)):
+        digit_list = list(map(int, input_list[i].split()))
+        list_in_list.append(digit_list)
+    return line_num, list_in_list
+    
+
+def set_nums(A, length):
+    T = []
+    for i in range(length):
+        T.append({'parent': -1, 'left': -1, 'right': -1})
+    for i in range(length):
+        v = A[i][0]
+        d = A[i][1]
+        for j in range(d):
+            c = A[i][j+2]
+            if j == 0:
+                T[v]['left'] = c
+            else:
+                T[l]['right'] = c
+            l = c
+            T[c]['parent'] = v
+    return T
+    
+    
+def set_depth(T, D, u, p):
+    D[u] = p
+    if T[u]['right'] != -1:
+        set_depth(T, D, T[u]['right'], p)
+    if T[u]['left'] != -1:
+        set_depth(T, D, T[u]['left'], p+1)
+    return D
+    
+    
+def print_one_line(i, T, D, A):
+    print(f"node {i}: parent = {T[i]['parent']}, depth = {D[i]}, ", end='')
+    if T[i]['parent'] == -1:
+        print(f"root, {A[i][2:]}")
+    elif T[i]["left"] == -1:
+        print("leaf, []")
+    else:
+        print(f"internal node, {A[i][2:]}")
+    
+
+length, A = input_mulitiple_line_numbers()
+T = set_nums(A, length)
+D = [i for i in range(length)]
+r = 0
+for i in range(0, length):
+    if T[i]['parent'] == -1:
+        r = i
+D = set_depth(T, D, r, 0)
+for i in range(length):
+    print_one_line(i, T, D, A)

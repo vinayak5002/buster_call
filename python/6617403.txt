@@ -1,0 +1,54 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test1.txt', 'r')
+    else:
+        f = sys.stdin
+
+    while True:
+        n, m, h, k = map(int, f.readline().split())
+        if n == m == h == k == 0:
+            break
+
+        s_list = [int(f.readline()) for _ in range(n)]
+        h_bar_list = []
+        for _ in range(m):
+            a, b = map(int, f.readline().split())
+            a -= 1
+            h_bar_list.append((-b, a))
+
+        h_bar_list.sort()
+        for _, a in h_bar_list:
+            s_list[a], s_list[a + 1] = s_list[a + 1], s_list[a]
+
+        a_list = list(range(n))
+        d_set = set()
+        for _, a in reversed(h_bar_list):
+            a0 = a_list[a]
+            a1 = a_list[a + 1]
+            a_list[a], a_list[a + 1] = a_list[a + 1], a_list[a]
+            d = s_list[a1] - s_list[a0]
+            if d < 0 and a0 <= k - 1 and k <= a1:
+                d_set.add(d)
+            elif d > 0 and a1 <= k - 1 and k <= a0:
+                d_set.add(-d)
+
+        c_sum = sum(s_list[:k])
+        if d_set:
+            c_sum += min(d_set)
+
+        print(c_sum)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

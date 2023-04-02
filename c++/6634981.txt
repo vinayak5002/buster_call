@@ -1,0 +1,53 @@
+# 個々のノードのクラス（idはリストの番目になるから持たない）
+class Node:
+    def __init__(self):
+        self.parent_id = -1
+        self.depth = 0
+        self.type = ""
+        self.childs_id = []
+
+global nodes
+
+# 再帰処理で深さをセット
+def set_depth(id, depth):
+
+    nodes[id].depth = depth
+    nodes[id].type = "internal node" if nodes[id].type == "" and len(nodes[id].childs_id) > 0 else "leaf"
+    
+    for child in nodes[id].childs_id:
+        set_depth(child, depth + 1)
+
+n = int(input())
+
+# n個のノードを登録しておく
+# キーはリストの番目になる
+nodes = [Node() for _ in range(n)]
+
+# のーどごとのくり返し
+for i in range(n):
+    # 入力値
+    params = list(map(int,input().split()))
+
+    # 子ノードごとのくり返し
+    for j in range(params[1]):
+        
+        child_id = params[j + 2]
+        
+        # 子ノードのパラメタ設定
+        nodes[child_id].parent_id = params[0]
+        
+        # 自ノードのパラメタ設定
+        # ノードリストの該当番目に子ノードのidを追加        
+        nodes[params[0]].childs_id.append(child_id)
+    
+# 根を探して、深さを計算する
+for i in range(n):
+    if nodes[i].parent_id == -1:
+        nodes[i].type = "root"
+        set_depth(i, 0)
+        break
+
+# 出力
+for i in range(n):
+    print(f"node {i}: parent = {nodes[i].parent_id}, depth = {nodes[i].depth}, {nodes[i].type}, {nodes[i].childs_id}")
+    

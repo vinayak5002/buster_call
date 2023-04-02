@@ -1,0 +1,81 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+
+class UnionFindTree {
+private:
+	vector<int> parent_;
+	vector<int> rank_;
+
+public:
+	UnionFindTree(int n) {
+		parent_.resize(n, 0);
+		rank_.resize(n, 0);
+
+		for (int i = 0; i < n; i++) {
+			parent_[i] = i;
+		}
+		return;
+	}
+
+	~UnionFindTree() {
+		return;
+	}
+
+	int find(int x) {
+		if (parent_[x] == x) {
+			return x;
+		}
+		return parent_[x] = find(parent_[x]);
+	}
+
+	void unite(int x, int y) {
+		x = find(x);
+		y = find(y);
+
+		if (x == y) {
+			return;
+		}
+
+		if (rank_[x] < rank_[y]) {
+			parent_[x] = y;
+		}
+		else {
+			parent_[y] = x;
+			if (rank_[x] == rank_[y]) {
+				rank_[x]++;
+			}
+		}
+		return;
+	}
+
+	bool is_same(int x, int y) {
+		return find(x) == find(y);
+	}
+};
+
+int main() {
+	int n, q, com, x, y;
+
+	cin >> n >> q;
+	UnionFindTree uft(n);
+
+	for (int i = 0; i < q; i++) {
+		cin >> com >> x >> y;
+		if (com == 0) {
+			uft.unite(x, y);
+		}
+		else {
+			if (uft.is_same(x, y)) {
+				cout << "1";
+			}
+			else {
+				cout << "0";
+			}
+			cout << endl;
+		}
+	}
+	return 0;
+}
+

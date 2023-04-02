@@ -1,0 +1,105 @@
+import sys
+from collections import defaultdict
+
+input = sys.stdin.buffer.readline
+
+INF = 10 ** 9
+
+n = int(input())
+ps = list(map(int, input().split()))
+children_list = []
+for _ in range(n):
+    k, *ts = map(int, input().split())
+    for i in range(k):
+        ts[i] -= 1
+    children_list.append(ts)
+
+
+def minmax(v):
+    if not children_list[v]:
+        return ps[v]
+    a = -INF
+    for c in children_list[v]:
+        val = -minmax(c)
+        a = max(a, val)
+    ps[v] = a
+    return a
+
+
+# def negamax_leaf_count(v, a, b):
+#     if not children_list[v]:
+#         return (ps[v], 1)
+#     ret_count = 0
+#     for c in children_list[v]:
+#         tmp, count = negamax_leaf_count(c, -b, -a)
+#         val = -tmp
+#         ret_count += count
+#         if val >= b:
+#             return (val, ret_count)
+#         if val > a:
+#             a = val
+#     return (a, ret_count)
+
+
+root = 0
+# print(ps)
+minmax(root)
+# print(ps)
+
+# minimum
+
+
+def negamax_leaf_count_minimum(v, a, b):
+    if not children_list[v]:
+        return (ps[v], 1)
+    max_val = -INF
+    count_min = INF # val >= b
+    count_sum = 0
+    children_list[v].sort(key=lambda c: ps[c])
+    for c in children_list[v]:
+        tmp, count = negamax_leaf_count_minimum(c, -b, -a)
+        val = -tmp
+        count_sum += count
+        max_val = max(max_val, val)
+        if val >= b:
+            count_min = min(count_min, count)
+        elif val > a:
+            a = val
+    if max_val >= b:
+        return (max_val, count_min)
+    return (max_val, count_sum)
+
+
+# maximum
+def negamax_leaf_count_maximum(v, a, b):
+    if not children_list[v]:
+        return (ps[v], 1)
+    count_max = -INF # val >= b
+    count_sum = 0
+    p2c = defaultdict(list)
+    for c in children_list[v]:
+        p2c[ps[c]].append(c)
+    max_val = -INF
+    for p in sorted(p2c.keys(), reverse=True):
+        val = -p
+        cs = p2c[p]
+        max_val = max(max_val, val)
+        if val >= b:
+            for c in cs:
+                _, count = negamax_leaf_count_maximum(c, -b, -a)
+                count_max = max(count_max, count)
+            continue
+        count_large = [negamax_leaf_count_maximum(c, -b, -a)[1] for c in cs]
+        count_small = [negamax_leaf_count_maximum(c, -b, -val)[1] for c in cs]
+        count = sum(count_small) + max([l - s for l, s in zip(count_large, count_small)])        
+        # print(p, count_large, count_small, count)
+        a = val
+        count_sum += count
+    if max_val >= b:
+        return (max_val, count_sum + count_max)
+    return (max_val, count_sum)
+
+
+print(negamax_leaf_count_minimum(root, -INF, INF)[1],
+      negamax_leaf_count_maximum(root, -INF, INF)[1])
+

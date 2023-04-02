@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+#include <cmath>
+using namespace std;
+#define rep(i,n) for(int i=0;i<(int) n ;i++)
+
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int w,h;
+    while(true){
+        
+        cin>>w>>h;
+        int k = w + h - 1;
+        if(w==0&&h==0) break;
+
+        vector<vector<int>> a(h,vector<int>(w,-1000));
+        vector<int> x(w,-1000),y(h,-1000);
+        rep(i,h){
+            rep(j,w){
+                int x1,y1,n;
+                cin>>x1>>y1>>n;
+                x1--;
+                y1--;
+                a[x1][y1] = n;
+            }
+        }
+        x[0] = 0;
+        string ans = "YES";
+        while(true){
+            int p = 0;
+            rep(i,h){
+                rep(j,w){
+                    if(x[j] != -1000 && y[i] != -1000 && a[i][j] == -1000 ){
+                        a[i][j] = x[j] + y[i];
+                        k++;
+                        p++;
+                    }
+                    else if(x[j] != -1000 && y[i] == -1000 && a[i][j] != -1000 ){
+                        y[i] = a[i][j] - x[j];
+                        p++;
+                    }
+                    else if(x[j] == -1000 && y[i] != -1000 && a[i][j] != -1000){
+                        x[j] = a[i][j] - y[i];
+                        p++;
+                    }
+                }
+            }
+            if(k = h*w){
+                break;
+            }
+            if(p == 0){ //p = 0;はもうどのマスも埋められない状態にあるということ
+                ans = "NO";
+                break;
+            }
+        }
+         cout<<ans<<endl;
+    }
+    return 0;
+}

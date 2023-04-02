@@ -1,0 +1,731 @@
+#pragma region Template
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using vi = vector<int>;
+using vl = vector<ll>;
+using vvi = vector<vi>;
+using vvl = vector<vl>;
+#define REP(i, n) for (int i = 0, i##_len = (n); i < i##_len; ++i)
+#define FOR(i, a, b) for (int i = (a), i##_len = (b); i < i##_len; ++i)
+#define ALL(x) (x).begin(), (x).end()  // sortなどの引数を省略したい
+#ifdef _DEBUG
+#define PRE_COMMAND          \
+    cin.rdbuf(in.rdbuf());   \
+    cout.rdbuf(out.rdbuf()); \
+    cout << fixed << setprecision(15);
+#else
+#define PRE_COMMAND                    \
+    cout << fixed << setprecision(15); \
+    ios::sync_with_stdio(false);       \
+    cin.tie(0);
+#endif
+const double EPS = 1e-10, PI = acos(-1.0);
+// 標準入出力
+template <class T1, class T2>
+istream& operator>>(istream& is, tuple<T1, T2>& t) {
+    return is >> get<0>(t) >> get<1>(t);
+}
+template <class T1, class T2, class T3>
+istream& operator>>(istream& is, tuple<T1, T2, T3>& t) {
+    return is >> get<0>(t) >> get<1>(t) >> get<2>(t);
+}
+template <class T> istream& operator>>(istream& is, vector<T>& vec) {
+    for (T& x : vec) is >> x;
+    return is;
+}
+template <class T1, class T2>
+ostream& operator<<(ostream& os, const tuple<T1, T2>& t) {
+    return os << get<0>(t) << " " << get<1>(t);
+}
+template <class T1, class T2, class T3>
+ostream& operator<<(ostream& os, const tuple<T1, T2, T3>& t) {
+    return os << get<0>(t) << " " << get<1>(t) << " " << get<2>(t);
+}
+template <class T> ostream& COUT_MAIN(ostream& os, const T& v) {
+    if (!v.size()) return os;
+    typename T::const_iterator ii = v.begin();
+    os << *ii++;
+    for (; ii != v.end(); ++ii) os << " " << *ii;
+    return os;
+}
+template <class T> ostream& operator<<(ostream& os, const vector<T>& v) {
+    return COUT_MAIN(os, v);
+}
+template <class T> ostream& operator<<(ostream& os, const set<T>& v) {
+    return COUT_MAIN(os, v);
+}
+template <class T, class S>
+ostream& operator<<(ostream& os, const map<T, S>& m) {
+    for (typename map<T, S>::const_iterator ii = m.begin(); ii != m.end();) {
+        os << tuple<T, S>(*(ii++));
+        if (ii != m.end()) os << '\n';
+    }
+    return os;
+}
+// 出力用関数
+void PRINT() {}
+template <class Head> void PRINT(Head&& head) { std::cout << head << '\n'; }
+template <class Head, class... Tail> void PRINT(Head&& head, Tail&&... tail) {
+    std::cout << head << ' ';
+    PRINT(std::forward<Tail>(tail)...);
+}
+template <class T> auto MAX(T& seq) { return *max_element(ALL(seq)); }
+template <class T> auto MIN(T& seq) { return *min_element(ALL(seq)); }
+template <class T> auto SUM(T& seq) {
+    return accumulate(++ALL(seq), *seq.begin());
+}
+template <class T> void REV(T& seq) { reverse(ALL(seq)); }
+template <class T> void SORT(T& seq) { sort(ALL(seq)); }
+template <class T, class S> void SORT(T& seq, S ordr) { sort(ALL(seq), ordr); }
+template <class T> void SORTR(vector<T>& seq) { sort(ALL(seq), greater<T>()); }
+template <class T> ll pow(ll n, T k) {
+    ll now = 1;
+    while (true) {
+        if (k & 1) now *= n;
+        k >>= 1;
+        if (k == 0) break;
+        n *= n;
+    }
+    return now;
+}
+template <class T> ll pow(int n, T k) { return pow((ll)n, k); }
+template <class T> int pow(int n_0, T k, int mod) {
+    if (n_0 >= mod) n_0 %= mod;
+    if (n_0 < 0) n_0 += mod;
+    unsigned long long n = (unsigned long long)n_0, now = 1;
+    while (true) {
+        if (k & 1) now = (now * n) % mod;
+        k >>= 1;
+        if (k == 0) break;
+        n = (n * n) % mod;
+    }
+    return (int)now;
+}
+void yn(bool flag) { PRINT(flag ? "YES" : "NO"); }
+#pragma endregion Template
+
+struct point {
+    double x, y, r, theta;
+    point() {}
+    point(double _x, double _y) {
+        x = _x, y = _y;
+        r = sqrt(_x * _x + _y * _y);
+        theta = atan2(_y, _x);
+        if (theta < 0) theta += 2 * PI;
+    }
+    // ()付きの出力
+    void print() { cout << '(' << x << ", " << y << ')' << '\n'; }
+    // 等号・不等号
+    bool operator==(const point& other) {
+        return abs(x - other.x) < EPS && abs(y - other.y) < EPS;
+    }
+    bool operator!=(const point& other) {
+        return abs(x - other.x) >= EPS || abs(y - other.y) >= EPS;
+    }
+    bool operator<(const point& other) {
+        if (abs(x - other.x) >= EPS) {
+            return (x + EPS <= other.x);
+        } else {
+            return (y + EPS <= other.y);
+        }
+    }
+    bool operator>(const point& other) {
+        if (abs(x - other.x) >= EPS) {
+            return (x >= other.x + EPS);
+        } else {
+            return (y >= other.y + EPS);
+        }
+    }
+    bool operator<=(const point& other) {
+        if (abs(x - other.x) >= EPS) {
+            return (x - EPS < other.x);
+        } else {
+            return (y - EPS < other.y);
+        }
+    }
+    bool operator>=(const point& other) {
+        if (abs(x - other.x) >= EPS) {
+            return (x > other.x - EPS);
+        } else {
+            return (y > other.y - EPS);
+        }
+    }
+    // 四則演算
+    point operator+(const point& other) { return {x + other.x, y + other.y}; }
+    point operator+(const point& other) const {
+        return {x + other.x, y + other.y};
+    }
+    point operator-(const point& other) { return {x - other.x, y - other.y}; }
+    point operator-(const point& other) const {
+        return {x - other.x, y - other.y};
+    }
+    point operator*(const double& other) { return {x * other, y * other}; }
+    point operator*(const double& other) const {
+        return {x * other, y * other};
+    }
+    point operator/(const double& other) { return {x / other, y / other}; }
+    point operator/(const double& other) const {
+        return {x / other, y / other};
+    }
+    point operator+() { return *this; }
+    point operator-() { return {-x, -y}; }
+    // +=の定義
+    point& operator+=(const point& other) {
+        x += other.x, y += other.y;
+        return *this;
+    }
+    // -=の定義
+    point& operator-=(const point& other) {
+        x -= other.x, y -= other.y;
+        return *this;
+    }
+    // *=の定義
+    point& operator*=(const double& other) {
+        x *= other, y *= other;
+        return *this;
+    }
+    // /=の定義
+    point& operator/=(const double& other) {
+        x /= other, y /= other;
+        return *this;
+    }
+    // 内積
+    double operator*(const point& other) { return x * other.x + y * other.y; }
+    double operator*(const point& other) const {
+        return x * other.x + y * other.y;
+    }
+    // 外積
+    double operator^(const point& other) { return x * other.y - y * other.x; }
+    double operator^(const point& other) const {
+        return x * other.y - y * other.x;
+    }
+    // 回転（ラジアン）
+    point rot(const double& t) {
+        double c = cos(t), s = sin(t);
+        return {c * x - s * y, s * x + c * y};
+    }
+    // cinによる入力
+    friend istream& operator>>(istream& is, point& rhs) {
+        istream& ret = is >> rhs.x >> rhs.y;
+        rhs.r = sqrt(rhs.x * rhs.x + rhs.y * rhs.y);
+        rhs.theta = atan2(rhs.y, rhs.x);
+        if (rhs.theta < 0) rhs.theta += 2 * PI;
+        return ret;
+    }
+    // coutによる出力
+    friend ostream& operator<<(ostream& os, const point& rhs) {
+        return os << rhs.x << " " << rhs.y;
+    }
+};
+
+// ax+by+c=0の形でも持っておく。
+struct line {
+    array<point, 2> edge;
+    bool segment;
+    double dist, a, b, c;
+    line(point p1, point p2, bool _segment = false) {
+        edge = {p1, p2};
+        segment = _segment;
+        dist = (p2 - p1).r;
+        if (abs(p1.x - p2.x) < EPS) {
+            a = 1, b = 0, c = -p1.x;
+        } else if (abs(p1.y - p2.y) < EPS) {
+            a = 0, b = 1, c = -p1.y;
+        } else {
+            a = p2.y - p1.y, b = p1.x - p2.x;
+            c = p2.x * p1.y - p1.x * p2.y;
+        }
+    }
+    line(double _a, double _b, double _c) {
+        point p1, p2;
+        a = _a, b = _b, c = _c;
+        if (abs(b) < EPS) {
+            p1 = {-c / a, 0}, p2 = {-c / a, 1};
+        } else {
+            p1 = {0, -c / b}, p2 = {1, -(a + c) / b};
+        }
+        edge = {p1, p2};
+        segment = false;
+        dist = (p2 - p1).r;
+    }
+};
+
+struct circle {
+    point p;
+    double x, y, r;
+    circle(point _p, double _r) { p = _p, x = _p.x, y = _p.y, r = _r; }
+    circle(double _x, double _y, double _r) {
+        p = {_x, _y}, x = _x, y = _y, r = _r;
+    }
+};
+
+struct triangle {
+    point a, b, c;
+    double A, B, C;  // 対辺の長さ
+    double s;        // 面積
+    triangle(point _a, point _b, point _c) {
+        a = _a, b = _b, c = _c;
+        A = sqrt((b.x - c.x) * (b.x - c.x) + (b.y - c.y) * (b.y - c.y));
+        B = sqrt((c.x - a.x) * (c.x - a.x) + (c.y - a.y) * (c.y - a.y));
+        C = sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+        s = abs((a ^ b) + (b ^ c) + (c ^ a)) / 2;
+    }
+    // 内接円の中心と半径
+    tuple<point, double> in_circle() {
+        double r = 2 * s / (A + B + C);
+        return make_tuple((a * A + b * B + c * C) / (A + B + C), r);
+    }
+    // 外接円の中心と半径
+    tuple<point, double> circum_circle() {
+        double AA = A * A / 4 / s;
+        double BB = B * B / 4 / s;
+        double CC = C * C / 4 / s;
+        point p = (a * AA * (BB + CC - AA) + b * BB * (CC + AA - BB) +
+                   c * CC * (AA + BB - CC));
+        double r = A * B * C / 2 / (A + B + C) / get<1>(in_circle());
+        return make_tuple(p, r);
+    }
+};
+
+struct geo {
+    double inf = numeric_limits<double>::infinity();
+    double nan = inf - inf;
+    geo() {}
+    // 符号を求める
+    int sgn(double x) { return (x > EPS) - (x < -EPS); }
+    // 0比較
+    bool notzero(double x) {
+        if (abs(x) > EPS) return true;
+        return false;
+    }
+    // x-z-yの並び
+    // 左に曲がる→1、右に曲がる→-1
+    // z-x-y→-2、x-y-z→2、x-z-y→0
+    int iSP(point x, point y, point z) {
+        point xy = y - x, xz = z - x, yz = z - y;
+        if ((xy ^ xz) > EPS) return 1;
+        if ((xy ^ xz) < -EPS) return -1;
+        if ((xy * xz) < -EPS) return -2;
+        if ((xy * yz) > EPS) return 2;
+        return 0;
+    }
+    int iSP(line xy_line, point z) {
+        point x = xy_line.edge[0], y = xy_line.edge[1];
+        return iSP(x, y, z);
+    }
+    // 角abcの角度をradで返す
+    double rad(point a, point b, point c) {
+        double t1 = (a - b).theta, t2 = (c - b).theta;
+        double ret = max(t1, t2) - min(t1, t2);
+        if (ret > PI) return 2 * PI - ret;
+        return ret;
+    }
+    // abとcdの交差(1)・一致(2)・交差しない(0)の確認
+    int cross(line ab_line, line cd_line) {
+        point a = ab_line.edge[0], b = ab_line.edge[1];
+        point c = cd_line.edge[0], d = cd_line.edge[1];
+        bool segment1 = ab_line.segment, segment2 = cd_line.segment;
+        if (!segment1 && segment2) {
+            swap(segment1, segment2);
+            swap(a, c);
+            swap(b, d);
+        }
+        if (segment1) {
+            if (iSP(a, b, c) * iSP(a, b, d) > EPS) return 0;
+        }
+        if (segment2) {
+            if (iSP(c, d, a) * iSP(c, d, b) > EPS) return 0;
+        }
+        point ab = b - a, ac = c - a, dc = c - d;
+        if (notzero(ab ^ dc)) return 1;
+        if (notzero(ab ^ ac)) return 0;
+        if (segment2) {
+            if (b < a) swap(a, b);
+            if (d < c) swap(c, d);
+            if (c < a) {
+                swap(a, c);
+                swap(b, d);
+            }
+            if (b == c) return 1;
+        }
+        return 2;
+    }
+    // 円c1と円c2の交差判定
+    // 離れてる→4,外接→3,交わる→2,内接→1,内包する→0
+    int cross(circle c1, circle c2) {
+        if (c1.r + c2.r + EPS < dist(c1, c2)) return 4;
+        if (abs(c1.r + c2.r - dist(c1, c2)) < EPS) return 3;
+        if (abs(max(c1.r, c2.r) - min(c1.r, c2.r) - dist(c1, c2)) < EPS) {
+            return 1;
+        }
+        if (min(c1.r, c2.r) + dist(c1, c2) + EPS < max(c1.r, c2.r)) {
+            return 0;
+        }
+        return 2;
+    }
+    // 円cと直線lの交差判定(線分ではない)
+    // 交点の数を出力
+    int cross(circle c, line l) {
+        if (abs(dist(l, c.p) - c.r) < EPS) return 1;
+        if (dist(l, c.p) < c.r) return 2;
+        return 0;
+    }
+    int cross(line l, circle c) { return cross(c, l); }
+    // 線abと線cdの交点
+    point cross_point(line ab_line, line cd_line) {
+        int cr = cross(ab_line, cd_line);
+        point a = ab_line.edge[0], b = ab_line.edge[1];
+        point c = cd_line.edge[0], d = cd_line.edge[1];
+        bool segment1 = ab_line.segment, segment2 = cd_line.segment;
+        point ab = a - b, cd = d - c, ac = c - a;
+        if (cr == 0) return {nan, nan};
+        if (cr == 2) return {inf, inf};
+        if (segment1 && segment2 && !notzero(ab ^ cd)) {
+            if (b < a) swap(a, b);
+            if (d < c) swap(c, d);
+            if (c < a) return d;
+            return b;
+        }
+        return a + ab * ((ac ^ cd) / (ab ^ cd));
+    }
+    // 円cと線lの交点
+    vector<point> cross_point(circle c, line l) {
+        int cr = cross(c, l);
+        if (cr == 0) return {};
+        double x = c.p.x, y = c.p.y, r = c.r;
+        double a = l.a, b = l.b, lc = l.c;
+        double d = -(a * x + b * y + lc), ab = a * a + b * b;
+        double rd = sqrt(ab * r * r - d * d);
+        point p1 = {(a * d - b * rd) / ab + x, (b * d + a * rd) / ab + y};
+        point p2 = {(a * d + b * rd) / ab + x, (b * d - a * rd) / ab + y};
+        if (!l.segment) {
+            if (cr == 1) return {p1};
+            return {p1, p2};
+        }
+        vector<point> p_v;
+        if (iSP(l.edge[0], l.edge[1], p1) == 0) p_v.push_back(p1);
+        if (cr == 2 && iSP(l.edge[0], l.edge[1], p2) == 0) {
+            p_v.push_back(p2);
+        }
+        return p_v;
+    }
+    vector<point> cross_point(line l, circle c) { return cross_point(c, l); }
+    // 円c1と円c2の交点
+    vector<point> cross_point(circle c1, circle c2) {
+        int cr = cross(c1, c2);
+        if (cr == 0 || cr == 4) return {};
+        double x = c2.x - c1.x, y = c2.y - c1.y;
+        double r1 = c1.r, r2 = c2.r;
+        double a = (x * x + y * y + r1 * r1 - r2 * r2) / 2;
+        double xy = x * x + y * y;
+        double r = sqrt(xy * r1 * r1 - a * a);
+        if (cr == 1 || cr == 3) {
+            if (!notzero(xy)) return {{inf, inf}};
+            return {{c1.x + a * x / xy, c1.y + a * y / xy}};
+        }
+        return {{c1.x + (a * x + y * r) / xy, c1.y + (a * y - x * r) / xy},
+                {c1.x + (a * x - y * r) / xy, c1.y + (a * y + x * r) / xy}};
+    }
+    // 点aと点bの距離
+    double dist(point a, point b) { return (a - b).r; }
+    // 線abと点pの距離
+    double dist(line ab_line, point p) {
+        point a = ab_line.edge[0], b = ab_line.edge[1];
+        bool segment = ab_line.segment;
+        point ab = b - a, ap = p - a, bp = p - b;
+        if (segment) {
+            if ((ab * ap) < -EPS) return ap.r;
+            if ((ab * bp) > EPS) return bp.r;
+        }
+        return abs((ap ^ ab) / ab.r);
+    }
+    double dist(point p, line ab_line) { return dist(ab_line, p); }
+    // 線abと円cの距離
+    double dist(line ab_line, circle c) {
+        return max(dist(ab_line, c.p) - c.r, (double)0);
+    }
+    double dist(circle c, line ab_line) { return dist(ab_line, c); }
+    // 円c1とc2の中心間距離
+    double dist(circle c1, circle c2) {
+        return sqrt((c1.x - c2.x) * (c1.x - c2.x) +
+                    (c1.y - c2.y) * (c1.y - c2.y));
+    }
+    // abとcdの距離
+    double dist(line ab_line, line cd_line) {
+        point a = ab_line.edge[0], b = ab_line.edge[1];
+        point c = cd_line.edge[0], d = cd_line.edge[1];
+        if (cross(ab_line, cd_line)) return 0;
+        return min(min(dist(ab_line, c), dist(ab_line, d)),
+                   min(dist(cd_line, a), dist(cd_line, b)));
+    }
+    // 直線abへ点cから引いた垂線の交点
+    point projection(line ab_line, point c) {
+        point a = ab_line.edge[0], b = ab_line.edge[1];
+        point ab = b - a, ac = c - a;
+        return a + ab * ((ab * ac) / ab_line.dist / ab_line.dist);
+    }
+    // 直線abに対する、cと線対称の点
+    point refrection(line ab_line, point c) {
+        return projection(ab_line, c) * 2 - c;
+    }
+    // 点pを通る円cの接線を求める
+    line tangent(circle c, point p) {
+        double x = c.p.x, y = c.p.y, r = c.r;
+        double a = p.x - x, b = p.y - y, rr = r * r;
+        double ab = a * a + b * b;
+        double rab = r * sqrt(ab - rr);
+        point p0 = {(a * rr - b * rab) / ab + x, (b * rr + a * rab) / ab + y};
+        point p1 = {(a * rr + b * rab) / ab + x, (b * rr - a * rab) / ab + y};
+        return line(p0, p1);
+    }
+    line tangent(point p, circle c) { return tangent(c, p); }
+    // 円c1,c2の共通接線のc1上の接点を求める
+    vector<point> tangent(circle c1, circle c2) {
+        int cr = cross(c1, c2);
+        double x1 = c1.p.x, y1 = c1.p.y, r1 = c1.r;
+        double x2 = c2.p.x, y2 = c2.p.y, r2 = c2.r;
+        double x = x2 - x1, y = y2 - y1, d = x * x + y * y;
+        double rd = r1 * sqrt(d - (r1 + r2) * (r1 + r2)) / d;
+        double rd2 = r1 * sqrt(d - (r1 - r2) * (r1 - r2)) / d;
+        double r = r1 * (r1 + r2) / d, rr = r1 * (r1 - r2) / d;
+        point p1 = {x * r + y * rd + x1, y * r - x * rd + y1};
+        point p2 = {x * r - y * rd + x1, y * r + x * rd + y1};
+        point p3 = {x * rr + y * rd2 + x1, y * rr - x * rd2 + y1};
+        point p4 = {x * rr - y * rd2 + x1, y * rr + x * rd2 + y1};
+        if (cr == 4) return {p1, p2, p3, p4};
+        if (cr == 3) return {p1, p3, p4};
+        if (cr == 2) return {p3, p4};
+        if (cr == 1) return {p3};
+        return {};
+    }
+    // p0-p1,p1-p2,...,p(n-1)-poが辺である多角形の面積を求める
+    double area(vector<point> const& p_v) {
+        int n = (int)p_v.size();
+        double ret = p_v[n - 1] ^ p_v[0] / 2;
+        for (int i = 0; i < n - 1; i++) ret += p_v[i] ^ p_v[i + 1] / 2;
+        return abs(ret);
+    }
+    // 凸多角形を直線pqで分割したときの左側の面積を求める
+    double area_cut(vector<point> const& p_v, line ab_line) {
+        int n = (int)p_v.size();
+        vector<int> isp(n);
+        for (int j = 0; j < n; j++) isp[j] = iSP(ab_line, p_v[j]);
+        if (!count(isp.begin(), isp.end(), 1)) return 0;
+        if (!count(isp.begin(), isp.end(), -1)) return area(p_v);
+        vector<point> ans_v;
+        for (int j = 0; j < 2 * n - 1; j++) {
+            int j1 = j % n, j2 = (j + 1) % n;
+            if (isp[j2] == 1 && ans_v.size()) ans_v.push_back(p_v[j2]);
+            if (isp[j1] != 1 && isp[j2] == 1) {
+                ans_v.push_back(cross_point({p_v[j1], p_v[j2]}, ab_line));
+                ans_v.push_back(p_v[j2]);
+            }
+            if (isp[j1] == 1 && isp[j2] != 1 && ans_v.size()) {
+                ans_v.push_back(cross_point({p_v[j1], p_v[j2]}, ab_line));
+                break;
+            }
+        }
+        return area(ans_v);
+    }
+    // 円c1とc2の共通部分の面積
+    double area_intersection(circle c1, circle c2) {
+        int cr = cross(c1, c2);
+        if (cr > 2) return 0;
+        if (cr < 2) return min(c1.r * c1.r, c2.r * c2.r) * PI;
+        if (c1.r < c2.r) swap(c1, c2);
+        vector<point> v_p = cross_point(c1, c2);
+        point p1 = c1.p, p2 = c2.p, p3 = v_p[0], p4 = v_p[1];
+        double r1 = rad(p3, p1, p4) / 2, r2 = rad(p4, p2, p3) / 2;
+        if (iSP(p3, p1, p4) == iSP(p3, p2, p4)) r2 = PI - r2;
+        return (c1.r * c1.r * r1 + c2.r * c2.r * r2) - area({p1, p3, p2, p4});
+    }
+    // 円cと多角形v_pの共通部分の面積
+    double area_intersection(circle c, vector<point> const& p_v) {
+        int n = (int)p_v.size();
+        point p = c.p;
+        double r = c.r, rr = c.r * c.r, ret = 0;
+        for (int i = 0; i < n; i++) {
+            double x1 = p_v[i].x, y1 = p_v[i].y;
+            double x2 = p_v[(i + 1) % n].x, y2 = p_v[(i + 1) % n].y;
+            point p1({x1, y1}), p2({x2, y2});
+            line l(p1, p2, true), l2(p1, p2, false);
+            vector<point> cp_pre = cross_point(c, l), cp;
+            for (point& elm : cp_pre) {
+                if (elm != p1 && elm != p2) cp.push_back(elm);
+            }
+            if ((p1 - p).r < r + EPS && (p2 - p).r < r + EPS) {
+                ret += ((p1 - p) ^ (p2 - p)) / 2;
+            } else if (cp.size() == 0 || (int)cross_point(c, l2).size() == 1) {
+                ret += rr * rad(p1, p, p2) * sgn((p1 - p) ^ (p2 - p)) / 2;
+            } else if (cp.size() == 2) {
+                point p3 = cp[0], p4 = cp[1];
+                if (iSP(p1, p4, p3)) swap(p3, p4);
+                ret += ((p3 - p) ^ (p4 - p)) / 2;
+                ret += rr * rad(p1, p, p3) * sgn((p1 - p) ^ (p3 - p)) / 2;
+                ret += rr * rad(p4, p, p2) * sgn((p4 - p) ^ (p2 - p)) / 2;
+            } else {
+                point p3 = cp[0];
+                if ((p1 - p).r > r + EPS) {
+                    ret += rr * rad(p1, p, p3) * sgn((p1 - p) ^ (p3 - p)) / 2;
+                    ret += ((p3 - p) ^ (p2 - p)) / 2;
+                } else {
+                    ret += rr * rad(p3, p, p2) * sgn((p3 - p) ^ (p2 - p)) / 2;
+                    ret += ((p1 - p) ^ (p3 - p)) / 2;
+                }
+            }
+        }
+        return ret;
+    }
+    double area_intersection(vector<point> const& p_v, circle c) {
+        return area_intersection(c, p_v);
+    }
+    // p0-p1,p1-p2,...,p(n-1)-poが辺である多角形が凸であるか確かめる
+    bool is_convex(vector<point> const& p_v) {
+        int n = (int)p_v.size();
+        vector<int> isp(n);
+        isp[n - 2] = iSP(p_v[n - 2], p_v[0], p_v[n - 1]);
+        isp[n - 1] = iSP(p_v[n - 1], p_v[1], p_v[0]);
+        for (int i = 0; i < n - 2; i++) {
+            isp[i] = iSP(p_v[i], p_v[i + 2], p_v[i + 1]);
+        }
+        set<int> s;
+        for (int i = 0; i < n; i++) {
+            if (abs(isp[i]) == 2) return false;
+            if (abs(isp[i]) == 1) s.insert(isp[i]);
+        }
+        return s.size() < 2;
+    }
+    // p0-p1,p1-p2,...,p(n-1)-poが辺である多角形の中にpが含まれるか
+    // 内部に含まれている→2、辺上にいる→1、含まれていない→0
+    int is_contained(vector<point> const& p_v, point p) {
+        int n = (int)p_v.size();
+        double x_max = -1e+100, y_max = -1e+100;
+        for (int i = 0; i < n - 1; i++) {
+            if (iSP(p_v[i], p_v[i + 1], p) == 0) return 1;
+        }
+        if (iSP(p_v[n - 1], p_v[0], p) == 0) return 1;
+        for (int i = 0; i < n; i++) {
+            x_max = max(x_max, p_v[i].x);
+            y_max = max(y_max, p_v[i].y);
+        }
+        while (true) {
+            bool flag = false;
+            double k1 = 1.1 + (double)std::rand() / (double)RAND_MAX;
+            double k2 = 1.1 + (double)std::rand() / (double)RAND_MAX;
+            point q = {x_max * k1, y_max * k2};
+            int c = cross({p_v[n - 1], p_v[0], true}, {p, q, true});
+            if (c == 2) continue;
+            for (int i = 0; i < n - 1; i++) {
+                int d = cross({p_v[i], p_v[i + 1], true}, {p, q, true});
+                if (d == 2) {
+                    flag = true;
+                    break;
+                }
+                c += d;
+            }
+            if (flag) continue;
+            return (c % 2) * 2;
+        }
+    }
+    // 点群における凸包を求める。
+    // on_edge=trueで角度180度の角も許容する。falseであれば入れない。
+    // 出力される点は反時計回り。
+    vector<point> convex_hull(vector<point> p_v, bool on_edge = true) {
+        double eps = EPS * (2 * on_edge - 1);
+        vector<point> q;
+        int k = 0, n = (int)p_v.size();
+        sort(p_v.begin(), p_v.end());
+        for (int i = 0; i < n; i++) {
+            while (k > 1 and
+                   ((q[k - 1] - q[k - 2]) ^ (q[k - 1] - p_v[i])) > eps) {
+                k--;
+                q.pop_back();
+            }
+            q.push_back(p_v[i]);
+            k++;
+        }
+        int t = k;
+        for (int i = n - 2; i > -1; i--) {
+            while (k > t and
+                   ((q[k - 1] - q[k - 2]) ^ (q[k - 1] - p_v[i])) > eps) {
+                k--;
+                q.pop_back();
+            }
+            q.push_back(p_v[i]);
+            k++;
+        }
+        q.resize(k - 1);
+        return q;
+    }
+    // 点群の直径を求める
+    double diameter(vector<point> const& p_v) {
+        vector<point> cv = convex_hull(p_v);
+        int n = (int)cv.size();
+        if (n == 2) return (cv[0] - cv[1]).r;
+        cv.push_back(cv[0]);
+        int i = 0, j = 0;
+        // x方向に一番遠い点対を求める
+        for (int k = 0; k < n; k++) {
+            if (cv[k] < cv[i]) i = k;
+            if (cv[k] > cv[j]) j = k;
+        }
+        // 最遠点対を求める
+        double ret = 0;
+        int si = i, sj = j;
+        while (i != sj || j != si) {
+            ret = max(ret, (cv[i] - cv[j]).r);
+            if (((cv[i + 1] - cv[i]) ^ (cv[j + 1] - cv[j])) < -EPS) {
+                i++;
+                if (i >= n) i -= n;
+            } else {
+                j++;
+                if (j >= n) j -= n;
+            }
+        }
+        return ret;
+    }
+    // 最近点対の距離を求める
+    double shortest_point(vector<point> p_v) {
+        int n = (int)p_v.size();
+        sort(p_v.begin(), p_v.end(),
+             [](const point& p, const point& q) { return p.x < q.x; });
+        return closest_pair(p_v, 0, n);
+    }
+    double closest_pair(vector<point>& p_v, int start, int last) {
+        int n = last - start;
+        if (n <= 1) { return inf; }
+        int mid = start + n / 2;
+        double x = p_v[mid].x;
+        double d =
+            min(closest_pair(p_v, start, mid), closest_pair(p_v, mid, last));
+        inplace_merge(p_v.begin() + start, p_v.begin() + mid,
+                      p_v.begin() + last,
+                      [](const point& p, const point& q) { return p.y < q.y; });
+        vector<point> p_v2;
+        for (int i = start; i < last; i++) {
+            if (abs(p_v[i].x - x) >= d) continue;
+            for (int j = (int)p_v2.size() - 1; j >= 0; j--) {
+                double dx = p_v[i].x - p_v2[j].x;
+                double dy = p_v[i].y - p_v2[j].y;
+                if (dy >= d) break;
+                d = min(d, sqrt(dx * dx + dy * dy));
+            }
+            p_v2.push_back(p_v[i]);
+        }
+        return d;
+    }
+};
+
+int main() {
+    PRE_COMMAND
+    // 入力の読み込み
+    geo g;
+    int n;
+    cin >> n;
+    vector<point> p_v(n);
+    cin >> p_v;
+
+    PRINT(g.diameter(p_v));
+}
+

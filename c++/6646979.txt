@@ -1,0 +1,69 @@
+#include <iostream>
+#include <unordered_map>
+#include <algorithm>
+#include <vector>
+using namespace std;
+using ll = long long;
+void printArray(const vector<ll>& s) {
+	for (ll i = 0; i < s.size(); i++) cout << s[i] << " "; 
+	cout << endl;
+}
+int main() {
+	ll n, k, l, r; cin >> n >> k >> l >> r;
+	vector<ll> a(n);
+	for (ll i = 0; i < n; i++) cin >> a[i];
+	// hanbun zenrekkyo
+	ll x = (n+1)/2;
+	ll y = n - x;
+	unordered_map<ll, vector<ll>> p;
+	for (ll i = 0; i < (1<<x); i++) {
+		ll cost = 0;
+		for (ll j = 0; j < x; j++) {
+			if (i & (1<<j)) {
+				cost += a[j];
+			}
+		}
+		ll num = __builtin_popcountll(i);
+		p[num].push_back(cost);
+	}
+	unordered_map<ll, vector<ll>> q;
+	for (ll i = 0; i < (1<<y); i++) {
+		ll cost = 0;
+		for (ll j = 0; j < y; j++) {
+			if (i & (1<<j)) {
+				cost += a[x+j];
+			}
+		}
+		ll num = __builtin_popcountll(i);
+		q[num].push_back(cost);
+	}
+	// for (auto& [num, vec]: p) {
+	// 	cout << "-------"  << num << endl; 	
+        // 	for (auto s: vec) cout << s << " ";
+	// 	cout << endl;                     
+	// }
+
+	// for (auto& [num, vec]: q) {
+	// 	cout << "-------"  << num << endl; 	
+	// 	for (auto s: vec) cout << s << " ";
+	// 	cout << endl;                     
+	// }
+
+	ll ans = 0;
+	for (auto& [num, vec]: p) {
+		if (num > k) continue;
+		sort(vec.begin(), vec.end());
+		for (auto val: vec) {
+			auto iter = q.find(k-num);
+			if (iter == q.end()) continue;
+			if (val > r) break;
+			auto& f = iter->second;
+			sort(f.begin(), f.end());
+			auto iter1 = lower_bound(f.begin(), f.end(), l-val);
+			auto iter2 = upper_bound(f.begin(), f.end(), r-val);
+			ans += iter2-iter1;
+		}
+	}
+	cout << ans << endl;
+}
+

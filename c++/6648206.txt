@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N;
+    cin >> N;
+    if (N == 1) {
+        cout << 0 << '\n';
+        return 0;
+    }
+    V<V<pair<int, ll>>> G(N);
+    for (int i = 0; i < N - 1; i++) {
+        int s, t, w;
+        cin >> s >> t >> w;
+        G[s].push_back({t, w});
+        G[t].push_back({s, w});
+    }
+    V<ll> dp1(N, 0);
+    auto dfs = [&](auto f, int cur, int par) -> void {
+        for (auto &[nex, cost] : G[cur]) {
+            if (nex == par) continue;
+            f(f, nex, cur);
+            dp1[cur] = max(dp1[cur], dp1[nex] + cost);
+        }
+        return;
+    };
+    dfs(dfs, 0, -1);
+    V<ll> dp2(N);
+    auto rerooting = [&](auto g, int cur, int par, ll dp1_par) -> void {
+        V<pair<ll, int>> dp1_cld;
+        dp1_cld.push_back({0, -1});
+        for (auto &[nex, cost] : G[cur]) {
+            if (nex == par) {
+                dp1_cld.push_back({dp1_par + cost, par});
+            } else {
+                dp1_cld.push_back({dp1[nex] + cost, nex});
+            }
+        }
+        sort(dp1_cld.rbegin(), dp1_cld.rend());
+        dp2[cur] = dp1_cld[0].first + dp1_cld[1].first;
+        for (auto &[nex, cost] : G[cur]) {
+            if (nex == par) continue;
+            if (nex == dp1_cld[0].second) {
+                g(g, nex, cur, dp1_cld[1].first);
+            } else {
+                g(g, nex, cur, dp1_cld[0].first);
+            }
+        }
+        return;
+    };
+    rerooting(rerooting, 0, -1, 0);
+    return 0;
+}
+

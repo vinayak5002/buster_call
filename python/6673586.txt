@@ -1,0 +1,90 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class RangeUpdateQuery:
+    def __init__(self, n, init_val):
+        self._n = 1
+        while self._n < n:
+            self._n <<= 2
+        self._lazy = [-1] * (2 * self._n - 1)
+        for i in range(self._n):
+            self._lazy[i + self._n - 1] = init_val
+        return
+
+    def _eval(self, k):
+        if self._lazy[k] < 0:
+            return
+        if k < self._n - 1:
+            k2 = 2 * k
+            self._lazy[k2 + 1] = self._lazy[k]
+            self._lazy[k2 + 2] = self._lazy[k]
+            self._lazy[k] = -1
+        return
+
+    def _update_sub(self, s, t, x, k, left, right):
+        if self._lazy[k] >= 0:
+            self._eval(k)
+
+        if right <= s or t <= left:
+            return
+        if s <= left and right <= t:
+            self._lazy[k] = x
+            return
+
+        mid = (left + right) // 2
+        k2 = 2 * k
+        self._update_sub(s, t, x, k2 + 1, left, mid)
+        self._update_sub(s, t, x, k2 + 2, mid, right)
+        return
+
+    # i: zero-based
+    def find(self, i):
+        i += self._n - 1
+
+        result = self._lazy[i]
+        i = (i - 1) // 2
+        while i >= 0:
+            if self._lazy[i] >= 0:
+                result = self._lazy[i]
+            i = (i - 1) // 2
+        return result
+
+    # [s, t), zero-based
+    def update(self, s, t, x):
+        self._update_sub(s, t, x, 0, 0, self._n)
+        return
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, q = map(int, f.readline().split())
+    init_val = 2 ** 31 - 1
+    ruq = RangeUpdateQuery(n, init_val)
+
+    for _ in range(q):
+        query_list = list(map(int, f.readline().split()))
+        if query_list[0] == 0:
+            s = query_list[1]
+            t = query_list[2] + 1
+            x = query_list[3]
+            ruq.update(s, t, x)
+        else:
+            i = query_list[1]
+            val = ruq.find(i)
+            print(val)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

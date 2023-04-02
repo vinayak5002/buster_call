@@ -1,0 +1,100 @@
+#include<stdio.h>
+#include<iostream>
+#include<stdlib.h>
+#include <math.h>
+
+
+#define NIL -1
+
+using namespace std;
+
+struct bNode{
+    int nodeId, parent, sibling, degree, depth, height, leftChild, rightChild;
+};
+
+bNode bTree[25];
+
+int height[25];
+int n;
+int curNode, leftChild, rightChild;
+
+int maxHeight;
+
+void printBNode(int n){
+    cout<< "node " << n << ": parent = " << bTree[n].parent <<", sibling = "<< bTree[n].sibling <<", degree = "<< bTree[n].degree << ", depth = "
+    << bTree[n].depth << ", height = " << bTree[n].height << ", ";
+
+    if(bTree[n].parent == NIL) cout << "root";
+    else if(bTree[n].degree == 0) cout << "leaf";
+    else cout << "internal node";
+
+    cout << endl;
+}
+
+void recurDepth(int n, int d){
+    bTree[n].depth = d;
+    if(bTree[n].leftChild != NIL) recurDepth(bTree[n].leftChild, d + 1);
+    if(bTree[n].rightChild != NIL) recurDepth(bTree[n].rightChild, d + 1);
+}
+
+int setHeight(int n){
+    if(n == -1) return -1;
+    int leftHeight = setHeight(bTree[n].leftChild);
+    int rightHeight = setHeight(bTree[n].rightChild);
+    bTree[n].height = max(leftHeight, rightHeight) + 1;
+    if(bTree[n].leftChild != NIL) setHeight(bTree[n].leftChild);
+    if(bTree[n].rightChild != NIL) setHeight(bTree[n].rightChild);
+    return bTree[n].height;
+}
+
+
+
+int main(){
+    scanf("%d", &n);
+    maxHeight = log(n) / log(2);
+    for(int i = 0; i < n; i++){
+        bTree[i].degree = 0;
+        bTree[i].parent = NIL;
+        bTree[i].sibling = NIL;
+    }
+
+
+    for(int i = 0; i < n; i++){
+        //cout<<"ehere"<<endl;
+        scanf("%d %d %d", &curNode, &leftChild, &rightChild);
+        bTree[curNode].nodeId = curNode;
+        bTree[curNode].leftChild = leftChild;
+        bTree[curNode].rightChild = rightChild;
+        if(leftChild != -1 && rightChild != -1) {
+            bTree[rightChild].parent = curNode;
+            bTree[leftChild].parent = curNode;
+            bTree[rightChild].sibling = leftChild;
+            bTree[leftChild].sibling = rightChild;
+            bTree[curNode].degree = 2;
+        }else if(leftChild != -1){
+             bTree[leftChild].parent = curNode;
+             bTree[curNode].degree = 1;
+        }else if(rightChild != -1){
+             bTree[leftChild].parent = curNode;
+              bTree[curNode].degree = 1;
+        }else{
+            bTree[curNode].degree = 0;
+        }
+        //cout<< "here" <<endl;
+    }
+
+    int r; 
+    for(int i = 0; i < n; i++)
+        if(bTree[i].parent == NIL){
+            r = i;
+            break;
+        }
+
+    recurDepth(r, 0);
+    setHeight(r);
+
+    for(int i = 0; i < n; i++) printBNode(i);
+
+
+    return 0;
+}

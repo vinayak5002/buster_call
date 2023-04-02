@@ -1,0 +1,72 @@
+#include<iostream>
+#include<utility>
+#include<algorithm>
+#include<vector>
+
+void merge(std::vector<double>& values,int beg,int mid,int end){
+    //1
+    std::vector<double> buffer;
+    //2
+    double buf;
+    int size1=mid-beg;
+    int size2=end-mid;
+    int i=0;
+    int j=0;
+    int n=buffer.size();
+    buffer.push_back(values[beg]);
+    while (i < size1 && j < size2) {
+        if (values[beg+i] < values[mid+j])
+            buffer.push_back(values[beg+i++]);
+        else
+            buffer.push_back(values[mid+j++]);
+    }
+
+    while (i < size1) buffer.push_back(values[beg+i]);
+    while (j < size2) buffer.push_back(values[mid+i]);
+    //3
+    int size=end-beg;
+    for(int k=0;k<size;k++){
+        values[beg+k]=buffer[k];
+    }
+
+}
+void merge_sort_impl(std::vector<double>& values,int beg,int end){
+    int size=end-beg;
+    if(size<=1){
+        return;
+    }
+    int mid=beg+size/2;
+    merge_sort_impl(values,beg,mid);
+    merge_sort_impl(values,mid,end);
+    merge(values,beg,mid,end);
+}
+void merge_sort(std::vector<double>& values){
+    merge_sort_impl(values,0,values.size());
+}
+
+void print_container(std::vector<double>& values){
+  int n = values.size();
+  for (int i = 0; i < n; ++i) {
+    std::cout << (i > 0 ? " " : "");
+    std::cout << values[i];
+  }
+  std::cout << "\n";
+}
+int main(){
+  //std::cout << "Enter the number of elements:\n";
+  int n;
+  std::cin >> n;
+  //std::cout << "Enter the elements:\n";
+  std::vector<double> vals={};
+    for (int i = 0; i < n; ++i) {
+      double val;
+      std::cin >> val;
+      vals.push_back(val);
+    }
+    //std::cout <<"Sorted elements: ";
+    merge_sort(vals);
+    
+
+  print_container(vals);
+}
+

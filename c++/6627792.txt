@@ -1,0 +1,154 @@
+#include <stdio.h>
+#define MAX 10000
+#define NIL -1
+
+typedef struct
+{
+  int parent, left, right;
+} Node;
+
+Node T[MAX];
+int n, D[MAX], H[MAX];
+
+void setDepth(int i, int d)
+{
+  // 子が存在しなくなったら終了
+  if (i == NIL)
+  {
+    return;
+  }
+  D[i] = d;
+  // 右の子、左の子に対してsetDepthを再起的に呼び出す
+  setDepth(T[i].left, d + 1);
+  setDepth(T[i].right, d + 1);
+}
+
+int setHeight(int i)
+{
+  int h1 = 0, h2 = 0;
+  if (T[i].left != NIL)
+  {
+    h1 = setHeight(T[i].left) + 1;
+  }
+  if (T[i].right != NIL)
+  {
+    h2 = setHeight(T[i].right) + 1;
+  }
+
+  // h1とh2で高い方を配列Hに格納
+  if (h1 > h2)
+  {
+    H[i] = h1;
+  }
+  else
+  {
+    H[i] = h2;
+  }
+
+  return H[i];
+}
+
+int getSibling(int i)
+{
+  // 親がいないなら兄弟もいないのでNILを返す
+  if (T[i].parent == NIL)
+  {
+    return NIL;
+  }
+  // 自分が右の子で自分の親に左の子が存在するなら左の子が兄弟
+  if (T[T[i].parent].left != i && T[T[i].parent].left != NIL)
+  {
+    return T[T[i].parent].left;
+  }
+  // 自分が左の子で自分の親に右の子が存在するなら右の子が兄弟
+  if (T[T[i].parent].right != i && T[T[i].parent].right != NIL)
+  {
+    return T[T[i].parent].right;
+  }
+
+  return NIL;
+}
+
+int getDegree(int i)
+{
+  int degree = 0;
+  if (T[i].left != NIL)
+  {
+    degree++;
+  }
+  if (T[i].right != NIL)
+  {
+    degree++;
+  }
+
+  return degree;
+}
+
+int main(void)
+{
+  int i, id, l, r;
+  int root = 0;
+  scanf("%d", &n);
+
+  // 親を全てNILにする
+  for (i = 0; i < n; i++)
+  {
+    T[i].parent = NIL;
+  }
+
+  for (i = 0; i < n; i++)
+  {
+    scanf("%d %d %d", &id, &l, &r);
+    T[id].left = l;
+    T[id].right = r;
+
+    // 左の子が存在するなら左の子の親である
+    if (l != NIL)
+    {
+      T[l].parent = id;
+    }
+
+    // 右の子が存在するなら右の子の親である
+    if (r != NIL)
+    {
+      T[r].parent = id;
+    }
+  }
+
+  // 親がNILのものは根である
+  for (i = 0; i < n; i++)
+  {
+    if (T[i].parent == NIL)
+    {
+      root = i;
+    }
+  }
+
+  setDepth(root, 0);
+  setHeight(root);
+
+  for (i = 0; i < n; i++)
+  {
+    printf("node %d: ", i);
+    printf("parent = %d, ", T[i].parent);
+    printf("sibling = %d, ", getSibling(i));
+    printf("degree = %d, ", getDegree(i));
+    printf("depth = %d, ", D[i]);
+    printf("height = %d, ", H[i]);
+
+    if (T[i].parent == NIL)
+    {
+      printf("root\n");
+    }
+    else if (T[i].left == NIL && T[i].right == NIL)
+    {
+      printf("leaf\n");
+    }
+    else
+    {
+      printf("internal node\n");
+    }
+  }
+
+  return 0;
+}

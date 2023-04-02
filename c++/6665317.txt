@@ -1,0 +1,87 @@
+#define READ_FROM_FILE 0
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+typedef long long ll;
+
+
+#define MAX_COST (10000000000)
+
+
+bool warshall_floyd(int num_vertexes, vector<vector<ll>>& cost_matrix) {
+	for (int k = 0; k < num_vertexes; k++) {
+		for (int i = 0; i < num_vertexes; i++) {
+			for (int j = 0; j < num_vertexes; j++) {
+				if (cost_matrix[i][j] == MAX_COST) {
+					if (cost_matrix[i][k] == MAX_COST || cost_matrix[k][j] == MAX_COST) {
+						cost_matrix[i][j] = MAX_COST;
+					}
+					else {
+						cost_matrix[i][j] = cost_matrix[i][k] + cost_matrix[k][j];
+					}
+				}
+				else {
+					cost_matrix[i][j] = min(cost_matrix[i][j], cost_matrix[i][k] + cost_matrix[k][j]);
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < num_vertexes; i++) {
+		if (cost_matrix[i][i] < 0) {
+			return true;
+		}
+	}
+	return false;
+}
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n, m;
+	vector<vector<ll>> cost_matrix;
+	bool is_there_negative_cycle = false;
+
+	cin >> n >> m;
+	cost_matrix.resize(n);
+	for (int i = 0; i < n; i++) {
+		cost_matrix[i].resize(n, MAX_COST);
+		cost_matrix[i][i] = 0;
+	}
+	for (int i = 0; i < m; i++) {
+		int s, t, d;
+
+		cin >> s >> t >> d;
+		cost_matrix[s][t] = d;
+	}
+
+	is_there_negative_cycle = warshall_floyd(n, cost_matrix);
+	if (is_there_negative_cycle) {
+		cout << "NEGATIVE CYCLE" << endl;
+	}
+	else {
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				if (cost_matrix[i][j] == MAX_COST) {
+					cout << "INF";
+				}
+				else {
+					cout << cost_matrix[i][j];
+				}
+				if (j < n - 1) {
+					cout << " ";
+				}
+			}
+			cout << endl;
+		}
+	}
+	return 0;
+}

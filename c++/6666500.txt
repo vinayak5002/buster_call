@@ -1,0 +1,222 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+/*
+2022 NTHU PME Programming Practice #1
+D - Caesar Cipher
+*/
+/*version:1.0
+*/
+
+#define			WORD_MAX_LENGTH		(80+1)
+#define			WORD_MAX_NOS		(80)
+
+#define			WORD_SPLIT_TOKEN	" \t\n."
+
+//#define IF_DEBUGGING_ON
+
+void		split0					(	unsigned char		*string		,
+								unsigned int		*wordbgn	,
+								unsigned int		*wordend	,
+								unsigned int		*wordcnt
+							) ;
+int		search0					(	unsigned char		*string		,
+								unsigned int		bgnidx		,
+								unsigned int		length
+							) ;
+void		decode0					(	unsigned char		*string		,
+								unsigned int		bgnidx		,
+								unsigned int		length		,
+								unsigned int		shift
+							) ;
+
+int main(void)
+{
+	long		loop_i						;
+	long		loop_j						;
+	long		loop_k						;
+	unsigned char	string	[WORD_MAX_LENGTH]			;
+	
+	unsigned int	wordbgn	[WORD_MAX_NOS]				;
+	unsigned int	wordlen	[WORD_MAX_NOS]				;
+	unsigned int	wordcnt						;
+
+	unsigned char	running						;
+	unsigned char	temp_char					;
+	unsigned char	endofline					;
+	int		shift						;
+
+					running			=	1		;
+					loop_i			=	0		;
+					endofline		=	0		;
+	while (running==1) {
+	  if(			scanf("%c",&temp_char)==EOF			) {
+					temp_char		=	'\n'		;
+					running			=	0		;
+	  }
+					string	[loop_i]	=	temp_char	;
+					loop_i++					;
+
+	  if(			loop_i>1					&&
+				temp_char=='\n'					) {
+					string	[loop_i]	=	'\0'		;
+					loop_i			=	0		;
+					endofline		=	1		;
+	  }
+
+	  if(				endofline==1				) {
+					split0	(	string, wordbgn, wordlen, &wordcnt	);
+#ifdef	IF_DEBUGGING_ON
+					printf("%s",string)				;
+#endif
+		for(loop_j=0;loop_j<wordcnt;loop_j++) {
+					shift			=	search0	(string, wordbgn[loop_j], wordlen[loop_j]);
+			if(		shift!=-1				) {
+#ifdef	IF_DEBUGGING_ON
+					printf("shift=%d\n",shift)				;
+#endif
+					break;
+			}
+		}
+#ifdef	IF_DEBUGGING_ON
+		for(loop_j=0;loop_j<wordcnt;loop_j++) {
+		  for(loop_k=0;loop_k<wordlen[loop_j];loop_k++) {
+					printf("%c",string[wordbgn[loop_j]+loop_k])	;
+		  }
+					printf("\n")					;
+		}
+#endif
+		if(			shift!=-1				) {
+		  for(loop_j=0;loop_j<wordcnt;loop_j++) {
+					decode0	(string, wordbgn[loop_j], wordlen[loop_j], shift);
+		  }
+		}
+					printf("%s",string)				;
+
+					endofline		=	0		;
+	  }
+	}
+
+    	return 0;
+}
+
+void		split0					(	unsigned char		*string		,
+								unsigned int		*wordbgn	,
+								unsigned int		*wordlen	,
+								unsigned int		*wordcnt
+							) {
+
+		int 		loop_i			;
+		unsigned int	length			;
+		int 		bgnidx			;
+		int 		preidx			;
+		int 		posidx			;
+		unsigned int	count			;
+		unsigned char	temp_char		;
+
+					
+					length			=	strlen(string)			;
+					count			=	0				;
+					bgnidx			=	-1				;
+	for(loop_i=0;loop_i<length;loop_i++) {
+					temp_char		=	string	[loop_i]		;
+	  if(			bgnidx==-1						&&
+				temp_char>='a'						&&
+				temp_char<='z'						) {
+					bgnidx			=	loop_i				;
+	  }
+	  else if(		bgnidx!=-1						&&
+			(	temp_char==' '						||
+				temp_char=='\t'						||
+				temp_char=='\n'						||
+				temp_char=='.'						||
+				loop_i==(length-1)				)	) {
+					wordbgn	[count]		=	bgnidx				;
+					wordlen	[count]		=	loop_i-bgnidx			;
+					count++								;
+
+					bgnidx			=	-1				;
+	  }
+	}
+					*wordcnt		=	count				;
+}
+
+int		search0					(	unsigned char		*string		,
+								unsigned int		bgnidx		,
+								unsigned int		length
+							) {
+
+/*
+	'a'~'z'		-> 097~122
+
+	a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t  u  v  w  x  y  z
+	00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F 10 11 12 13 14 15 16 17 18 19	
+
+	case0: 'the' 	-> 74_68_65		13_07_04
+	case1: 'this'	-> 74_68_69_73		13_07_08_12	
+	case2: 'that'	-> 74_68_61_74		13_07_00_13
+*/
+		int		result	=	-1	;
+		int 		loop_i			;
+		int 		loop_j			;
+		unsigned char	temp0		[4]	;
+		unsigned char	temp1		[4]	;
+
+	  for(loop_j=0;loop_j<4;loop_j++) {
+					temp0	[loop_j]	=	string	[bgnidx+loop_j]-'a'	;
+	  }
+
+	  for(loop_i=0;loop_i<26;loop_i++) {
+		for(loop_j=0;loop_j<4;loop_j++) {
+					temp1[loop_j]		=	temp0[loop_j] + loop_i		;
+					temp1[loop_j]		%=	26				;
+					temp1[loop_j]		+=	'a'				;
+		}
+
+		if(		length==3			&&
+				temp1[0]=='t'			&&
+				temp1[1]=='h'			&&
+				temp1[2]=='e'			) {
+					result			=	loop_i				;
+					break;
+		}
+		else if(	length==4			&&
+				temp1[0]=='t'			&&
+				temp1[1]=='h'			&&
+				temp1[2]=='i'			&&
+				temp1[3]=='s'			) {
+					result			=	loop_i				;
+					break;
+		}
+		else if(	length==4			&&
+				temp1[0]=='t'			&&
+				temp1[1]=='h'			&&
+				temp1[2]=='a'			&&
+				temp1[3]=='t'			) {
+					result			=	loop_i				;
+					break;
+		}
+	  }
+
+		return	result		;
+}
+
+void		decode0					(	unsigned char		*string		,
+								unsigned int		bgnidx		,
+								unsigned int		length		,
+								unsigned int		shift
+							) {
+
+		int 		loop_i			;
+		int 		loop_j			;
+					loop_j			=	bgnidx				;
+	  for(loop_i=0;loop_i<length;loop_i++) {
+					string[loop_j]		-=	'a'				;
+					string[loop_j]		+=	shift				;
+					string[loop_j]		%=	26				;
+					string[loop_j]		+=	'a'				;
+					loop_j			++					;
+	  }
+}
+

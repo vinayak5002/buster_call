@@ -1,0 +1,40 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int func(int n){
+	vector<int> line(n);
+	for(auto &i:line)cin>>i;
+	vector<vector<int>> dp(n,vector<int>(n,-1));
+	auto ok = [&](int p1,int p2){
+		return abs(line[p1] - line[p2]) <= 1;
+	};
+	function<int(int,int)> rec = [&](int l,int r) -> int{
+		if(l >= r)return 0;
+		if(l + 1 == r){
+			return ok(l,r) * 2;
+		}
+		int &it = dp[l][r];
+		if(it >= 0)return it;
+		if(rec(l+1,r-1)==r-l-1 and ok(l,r)){
+			it = r - l + 1;
+			return it;
+		}
+		it = 0;
+		for(int mid=l;mid<r;++mid){
+			it = max<int>(it,rec(l,mid)+rec(mid+1,r));
+		}
+		return it;
+	};
+	return rec(0,n-1);
+}
+
+
+int main(){
+	while(true){
+		int n;
+		cin >> n;
+		if(n==0)break;
+		cout << func(n) << endl;
+	}
+}
+

@@ -1,0 +1,44 @@
+import sys
+sys.setrecursionlimit(10**6)
+class RMQ:
+    def __init__(self, n):
+        x = 1
+        while n >= x:
+            x <<= 1 
+        self.n = x
+        self.dat = [2**31-1] * 2 * x
+
+    def update(self, i, x):
+        i += self.n - 1
+        self.dat[i] = x
+        while i > 0:
+            i = (i - 1) // 2
+            self.dat[i] = min(self.dat[i * 2 + 1], self.dat[i * 2 + 2])
+
+
+    def find(self, a, b):
+        return self.query(a, b+1, 0, 0, self.n)
+
+    # k:現在見てるノードの位置 [l, r): dat[k]が表している位置
+    def query(self, a, b, k, l, r):
+        if r <= a or b <= l:
+            return 1<<32-1
+        elif a <= l and r <= b: 
+            return self.dat[k]
+        else:
+            vl = self.query(a, b, k * 2 + 1, l, (l + r) // 2)
+            vr = self.query(a, b, k * 2 + 2, (l + r) // 2, r)
+            return min(vl, vr)
+
+
+n, q = map(int, input().split())
+rmq = RMQ(n)
+for _ in range(q):
+    com, x, y = map(int, input().split())
+    if com == 0:
+        rmq.update(x, y)
+    elif com == 1:
+        ans = rmq.find(x, y)
+        print(ans)
+
+

@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using Long = long long;
+
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+    int n, m;
+    cin >> n >> m;
+    vector<int> p(m, 0);
+    for (int i = 0; i < m; ++i) {
+        cin >> p[i];
+    }
+    vector<tuple<Long, Long, Long>> ticket(n - 1);
+    for (int i = 0; i < n - 1; ++i) {
+        int a, b, c;
+        cin >> a >> b >> c;
+        ticket[i] = make_tuple(a, b, c);
+    }
+    // 鉄道ごとの利用回数を調べる(1次元いもす法)
+    vector<Long> railway(n, 0);
+    for (int i = 0; i < m - 1; ++i) {
+        if (p[i] < p[i + 1]) {
+            railway[p[i] - 1] += 1;
+            railway[p[i + 1] - 1] -= 1;
+        } else {
+            railway[p[i + 1] - 1] += 1;
+            railway[p[i] - 1] -= 1;
+        }
+    }
+    for (int i = 0; i < n - 1; ++i) railway[i + 1] += railway[i];
+    long long amounts = 0;
+    for (int i = 0; i < n - 1; ++i) {
+        long long paper = get<0>(ticket[i]) * railway[i];  // 紙のきっぷの料金
+        long long ic = get<1>(ticket[i]) * railway[i] +
+                       get<2>(ticket[i]);  // ICカードの料金
+        if (paper <= ic) {
+            amounts += paper;
+        } else {
+            amounts += ic;
+        }
+    }
+    cout << amounts << endl;
+    return 0;
+}
+
+

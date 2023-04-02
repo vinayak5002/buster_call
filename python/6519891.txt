@@ -1,0 +1,82 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let line = si[0]
+	let num = line.split(" ")
+	let arrayNum = num[0]
+	let queryNum = num[1]
+	let array = new Array()
+	for (let i = 0; i < arrayNum; i++) {
+		array[i] = new Array()
+	}
+	
+	for (let i = 1; i <= queryNum; i++) {
+		let line = si[i]
+		let num = line.split(" ").map(function(value) {
+		return Number(value)
+		})
+		let order = num[0]
+		let queNum = num[1]
+		if (order == '0') {
+			// 指定されたキューに入れる
+			let addNum = num[2]
+			array[queNum].push(addNum)
+			let childIndex = array[queNum].length -1
+			while (true) {
+				if (childIndex == 0){
+					break;
+				}
+				let parentIndex = parseInt((childIndex - 1) / 2)
+				if (array[queNum][parentIndex] < array[queNum][childIndex]) {
+					let tmp = array[queNum][parentIndex]
+					array[queNum][parentIndex] = array[queNum][childIndex]
+					array[queNum][childIndex] = tmp
+					childIndex = parentIndex
+				} else {
+					break;
+				}
+			}
+		} else if (order == '1') {
+			// 指定されたキューの取り出される要素を表示
+			if (array[queNum].length) {
+				so.write(array[queNum][0] + "\n")
+			}
+			
+		} else {
+			//指定されたキューから要素を取り出す
+			if (array[queNum].length) {
+				let index = array[queNum].length - 1
+				array[queNum][0] = array[queNum][index]
+				array[queNum].pop
+				index--
+				let parentIndex = 0
+				let changeIndex
+				while (true) {
+					let leftChildIndex = parentIndex * 2 + 1
+					let rightChildIndex = parentIndex * 2 + 2
+					if (leftChildIndex <= index && rightChildIndex <= index) {
+						if (array[queNum][leftChildIndex] < array[queNum][rightChildIndex]) {
+							changeIndex = rightChildIndex
+						} else {
+							changeIndex = leftChildIndex
+						}
+					} else if (leftChildIndex <= index) {
+						changeIndex = leftChildIndex
+					} else {
+						break;
+					}
+					if (array[queNum][parentIndex] < array[queNum][changeIndex]) {
+						let tmp = array[queNum][parentIndex]
+						array[queNum][parentIndex] = array[queNum][changeIndex]
+						array[queNum][changeIndex] = tmp
+						parentIndex = changeIndex
+					}
+				}
+			}
+		}
+	}
+}
+
+

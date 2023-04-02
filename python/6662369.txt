@@ -1,0 +1,36 @@
+import sys
+from bisect import bisect_left, bisect_right
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n = int(f.readline())
+    a_list = []
+    max_a = 10**9 + 1
+    for _ in range(n):
+        a = int(f.readline())
+        a_list.append(a)
+
+    dp = [max_a for _ in range(n)]
+    for a in a_list:
+        idx = bisect_right(dp, a - 1)
+        dp[idx] = min(dp[idx], a)
+
+    max_length = bisect_left(dp, max_a)
+    print(max_length)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

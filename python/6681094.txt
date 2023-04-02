@@ -1,0 +1,24 @@
+import scala.annotation.tailrec
+import scala.io.StdIn
+
+
+object Main extends App {
+  var set:Set[String] = Set()
+  val N  = StdIn.readInt()
+  val S = for (_ <- 0 until N) yield StdIn.readLine().split(" ").toList
+
+  @tailrec
+  def solver(ll:List[List[String]], ac:List[String]):List[String] = {
+    ll match {
+      case List("insert", s)::xs =>
+        set = set + s
+        solver(xs, ac)
+      case List("find", s)::xs =>
+        if (set contains s) solver(xs, "yes"::ac) else solver(xs, "no"::ac)
+      case _ => ac.reverse
+    }
+  }
+
+  val C = solver(S.toList, List())
+  println(s"${C.mkString("\n")}")
+}

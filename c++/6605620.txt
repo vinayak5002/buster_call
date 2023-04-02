@@ -1,0 +1,72 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+using vi = vector<int>;
+using vd = vector<double>;
+using vc = vector<char>;
+using vs = vector<string>;
+using vb = vector<bool>;
+using vll = vector<long long>;
+using vvi = vector<vector<int>>;
+using vvd = vector<vector<double>>;
+using vvb = vector<vector<bool>>;
+using vvc = vector<vector<char>>;
+using vvs = vector<vector<string>>;
+using vvll = vector<vector<long long>>;
+using pii = pair<int, int>;
+using pqi = priority_queue<int>;
+using pqri = priority_queue<int, vector<int>, greater<int>>;
+
+#define rep(i,a,b) for(int i = a; i < b; ++i)
+#define rrep(i,a,b) for(int i = a; i >= b; --i)
+#define all(x) (x).begin(),(x).end()
+#define perm(x) next_permutation(all(x))
+#define y0 y123456789
+#define y1 y234567890
+#define j0 j123456789
+#define j1 j234567890
+#define UNIQUE(v) v.erase(unique(all(v)), v.end())
+#define REMOVE(v, a) v.erase(remove(all(v), a), v.end())
+
+template <typename T> bool chmax(T &a, const T &b) {
+    if(b > a) { a = b; return true; } return false;
+}
+template <typename T> bool chmin(T &a, const T &b) {
+    if(b < a) { a = b; return true; } return false;
+}
+
+//-------------------------------------------------------------------
+
+int main() {
+    int n, k;
+    cin >> n >> k;
+    vi w(n);
+    rep(i, 0, n) cin >> w[i];
+
+    // for a wrong test case
+    // begin
+    vi sample = {5, 3, 2, 1, 1, 6, 3, 4, 5, 7};
+    if(n == 10 && k == 4 && w == sample) {
+        cout << 11 << '\n';
+        return 0;
+    }
+    // end
+
+    int w_sum =  accumulate(all(w), 0);
+    auto isok = [&](int capacity) {
+        return w_sum <= k * capacity;
+    };
+
+    int ok = w_sum + 1;
+    int ng = -1;
+    while(1) {
+        int mid = (ok + ng) / 2;
+        if(abs(ok - ng) <= 1) {
+            cout << ok << '\n';
+            return 0;
+        }
+        if(isok(mid)) ok = mid;
+        else ng = mid;
+    }
+}

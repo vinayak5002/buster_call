@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int n, m, t, p;
+        cin >> n >> m >> t >> p;
+        if (n == 0) break;
+
+        vector<vector<int>> cnt(m, vector<int>(n, 1));
+        rep(_,0,t) {
+            int d, c;
+            cin >> d >> c;
+            if (d == 1) {
+                // horizontal
+                vector<vector<int>> ncnt(m, vector<int>(max(n-c, c)));
+                rep(i,0,m) {
+                    rep(j,0,n) {
+                        int nj;
+                        if (j < c) {
+                            nj = c - j - 1;
+                        } else {
+                            nj = j - c;
+                        }
+                        ncnt[i][nj] += cnt[i][j];
+                    }
+                }
+                cnt.swap(ncnt);
+                n = max(n-c, c);
+            } else {
+                vector<vector<int>> ncnt(max(m-c, c), vector<int>(n));
+                rep(i,0,m) {
+                    int ni;
+                    if (i < c) {
+                        ni = c - i - 1;
+                    } else {
+                        ni = i - c;
+                    }
+                    rep(j,0,n) {
+                        ncnt[ni][j] += cnt[i][j];
+                    }
+                }
+                cnt.swap(ncnt);
+                m = max(m-c, c);
+            }
+        }
+        rep(_,0,p) {
+            int x, y;
+            cin >> x >> y;
+            cout << cnt[y][x] << "\n";
+        }
+    }
+}

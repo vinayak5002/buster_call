@@ -1,0 +1,58 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef pair<ll, ll> pr;
+typedef pair<pr, ll> pr2;
+
+#define rep(i, n) for (ll i = 0; i < (ll)(n); i++)
+
+const ll INF = 1e16;
+
+pr extgcd(ll a, ll b){
+    if(b != 0){
+        pr p = extgcd(b, a % b);
+        ll x = p.first, y = p.second;
+        return {y, x - (a / b) * y};
+    } else {
+        return {1, 0};
+    }
+}
+
+
+int main(void){
+    ll a, b; cin >> a >> b;
+    ll g = gcd(a, b);
+    a /= g; b/= g;
+    pr e = extgcd(a, b);
+    pr e1 = {e.first + b, e.second - a};
+    pr e2 = {e.first - b, e.second + a};
+    vector<pr> v_e = {e, e1, e2};
+    vector<ll> d_e(3);
+    rep(i, 3){
+        d_e[i] = abs(v_e[i].first) + abs(v_e[i].second);
+    }
+    ll m = INF;
+    rep(i, 3){
+        m = min(m, d_e[i]);
+    }
+    ll count = 0;
+    vector<ll> index = {};
+    rep(i, 3){
+        if(m == d_e[i]){
+            count++;
+            index.push_back(i);
+        }
+    }
+    if(count == 1){
+        cout << v_e[index[0]].first << " " << v_e[index[0]].second << endl;
+    }
+    if(count == 2){
+        if(v_e[index[0]].first <= v_e[index[0]].second){
+            cout << v_e[index[0]].first << " " << v_e[index[0]].second << endl;
+        } else {
+            cout << v_e[index[1]].first << " " << v_e[index[1]].second << endl;
+        }
+    }
+}
+

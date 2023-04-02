@@ -1,0 +1,115 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+
+public class Main {
+
+	static int[] parent, left, right;
+	static StringBuilder sb = new StringBuilder();
+
+	public static void main(String[] args) throws IOException{
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		PrintWriter out = new PrintWriter(System.out);
+
+		int n = Integer.parseInt(br.readLine());
+
+		parent = new int[n];
+		left = new int[n];
+		right = new int[n];
+
+		String[] num;
+		String input, type;
+		int p,s,deg,dep,h, inp, inl, inr;
+
+		for(int i=0; i<n; i++) {
+			parent[i] = -1;
+			left[i] = -1;
+			right[i] = -1;
+		}
+
+		//入力&格納
+		for(int i=0; i<n; i++) {
+
+			input = br.readLine();
+			num = input.split(" ");
+			inp = Integer.parseInt(num[0]);
+			inl = Integer.parseInt(num[1]);
+			inr = Integer.parseInt(num[2]);
+
+			if(inl != -1) {
+
+				parent[inl] = inp;
+				parent[inr] = inp;
+				left[inp] = inl;
+				right[inp] = inr;
+			}
+		}
+
+
+		//出力
+		for(int i=0; i<n; i++) {
+
+			p = parent[i];
+			dep = findD(parent[i], 0);
+			h = findH(i, 0, 0, i);
+			deg = 2;
+
+
+			if(left[i] == -1) {
+				type = "leaf";
+				deg--;
+			}
+			if(p == -1)
+				type = "root";
+			else
+				type = "internal node";
+
+			if(right[i] == -1)
+				deg--;
+
+			if(parent[i] != -1) {
+				if(left[parent[i]] == i)
+					s = right[parent[i]];
+				else
+					s = left[parent[i]];
+			}
+			else
+				s = -1;
+
+			out.println("node " + i + ": parent = " + p + ", sibling = " + s + ", degree = " + deg +
+					", depth = " + dep + ", height = " + h + ", " + type);
+		}
+
+		out.flush();
+	}
+
+
+	//深さ探索
+	static int findD(int now, int d) {
+
+		//System.out.println(now + ", " + d);
+
+		if(now != -1)
+			return findD(parent[now], ++d);
+		else
+			return d;
+	}
+
+	//高さ探索
+	//最初だけ左右どっちも、2回目以降は左のみ
+	//h2いらない？
+	static int findH(int now, int h1, int h2, int original) {
+
+			if(left[now] != -1)
+				return findH(left[now], ++h1, h2, original);
+
+			if(right[original] != -1 && now != original && h2 == 0) {
+				now = original;
+				return findH(right[now], ++h2, h1, original);
+			}
+
+		return (h1 >= h2)? h1 : h2;
+	}
+}

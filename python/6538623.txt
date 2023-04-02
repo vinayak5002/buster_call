@@ -1,0 +1,39 @@
+class Node:
+  def __init__(self):
+    self.parent = -1
+    self.children = None
+    self.kind = "root"
+    self.depth = 0
+
+def searchType(node):
+  if node.children:
+    if node.parent == -1:
+      return "root"
+    return "internal node"
+  else:
+    return "leaf"
+
+def searchDepth(id, depth):
+  nodes[id].depth = depth
+  if nodes[id].children:
+    for child in nodes[id].children:
+      searchDepth(child, depth + 1)
+
+
+n = int(input())
+nodes = [Node() for _ in range(n)]#nodeのリスト
+for _ in range(n):#親と子の情報を追加
+  id, k, *c = list(map(int, input().split()))
+  nodes[id].children = c#子の情報を追加
+  nodes[id].kind = searchType(nodes[id])#Type情報追加
+  for child in c:
+    nodes[child].parent = id#親の情報を追加
+
+#深さの情報入れる
+for id in enumerate(nodes):
+  if nodes[id].parent == -1:#根を探す
+    searchDepth(id, 0)
+    break
+
+for id, node in enumerate(nodes):
+  print(f"node {id}: parent = {node.parent}, depth = {node.depth}, {node.kind}, {node.children}")

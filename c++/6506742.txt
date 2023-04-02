@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < n; ++i)
+typedef long long ll;
+using namespace std;
+
+void solve(int H, int W, int N, int M) {
+    vector cnt(H, vector<int>(W, 1));
+
+    rep(i, N) {
+        int d, c;
+        cin >> d >> c;
+
+        if (d == 1) {
+            if (c * 2 > W) {
+                rep(j, H) rep(k, W / 2) {
+                    swap(cnt[j][k], cnt[j][W - k - 1]);
+                }
+                c = W - c;
+            }
+            rep(j, H) rep(k, c) {
+                cnt[j][k] += cnt[j][2 * c - k - 1];
+            }
+            W -= c;
+            cnt.resize(H, vector<int>(W));
+        } else {
+            if (c * 2 > H) {
+                rep(j, H / 2) rep(k, W) {
+                    swap(cnt[j][k], cnt[H - j - 1][k]);
+                }
+                c = H - c;
+            }
+            rep(j, W) rep(k, c) {
+                cnt[k][j] += cnt[2 * c - k - 1][j];
+            }
+            H -= c;
+            cnt.resize(H, vector<int>(W));
+        }
+    }
+
+    rep(i, M) {
+        int x, y;
+        cin >> x >> y;
+        cout << cnt[y][x] << "\n";
+    }
+}
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+
+    int H, W, N, M;
+    while (cin >> W >> H >> N >> M, H)
+        solve(H, W, N, M);
+
+    return 0;
+}
+

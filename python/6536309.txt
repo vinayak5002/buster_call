@@ -1,0 +1,27 @@
+use std::io;
+
+fn main() {
+    let (_, r) = {
+        let mut buffer = String::new();
+        io::stdin().read_line(&mut buffer).unwrap();
+        let n = buffer.trim().parse::<usize>().unwrap();
+
+        let mut r = vec![];
+        for _ in 0..n {
+            let mut buffer = String::new();
+            io::stdin().read_line(&mut buffer).unwrap();
+            let r_i = buffer.trim().parse::<i64>().unwrap();
+            r.push(r_i);
+        }
+        (n, r)
+    };
+
+    let mut minv = *r.first().unwrap();
+    let mut maxv = std::i64::MIN;
+    for &r_i in r.iter().skip(1) {
+        maxv = maxv.max(r_i - minv);
+        minv = minv.min(r_i);
+    }
+    println!("{}", maxv);
+}
+

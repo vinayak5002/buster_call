@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct Point
+{
+    double x, y;
+} p1, p2, p3;
+//给出三个顶点 求出三角形的外接圆的圆心坐标
+// void getCircle(Point p1, Point p2, Point p3, Point &c1, double &r)
+// {
+//     double a = p1.x * p1.x + p1.y * p1.y;
+//     double b = p2.x * p2.x + p2.y * p2.y;
+//     double c = p3.x * p3.x + p3.y * p3.y;
+//     double d = 2 * (p1.x * (p2.y - p3.y) + p2.x * (p3.y - p1.y) + p3.x * (p1.y - p2.y));
+//     double e = a * (p2.y - p3.y) + b * (p3.y - p1.y) + c * (p1.y - p2.y);
+//     double f = a * (p3.x - p2.x) + b * (p1.x - p3.x) + c * (p2.x - p1.x);
+//     double g = a * (p2.x * p3.y - p3.x * p2.y) + b * (p3.x * p1.y - p1.x * p3.y) + c * (p1.x * p2.y - p2.x * p1.y);
+//     c1.x = f / d;
+//     c1.y = g / d;
+//     r = sqrt((c1.x - p1.x) * (c1.x - p1.x) + (c1.y - p1.y) * (c1.y - p1.y));
+// }
+Point fun(Point a, Point b, Point c)
+{
+    double fm = a.x * (b.y - c.y) - a.y * (b.x - c.x) + (b.x * c.y - b.y * c.x);
+    double t1 = (a.x * a.x + a.y * a.y) / 2;
+    double t2 = (b.x * b.x + b.y * b.y) / 2;
+    double t3 = (c.x * c.x + c.y * c.y) / 2;
+    double u = t1 * (b.y - c.y) - a.y * (t2 - t3) + (t2 * c.y - t3 * b.y);
+    double v = a.x * (t2 - t3) - t1 * (b.x - c.x) + (b.x * t3 - c.x * t2);
+    return {u / fm, v / fm};
+}
+double f(Point a, Point b)
+{
+    return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+}
+int main()
+{
+    cin >> p1.x >> p1.y;
+    cin >> p2.x >> p2.y;
+    cin >> p3.x >> p3.y;
+    Point ans = fun(p1, p2, p3);
+    printf("%.10lf %.10lf %.10lf", ans.x, ans.y, f(ans, p1));
+}

@@ -1,0 +1,119 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define ll long long
+#define rep(i,a,b) for(ll i = a; i < b; i++)
+#define REP(i,a,b) for(ll i = a; i <=b; i++)
+#define fore(i,a) for(auto &i : a)
+#define all(x) (x).begin(),(x).end()
+#define fix(i) fixed << setprecision(i)
+#define nextp(v) next_permutation(all(v))
+
+
+
+template<class T>bool chmax(T& a, const T& b) { if(a < b) { a = b; return 1; } return 0; }
+template<class T>bool chmin(T& a, const T& b) { if(b < a) { a = b; return 1; } return 0; }
+
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+using pq = priority_queue<int>;
+using pqll = priority_queue<ll>;
+using vpic = vector<pair<int, char>>;
+
+
+
+const ll INF = LLONG_MAX/2;
+const ll MOD = 1000000007;
+
+
+
+
+
+vpic bubbleSort(vpic v, int N) {
+  vpic a(N);
+  rep(i,0,N) a[i] = { v[i].first, v[i].second };
+  
+  rep(i,0,N-1) {
+    rep(j,0,N-i-1) {
+      if(a[j].first > a[j+1].first) {
+        swap(a[j], a[j+1]);
+      }
+    }
+  }
+  
+  return a;
+}
+
+
+vpic selectionSort(vpic v, int N) {
+  vpic a(N);
+  rep(i,0,N) a[i] = { v[i].first, v[i].second };
+  
+  rep(i,0,N) {
+    int minj = i;
+    rep(j,i,N) {
+      if(a[j].first < a[minj].first) {
+        minj = j;
+      }
+    }
+    if(i != minj) {
+      swap(a[i], a[minj]);
+    }
+  }
+  
+  return a;
+}
+
+
+bool isStable(vpic a, vpic b) {
+  int N = a.size();
+  
+  rep(i,0,N-1) rep(j,0,N) {
+    if(a[i].first != b[j].first
+      && a[i].second != b[i].second) return false;
+  }
+  
+  return true;
+}
+
+
+int main() {
+  int N; cin >> N;
+  
+  bool Flag = true;
+  
+  set<int> s;
+  vpic a(N);
+  
+  rep(i,0,N) {
+    string S; cin >> S;
+    char C = S[0]; int A = stoi(S.substr(1));
+    a[i] = { A, C };
+    
+    if(s.count(A)) Flag = false;
+    s.insert(A);
+  }
+  
+  vpic bs = bubbleSort(a, N);
+  
+  rep(i,0,N) {
+    if(i) printf(" ");
+    printf("%c%d", bs[i].second, bs[i].first);
+  }
+  printf("\n");
+  
+  puts("Stable");
+  
+  vpic ss = selectionSort(a, N);
+  
+  rep(i,0,N) {
+    if(i) printf(" ");
+    printf("%c%d", ss[i].second, ss[i].first);
+  }
+  printf("\n");
+  
+  puts((isStable(bs, ss)?"Stable":"Not stable"));
+  
+  return 0;
+}

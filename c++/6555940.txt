@@ -1,0 +1,68 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+
+template<class T>
+class segment_tree{
+  private:
+    ll n;
+    vector<T> data;
+
+  public:
+    segment_tree(ll _n){
+      n = 1;
+      while(n < _n) n *= 2;
+      data.resize(2 * n - 1, INF);
+    }
+
+    void update(ll i, T a){
+      i += n - 1;
+      data[i] = a;
+      while(i > 0){
+        i = (i - 1) / 2;
+        data[i] = min(data[i * 2 + 1], data[i * 2 + 2]);
+      }
+    }
+
+    T query(ll a, ll b, ll k = 0, ll l = 0, ll r = -1){
+      if(r < 0) r = n;
+      // [a, b) と[l, r)が交差しない
+      if(r <= a || b <= l) return INF;
+      // 完全に含んでいればその節点の値
+      if(a <= l && r <= b) return data[k];
+      // そうでなければ2つの子の最小値
+      T vl = query(a, b, k * 2 + 1, l, (l + r) / 2);
+      T vr = query(a, b, k * 2 + 2, (l + r) / 2, r);
+      return min(vl, vr);
+    }
+};
+
+int main(){
+  cout << fixed << setprecision(20);
+  
+  ll n, q;
+  cin >> n >> q;
+  
+  segment_tree<ll> st(n);
+  for(ll i = 0; i < n; i++) st.update(i, 2147483647);
+  while(q){
+    ll c, x, y;
+    cin >> c >> x >> y;
+    if(c == 0){
+      st.update(x, y);
+    }
+    else{
+      cout << st.query(x, y + 1) << endl;
+    }
+    q--;
+  }
+  
+  return 0;
+}
+
+

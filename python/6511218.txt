@@ -1,0 +1,38 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let permNum = Number(si[0])
+	let perm = si[1].split(" ")
+	
+	let res = permutation(perm, permNum).sort()
+	let index = res.findIndex(function(elem){
+		return elem.toString() == perm.toString()
+	})
+	for (let i = index - 1; i <= index + 1; i++) {
+		if (0 <= i && i < res.length) {
+			so.write(res[i].join(" ") + "\n")
+		}
+	}
+	
+	function permutation (val, pNum) {
+		let res = []
+		if (pNum == 1) {
+			for (let i = 0; i < val.length; i++) {
+				res[i] = [val[i]]
+			}
+			return res 
+		}
+		for (let i = 0; i < val.length; i++) {
+			let tmp = val.slice()
+			tmp.splice(i,1)
+			let raw = permutation(tmp, (pNum - 1))
+			for (let j = 0; j < raw.length; j++) {
+				res.push([val[i]].concat(raw[j]))
+			}
+		}
+		return res
+	}
+}
+

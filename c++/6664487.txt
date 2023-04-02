@@ -1,0 +1,125 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+using namespace std;
+
+
+class RangeUpdateQuery {
+private:
+	int n_;
+	vector<int> lazy_;
+
+private:
+	void eval(int k) {
+		if (lazy_[k] < 0) {
+			return;
+		}
+		if (k < n_ - 1) {
+			int k2 = 2 * k;
+			lazy_[k2 + 1] = lazy_[k];
+			lazy_[k2 + 2] = lazy_[k];
+			lazy_[k] = -1;
+		}
+		return;
+	}
+
+	void update_sub(int s, int t, int x, int k, int left, int right) {
+		if (lazy_[k] >= 0) {
+			eval(k);
+		}
+		if (right <= s || t <= left) {
+			return;
+		}
+		if (s <= left && right <= t) {
+			lazy_[k] = x;
+			return;
+		}
+		int mid = (left + right) / 2;
+		int k2 = 2 * k;
+		update_sub(s, t, x, k2 + 1, left, mid);
+		update_sub(s, t, x, k2 + 2, mid, right);
+		return;
+	}
+
+public:
+	RangeUpdateQuery(int n, int init_val) {
+		n_ = 1;
+		while (n_ < n) {
+			n_ <<= 2;
+		}
+		lazy_ = vector<int>(2 * n_ - 1, -1);
+		for (int i = 0; i < n_; i++) {
+			lazy_[i + n_ - 1] = init_val;
+		}
+		return;
+	}
+
+	~RangeUpdateQuery() {}
+
+	// i: zero-based
+	int find(int i) {
+		int result = -1;
+
+		i += n_ - 1;
+		result = lazy_[i];
+		i = (i - 1) / 2;
+		while (true) {
+			if (lazy_[i] >= 0) {
+				result = lazy_[i];
+			}
+			i = (i - 1);
+			if (i < 0) {
+				break;
+			}
+			i /= 2;
+		}
+		return result;
+	}
+
+	// [s, t), zero-based
+	void update(int s, int t, int x) {
+		update_sub(s, t, x, 0, 0, n_);
+		return;
+	}
+};
+
+int main() {
+#if READ_FROM_FILE
+	std::ifstream ifs("test0.txt");
+	std::cin.rdbuf(ifs.rdbuf());
+#endif
+	int n = -1;
+	int q = -1;
+	int init_val = pow(2, 31) - 1;
+	int op = -1;
+	int s = -1;
+	int t = -1;
+	int x = -1;
+	int idx = -1;
+	int val = init_val;
+
+	cin >> n >> q;
+	RangeUpdateQuery ruq(n, init_val);
+
+	for (int i = 0; i < q; i++) {
+		cin >> op;
+		if (op == 0) {
+			cin >> s >> t >> x;
+			t++;
+			ruq.update(s, t, x);
+		}
+		else {
+			cin >> idx;
+			val = ruq.find(idx);
+			cout << val << endl;
+		}
+	}
+	return 0;
+}
+

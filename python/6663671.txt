@@ -1,0 +1,139 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def induced_sort(n, s, stype, lms, cum, sa):
+    buf = cum[:]
+    for i in lms[::-1]:
+        v = s[i]
+        buf[v + 1] -= 1
+        sa[buf[v + 1]] = i
+    buf = cum[:]
+    for i in range(n):
+        if sa[i] != -1 and not stype[sa[i] - 1]:
+            v = s[sa[i] - 1]
+            sa[buf[v]] = sa[i] - 1
+            buf[v] += 1
+    buf = cum[:]
+    for i in range(n - 1, -1, -1):
+        if stype[sa[i] - 1]:
+            v = s[sa[i] - 1]
+            buf[v + 1] -= 1
+            sa[buf[v + 1]] = sa[i] - 1
+
+
+def sa_is(s):
+    n = len(s)
+    stype = [True] * n
+    for i in range(n - 2, -1, -1):
+        if s[i] == s[i + 1]:
+            stype[i] = stype[i + 1]
+        else:
+            stype[i] = s[i] < s[i + 1]
+
+    lms = []
+    lms_map = [-1] * n
+    for i in range(1, n):
+        if not stype[i - 1] and stype[i]:
+            lms_map[i] = len(lms)
+            lms.append(i)
+
+    k = max(s) + 1
+    bucket = [0] * k
+    for v in s:
+        bucket[v] += 1
+    cum = [0] * (k + 1)
+    for i in range(k):
+        cum[i + 1] = cum[i] + bucket[i]
+
+    sa = [-1] * n
+    induced_sort(n, s, stype, lms, cum, sa)
+
+    if len(lms) <= 2:
+        return sa
+
+    _lms = lms
+    lms = [s for s in sa if lms_map[s] != -1]
+    lms_sub_str = list(range(len(lms)))
+    for i in range(2, len(lms)):
+        left, right = lms[i - 1], lms[i]
+        if s[left] != s[right]:
+            lms_sub_str[i] = lms_sub_str[i - 1] + 1
+            continue
+        while True:
+            left += 1
+            right += 1
+            if s[left] != s[right] or lms_map[left] * lms_map[right] < 0:
+                lms_sub_str[i] = lms_sub_str[i - 1] + 1
+                break
+            if lms_map[left] >= 0 and lms_map[right] >= 0:
+                lms_sub_str[i] = lms_sub_str[i - 1]
+                break
+
+    sub_s = [0] * len(lms)
+    for i, v in zip(lms, lms_sub_str):
+        sub_s[lms_map[i]] = v
+    sub_sa = sa_is(sub_s)
+    lms = [_lms[s] for s in sub_sa]
+
+    sa = [-1] * n
+    induced_sort(n, s, stype, lms, cum, sa)
+    return sa
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    input_str = f.readline().rstrip('\n')
+    if len(input_str) == 1:
+        q = int(f.readline())
+        for _ in range(q):
+            pattern_str = f.readline().rstrip('\n')
+            if len(pattern_str) > 1:
+                print(0)
+            elif input_str == pattern_str:
+                print(1)
+            else:
+                print(0)
+        return
+
+    converted_str = list(map(ord, input_str + '$'))
+    n0 = len(input_str)
+    sa = sa_is(converted_str)[1:]
+
+    q = int(f.readline())
+    for _ in range(q):
+        pattern_str = f.readline().rstrip('\n')
+        n1 = len(pattern_str)
+        left = 0
+        right = n0
+        while left + 1 < right:
+            mid = (left + right) // 2
+            if input_str[sa[mid]:sa[mid] + n1] < pattern_str:
+                left = mid
+            else:
+                right = mid
+        if right > n0 - 1:
+            print(0)
+        elif sa[right] + n1 > n0:
+            print(0)
+        elif input_str[sa[right]:sa[right] + n1] == pattern_str:
+            print(1)
+        elif input_str[sa[left]:sa[left] + n1] == pattern_str:
+            print(1)
+        else:
+            print(0)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

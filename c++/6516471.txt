@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+int main()
+{
+    int n;
+    while (1)
+    {
+        cin >> n;
+        if (n == 0)
+        {
+            break;
+        }
+        vector<ll> vec(n);
+        for (int i = 0; i < n; i++)
+        {
+            cin >> vec[i];
+        }
+        ll m = 50*(n+1);
+        ll all_val = accumulate(vec.begin(), vec.end(), 0);
+        vector<vector<bool>> dp(m + 1, vector<bool>(m + 1));
+        dp[0][0] = true;
+        for (ll k = 0; k < n; k++)
+        {
+            for (ll i = m; i >= 0; i--)
+            {
+                for (ll j = m; j >= 0; j--)
+                {
+                    if (!dp[i][j])
+                    {
+                        continue;
+                    }
+                    dp[i][j + vec[k]] = true;
+                    dp[i + vec[k]][j] = true;
+                }
+            }
+        }
+        ll ans = 0;
+        for (ll i = m; i >= 0; i--)
+        {
+            for (ll j = m; j >= 0; j--)
+            {
+                if (!dp[i][j] || all_val - i - j == 0)
+                    continue;
+                ll min_v = min({i, j, all_val - i - j});
+                ans = max(min_v, ans);
+            }
+        }
+        cout << ans << endl;
+    }
+}
+

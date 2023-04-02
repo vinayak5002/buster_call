@@ -1,0 +1,213 @@
+import gc
+
+
+class node():
+    def __init__(self, id, left, right, key):
+        self.id = id
+        self.leftid = left
+        self.rightid = right
+        self.key = key
+
+    def set_parent(self, p):
+        self.parent = p
+
+
+class Binary_Search_Tree():
+    def __init__(self):
+        self.nodelist = []
+        self.root = -1
+
+    def preorder_tree_walk_printkey(self, PL, IDtoNode, node):
+        PL.append(node.key)
+        if node.leftid >= 0:
+            self.preorder_tree_walk_printkey(PL, IDtoNode, IDtoNode[node.leftid])
+        if node.rightid >= 0:
+            self.preorder_tree_walk_printkey(PL, IDtoNode, IDtoNode[node.rightid])
+
+    def inorder_tree_walk_printkey(self, IL, IDtoNode, node):
+        if node.leftid >= 0:
+            self.inorder_tree_walk_printkey(IL, IDtoNode, IDtoNode[node.leftid])
+        IL.append(node.key)
+        if node.rightid >= 0:
+            self.inorder_tree_walk_printkey(IL, IDtoNode, IDtoNode[node.rightid])
+
+    def inorder_tree_walk_print(self, IL, IDtoNode, node):
+        if node.leftid >= 0:
+            self.inorder_tree_walk_print(IL, IDtoNode, IDtoNode[node.leftid])
+        IL.append(node.id)
+        if node.rightid >= 0:
+            self.inorder_tree_walk_print(IL, IDtoNode, IDtoNode[node.rightid])
+
+    def insert(self, nodez, IDtoNode):
+        nodey = -1
+        nodex = self.root
+        while nodex != -1:
+            nodey = nodex
+            if nodez.key < nodex.key:
+                nodex = IDtoNode[nodex.leftid]
+            else:
+                nodex = IDtoNode[nodex.rightid]
+
+        if nodey != -1:
+            nodez.set_parent(nodey)
+            if nodez.key < nodey.key:
+                nodey.leftid = nodez.id
+            else:
+                nodey.rightid = nodez.id
+
+        else:
+            nodez.set_parent(nodez)
+            self.root = nodez
+
+    
+    def find(self, num, IDtoNode):
+        cur_node = self.root
+        while cur_node != -1:
+            if cur_node.key == num:
+                return "yes"
+            elif cur_node.key > num:
+                cur_node = IDtoNode[cur_node.leftid]
+            elif cur_node.key < num:
+                cur_node = IDtoNode[cur_node.rightid]
+
+        return "no"
+
+    def delete(self, num, IDtoNode):
+        cur_node = self.root
+        target = -1
+        while cur_node != -1:
+            if cur_node.key == num:
+                target = cur_node
+                break
+            elif cur_node.key > num:
+                cur_node = IDtoNode[cur_node.leftid]
+            elif cur_node.key < num:
+                cur_node = IDtoNode[cur_node.rightid]
+
+        if target == -1:
+            return "no node"
+
+        #delete process
+        #Case3:two children under target
+        if target.leftid >= 0 and target.rightid >= 0:
+            """IL = []
+            self.inorder_tree_walk_print(IL, IDtoNode, self.root)
+            MapIDtoInOrder = [""] * 500001
+            for i in range(len(IL)):
+                MapIDtoInOrder[IL[i]] = i
+            while target.leftid >= 0 and target.rightid >= 0:
+                next_target = IDtoNode[IL[MapIDtoInOrder[target.id]+1]]
+                target.key = next_target.key
+                target = next_target"""
+            next_target = IDtoNode[target.rightid]
+            while next_target.leftid != -1:
+                next_target = IDtoNode[next_target.leftid]
+            target.key = next_target.key
+            target = next_target
+
+
+                
+
+        #Case1:no child under target
+        if target.leftid == -1 and target.rightid == -1 :
+            if target == self.root:
+                del target
+                gc.collect()
+
+            else:
+                if target.parent.leftid == target.id:
+                    target.parent.leftid = -1
+                elif target.parent.rightid == target.id:
+                    target.parent.rightid = -1
+
+                del target
+                gc.collect()
+
+        #Case2-1:one child under target (left)
+        elif target.leftid >= 0 and target.rightid == -1 :
+            if target == self.root:
+                IDtoNode[target.leftid].parent = IDtoNode[target.leftid]
+                self.root = target.leftid
+                del target
+                gc.collect()
+
+            else:
+                if target.parent.leftid == target.id:
+                    target.parent.leftid = target.leftid
+                    IDtoNode[target.leftid].parent = target.parent
+
+                elif target.parent.rightid == target.id:
+                    target.parent.rightid = target.leftid
+                    IDtoNode[target.leftid].parent = target.parent
+
+                del target
+                gc.collect()
+
+        #Case2-2:one child under target (right)
+        elif target.leftid == -1 and target.rightid >= 0:
+            if target == self.root:
+                IDtoNode[target.rightid].parent = IDtoNode[target.rightid]
+                self.root = target.rightid
+                del target
+                gc.collect()
+
+            else:
+                if target.parent.leftid == target.id:
+                    target.parent.leftid = target.rightid
+                    IDtoNode[target.rightid].parent = target.parent
+
+                elif target.parent.rightid == target.id:
+                    target.parent.rightid = target.rightid
+                    IDtoNode[target.rightid].parent = target.parent
+
+                del target
+                gc.collect()
+
+            
+
+
+
+
+import sys
+
+
+readline = sys.stdin.readline
+
+#input
+BST = Binary_Search_Tree()
+
+n = int(input())
+
+IDtoNode=[""]*500001
+
+IDtoNode[-1] = -1
+
+for i in range(n):
+    comm = readline()
+    if comm[:7] == "insert ":
+        new_node = node(i, -1, -1, int(comm[7:]))
+        IDtoNode[new_node.id] = new_node
+
+        #set position
+        BST.insert(new_node, IDtoNode)
+
+    elif comm[:5] == "find ":
+        print(BST.find(int(comm[5:]), IDtoNode))
+        
+    elif comm[:7] == "delete ":
+        BST.delete(int(comm[7:]), IDtoNode)
+
+    else:
+        #print
+        Inorderlist = []
+        BST.inorder_tree_walk_printkey(Inorderlist, IDtoNode, BST.root)
+        #print("Inorder")
+        print("", *Inorderlist)
+
+
+        Preorderlist = []
+        BST.preorder_tree_walk_printkey(Preorderlist, IDtoNode,  BST.root)
+        #print("Preorder")
+        print("", *Preorderlist)
+
+

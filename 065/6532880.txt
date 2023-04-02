@@ -1,0 +1,99 @@
+#include <iostream>
+#include <climits>
+#include <vector>
+
+template<typename T> class sequence {
+    int cap, sz, fr, bk;
+    T* ptr;
+
+    void replace(int n, int c) {
+        T* p = new T[c];
+        for (int i = 0; i < sz; i++) p[i] = ptr[(fr + i) % cap];
+        std::swap(ptr, p);
+        delete[] p;
+        cap = c;
+        sz = n;
+        fr = 0;
+        bk = n - 1;
+    }
+public :
+    sequence() : cap(0), sz(0), fr(0), bk(0), ptr(nullptr) { }
+    sequence(int n, T x) : cap(n * 2), sz(n), fr(0), bk(n - 1), ptr(new T[cap]) {
+        for (int i = 0; i < sz; i++) ptr[i] = x;
+    }
+    ~sequence() { delete[] ptr; }
+    int size() const { return sz; }
+    int max_size() const { return INT_MAX; }
+    void resize(int n) {
+        if (n == 0) clear();
+        else if (n <= cap) bk = (fr + n - 1) % cap, sz = n;
+        else replace(n, n * 2);
+    }
+    int capacity() const { return cap; }
+    bool empty() const { return sz == 0; }
+    void reserve(int n) { replace(sz, n); }
+    void shrink_to_fit() { replace(sz, sz); }
+    T& operator[](int i) { return ptr[(fr + i) % cap]; }
+    T& front() { return ptr[fr]; }
+    T& back() { return ptr[bk]; }
+    void push_front(T x) {
+        if (sz == cap) {
+            resize(sz + 1);
+            ptr[fr = cap - 1] = x;
+            bk--;
+        } else {
+            if (--fr < 0) fr = cap - 1;
+            ptr[fr] = x;
+            sz++;
+        }
+    }
+    void push_back(T x) {
+        if (sz == cap) {
+            resize(sz + 1);
+            ptr[bk] = x;
+        } else {
+            if (++bk == cap) bk = 0;
+            ptr[bk] = x;
+            sz++;
+        }
+    }
+    void pop_front() {
+        if (++fr == cap) fr = 0;
+        sz--;
+    }
+    void pop_back() {
+        if (--bk < 0) bk = cap - 1;
+        sz--;
+    }
+    void swap(sequence<T>& sq) {
+        std::swap(sz, sq.sz);
+        std::swap(cap, sq.cap);
+        std::swap(fr, sq.fr);
+        std::swap(bk, sq.bk);
+        std::swap(ptr, sq.ptr);
+    }
+    void clear() { sz = fr = bk = 0; }
+};
+
+int main() {
+    int n, q;
+    std::cin >> n >> q;
+
+    sequence<int> A[n];
+
+    while (q--) {
+        int query, t, x;
+        std::cin >> query >> t;
+        if (query == 0) {
+            std::cin >> x;
+            A[t].push_back(x);
+        } else if (query == 1) {
+            for (int i = 0; i < A[t].size(); i++) {
+                std::cout << A[t][i] << (i == A[t].size() - 1 ? '\n' : ' ');
+            }
+            if (A[t].size() == 0) std::cout << '\n';
+        } else {
+            A[t].clear();
+        }
+    }
+}

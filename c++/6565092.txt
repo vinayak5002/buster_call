@@ -1,0 +1,84 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define REP(i,n) for(int i=0;i<int(n);i++)
+typedef long long ll;
+typedef pair<int,int> P;
+
+int q[10][10];
+vector<int> e(9,0);
+bool inside(int x,int y){ return (1<=x && x<=8 && 1<=y && y<=8); }
+
+bool chk(int x,int y){
+	bool f=true;
+	for(int i=1;i<=8;i++){
+		for(int j=1;j<=8;j++){
+			if(q[i][j]==1){
+				if(i==x) f=false;
+				if(j==y) f=false;
+				if(abs(i-x)==abs(j-y)) f=false;
+				if(!f) break;
+			}
+		}
+		if(!f) break;
+	}
+
+	return f;
+}
+
+void print(){
+	for(int i=1;i<=8;i++){
+		for(int j=1;j<=8;j++){
+			if(q[i][j]==1) cout << "Q";
+			else cout << ".";
+		}
+		cout << endl;
+	}
+}
+
+void dfs(int x,int y){
+
+	if(!inside(x,y)) return;
+	if(!chk(x,y)) return;
+
+	q[x][y]=1;
+
+	if(x==8 || (x==7 && e[8]==1)){
+		print();
+		return;
+	}
+
+	int s=1;
+	while(e[x+s]==1) s++;
+
+	for(int j=1;j<=8;j++) dfs(x+s,j);
+
+    q[x][y]=0;
+
+}
+
+int main(void){
+	int i,j,k;
+
+	cin.tie(0);  ios_base::sync_with_stdio(false);
+
+	int N;
+	cin >> N;
+	for(i=0;i<N;i++){
+		int x,y;
+		cin >> x >> y;
+		x++; y++;
+		q[x][y]=1;
+		e[x]=1;
+	}
+
+	int c=1;
+	while(e[c]==1) c++;
+
+	for(int j=1;j<=8;j++)  dfs(c,j);
+
+
+	return 0;
+}
+

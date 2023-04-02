@@ -1,0 +1,267 @@
+#include <bits/stdc++.h>
+
+
+#include <algorithm>
+#include <cassert>
+#include <vector>
+
+
+#ifdef _MSC_VER
+#include <intrin.h>
+#endif
+
+namespace atcoder {
+
+namespace internal {
+
+int ceil_pow2(int n) {
+    int x = 0;
+    while ((1U << x) < (unsigned int)(n)) x++;
+    return x;
+}
+
+constexpr int bsf_constexpr(unsigned int n) {
+    int x = 0;
+    while (!(n & (1 << x))) x++;
+    return x;
+}
+
+int bsf(unsigned int n) {
+#ifdef _MSC_VER
+    unsigned long index;
+    _BitScanForward(&index, n);
+    return index;
+#else
+    return __builtin_ctz(n);
+#endif
+}
+
+}  // namespace internal
+
+}  // namespace atcoder
+
+
+namespace atcoder {
+
+template <class S, S (*op)(S, S), S (*e)()>
+struct segtree {
+ public:
+  segtree() : segtree(0) {}
+  explicit segtree(int n) : segtree(std::vector<S>(n, e())) {}
+  explicit segtree(const std::vector<S>& v) : _n(int(v.size())) {
+    log = internal::ceil_pow2(_n);
+    size = 1 << log;
+    d = std::vector<S>(2 * size, e());
+    for (int i = 0; i < _n; i++) d[size + i] = v[i];
+    for (int i = size - 1; i >= 1; i--) {
+      update(i);
+    }
+  }
+
+  void set(int p, S x) {
+    assert(0 <= p && p < _n);
+    p += size;
+    d[p] = x;
+    for (int i = 1; i <= log; i++) update(p >> i);
+  }
+
+  S get(int p) const {
+    assert(0 <= p && p < _n);
+    return d[p + size];
+  }
+
+  S prod(int l, int r) const {
+    assert(0 <= l && l <= r && r <= _n);
+    S sml = e(), smr = e();
+    l += size;
+    r += size;
+
+    while (l < r) {
+      if (l & 1) sml = op(sml, d[l++]);
+      if (r & 1) smr = op(d[--r], smr);
+      l >>= 1;
+      r >>= 1;
+    }
+    return op(sml, smr);
+  }
+
+  S all_prod() const { return d[1]; }
+
+  template <bool (*f)(S)>
+  int max_right(int l) const {
+    return max_right(l, [](S x) { return f(x); });
+  }
+  template <class F>
+  int max_right(int l, F f) const {
+    assert(0 <= l && l <= _n);
+    assert(f(e()));
+    if (l == _n) return _n;
+    l += size;
+    S sm = e();
+    do {
+      while (l % 2 == 0) l >>= 1;
+      if (!f(op(sm, d[l]))) {
+        while (l < size) {
+          l = (2 * l);
+          if (f(op(sm, d[l]))) {
+            sm = op(sm, d[l]);
+            l++;
+          }
+        }
+        return l - size;
+      }
+      sm = op(sm, d[l]);
+      l++;
+    } while ((l & -l) != l);
+    return _n;
+  }
+
+  template <bool (*f)(S)>
+  int min_left(int r) const {
+    return min_left(r, [](S x) { return f(x); });
+  }
+  template <class F>
+  int min_left(int r, F f) const {
+    assert(0 <= r && r <= _n);
+    assert(f(e()));
+    if (r == 0) return 0;
+    r += size;
+    S sm = e();
+    do {
+      r--;
+      while (r > 1 && (r % 2)) r >>= 1;
+      if (!f(op(d[r], sm))) {
+        while (r < size) {
+          r = (2 * r + 1);
+          if (f(op(d[r], sm))) {
+            sm = op(d[r], sm);
+            r--;
+          }
+        }
+        return r + 1 - size;
+      }
+      sm = op(d[r], sm);
+    } while ((r & -r) != r);
+    return 0;
+  }
+
+ private:
+  int _n, size, log;
+  std::vector<S> d;
+
+  void update(int k) { d[k] = op(d[2 * k], d[2 * k + 1]); }
+};
+
+}  // namespace atcoder
+
+
+using namespace atcoder;
+using namespace std;
+using ll = long long;
+const int IINF = 0x3f3f3f3f;  // 2倍しても負にならない
+const long long LINF = 0x3f3f3f3f3f3f3f3fLL;
+long long MOD = 1000000007;
+using plint = pair<ll, ll>;
+using pint = pair<int, int>;
+#define all(obj) (obj).begin(), (obj).end()
+using Graph = vector<vector<int>>;
+
+// 変数宣言------------------
+
+// 関数定義------------------
+using S = char;
+// 演算子
+S op(S a, S b) { return min(a, b); }
+// 単位元
+S e() { return (char)('z' + 1); }
+
+using S2 = int;
+// 演算子
+S2 op2(S2 a, S2 b) { return a + b; }
+// 単位元
+S2 e2() { return 0; }
+
+// メイン------------------
+int main() {
+  // デバッグ用
+  ifstream in("input.txt");
+  if (in.is_open()) {
+    cin.rdbuf(in.rdbuf());
+  }
+
+  string s;
+  int k;
+  cin >> s >> k;
+  int n = s.size();
+  vector<char> vec(all(s));
+
+  string ans(n, '*');
+
+  // 残りの文字を管理
+  segtree<S, op, e> seg(vec);
+  // 使った文字数の個数を 0 or 1 で管理
+  segtree<S2, op2, e2> used(vector<S2>(n, 1));
+
+  // TODO: 動作確認
+  // auto print = [&](int r, char c) {
+  //   cout << "0123456789" << endl;
+  //   for (int j = 0; j < n; j++) {
+  //     cout << seg.get(j);
+  //   }
+  //   cout << endl;
+  //   cout << ans << endl;
+  //   cout << 0 << " " << r << " : " << c << " : " << k << endl;
+  // };
+
+  // 先頭から順番に, 最も小さい文字に置き換える
+  for (int l = 0; l < n; l++) {
+    if (k <= 0) {
+      // ans[l] = s[l];
+      auto f = [&](char v) { return v >= e(); };
+      int i = seg.max_right(0, f);  // 最も左の文字
+      // cout << i << endl;
+      ans[l] = seg.get(i);
+      // 使った文字をマーキング
+      seg.set(i, e());
+      used.set(i, 0);
+      continue;
+    };
+
+    // TODO: 動作確認
+    // for (int j = 0; j < n; j++) {
+    //   cout << used.get(j);
+    // }
+    // cout << endl;
+
+    // 交換回数k以内の, 一番右のインデックス
+    auto f = [&](int v) { return v <= k; };
+    int r = min(n, used.max_right(0, f) + 1);
+    // cout << "r " << r << endl;
+    // 交換回数k以内の, 最も小さい文字
+    char c = seg.prod(0, r);
+    auto g = [&](char v) { return v > c; };
+    int i = seg.max_right(0, g);  // 最も小さい文字のインデックス
+
+    // TODO: 動作確認
+    // print(n, c);
+
+    // 交換に必要なコスト
+    int cost = used.prod(0, i);
+    // cout << "i " << i << endl;
+    // cout << "cost " << cost << endl;
+
+    // 使った文字をマーキング
+    seg.set(i, e());
+    used.set(i, 0);
+    // 文字を置き換えj
+    ans[l] = c;
+    // 移動回数をへらす
+    k -= cost;
+
+    // cout << endl;
+  }
+
+  // cout << "------------------" << endl;
+  cout << ans << endl;
+  // cout << "cekophsin" << endl;
+}

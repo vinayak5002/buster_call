@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int N;
+    cin >> N;
+    rep(nn, N) {
+        V<string> S(9);
+        rep(i, 9) cin >> S[i];
+        V<ll> a(9);
+        rep(i, 9) {
+            for (auto si : S[i]) {
+                if ('0' <= si and si <= '9') {
+                    a[i] = 16 * a[i] + si - '0';
+                } else {
+                    a[i] = 16 * a[i] + si - 'a' + 10;
+                }
+            }
+        }
+        ll K = 0;
+        rep(b, 32) {
+            ll s = 0;
+            rep(i, 8) s += a[i] ^ K;
+            if ((s & (1LL << (b + 1) - 1)) != (a[8] & (1LL << (b + 1) - 1))) {
+                K |= 1LL << b;
+            }
+        }
+        string ss;
+        do {
+            if ((K & 15) >= 10) {
+                ss += 'a' + (K & 15) - 10;
+            } else {
+                ss += '0' + (K & 15);
+            }
+            K /= 16;
+        } while (K > 0);
+        reverse(ss.begin(), ss.end());
+        cout << ss << '\n';
+    }
+    return 0;
+}
+

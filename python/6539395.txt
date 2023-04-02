@@ -1,0 +1,40 @@
+use std::io::Read;
+const P_MAX:usize = 1_000_000;
+fn main() {
+    let mut input = String::new();
+    std::io::stdin().read_to_string(&mut input).expect("invalid input");
+    let mut itr = input.lines();
+    let num_tracks = itr.next().unwrap().split_ascii_whitespace().nth(1).unwrap().parse::<usize>().unwrap();
+    let payloads = itr.fold(Vec::new(), |mut v,e| {
+        v.push(e.parse::<usize>().unwrap());
+        v
+    });
+    let mut right = P_MAX;
+    let mut left = 1usize;
+
+    while left < right {
+        let mid = (left + right) /2;
+        if try_load_tracks(mid, num_tracks, &payloads) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
+    println!("{}", left);
+
+}
+
+
+fn try_load_tracks (max_cap:usize, track_num: usize, payloads: &Vec<usize>) -> bool {
+    let mut tracks = vec![max_cap; track_num as usize];
+    payloads.iter().all(|pl| {
+        tracks.iter_mut().any(|cap| {
+            if *cap >= *pl {
+                *cap -= pl;
+                true
+            } else {
+                false
+            }
+        })
+    })
+}

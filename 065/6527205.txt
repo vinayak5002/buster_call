@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+#define For(i, n) for(int i = 0; i < n; ++i)
+
+using namespace std;
+
+const int maxn = 1001;
+int n, m;
+int g[maxn][maxn];
+int f[maxn];
+bool vst[maxn];
+
+void dfs(int u) {
+	vst[u] = 1;
+	For (v, n) {
+		if (g[u][v] > 0 && !vst[v]) {
+			f[v] = u;
+			dfs(v);
+		}
+	}
+}
+
+void show() {
+	cout << '\n';
+	For (u, n) {
+		For (v, n) {
+			if (g[u][v] > 0) {
+				cout << u << ' ' << v << ' ' << g[u][v] << '\n';
+			}
+		}
+	}
+	cout << '\n';
+}
+
+int main(int argc, char* argv[]) {
+	
+	// ifstream fin(argv[1]);
+	// ofstream fout(argv[2]);
+
+	cin >> n >> m;
+	// fin >> n >> m;
+	For (i, m) {
+		int u, v, w;
+		// fin >> u >> v >> w;
+		cin >> u >> v >> w;
+		g[u][v] += w;
+		// g[v][u] += w;
+	}
+
+	// show();
+	int ans = 0;
+	while (1) {
+		memset(vst, 0, sizeof(vst));
+		f[0] = -1;
+		dfs(0);
+
+		if (!vst[n - 1]) break;
+		int v = n - 1;
+		int mn = g[f[v]][v];
+		// cout << "path ";
+		while (v != 0) {
+			// cout << v << ' ';
+			mn = min(mn, g[f[v]][v]);
+			v = f[v];
+		}
+		ans += mn;
+		// cout << '\n';
+		// cout << "min " << mn << '\n';
+		v = n - 1;
+		while (v != 0) {
+			int u = f[v];
+			g[u][v] -= mn;
+			g[v][u] += mn;
+			v = u;
+		}
+		// int v = n - 1;
+
+		// show();
+	}
+	// fout << ans << '\n';
+	cout << ans << '\n';
+
+	return 0;
+}

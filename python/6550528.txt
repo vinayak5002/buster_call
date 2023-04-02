@@ -1,0 +1,68 @@
+
+import java.util.*;
+public class Main {
+    public static void main(String[] args) {
+        int Max = Integer.MAX_VALUE;
+        Scanner scan = new Scanner(System.in);
+        int v = scan.nextInt();
+        int e = scan.nextInt();
+        int r = scan.nextInt();
+
+        List<int[]>[] Graph = new ArrayList[v];
+        for(int i = 0 ; i <v ; i++)
+        {
+            Graph[i] = new ArrayList();
+        }
+
+
+
+        for(int i  = 0 ; i<e ; i++)
+        {
+            int s = scan.nextInt();
+            int t = scan.nextInt();
+            int d = scan.nextInt();
+            Graph[s].add(new int[]{t,d});
+        }
+
+        int[] dis = new int[v];
+        boolean[] collected = new boolean[v];
+        Arrays.fill(dis , Max);
+        Arrays.fill(collected , false);
+
+        Queue<int[]> heap = new PriorityQueue<>((o1, o2) -> o1[1]-o2[1]);
+
+        heap.add(new int[]{r,0});
+        dis[r] = 0;
+
+        while(true)
+        {
+            if(heap.isEmpty()) break;
+            int[] vertex = heap.poll();
+            if(vertex[1] > dis[vertex[0]])
+                continue;
+            collected[vertex[0]]=true;
+
+            for(int[] arr : Graph[vertex[0]])
+            {
+                if(dis[vertex[0]]+arr[1]<dis[arr[0]] && !collected[arr[0]])
+                {
+                    dis[arr[0]] = dis[vertex[0]]+arr[1];
+                    heap.add(new int[]{arr[0],dis[arr[0]]});
+                }
+            }
+
+        }
+
+        for (int i = 0; i < v; i++) {
+            if (dis[i] != Max)
+                System.out.println(dis[i]);
+            else
+                System.out.println("INF");
+        }
+
+
+
+    }
+
+}
+

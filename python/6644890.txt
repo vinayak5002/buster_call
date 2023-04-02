@@ -1,0 +1,77 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+)
+
+func main() {
+	sc := bufio.NewScanner(os.Stdin)
+	sc.Split(bufio.ScanWords)
+
+	sc.Scan()
+	n, _ := strconv.Atoi(sc.Text())
+
+	v := make([][]int, n)
+	for i := 0; i < n; i++ {
+		sc.Scan()
+		u, _ := strconv.Atoi(sc.Text())
+
+		sc.Scan()
+		k, _ := strconv.Atoi(sc.Text())
+
+		var vi []int
+		for i := 0; i < k; i++ {
+			sc.Scan()
+			t, _ := strconv.Atoi(sc.Text())
+
+			vi = append(vi, t)
+		}
+		v[u-1] = vi
+	}
+
+	visited := make([]bool, n)
+	d := make([]int, n)
+	f := make([]int, n)
+
+	dfs(v, 1, visited, d, f)
+
+	for i, value := range visited {
+		if !value {
+			index++
+			dfs(v, i+1, visited, d, f)
+		}
+	}
+
+	for i := 0; i < n; i++ {
+		fmt.Printf("%d %d %d\n", i+1, d[i], f[i])
+	}
+}
+
+var index int = 1
+
+func dfs(v [][]int, s int, visited []bool, d, f []int) {
+
+	if visited[s-1] {
+		index++
+		f[s-1] = index
+		return
+	}
+
+	visited[s-1] = true
+	d[s-1] = index
+
+	for _, vi := range v[s-1] {
+		if visited[vi-1] {
+			continue
+		}
+		index++
+		dfs(v, vi, visited, d, f)
+	}
+
+	index++
+	f[s-1] = index
+}
+

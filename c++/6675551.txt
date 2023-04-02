@@ -1,0 +1,151 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <cstring>
+#include <deque>
+using namespace std;
+
+
+template<class T>
+class Deque {
+private:
+	T* data_;
+	int head_;
+	int tail_;
+	int size_;
+	int capacity_;
+
+private:
+	void reserve(int n) {
+		if (n > capacity_) {
+			T* tmp = data_;
+			T* new_data = new int[n];
+
+			if (head_ <= tail_) {
+				memcpy(new_data, &data_[head_], sizeof(T) * size_);
+			}
+			else {
+				int d = capacity_ - head_;
+
+				memcpy(new_data, &data_[head_], sizeof(T) * d);
+				memcpy(&new_data[d], data_, sizeof(T) * (size_ - d));
+			}
+			capacity_ = n;
+			data_ = new_data;
+			head_ = 0;
+			tail_ = size_ - 1;
+			delete[] tmp;
+		}
+		return;
+	}
+
+public:
+	Deque() : data_(NULL), head_(0), tail_(0), size_(0), capacity_(4) {
+		data_ = new T[4];
+		return;
+	}
+
+	~Deque() {
+		delete[] data_;
+		return;
+	}
+
+	void push_back(const T& x) {
+		if (size_ == capacity_) {
+			reserve(2 * capacity_);
+		}
+		tail_ = (tail_ + 1) % capacity_;
+		data_[tail_] = x;
+		size_++;
+		if (size_ == 1) {
+			head_ = tail_;
+		}
+		return;
+	}
+
+	void push_front(const T& x) {
+		if (size_ == capacity_) {
+			reserve(2 * capacity_);
+		}
+		head_--;
+		if (head_ < 0) {
+			head_ = capacity_ - 1;
+		}
+		data_[head_] = x;
+		size_++;
+		if (size_ == 1) {
+			tail_ = head_;
+		}
+		return;
+	}
+
+	T random_access(int p) const {
+		return data_[(head_ + p) % capacity_];
+	}
+
+	void pop_back() {
+		tail_--;
+		if (tail_ < 0) {
+			tail_ = capacity_ - 1;
+		}
+		size_--;
+		return;
+	}
+
+	void pop_front() {
+		head_ = (head_ + 1) % capacity_;
+		size_--;
+		return;
+	}
+};
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	string buf;
+	int q = -1;
+	Deque<int> deq;
+
+	cin >> q;
+	for (int i = 0; i < q; i++) {
+		int op = -1;
+
+		cin >> op;
+		if (op == 0) {
+			int d = -1, x = -1;
+
+			cin >> d >> x;
+			if (d == 0) {
+				deq.push_front(x);
+			}
+			else {
+				deq.push_back(x);
+			}
+		}
+		else if (op == 1) {
+			int p = -1;
+
+			cin >> p;
+			cout << deq.random_access(p) << endl;
+		}
+		else {
+			int d = -1;
+
+			cin >> d;;
+			if (d == 0) {
+				deq.pop_front();
+			}
+			else {
+				deq.pop_back();
+			}
+		}
+	}
+	return 0;
+}

@@ -1,0 +1,145 @@
+/// 入力を取得するマクロ
+/// https://qiita.com/tanakh/items/0ba42c7ca36cd29d0ac8
+macro_rules! input {
+    (source = $s:expr, $($r:tt)*) => {
+        let mut iter = $s.split_whitespace();
+        input_inner!{iter, $($r)*}
+    };
+    ($($r:tt)*) => {
+        let s = stdin!();
+        let mut iter = s.split_whitespace();
+        input_inner!{iter, $($r)*}
+    };
+}
+
+macro_rules! input_inner {
+    ($iter:expr) => {};
+    ($iter:expr, ) => {};
+
+    ($iter:expr, $var:ident : $t:tt $($r:tt)*) => {
+        let $var = read_value!($iter, $t);
+        input_inner!{$iter $($r)*}
+};
+}
+
+macro_rules! read_value {
+    ($iter:expr, ( $($t:tt),* )) => {
+        ( $(read_value!($iter, $t)),* )
+    };
+
+    ($iter:expr, [ $t:tt ; $len:expr ]) => {
+        (0..$len).map(|_| read_value!($iter, $t)).collect::<Vec<_>>()
+    };
+
+    ($iter:expr, chars) => {
+        read_value!($iter, String).chars().collect::<Vec<char>>()
+    };
+
+    ($iter:expr, usize1) => {
+        read_value!($iter, usize) - 1
+    };
+
+    ($iter:expr, $t:ty) => {
+        $iter.next().unwrap().parse::<$t>().expect("Parse error")
+    };
+}
+
+macro_rules! stdin {
+    () => {{
+        use std::io::Read;
+        let mut s = String::new();
+        std::io::stdin().read_to_string(&mut s).unwrap();
+        s
+    }};
+}
+
+macro_rules! stdout {
+    ($out:expr) => {{
+        use std::io::Write;
+        let out = std::io::stdout();
+        let mut out = std::io::BufWriter::new(out.lock());
+        writeln!(out, "{}", $out).unwrap();
+    }};
+}
+
+macro_rules! join {
+    ($input:expr) => {
+        join!($input, " ")
+    };
+
+    ($input:expr, $separator:expr) => {
+        $input
+            .iter()
+            .map(|a| a.to_string())
+            .collect::<Vec<String>>()
+            .join($separator)
+    };
+}
+
+///
+/// ## Usage
+///
+/// ```
+/// // Define `solve` function that has a argument(&str or String) and a return value(&str or String).
+/// fn solve(input: &str) -> String {
+///     input.split_whitespace().collect::<Vec<&str>>().join("")
+/// }
+/// // Write the test case as follows.
+/// test! {
+///     case("1 2", "12")
+/// }
+/// ```
+///
+///　If you want to possibly return a type other than String, you can write the following.
+///
+/// ```
+/// fn solve(input: &str) -> i32 {
+///     input.split_whitespace().collect::<Vec<&str>>().join("") as i32
+/// }
+///
+/// test! {
+///     expect as i32,
+///     case("1 2", 12)
+/// }
+/// ```
+///
+/// Misc
+///
+/// ```
+/// fn something(input: i32) -> i32 {
+///     input
+/// }
+///
+/// test! { something,
+///     input as i32,
+///     expect as i32,
+///     case(1, 1)
+/// }
+/// ```
+macro_rules! test {
+    ($( case($input:literal, $expected:literal) )*) => {
+        test! {
+            input as &str,
+            expect as &str,
+            $( case($input, $expected)  )*
+        }
+    };
+
+    (expect as $expected_type:ty, $( case($input:literal, $expected:literal) )*) => {
+        test! {
+            input as &str,
+            expect as $expected_type,
+            $( case($input, $expected)  )*
+        }
+    };
+
+    (input as $input_type:ty, expect as $expected_type:ty, $( case($input:literal, $expected:literal) )*) => {
+        test! { solve,
+            input as $input_type,
+            expect as $expected_type,
+            $( case($input, $expected)  )*
+        }
+    };
+
+    ($fn_name:ident, input as $input_type:ty, expect as $expected_type:ty, $( case($input:literal, $expected:literal) )*) => {
+

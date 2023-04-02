@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+// 頂点v が 集合Sに属する時 S[v] = 1, 属さないとき S[v] = 0
+
+// S の 1-近傍 S1 を作成
+void oneNbhd(int S1[], int S[], int n, int M[][n])
+{
+    for (int u = 0; u < n; u++)
+	S1[u] = S[u];
+    for (int u = 0; u < n; u++) {
+	if (S[u] == 0)
+	    continue;
+	for (int v = 0; v < n; v++) {
+	    if (M[u][v]  == 1)
+		S1[v] = 1;
+	}
+    }
+}
+
+// s と t は同じ成分内にある？
+bool sameComp(int s, int t, int n, int M[][n])
+{
+    int U[n][n];
+
+    //  N をゼロクリア
+    for (int i = 0; i < n; i++)
+	for (int j = 0; j < n; j++)
+	    U[i][j] = 0;
+
+    //  s の 0-近傍
+    for (int u = 0; u < n; u++)
+	if (u == s)
+	    U[0][u] = 1;
+
+    //  s の i-近傍
+    for (int i = 1; i < n; i++) {
+	oneNbhd(U[i], U[i-1], n, M);
+	if (U[i][t] == 1)
+	    return true;
+    }
+
+    return false;
+}
+
+int main()
+{
+    int n;      // 頂点の数
+    scanf("%d", &n);
+    int M[n][n];    //  隣接行列
+    //  M をゼロクリア
+    for (int i = 0; i < n; i++)
+	for (int j = 0; j < n; j++)
+	    M[i][j] = 0;
+
+    int m;    //  辺の数
+    scanf("%d", &m);
+    for (int i = 0; i < m; i++) {
+	int s, t;
+	scanf("%d %d", &s, &t);
+	M[s][t] = M[t][s] = 1;
+    }
+
+    int q;    // 質問の数
+    scanf("%d", &q);
+    for (int i = 0; i < q; i++) {
+	int s, t;
+	scanf("%d %d", &s, &t);
+	if (sameComp(s, t, n, M) == true)
+	    printf("yes\n");
+	else
+	    printf("no\n");
+    }
+
+    return 0;
+} 
+

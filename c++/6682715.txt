@@ -1,0 +1,193 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef struct node
+{
+	struct node *right;    // 右の子
+	struct node *left;     // 左の子
+	struct node *parent;   // 親
+	int key;               // キー
+} Node;
+
+#define NIL NULL
+
+Node *root;
+
+void insert(int k)
+{
+	Node *y = NIL;      // x の親
+	Node *x = root;     // T の根
+	Node *z;
+
+	z = (Node *)malloc(sizeof(Node));
+	z->key = k;
+	z->left = NIL;
+	z->right = NIL;
+
+	while(x!=NIL)
+	{
+		y = x;
+		if(z->key < x->key)   // k は x の key より小さい
+		{
+			x = x->left;
+		}
+		else
+		{
+			x = x->right;
+		}
+	}
+	
+	z->parent = y;
+	
+	if(y == NIL)
+	{
+		root = z;
+	}
+	else
+	{
+		if(z->key > y->key)
+		{
+			y->right = z;
+		}
+		else
+		{
+			y->left = z;
+		}
+	}
+}
+
+Node* tree_Search(Node *u, int k)
+{
+	while( u != NIL && k != u->key)
+	{
+		if(k < u->key) u = u->left;  // k がu->keyより小さいとき，左側を探す
+		else u = u->right;
+	}
+	return u;
+}
+
+Node* getMinimum(Node* x)
+{
+	while(x->left != NIL)
+	{
+		x = x->left;
+	}
+	
+	return x;
+}
+
+// 節点uの次節点を求める //
+
+
+void tree_delete(Node* u)
+{
+	Node* y;    // 削除する対象
+	Node* x;    // 削除する対象の子
+	
+	
+	// 削除する節点の決定 //
+	if(u->left == NIL || u->right == NIL)     // どちらの子もいないまたは子が一人いるときuを削除する
+	{
+		y = u;
+	}
+	else                                      // 二人の子がいるとき，uの次節点を削除する
+	{
+		y = getMinimum(u->right);
+	}
+	
+	// 削除する節点の子の決定 //
+	if(y->left != NIL)
+	{
+		x = y->left;                    // 左の子がいるなら左の子
+	}
+	else
+	{
+		x = y->right;                   // 左の子がいないかつ右の子はいる，またはどちらの子もいないとき，右の子
+	}
+	
+	if( x != NIL )   // xの親はyのままなので，xの親をyの親に変更する
+	{
+		x->parent = y->parent;
+	}
+	
+	if( y->parent == NIL )   // 削除するｙが根のとき，xを根にする
+	{
+		root = x;
+	}
+	else if( y == (y->parent)->left )
+	{
+		(y->parent)->left = x;            // y自身が左の子のとき，ｘをyの親の左の子にする
+	}
+	else
+	{
+		(y->parent)->right = x;           // y自身が右の子のとき，ｘをyの親の右の子にする
+	}
+	
+	if( y != u )
+	{
+		u->key = y->key;
+	}
+	
+	free(y);
+}
+
+void inorder(Node *u)
+{
+	if(u == NIL) return;
+	inorder(u->left);
+	printf(" %d", u->key);
+	inorder(u->right);
+}
+void preorder(Node *u)
+{
+	if(u == NIL) return;
+	printf(" %d", u->key);
+	preorder(u->left);
+	preorder(u->right);
+}
+
+void tree_free(Node *n)
+{
+	if( n != NULL)
+	{
+		tree_free(n->left);
+		tree_free(n->right);
+		free(n);
+	}
+}
+
+int main(void)
+{
+	int n, i, x;
+	char com[20];
+	Node *t;
+	scanf("%d", &n);
+
+	for ( i = 0; i < n; i++ )
+	{
+		scanf("%s", com);
+		if ( com[0] == 'f' ) 
+		{
+			scanf("%d", &x);
+			t = tree_Search(root, x);
+			if ( t != NIL ) printf("yes\n");
+			else printf("no\n");
+		}
+		else if ( com[0] == 'i' )
+		{
+			scanf("%d", &x);
+			insert(x);
+		}
+		else if ( com[0] == 'p' )
+		{
+			inorder(root);
+			printf("\n");
+			preorder(root);
+			printf("\n");
+		}
+	}
+	
+	tree_free(root);  // データ解放
+	return 0;
+}
+

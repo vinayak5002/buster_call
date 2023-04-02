@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+using namespace std;
+int enqueue(int a, vector<int> &Q, int &tail){
+    Q.at(tail) = a;
+    tail ++;
+    if(tail == Q.size()) tail = 0;
+    return 0;
+}
+int dequeue(vector<int> &Q, int &head){
+    int ans = Q.at(head);
+    head ++;
+    if(head == Q.size()) head = 0;
+    return ans;
+}
+int isE(int head, int tail){
+    return tail == head;
+}
+int main(){
+    int n, q;
+    cin >> n >> q;
+    int head = 0, tail = 0, atail = 0;
+    vector<int> Q(2 * n);
+    vector<string> name(n);
+    vector<int> pt(n);
+    vector<int> T(n);
+    vector<int> ans(n);
+    for(int i = 0;i < n;i++){
+        cin >> name.at(i) >> pt.at(i);
+        enqueue(i, Q, tail);
+    }
+    int t = 0;
+    while(!(isE(head, tail))){
+        int x = dequeue(Q, head);
+        if(pt.at(x) > q){
+            t += q;
+            pt.at(x) -= q;
+            enqueue(x, Q, tail);
+        } else if(pt.at(x) <= q){
+            t += pt.at(x);
+            enqueue(x, ans, atail);
+            T.at(x) = t;
+        }
+    }
+    int j = 0;
+    for(int i = 0;i < n;i++){
+        int x = dequeue(ans, j);
+        cout << name.at(x) << " " << T.at(x) << endl;
+    }
+    return 0;
+}

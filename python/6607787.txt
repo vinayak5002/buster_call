@@ -1,0 +1,30 @@
+use std::io::prelude::*;
+
+fn main() {
+    let stdin = std::io::stdin();
+
+    for line in stdin.lock().lines() {
+        let d : usize = line.unwrap().parse().unwrap();
+        let p = list_primes(d);
+        println!("{}", p.len());
+    }
+}
+
+fn list_primes(n: usize) -> Vec<usize> {
+    let mut is_prime: Vec<bool> = vec![true; (n+1)/2];
+    let mut res = Vec::with_capacity((n+1)/2);
+    is_prime[0] = false;
+    for i in (1..).take_while(|x| x*x*4 < (n+1)) {
+        if !is_prime[i] { continue; }
+        for mult in (2*i*(i+1)..(n+1)/2).step_by(2*i+1) {
+            is_prime[mult] = false;
+        }
+    }
+    res.push(2);
+    for i in 0..(n+1)/2 {
+        if is_prime[i] {
+            res.push(2*i+1);
+        }
+    }
+    res
+}

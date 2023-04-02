@@ -1,0 +1,50 @@
+#include<iostream>
+#include<string>
+#include<map>
+#include<set>
+#include<queue>
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+#include<vector>
+#include<cmath>
+using namespace std;
+//#define int long long
+#define INF 0x3f3f3f3f
+char maps[105][105];
+int book[105][105];
+int n,m,ans=0;
+int dirt[4][2]={0,1,1,0,-1,0,0,-1};
+void dfs(int x,int y,char c)
+{
+    for(int i=0;i<4;i++)
+    {
+        int tx=x+dirt[i][0];
+        int ty=y+dirt[i][1];
+        if(tx<1||tx>n||ty<1||ty>m||book[tx][ty]==1||maps[tx][ty]!=c) continue;
+        book[tx][ty]=1;
+        dfs(tx,ty,c);
+    }
+}
+int main()
+{
+    while(cin>>n>>m) {
+        if(n==0&&m==0) break;
+        memset(book,0,sizeof(book));
+        ans=0;
+        for (int i = 1; i <= n; i++)
+            for (int j = 1; j <= m; j++)
+                cin >> maps[i][j];
+        for (int i = 1; i <= n;i++)
+            for(int j=1;j<=m;j++)
+            {
+                if(!book[i][j])
+                {
+                    book[i][j]=1;
+                    ans++;
+                    dfs(i,j,maps[i][j]);
+                }
+            }
+        cout<<ans<<endl;
+    }
+}

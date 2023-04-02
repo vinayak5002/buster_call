@@ -1,0 +1,155 @@
+#include<iostream>
+#include<string>
+#include<vector>
+#include<queue>
+#include<stack>
+#include<map>
+#include<set>
+#include<algorithm>
+#include<functional>
+#include<cstdio>
+#include<cstdlib>
+#include<cmath>
+#include<cassert>
+#include<ctime>
+using namespace std;
+
+#define mind(a,b) (a>b?b:a)
+#define maxd(a,b) (a>b?a:b)
+#define absd(x) (x<0?-(x):x)
+#define pow2(x) ((x)*(x))
+#define rep(i,n) for(int i=0; i<n; ++i)
+#define repr(i,n) for(int i=n-1; i>=0; --i)
+#define repl(i,s,n) for(int i=s; i<=n; ++i)
+#define replr(i,s,n) for(int i=n; i>=s; --i)
+#define repf(i,s,n,j) for(int i=s; i<=n; i+=j)
+#define repe(e,obj) for(auto e : obj)
+
+#define SP << " " <<
+#define COL << " : " <<
+#define COM << ", " <<
+#define ARR << " -> " <<
+#define PNT(STR) cout << STR << endl
+#define POS(X,Y) "(" << X << ", " << Y << ")"
+#define DEB(A) " (" << #A << ") " << A
+#define DEBREP(i,n,val) for(int i=0; i<n; ++i) cout << val << " "; cout << endl
+#define ALL(V) (V).begin(), (V).end()
+#define INF 1000000007
+#define INFLL 1000000000000000007LL
+#define EPS 1e-9
+
+typedef unsigned int uint;
+typedef unsigned long ulong;
+typedef unsigned long long ull;
+typedef long long ll;
+typedef long double ld;
+#define P_TYPE int
+typedef pair<P_TYPE, P_TYPE> P;
+typedef pair<P, P_TYPE> PI;
+typedef pair<P_TYPE, P> IP;
+typedef pair<P, P> PP;
+typedef priority_queue<P, vector<P>, greater<P> > pvqueue;
+
+#define NN 65
+#define Q 10003
+
+int ans[Q];
+
+int conv(char c) {
+  if('a' <= c && c <= 'z') {
+    return c - 'a';
+  } else if('A' <= c && c <= 'Z') {
+    return 26 + (c - 'A');
+  } else if('0' <= c && c <= '9') {
+    return 52 + (c - '0');
+  }
+  return 62;
+}
+
+struct TrieNode {
+  TrieNode(int size) : sz(size), cnt(0) {
+    for(int i = 0; i < NN; ++i) next[i] = nullptr;
+    suffix = nullptr;
+    mark = 0;
+  }
+  TrieNode *next[NN];
+  TrieNode *suffix;
+  int sz, cnt;
+  vector<int> vs;
+  int mark;
+};
+
+TrieNode *root = new TrieNode(0);
+vector<TrieNode*> nodes;
+
+void add(string s, int k) {
+  TrieNode *node = root;
+  for(int i = 0; i < s.length(); ++i) {
+    int code = conv(s[i]);
+    if(!node->next[code]) {
+      node = node->next[code] = new TrieNode(node->sz + 1);
+    } else {
+      node = node->next[code];
+    }
+  }
+  node->cnt = 1;
+  node->vs.push_back(k);
+}
+
+void suffix() {
+  queue<TrieNode*> que;
+  que.push(root);
+  nodes.push_back(root);
+  while(!que.empty()) {
+    TrieNode* v = que.front(); que.pop();
+    for(int i = 0; i < NN; ++i) {
+      if(v->next[i] && v->sz < v->next[i]->sz) {
+        if(v->suffix) {
+          v->next[i]->suffix = v->suffix->next[i];
+        } else {
+          v->next[i]->suffix = root;
+        }
+        que.push(v->next[i]);
+        nodes.push_back(v->next[i]);
+      } else {
+        if(v->suffix) {
+          v->next[i] = v->suffix->next[i];
+        } else {
+          if(root->next[i]) {
+            v->next[i] = root->next[i];
+          } else {
+            v->next[i] = root;
+          }
+        }
+      }
+    }
+  }
+  root->suffix = root;
+}
+
+int main() {
+  string t; cin >> t;
+  int q; cin >> q;
+  rep(i, q) {
+    string p; cin >> p;
+    add(p, i);
+  }
+  suffix();
+
+  TrieNode* nd = root;
+  for(char c : t) {
+    nd = nd->next[conv(c)];
+    nd->mark = 1;
+  }
+  for(auto it = nodes.rbegin(); it != nodes.rend(); ++it) {
+    TrieNode* nd = *it;
+    if(nd != root && nd->mark) {
+      nd->suffix->mark = 1;
+      for(int e : nd->vs) ans[e] = 1;
+    }
+  }
+  rep(i, q) {
+    cout << ans[i] << endl;
+  }
+  return 0;
+}

@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+template <class T>
+using ve = vector<T>;
+template <class T>
+using vv = vector<vector<T>>;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define repg(i, j, n) for (int i = (int)j; i < (int)(n); i++)
+#define repi(i, n) for (int i = (int)(n)-1; i >= 0; i--)
+#define repig(i, j, n) for (int i = (int)(n)-1; i >= (int)j; i--)
+
+int main() {
+    /*
+      ナップザックで、同じ物を何度も選べるパターン。
+      BFの全探索だと、(W/wmin)^Nの探索が必要。
+      ただ価値の総和の最大値だけわかればいいため、maxで圧縮していけそう
+      かつ、やはりステップごとにルールベースで枝刈り・圧縮していけるケースになる。
+      関心があるのは、価値の総和と、重さの総和。重さの総和ごとに価値の総和をmaxで圧縮していく。
+    */
+    int N, W;
+    cin >> N >> W;
+    ve<int> val(N);
+    ve<int> wei(N);
+    rep(i, N) cin >> val[i] >> wei[i];
+    ve<ve<ll>> dp(2, ve<ll>(W + 1, 0));
+
+    int idx = 0;
+    rep(i, N) dp[0][wei[i]] = val[i];
+    repg(i, 1, W + 1) {
+        i % 2 == 1 ? idx = 1 : idx = 0;
+        rep(k, W + 1) {
+            rep(l, N) if (k - wei[l] >= 0) dp[idx][k] = max(dp[idx][k], dp[1 - idx][k - wei[l]] + val[l]);
+            dp[idx][k] = max(dp[idx][k], dp[1 - idx][k]);
+        }
+    }
+
+    ll ans = 0;
+    N - 1 % 2 == 1 ? idx = 1 : idx = 0;
+    rep(i, W + 1) ans = max(ans, dp[idx][i]);
+    cout << ans << endl;
+}
+

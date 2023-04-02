@@ -1,0 +1,117 @@
+#include <bits/stdc++.h>
+using std::cin;
+using std::getline;
+using std::cout;
+using std::endl;
+using std::string;
+using std::bitset;
+using std::vector;
+using std::array;
+using std::stack;
+using std::queue;
+using std::priority_queue;
+using std::set;
+using std::map;
+using std::pair;
+using llong = long long;
+template<typename T> using nLimits = std::numeric_limits<T>;
+#define ALL(a) (a).begin(), (a).end()
+#define REP(i, n) for (int i = 0; i < static_cast<int>(n); ++i)
+#define RREP(i, n) for (int i = static_cast<int>(n) - 1; i >= 0; --i)
+#define FOR(i, a, b) for (int i = static_cast<int>(a); i < static_cast<int>(b); ++i)
+#define RFOR(i, a, b) for (int i = static_cast<int>(a) - 1; i >= static_cast<int>(b); --i)
+constexpr int INF = 1001001001;
+constexpr llong LINF = 1001001001001001001ll;
+
+template<typename T> inline bool chMin(T &a, T b) { return ((a > b) ? (a = b, true) : (false)); }
+template<typename T> inline bool chMax(T &a, T b) { return ((a < b) ? (a = b, true) : (false)); }
+template<typename T> void printArray(const T* a, const size_t n);
+
+
+int N_V, N_E;
+vector<vector<int>> G;
+vector<vector<pair<int, int>>> adj;
+
+
+int prim_que() {
+    priority_queue<pair<int, int>, vector<pair<int, int>>, std::greater<pair<int, int>>> q;
+    for (auto tmp : adj[0]) q.push(tmp);
+    vector<bool> status(N_V, false);
+    status[0] = true;
+    int ans = 0;
+    while (!q.empty()) {
+        auto uu = q.top();
+        q.pop();
+        if (status[uu.second]) continue;
+        status[uu.second] = true;
+        ans += uu.first;
+        for (auto tmp : adj[uu.second]) {
+            if (!status[tmp.second]) q.push(tmp);
+        }
+    }
+    return ans;
+}
+
+
+int prim() {
+    vector<int> dist(N_V, INF), parent(N_V, -1);
+    vector<bool> status(N_V, false);
+    dist[0] = 0;
+    int u, min_cost;
+    while (true) {
+        min_cost = INF;
+        u = -1;
+        REP(i, N_V) if (min_cost > dist[i] && status[i] != true) {
+            u = i;
+            min_cost = dist[i];
+        }
+        if (u == -1) break;
+        status[u] = true;
+
+        REP(v, N_V) if (status[v] != true && G[u][v] != INF) {
+            if (dist[v] > G[u][v]) {
+                dist[v] = G[u][v];
+                parent[v] = u;
+                // status[v] = true;
+            }
+        }
+    }
+    int sum = 0;
+    REP(i, N_V) if (parent[i] != -1) sum += G[i][parent[i]];
+    return sum;
+}
+
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout << std::fixed << std::setprecision(20);
+
+    cin >> N_V >> N_E;
+
+    G.resize(N_V, vector<int>(N_V, INF));
+    adj.resize(N_V);
+
+    REP(i, N_E) {
+        int s, t, w;
+        cin >> s >> t >> w;
+        G[s][t] = w;
+        G[t][s] = w;
+        // adj[s].emplace_back(pair<int, int>(t, w));
+        // adj[t].emplace_back(pair<int, int>(s, w));
+        adj[s].emplace_back(pair<int, int>(w, t));
+        adj[t].emplace_back(pair<int, int>(w, s));
+    }   
+
+    // cout << prim() << endl;
+    cout << prim_que() << endl;
+}
+
+
+template<typename T> 
+void printArray(const T* a, const size_t n) {
+    string s = std::to_string(a[0]);
+    FOR(i, 1, n) s += " " + std::to_string(a[i]);
+    cout << s + "\n";
+}
+

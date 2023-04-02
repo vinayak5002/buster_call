@@ -1,0 +1,102 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+#define e -1
+
+typedef struct node{
+	int parent; //nodeの親
+	int left;   //nodeの左の子
+	int right;  //nodeの右の兄弟
+} node_t;
+
+int depth(node_t *N, int u)
+{
+	int d=0; //節点の深さ
+	while(N[u].parent != e){
+		d++;
+		u = N[u].parent;
+	}
+	return d;
+}
+
+int main(void)
+{
+	int n; //節点の個数
+	char s[32];
+	node_t *N; //3つのint型の構造体
+	char *p;
+	char *tok_p;
+	int id; //idの確認
+	int k; //各接点の次数,あるいはN[i]の子
+	int c; //各接点の持つ子の位置
+	int b = -1; //ループ中の一つ前の数値(兄弟)
+	int dep; //節点の深さ
+	
+	int i;
+	
+	fgets(s, sizeof(s)-1, stdin);
+	sscanf(s, "%d", &n);
+	
+	N = malloc(sizeof(node_t)*(n+1));
+	
+	for(i=0; i<n; i++){
+		//nodeの初期化
+		N[i].parent = e;
+		N[i].left = e;
+		N[i].right = e;
+	}
+	
+	for(i=0; i<n; i++){
+		fgets(s, sizeof(s)-1, stdin);
+		p = s;
+		tok_p = strtok(p, " "); //idの切り出し
+		id = atoi(tok_p);
+		p=NULL;
+		tok_p = strtok(p, " "); //kの切り出し
+		k = atoi(tok_p);
+		while(0<k){
+			p=NULL;
+			tok_p = strtok(p, " /\0");
+			c = atoi(tok_p);
+			N[c].parent = id;
+			if(N[id].left == e) N[id].left = c;
+			if(N[c].parent == N[b].parent && b != e) N[b].right = c;
+			
+			b = c; //bは一つ前のcを残す
+			k--;
+		}
+	}
+	
+	
+	for(i=0; i<n; i++){
+		printf("node %d: parent = %d, ", i, N[i].parent);
+		dep = depth(N, i);
+		printf("depth = %d, ", dep);
+		if(N[i].left == e){ //子を持たない
+			printf("leaf");
+		}else if(N[i].parent == e){ //親を持たない
+			printf("root");
+		}else{
+			printf("internal node");
+		}
+		printf(", [");
+		
+		k = N[i].left;
+		while(k != e){ //N[i]の子が兄弟を持つ限り
+			printf("%d", k);
+			k = N[k].right;
+			if(k != e){ //兄弟が残っている場合
+				printf(", ");
+			}
+		}
+		
+		printf("]\n");
+	}
+	printf("7\n");
+	
+	
+	free(N);
+	
+	return 0;
+}

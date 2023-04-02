@@ -1,0 +1,136 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 100001
+#define NIL -2000000002
+#define MAXN 50
+int n;
+const long long int infty = (1LL<<31) - 1;
+long long int A[MAX];
+
+//セグメントツリーで実装し直します。
+/* RMQ：[0,n-1] について、区間ごとの最小値を管理する構造体
+    update(i,x): i 番目の要素を x に更新。O(log(n))
+    query(a,b): [a,b) での最小の要素を取得。O(log(n))
+*/
+template <typename T>
+struct RMQ {
+    const T INF = numeric_limits<T>::max();
+    int n;         // 葉の数
+    vector<T> dat; // 完全二分木の配列
+    vector<T> lazy; // 完全二分木の配列
+    vector<T> lazyFlag; // 完全二分木の配列
+
+    RMQ(int n_) : n(), dat(n_ * 4, INF), lazy(n_ * 4, 0), lazyFlag(n_ * 4, 0)
+     { // 葉の数は 2^x の形
+        int x = 1;
+        while (n_ > x) {
+            x *= 2;
+        }
+        n = x;
+    }
+    //こちらは単純な一点更新
+    void update(int i, T x) {
+        i += n - 1;  // i番目は、配列上では n-1+i 番目に格納されている
+        dat[i] = x;
+        while (i > 0) {
+            i = (i - 1) / 2;  // parent
+            dat[i] = min(dat[i * 2 + 1], dat[i * 2 + 2]);
+        }
+    }
+
+    //こちらはlazy×区間更新
+    void update(int a, int b, int x, int k=0, int l=0, int r=-1) {
+        // if(r < 0) r = n;
+        lazyEvaluate(k, l, r);
+        if(b <= l || r <= a) return;
+        if(a <= l && r <= b) {
+            lazy[k] = x;
+            lazyFlag[k] = 1;
+            lazyEvaluate(k, l, r);
+        }
+        else {
+            update(a, b, x, 2*k+1, l, (l+r)/2);
+            update(a, b, x, 2*k+2, (l+r)/2, r);
+            dat[k] = min(dat[2*k+1], dat[2*k+2]);
+        }
+    }
+
+    void lazyEvaluate(int k, int l, int r) {
+        if(lazyFlag[k]) {
+            dat[k] = lazy[k];
+            if(r - l > 1) {
+                lazy[k*2+1] = lazy[k*2+2] = lazy[k];
+                lazyFlag[k*2+1] = lazyFlag[k*2+2] = true;
+            }
+            lazyFlag[k] = false;
+        }
+    }
+
+    // the minimum element of [a,b)
+    T query(int a, int b) { return query_sub(a, b, 0, 0, n); }
+    T query_sub(int a, int b, int k, int l, int r) {
+        lazyEvaluate(k,l,r);
+        if (r <= a || b <= l) {
+            return INF;
+        } else if (a <= l && r <= b) {
+            return dat[k];
+        } else {
+            T vl = query_sub(a, b, k * 2 + 1, l, (l + r) / 2);
+            T vr = query_sub(a, b, k * 2 + 2, (l + r) / 2, r);
+            return min(vl, vr);
+        }
+    }
+};
+
+
+
+int main() {
+    int q = 0;
+    cin >> n >> q ;
+    RMQ<int> R(n);
+
+    // nは登場人物の人数、qはクエリ（命令）の個数
+    // この時点でn個のノードが成立している。
+    for (int i = 0 ; i < q ; i++ ) {
+        int a , b, c ,com ;
+        cin >> com ;
+
+        if (com == 0) { 
+            cin >> a >> b  ; 
+            //printf("update %d %d\n",a,b);
+            R.update(a,a+1,b,0,0,n);
+            //printf ("%d\n", R.dat[2]);
+        } else if (com == 1)  {
+            cin >> a >> b  ;
+            //printf("findmin %d %d\n",a,b);
+            int minimum = R.query(a, b+1) ; 
+            printf("%d\n", minimum);
+        }
+    }    
+	return 0 ;
+}
+/*
+
+数列 A = {a0,a1 ,...,an-1} に対し、次の２つの操作を行うプログラムを作成せよ。
+
+update(i,x): aiをxに変更する。
+find(s,t): as,as+1,...,atの最小値を出力する。
+ただし、ai (i=0,1,...,n−1)は、231-1で初期化されているものとする。
+
+入力
+n q
+com0 x0 y0
+com1 x1 y1
+...
+comq−1 xq−1 yq−1
+１行目にAの要素数n, クエリの数qが与えられる。続くq行にクエリが与えられる。comは、クエリの種類を示し、'0'がupdate(xi,yi)、'1'がfind(xi,yi)を表す。
+
+出力
+各findクエリについて、最小値を１行に出力せよ。
+
+制約
+1≤n≤100000
+1≤q≤100000
+comiが0のとき、0≤xi<n, 0≤yi<231−1
+comiが1のとき、0≤xi<n, 0≤yi<n
+*/

@@ -1,0 +1,99 @@
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+#include <vector>
+#include <algorithm>
+#include <sstream>
+
+void setcout()
+{
+    std::cout << std::fixed << std::setprecision(10);
+}
+
+struct DICE
+{
+    int N = 5;
+    int E = 3;
+    int S = 2;
+    int W = 4;
+    int U = 1;
+    int D = 6;
+
+    void roll_N()
+    {
+        std::swap(U, S);
+        std::swap(S, D);
+        std::swap(D, N);
+    }
+    void roll_E()
+    {
+        std::swap(U, W);
+        std::swap(W, D);
+        std::swap(D, E);
+    }
+    void roll_S()
+    {
+        std::swap(U, N);
+        std::swap(N, D);
+        std::swap(D, S);
+    }
+    void roll_W()
+    {
+        std::swap(U, E);
+        std::swap(E, D);
+        std::swap(D, W);
+    }
+    void yaw_p()
+    {
+        std::swap(N, E);
+        std::swap(E, S);
+        std::swap(S, W);
+    }
+    void yaw_n()
+    {
+        std::swap(N, W);
+        std::swap(W, S);
+        std::swap(S, E);
+    }
+
+    void align(int xU, int xS)
+    {
+        int c = 0;
+        while (U != xU)
+        {
+            roll_N();
+            if (c++ == 4)
+            {
+                yaw_p();
+                c = 0;
+            }
+        }
+        while (S != xS)
+        {
+            yaw_p();
+        }
+    }
+} dice;
+
+int main()
+{
+    DICE d1, d2;
+    std::cin >> d1.U >> d1.S >> d1.E >> d1.W >> d1.N >> d1.D;
+    std::cin >> d2.U >> d2.S >> d2.E >> d2.W >> d2.N >> d2.D;
+
+    for (int m = 0; m < 4; m++)
+    {
+        for (int n = 0; n < 4; n++)
+        {
+            if (d1.U == d2.U && d1.N == d2.N && d1.E == d2.E && d1.S == d2.S && d1.W == d2.W && d1.D == d2.D)
+            {
+                std::cout << "Yes" << std::endl;
+                return 0;
+            }
+            d2.roll_N();
+        }
+        d2.yaw_p();
+    }
+    std::cout << "No" << std::endl;
+    return 0;
+}

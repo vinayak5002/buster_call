@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for(int i=0; i<(n); i++)
+#define INF ((1LL<<62)-(1LL<<31))
+#define all(a)  (a).begin(),(a).end()
+#define rall(a)  (a).rbegin(),(a).rend()
+typedef long long ll;
+typedef pair<ll,ll> pl;
+
+struct Graph {
+    struct Edge {
+        int rev,from,to,cap;
+        Edge(int r,int f,int t,int c):rev(r),from(f),to(t),cap(c) {}
+    };
+    vector<vector<Edge>> list;
+    Graph(int N=0):list(N) {}
+    size_t size() { return list.size(); }
+    vector<Edge> &operator [] (int i) { return list[i]; }
+    Edge& redge(const Edge &e) { return list[e.to][e.rev]; }
+    void run_flow(Edge &e,int f) {
+        e.cap-=f;
+        redge(e).cap+=f;
+    }
+    void addedge(int from,int to,int cap) {
+        int fromrev=(int)list[from].size();
+        int torev=(int)list[to].size();
+        list[from].push_back(Edge(torev,from,to,cap));
+        list[to].push_back(Edge(fromrev,to,from,0));
+    }
+    //Graph g(n);
+};
+
+struct Fordfulkerson {
+    const int INFTY=1<<30;
+    vector<bool> seen;
+    Fordfulkerson() {}
+    int dfs(Graph &G,int v,int t,int f) {
+        if(v==t) return f;
+        seen[v]=true;
+        for(auto &nv:G[v]) {
+            if(seen[nv.to]) continue;
+            if(nv.cap==0) continue;
+            int flow=dfs(G,nv.to,t,min(f,nv.cap));
+            if(flow==0) continue;
+            G.run_flow(nv,flow);
+            return flow;
+        }
+        return 0;
+    }
+    int solve(Graph &G,int s,int t) {
+        int res=0;
+        while(true) {
+            seen.assign((int)G.size(),false);
+            int flow=dfs(G,s,t,INFTY);
+            if(flow==0) return res;
+            res+=flow;
+        }
+        return 0;
+    }
+    //Fordfulkerson ff;
+};
+
+int main() {
+    int x,y,e;
+    cin >> x >> y >> e;
+    Graph g(x+y+2);
+    rep(i,e) {
+        int u,v,c;
+        cin >> u >> v;
+        g.addedge(u,v+x,1);
+    }
+    rep(i,x) g.addedge(x+y,i,1);
+    rep(i,y) g.addedge(i+x,x+y+1,1);
+    Fordfulkerson ff;
+    cout << ff.solve(g,x+y,x+y+1) << endl;
+    return 0;
+}

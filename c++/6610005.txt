@@ -1,0 +1,43 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+vector<string> split(string &s, char delimiter){
+  vector<string> res;
+  int prev_split_point = 0;
+  for (int i = 0; i < s.length(); i++) {
+    while(s[i] != delimiter && i < s.length())i++;
+    string add = s.substr(prev_split_point, i - prev_split_point);
+    if(!add.empty())res.push_back(add);
+    prev_split_point = i + 1;
+  }
+  return res;
+}
+
+int main(int argc, char *argv[]){
+  string s;
+  cin >> s;
+  vector<string> key = split(s, '.');
+  vector<string> yaml;
+  cin.ignore();
+  int indent = 0, p = 0;
+  while(getline(cin, s))yaml.push_back(s);
+  for (int i = 0; i < key.size() && p < yaml.size(); i++) {
+    while(p < yaml.size() &&
+          key[i] != yaml[p].substr(indent, key[i].length())){
+      p++;
+    }
+    while(i < key.size() - 1 &&
+          p + 1 < yaml.size() && yaml[p + 1][indent] == ' ')indent++;
+    if(i < key.size() - 1 && p < yaml.size())p++;
+  }
+  int len = key[key.size() - 1].length()+ 2;
+  if(p == yaml.size()){
+    std::cout << "no such property" << std::endl;
+  }else if(yaml[p].length() <= indent + len){
+    std::cout << "object" << std::endl;
+  }else{
+    std::cout << "string \"" << yaml[p].substr(indent + len) << "\"" << std::endl;
+  }
+  return 0;
+}
+

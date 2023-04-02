@@ -1,0 +1,40 @@
+def oi(): return int(input())
+def os(): return input()
+def mi(): return list(map(int, input().split()))
+
+# import sys
+# input = sys.stdin.readline
+
+import sys
+sys.setrecursionlimit(10**8)
+
+input_count=0
+N = oi()
+maps = [[] for i in range(N)]
+for i in range(1,N+1):
+    temp = mi()
+    for j in temp[2:]:
+        maps[i-1].append(j-1)
+
+dicts = {i:[] for i in range(N)}
+reached = set([])
+count = 1
+def dfs(node):
+    global count
+    dicts[node].append(count)
+    count += 1
+    
+    reached.add(node)
+    for next_node in maps[node]:
+        if next_node not in reached:
+            dfs(next_node)
+            
+    count += 1
+    dicts[node].append(count)
+
+for i in range(N):
+    if len(dicts[i])==0:
+        dfs(i)
+
+for k,v in dicts.items():
+    print(*[k+1, v[0], v[1]-1])

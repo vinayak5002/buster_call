@@ -1,0 +1,142 @@
+from collections import defaultdict, deque, Counter
+from itertools import permutations, product
+from heapq import heapify, heappop, heappush
+import math
+import bisect
+from random import randint
+import sys
+sys.setrecursionlimit(700000)
+input = sys.stdin.readline
+inf = float('inf')
+mod1 = 10**9+7
+mod2 = 998244353
+
+#################################################
+
+class LowLink():
+
+    def __init__(self, adj):
+        self.n = len(adj)
+        self.adj = adj
+        self.ord = [inf]*self.n
+        self.low = [inf]*self.n
+        self.son = [[] for _ in range(self.n)]
+        for s in range(self.n):
+            if self.ord[s] != inf: continue
+            o = 0
+            l = inf
+            stack = [(None, s)]
+            while stack:
+                pre, now = stack.pop()
+                if now >= 0:
+                    l = inf
+                    if self.ord[now] != inf:
+                        l = self.ord[now]
+                        continue
+                    if pre is not None:
+                        self.son[pre].append(now)
+                    self.ord[now] = o
+                    self.low[now] = o
+                    o += 1
+                    for next in self.adj[now]:
+                        if next == pre: continue
+                        stack.append((None, ~now))
+                        stack.append((now, next))
+                else:
+                    now = ~now
+                    l = min(self.low[now], l)
+                    self.low[now] = l
+        self.ap = self.articlation_points() # 関節点
+        print("ap ok")
+        # self.br = self.bridges() # 橋
+
+    def articlation_points(self):
+        ret = []
+        for i in range(self.n):
+            if self.ord[i] == 0:
+                if len(self.son[i]) >= 2:
+                    ret.append(i)
+            else:
+                for j in self.son[i]:
+                    if self.ord[i] <= self.low[j]:
+                        ret.append(i)
+                        break
+        return ret
+
+    def bridges(self):
+        ret = []
+        for i in range(self.n):
+            for j in self.son[i]:
+                if self.ord[i] < self.low[j]:
+                    ret.append((i, j) if i < j else (j, i))
+        return ret
+
+    # 二重頂点連結成分を辺集合の形で返す
+    def biconnected_components(self):
+        ret = []
+        visited = [False]*self.n
+        back = set()
+        for s in range(self.n):
+            if visited[s]: continue
+            stack = [(None, s)]
+            edge_stack = []
+            while stack:
+                pre, now = stack.pop()
+                if now >= 0:
+                    if visited[now]: continue
+                    visited[now] = True
+                    for next in self.adj[now]:
+                        if next == pre: continue
+                        stack.append((now, ~next))
+                        stack.append((now, next))
+                        edge_stack.append((now, next))
+                if now < 0:
+                    now, next = pre, ~now
+                    if self.ord[now] <= self.low[next]:
+                        bc = []
+                        u, v = None, None
+                        while (u, v) != (now, next):
+                            u, v = edge_stack.pop()
+                            if (v, u) in back: continue
+                            bc.append((u, v))
+                            back.add((u, v))
+                        if bc: ret.append(bc)
+        return ret
+
+    # biconnected_components を辺集合ではなく頂点集合に変換
+    def bcs_by_vertex(self, bcs):
+        ret = []
+        for bc in bcs:
+            s = set()
+            for u, v in bc:
+                s.add(u)
+                s.add(v)
+            ret.append(list(s))
+        return ret
+
+    # bct[:len(self.ap)]: 関節点, bct[len(self.ap):]: 二重頂点連結成分
+    # self.ap[i]: 関節点iの元グラフでの番号 (0 ≤ i < len(self.ap))
+    # bcsv[i]: 二重頂点連結成分iに属する頂点の元グラフでの番号 (len(self.ap) ≤ i < len(bct))
+    def block_cut_tree(self):
+        bcs = self.biconnected_components()
+        bcsv = self.bcs_by_vertex(bcs)
+        n, m = len(self.ap), len(bcs)
+        idx = {v: i for i, v in enumerate(self.ap)}
+        bct = [[] for _ in range(n+m)]
+        for i, bc in enumerate(bcsv, n):
+            for v in bc:
+                if v in idx:
+                    bct[idx[v]].append(i)
+                    bct[i].append(idx[v])
+        return bct, bcs, bcsv
+
+N, M = map(int, input().rstrip('\n').split())
+adj = [[] for _ in range(N)]
+for _ in range(M):
+    u, v = map(int, input().rstrip('\n').split())
+    adj[u].append(v)
+    adj[v].append(u)
+
+ll = LowLink(adj)
+for v in sorted(ll.ap):
+    print(v)

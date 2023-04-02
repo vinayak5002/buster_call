@@ -1,0 +1,82 @@
+#include <iostream>
+#include <vector>
+
+#define INFTY 1000000000
+
+int merge(std::vector<int> &S, int left, int mid, int right)
+{
+    int n1 = mid - left;
+    int n2 = right - mid;
+    std::vector<int> L(n1);
+    std::vector<int> R(n2);
+    for (int m = 0; m < n1; m++)
+    {
+        L[m] = S[left + m];
+    }
+    for (int n = 0; n < n2; n++)
+    {
+        R[n] = S[mid + n];
+    }
+    L.push_back(INFTY);
+    R.push_back(INFTY);
+    int i = 0;
+    int j = 0;
+    int count = 0;
+    for (int k = left; k < right; k++)
+    {
+        if (L[i] <= R[j])
+        {
+            S[k] = L[i];
+            i++;
+        }
+        else
+        {
+            S[k] = R[j];
+            j++;
+        }
+        count++;
+    }
+    return count;
+}
+
+int mergeSort(std::vector<int> &S, int left, int right, int &count)
+{
+    if (left + 1 < right)
+    {
+        int mid = (left + right) / 2;
+        mergeSort(S, left, mid, count);
+        mergeSort(S, mid, right,count);
+        count += merge(S, left, mid, right);
+    }
+    return count;
+}
+
+int main()
+{
+    int n;
+    std::cin >> n;
+    std::vector<int> S;
+    for (int i = 0; i < n; i++)
+    {
+        int input;
+        std::cin >> input;
+        S.push_back(input);
+    }
+
+    int count = 0;
+    count = mergeSort(S, 0, n, count); //マージソートする
+
+    for (size_t i = 0; i < S.size(); i++)
+    {
+        if (i)
+        {
+            std::cout << " ";
+        }
+
+        std::cout << S[i]; //間に空白、末尾空白不要→処理作ってしまう
+    }
+    std::cout << std::endl;
+    std::cout << count << std::endl;
+
+    return 0;
+}

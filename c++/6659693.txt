@@ -1,0 +1,121 @@
+#include<stdio.h>
+
+#define MAX 26
+#define e -1
+
+//各配列の+1は一時保存要素の分
+int id[MAX+1]; //節点番号
+int left[MAX+1]; //左の子
+int right[MAX+1]; //右の子
+int parent[MAX+1]; //節点の親
+
+int start()
+{
+	int s=0;
+	for(int i=0; i<MAX; i++){
+		if(parent[id[i]] == e){
+			s = i;
+			return s;
+		}
+	}
+	
+	return s;
+}
+
+void preorder(int i)
+{
+	printf(" %d", id[i]);
+	if(left[i] != e){ //左の子が存在
+		//printf("  left[%d] = %d\n", i, left[i]);
+		preorder(left[i]);
+	}
+	if(right[id[i]] != e){ //右の子が存在
+		//printf("  right[%d] = %d\n", id[i], right[id[i]]);
+		preorder(right[id[i]]);
+	}
+}
+
+void inorder(int i)
+{
+	if(left[id[i]] != e){ //左の子が存在
+		//printf("  left[%d] = %d\n", id[i], left[id[i]]);
+		inorder(left[id[i]]);
+	}
+	printf(" %d", id[i]);
+	
+	if(right[id[i]] != e){ //右の子が存在
+		//printf("  right[%d] = %d\n", id[i], right[id[i]]);
+		inorder(right[id[i]]);
+	}
+}
+
+void postorder(int i)
+{
+	
+	if(left[id[i]] != e){ //左の子が存在
+		//printf("  left[%d] = %d\n", id[i], left[id[i]]);
+		postorder(left[id[i]]);
+	}
+	if(right[id[i]] != e){ //右の子が存在
+		//printf("  right[%d] = %d\n", id[i], right[id[i]]);
+		postorder(right[id[i]]);
+	}
+	printf(" %d", id[i]);
+}
+
+int main(void)
+{
+	char str[16];
+	int n;
+	int s; //開始地点
+	
+	int i;
+	
+	//初期化
+	for(i=0; i<MAX; i++){
+		id[i] = e;
+		left[i] = e;
+		right[i] = e;
+		parent[i] = e;
+	}
+	
+	
+	fgets(str, sizeof(str)-1, stdin);
+	sscanf(str, "%d", &n);
+	
+	for(i=0; i<n; i++){
+		fgets(str, sizeof(str)-1, stdin);
+		//各配列の最後尾の一つ前に一時保存
+		sscanf(str, "%d%d%d", &id[MAX-1], &left[MAX-1], &right[MAX-1]);
+		 
+		//idと配列の番号が一致するよう入れる
+		id[id[MAX-1]] = id[MAX-1];
+		left[id[MAX-1]] = left[MAX-1];
+		right[id[MAX-1]] = right[MAX-1];
+		
+		if(left[id[MAX-1]] != e){
+			parent[left[id[MAX-1]]] = id[MAX-1]; //左の子に親の節点番号を与える
+			//printf("parent[%d] = %d\n", left[id[MAX-1]], parent[left[id[MAX-1]]]);
+		}
+		if(right[id[MAX-1]] != e){
+			parent[right[id[MAX-1]]] = id[MAX-1]; //右の子に親の節点番号を与える
+			//printf("parent[%d] = %d\n", right[id[MAX-1]], parent[right[id[MAX-1]]]);
+		}
+	}
+	
+	//開始地点を探索
+	s = start();
+	//printf("s = %d\n", s);
+	//Preorder
+	printf("Preorder\n");
+	preorder(s);
+	//Inorder
+	printf("\nInorder\n");
+	inorder(s);
+	//Postorder
+	printf("\nPostorder\n");
+	postorder(s);
+	printf("\n");
+	
+	return 0;
+}

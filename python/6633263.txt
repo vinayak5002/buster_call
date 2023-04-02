@@ -1,0 +1,61 @@
+use std::io;
+use std::io::Read;
+
+fn main() {
+    let mut buf = String::new();
+    io::stdin().read_to_string(&mut buf).unwrap();
+    let mut iter = buf.split_whitespace();
+
+    loop {
+        let n: usize = iter.next().unwrap().parse().unwrap();
+        if n == 0 {
+            break;
+        }
+        let mut sectors = vec![-1; 1000000001];
+        let mut files = vec![Vec::new(); 1000000001];
+        let mut blank = Vec::new();
+
+        blank.push(0);
+
+        for _ in 0..n {
+            let command = iter.next().unwrap();
+            if command == "R" {
+                let index: usize = iter.next().unwrap().parse().unwrap();
+                println!("{}", sectors[index])
+            } else if command == "W" {
+                let filename: usize = iter.next().unwrap().parse().unwrap();
+                let size: isize = iter.next().unwrap().parse().unwrap();
+                let mut index = blank.pop().unwrap();
+                files[filename].push(index);
+
+                for _ in 0..size {
+                    if sectors[index] != -1 {
+                        index = blank.pop().unwrap();
+                        files[filename].push(index);
+                    }
+                    sectors[index] = filename as isize;
+                    index += 1
+                }
+                blank.push(index);
+            } else if command == "D" {
+                let filename: usize = iter.next().unwrap().parse().unwrap();
+                let mut index = files[filename].pop().unwrap();
+                blank.push(index);
+
+                loop {
+                    if sectors[index] != filename as isize {
+                        match files[filename].pop() {
+                            Some(n) => index = n,
+                            None => break,
+                        }
+                        blank.push(index);
+                    }
+                    sectors[index] = -1;
+                    index += 1
+                }
+            }
+        }
+        println!("");
+    }
+}
+

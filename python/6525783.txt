@@ -1,0 +1,142 @@
+import java.util.Scanner;
+
+public class Main {
+    static final int N = 8;
+    static int[][] queens = new int[N][2];
+
+    public static void main(String[] args) {
+        // Queenの位置を盤面外で初期化
+        for (int i = 0; i < N; i++) {
+            queens[i][0] = -1;
+            queens[i][1] = -1;
+        }
+
+        // 入力を受け取ってk個のQueenの位置が決まる
+        Scanner sc = new Scanner(System.in);
+        int k = sc.nextInt();
+        for (int i = 0; i < k; i++) {
+            queens[i][0] = sc.nextInt();
+            queens[i][1] = sc.nextInt();
+        }
+
+        solve(k);
+        displayAns();
+        sc.close();
+    }
+
+    static void solve(int k) {
+        Boolean[][] isDangerous = new Boolean[N][N];
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                isDangerous[i][j] = false;
+            }
+        }
+
+        for (int i = 0; i < k; i++) {
+            paintDangerousGrid(isDangerous, queens[i]);
+        }
+
+        // start
+        boolean beginningRow = false;
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (!isDangerous[i][j]) {
+                    beginningRow = true;
+                    DFS(makeBoolArrayClone(isDangerous), makeIntArrayClone(queens), new int[] { i, j }, k);
+                }
+            }
+            if (beginningRow) {
+                break;
+            }
+        }
+    }
+
+    static void DFS(Boolean[][] isDangerous, int[][] temporalQueen, int[] start, int QueenIndex) {
+        temporalQueen[QueenIndex][0] = start[0];
+        temporalQueen[QueenIndex][1] = start[1];
+
+        if (start[0] == N - 1) {
+            if (QueenIndex == N - 1) {
+                queens = temporalQueen;  // 正式にqueenがもつアドレスを上書き
+            }
+            return;
+        }
+
+        paintDangerousGrid(isDangerous, start);
+        for (int i = N * start[0] + start[1]; i < N * N; i++) {
+            if (!isDangerous[i / N][i % N]) {
+                DFS(makeBoolArrayClone(isDangerous), makeIntArrayClone(temporalQueen), new int[] { i / N, i % N }, QueenIndex + 1);
+            }
+        }
+    }
+
+    static void paintDangerousGrid(Boolean[][] field, int[] Queen) {
+        int row = Queen[0];
+        int column = Queen[1];
+        if (row < 0 || N <= row || column < 0 || N <= column)
+            return;
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (i == row || j == column || Math.abs(i - row) == Math.abs(j - column))
+                    field[i][j] = true;
+            }
+        }
+    }
+
+    static void displayField(Boolean[][] dangerGrid) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (isQueenAt(i, j)) {
+                    System.out.print("Q ");
+                } else if (dangerGrid[i][j]) {
+                    System.out.print("# ");
+                } else {
+                    System.out.print(". ");
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    static void displayAns() {
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                if (isQueenAt(i, j)) {
+                    System.out.print("Q");
+                } else {
+                    System.out.print(".");
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    static boolean isQueenAt(int i, int j) {
+        boolean res = false;
+        for (int k = 0; k < N; k++) {
+            if (queens[k][0] == i && queens[k][1] == j) {
+                res = true;
+                break;
+            }
+        }
+        return res;
+    }
+
+    static int[][] makeIntArrayClone(int[][] array){
+        int[][] clone = new int[array.length][];
+        for (int i = 0; i < clone.length; i++) {
+            clone[i] = array[i].clone();
+        }
+        return clone;
+    }
+
+    static Boolean[][] makeBoolArrayClone(Boolean[][] array){
+        Boolean[][] clone = new Boolean[array.length][];
+        for (int i = 0; i < clone.length; i++) {
+            clone[i] = array[i].clone();
+        }
+        return clone;
+    }
+}
+

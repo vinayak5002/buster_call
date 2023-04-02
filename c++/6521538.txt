@@ -1,0 +1,111 @@
+#include <cstdio>
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class List{
+    struct content{
+        const unsigned long long int key;
+        content *before, *after;
+        content(unsigned long long int num, content *p): key{num}, 
+        before{nullptr}, after{p}{}
+        ~content(){
+            before=nullptr;
+            after=nullptr;
+        }
+        content(content&)=delete;
+        void link_a(content* p){
+            after=p;
+        }
+        void link_b(content* p){
+            before=p;
+        }
+    };
+    content *start, *last;
+    void del_c(content *p){
+        content *p_bef, *p_aft;
+        p_bef=p->before;
+        p_aft=p->after;
+        if(p==start){
+            start=p_aft;
+            start->before=nullptr;
+        }else if(p==last){
+            last=p_bef;
+            last->after=nullptr;
+        }else{
+            p_bef->after=p_aft;
+            p_aft->before=p_bef;
+        }
+        delete p;
+    }
+    public:
+    List(){}
+    List(List&)=delete;
+    List(List&&)=delete;
+    ~List(){
+        content *ptr=start;
+        while(ptr->after!=nullptr){
+            ptr=ptr->after;
+            ptr->before->~content();
+        }
+        ptr->~content();
+    }
+    content* search(unsigned long long int num){
+        content *p=start;
+        while(p->key!=num){
+            p=p->after;
+            if(p==nullptr)break;
+        }
+        return p;
+    }
+    void insert(unsigned long long num){
+        content* p = new content(num, start);
+        if(start==nullptr){
+            last=p;
+            start=p;
+            return;
+        }
+        start->before=p;
+        start=p;
+    }
+    void del(unsigned long long num){
+        content *p=search(num);
+        if(p!=nullptr){
+            del_c(p);
+        }
+    }
+    void delF(){
+        del_c(start);
+    }
+    void delL(){
+        del_c(last);
+    }
+    void print(){
+        content *p=start;
+        while(p->after!=nullptr){
+            cout<<p->key<<" ";
+            p=p->after;
+        }
+        cout<<p->key<<endl;
+    }
+};
+int main(){
+    unsigned long long int n, temp;
+    cin>>n;
+    List l;
+    string command;
+    for(unsigned long long i=0; i<n; ++i){
+        cin>>command>>temp;
+        if(command=="insert"){
+            l.insert(temp);
+        }else if(command=="delete"){
+            l.del(temp);
+        }else if(command=="deleteFirst"){
+            l.delF();
+        }else if(command=="deleteLast"){
+            l.delL();
+        }
+    }
+    l.print();
+}

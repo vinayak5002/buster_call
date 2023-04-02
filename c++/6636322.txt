@@ -1,0 +1,137 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+class suffix_array{
+  private:
+    string s;
+    ll n, k;
+    vector<ll> sa, lcp, rank, tmp;
+  public:
+    // 文字列sのsuffix_arrayの構築
+    suffix_array(string &s): s(s){
+      n = s.size();
+      sa.resize(n + 1);
+      rank.resize(n + 1);
+      tmp.resize(n + 1);
+
+      for(ll i = 0; i < n; i++){
+        sa[i] = i;
+        rank[i] = i < n ? (ll)s[i] : -1;
+      }
+
+      auto compare_sa = [&](ll i, ll j){
+        if(rank[i] != rank[j]) return rank[i] < rank[j];
+        else{
+          ll ri = i + k <= n ? rank[i + k] : -1;
+          ll rj = j + k <= n ? rank[j + k] : -1;
+          return ri < rj;
+        }
+      };
+
+      for(k = 1; k <= n; k *= 2){
+        sort(sa.begin(), sa.end(), compare_sa);
+        tmp[sa[0]] = 0;
+
+        for(ll i = 1; i <= n; i++){
+          tmp[sa[i]] = tmp[sa[i - 1]] + (compare_sa(sa[i - 1], sa[i]) ? 1 : 0);
+        }
+        for(ll i = 0; i <= n; i++){
+          rank[i] = tmp[i];
+        }
+      }
+    }
+
+    void construct_lcp(){
+      for(ll i = 0; i <= n; i++) rank[sa[i]] = i;
+
+      ll h = 0;
+      lcp[0] = 0;
+      for(ll i = 0; i < n; i++){
+        ll j = sa[rank[i] - 1];
+
+        if(h > 0) h--;
+        while(j + h < n && i + h < n){
+          if(s[j + h] != s[i + h]) break;
+          h++;
+        }
+        lcp[rank[i] - 1] = h;
+      }
+    }
+
+    // [lb, ub)の各要素はtを部分文字列として含む
+    pair<ll, ll> contain_range(string &t){
+      ll st = t.size();
+      ll lb, ub, lef, mid, rig;
+      
+      lef = 0, rig = n + 1;
+      while(rig - lef > 1){
+        mid = (lef + rig) / 2;
+        string subs = s.substr(sa[mid], st);
+        if(t <= subs) rig = mid;
+        else lef = mid;
+      }
+      lb = rig;
+
+      lef = 0, rig = n + 1;
+      while(rig - lef > 1){
+        mid = (lef + rig) / 2;
+        string subs = s.substr(sa[mid], st);
+        if(t < subs) rig = mid;
+        else lef = mid;
+      }
+      ub = rig;
+      return {lb, ub};
+    }
+
+    // tを何箇所含むか
+    ll cnt(string &t){
+      pair<ll, ll> pai = contain_range(t);
+      return pai.second - pai.first;
+    }
+
+    // sはtを含むか
+    bool is_contain(string &t){
+      return cnt(t) != 0;
+    }
+};
+
+
+
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  string s;
+  cin >> s;
+
+  suffix_array sa(s);
+
+  ll q;
+  cin >> q;
+  while(q--){
+    string t;
+    cin >> t;
+    cout << sa.is_contain(t) << endl;
+  }
+
+
+
+  return 0;
+}

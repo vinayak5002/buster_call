@@ -1,0 +1,37 @@
+n=int(input())
+n_l=[0]*101
+ans_l=[[1,0] for _ in range(101)]
+cp=100
+for _ in range(n):
+    input_l=list(map(int,input().split()))
+    n_l[input_l[0]]=input_l[1:]
+    cp=min(cp,input_l[0])
+v_l=[]
+rootl=[cp]
+stack=[cp]
+time=1
+while rootl:
+    flag=True
+    if cp not in v_l:
+        ans_l[cp][0]=time
+        v_l.append(cp)
+    if n_l[cp][0]!=0:
+        for c in reversed(n_l[cp][1:]):
+            #if c not in stack:#これ要らない?
+            if c not in v_l:
+                stack.append(c)
+                flag=False
+    if flag:
+        ans_l[cp][1]=time
+        time+=1
+        cp=rootl.pop()
+        continue
+    cp=stack.pop()
+    rootl.append(cp)
+    time+=1
+ans_l[cp][1]=time
+for i in range(101):
+    if ans_l[i]!=[1,0]:
+        print(i,*ans_l[i])
+
+

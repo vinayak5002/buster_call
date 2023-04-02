@@ -1,0 +1,26 @@
+from collections import defaultdict
+from bisect import bisect
+
+h,w = map(int,input().split())
+field = [list(input()) for _ in range(h)]
+
+jewel = []
+orb = defaultdict(list)
+ingot = defaultdict(list)
+for i in range(h):
+    for j in range(w):
+        if field[i][j] == "J":
+            jewel.append([i,j])
+        elif field[i][j] == "O":
+            orb[i].append(j)
+        else:
+            ingot[j].append(i)
+
+ans = 0
+for x,y in jewel:
+    if orb[x] and ingot[y]:
+        i = bisect(orb[x],y)
+        j = bisect(ingot[y],x)
+        ans += len(orb[x][i:]) * len(ingot[y][j:])
+
+print(ans)

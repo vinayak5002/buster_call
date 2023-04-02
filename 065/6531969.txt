@@ -1,0 +1,92 @@
+#include <bits/stdc++.h>
+
+#include <cctype>
+
+using namespace std;
+
+#define rep(i, n) for (int i = 0; i < (int)n; ++i)
+#define FOR(i, a, b) for (int i = (int)a; i < (int)b; ++i)
+#define rrep(i, n) for (int i = ((int)n - 1); i >= 0; --i)
+
+using ll = long long;
+using ld = long double;
+
+__attribute__((unused)) const ll INF = 1e18;
+__attribute__((unused)) const int Inf = 1e9;
+__attribute__((unused)) const double EPS = 1e-9;
+__attribute__((unused)) const ll MOD = 1000000007;
+
+int partition(vector<pair<int, char>>& v, int l, int r) {
+  int i = l;
+  FOR(j, l, r) {
+    if (v[j].first <= v[r - 1].first) {
+      swap(v[i++], v[j]);
+    }
+  }
+
+  return i - 1;
+}
+
+void quickSort(vector<pair<int, char>>& v, int l, int r) {
+  if (r - l <= 1) return;
+  int p = partition(v, l, r);
+  quickSort(v, l, p);
+  quickSort(v, p, r);
+}
+
+void merge(vector<pair<int, char>>& v, int l, int mid, int r) {
+  int n = mid - l, m = r - mid;
+  vector<pair<int, char>> left(n + 1), right(m + 1);
+  rep(i, n) left[i] = v[i + l];
+  rep(i, m) right[i] = v[i + mid];
+  int i = 0, j = 0;
+  left[n] = {INT_MAX, 'x'};
+  right[m] = {INT_MAX, 'x'};
+
+  FOR(k, l, r) {
+    if (left[i].first <= right[j].first) {
+      v[k] = left[i++];
+    } else {
+      v[k] = right[j++];
+    }
+  }
+}
+
+void mergeSort(vector<pair<int, char>>& v, int l, int r) {
+  if (r - l <= 1) return;
+  int mid = (l + r) / 2;
+  mergeSort(v, l, mid);
+  mergeSort(v, mid, r);
+  merge(v, l, mid, r);
+}
+
+int main() {
+  cin.tie(nullptr);
+  ios::sync_with_stdio(0);
+
+  int n;
+  cin >> n;
+  vector<pair<int, char>> a(n), b(n);
+  rep(i, n) {
+    cin >> a[i].second >> a[i].first;
+    b[i] = a[i];
+  }
+  quickSort(a, 0, n);
+  mergeSort(b, 0, n);
+  bool isStable = true;
+  rep(i, n) {
+    if (a[i] != b[i]) {
+      isStable = false;
+      break;
+    }
+  }
+  if (isStable)
+    cout << "Stable" << endl;
+  else
+    cout << "Not stable" << endl;
+
+  rep(i, n) { cout << a[i].second << " " << a[i].first << endl; }
+
+  return 0;
+}
+

@@ -1,0 +1,38 @@
+from bisect import bisect_left
+
+
+# 最長増加部分列 : 計算量O(n)
+def lis1(a: list):
+    s = [a[0]]
+    for aa in a[1:]:
+        if aa > s[-1]:
+            s.append(aa)
+        else:
+            s[bisect_left(s, aa)] = aa
+
+    return len(s)
+
+
+# 最長増加部分列 : 計算量O(n * n)
+def lis2(a: list, n):
+    dp = [0] * n
+    max_len = 0
+    for i in range(n):
+        dp[i] = 1
+        for j in range(i):
+            if a[i] > a[j]:
+                dp[i] = max(dp[i], dp[j] + 1)
+        max_len = max(max_len, dp[i])
+
+    return max_len
+
+
+def main():
+    n = int(input())
+    a = [int(input()) for _ in range(n)]
+    print(lis1(a))
+
+
+if __name__ == '__main__':
+    main()
+

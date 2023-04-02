@@ -1,0 +1,76 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  string s;
+  cin >> s;
+  stack<ll> st;
+  stack<pair<ll, ll>> p;
+
+  ll ans = 0;
+  ll n = SZ(s);
+
+  rep(i, 0, n){
+      if(s[i] == '\\'){
+          st.push(i);
+      }
+      else if(s[i] == '/' && !st.empty()){
+          ll j = st.top();
+          st.pop();
+          ll a = i - j;
+          ans += a;
+          p.push({j, a});
+
+          ll sum = 0;
+          ll pos;
+          while(1){
+              if(p.empty() || p.top().first < j){
+                  p.push({pos, sum});
+                  break;
+              }
+              auto pp = p.top();
+              p.pop();
+              pos = pp.first;
+              sum += pp.second;
+          }
+      }
+  }
+
+  cout << ans << endl;
+  stack<ll> st2;
+
+  while(!p.empty()){
+      auto pp = p.top();
+      p.pop();
+      st2.push(pp.second);
+  }
+
+  cout << st2.size();
+  while(!st2.empty()){
+      cout << " " << st2.top();
+      st2.pop();
+  }
+  cout << endl;
+
+
+  return 0;
+}

@@ -1,0 +1,85 @@
+#include<stdio.h>
+#define N 100
+#define INFTY 2022
+#define WHITE 0
+#define GRAY 1
+#define BLACK 2
+
+
+int G[N][N], n;                    // 隣接行列，頂点数
+
+int prim()
+{
+	int u, minc, i, j;
+	int d[N];                      // Tに属する頂点とV-Tに属する頂点を繋ぐ辺の最小重みを格納
+	int p[N], color[N];            // p[u]にMSTにおける頂点uの親を格納，頂点の訪問状況を格納
+	int sum = 0;
+	
+	for(i = 0; i < n; i++)
+	{
+		d[i] = INFTY;
+		color[i] = WHITE;
+	}
+	
+	d[0] = 0;                      // 最初に頂点0と繋がっているほかの頂点との間の辺の重みと比較するため初期化
+	p[0] = -1;                     // 始点の親
+	
+	while(1)
+	{
+		minc = INFTY;
+		for(i = 0; i < n; i++)
+		{
+			if(color[i] != BLACK && d[i] < minc)
+			{
+				minc = d[i];       // 無限ループの一回目はd[0]のみ
+				u = i;             // 二回目以降は前回選ばれた頂点との最小の重みd[i]が選ばれる
+			}
+		}
+		
+		if(minc == INFTY) break;
+		
+		color[u] = BLACK;          // 訪問済み
+		
+		for(j = 0; j < n; j++)
+		{
+			if(color[j] != BLACK && G[u][j] != -1)
+			{
+				if(d[j] > G[u][j])  // より小さい重みがあるならば
+				{
+					d[j] = G[u][j];
+					p[j] = u;
+					color[j] = GRAY;
+				}
+			}
+		}
+	}
+	for(i = 0; i < n; i++)
+	{
+		if(p[i] != -1)
+		{
+			sum += G[i][p[i]];
+		}
+	}
+	
+	return sum;
+}
+
+int main(void)
+{
+	int i, j;
+	int a_ij;
+	
+	scanf("%d", &n);
+	for( i = 0; i < n; i++ )
+	{
+		for( j = 0; j < n; j++ )
+		{
+			scanf("%d", &a_ij);
+			G[i][j] = a_ij;             // i行j列目の要素を格納
+		}                               // 辺がない場合は-1
+	}
+	
+	printf("%d\n", prim());
+	
+	return 0;
+}

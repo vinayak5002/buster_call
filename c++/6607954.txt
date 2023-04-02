@@ -1,0 +1,98 @@
+#include<cstdio>
+#include<queue>
+#include<vector>
+#include<cstring>
+using namespace std;
+
+const int INF=1000000000;
+
+struct edge
+{
+    int u,v,d,c;
+    edge(int u,int v,int d,int c):u(u),v(v),d(d),c(c){}
+};
+
+int N,M;
+
+vector<edge> es[10001],pre[10001];
+int d[10001],vis[10001];
+
+typedef pair<int,int> P;
+
+void solve()
+{
+    priority_queue<P,vector<P>,greater<P> >que;////////////
+
+    int ans=0;////////////////////////
+
+    d[1]=0;vis[1]=1;
+
+    for(int i=0;i<es[1].size();i++)
+    {
+        edge& e=es[1][i];
+        int nex=e.u==1?e.v:e.u;//
+        d[nex]=e.d;
+        pre[nex].push_back(e);
+        que.push(P(d[nex],nex));
+    }
+
+    while(!que.empty())
+    {
+        int d2=que.top().first;
+        int cur=que.top().second; que.pop();
+
+        if(vis[cur])continue;
+
+        vis[cur]=1;
+
+        int mi=1000;
+        for(int i=0;i<pre[cur].size();i++)
+        {
+            edge& e=pre[cur][i];
+            mi=min(mi,e.c);
+        }
+        ans+=mi;
+
+
+        for(int i=0;i<es[cur].size();i++)
+        {
+            edge& e=es[cur][i];
+            int nex=e.u==cur?e.v:e.u;
+
+            if(d[nex]>d[cur]+e.d)
+            {
+                pre[nex].clear();
+                d[nex]=d[cur]+e.d;
+                pre[nex].push_back(e);
+            }
+            else if(d[nex]==d[cur]+e.d)
+            {
+                pre[nex].push_back(e);
+            }
+            que.push(P(d[nex],nex));
+        }
+    }
+
+    printf("%d\n",ans);
+}
+
+int main()
+{
+    while(scanf("%d%d",&N,&M)&&N)
+    {
+        for(int i=0;i<M;i++)
+        {
+            int u,v,d,c;
+            scanf("%d%d%d%d",&u,&v,&d,&c);
+            es[u].push_back(edge(u,v,d,c));
+            es[v].push_back(edge(u,v,d,c));
+        }
+        for(int i=1;i<=N;i++)
+            pre[i].clear();
+        fill(d+1,d+N+1,INF);
+        memset(vis,0,sizeof(vis));
+
+        solve();
+    }
+}
+

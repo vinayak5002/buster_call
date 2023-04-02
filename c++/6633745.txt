@@ -1,0 +1,104 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define MOD 1000000007
+//#define MOD 998244353
+#define INF 1e18 + 10
+#define EPS 1e-9
+#define F first
+#define S second
+
+#define debug(x) cout<<x<<endl;
+#define repi(i,x,n) for(int i=x;i<n;i++)
+#define rep(i,n) repi(i,0,n)
+#define lp(i,n) repi(i,0,n)
+#define repn(i,n) for(int i=n;i>=0;i--)
+#define int long long
+#define endl "\n"
+
+typedef pair<double,double> PII;
+typedef pair<int,string> PIS;
+typedef pair<string,int> PSI;
+
+template <typename T>
+bool chmax(T &a, const T& b) {
+  if (a < b) {
+    a = b; 
+    return true;
+  }
+  return false;
+}
+
+template <typename T>
+bool chmin(T &a, const T& b) {
+  if (a > b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+double dist(PII a,PII b){
+  return sqrt( (a.F-b.F)*(a.F-b.F) + (a.S-b.S)*(a.S-b.S));
+}
+
+double cross(PII a,PII b){
+  return a.F*b.S - a.S*b.F;
+}
+
+PII calc(PII a,PII b,PII c,PII d){
+  double s,t,u;
+  s=(d.S-c.S)*(d.F-a.F) - (d.F-c.F)*(d.S-a.S);
+  t=(b.F-a.F)*(d.S-a.S) - (b.S-a.S)*(d.F-a.F);
+  u=(b.F-a.F)*(d.S-c.S) - (b.S-a.S)*(d.F-c.F);
+  double xx=s/u,yy=t/u;
+  if( (xx>=0 && xx<=1) && (yy>=0 && yy<=1) ){
+    PII crs;
+    crs.F=a.F+(xx*(b.F-a.F));
+    crs.S=a.S+(xx*(b.S-a.S));
+    return crs;
+  }else return{-100000,-100000};
+  
+}
+	   
+
+signed main(){
+  cin.tie(0);	
+  ios::sync_with_stdio(false);
+  int t;
+  cin>>t;
+  rep(cs,t){
+    PII X,Y;
+    cin>>X.F>>X.S>>Y.F>>Y.S;
+    vector< pair<double,int> > pnt;
+    int n;
+    cin>>n;
+    rep(i,n){
+      PII x,y;
+      int o,l;
+      cin>>x.F>>x.S>>y.F>>y.S>>o>>l;
+      int snd=o+l;
+      if(snd==1) snd=0;
+      else snd=1;
+      PII crs=calc(X,Y,x,y);
+      PII inf={-100000,-100000};
+      //cout<<crs.F<<" "<<crs.S<<endl;
+      if(crs!=inf){
+	pnt.push_back({dist(X,crs),snd});
+      }
+    }
+    sort(pnt.begin(),pnt.end() );
+    int ans=0,now=0;
+    rep(i,pnt.size() ){
+      //cout<<pnt[i].F<<" "<<pnt[i].S<<endl;
+      if(i==0) now=pnt[i].S;
+      else if(pnt[i].S!=now){
+	now=pnt[i].S;
+	ans++;
+      }
+    }
+    cout<<ans<<endl;
+  }
+
+  return 0;
+}
+

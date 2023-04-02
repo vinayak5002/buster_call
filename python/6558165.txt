@@ -1,0 +1,34 @@
+while True:
+
+    N,M = map(int,input().split())
+    if N == 0 and M == 0:
+        break
+    #S = input()
+    INF = float("inf")
+    C = []
+    for _ in range(M):
+        C.append(int(input()))
+    x = []
+    for _ in range(N):
+        x.append(int(input()))
+    dp = [[INF]*256 for _ in range(N+1)]
+    dp[0][128] = 0
+    y = {128}
+    for i in range(1,N+1):
+        y_next = set()
+        for p in y:
+            for k in range(M):
+                if p+C[k]<0:
+                    y_ = 0
+                elif p+C[k]>255:
+                    y_ = 255
+                else:
+                    y_ = p+C[k]
+                dp[i][y_] = min(dp[i][y_], dp[i-1][p] + (x[i-1]-y_)**2)
+                y_next.add(y_)
+        y = y_next
+
+    ans = INF
+    for j in range(256):
+        ans = min(ans,dp[N][j])
+    print(ans)

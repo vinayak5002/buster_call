@@ -1,0 +1,158 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+using namespace std;
+
+#define all(x) (x).begin(),(x).end()
+#define print(x) cout << (x) << '\n'
+typedef long long ll;
+typedef long double ld;
+using P = pair<int,int>;
+using pll = pair<ll,ll>;
+using Graph = vector<vector<int>>;
+
+//const ll MOD = 1000000007;
+//const ll MOD = 998244353;
+
+template <typename T> inline bool chmax(T &a, T b) {return a < b ? a = b, true : false;}
+template <typename T> inline bool chmin(T &a, T b) {return a > b ? a = b, true : false;}
+
+template <typename T>
+void vin(vector<T> &v) {
+    int l = v.size();
+    for(int i = 0; i < l; i++) cin >> v[i];
+}
+
+template <typename T>
+void vout(vector<T> &v) {
+    int l = v.size();
+    for(int i = 0; i < l; i++) cout << v[i] << (i < l - 1 ? ' ' : '\n');
+}
+
+int la, lb;
+
+string calc(string x, string y) {
+    string ret = "";
+    int nex = 0;
+    for(int i = la - 1; i >= la - lb; i--) {
+        int t = x[i] - '0' + y[i - la + lb] - '0' + nex;
+        if(t >= 10) {
+            nex = t / 10;
+            ret += char('0' + t % 10);
+        } else {
+            nex = 0;
+            ret += char('0' + t);
+        }
+    }
+    for(int i = la - lb - 1; i >= 0; i--) {
+        int t = x[i] - '0' + nex;
+        if(t >= 10) {
+            nex = t / 10;
+            ret += char('0' + t % 10);
+        } else {
+            nex = 0;
+            ret += char('0' + t);
+        }
+    }
+    if(nex > 0) {
+        ret += char('0' + nex);
+    }
+    reverse(all(ret));
+    return ret;
+}
+
+string calc2(string x, string y) {
+    bool p = true;
+    if(la < lb) {
+        p = false;
+    } else if(la == lb && x < y) {
+        p = false;
+    }
+    if(!p) {
+        swap(x, y);
+        swap(la, lb);
+    }
+
+    string ret = "";
+    int nex = 0;
+    for(int i = la - 1; i >= la - lb; i--) {
+        int t = x[i] - '0' - (y[i - (la - lb)] - '0') - nex;
+        if(t < 0) {
+            nex = 1;
+            ret += char('0' + t + 10);
+        } else {
+            ret += char('0' + t);
+            nex = 0;
+        }
+    }
+    for(int i = la - lb - 1; i >= 0; i--) {
+        int t = x[i] - '0' - nex;
+        if(t < 0) {
+            nex = 1;
+            ret += char('0' + t + 10);
+        } else {
+            nex = 0;
+            ret += char('0' + t);
+        }
+    }
+    reverse(all(ret));
+    int L = ret.length();
+    int zero = 0;
+    for(int i = 0; i < L; i++) {
+        if(ret[i] == '0') {
+            zero++;
+        } else {
+            break;
+        }
+    }
+    ret = ret.substr(zero, L - zero);
+    if(p) {
+        ret = "-" + ret;
+    }
+    if(ret == "-") {
+        ret = "0";
+    }
+    return ret;
+}
+
+int main() {
+    cin.tie(0); cout.tie(0);
+    ios::sync_with_stdio(false);
+    cout << fixed << setprecision(18);
+
+    string A, B;
+    cin >> A >> B;
+    la = A.length();
+    lb = B.length();
+
+    string ans;
+    if(A[0] == '-' && B[0] == '-') {
+        A = A.substr(1, la - 1);
+        B = B.substr(1, lb - 1);
+        la--;
+        lb--;
+        if(la < lb) {
+            swap(A, B);
+            swap(la, lb);
+        }
+        ans = calc(A, B);
+        ans = "-" + ans;
+    } else if(A[0] == '-') {
+        A = A.substr(1, la - 1);
+        la--;
+        ans = calc2(A, B);
+    } else if(B[0] == '-') {
+        swap(A, B);
+        swap(la, lb);
+        A = A.substr(1, la - 1);
+        la--;
+        ans = calc2(A, B);
+    } else {
+        if(la < lb) {
+            swap(A, B);
+            swap(la, lb);
+        }
+        ans = calc(A, B);
+    }
+    print(ans);
+    return 0;
+}

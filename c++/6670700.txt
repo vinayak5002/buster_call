@@ -1,0 +1,85 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+#ifdef DBG
+void printVec(vector<int> *V)
+{
+    for (auto it = V->begin(); it != V->end(); it++)
+	cout << " " << *it;
+    cout << endl;
+}
+#endif
+
+// S の 1-近傍 S1 を作成. 新たに加わった頂点の数を返す。
+vector<int> *oneNbh(vector<int> *S, vector<int> *AL[])
+{
+    vector<int> *N = new vector<int>;
+    
+    for (auto it = S->begin(); it != S->end(); it++) {
+	vector<int> *U = AL[*it];       // *U: *S の元 *it に隣接する頂点たち
+	for (auto it = U->begin(); it != U->end(); it++) {
+	    if (find(S->begin(), S->end(), *it) == S->end()) 
+		N->push_back(*it);
+	}
+    }
+    return N;
+}
+
+int main()
+{
+    int n;                    //  頂点数
+    cin >> n;
+    vector<int> *nbh[n];      // nbh[i]: i近傍 
+    int d[n + 1];             //  d[v]: 頂点 v の 1 からの深さ
+    vector<int> *AL[n + 1];   //  AL[v]:  頂点 v の隣接リスト
+
+    for (int i = 0; i < n; i++) {
+	int u;   // 頂点
+	int k;   // u に隣接する頂点の数
+	cin >> u >> k;
+	AL[u] = new vector<int>;
+	int v;
+	for (int j = 0; j < k; j++) {
+	    cin >> v;
+	    AL[u]->push_back(v);
+	}
+    }
+    
+        // d の初期化
+    for (int i = 1; i <= n; i++)
+	d[i] = -1;
+
+    //  0 近傍をセット
+    nbh[0] = new vector<int>;
+    nbh[0]->push_back(1);               // 最初の集合は {1}
+
+    //  i 近傍をセットしつつ、 d[i] を求める。
+    for (int i = 1; i < n; i++) {
+	nbh[i] = new vector<int>;
+	vector<int> *N = oneNbh(nbh[i-1], AL);
+	for (auto it = N->begin(); it != N->end(); it++) {
+	    d[*it] = i;
+	    nbh[i]->push_back(*it);
+	}
+	delete N;
+    }
+
+#ifdef DBG
+    //  nbh[] を印字
+    for (int i = 0; i < n; i++) {
+	cout << i << ":  ";
+	printVec(nbh[i]);
+    }
+#endif
+
+    //  d[] を印字
+    for (int v = 1; v <= n; v++)
+	cout << v << ' ' << d[v] << endl;
+
+    return 0;
+}
+
+

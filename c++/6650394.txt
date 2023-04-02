@@ -1,0 +1,64 @@
+#include <stdio.h>
+
+// 頂点 v が 集合 S に属する時 S[v] = 1, 属さないとき S[v] = 0
+
+int connected(int s, int t, int n, int C[][n])
+{
+    if (C[s][t] >= 0)
+	return C[s][t];
+
+    for (int i = 2; i < n; i++) {                 
+	for (int u = 0; u < n; u++) {             // u について
+	    for (int v = 0; v < n; v++)
+		if (C[s][v] == 1 && C[v][u] == 1) // s と v, v と u が連結のとき
+		    C[s][u] = C[u][s] = 1;        // s と u は連結
+	}
+	if (C[s][t] == 1)   // s と t との距離が i ならこの時点で C[s][t] == 1
+	    return 1;
+    }    // ここまで来てしまったら、２点間の距離は n 以上、つまり連結でない
+    return C[s][t] = C[t][s] = 0;
+}
+ 
+int main()
+{
+    int n;      // 頂点の数
+    scanf("%d", &n);
+    //  s と t が同じ成分内なら C[s][t] = 1, そうでないなら 0, 未知なら -1
+    int C[n][n];    
+    //  C を初期化
+    for (int i = 0; i < n; i++) {
+	C[i][i] = 1;
+	for (int j = 0; j < i; j++)
+	    C[i][j] = C[j][i] = -1;
+    }
+
+    int m;    //  辺の数
+    scanf("%d", &m);
+    for (int i = 0; i < m; i++) {
+	int s, t;
+	scanf("%d %d", &s, &t);
+	C[s][t] = C[t][s] = 1;
+    }
+
+    int q;    // 質問の数
+    scanf("%d", &q);
+    for (int i = 0; i < q; i++) {
+	int s, t;
+	scanf("%d %d", &s, &t);
+	if (connected(s, t, n, C) > 0)
+	    printf("yes\n");
+	else
+	    printf("no\n");
+#ifdef DBG	
+	for (int u = 0; u < n; u++) {
+	    for (int v = 0; v < n; v++) {
+		printf(" %2d", C[u][v]);
+	    }
+	    printf("\n");
+	}
+#endif
+    }
+
+    return 0;
+} 
+

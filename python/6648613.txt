@@ -1,0 +1,48 @@
+// 11-A
+
+/*-- 入力 --*/
+//const input = ('1 2 4 8 16 32\nSE').split('\n');
+const input = require("fs").readFileSync("/dev/stdin", "utf8").trim();
+
+/*-- 処理 --*/
+
+// 以下、ダイスクラス定義
+class Dice{
+    constructor(faceNumber){
+        this.faceNumber = faceNumber; //[1,2,3,4,5,6]
+        this.root = { //各方位について、面1->面3, 面3->面6...と位置が移動
+            "E":[1,3,6,4,1], //添字+1
+            "W":[1,4,6,3,1],
+            "S":[1,2,6,5,1],
+            "W":[1,5,6,2,1]
+        }
+    }
+    //moveメソッドは、方向配列を与えると、移動後の面1の数字を返す
+    move(direct){
+        let idx = [0,1,2,3,4,5];
+        direct.forEach(val => {
+            this.root[val].reduce( (acc,curr) =>{
+                let tmp = idx[curr-1]; //（例）1番目の添字を、3番目に代入
+                idx[curr-1] = idx[acc-1];
+                return tmp;
+            }); 
+        });
+        return this.faceNumber[idx[0]];
+    }
+}
+
+// １行目 １行目に各面の整数
+// ２行目 命令はそれぞれ図に示す４方向を表す文字 E、N、S、W 
+let faceNumber = input[0].split(' ').map(Number);
+let direct = input[1].split('');
+// ダイスのインスタンスを生成し、moveメソッドを実行
+const dice1 = new Dice(faceNumber);
+console.log(dice1.move(direct));
+
+
+
+
+
+
+
+

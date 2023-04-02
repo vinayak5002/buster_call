@@ -1,0 +1,120 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+
+	const q = parseInt(si[0].split("\n"));
+	const BIT_NUM = 32;
+	
+	const ON = new Array(2);
+	ON[0] = Array(BIT_NUM).fill('1');
+	ON[1] = Array(BIT_NUM).fill('1');
+	
+	const OFF = new Array(2);
+	OFF[0] = Array(BIT_NUM).fill('0');
+	OFF[1] = Array(BIT_NUM).fill('0');
+	
+	let flag = new Array(2);
+	flag[0] = Array(BIT_NUM).fill('0');
+	flag[1] = Array(BIT_NUM).fill('0');
+	
+	let ans = '';
+	
+	for (let i = 1; i < q + 1; i++) {
+		let order = si[i].split(" ");
+		let l = 0;
+		let n = 0;
+		switch (order[0]) {
+			case '0':	//test
+				l = Math.floor(order[1] / BIT_NUM);
+				n = order[1] % BIT_NUM;
+				ans += flag[l][n] + '\n';
+				break;
+				
+			case '1':	//set
+				l = Math.floor(order[1] / BIT_NUM);
+				n = order[1] % BIT_NUM;
+				flag[l][n] = '1';
+				break;
+				
+			case '2':	//clear
+				l = Math.floor(order[1] / BIT_NUM);
+				n = order[1] % BIT_NUM;
+				flag[l][n] = '0';
+				break;
+				
+			case '3':	//flip
+				l = Math.floor(order[1] / BIT_NUM);
+				n = order[1] % BIT_NUM;
+				if (flag[l][n] === '0') {
+					flag[l][n] = '1';
+				} else {
+					flag[l][n] = '0';
+				}
+				break;
+				
+			case '4':	//all
+				if (flag === ON) {
+					ans += '1\n';
+				} else {
+					ans += '0\n';
+				}
+				break;
+				
+			case '5':	//any
+				if (flag === OFF) {
+					ans += '0\n';
+				} else {
+					ans += '1\n';
+				}
+				break;
+				
+			case '6':	//none
+				if (flag === OFF) {
+					ans += '1\n';
+				} else {
+					ans += '0\n';
+				}
+				break;
+				
+			case '7':	//count
+				let count = 0;
+				for (let j = 0; j < 2; j++) {
+					for (let k = 0; k < BIT_NUM; k++) {
+						count += Number(flag[j][k]);
+					}
+				}
+				ans += count + '\n';
+				break;
+				
+			case '8':	//val
+				
+				let num = [];
+				for (let j = 1; j >= 0; j--) {
+					for (let k = BIT_NUM - 1; k >= 0; k--) {
+						num += flag[j][k];
+					}
+				}
+				ans += parseInt(num, 2) + '\n';
+				
+				/*
+				let head = [];
+				let tail = [];
+				
+				for (let j = BIT_NUM - 1; j >= 0; j--) {
+					head += flag[0][j];
+					tail += flag[1][j];
+				}
+				head = String(parseInt(head, 2));
+				tail = String(parseInt(tail, 2));
+				console.log(head + ' ' + tail);
+				console.log(head.length+ ' ' +tail.length);
+				*/
+				break;
+		}
+	}
+
+	so.write(ans);
+
+}

@@ -1,0 +1,64 @@
+#include <iostream>
+using namespace std;
+
+#define MAX_n 100000
+
+int n;
+int W[MAX_n];
+
+int P2k(long P)
+{
+    int k = 0;
+    long w = 0;
+    // 最後から２番めまでの２持つの処理
+    for (int i = 0; i < n - 1; i++) {
+	if (w + W[i] > P) {
+	    ++k;            // k 番目のトラックへの積載終了
+	    w = W[i];       // 残った積荷
+	} else {
+	    w += W[i];
+	}
+    }
+    // 一番最後の積荷の処理
+    if (w + W[n-1] <= P)
+	k += 1;
+    else
+	k += 2;
+	
+    return k;
+}
+
+int k2P(int k, long minP, long maxP)
+{
+    long l = minP;
+    if (P2k(l) <= k)
+	return l; 
+    long r = maxP;
+    while (r - l > 1) {
+	long m = (l + r) / 2;
+	if (P2k(m) > k)
+	    l = m;        //  P2k(l) > k
+	else 
+	    r = m;        //  P2k(r) <= k
+    }
+    return r;
+}
+	
+int main()
+{
+    int k;
+    long minP = 1;
+    long maxP = 0;
+    cin >> n >> k;
+    for (int i = 0; i < n; i++) {
+	cin >> W[i];
+	maxP += W[i];
+	if (W[i] > minP)
+	    minP = W[i];
+    }
+
+    cout << k2P(k, minP, maxP) << endl;
+
+    return 0;
+}
+

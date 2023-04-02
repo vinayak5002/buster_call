@@ -1,0 +1,91 @@
+#include<stdio.h>
+#define MAX 100000
+
+typedef struct pp{
+    int name[100];
+    int t;
+}P;
+
+P Q[MAX];
+int head;
+
+intialize(int tail){
+    head=tail=0;
+}
+
+isEmpty(int tail){
+    return head==tail;
+}
+
+isFull(int tail){
+    return  head==(tail+1)%MAX;
+}
+
+void enqueue(P x,int tail){
+    if(isFull(tail)){
+        printf("満杯\n");
+        return;
+    }
+    Q[tail]=x;
+    if(tail+1==MAX){
+        tail=0;
+    }
+    else{tail++;}
+}
+   
+
+P dequeue(int tail){
+    if(isEmpty(tail)){
+        printf("空\n");
+        return;
+    }
+    P x=Q[head];
+    if(head+1==MAX){
+    head=0;
+    }
+    else{
+        head++;
+    }
+    return x;
+}
+
+int min(int a,int b){return a<b?a:b;}
+
+int main(){
+    int elaps=0,c;
+    int i,q,n,tail;
+    P u;
+    scanf("%d %d",&n,&q);
+    
+    for(i=1;i<=n;i++){
+        scanf("%s",Q[i].name);
+        scanf("%d",&Q[i].t);
+    }
+    head=1;tail=n+1;
+    
+    while(head!=tail){
+        u=dequeue(tail);
+        c=min(q,u.t);
+        u.t -= c;
+        elaps += c;
+        if(u.t>0)enqueue(u,tail);
+        else{
+            printf("%s %d\n",u.name,elaps);
+        }
+    }
+    
+    return 0;
+}
+    
+
+
+
+
+
+
+
+
+
+
+
+

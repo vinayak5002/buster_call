@@ -1,0 +1,47 @@
+#include <iostream>
+
+int maxProfit( int price[], int size )
+{
+	// Initializes with the lowest int
+	int profit = -2147483648;
+
+	// Buying
+	for( int i = 0; i < size - 1; i++ )
+	{
+		// Selling
+		for( int j = i + 1; j < size; j++ )
+		{
+			int delta = price[j] - price[i];
+			if( delta > profit )
+			{
+				profit = delta;
+			}
+
+			// Skip lower prices coming after the current one (high is good)
+			for( int k = j; price[k] >= price[j + 1]; j++ );
+		}
+
+		// Skip higher prices coming after the current one (low is good)
+		for( int k = i; price[k] <= price[i + 1]; i++ );
+	}
+
+	return profit;
+}
+
+int main()
+{
+	int size;
+	std::cin >> size;
+	int* price = new int[size];
+
+	for( int i = 0; i < size; i++ )
+	{
+		std::cin >> price[i];
+	}
+
+	std::cout << maxProfit( price, size ) << std::endl;
+
+	delete[] price;
+
+	return 0;
+}

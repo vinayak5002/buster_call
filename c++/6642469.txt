@@ -1,0 +1,60 @@
+#include<string>
+#include<iostream>
+#include<map>
+
+void strSearch(const std::string& target, const std::string& str) {
+	// ブルートフォース
+	for (int i = 0; i < target.size(); i++) {
+		// 比較
+		for (int j = 0; j < str.size(); j++) {
+			if (target[i + j] != str[j]) break;
+			if (j == str.size() - 1) {
+				std::cout << i << std::endl;
+			}
+		}
+	}
+}
+
+std::map<char, int> makeLUT(const std::string& str) {
+	const int size = str.size();
+	std::map<char, int> lut; //look up table
+	for (int i = 0; i < str.size() - 1; i++) {
+		lut[str[i]] = size - i - 1;
+	}
+	return lut;
+}
+
+void strSearchBM(const std::string& target, const std::string& str) {
+	std::map<char, int> lut = makeLUT(str);
+	if (target.size() < str.size()) return;
+	for (int i = 0; i < target.size() - str.size() + 1;) {
+		// 比較
+		for (int j = str.size() - 1; j >= 0; j--) {
+			if (target[i + j] != str[j]) {
+				const auto& itr = lut.find(target[i + j]);
+				if (itr == lut.end()) {
+					i += j + 1;
+				}
+				else {
+					const int slide = itr->second - str.size() + j + 1;
+					i += slide > 0 ? slide : 2;
+				}
+				break;
+			}
+			if (j == 0) {
+				std::cout << i << std::endl;
+				i++;
+			}
+		}
+	}
+}
+
+int main() {
+	// read
+	std::string target;
+	std::string str;
+	std::cin >> target;
+	std::cin >> str;
+
+	strSearchBM(target, str);
+}

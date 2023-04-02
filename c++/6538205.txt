@@ -1,0 +1,159 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define sz(x) (int)x.size()
+#define fi first
+#define se second
+
+typedef long long lli;
+typedef pair<int, int> pii;
+
+const int maxn = 205;
+const int mod = 1e9 + 7;
+
+int n, m, src;
+vector<int> gr[maxn], igr[maxn];
+
+vector<int> ord;
+bool vis[maxn];
+int col[maxn];
+
+int e[maxn];
+
+int powmod(int x, int k) {
+    if(k == 0) return 1;
+    int t = powmod(x, k / 2);
+    if(k % 2 == 0) return t * 1LL * t % mod;
+    else return t * 1LL * t % mod * x % mod;
+}
+
+int inv(int x) {
+    return powmod(x, mod - 2);
+}
+
+vector<int> basis[maxn];
+
+void add(vector<int> v) {
+    for(int i = 1; i <= n; ++i) {
+        if(v[i] != 0) {
+            if(sz(basis[i]) == 0) {
+                basis[i] = v;
+                break;
+            }
+            else {
+                int t = basis[i][i] * 1LL * inv(v[i]) % mod;
+                for(int j = i; j <= n + 1; ++j) {
+                    v[j] = (v[j] * 1LL * t - basis[i][j] + mod) % mod;
+                }
+            }
+        }
+    }
+}
+
+void read_input() {
+    cin >> n >> m >> src;
+    for(int i = 1; i <= m; ++i) {
+        int u, v;
+        cin >> u >> v;
+        gr[u].push_back(v);
+        igr[v].push_back(u);
+    }
+}
+
+void dfs1(int u) {
+    vis[u] = true;
+    for(auto&v: gr[u]) {
+        if(!vis[v]) dfs1(v);
+    }
+    ord.push_back(u);
+}
+
+void dfs2(int u, int cl) {
+    col[u] = cl;
+    for(auto&v: igr[u]) {
+        if(col[v] == -1)
+            dfs2(v, cl);
+    }
+}
+
+void solve() {
+    fill(vis + 1, vis + n + 1, false);
+    for(int u = 1; u <= n; ++u) {
+        if(!vis[u]) dfs1(u);
+    }
+    reverse(ord.begin(), ord.end());
+    fill(col + 1, col + n + 1, -1);
+    for(int i = 0, j = 0; i < n; ++i) {
+        int u = ord[i];
+        if(col[u] == -1) {
+            dfs2(u, ++j);
+        }
+    }
+
+    fill(vis + 1, vis + n + 1, false);
+    ord.clear();
+    dfs1(src);
+
+    bool flag = false;
+    for(int u = 1; u <= n; ++u) {
+        if(!vis[u]) continue;
+        if(col[u] != col[src]) {
+            flag = true;
+            break;
+        }
+    }
+
+    if(!flag) {
+        cout << "-1\n";
+        return;
+    }
+
+    for(int u = 1; u <= n; ++u) {
+        if(!vis[u]) continue;
+        if(col[u] != col[src] || sz(gr[u]) == 0) {
+            vector<int> v(n + 2, 0);
+            v[u] = 1;
+            add(v);
+        }
+        else if(col[u] == col[src]) {
+            vector<int> v(n + 2, 0);
+            v[u] = 1;
+            for(auto&to: gr[u]) {
+                v[to] = (mod - inv(sz(gr[u]))) % mod;
+            }
+            v[n + 1] = 1;
+            add(v);
+        }
+    }
+
+    for(int i = n; i > 0; --i) {
+        if(!vis[i]) continue;
+        int t = basis[i][n + 1];
+        for(int j = n; j > i; --j) {
+            t = (t - e[j] * 1LL * basis[i][j] + mod * 1LL * mod) % mod;
+        }
+        e[i] = t * 1LL * inv(basis[i][i]) % mod;
+    }
+
+    cout << e[src] << '\n';
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    #ifdef LOCAL
+        freopen("test.inp", "r", stdin);
+        freopen("test.out", "w", stdout);
+    #endif // LOCAL
+
+    int ntest = 1;
+    //cin >> ntest;
+
+    while(ntest--) {
+        read_input();
+        solve();
+    }
+}
+

@@ -1,0 +1,81 @@
+def kdtree(xss, dims=None, axis=0, leaf_size=1, axis_interval=1):
+    import itertools, math, operator
+
+    class Node:
+        def __init__(self, dims, axis, nodes):
+            self.dims = dims
+            self.axis, self.nodes = axis, nodes
+            self.left = self.right = None
+        def query_range(self, ys, zs, lowers=None, uppers=None, normalize=True):
+            dims, axis = self.dims, self.axis
+            lowers = lowers or [-math.inf]*dims
+            uppers = uppers or [+math.inf]*dims
+            ys, zs = zip(*((min(ws), max(ws)) for ws in [*zip(ys, zs)][:dims])) if normalize else (ys, zs)
+            if zs[axis] < lowers[axis] or uppers[axis] < ys[axis]: return []
+            #if all(y <= l and u <= z for l, u, y, z in zip(lowers, uppers, ys, zs)): return self.tolist()
+            lowers2, uppers2 = lowers[:], uppers[:]
+            lowers2[axis] = uppers2[axis] = self.values[0][axis]
+            return itertools.chain(
+                ( vs for vs in self.values if all(y <= v <= z for v, y, z in [*zip(vs, ys, zs)][:dims]) ),
+                self.left.query_range(ys, zs, lowers, uppers2, normalize=False) if self.left else [],
+                self.right.query_range(ys, zs, lowers2, uppers, normalize=False) if self.right else [],
+            )
+        def tolist(self):
+            return itertools.chain(
+                self.values,
+                self.left.tolist() if self.left else [],
+                self.right.tolist() if self.right else [],
+            )
+        def query_nearest(self, ys, lowers=None, uppers=None):
+            dims, axis = self.dims, self.axis
+            lowers = lowers or [-math.inf]*dims
+            uppers = uppers or [+math.inf]*dims
+            if ys[axis] < lowers[axis] or uppers[axis] < ys[axis]: return None
+            dist = lambda vs: math.sqrt(sum((v-y)**2 for v, y in zip(vs, ys)))
+            if not self.left and not self.right:
+                return min(((dist(vs), vs) for vs in self.values), key=operator.itemgetter(0))
+            lowers2, uppers2 = lowers[:], uppers[:]
+            lowers2[axis] = uppers2[axis] = self.values[0][axis]
+            if ys[axis] < self.values[0][axis]:
+                d, vs = self.left.query_nearest(ys, lowers, uppers2) if self.left else (dist(self.values[0]), self.values[0])
+                another = self.right
+            else:
+                d, vs= self.right.query_nearest(ys, lowers2, uppers) if self.right else (dist(self.values[0]), self.values[0])
+                another = self.left
+            if abs(self.values[0][axis] - ys[axis]) <= d:
+                d, vs = min((d, vs), (dist(self.values[0]), self.values[0]), key=operator.itemgetter(0))
+                d, vs = min(((dist(vs), vs) for vs in another.query_range()), key=operator.itemgetter(0))
+            pass
+        pass
+
+    if not xss: return None
+    
+    dims = dims or len(xss[0])
+    norm_axis = lambda axis: (axis // axis_interval) % dims
+    node = Node(dims, norm_axis(axis), len(xss))
+
+    if node.nodes <= leaf_size:
+        node.values = xss
+        return node
+
+    if axis % axis_interval == 0:
+        xss.sort(key=operator.itemgetter(norm_axis(axis)))
+
+    mid = node.nodes//2
+    node.values = [xss[mid]]
+    node.left = kdtree(xss[0:mid], dims, axis+1, leaf_size)
+    
+    if node.nodes > 1:
+        node.right = kdtree(xss[mid+1:], dims, axis+1, leaf_size)
+
+    return node
+
+rxs = lambda: [*map(int, input().split())]
+N, = rxs()
+tree = kdtree([(x, y, i) for i, (x, y) in ((i, rxs()) for i in range(N))], dims=2, leaf_size=80, axis_interval=math.sqrt(N))
+Q, = rxs()
+
+for sx, tx, sy, ty in [rxs() for _ in range(Q)]:
+    ans = "\n".join(map(str, sorted(i[2] for i in tree.query_range((sx, sy), (tx, ty)))))
+    print((ans + "\n") if ans else "")
+

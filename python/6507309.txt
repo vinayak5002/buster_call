@@ -1,0 +1,49 @@
+import java.util.*;
+
+public class Main {
+    static Scanner sc = new Scanner(System.in);
+    static int cnt = 0;
+    public static void main(String[] args) {
+        int n = getInt();
+        int[] S = new int[n];
+        StringBuilder res = new StringBuilder();
+        Arrays.setAll(S, num -> getInt());
+        mergeSort(S, 0, S.length);
+        Arrays.stream(S).forEach(s -> res.append(s).append(' '));
+        res.deleteCharAt(res.length()-1);
+        System.out.println(res);
+        System.out.println(cnt);
+    }
+
+    static int getInt() {
+        return Integer.parseInt(sc.next());
+    }
+
+    static void merge(int[] A, int left, int right, int mid) {
+        int n1 = mid - left;
+        int n2 = right - mid;
+        int[] L = new int[n1 + 1];
+        int[] R = new int[n2 + 1];
+        for (int i = 0; i < n1; i++) {
+            L[i] = A[left + i];
+        }
+        for (int i = 0; i < n2; i++) {
+            R[i] = A[mid + i];
+        }
+        L[n1] = R[n2] = Integer.MAX_VALUE;
+        int li = 0, ri = 0;
+        for (int i = left; i < right; i++) {
+            A[i] = L[li] <= R[ri] ? L[li++] : R[ri++];
+            cnt++;
+        }
+    }
+
+    static void mergeSort(int[] A, int left, int right) {
+        if (left + 1 < right) {
+            int mid = (left + right) / 2;
+            mergeSort(A, left, mid);
+            mergeSort(A, mid, right);
+            merge(A, left, right, mid);
+        }
+    }
+}

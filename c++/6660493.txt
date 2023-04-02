@@ -1,0 +1,64 @@
+#include<iostream>
+#include<algorithm>
+#include<vector>
+#include<cmath>
+#include<string>
+#include<map>
+#include<set>
+#include<queue>
+#include<deque>
+
+#define rep(i,s,e) for(int i=s;i<e;i++)
+#define mod 1000000007
+#define inf 1LL<<60
+
+using namespace std;
+
+using graph = vector<vector<int>>;
+using ll = long long;
+
+typedef pair<int,int> P;
+
+int dx[8]={1,0,-1,0,1,1,-1,-1};
+int dy[8]={0,1,0,-1,1,-1,1,-1};
+
+
+
+int w,h;
+int seen[55][55];
+void dfs(graph &g,int sx,int sy){
+    if(seen[sx][sy]==1||sx<0||sy<0||sx>=h||sy>=w||g[sx][sy]==0) return;
+    seen[sx][sy]=1;
+    rep(i,0,8){
+        dfs(g,sx+dx[i],sy+dy[i]);
+    }
+}
+
+int main(){
+    while(1){
+        cin>>w>>h;
+        if(w==0&&h==0) break;
+        rep(i,0,55){
+            rep(j,0,55) seen[i][j]=0;
+        }
+        graph g(h);
+        rep(i,0,h){
+            rep(j,0,w){
+                int c;
+                cin>>c;
+                g[i].push_back(c);
+            }
+        }
+        int ans=0;
+        rep(i,0,h){
+            rep(j,0,w){
+                if(seen[i][j]==1||g[i][j]==0) continue;
+                dfs(g,i,j);
+                ans++;
+            }
+        }
+        cout<<ans<<endl;
+    }
+}
+
+

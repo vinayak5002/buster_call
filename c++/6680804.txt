@@ -1,0 +1,27 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+    int N, W;
+    cin >> N >> W;
+    vector<int> v_vec(N), w_vec(N);
+    for (int i = 0; i < N; ++i)
+        cin >> v_vec.at(i) >> w_vec.at(i);
+    vector<vector<int>> dp(N + 1, vector<int>(W + 1, -1));
+    dp.at(0).at(0) = 0;
+    for (int i = 0; i < N; ++i) {
+        int v = v_vec.at(i);
+        int w = w_vec.at(i);
+        for (int j = 0; j <= W; ++j) {
+            dp.at(i + 1).at(j) = dp.at(i).at(j);
+            if (j < w)
+                continue;
+            int prev = dp.at(i + 1).at(j - w);
+            if (prev == -1)
+                continue;
+            dp.at(i + 1).at(j) = max(prev + v, dp.at(i + 1).at(j)); 
+        }
+    }
+    cout << *max_element(dp.at(N).begin(), dp.at(N).end()) << endl;
+}

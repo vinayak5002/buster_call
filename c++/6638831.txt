@@ -1,0 +1,131 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct heapnode{
+	int x;
+	struct heapnode *next;
+	struct heapnode *prev;
+	struct heapnode *p;
+	struct heapnode *l;
+	struct heapnode *r;
+};
+
+struct heapnode* n_heapnode(int x){
+	struct heapnode* heapnodeREI = (struct heapnode *)malloc(sizeof(struct heapnode));
+	heapnodeREI->x = x;
+	heapnodeREI->next = NULL;
+	heapnodeREI->prev = NULL;
+	heapnodeREI->p = NULL;
+	heapnodeREI->l = NULL;
+	heapnodeREI->r = NULL;
+	return heapnodeREI;
+}
+
+int main(void) {
+	int n, q, query, t, x, i, j, tmp;
+	struct heapnode *sn, *top[1000], *bottom[1000], *lastparent[1000], *point, *bottom2;
+
+	scanf("%d %d", &n, &q);
+
+	for (i = 0; i < n; i++){
+		top[i] = NULL;
+		bottom[i] = NULL;
+		lastparent[i] = NULL;
+	}
+
+	for (i = 0; i < q; i++){
+		scanf("%d %d", &query, &t);
+		if (query == 0){
+			scanf("%d", &x);
+			sn = n_heapnode(x);
+			if (top[t] == NULL){
+				top[t] = sn;
+			}
+			else {
+				sn->prev = bottom[t];
+				bottom[t]->next = sn;
+			}
+			bottom[t] = sn;
+			if (lastparent[t] == NULL){
+				lastparent[t] = sn;
+			}
+			else{
+				if (lastparent[t]->l == NULL){
+					lastparent[t]->l = bottom[t];
+					bottom[t]->p = lastparent[t];
+				}
+				else if (lastparent[t]->r == NULL){
+					lastparent[t]->r = bottom[t];
+					bottom[t]->p = lastparent[t];
+					lastparent[t] = lastparent[t]->next;
+				}
+			}
+			point = bottom[t];
+			while (point != top[t] && point->x > point->p->x){
+				tmp = point->x;
+				point->x = point->p->x;
+				point->p->x = tmp;
+				point = point->p;
+			}
+		}
+
+		else if (query == 1){
+			if (top[t] != NULL){
+				printf("%d\n", top[t]->x);
+			}
+		}
+
+		else if (query == 2){
+			if (top[t] != NULL){
+				bottom2 = bottom[t]->prev;
+				bottom2->next = NULL;
+				if (bottom[t] == top[t]){
+					top[t] = NULL;
+					lastparent[t] = NULL;
+				}
+				else if (lastparent[t]->l != NULL){
+					lastparent[t]->l = NULL;
+				}
+				else{
+					lastparent[t] = lastparent[t]->prev;
+					lastparent[t]->r = NULL;
+				}
+				top[t]->x = bottom[t]->x;
+				free(bottom[t]);
+				bottom[t] = bottom2;
+
+				point = top[t];
+				while (point != NULL && point->l != NULL){
+					if (point->r == NULL && point->x < point->l->x){
+						tmp = point->x;
+						point->x = point->l->x;
+						point->l->x = tmp;
+						point = point->l;
+					}
+					else if (point->l->x > point->r->x && point->x < point->l->x){
+						tmp = point->x;
+						point->x = point->l->x;
+						point->l->x = tmp;
+						point = point->l;
+					}
+					else if (point->l->x < point->r->x && point->x < point->r->x){
+						tmp = point->x;
+						point->x = point->r->x;
+						point->r->x = tmp;
+						point = point->r;
+					}
+				}
+			}
+		}
+	}
+
+	for (i = 0; i < n; i++){
+		while (bottom[i] != NULL){
+			bottom2 = bottom[i]->prev;
+			free(bottom[i]);
+			bottom[i] = bottom2;
+		}
+	}
+
+	return 0;
+}

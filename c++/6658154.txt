@@ -1,0 +1,60 @@
+#途中
+
+
+N=int(input())
+command=[]
+for i in range(N):
+    command.append(input().split())
+    # if(name=="delete" or "insert"):
+    #     number=int(input())
+    #     command.append([name,number])
+    # else:
+    #     command.append([name])
+# for i in range(N):
+#     print(command[i])
+
+ans=[]
+#先頭と最後のindexを記録
+head=0
+tail=0
+
+for i in range(N):
+    if(command[i][0]=="insert"):
+        if(len(ans)==0):
+            ans.append({"key":int(command[i][1]),"prev":-99999,"next":-99999})
+        else:
+            ans.append({"key":int(command[i][1]),"prev":-99999,"next":head})
+            ans[head]["prev"]=len(ans)-1
+            head=len(ans)-1
+        # print(head)
+    elif(command[i][0]=="delete"):
+        # if command[i][1] in ans:
+        #     ans.remove(command[i][1])
+        # # print(head)
+        index=head
+        while(index!=-99999):
+            if(ans[index]["key"]==int(command[i][1])):
+                if(index==tail):
+                    tail=ans[tail]["prev"]
+                    ans[tail]["next"]=-99999
+                elif(index==head):
+                    head=ans[head]["next"]
+                    ans[head]["prev"]=-99999
+                else:   
+                    ans[ans[index]["prev"]]["next"]=ans[index]["next"]
+                    ans[ans[index]["next"]]["prev"]=ans[index]["prev"]
+            index=ans[index]["next"]
+    elif(command[i][0]=="deleteFirst"):
+        head=ans[head]["next"]
+        ans[head]["prev"]=-99999
+        # print(head)
+    elif(command[i][0]=="deleteLast"):
+        tail=ans[tail]["prev"]
+        ans[tail]["next"]=-99999
+        # print(head)
+        # print(tail)
+index=head
+while(ans[index]["next"]!=-99999):
+     print(ans[index]["key"],end="")
+     index=ans[index]["next"]
+print(ans[index]["key"])

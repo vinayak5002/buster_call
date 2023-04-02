@@ -1,0 +1,32 @@
+class Dice():
+    def __init__(self, sequence):
+        self.sequence = sequence
+    
+    def label(self, label):
+        return [self.sequence[int(index)] for index in str(label)]
+    
+    def roll(self, order):
+        for direct in order:
+            if direct == "N": self.sequence = self.label(152304)
+            elif direct == "E":self.sequence = self.label(310542)
+            elif direct == "W":self.sequence = self.label(215043)
+            elif direct == "S":self.sequence = self.label(402351)
+
+class NewDice():
+    def __init__(self, sequence):
+        super().__init__(sequence)
+        self.candidates = []
+        for ops in ('', 'N', 'E', 'W', 'S', 'NN'):
+            dice = Dice(self.sequence)
+            dice.roll(ops)
+            for _ in range(4):
+                dice.roll('NES')
+                self.candidates.append(dice.sequence)
+    
+    def __eq__(self, other):
+        return min(self.candidates) == min(other.candidates)
+
+X = NewDice(list(map(int, input().split())))
+Y = NewDice(list(map(int, input().split()))) 
+
+print('Yes'  if X == Y else 'No')

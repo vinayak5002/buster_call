@@ -1,0 +1,50 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def calc_area_of_intersection_between_two_circles(r0, r1, d):
+    r02 = r0**2
+    r12 = r1**2
+    d2 = d**2
+
+    d0 = (r02 - r12 + d2) / (2 * d)
+    d1 = (r12 - r02 + d2) / (2 * d)
+
+    theta0 = math.acos(d0 / r0)
+    theta1 = math.acos(d1 / r1)
+
+    return r02 * theta0 - d0 * math.sqrt(r02 - d0**2) + r12 * theta1 - d1 * math.sqrt(r12 - d1**2)
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    x0, y0, r0 = map(int, f.readline().split())
+    x1, y1, r1 = map(int, f.readline().split())
+
+    if r0 < r1:
+        x0, y0, r0, x1, y1, r1 = x1, y1, r1, x0, y0, r0
+
+    d = math.sqrt((x1 - x0)**2 + (y1 - y0)**2)
+
+    if d >= r0 + r1:
+        print(0)
+    elif d <= r0 - r1:
+        print(f'{math.pi * r1**2:.6f}')
+    else:
+        print(f'{calc_area_of_intersection_between_two_circles(r0, r1, d):.6f}')
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

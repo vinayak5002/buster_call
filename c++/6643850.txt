@@ -1,0 +1,127 @@
+# さいころの構造体（さいころクラス）
+class Dice:
+
+    def __init__(self):
+
+        # さいころの各面とindexの対応
+        # さいころの値 | indexの値
+        #    1         |    0
+        # 4, 2, 3, 5   | 3, 1, 2, 4
+        #    6         |    5
+        self.top = 0
+        self.up = 4
+        self.down = 1
+        self.left = 3
+        self.right = 2
+        self.back = 5
+
+    # さいころ面の入力受付
+    def input_dice(self):
+
+        self.dice  = [int(i) for i in input().split()]
+
+    # 転がす方向の入力受付
+    def input_direction(self):
+
+        self.roll_direction = list(input())
+
+    # 転がす関数========
+    def n_direction(self, dice):
+
+        dice[self.up], dice[self.top], dice[self.down], dice[self.back] = \
+        dice[self.top], dice[self.down], dice[self.back], dice[self.up]
+        #dice[0], dice[1], dice[5], dice[4] = dice[1], dice[5], dice[4], dice[0] 
+        return dice   
+    
+    def s_direction (self, dice):
+
+        dice[self.top], dice[self.down], dice[self.back], dice[self.up] = \
+        dice[self.up], dice[self.top], dice[self.down], dice[self.back]
+        #dice[0], dice[1], dice[4], dice[5] = dice[4], dice[0], dice[5], dice[1]
+        return dice
+
+    def w_direction(self, dice):
+
+        dice[self.left], dice[self.top], dice[self.right], dice[self.back] = \
+        dice[self.top], dice[self.right], dice[self.back], dice[self.left]
+        #dice[3], dice[1], dice[2], dice[4] = dice[1], dice[2], dice[4], dice[3]
+        return dice
+
+    def e_direction(self, dice):
+
+        dice[self.top], dice[self.right], dice[self.back], dice[self.left] = \
+        dice[self.left], dice[self.top], dice[self.right], dice[self.back]
+        #dice[1], dice[2], dice[3], dice[4] = dice[3], dice[1], dice[4], dice[2]
+        return dice
+
+    # 方向に応じてさいころを転がす
+    def direction(self, input_direct):
+
+        if input_direct == "N":
+                self.dice = self.n_direction(self.dice) 
+
+        elif input_direct == "S":
+                self.dice = self.s_direction(self.dice)
+
+        elif input_direct == "W":
+                self.dice = self.w_direction(self.dice)
+
+        elif input_direct == "E":
+                self.dice = self.e_direction(self.dice)  
+       
+    # ========
+
+    # さいころ面の値を出力
+    def print_face(self, side):
+
+        print(self.dice[side])
+
+    # 方向に従いさいころを転がす
+    def roll(self):
+
+        for d in self.roll_direction:
+            # さいころを転がす
+            self.direction(d)
+        
+        self.print_face(self.top)
+
+
+    # テスト関数--------
+    def test_roll(self, input_flg = False):    
+
+        self.dice = [1,2,3,4,5,6]
+        self.roll_direction = ["N", "S", "W", "E"]
+
+        self._check_roll()
+    
+    def _check_dice(self, dice):
+
+        print(f"  , {dice[0]}")
+        print(f"{dice[3]} , {dice[1]} , {dice[2]} , {dice[4]}")
+        print(f"  , {dice[5]}")
+
+    def _check_roll(self):
+        
+        print("初期値")
+        self._check_dice(self.dice)
+
+        for d in self.roll_direction:
+            self.direction(d)
+            
+            print(f"{d}--------")
+            self._check_dice(self.dice)
+
+            self.dice = [1,2,3,4,5,6]
+
+    #--------
+
+    
+
+
+  
+dice = Dice()
+
+dice.input_dice()
+dice.input_direction()
+
+dice.roll()

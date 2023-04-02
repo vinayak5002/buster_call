@@ -1,0 +1,53 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let line = si[0].split(" ").map(val => Number(val))
+	let listNum = line[0]
+	let start = new Array(listNum).fill(-1)
+	let end = new Array(listNum).fill(-1)
+	let array = new Array()
+	let queryNum = line[1]
+	let out = ""
+	for (let i = 0; i < queryNum; i++) {
+		let queryLine = si[i + 1].split(" ")
+		let order = queryLine[0]
+		let pointer = queryLine[1]
+		let elem = queryLine[2]
+		
+		if (order == 0) {
+			// 挿入
+			add = {
+				val: elem,
+				nextIndex: -1
+			}
+			array.push(add)
+			let nowIndex = array.length - 1
+			if (start[pointer] == -1) {
+				start[pointer] = nowIndex
+				end[pointer] = start[pointer]
+				//console.log(start,end)
+				continue;
+			}
+			array[end[pointer]].nextIndex = nowIndex
+			end[pointer] = nowIndex
+			/*console.log(start,end)
+			console.log(array)*/
+		} else if (order == 1) {
+			// 要素の列挙
+			for (let j = start[pointer]; j != -1; j = array[j].nextIndex) {
+				out += array[j].val + " "
+			}
+			out += "\n"
+		} else {
+			// 接合
+			array[end[elem]].nextIndex = start[pointer]
+			end[elem] = end[pointer]
+			start[pointer] = -1
+			end[pointer] = -1
+		}	
+	}
+	so.write(out)
+}
+

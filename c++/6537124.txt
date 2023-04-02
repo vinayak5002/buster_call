@@ -1,0 +1,161 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <deque>
+#include <queue>
+#include <string>
+#include <iomanip>
+#include <set>
+#include <unordered_set>
+#include <map>
+#include <unordered_map>
+#include <utility>
+#include <stdio.h>
+#include <math.h>
+#include <assert.h>
+#if __has_include(<atcoder/all>)
+#include <atcoder/all>
+using namespace atcoder;
+#endif
+using namespace std;
+using ll=long long;
+#define read(x) cin>>(x);
+#define readll(x) ll (x);cin>>(x);
+#define readS(x) string (x);cin>>(x);
+#define readvll(x,N) vector<ll> (x)((N));for(int i=0;i<(N);i++){cin>>(x)[i];}
+
+
+/*
+void dfs(ll v,string X,vector<ll>& Y){
+  //cerr<<X<<endl;
+  string L,R;
+  ll xsize=X.size()-1;
+  int left=0,right=0;
+  ll u=0;
+  for(ll i=1;i<xsize;i++){
+    if(X[i]=='('){
+      left++;
+      L.push_back(X[i]);
+    }else if(X[i]==')'){
+      right++;
+      L.push_back(X[i]);
+    }else if(X[i]!='[' || right!=left){
+      L.push_back(X[i]);
+    }else{
+      for(ll j=i+1;j<xsize;j++){
+        if(X[j]!=']'){
+          u*=10;
+          u+=X[j]-'0';
+        }else{
+          for(ll k=j+1;k<xsize;k++){
+            R.push_back(X[k]);
+          }
+          break;
+        }
+      }
+      break;
+    }
+  }
+  Y[v]=u;
+  if(L!="()" && L!="(()"){
+    dfs(2*v+1,L,Y);
+  }
+  if(R!="()" && R!="()))"){
+    dfs(2*v+2,R,Y);
+  }
+  return;
+}
+
+string dfs2(ll v,vector<ll>& Z){
+  if(Z[v]==-1){
+    return "()";
+  }else{
+    return "("+dfs2(2*v+1,Z)+"["+to_string(Z[v])+"]"+dfs2(2*v+2,Z)+")";
+  }
+}
+
+*/
+
+void dfs_map(ll v,string X,unordered_map<ll,ll>& Y){
+  //cerr<<X<<endl;
+  string L,R;
+  ll xsize=X.size()-1;
+  int left=0,right=0;
+  ll u=0;
+  for(ll i=1;i<xsize;i++){
+    if(X[i]=='('){
+      left++;
+      L.push_back(X[i]);
+    }else if(X[i]==')'){
+      right++;
+      L.push_back(X[i]);
+    }else if(X[i]!='[' || right!=left){
+      L.push_back(X[i]);
+    }else{
+      for(ll j=i+1;j<xsize;j++){
+        if(X[j]!=']'){
+          u*=10;
+          u+=X[j]-'0';
+        }else{
+          for(ll k=j+1;k<xsize;k++){
+            R.push_back(X[k]);
+          }
+          break;
+        }
+      }
+      break;
+    }
+  }
+  Y[v]=u;
+  if(L!="()" && L!="(()"){
+    dfs_map(2*v+1,L,Y);
+  }
+  if(R!="()" && R!="())"){
+    dfs_map(2*v+2,R,Y);
+  }
+  return;
+}
+
+
+string dfs2_map(ll v,unordered_map<ll,ll>& Z){
+  if(Z.find(v)==Z.end()){
+    return "()";
+  }else{
+    return "("+dfs2_map(2*v+1,Z)+"["+to_string(Z[v])+"]"+dfs2_map(2*v+2,Z)+")";
+  }
+}
+
+//const ll size=10000000;
+
+int main(){
+  unordered_map<ll,ll> MA,MB,MC;
+  //vector<ll> VA(size,-1),VB(size,-1),VC(size,-1);
+  string A,B;
+  cin>>A>>B;
+  A="("+A+")";
+  B="("+B+")";
+  //dfs(0,A,VA);
+  //dfs(0,B,VB);
+  dfs_map(0,A,MA);
+  dfs_map(0,B,MB);
+  /*
+  for(ll i=0;i<size;i++){
+    if(VA[i]!=-1 && VB[i]!=-1){
+      VC[i]=VA[i]+VB[i];
+    }
+  }
+  */
+ for(pair<ll,ll> i:MA){
+   if(MB.find(i.first)!=MB.end()){
+     MC.insert(make_pair(i.first,MB[i.first]+i.second));
+   }
+ }
+  string ans=dfs2_map(0,MC);
+  for(ll i=1;i<(ll)ans.size()-1;i++){
+    cout<<ans[i];
+  }
+  cout<<endl;
+  return 0;
+}
+
+

@@ -1,0 +1,105 @@
+#include<bits/stdc++.h>
+#include <iostream>
+#include <stack>
+
+using namespace std;
+#define Max(a, b) (a > b ? a : b)
+#define Min(a, b) (a < b ? a : b)
+#define four(i, st, ed) for (i = st; i <= ed; i++)
+#define ll long long
+#define mem(a, b) memset(a,b,sizeof(a))
+#define maxn ((int)10000+5)
+#define maxm  ((int)20000+5)
+
+template<class T>
+T qpow(T a, int b) {
+    if (b == 1)
+        return a;
+    else if (b == 0)
+        return 1;
+    if (b % 2 == 0)
+        return qpow(a * a, b / 2);
+    else
+        return a * qpow(a, b - 1);
+}
+
+struct Edge {
+    int dis, cost, id;
+
+    Edge() {};
+
+    Edge(int dis, int cost, int id) {
+        this->dis = dis;
+        this->cost = cost, this->id = id;
+    }
+} edge[maxm];
+
+struct node {
+    int id, dis;
+
+    node() {}
+
+    node(int id, int dis) {
+        this->id = id;
+        this->dis = dis;
+    }
+
+    bool friend operator<(node a, node b) {
+        return a.dis > b.dis;
+    }
+};
+
+vector<Edge> v[maxn];
+int n, m;
+ll sum=0;
+bool vis[maxn];
+int d[maxn];
+int c[maxn];
+
+void dj() {
+    priority_queue<node> q;
+    q.push(node(1, 0));
+    while (!q.empty()) {
+        node u = q.top();
+        q.pop();
+        if(vis[u.id])continue;
+        vis[u.id] = 1;
+        int len = v[u.id].size();
+        int i;
+        four(i, 0, len - 1) {
+            Edge t = v[u.id][i];
+            if (d[t.id] > d[u.id] + t.dis) {
+                d[t.id] = d[u.id] + t.dis;
+                c[t.id] = t.cost;
+                q.push(node(t.id, d[t.id]));
+            } else if (d[t.id] == d[u.id] + t.dis&&c[t.id]>t.cost) {
+                c[t.id]=t.cost;
+            }
+        }
+    }
+}
+
+int main() {
+    while (scanf("%d%d", &n, &m) && n) {
+        int i;
+        sum=0;
+        mem(d, 0x3f);
+        mem(c, 0x3f);
+        d[1]=0;
+        c[1]=0;
+        four(i, 1, m) {
+            int from, to, dis, cost;
+            scanf("%d%d%d%d", &from, &to, &dis, &cost);
+            v[from].push_back(Edge(dis, cost, to));
+            v[to].push_back(Edge(dis, cost, from));
+        }
+        dj();
+
+        mem(vis, 0);
+        four(i, 1, n) {
+            v[i].clear();
+            sum+=c[i];
+        }
+        cout<<sum<<endl;
+    }
+}

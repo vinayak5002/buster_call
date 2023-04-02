@@ -1,0 +1,26 @@
+#include <vector>
+#include <algorithm>
+#include <iostream>
+#include <map>
+using namespace std;
+int main(){
+    int N, W;
+    cin>>N>>W;
+    map<int, int> way_val;
+    for(int i=0; i<N; i++){
+        int val, way;
+        cin>>val>>way;
+        if(way_val.find(way)&&way_val.at(way)<val){
+            way_val.at(way)=val;
+        }else if(!way_val.contains(way)){
+            way_val[way]=val;
+        }
+    }
+    vector<int> bag_val(W+1, 0);
+    for(auto now = way_val.cbegin(); now!=way_val.cend(); ++now){
+        for(int k=now->first; k<=W; ++k){
+            bag_val[k]=max(bag_val[k], bag_val[k-now->first]+now->second);
+        }
+    }
+    cout<<bag_val[W]<<endl;
+}

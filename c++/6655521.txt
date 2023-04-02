@@ -1,0 +1,122 @@
+#include <iostream>
+#include <array>
+#include <cmath>
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////     HEADER    ///////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+#define fequal(a, b) (fabs((a) - (b)) < 1.0e-10)
+constexpr double EPS = 1e-10;
+
+struct Point2D
+{
+    double x, y;
+};
+
+class Vector2D
+{
+public:
+    Vector2D(double x, double y) : x(x), y(y) {}
+    Vector2D(const Point2D &p_start, const Point2D &p_end) : x(p_end.x - p_start.x), y(p_end.y - p_start.y) {}
+
+    inline double X() const { return x; };
+    inline double Y() const { return y; };
+
+    inline Vector2D operator+(const Vector2D &v) const { return Vector2D(x + v.x, y + v.y); };
+    inline Vector2D operator-(const Vector2D &v) const { return Vector2D(x - v.x, y - v.y); };
+    inline Vector2D operator*(double k) const { return Vector2D(x * k, y * k); };
+    inline Vector2D operator/(double k) const { return Vector2D(x / k, y / k); };
+
+    inline double dot(const Vector2D &v) const { return x * v.x + y * v.y; };
+    inline double cross(const Vector2D &v) const { return x * v.y - y * v.x; };
+    inline double norm() const { return std::sqrt(x * x + y * y); };
+    inline Vector2D unit() const { return (*this) / norm(); };
+
+    inline bool parallel(Vector2D &v) const { return fequal(cross(v), 0); };
+    inline bool orthogonal(Vector2D &v) const { return fequal(dot(v), 0); };
+
+    double subtended_angle(const Vector2D &v) const;
+
+private:
+    double x, y;
+};
+
+double Vector2D::subtended_angle(const Vector2D &v) const
+{
+    double norm_a = dot(*this);
+    double norm_b = v.dot(v);
+    if (norm_a == 0 || norm_b == 0)
+        return 0;
+
+    double value = dot(v) / (norm_a * norm_b);
+    return std::acos(value);
+}
+
+void read_point(Point2D &p)
+{
+    std::cin >> p.x >> p.y;
+}
+//////////////////////////////////////// END OF HEADER ///////////////////////////////////////////
+
+enum ClockWise
+{
+    ON_SEGMENT = 0,
+    CLOCKWISE = -1,
+    COUNTER_CLOCKWISE = 1,
+    ONLINE_FRONT = -2,
+    ONLINE_BACK = 2,
+};
+
+ClockWise counter_clockwise(Point2D &p0, Point2D &p1, Point2D &p2)
+{
+    auto v_p0_p1 = Vector2D(p0, p1);
+    auto v_p0_p2 = Vector2D(p0, p2);
+
+    if (v_p0_p1.cross(v_p0_p2) > 0.0)
+        return COUNTER_CLOCKWISE;
+    if (v_p0_p1.cross(v_p0_p2) < 0.0)
+        return CLOCKWISE;
+    if (v_p0_p1.dot(v_p0_p2) < 0.0)
+        return ONLINE_BACK;
+    if (v_p0_p1.norm() + EPS < v_p0_p2.norm())
+        return ONLINE_FRONT;
+    return ON_SEGMENT;
+};
+
+bool check_intersect(const Point2D &p0, const Point2D &p1, const Point2D &p2, const Point2D &p3)
+{
+    double cross_product_p0 = Vector2D(p0, p1).cross(Vector2D(p0, p2)) * Vector2D(p0, p1).cross(Vector2D(p0, p3));
+    double cross_product_p2 = Vector2D(p2, p3).cross(Vector2D(p2, p0)) * Vector2D(p2, p3).cross(Vector2D(p2, p1));
+
+    if (cross_product_p0 <= 0 &&
+        cross_product_p2 <= 0 &&
+        counter_clockwise(p0, p1, p2) * counter_clockwise(p0, p1, p3) <= 0)
+        return true;
+
+    return false;
+}
+
+int main()
+{
+    int q;
+    std::cin >> q;
+
+    for (int i = 0; i < q; i++)
+    {
+
+        Point2D p0, p1, p2, p3;
+
+        read_point(p0);
+        read_point(p1);
+        read_point(p2);
+        read_point(p3);
+
+        double cross_product_p0 = Vector2D(p0, p1).cross(Vector2D(p0, p2)) * Vector2D(p0, p1).cross(Vector2D(p0, p3));
+        double cross_product_p2 = Vector2D(p2, p3).cross(Vector2D(p2, p0)) * Vector2D(p2, p3).cross(Vector2D(p2, p1));
+
+        if (check_intersect(p0, p1, p2, p3))
+            std::cout << 1 << std::endl;
+        else
+            std::cout << 0 << std::endl;
+    }
+}

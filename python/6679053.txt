@@ -1,0 +1,70 @@
+Node *nil; 
+void init() {
+nil = (Node *)malloc(sizeof(Node));
+nil->next = nil;
+nil->prev = nil;
+}
+
+void insert(int key) {
+Node *x = (Node *)malloc(sizeof(Node));
+x->key = key;
+// 番兵の直後に要素を追加
+x->next = nil->next;
+nil->next->prev = x; //初回はnil->prevをNodeに繋ぐ
+nil->next = x;
+x->prev = nil; 
+}
+
+Node* listSearch(int key) {
+Node *cur = nil->next; // 番兵の次の要素から辿る
+while ( cur != nil && cur->key != key ) { 
+cur = cur->next; 
+} 
+return cur;
+}
+
+void deleteNode(Node *t) {
+if ( t == nil ) return; 
+// t が番兵の場合は処理しない
+t->prev->next = t->next;
+t->next->prev = t->prev;
+free(t); 
+} 
+void deleteFirst() { 
+deleteNode(nil->next); 
+}
+
+void deleteLast() {
+deleteNode(nil->prev); 
+} 
+void deleteKey(int key) {
+// 検索したノードを削除
+deleteNode(listSearch(key)); 
+} 
+
+
+int main() {
+    long n;
+    cin >> n;
+    Doubly_linked_list l;
+    string str;
+    for(int i = 0; i < n; i++) {
+        cin >> str;
+        if(str[0] == 'i') {
+			int x;
+			cin >> x;	
+            l.insert(x);
+        } else if(str[6] == 'F') {
+            l.delete_first();
+		} else if (str[6] == 'L') {
+			l.delete_last();
+        } else {
+			int x;
+			cin >> x;
+            l.delete_value(x);
+        }
+    }
+
+    l.print_list();
+    return 0;
+}

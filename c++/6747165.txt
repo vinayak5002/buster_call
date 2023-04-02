@@ -1,0 +1,66 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+const int INF = 1<<28;
+
+namespace {
+
+    vector<int> as;
+
+    bool input() {
+        as.clear(); as.resize(4);
+        for (int i = 0; i < 4; i++) {
+            cin >> as[i];
+        }
+        if (as[0] == 0 && as[1] == 0 && as[2] == 0 && as[3] == 0){ 
+            return false;
+        }
+        return true;
+    }
+
+    bool done() {
+        int count = 0;
+        for (int i = 0; i < 4; i++) {
+            if (as[i] > 0) {
+                count++;
+            }
+        }
+        return count == 1;
+    }
+
+    pair<int, int> getMina() {
+        int index = -1;
+        int minv = INF;
+        for (int i = 0; i < 4; i++) {
+            if (as[i] == 0) continue;
+            if (minv > as[i]) {
+                index = i;
+                minv = as[i];
+            }
+        }
+        return make_pair(index, minv);
+    }
+
+    void remove_from_others(int idx, int v) {
+        for (int i = 0; i < 4; i++) {
+            if (i == idx) continue;
+            as[i] = max(0, as[i] - v);
+        }
+    }
+
+    void solve() {
+        while (! done()) {
+            auto [idx, min_a] = getMina();
+            remove_from_others(idx, min_a);
+        }
+        cout << *max_element(as.begin(), as.end()) << endl;
+    }
+}
+
+int main() {
+    while (input()) solve();
+}
+

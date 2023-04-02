@@ -1,0 +1,192 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using ld = long double;
+using ll = long long;
+using ull = unsigned long long;
+
+template<class T> using pq = priority_queue<T>;
+template<class T> using pqg = priority_queue<T, vector<T>, greater<T>>;
+
+template<class T, class U> inline bool chmin(T& a, const U& b) { if (a > b) { a = b; return 1; } return 0; }
+template<class T, class U> inline bool chmax(T& a, const U& b) { if (a < b) { a = b; return 1; } return 0; }
+
+template<class T> auto min(const T& a) { *min_elemenet(all(a)); }
+template<class T> auto max(const T& a) { *max_elemenet(all(a)); }
+
+// const ll MOD = 998244353;
+const ll MOD = 1000000007;
+const ll INF = 1 << 30;
+const ll INFLL = 1LL << 60;
+const ld EPS = 1e-9;
+
+const ll dx[] = {0, 1, 0, -1, 1, -1, 1, -1};
+const ll dy[] = {1, 0, -1, 0, 1, -1, -1, 1};
+
+#define overload4(a, b, c, d, e, ...) e
+#define overload3(a, b, c, d, ...) d
+
+#define all1(v) begin(v), end(v)
+#define all2(v, a) begin(v), begin(v) + a
+#define all3(v, a, b) begin(v) + a, begin(v) + b
+
+#define rep1(a) for (ll i = 0; i < a; ++i)
+#define rep2(i, a) for (ll i = 0; i < a; ++i)
+#define rep3(i, a, b) for (ll i = a; i < b; ++i)
+#define rep4(i, a, b, c) for (ll i = a; i < b; i += c)
+#define rrep1(a) for (ll i = a-1; i >= 0; --i)
+#define rrep2(i, a) for (ll i = a-1; i >= 0; --i)
+#define rrep3(i, a, b) for (ll i = a-1; i >= b; --i)
+#define rrep4(i, a, c) for (ll i = a-1; i >= b; i -= c)
+
+#define each1(a, v) for (auto& a : v)
+#define each2(a, b, v) for (auto& [a, b] : v)
+#define each3(a, b, c, v) for (auto& [a, b, c] : v)
+
+#define all(...) overload3(__VA_ARGS__, all3, all2, all1)(__VA_ARGS__)
+#define rep(...) overload4(__VA_ARGS__, rep4, rep3, rep2, rep1)(__VA_ARGS__)
+#define rrep(...) overload4(__VA_ARGS__, rrep4, rrep3, rrep2, rrep1)(__VA_ARGS__)
+#define each(...) overload4(__VA_ARGS__, each3, each2, each1)(__VA_ARGS__)
+
+#define vec(type, name, __VA_ARGS__) vector<type> name(__VA_ARGS__)
+#define vv(type, name, h, __VA_ARGS__) vector<vector<type>> name(h, vector<type>(__VA_ARGS__));
+#define vvv(type, name, h, w, __VA_ARGS__) vector<vector<vector<type>>> name(h, vector<vector<type>>(w, vector<type>(__VA_ARGS__)));
+
+#define SUM(a) accumulate(all(a), 0LL)
+#define SI(a) size(a)
+#define SORT(a) sort(all(a))
+#define REV(a) reverse(all(a))
+#define UNIQ(a) Sort(a), a.erase(unique(all(a)), end(a))
+
+template<class... T> void in(T&... a) { (cin >> ... >> a); }
+template<class T> void in(vector<T>& a) { each(e, a) in(e); }
+template<class T> void in(vector<vector<T>>& a) { each(e, a) in(e); }
+template<class T> void in(vector<vector<vector<T>>>& a) { each(e, a) in(e); }
+template<class T, class U> void in(pair<T, U>& a) { in(a.first), in(a.second); }
+
+#define INT(...) int __VA_ARGS__; in(__VA_ARGS__)
+#define CHR(...) char __VA_ARGS__; in(__VA_ARGS__)
+#define STR(...) string __VA_ARGS__; in(__VA_ARGS__)
+#define LL(...) ll __VA_ARGS__; in(__VA_ARGS__)
+#define LD(...) ld __VA_ARGS__; in(__VA_ARGS__)
+#define ULL(...) ull __VA_ARGS__; in(__VA_ARGS__)
+#define VEC(type, name, ...) vec(type, name, __VA_ARGS__); in(name)
+#define VV(type, name, h, ...) vv(type, name, h, __VA_ARGS__); in(name)
+#define VVV(type, name, h, w, ...) vvv(type, name, h, w, __VA_ARGS__); in(name)
+
+template<class T> void out(T a) { cout << a << '\n'; }
+template<class T> void out(vector<T>& a) { rep(i, a.size()) cout << a[i] << " \n"[i == a.size()-1]; }
+template<class T> void out(vector<vector<T>>& a) { rep(i, a.size()) out(a[i]); }
+template<class T> void out(vector<vector<vector<T>>>& a) { rep(i, a.size()) out(a[i]); }
+template<class T, class U> void out(pair<T, U>& a) { cout << a.first << ' ' << a.second << '\n'; }
+
+template<class T = int>
+struct Edge {
+  int from, to, idx;
+  T cost;
+
+  Edge() = default;
+  Edge(int from, int to, T cost = 1, int idx = -1) : from(from), to(to), cost(cost), idx(idx) {}
+
+  bool operator < (const Edge& e) const { return cost < e.cost; }
+};
+
+template<class T = int>
+struct Graph {
+  vector<vector<Edge<T>>> g;
+  int es;
+
+  Graph() = default;
+  Graph(int n) : g(n), es(0) {}
+
+  size_t size() const { return g.size(); }
+  void add_directed_edge(int from, int to, T cost = 1) {
+    g[from].emplace_back(from, to, cost, es++);
+  }
+  void add_edge(int from, int to, T cost = 1) {
+    g[from].emplace_back(from, to, cost, es++);
+    g[to].emplace_back(to, from, cost, es++);
+  }
+
+  inline vector<Edge<T>> &operator[](const int &k) { return g[k]; }
+  inline const vector<Edge<T>> &operator[](const int &k) const { return g[k]; }
+};
+
+template<class T = int>
+using Edges = vector<Edge<T>>;
+
+
+/*
+  LowLink: 無向グラフの関節点・橋を列挙する構造体
+  作成: O(E+V)
+  関節点の集合: vector<int> aps
+  橋の集合: vector<pair<int,int>> bridges
+*/
+
+
+template<class G>
+struct LowLink {
+  const G& g;
+  vector<int> used, ord, low, aps;
+  vector<pair<int,int>> bridges;
+
+  LowLink(const G& g) : g(g) {
+    used.assign(g.size(), 0);
+    ord.assign(g.size(), 0);
+    low.assign(g.size(), 0);
+
+    int k = 0;
+    for (int i = 0; i < g.size(); ++i) {
+      if (!used[i]) k = dfs(i, k, -1);
+    }
+
+    sort(begin(aps), end(aps));
+    sort(begin(bridges), end(bridges));
+  }
+
+  int dfs(int id, int k, int par) {
+    used[id] = true;
+    ord[id] = k++;
+    low[id] = ord[id];
+    bool is_aps = false;
+    int cnt = 0;
+
+    for (auto& e : g[id]) {
+      if (!used[e.to]) {
+        ++cnt;
+        k = dfs(e.to, k, id);
+        low[id] = min(low[id], low[e.to]);
+
+        if (par != -1 && ord[id] <= low[e.to]) is_aps = true;
+        if (ord[id] < low[e.to]) bridges.emplace_back(min(id, e.to), max(id, e.to));
+      } else if (e.to != par) {
+        low[id] = min(low[id], ord[e.to]);
+      }
+    }
+
+    if (par == -1 && cnt >= 2) is_aps = true;
+    if (is_aps) aps.push_back(id);
+
+    return k;
+  }
+};
+
+int main(void) {
+  INT(V, E);
+  Graph<int> G(V);
+
+  rep(E) {
+    int s, t;
+    cin >> s >> t;
+
+    G.add_edge(s, t);
+  }
+
+  LowLink L(G);
+
+  each(e, L.aps) out(e);
+
+  return 0;
+}
+

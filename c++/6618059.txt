@@ -1,0 +1,130 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define EPS 1e-8
+int const PN = 8e4 + 10;
+struct Point {
+    double x,y;
+    Point(double x = 0, double y = 0) : x(x), y(y) {}
+    Point operator + (Point p) {return Point(x + p.x, y + p.y);}
+    Point operator - (Point p) {return Point(x - p.x, y - p.y);}
+    Point operator * (double a) {return Point(x * a, y * a);}
+    Point operator / (double a) {return Point(x / a, y / a);}
+
+    double norm() {return x * x + y * y;}
+    double abs() {return sqrt(norm());}
+    bool operator < (const Point &p) const {return x != p.x ? x < p.x : y < p.y;}
+    double operator ^ (const Point &b) {return x * b.y - y * b.x;};
+    bool operator == (const Point &p) const {return fabs(x - p.x) > EPS && fabs(y - p.y) < EPS;}
+    double len() {return hypot(x, y);}
+};
+
+struct Segment {
+    Point p1, p2;
+};
+
+typedef Point Vector;
+
+double Dot(Vector a, Vector b) {
+    return a.x * b.x + a.y * b.y;
+}
+
+double Cross(Vector A, Vector B) {
+    return A.x * B.y - A.y * B.x; }
+
+int ccw(Point a, Point b, Point c) {
+    b = b - a;
+    c = c - a;
+    if(Cross(b, c) > EPS) return 1;
+    if(Cross(b, c) < -EPS) return -1;
+    if(Dot(b,c) < 0) return 2;
+    if(b.norm() < c.norm()) return -2;
+    return 0;
+}
+
+inline int sgn(double n) {
+    if(fabs(n) < 1e-6) return 0;
+    else if(n > 0) return 1;
+    else return -1;
+}
+int cmp(Point a, Point b) {
+    return a.y < b.y || (a.y == b.y && a.x < b.x);
+}
+
+struct Line {
+    Point a, b;
+    Line() {}
+    Line(Point a, Point b) {
+        this->a = a;
+        this->b = b;
+    }
+};
+
+inline bool eq(double a, double b){return fabs(b - a) < EPS;}
+
+
+struct Polygon {
+
+    int n;
+    Point p[PN];
+
+    void add(Point q) {
+        p[n++] = q;
+    }
+    
+    double rotating_calipers() {
+        double res = 0;
+        for(int i = 0,j = 1; i < n; i++) {
+            Point p1 = p[i], p2 = p[(i+1) % n];
+            while(sgn((abs((p2 - p1) ^ (p[j] - p1))) - abs((p2 - p1) ^ (p[(j+1) % n] - p1))) <= 0) j = (j+1) % n;
+            res = max({res, (p1 - p[j]).len(), (p2 - p[j]).len()});
+        }
+        return res;
+    }
+};
+
+Point crosspoint(Line l, Line m) {
+    double A = Cross(l.b - l.a, m.b - m.a);
+    double B = Cross(l.b - l.a, l.b - m.a);
+    if(eq(abs(A), 0.0) && eq(abs(B), 0.0)) return m.a;
+    return m.a + (m.b - m.a) * B / A;
+}
+
+vector<Point> convex_cut(const vector<Point> &u, Line l) {
+    vector<Point> ret;
+    int n = u.size();
+    for(int i = 0; i < n; i++) {
+        Point now = u[i], nxt = u[(i+1) % n];
+        if(ccw(l.a, l.b, now) != -1) ret.push_back(now);
+        if(ccw(l.a, l.b, now) * ccw(l.a, l.b, nxt) < 0) {
+            ret.push_back(crosspoint(Line(now, nxt), l));
+        }
+    }
+    return ret;
+}
+
+int main() {
+    vector<Point> q;
+    int n;
+    cin >> n;
+    for(int i = 0; i < n; i++) {
+        double a,b;
+        cin >> a >> b;
+        q.push_back(Point(a,b));
+    }
+    int k;
+    cin >> k;
+    for(int i = 0; i < k; i++) {
+        int lx1,ly1,lx2,ly2;
+        cin >> lx1 >> ly1 >> lx2 >> ly2;
+        Line t;
+        t.a = Point(lx1,ly1);
+        t.b = Point(lx2,ly2);
+        vector<Point> ans = convex_cut(q, t);
+        double A = 0;
+        for(int i = 0; i < ans.size(); i++) {
+            A += ans[i] - ans[0] ^ (ans[(i+1) % ans.size()] - ans[0]);
+        }
+        printf("%.8lf\n", A / 2);
+    }
+}
+

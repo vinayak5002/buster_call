@@ -1,0 +1,44 @@
+#include <vector>
+#include <iostream>
+#include <string>
+#include <utility>
+
+using namespace std;
+using ll = long double ;
+using vec_ll = vector<ll>;
+using vec_i = vector<int>;
+
+int f(vec_i &mat){
+    int n=mat.size()-1;
+    int ans[n+1][n+1];
+    for(int i=1; i<=n; ++i){
+        ans[i][i]=0;
+    }
+    for(int l=2; l<=n; ++l){
+        for(int i=1; i<=n-l+1; ++i){
+            int j=i+l-1;
+            ans[i][j]=2147483647;
+            for(int k=i; k<=j-1; ++k){
+                ans[i][j]=min(ans[i][j]
+                , ans[i][k]+ans[k+1][j]+
+                mat[i-1]*mat[k]*mat[j]);
+            }
+        }
+    }
+    return ans[1][n];
+}
+
+int main(){
+    int n;
+    cin>>n;
+    vec_i mat(n+1);
+    cin>>mat[0];
+    for(int i=0; i<n-1; ++i){
+        int x;
+        cin>>x>>x;
+        mat[i+1]=x;
+    }
+    cin>>mat[n];
+    int min=f(mat);
+    cout<<min<<endl;
+}

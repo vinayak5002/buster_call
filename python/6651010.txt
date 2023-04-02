@@ -1,0 +1,117 @@
+import scala.annotation.tailrec
+import scala.io.StdIn.{readInt, readLine}
+
+class DNode(var prev:DNode = null, var next:DNode = null)
+case class Node(value:Int) extends DNode {
+  override def toString: String = value.toString
+}
+
+class NodeList() {
+  private val head = new DNode()
+  head.next = head
+  head.prev = head
+
+  def append(v:Int):Unit = {
+    val n = Node(v)
+    val m = head.next
+    m.prev = n
+    n.next = m
+    n.prev = head
+    head.next = n
+  }
+  def remove(node:DNode):Unit = {
+    if (node != head) {
+      val p = node.prev
+      val n = node.next
+      p.next = n
+      n.prev = p
+    }
+  }
+  def fetch(v:Int): Option[Node] = {
+    @tailrec
+    def traverse(m:DNode): Option[Node] = {
+      if (m == head) None
+      else m match {
+        case n:Node if n.value == v => Some(n)
+        case _ => traverse(m.next)
+      }
+    }
+    traverse(head.next)
+  }
+  def removeFirst():Unit = {
+    remove(head.next)
+  }
+  def removeLast():Unit = {
+    remove(head.prev)
+  }
+  def toList: List[Int] = {
+    @tailrec
+    def iterate(m:DNode, ac:List[Int]): List[Int] = {
+      m match {
+        case n:Node => iterate(n.prev, n.value::ac)
+        case _ => ac
+      }
+    }
+    iterate(head.prev, List[Int]())
+  }
+}
+
+trait Command {
+  def execute(nodes:NodeList):Unit
+}
+case class InsertCommand(x:Int) extends Command {
+  override def execute(nodes:NodeList):Unit = {
+    nodes.append(x)
+    // println(s"insert $x:${nodes.toList().mkString(" ")}")
+  }
+}
+case class DeleteCommand(v:Int) extends Command {
+  override def execute(nodes:NodeList):Unit = {
+    // println(s"delete $v: ${nodes.fetch(v).toString()}")
+    nodes.fetch(v) match {
+      case Some(n) => nodes.remove(n)
+      case None => ()
+    }
+    // println(s"delete $v:${nodes.toList().mkString(" ")}")
+  }
+}
+
+case class DeleteFirstCommand() extends Command {
+  override def execute(nodes:NodeList):Unit = {
+    nodes.removeFirst()
+    // println(s"delete First:${nodes.toList().mkString(" ")}")
+  }
+}
+
+case class DeleteLastCommand() extends Command {
+  override def execute(nodes:NodeList):Unit = {
+    nodes.removeLast()
+    // println(s"delete Last:${nodes.toList().mkString(" ")}")
+  }
+}
+
+case class IllegalCommand(str:String) extends Command {
+  override def execute(nodes:NodeList):Unit = {
+    println(s"Error:Illegal command found: $str")
+  }
+}
+
+object Main extends App {
+  def readCommand():Command = readLine().split(' ').toList match {
+    case "insert"::xs => InsertCommand(xs.head.toInt)
+    case "delete"::xs => DeleteCommand(xs.head.toInt)
+    case "deleteFirst"::_ => DeleteFirstCommand()
+    case "deleteLast"::_ => DeleteLastCommand()
+    case xs => IllegalCommand(xs.head)
+   }
+
+  val nodes = new NodeList()
+  val N = readInt
+
+  for (_ <- 0 until N) {
+    readCommand().execute(nodes)
+  }
+
+  println(nodes.toList.mkString(" "))
+}
+

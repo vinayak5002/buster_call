@@ -1,0 +1,117 @@
+#include <iostream>
+#include <string>
+#include <iomanip>
+#include <cmath>
+
+using namespace std;
+
+// Chebyshev distance
+double GetChebyshevDistance(double *x, double *y, int n)
+{
+  double max = 0.0;
+  for (int i = 0; i < n; i++)
+  {
+    if (abs(x[i] - y[i]) > max)
+    {
+      max = abs(x[i] - y[i]);
+    }
+  }
+  return max;
+}
+
+// 1-3 Distance
+double GetDistance(double *x, double *y, int n, double r)
+{
+  double sum = 0.0;
+  for (int i = 0; i < n; i++)
+  {
+    sum += pow(abs(x[i] - y[i]), r);
+  }
+
+  double d = pow(sum, (1.0 / r));
+
+  return d;
+}
+
+// Euclidean Distance
+double GetEuclideanDistance(double *x, double *y, int n)
+{
+  double sum = 0.0;
+  for (int i = 0; i < n; i++)
+  {
+    sum += pow(abs(x[i] - y[i]), 2);
+  }
+  double d = sqrt(sum);
+  return d;
+}
+
+// Manhattan Distance
+double GetManhattanDistance(double *x, double *y, int n)
+{
+  double sum = 0.0;
+  for (int i = 0; i < n; i++)
+  {
+    sum += abs(x[i] - y[i]);
+  }
+  return sum;
+}
+
+double GetMinkowskiDistance(double *x, double *y, int n, int r)
+{
+  double g = 0;
+
+  switch (r)
+  {
+  case 1:
+    g = GetManhattanDistance(x, y, n);
+    break;
+  case 2:
+    g = GetEuclideanDistance(x, y, n);
+    break;
+  case 3:
+    g = GetDistance(x, y, n, 3.0);
+    break;
+  case 4:
+    g = GetChebyshevDistance(x, y, n);
+    break;
+  default:
+    break;
+  }
+  return g;
+}
+
+int main()
+{
+
+  int n;
+
+  cin >> n;
+
+  double x[n];
+  double y[n];
+
+  for (int i = 0; i < n; i++)
+  {
+    cin >> x[i];
+  }
+
+  for (int i = 0; i < n; i++)
+  {
+    cin >> y[i];
+  }
+
+  double g = GetMinkowskiDistance(x, y, n, 1);
+  cout << fixed << setprecision(6) << g << endl;
+
+  g = GetMinkowskiDistance(x, y, n, 2);
+  cout << fixed << setprecision(6) << g << endl;
+
+  g = GetMinkowskiDistance(x, y, n, 3);
+  cout << fixed << setprecision(6) << g << endl;
+
+  g = GetMinkowskiDistance(x, y, n, 4);
+  cout << fixed << setprecision(6) << g << endl;
+
+  return 0;
+}
+

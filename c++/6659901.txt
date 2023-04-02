@@ -1,0 +1,90 @@
+#include<stdio.h>
+#include<string.h>
+
+#define Word 31
+#define Line 100
+
+#define max(a,b) (a>b? a:b)
+#define min(a,b) (a<b? a:b)
+
+void swap(int *a, int *b){
+    int tmp=*a;
+    *a=*b;
+    *b=tmp;
+}
+
+void swap_str(char *a, char *b){
+    char tmp;
+    for(int i=0; i<=max(strlen(a),strlen(b)) ; i++){
+        tmp=*(a+i);
+        *(a+i)=*(b+i);
+        *(b+i)=tmp;
+    }
+}
+
+void swap_digital(int *a, int *b, int max_number){
+    for(int i=0; i<max_number ; i++){
+        swap(a+i, b+i);
+    }
+}
+
+int compare(char *a, char *b){
+    for(int i=0 ; i<min(strlen(a), strlen(b)) ; i++){
+        if(a[i] > b[i])
+            return 1;
+        else if(a[i] < b[i])
+            return 0;
+    }
+    return strlen(a) >strlen(b);
+}
+
+int main(){
+    char tmp_word[Word], table[Line][Word]={{'\0'}};
+    int tmp_page, page[Line][Line]={{0}}, top_page[Line]={0}, total=0, number;
+    while(scanf("%s%d", tmp_word, &tmp_page)!=EOF){
+        for(int i=0 ; i<Line ; i++){
+            if(table[i][0]=='\0'){
+                strcpy(table[i], tmp_word);
+                page[i][top_page[i]++] = tmp_page;
+                total++;
+                break;
+            }
+            if(strcmp(table[i], tmp_word)==0){
+                page[i][top_page[i]++] = tmp_page;
+                break;
+            }
+        }
+    }
+
+    for(int i=0 ; i<total ; i++){
+        for(int j=0 ; j<(top_page[i]-1) ; j++){
+            for(int k=0 ; k<(top_page[i]-1) ; k++){
+                if(page[i][k]>page[i][k+1]){
+                    swap(&page[i][k], &page[i][k+1]);
+                }
+            }
+        }
+    }
+
+    for(int i=0 ; i<(total-1) ; i++){
+        for(int j=0 ; j<(total-1) ; j++){
+            if(compare(table[j], table[j+1])){
+                swap_str(&table[j][0], &table[j+1][0]);
+                number = max(top_page[j], top_page[j+1]);
+                swap_digital(&page[j][0], &page[j+1][0], number);
+                swap(&top_page[j], &top_page[j+1]);
+            }
+        }
+    }
+
+    for(int i=0 ; i<total ; i++){
+        printf("%s\n",table[i]);
+        for(int j=0 ; j<(top_page[i]-1) ; j++){
+            printf("%d ", page[i][j]);
+        }
+        printf("%d\n", page[i][top_page[i]-1]);
+    }
+
+    return 0;
+}
+

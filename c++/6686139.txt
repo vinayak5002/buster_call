@@ -1,0 +1,32 @@
+#include <vector>
+#include <algorithm>
+#include <iostream>
+using namespace std;
+int comp(int n, vector<int> &coin, int start, int min){
+    vector<int> answer{};
+    if(start<0)return 2147483647;
+    for(int i=start; i>=0; --i){
+        if(n>=coin[i]){
+            int c_min=comp(n, coin, i-1, min);
+            answer.push_back(c_min);
+            min+=(n/coin[i]);
+            n%=coin[i];
+        }
+    }
+    answer.push_back(min);
+    sort(answer.begin(), answer.end());
+    return answer.front();
+}
+
+int main(){
+    int n, m;
+    cin>>n>>m;
+    vector<int> coin(m);
+    for(auto &x : coin){
+        cin>>x;
+    }
+    sort(coin.begin(), coin.end());
+    int ans=n;
+    ans=comp(n, coin, m-1, 0);
+    cout<<ans<<endl;
+}

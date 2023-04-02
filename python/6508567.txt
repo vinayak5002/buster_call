@@ -1,0 +1,156 @@
+   #include <bits/stdc++.h>
+    using namespace std;
+    #include <math.h>
+    #include <iomanip>
+    #include <cstdint>
+    #include <string>
+    #include <sstream>
+    
+    template<class T> inline bool chmax(T& a, T b) { if (a < b) { a = b; return 1; } return 0; }
+    template<class T> inline bool chmin(T& a, T b) { if (a > b) { a = b; return 1; } return 0; }
+    #define rep(i,n) for (int i = 0; i < (n); ++i)
+
+    typedef long long ll;
+    typedef unsigned long long ull;
+    using P=pair<ll,ll>;
+    using tp=tuple<ll,ll,ll>;
+    const int INF=1001001001;
+    const ll INFL=1e18;
+    const int mod=1e9+7;
+    
+    struct Node{
+        int key,priority;
+        Node *left,*right;
+        Node(int x,int y) :key(x),priority(y),left(nullptr),right(nullptr){}
+    };
+
+    Node* rightRotate(Node* t);
+    Node* leftRotate(Node* t);
+    Node* insert(Node* t,int ky,int priority);
+    Node* Delete(Node* t,int key);
+    Node* _delete(Node* t,int key);
+
+    Node* rightRotate(Node* t){
+        Node* s=t->left;
+        t->left=s->right;
+        s->right=t;
+        return s;
+    }
+    Node* leftRotate(Node* t){
+        Node* s=t->right;
+        t->right=s->left;
+        s->left=t;
+        return s;
+    }
+    Node* insert(Node* t,int key,int priority){
+        if(t==nullptr){
+            return new Node(key,priority);
+        }
+        if(key==t->key){
+            return t;
+        }
+        if(key<t->key){
+            t->left=insert(t->left,key,priority);
+            if(t->priority < t->left->priority){
+                t=rightRotate(t);
+            }
+        }
+        else{
+            t->right=insert(t->right,key,priority);
+            if(t->priority < t->right->priority){
+                t=leftRotate(t);
+            }
+        }
+        return t;
+    }
+    Node* Delete(Node* t,int key){
+        if(t==nullptr){
+            return nullptr;
+        }
+        if(key < t->key){
+            t->left=Delete(t->left,key);
+        }
+        else if(key > t->key){
+            t->right=Delete(t->right,key);
+        }
+        else{
+            return _delete(t,key);
+        }
+        return t;
+    }
+    Node* _delete(Node* t,int key){
+        if(t->left==nullptr&&t->right==nullptr){
+            return nullptr;
+        }
+        else if(t->left==nullptr){
+            t=leftRotate(t);
+        }
+        else if(t->right==nullptr){
+            t=rightRotate(t);
+        }
+        else{
+            if(t->left->priority > t->right->priority){
+                t=rightRotate(t);
+            }
+            else{
+                t=leftRotate(t);
+            }
+        }
+        return Delete(t,key);
+    }
+    Node* find(Node* t,int key){
+        while(t){
+            if(t->key == key){return t;}
+            else if(t->key > key){t=t->left;}
+            else{t=t->right;}
+        }
+        return nullptr;
+    }
+    void dfs(Node* root,int t){
+        if(!root){return;}
+        if(t==1){cout<<" "<<root->key;}
+        dfs(root->left,t);
+        if(t==2){cout<<" "<<root->key;}
+        dfs(root->right,t);
+    }
+    void solve(){
+        int m;
+        cin>>m;
+        Node* root=new Node(-INF,INF);
+        rep(i,m){
+            string s;
+            cin>>s;
+            Node* cur=root;
+            if(s=="insert"){
+                int key,priority;
+                cin>>key>>priority;
+                insert(cur,key,priority);
+            }
+            if(s=="print"){
+                dfs(cur->right,2);
+                cout<<endl;
+                dfs(cur->right,1);
+                cout<<endl;
+            }
+            if(s=="delete"){
+                int key;
+                cin>>key;
+                Delete(cur,key);
+            }
+            if(s=="find"){
+                int key;
+                cin>>key;
+                Node* f=find(cur,key);
+                cout<<(!f?"no":"yes")<<endl;
+            }
+        }
+    }
+
+    int main(){
+        ios_base::sync_with_stdio(false);
+        cin.tie(NULL);
+        
+        solve();
+        
+        return 0;
+    }

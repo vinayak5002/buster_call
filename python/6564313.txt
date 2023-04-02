@@ -1,0 +1,2 @@
+input()
+print' '.join(map(str,raw_input().split())[::-1])

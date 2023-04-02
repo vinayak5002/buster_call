@@ -1,0 +1,73 @@
+/**
+ *    author:  longvu
+ *    created: 06/15/22 10:03:57
+**/
+#include<bits/stdc++.h>
+
+using namespace std;
+
+#define int long long
+#define sz(x) ((int)x.size())
+#define all(x) (x).begin(), (x).end()
+const int INF = numeric_limits<int>::max();
+const int nax = (int)(100001);
+const int mod = 1e9 + 7;
+
+template<class X, class Y>
+bool maximize(X& x, const Y y) {
+    if (y > x) {x = y; return true;}
+    return false;
+}
+template<class X, class Y>
+bool minimize(X& x, const Y y) {
+    if (y < x) {x = y; return true;}
+    return false;
+}
+
+#define ld long double
+
+int n, m;
+int U[nax], V[nax];
+ld p, f[nax];
+ld expo(ld a, int b) {
+    if (!b) {
+        return 1.0;
+    }
+    ld tmp = expo(a, b >> 1);
+    if (b & 1) {
+        return tmp * tmp * a;
+    }
+    return tmp * tmp;
+}
+
+#define getbit(mask, idx) (((mask) >> (idx)) & 1)
+
+int32_t main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cin >> n >> m >> p;
+    for (int i = 0; i < m; ++i) {
+        cin >> U[i] >> V[i];
+        U[i]--; V[i]--;
+    }
+    p /= 100;
+    for (int mask = 1; mask < (1 << n); ++mask) {
+        if (mask & 1) {
+            f[mask] = 1;
+            for (int submask = (mask - 1) & mask; submask > 0; submask = (submask - 1) & mask) {
+                int cnt = 0;
+                for (int i = 0; i < m; ++i) {
+                    if (getbit(mask, U[i]) && getbit(mask, V[i])
+                            && (getbit(submask, U[i]) != getbit(submask, V[i]))) {
+                        cnt++;
+                    }
+                }
+                f[mask] -= f[submask] * expo(p, cnt);
+            }
+        }
+    }
+    for (int mask = 0; mask < (1 << n); ++ mask) {
+        printf("%0.9Lf\n", f[mask]);
+    }
+    return 0;
+}

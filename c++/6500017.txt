@@ -1,0 +1,224 @@
+#include <bits/stdc++.h>
+
+#define fa ios_base::sync_with_stdio(false);cin.tie(nullptr);cout.tie(0);
+typedef long long ll;
+typedef long double ld;
+typedef double d;
+typedef unsigned long long ull;
+#define all(v) ((v).begin()),((v).end())
+#define rall(v) ((v).rbegin()),((v).rend())
+#define error(args...) { string _s = #args; replace(_s.begin(), _s.end(), ',', ' '); stringstream _ss(_s); istream_iterator<string> _it(_ss); err(_it, args); }
+using namespace std;
+typedef pair<long long, pair<long long, long long >> PII;
+const ll N = 1e6 + 5, INF = 1e9 + 5, mod = 1e9 + 7;
+
+ll add(ll a, ll b) {
+    a = (0LL + a + mod) % mod;
+    b = (0LL + b + mod) % mod;
+    return (a + b) % mod;
+}
+
+ll mul(ll a, ll b) {
+    a %= mod;
+    b %= mod;
+    return (1LL * a * b) % mod;
+}
+
+ll fastPow(ll base, ll power) {
+    if (base == 1 or power == 0)
+        return 1;
+    ll halfPower = fastPow(base, power / 2);
+    ll ans = mul(halfPower, halfPower);
+    if (power % 2 == 1)
+        ans = mul(ans, base);
+    return ans;
+}
+
+ll modInverse(ll x) {
+    return fastPow(x, mod - 2);
+}
+
+ll fac[N];
+
+void pre() {
+    fac[0] = 1;
+    for (ll i = 1; i < N; i++)
+        fac[i] = mul(fac[i - 1], i);
+}
+
+ll nPr(ll n, ll r) {
+    return mul(fac[n], modInverse(fac[n - r]));
+}
+
+ll nCr(ll n, ll r) {
+    //   return fac[n] / (fac[r] * fac[n - r]);
+    return mul(fac[n], modInverse(mul(fac[n - r],
+                                      fac[r])));
+}
+
+ll starsAndBars(ll stars, ll bars) {
+    return nCr(stars + bars, bars);
+}
+
+bool check(ll x, ll a, ll b) {
+    while (x > 0) {
+
+        if (x % 10 == a || x % 10 == b) {
+            x /= 10;
+        } else return false;
+    }
+    return true;
+}
+
+vector<int> adj[10001];
+int vis[10001];
+bool boo=0;
+int mx = 0, mxN = 1,N1,M;
+
+void dfs(int node) {
+    vis[node] = 1;
+
+    for (auto i: adj[node]) {
+        if (vis[i] == 0||vis[i] == 2) {
+            dfs(i);
+        }
+        if(vis[i]==1)
+            boo=1;
+    }
+    vis[node] = 2;
+}
+
+void bfs(int src) {
+    int te = 0;
+    queue<pair<int, int>> q;
+    q.push({src, 1});
+    vis[src] = 1;
+    while (!q.empty()) {
+        int node = q.front().first, lev = q.front().second;
+        for (auto i: adj[node]) {
+            if (!vis[i])
+                q.push({i, lev + 1});
+            vis[i] = 1;
+        }
+        q.pop();
+    }
+}
+
+int countDivisors(int n) {
+    int cnt = 0;
+    for (int i = 1; i <= sqrt(n); i++) {
+        if (n % i == 0) {
+
+            if (n / i == i)
+                cnt++;
+            else
+                cnt = cnt + 2;
+        }
+    }
+    // mp[n]=cnt;
+    return cnt;
+}
+
+ll NCR(int n, int m) {
+    ld res = 1;
+    m = min(m, n - m);
+    for (int i = 0; i < m; i++) {
+        res = res * (n - i) / (i + 1);
+    }
+    return (ll) res;
+}
+
+int com(pair<int, int> a, pair<int, int> b) {
+    if (abs(a.second - a.first) < abs(b.second - b.first))
+        return 0;
+    else if (abs(a.second - a.first) > abs(b.second - b.first))
+        return 1;
+
+    if (max(a.second, a.first) < max(b.second, b.first))
+        return 0;
+    else
+        return 1;
+}
+
+int main() {
+#ifndef ONLINE_JUDGE
+    freopen("i.txt", "r", stdin);
+    freopen("o.txt", "w", stdout);
+#endif
+    fa
+    // priority_queue<PII, vector<PII>, greater<PII> > pq;
+    //pq.emplace(a,make_pair(b,c));
+    /*
+                 E E E E     0                      D
+                 E                                  D
+                 E E E E     I    A A A         D D D
+                 E           I   A     A       D    D
+                 E E E E     I    A A A A       D D D
+                                         A
+
+*/
+
+    ll t = 1;
+   // cin >> t;
+    for (int h = 0; h < t; ++h) {
+        ll n = 0, y = -1, cnt = 1, ans = 0, m, x = -1, a, b;
+        cin >> N1>>M;
+        for (int i = 0; i <M ; ++i) {
+            cin>>a>>b;
+            adj[a].push_back(b);
+        }
+        for (int i = 0; i < N1; ++i) {
+            if(!vis[i+1])
+            dfs(i+1);
+        }
+cout<<boo<<"\n";
+
+}}
+
+/*   y= log10(n);
+   for(ll i=0;i< (1<<y) ;i++)
+   {
+       cnt=0;
+       x=n;
+       for (int j = 0; j < y; ++j) {
+
+           if(i>>j)
+           {
+               ans+=x%int(pow(10,cnt+1));
+               x/=int(pow(10,cnt));
+               cnt=1;
+           }
+           cnt++;
+       }
+       ans+=x;
+       cout<<ans<<"\n";
+
+     //  cout<<i<<" " <<j<<" "<<ans%mod<<endl;
+
+*/
+// }
+//        ll arr[n+5];
+//        for (int i = 0; i <n; ++i) {
+//          cin>>arr[i];
+//
+//            }
+//        for (int i = 0; i <m; ++i) {
+//         cin>>x>>y;
+//        }
+//        if(x<y) {
+//cur=y-x;
+//cur/=3;
+//y-=cur;
+//x+=(cur*2);
+//if(y-x==2)
+//    y--,x+=2;
+//        }
+//        if(x>y)
+//            cout<<x*2-1<<"\n";
+//        else
+//        cout<<y*2<<"\n";
+//        }
+
+
+
+

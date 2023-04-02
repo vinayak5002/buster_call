@@ -1,0 +1,76 @@
+use std::io::stdin;
+
+#[derive(PartialEq, Eq, Clone, Debug)]
+struct Card {
+    suit: String,
+    number: i32,
+}
+
+impl Card {
+    fn new(suit: String, number: i32) -> Self {
+      Card { suit, number }
+    }
+}
+
+fn print_cards(cards: &[Card], indeces: &[usize]) {
+    for i in indeces.iter() {
+        let card = &cards[*i];
+        println!("{} {}", card.suit, card.number);
+    }
+}
+
+fn print_arr(arr: &[usize]) {
+    let result = arr.iter().map(|x| x.to_string()).collect::<Vec<String>>().join(" ");
+    println!("{}", result);
+}
+
+pub fn main() {
+    let mut buf = String::new();
+    stdin().read_line(&mut buf).unwrap();
+    let n: i32 = buf.trim_end().parse().unwrap();
+    let mut cards = Vec::new();
+    let mut indeces = Vec::new();
+    for i in 0..n {
+        let mut buf = String::new();
+        stdin().read_line(&mut buf).unwrap();
+        let card = buf.split_whitespace().collect::<Vec<&str>>();
+        let card = Card::new(card[0].to_string(), card[1].parse().unwrap());
+        cards.push(card);
+        indeces.push(i as usize);
+    }
+    let stable = quick_sort(&mut cards, &mut indeces, 0, n-1);
+    println!("{}", if stable {"Stable"} else {"Not stable"});
+    print_cards(&cards, &indeces);
+}
+
+fn quick_sort(arr: &mut Vec<Card>, indeces: &mut Vec<usize>, low: i32, high: i32) -> bool {
+    let mut stable = true;
+    if low < high {
+        let (idx_pivot, res1) = partition(arr, indeces, low as i32, high as i32);
+
+        let res2 = quick_sort(arr, indeces, low, idx_pivot - 1);
+        let res3 = quick_sort(arr, indeces, idx_pivot + 1, high);
+        stable = res1 & res2 & res3;
+    }
+    stable
+}
+
+fn partition(arr: &mut Vec<Card>, indeces: &mut Vec<usize>, low: i32, high: i32) -> ( i32, bool ) {
+    let mut i = low - 1;
+    let low = low as usize;
+    let high = high as usize;
+    let pivot = &arr[indeces[high]];
+    let mut stable = true;
+
+    for j in low..high {
+        if arr[indeces[j]].number <= pivot.number {
+            i+=1;
+            indeces.swap(i as usize, j);
+            if arr[indeces[i as usize]].suit == arr[indeces[j]].suit {
+                stable = false;
+            }
+        }
+    }
+    indeces.swap((i + 1) as usize, high);
+    ( i + 1, stable )
+}

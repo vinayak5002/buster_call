@@ -1,0 +1,49 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+  int n;
+  cin >> n;
+  vector<vector<pair<int, int>>> G(n);
+  for(int i = 0; i < n-1; i++){
+    int s, t, w;
+    cin >> s >> t >> w;
+    G[s].emplace_back(t, w);
+    G[t].emplace_back(s, w);
+  }
+  queue<int> que;
+  que.push(0);
+  vector<int> dist1(n, -1), dist2(n, -1);
+  dist1[0] = 0;
+  while(!que.empty()){
+    int v = que.front();
+    que.pop();
+    for(auto[nv, cost] : G[v]){
+      if(dist1[nv] != -1) continue;
+      dist1[nv] = dist1[v] + cost;
+      que.push(nv);
+    }
+  }
+  int id = -1, M = 0;
+  for(int i = 0; i < n; i++){
+    if(M < dist1[i]){
+      M = dist1[i];
+      id = i;
+    }
+  }
+  que.push(id);
+  dist2[id] = 0;
+  while(!que.empty()){
+    int v = que.front();
+    que.pop();
+    for(auto[nv, cost] : G[v]){
+      if(dist2[nv] != -1) continue;
+      dist2[nv] = dist2[v] + cost;
+      que.push(nv);
+    }
+  }
+  
+  cout << *max_element(dist2.begin(), dist2.end()) << endl;
+  return 0;
+}
+

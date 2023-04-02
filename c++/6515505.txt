@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef pair<ll, ll> pr;
+typedef pair<pr, ll> pr2;
+
+const ll INF = 1e11;
+
+// {cost, vertex}で管理する
+
+int main(void){
+    ll V, E; cin >> V >> E;
+    vector<vector<pr>> G(V, vector<pr>(0)); // 隣接リスト
+    for(ll i = 0; i < E; i++){
+        ll s, t, w; cin >> s >> t >> w;
+        G[s].push_back({w, t});
+        G[t].push_back({w, s});
+    }
+    vector<ll> min_reserved(V, INF);
+    ll ans = 0;
+    priority_queue<pr, vector<pr>, greater<pr>> que;
+    que.push({0, 0});
+    min_reserved[0] = 0;
+    ll count = 0;
+    while(!que.empty()){
+        pr q = que.top(); que.pop();
+        ll q_cost = q.first, u = q.second;
+        if(q_cost == min_reserved[u]){
+            ans += q_cost;
+            for(ll i = 0; i < G[u].size(); i++){
+                ll cost = G[u][i].first, v = G[u][i].second;
+                if(cost < min_reserved[v]){
+                    min_reserved[v] = cost;
+                    que.push({cost, v});
+                }
+            }
+        }
+    }
+    cout << ans << endl;
+}
+

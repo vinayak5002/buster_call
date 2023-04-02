@@ -1,0 +1,80 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+#include <string>
+#include <sstream>
+using namespace std;
+
+
+class Vector {
+private:
+	static const int max_num_elements = 200000;
+	int data_[max_num_elements];
+	unsigned int size_;
+
+public:
+	Vector() : size_(0) {
+		return;
+	}
+
+	~Vector() {
+		return;
+	}
+
+	void push_back(const int& x) {
+		data_[size_++] = x;
+		return;
+	}
+
+	int random_access(unsigned int p) const{
+		return data_[p];
+	}
+
+	void pop_back() {
+		size_--;
+		return;
+	}
+
+};
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	string buf;
+	int q = -1;
+	Vector vec;
+
+
+	getline(std::cin, buf);
+	q = stoi(buf);
+
+	for(int i = 0; i < q; i++){
+		getline(std::cin, buf);
+		if(buf[0] == '0'){
+			istringstream stream(buf);
+			int tmp, x;
+
+			stream >> tmp >> x;
+			vec.push_back(x);
+		}
+		else if(buf[0] == '1'){
+			istringstream stream(buf);
+			int tmp, p;
+
+			stream >> tmp >> p;
+			cout << vec.random_access(p) << endl;
+		}
+		else{
+			vec.pop_back();
+		}
+	}
+	return 0;
+}

@@ -1,0 +1,84 @@
+import scala.annotation.tailrec
+import scala.io.StdIn
+
+class Node() {
+  var nodes: List[Node] = List()
+  def register(key:String):Unit = {
+    def setNode(root: Node, node: Node): Node = {
+      val nodeClass = node.getClass
+      val list = root.nodes.filter(nodeClass == _.getClass)
+      if (list.nonEmpty) list.head
+      else {
+        root.nodes = node :: root.nodes
+        node
+      }
+    }
+    @tailrec
+    def iterate(root:Node, key:String):Unit = key.headOption match {
+      case Some('A') => iterate(setNode(root, ANode()), key.tail)
+      case Some('C') => iterate(setNode(root, CNode()), key.tail)
+      case Some('G') => iterate(setNode(root, GNode()), key.tail)
+      case Some('T') => iterate(setNode(root, TNode()), key.tail)
+      case None => setNode(root, EOKey())
+    }
+    iterate(this, key)
+  }
+  def exist(key:String):Boolean = {
+    def findNode(root:Node, node:Node):Option[Node] = {
+      val nodeClass = node.getClass
+      val list = root.nodes.filter(nodeClass == _.getClass)
+      list.headOption
+    }
+    @tailrec
+    def iterate(root:Node, key:String):Boolean = key.headOption match {
+      case Some('A') => findNode(root, ANode()) match {
+        case Some(n) => iterate(n, key.tail)
+        case None => false
+      }
+      case Some('C') => findNode(root, CNode()) match {
+        case Some(n) => iterate(n, key.tail)
+        case None => false
+      }
+      case Some('G') => findNode(root, GNode()) match {
+        case Some(n) => iterate(n, key.tail)
+        case None => false
+      }
+      case Some('T') => findNode(root, TNode()) match {
+        case Some(n) => iterate(n, key.tail)
+        case None => false
+      }
+      case None => findNode(root, EOKey()) match {
+        case Some(_) => true
+        case None => false
+      }
+    }
+    iterate(this, key)
+  }
+
+}
+
+case class ANode() extends Node
+case class CNode() extends Node
+case class GNode() extends Node
+case class TNode() extends Node
+case class EOKey() extends Node
+
+object Main extends App {
+  val N  = StdIn.readInt()
+  val S = for (_ <- 0 until N) yield StdIn.readLine().split(" ").toList
+
+  @tailrec
+  def solver(ll:List[List[String]], ac:List[String]):List[String] = {
+    ll match {
+      case List("insert", s)::xs =>
+        tree.register(s)
+        solver(xs, ac)
+      case List("find", s)::xs => if (tree.exist(s)) solver(xs, "yes"::ac) else solver(xs, "no"::ac)
+      case _ => ac.reverse
+    }
+  }
+
+  val tree = EOKey()
+  val C = solver(S.toList, List())
+  println(s"${C.mkString("\n")}")
+}

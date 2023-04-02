@@ -1,0 +1,149 @@
+#include <cctype>
+#include <cerrno>
+#include <cfloat>
+#include <ciso646>
+#include <climits>
+#include <clocale>
+#include <cmath>
+#include <csetjmp>
+#include <csignal>
+#include <cstdarg>
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+
+#if __cplusplus >= 201103L
+#include <ccomplex>
+#include <cfenv>
+#include <cinttypes>
+#include <cstdbool>
+#include <cstdint>
+#include <ctgmath>
+#include <cwchar>
+#include <cwctype>
+#endif
+
+// C++
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <deque>
+#include <exception>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <iosfwd>
+#include <iostream>
+#include <istream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <locale>
+#include <map>
+#include <memory>
+#include <new>
+#include <numeric>
+#include <ostream>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <stdexcept>
+#include <streambuf>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <valarray>
+#include <vector>
+
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> pii;
+typedef pair<double, double> pdd;
+typedef pair<long long, long long> pll;
+
+#define REP(i, n) for (ll i = 0; i < ll(n); i++)
+#define REPD(i, n) for (ll i = n - 1; i >= 0; i--)
+#define FOR(i, a, b) for (ll i = a; i <= ll(b); i++)
+#define FORD(i, a, b) for (ll i = a; i >= ll(b); i--)
+#define FORA(i, I) for (const auto& i : I)
+
+#define ALL(x) x.begin(), x.end()
+#define SIZE(x) ll(x.size())
+
+#define INF32 2147483647
+#define INF64 9223372036854775807
+#define MOD 1000000007
+
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+
+#define OP(m) cout << m << endl;
+ll myceil(ll a, ll b) { return (a + (b - 1)) / b; }
+ll myfloor(ll a, ll b) { return a / b; }
+
+int dx4[4] = {1, 0, -1, 0};
+int dy4[4] = {0, 1, 0, -1};
+int dx8[8] = {-1, -1, 0, 1, 1, 1, 0, -1};
+int dy8[8] = {0, -1, -1, -1, 0, 1, 1, 1};
+
+struct link {
+    int to;
+    ll cost;
+    bool operator>(const link& other) const { return cost > other.cost; }
+    bool operator<(const link& other) const { return cost < other.cost; }
+};
+
+int main() {
+    int n;
+    cin >> n;
+    vector<vector<link>> adj(n);
+    REP(i, n) {
+        int u, k;
+        cin >> u >> k;
+        REP(j, k) {
+            int v, c;
+            cin >> v >> c;
+            link link1 = {v, c};
+            adj[u].push_back(link1);
+        }
+    }
+
+    priority_queue<link, vector<link>, greater<link>> Q;
+
+    vector<ll> dist(n, INF32);
+    vector<ll> dist2(n, INF32);
+    dist[0] = static_cast<ll>(0);
+    link init_edge = {0, static_cast<ll>(0)};
+    Q.push(init_edge);
+    while (!Q.empty()) {
+        link node = Q.top();
+        Q.pop();
+        int to = node.to;
+        if (node.cost > dist[to]) {
+            continue;
+        }
+        for (int i = 0; i < adj[to].size(); i++) {
+            link neighbor = adj[to][i];
+            ll newCost = dist[to] + neighbor.cost;
+            if (newCost < dist[neighbor.to]) {
+                link new_elem = {neighbor.to, newCost};
+                Q.push(new_elem);
+                swap(dist[neighbor.to], newCost);
+            }
+            if (newCost < dist2[neighbor.to]) {
+                link new_elem = {neighbor.to, newCost};
+                Q.push(new_elem);
+                dist2[neighbor.to] = newCost;
+            }
+        }
+    }
+
+    REP(i, n) { cout << i << " " << dist[i] << endl; }
+    return 0;
+}

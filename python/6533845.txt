@@ -1,0 +1,58 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.NoSuchElementException;
+import java.util.zip.ZipEntry;
+
+public class Main {
+	static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+	public static void main (String args[]) throws Exception{
+		int n = Integer.parseInt(br.readLine());
+		ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
+		for(int i = 0; i < n+1; ++i) list.add(new ArrayList<Integer>());
+		for(int i = 0; i < n; ++i) {
+			String[] s = br.readLine().split(" ");
+			int u = Integer.parseInt(s[0]);
+			int k = Integer.parseInt(s[1]);
+			for(int j = 0; j < k; ++j) {
+				list.get(u).add(Integer.parseInt(s[j+2]));
+			}
+		}
+		list.get(0).add(1);
+		
+		Deque<Integer> stack = new ArrayDeque<>();
+		boolean[] isVisited = new boolean[n+1];
+		int time = 1;
+		int[][] ans = new int[n+1][2];
+		stack.add(0);
+		while(stack.peek() != null) {
+			int vv = stack.pop();
+			stack.push(vv);
+			int size = stack.size();
+			for(Integer i : list.get(vv)) {
+				if(isVisited[i]) continue;
+				stack.push(i);
+				isVisited[i] = true;
+				ans[i][0] = time;
+				time++;
+			}
+			if(stack.size() == size) {
+				ans[vv][1] = time;
+				stack.pop();
+				time++;
+			}
+		}
+		for(int i = 0; i < n; ++i) {
+			System.out.print(i+1+" ");
+			for(int j : ans[i+1]) {
+				System.out.print(j+" ");
+			}
+			System.out.println();
+		}
+	}
+}

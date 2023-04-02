@@ -1,0 +1,63 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int root(int i, int r[]){
+    if (r[i] == i) return i;
+
+    return (r[i] = root(r[i], r));
+}
+
+void unite(int i, int j, int r[]){
+    r[root(i,r)] = root(j, r);
+}
+
+bool is_same_set(int i, int j, int r[]){
+    return root(i, r) == root(j, r); 
+}
+
+bool finish(int r[], int n){
+    for (int i=0; i < n; i++){
+        for (int j=i+1; j < n; j++){
+            if (! is_same_set(i, j, r)) return (false);
+        }
+    }
+
+    return (true);
+}
+
+int main(){
+    int n;
+    cin >> n;
+
+    int bridge[n][n], r[n];
+    for (int i=0; i < n; i++){
+        for (int j=0; j < n; j++) cin >> bridge[i][j];
+        r[i] = i;
+    }
+
+    int answer = 0;
+    while (! finish(r, n)){
+        int min = 2000;
+        for (int i=0; i < n; i++){
+            for (int j = i+1; j < n; j++){
+                if (bridge[i][j] != -1 && bridge[i][j] < min) min = bridge[i][j];
+            }
+        }
+
+        for (int i=0; i < n; i++){
+            for (int j=i+1; j < n; j++){
+                if (bridge[i][j] == min){
+                    if (! is_same_set(i, j, r)){
+                        unite(i, j, r);
+                        answer += bridge[i][j];
+                    }
+
+                    bridge[i][j] = 2000;
+                }
+            }
+        }
+    }
+
+    cout << answer << endl;
+    return 0;
+}

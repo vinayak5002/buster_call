@@ -1,0 +1,64 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+struct Edge {
+    int to, cap, rev;
+    Edge(int _to, int _cap, int _rev) : to(_to), cap(_cap), rev(_rev) {}
+};
+
+vector<vector<Edge>> G;
+
+void AddEdge(int f, int t, int c) {
+    G[f].emplace_back(t, c, G[t].size());
+    G[t].emplace_back(f, 0, G[f].size() - 1);
+}
+
+vector<int> U;
+
+int DFS(int s, int t, int f = 1 << 30) {
+    U[s] = 1;
+    if (s == t) return f;
+    for (auto& z : G[s]) {
+        if (U[z.to]) continue;
+        if (z.cap == 0) continue;
+        U[z.to] = 1;
+        int nf = DFS(z.to, t, min(z.cap, f));
+        if (nf > 0) {
+            z.cap -= nf;
+            G[z.to][z.rev].cap += nf;
+            return nf;
+        }
+    }
+    return 0;
+}
+
+int main(int argc, const char * argv[]) {
+    int X, Y, M;
+    cin >> X >> Y >> M;
+    int N = X + Y + 2;
+    G.resize(N);
+    for (int m = 0; m < M; ++m) {
+        int x, y;
+        cin >> x >> y;
+        AddEdge(x, X + y, 1);
+    }
+    for (int x = 0; x < X; ++x) {
+        AddEdge(N - 2, x, 1);
+    }
+    for (int y = 0; y < Y; ++y) {
+        AddEdge(X + y, N - 1, 1);
+    }
+    
+    int Ans = 0;
+    while (1) {
+        U.assign(N, 0);
+        int F = DFS(N - 2, N - 1);
+        if (F == 0) break;
+        Ans += F;
+    }
+    cout << Ans << endl;
+    
+    return 0;
+}
+

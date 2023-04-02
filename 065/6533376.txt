@@ -1,0 +1,72 @@
+#include <iostream>
+#include <math.h>
+#include <vector>
+#include <string>
+#include <utility>
+#include <algorithm>
+#include <map>
+#include <queue>
+#include <set>
+#include <bitset>
+using namespace std;
+
+#undef SHRT_MIN
+#undef SHRT_MAX
+#undef USHRT_MAX
+#undef INT_MIN
+#undef UINT_MAX
+#undef LONG_MIN
+#undef LONG_MAX
+#undef ULONG_MAX
+#undef LLONG_MAX
+#undef LLONG_MIN
+#undef ULLONG_MAX
+#define SHRT_MIN    (-32768)
+#define SHRT_MAX      32767
+#define USHRT_MAX     0xffff
+#define INT_MIN     (-2147483647 - 1)
+#define INT_MAX       2147483647
+#define UINT_MAX      0xffffffff
+#define LONG_MIN    (-2147483647L - 1)
+#define LONG_MAX      2147483647L
+#define ULONG_MAX     0xffffffffUL
+#define LLONG_MAX     9223372036854775807
+#define LLONG_MIN   (-9223372036854775807 - 1)
+#define ULLONG_MAX    0xffffffffffffffffu
+
+#define vecALL(vec) (vec).begin() , (vec).end() 
+
+#define vecSORT(vec) sort(vecALL(vec))
+#define vecrSORT(vec) sort(vec.rbegin(), vec.rend())
+
+typedef long long llong;
+typedef unsigned long long ullong;
+
+//オーバーフロー対策
+#define int llong
+#define uint ullong
+
+
+signed main() {
+	/*ios::sync_with_stdio(false);
+	cin.tie(nullptr);*/
+
+
+	int N, M;
+	cin >> N >> M;
+	vector<int>C(M);
+	for (int i = 0; i < M; i++)cin >> C[i];
+
+	vector<vector<int> >dp(M + 1, vector<int>(N + 1, INT_MAX));
+	dp[0][0] = 0;
+
+	for (int m = 0; m < M; m++) {
+		for (int n = 0; n <= N; n++) {
+			if (n >= C[m])dp[m + 1][n] = min(min(dp[m][n], dp[m][n - C[m]] + 1), dp[m + 1][n - C[m]] + 1);
+			else dp[m + 1][n] = dp[m][n];
+		}
+	}
+	cout << dp[M][N] << endl;
+	return 0;
+}
+

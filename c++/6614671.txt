@@ -1,0 +1,113 @@
+#define _USE_MATH_DEFINES
+#include<iostream>
+#include<iomanip>
+#include<vector>
+#include<string>
+#include<algorithm>
+#include<cmath>
+#include<stack>
+#include<queue>
+#include<set>
+#include<map>
+#include<climits>
+#include<bitset>
+#include<unordered_map>
+#include<unordered_set>
+#include<random>
+#include<list>
+#include<functional>
+using namespace std;
+#define LP(I,S,G) for (long long int I = (S); I < (G); I++)
+#define IN(X) 	for (int in = 0; in < X.size(); in++)cin >> X[in]
+#define OUT(X) 	for (int in = 0; in < X.size(); in++)cout << X[in]<<" "
+#define SORT(X) sort((X).begin(), (X).end())
+#define CSORT(X,Y) sort(X.begin(), X.end(),Y)
+#define COPY(X,Y) copy(X.begin(), X.end(), Y.begin())
+#define ALL(X,Y) for (auto X = (Y).begin(); X != (Y).end(); X++)
+#define FULL(a)  (a).begin(),(a).end()
+#define BFS(Q,S) for(Q.push(S);Q.size()!=0;Q.pop())
+typedef long long int ll;
+typedef unsigned long long int ull;
+long long int M = 998244353;
+
+
+int dx[] = { 1,0,-1,0 }, dy[] = { 0,-1,0,1 };
+
+ll MAX(ll A, ll B) { return ((A) > (B) ? (A) : (B)); }
+ll MIN(ll A, ll B) { return ((A) < (B) ? (A) : (B)); }
+long long int xor128() {
+	static long long int x = 123456789, y = 362436069, z = 521288629, w = 88675123;
+	long long int t = (x ^ (x << 11));
+	x = y; y = z; z = w;
+	return (w = (w ^ (w >> 19)) ^ (t ^ (t >> 8)));
+}
+
+struct HashPair {
+	//注意 constがいる
+	template<class T1, class T2>
+	size_t operator()(const pair<T1, T2> &p) const {
+		//first分をハッシュ化する
+		auto hash1 = hash<T1>{}(p.first);
+		//second分をハッシュ化する
+		auto hash2 = hash<T2>{}(p.second);
+		//重複しないようにハッシュ処理
+		size_t seed = 0;
+		seed ^= hash1 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		seed ^= hash2 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		return seed;
+	}
+};
+template<class I1, class I2>
+istream& operator>>(istream& s, pair<I1, I2>& in) {
+	s >> in.first >> in.second;
+	return s;
+}
+
+
+int main() {
+	while (1) {
+		ll n;
+		cin >> n;
+		if (n == 0)break;
+		vector<ll> p(n);
+		IN(p);
+		vector<vector<vector<ll>>> dp(n + 1, vector<vector<ll>>(n + 1, vector<ll>(1000, LLONG_MAX)));
+		dp[0][0][0] = 0;
+		LP(x, 0, n) {
+			LP(y, 0, n) {
+				LP(z, 0, 1000) {
+					if (dp[x][y][z] == LLONG_MAX)continue;
+//					cout << x << " " << y << " " << z << "->\n";
+					dp[x + 1][y][z] = MIN(dp[x][y][z], dp[x + 1][y][z]);
+					if (z >= 500) {
+						dp[x + 1][y + 1][(500+z - p[x] % 1000) % 1000] = MIN(dp[x][y][z] + p[x], dp[x + 1][y + 1][(1000 + z - p[x] % 1000) % 1000]);
+//						cout << x+1 << " " << y+1 << " " << (500 + z - p[x] % 1000) % 1000 << "\n";
+					}
+					else if (1000+z - p[x] % 1000 >= 500&&p[x]%1000!=0) {
+						dp[x + 1][y + 1][(500 + z - p[x] % 1000)%1000] = MIN(dp[x][y][z] + p[x], dp[x + 1][y + 1][(500 + z - p[x] % 1000)%1000]);
+//						cout << x+1 << " " << y + 1 << " " << (500 + z - p[x] % 1000) % 1000 << "\n";
+					}
+					else {
+						dp[x + 1][y][(1000 + z - p[x] % 1000)%1000] = MIN(dp[x][y][z] + p[x], dp[x + 1][y][(1000 + z - p[x] % 1000)%1000]);
+//						cout << x+1 << " " << y  << " " << (1000 + z - p[x] % 1000)%1000 << "\n";
+					}
+				}
+			}
+		}
+		ll max = 0, min = LLONG_MAX;
+		LP(y, 0, n+1) {
+			LP(z, 0, 1000) {
+				if (dp[n][y][z] == LLONG_MAX)continue;
+				if (y > max) {
+					max = y;
+					min = dp[n][y][z];
+				}
+				else {
+					min = MIN(dp[n][y][z], min);
+				}
+			}
+		}
+		cout << max << " " << min << "\n";
+	}
+	return 0;
+}

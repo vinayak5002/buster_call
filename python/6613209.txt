@@ -1,0 +1,83 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace プログラム実行用
+{
+    internal class Program
+    {
+        static void Main(string[] args)
+        {
+            string line = Console.ReadLine();
+            int count = int.Parse(line.Split(' ')[0]);
+            int quantam = int.Parse(line.Split(' ')[1]);
+            string[] strAr = new string[count];
+            for(int i = 0; i < count; i++)
+            {
+                strAr[i] = Console.ReadLine();
+            }
+            Run(strAr, quantam);
+        }
+
+        public class Item
+        {
+            public string pName { get; set; }
+            public int Time { get; set; }
+
+            public Item(string name, int time)
+            {
+                pName = name;
+                Time = time;
+            }
+        }
+
+        static void Run(string[] strArray, int quantum)
+        {
+            Queue<Item> queue = new();
+
+            for (int i = 0; i < strArray.Length; i++)
+            {
+                string val = strArray[i].Split(' ')[1];
+                string name = strArray[i].Split(' ')[0];
+                queue.Enqueue(new Item(name, int.Parse(val)));
+            }
+
+
+            int count = 0;
+            List<Item> resultList = new();
+            while (queue.Count > 0)
+            {
+                int left = quantum;
+                // 値を取り出す
+                Item process = queue.Dequeue();
+
+                int val = process.Time;
+
+                int result = val - left;
+                // 処理完了
+                if (result <= 0)
+                {
+                    // 処理能力の残り
+                    left = Math.Abs(result);
+                    count += val;
+
+                    string name = process.pName;
+                    resultList.Add(new Item(name, count));
+                    if (queue.Count == 0) break;
+                }
+                else
+                {
+                    process.Time = result;
+                    queue.Enqueue(process);
+                    count += quantum;
+                }
+            }
+
+            foreach (var r in resultList)
+            {
+                Console.WriteLine($"{r.pName} {r.Time}");
+            }
+        }
+    }
+}
+

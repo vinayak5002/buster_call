@@ -1,0 +1,102 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+#define all(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+bool chmax(ll& p, ll q) {
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+bool chmin(ll& p, ll q) {
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+ll gcd(ll(a), ll(b)) {
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+
+    vll T(10, 1);
+    rep(i, 9) {
+        T[i + 1] = T[i] * 10;
+    }
+    while (1) {
+        ll N;
+        cin >> N;
+        if(N==0)return 0;
+        vector<string> S(N);
+        rep(i, N)cin >> S[i];
+        map<char, ll> CN;
+        map<ll, ll> MC;
+        set<ll> F;
+        rep(i, N - 1) {
+            rep(k, S[i].size()) {
+                if (!CN.count(S[i][k]))CN[S[i][k]] = CN.size();
+                MC[CN[S[i][k]]] += T[S[i].size() - k - 1];
+
+                
+            }
+            if(S[i].size()!=1)F.insert(CN[S[i][0]]);
+            
+        }
+        rep(k, S[N-1].size()) {
+            if (!CN.count(S[N-1][k]))CN[S[N-1][k]] = CN.size();
+            MC[CN[S[N - 1][k]]] -= T[S[N-1].size() - k - 1];
+            if(S[N-1].size()!=1)F.insert(CN[S[N-1][0]]);
+        }
+
+        
+        vll P(10);
+        rep(i, 10)P[i] = i;
+
+        ll an = 0;
+        do {
+            ll j = 0;
+
+            for (auto m : MC) {
+                j += P[m.first] * m.second;
+                if (P[m.first] == 0 && F.count(m.first))j = -1e18;
+            }
+            an += (j == 0);
+            
+
+        } while (next_permutation(all(P)));
+        rep(i,10 - MC.size()) {
+            an /= (i + 1);
+        }
+        cout << an << endl;
+    }
+
+
+}

@@ -1,0 +1,210 @@
+#include <bits/stdc++.h>
+// #include <iostream>
+// #include <cstdio>
+// #include <iomanip>
+// #include <cmath>
+using namespace std;
+
+const double eps=1e-7;
+const double PI = 3.1415926535897;
+int dcmp(double x){ //判断当前浮点数正负
+    if(fabs(x) < eps) return 0;
+    return x < 0 ? -1 : 1;
+}
+bool dcmp(double a, double b){
+    return fabs(a - b) < eps;
+}
+struct Point{
+    double x,y;
+    Point(double x=0, double y=0):x(x),y(y){}
+};
+typedef Point Vector;
+Vector operator + (Vector A, Vector B) { return Vector(A.x+B.x, A.y+B.y); }
+Vector operator - (Point A, Point B) { return Vector(A.x-B.x, A.y-B.y); }
+Vector operator * (Vector A, double t) { return Vector(A.x*t, A.y*t); }
+Vector operator / (Vector A, double t) { return Vector(A.x/t, A.y/t); }
+bool operator < (const Point& a, const Point& b){
+    return a.x < b.x || (a.x == b.x && a.y < b.y);
+}
+bool operator == (const Point& a, const Point &b){
+    return dcmp(a.x-b.x) == 0 && dcmp(a.y-b.y) == 0;
+}
+double Dot(Vector A, Vector B){ //点积
+    return A.x * B.x + A.y * B.y;
+}
+double Length(Vector A){ //向量长度
+    return sqrt(Dot(A,A));
+}
+double Angle(Vector A){
+    return atan2(A.y,A.x);
+}
+double Angle(Vector A, Vector B){ //向量A到向量B的夹角
+    return acos(Dot(A,B) / Length(A) / Length(B));
+}
+double Cross(Vector A, Vector B){ //叉积
+    return A.x * B.y - A.y * B.x;
+}
+Vector Rotate(Vector A, double rad) { //A向量逆时针旋转rad弧度
+    return Vector(A.x*cos(rad)-A.y*sin(rad),A.x*sin(rad)+A.y*cos(rad));
+}
+bool Pointcmp(Point a, Point b){
+    if(a.x != b.x) return a.x < b.x;
+    return a.y < b.y;
+}
+
+Point Intersection(Point P, Vector v, Point Q, Vector w){ //求两直线交点
+    Vector u = P - Q;
+    double t = Cross(w, u) / Cross(v, w);
+    return P+v*t;
+}
+double DistanceToLine(Point P, Point A, Point B){ //点P到直线AB的距离 
+    Vector v1 = B - A, v2 = P - A;
+    return fabs(Cross(v1, v2)) / Length(v1);
+}
+double DistanceToSegment(Point P, Point A, Point B){ //点P到线段AB的距离 
+    if(A == B) return Length(P-A);
+    Vector v1 = B - A, v2 = P - A, v3 = P - B;
+    if(dcmp(Dot(v1, v2)) < 0) return Length(v2);
+    else if(dcmp(Dot(v1, v3)) > 0) return Length(v3);
+    else return fabs(Cross(v1, v2)) / Length(v1);
+}
+Point GetLineProjection(Point P, Point A, Point B){ 
+//点P在直线AB上的投影 
+    Vector V = B-A;
+    return A+V*(Dot(V, P-A) / Dot(V, V));
+}
+Point GetLineReflection(Point P, Point A, Point B){ //点P到直线AB的反射（对称点）
+    Point C = GetLineProjection(P,A,B);
+    return C + C - P;
+}
+int CompareVectorDirection(Vector A, Vector B){//判断向量B在向量A中的位置（-1为逆时针，1为顺时针，0为同向，-2为反向）
+    double x = dcmp(Cross(B,A));
+    if(x) return x;
+    if(Dot(A,B)<0) return -2;
+    return 0;
+}
+bool InTheSegment(Point P, Point A, Point B){//判断P在线段AB上
+    Vector v1 = B - A, v2 = P - A;
+    if(P==A) return true;
+    return dcmp(Cross(v1,v2)) == 0 && dcmp(Dot(v1,v2)) == 1 && Length(v1) >= Length(v2);
+}
+bool sameLine(Point P, Point A, Point B){
+    if(!dcmp(Cross(B-A, P-A))) return true;
+    return false;
+}
+bool SegmentProperIntersection(Point a1, Point a2, Point b1, Point b2){ //判断两个线段是否规范相交（恰好有一个公共点且不是顶点） 
+    double c1 = Cross(a2-a1,b1-a1), c2 = Cross(a2-a1,b2-a1),
+           c3 = Cross(b2-b1,a1-b1), c4 = Cross(b2-b1,a2-b1);
+    return dcmp(c1)*dcmp(c2)<0 && dcmp(c3)*dcmp(c4) < 0;
+}
+bool SegmentIntersection(Point A, Point B, Point P, Point Q){//判断两个线段是否相交
+    if(SegmentProperIntersection(A,B,P,Q)) return 1;
+    if(InTheSegment(A,P,Q) || InTheSegment(B,P,Q)) return 1;
+    if(InTheSegment(P,A,B) || InTheSegment(Q,A,B)) return 1;
+    return 0;
+}
+double DistanceBetweenSegment(Point P, Point Q, Point A, Point B){
+    if(SegmentIntersection(P,Q,A,B)) return 0.0;
+    return min({DistanceToSegment(P,A,B), DistanceToSegment(Q,A,B),
+            DistanceToSegment(A,P,Q), DistanceToSegment(B,P,Q)});
+}
+struct Line{
+    Point S, T;
+    double a, b, c;
+    double ang;
+    void getline(Point A, Point B){
+        S = A, T = B;
+        ang = Angle(T - S);
+    }
+    Line(){}
+    Line(Point x, Point y){
+        this->S = x, this->T = y, this->ang = Angle(x,y);
+        if(fabs(x.x - y.x) < eps){
+            a = 1, c = -x.x, b = 0;
+        }else if(fabs(x.y - y.y) < eps){
+            a = 0, c = -x.y, b = 1;
+        }else{
+            a = x.y - y.y, b = y.x - x.x,
+            c = (x.x - y.x) * y.y - (x.y - y.y) * y.x;
+        }
+    }
+    bool operator<(const Line &l) const{
+        return ang < l.ang;
+    }
+    bool same_side(Point P){
+        if(P == S) return 1;
+        return Dot(T-S, P-S) >= 0;
+    }
+};
+bool Parallel(Line a, Line b){ //判断两条线是否平行
+    return dcmp(Cross(a.T - a.S, b.T - b.S), 0);
+}
+bool Orthogonal(Line a, Line b){ //判断两条线是否相交
+    return dcmp(Dot(a.T - a.S, b.T - b.S),0);
+}
+Point Intersection(Line a, Line b){ //两直线交点
+    return Intersection(a.S, a.T - a.S, b.S, b.T - b.S);
+}
+double PolygonArea(Point* p, int n){   //求凸包面积
+    double area = 0;
+    for(int i = 1; i < n-1; i++){
+        area+=Cross(p[i]-p[0],p[i+1]-p[0]);
+    }
+    return fabs(area/2);
+}
+bool checkPolygon(Point* p, int n){ //判断按照该顺序是否构成一个凸包
+    int w = -2;
+    for(int i = 0; i < n; i++){
+        int t = CompareVectorDirection(p[(i+1)%n]-p[i],p[(i-1+n)%n]-p[i]);
+        if(t==-2) continue;
+        if(w==-2) w = t;
+        if(t!=w) return 0;
+    }
+    return 1;
+}
+bool checkdirection(Vector V1, Vector V2, Vector P){ //判断什么来着？
+    int x = CompareVectorDirection(P,V1);
+    int y = CompareVectorDirection(P,V2);
+    if(x==1 && y==-1 || x==-1 && y==1) return false;
+    return true;
+}
+mt19937 rnd(time(0));
+double rangeRand(double l, double r){
+    double res = (1.0 * rnd() / UINT_MAX) * (r - l + 1) + l;
+    return res;
+}
+int P_In_Polygon(Point A, Point *p, int num){ // 2为A在多边形上，1为A在多边形里面，0为A在多边形外部。
+    int cnt = 0;
+
+    double ang = rangeRand(0.1,100);
+    //cout<<ang<<'\n';
+    Point B = A + Point(1, ang);
+    Line b(A, B);
+    for(int i = 0; i < num; i++){
+        if(InTheSegment(A,p[i], p[(i+1)%num])) return 2;
+        Line a(p[i], p[(i+1)%num]);
+        if(InTheSegment(Intersection(a,b), p[i], p[(i+1)%num]) && b.same_side(Intersection(a,b))) cnt++;
+    }
+    //cout<<cnt<<endl;
+    return cnt & 1;
+}
+
+const int N = 105;
+Point p[N];
+signed main(){
+    cin.tie(0)->sync_with_stdio(0);
+    cout<<fixed<<setprecision(10);
+
+    int n, q, x, y;
+    cin>>n;
+    for(int i = 0; i < n; i++){
+        cin>>p[i].x>>p[i].y;
+    }   
+
+    cin>>q;
+    for(int i = 0; i < q; i++){
+        cin>>x>>y;
+        int flg = P_In_Polygon(Point(x,y), p, n);
+        cout<<(flg != 1 ? (flg != 2 ? 0 : 1) : 2)<<'\n';
+    }
+}

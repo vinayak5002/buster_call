@@ -1,0 +1,142 @@
+import java.util.Scanner;
+
+public class Main {
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		
+		String[][] chess = new String[8][8];
+		int n = sc.nextInt();
+		
+		for(int i=0;i<n;i++) {
+			int l = sc.nextInt();
+			int w = sc.nextInt();
+			insert(chess,w,l);
+			/*for(int j=0;j<8;j++) {
+				chess[width][j] = ".";
+				chess[j][length] = ".";
+				if(width+j < 8 && length + j < 8) {
+					chess[width+j][length+j] = ".";
+				}
+				if(width-j >= 0 && length + j < 8) {
+					chess[width-j][length+j] = ".";
+				}
+				if(width-j >= 0 && length - j >= 0) {
+					chess[width-j][length-j] = ".";
+				}
+				if(width+j < 8 && length - j >= 0) {
+					chess[width+j][length-j] = ".";
+				}
+			}*/
+		}
+		
+		//print(chess);
+		//System.out.println(chess[0][0]);
+		if(cal(chess,0,0)) {
+			print(chess);
+		}else {
+			System.out.println("false");
+			print(chess);
+		}
+		
+	}
+	
+	static void insert(String[][] chess,int w,int l) {
+		
+				/*for(int j=0;j<8;j++) {
+					chess[w][j] = ".";
+					chess[j][l] = ".";
+					if(w+j < 8 && l + j < 8) {
+						chess[w+j][l+j] = ".";
+					}
+					if(w-j >= 0 && l + j < 8) {
+						chess[w-j][l+j] = ".";
+					}
+					if(w-j >= 0 && l - j >= 0) {
+						chess[w-j][l-j] = ".";
+					}
+					if(w+j < 8 && l - j >= 0) {
+						chess[w+j][l-j] = ".";
+					}
+				}*/
+				chess[w][l] = "Q";
+				//print(chess);
+				//System.out.println();
+	}
+	
+	static boolean check(String[][] chess,int w,int l) {
+		for(int j=0;j<8;j++) {
+			if(chess[w][j] == "Q" || chess[j][l] == "Q") {
+				return false;
+			}
+			if(w+j < 8 && l + j < 8) {
+				if(chess[w+j][l+j] == "Q") return false;
+			}
+			if(w-j >= 0 && l + j < 8) {
+				if(chess[w-j][l+j] == "Q") return false;
+			}
+			if(w-j >= 0 && l - j >= 0) {
+				if(chess[w-j][l-j] == "Q") return false;
+			}
+			if(w+j < 8 && l - j >= 0) {
+				if(chess[w+j][l-j] == "Q") return false;
+			}
+		}
+		return true;
+	}
+	
+	static void delete(String[][] chess,int l) {
+		for(int i=0;i<8;i++) {
+			if(chess[i][l] == "Q") {
+				chess[i][l] = null;
+			}
+		}
+	}
+	
+	
+	static boolean cal(String[][] chess,int w,int l) {
+		/*System.out.println("first");
+		print(chess);
+		System.out.println();*/
+		
+		if(l >= 8) return true;
+		for(int i=w;i<8;i++) {
+			if(chess[i][l] == "Q") {
+				if(cal(chess,0,l+1) == false) {
+					return false;
+				}else {
+					return true;
+				}
+			}
+			if(check(chess,i,l)) {
+				insert(chess,i,l);
+				if(cal(chess,0,l+1) == false) {
+					delete(chess,l);
+					if(i+1 >= 8) {
+						return false;
+					}else {
+						check(chess,i+1,l);
+					}
+				}else {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	
+	static void print(String[][] chess) {
+		for(int i=0;i<8;i++) {
+			for(int j=0;j<8;j++) {
+				if(chess[j][i] == null) {
+					System.out.print(".");
+				}else {
+					System.out.print(chess[j][i]);
+				}
+			}
+			System.out.println();
+		}
+		
+	}
+}
+

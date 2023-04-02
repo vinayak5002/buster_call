@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef pair<int, int> Pair;
+
+int N, coords[100000][2];
+bool visited[100000];
+
+long solve() {
+    long totalCost = 0;
+
+    priority_queue<Pair, vector<Pair>, greater<Pair>> queue;
+    queue.push(make_pair(0, 0));
+
+    int numVisitedCities = 0;
+    while (!queue.empty()) {
+        Pair p = queue.top();
+        queue.pop();
+        while (visited[p.second]) {
+            p = queue.top();
+            queue.pop();
+        }
+
+        totalCost += p.first;
+        visited[p.second] = true;
+
+        numVisitedCities++;
+        if (numVisitedCities == N)
+            return totalCost;
+
+        for (int i = 0; i < N; i++) {
+            if (visited[i])
+                continue;
+            queue.push(make_pair(max(abs(coords[i][0] - coords[p.second][0]), abs(coords[i][1] - coords[p.second][1])), i));
+        }
+
+        while (!queue.empty() && queue.top().first == p.first) {
+            Pair pp = queue.top();
+            queue.pop();
+            if (visited[pp.second])
+                continue;
+
+            totalCost += pp.first;
+            visited[pp.second] = true;
+
+            numVisitedCities++;
+            if (numVisitedCities == N)
+                return totalCost;
+        }
+    }
+
+    return totalCost;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+
+    cin >> N;
+    for (int i = 0; i < N; i++)
+        cin >> coords[i][0] >> coords[i][1];
+    cout << solve() << endl;
+
+    return 0;
+}
+

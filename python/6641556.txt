@@ -1,0 +1,67 @@
+using System;
+using System.Linq;
+using System.Collections.Generic;
+
+internal class Program
+{
+    static void Main()
+    {
+        while (true)
+        {
+            var n = int.Parse(Console.ReadLine());
+            var m = int.Parse(Console.ReadLine());
+
+            // 終了条件
+            if (n == 0 && m == 0)
+            {
+                break;
+            }
+
+            // 友達関係の格納用
+            var graph = new List<List<int>>();
+
+            // 初期化処理
+            for (int i = 0; i < n; i++)
+            {
+                graph.Add(new List<int>());
+            }
+
+            // 自分の友達関係用
+            var friend = new List<int>();
+
+            for (int i = 0; i < m; i++)
+            {
+                var input = Console.ReadLine().Split().Select(int.Parse).ToArray();
+                var a = input[0] - 1;
+                var b = input[1] - 1;
+                graph[a].Add(b);
+                graph[b].Add(a);
+
+                if (a == 0)
+                {
+                    friend.Add(b);
+                }
+            }
+            // 自分の友達の友達関係用
+            var friendsFriend = new List<int>();
+            
+            foreach (int f in friend.ToArray())
+            {
+                foreach(int ff in graph[f])
+                {
+                    friendsFriend.Add(ff);
+                }
+            }
+
+            // friend + friendsFriend
+            friend.AddRange(friendsFriend);
+
+            // 重複削除
+            var ans = friend.Distinct().ToList();
+
+            // 自分が含まれてたら削除
+            ans.Remove(0);
+            Console.WriteLine(ans.Count());
+        }
+    }
+}

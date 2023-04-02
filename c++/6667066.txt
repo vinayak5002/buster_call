@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <stdbool.h>
+
+int max;
+
+typedef struct{
+    int pointA, x1, y1;
+    int pointB, x2, y2;
+    int len;
+} universalSet;
+
+
+void generateLine(int* x, int* y, universalSet* line);
+
+int cmp(const void* a, const void* b);
+
+long long int Kruskal(universalSet* line);
+
+bool connect(int pointA, int pointB, int* disjointSet);
+
+int find_root(int* disjointSet, int point);
+
+int main(){
+    scanf("%d", &max);
+    int* x = (int*)calloc(max, sizeof(int));
+    int* y = (int*)calloc(max, sizeof(int));
+    for(int i=0; i<max; i++){
+        scanf("%d%d", &x[i], &y[i]);
+    }
+
+    universalSet* line = calloc(max*(max-1)/2, sizeof(universalSet)); 
+    generateLine(x, y, line);
+    qsort(line, max*(max-1)/2, sizeof(universalSet), cmp);  
+
+    printf("%lld\n", Kruskal(line)); 
+
+    free(x);
+    free(y);
+    return 0;
+}
+
+void generateLine(int* x, int* y, universalSet* line){
+    for(int i=0; i<max; i++){
+        for(int j=i+1; j<max; j++){
+            static int k=0;
+            line[k].pointA = i;
+            line[k].pointB = j;
+            line[k].x1 = x[i]; line[k].y1 = y[i];
+            line[k].x2 = x[j]; line[k].y2 = y[j];
+            line[k].len = ( abs(x[i] - x[j]) > abs(y[i] - y[j]) )?\
+                abs(x[i] - x[j]) : abs(y[i] - y[j]);
+            k++;
+        }
+    }
+}
+
+int cmp(const void*a, const void*b){
+    universalSet *lineA = (universalSet*)a;
+    universalSet *lineB = (universalSet*)b;
+    return ( lineA->len - lineB->len );
+}
+
+long long int Kruskal(universalSet* line){
+    int *disjointSet = (int*)calloc(max, sizeof(int));
+    for(int i=0; i<max; i++) disjointSet[i] = i;  
+
+    long long int sum=0;
+    for(int k=0; k<max*(max-1)/2; k++){  
+        if(connect(line[k].pointA, line[k].pointB, disjointSet)){
+            sum += (long long int)line[k].len; 
+        } else{
+            continue;
+        }
+    }
+
+    free(disjointSet);
+    return sum;
+} 
+ 
+bool connect(int pointA, int pointB, int* disjointSet){
+    int rootA = find_root(disjointSet, pointA);
+    int rootB = find_root(disjointSet, pointB);
+    
+    if(rootA != rootB){
+        disjointSet[rootA] = rootB;  
+        return true;
+    } else{
+        return false;
+    }
+}
+
+int find_root(int* disjointSet, int point){
+    if(disjointSet[point] == point) return point; 
+
+    int root = find_root(disjointSet, disjointSet[point]); 
+    disjointSet[point] = root;  
+    return root;
+}

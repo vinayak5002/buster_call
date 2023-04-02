@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+
+#define rep(i,n) for(ll (i)=0; (i)<(ll)(n); (i)++)
+#define FOR(i, b, e) for(ll (i)=(b); (i)<=(ll)(e); (i)++)
+#define ALL(x) (x).begin(), (x).end()
+
+const ll INF = 100100100100100100;
+
+const ll V_MAX = 200200; // 節点数の上限
+ll V; // 実際の頂点数
+// 実際の有向グラフと辺を逆向きにしたグラフ
+vector<vector<ll>> g(V_MAX, vector<ll>(0)), rg(V_MAX, vector<ll>(0));
+vector<ll> vs(0); // 帰りがけ順の並び
+vector<bool> used(V_MAX, false); // 既に走査した点
+vector<ll> cmp(V_MAX); // 属する強連結成分のトポロジカル順序
+// 元のグラフへのDFS
+void dfs(ll s) {
+  used[s] = true;
+  rep(i, g[s].size()) {
+    if(!used[g[s][i]]) dfs(g[s][i]);
+  }
+  vs.push_back(s);
+}
+// 逆向きのグラフへのDFS
+void rdfs(ll s, ll k) {
+  used[s] = true;
+  cmp[s] = k;
+  rep(i, rg[s].size()) {
+    if(!used[rg[s][i]]) rdfs(rg[s][i], k);
+  }
+}
+// 強連結成分分解、節点を縮約した時の節点数を返す
+ll scc() {
+  rep(i, V) used[i] = false;
+  vs = {};
+  // 元のグラフを走査
+  rep(i, V) {
+    if(!used[i]) dfs(i);
+  }
+  rep(i, V) used[i] = false;
+  // 逆向きのグラフを走査
+  ll k = 0;
+  for(ll i = vs.size()-1; i >= 0; i--) {
+    if(!used[vs[i]]) rdfs(vs[i], k++);
+  }
+  return k;
+}
+
+int main() {
+  ll e; cin >> V >> e;
+  rep(i, e) {
+    ll s, t; cin >> s >> t;
+    g[s].push_back(t);
+    rg[t].push_back(s);
+  }
+  scc();
+  ll q; cin >> q;
+  rep(i, q) {
+    ll u, v; cin >> u >> v;
+    if(cmp[u] == cmp[v]) cout << 1 << endl;
+    else cout << 0 << endl;
+  }
+  return 0;
+}
+

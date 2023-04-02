@@ -1,0 +1,45 @@
+import sys
+import heapq
+from _heapq import heappush, heappop
+from collections import deque
+
+
+BIG_NUM = 2000000000
+
+N,K = map(int,input().split())
+W = [0]*N
+sum = 0
+
+for i in range(N):
+    tmp = int(input())
+    W[i] = tmp
+    sum += tmp
+
+
+def isOK(P):
+    t_sum = 0 #現在のトラックに積んだ荷の総量
+    w_ind = 0 #荷物のインデックス
+
+    for t_ind in range(K):
+        while w_ind < N and t_sum + W[w_ind] <= P:
+            t_sum += W[w_ind]
+            w_ind += 1
+        if w_ind == N:
+            return True
+        t_sum = 0 #次のトラックへ
+
+    return False
+
+
+left = 0; right = sum; mid = (left+right)//2;
+ans = sum
+
+while left <= right:
+    if isOK(mid):
+        ans = mid
+        right = mid-1
+    else:
+        left = mid+1
+    mid = (left+right) //2
+
+print(ans)

@@ -1,0 +1,137 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100
+#define NIL NULL
+
+struct Node
+{
+  int key;
+  struct Node *p;
+  struct Node *l;
+  struct Node *r;
+};
+
+typedef struct Node *N;
+
+N root;
+
+void insert(int k)
+{
+  N y = NIL;
+  N x = root;
+  N z;
+
+  z = malloc(sizeof(struct Node));
+  z->key = k;
+  z->l = NIL;
+  z->r = NIL;
+
+  while (x != NIL)
+  {
+    y = x;
+    if (x->key > z->key)
+    {
+      x = x->l;
+    }
+    else
+    {
+      x = x->r;
+    }
+  }
+
+  z->p = y;
+
+  if (y == NIL)
+  {
+    root = z;
+  }
+  else if (y->key > z->key)
+  {
+    y->l = z;
+  }
+  else
+  {
+    y->r = z;
+  }
+}
+
+N find(N u, int k)
+{
+  while (u != NIL && k != u->key)
+  {
+    if (k < u->key)
+    {
+      u = u->l;
+    }
+    else
+    {
+      u = u->r;
+    }
+  }
+  return u;
+}
+void preOrder(struct Node *u)
+{
+  if (u == NIL)
+  {
+    return;
+  }
+
+  printf(" %d", u->key);
+  preOrder(u->l);
+  preOrder(u->r);
+}
+
+void inOrder(struct Node *u)
+{
+  if (u == NIL)
+  {
+    return;
+  }
+
+  inOrder(u->l);
+  printf(" %d", u->key);
+  inOrder(u->r);
+}
+
+int main(void)
+{
+  int m, i, x;
+  char com[MAX];
+
+  scanf("%d", &m);
+
+  for (i = 0; i < m; i++)
+  {
+    scanf("%s", com);
+
+    if (com[0] == 'i')
+    {
+      scanf("%d", &x);
+      insert(x);
+    }
+    else if (com[0] == 'f')
+    {
+      scanf("%d", &x);
+      N t = find(root, x);
+      if (t != NIL)
+      {
+        printf("yes\n");
+      }
+      else
+      {
+        printf("no\n");
+      }
+    }
+    else if (com[0] == 'p')
+    {
+      inOrder(root);
+      printf("\n");
+      preOrder(root);
+      printf("\n");
+    }
+  }
+
+  return 0;
+}

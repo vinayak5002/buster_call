@@ -1,0 +1,190 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef pair<int, int> pii;
+typedef pair<double, double> pdd;
+typedef pair<long long, long long> pll;
+typedef long long ll;
+
+#define YESNO(bool)            \
+    if (bool) {                \
+        cout << "YES" << endl; \
+    } else {                   \
+        cout << "NO" << endl;  \
+    }
+#define yesno(bool)            \
+    if (bool) {                \
+        cout << "yes" << endl; \
+    } else {                   \
+        cout << "no" << endl;  \
+    }
+#define YesNo(bool)            \
+    if (bool) {                \
+        cout << "Yes" << endl; \
+    } else {                   \
+        cout << "No" << endl;  \
+    }
+#define REP(i, n) for (ll i = 0; i < ll(n); i++)
+#define REPD(i, n) for (ll i = n - 1; i >= 0; i--)
+#define FOR(i, a, b) for (ll i = a; i <= ll(b); i++)
+#define FORD(i, a, b) for (ll i = a; i >= ll(b); i--)
+#define FORA(i, I) for (const auto &i : I)
+
+#define ALL(x) x.begin(), x.end()
+#define SIZE(x) ll(x.size())
+
+#define INF32 2147483647
+#define INF64 9223372036854775807
+#define MOD 1000000007
+#define INF 1000000000
+
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+
+#define OP(m) cout << m << endl;
+ll myceil(ll a, ll b) { return (a + (b - 1)) / b; }
+ll myfloor(ll a, ll b) { return a / b; }
+
+int dx4[4] = {1, 0, -1, 0};
+int dy4[4] = {0, 1, 0, -1};
+int dx8[8] = {-1, -1, 0, 1, 1, 1, 0, -1};
+int dy8[8] = {0, -1, -1, -1, 0, 1, 1, 1};
+// cout<<fixed<<setprecision(10);
+
+template <typename T>
+class graph {
+   public:
+    struct edge {
+        int from;
+        int to;
+        T cost;
+    };
+    vector<edge> edges;
+    vector<vector<int> > g;  //  adjacency list
+    int n;                   // vertices number
+
+    graph(int _n) : n(_n) { g.resize(n); }
+    virtual int add(int from, int to, T cost) = 0;
+};
+
+template <typename T>
+class undigraph : public graph<T> {
+   public:
+    using graph<T>::edges;
+    using graph<T>::g;
+    using graph<T>::n;
+    undigraph(int _n) : graph<T>(_n) {}
+    int add(int from, int to, T cost = 1) {
+        assert(0 <= from && from < n && 0 <= to && to < n);
+        int id = (int)edges.size();  // edge id
+        g[from].push_back(id);  // g[2]=1 refres to 2->edges[1]={from:2,to:3,1}
+        g[to].push_back(id);
+        edges.push_back({from, to, cost});
+        return id;
+    }
+};
+
+template <typename T>
+class digraph : public graph<T> {
+   public:
+    using graph<T>::edges;
+    using graph<T>::g;
+    using graph<T>::n;
+    digraph(int _n) : graph<T>(_n) {}
+    int add(int from, int to, T cost = 1) {
+        assert(0 <= from && from < n && 0 <= to && to < n);
+        int id = (int)edges.size();
+        g[from].push_back(id);
+        edges.push_back({from, to, cost});
+        return id;
+    }
+};
+
+template <typename T>
+vector<T> bellman_ford(const digraph<T> &G, int source, bool &cycle) {
+    assert(0 <= source && source < G.n);
+    T inf = INF;
+    vector<T> dist(G.n, inf);
+    dist[source] = static_cast<T>(0);
+    for (int i = 0; i < G.n + 1; ++i) {
+        for (auto &e : G.edges) {
+            if (dist[e.from] != inf && dist[e.from] + e.cost < dist[e.to]) {
+                dist[e.to] = dist[e.from] + e.cost;
+                if (i == G.n) cycle = true;  // There are negative edges
+            }
+        }
+    }
+    return dist;
+    // Time Complexity: O(V*E), Space Complexity: O(V)
+}
+
+// Usage:
+// bool cycle = false;
+// vector<int> dist = bellman_ford(G, src, cycle);
+
+int main() {
+    int V, E, r;
+    cin >> V >> E >> r;
+
+    digraph<int> G(V);
+
+    REP(i, E) {
+        int s, t, d;
+        cin >> s >> t >> d;
+        G.add(s, t, d);
+    }
+    bool cycle = false;
+    vector<int> dist = bellman_ford(G, r, cycle);
+    if (cycle) {
+        OP("NEGATIVE CYCLE")
+    } else {
+        REP(i, G.n) {
+            if (dist[i] == INF) {
+                OP("INF")
+                continue;
+            }
+            OP(dist[i])
+        }
+    }
+}
+// struct edge {
+//     int from, to, cost;
+// };
+// int main() {
+//     int V, E, r;
+//     cin >> V >> E >> r;
+
+//     edge eg[2000];
+//     int INF = 10000000;
+//     vector<int> m(V, INF);
+//     m[r] = 0;
+//     REP(i, E) {
+//         int s, t, d;
+//         cin >> s >> t >> d;
+
+//         eg[i].from = s;
+//         eg[i].to = t;
+//         eg[i].cost = d;
+//     }
+//     REP(i, V) {
+//         REP(j, E) {
+//             edge e = eg[j];
+//             if (m[e.from] != INF && m[e.to] > m[e.from] + e.cost) {
+//                 m[e.to] = m[e.from] + e.cost;
+//                 if (i == V - 1) {
+//                     OP("NEGATIVE CYCLE")
+//                     return 0;
+//                 }
+//             }
+//         }
+//     }
+//     REP(i, V) {
+//         if (m[i] == INF) {
+//             OP("INF")
+//             continue;
+//         }
+//         OP(m[i])
+//     }
+// }

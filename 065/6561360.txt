@@ -1,0 +1,36 @@
+#include<bits/stdc++.h>
+using namespace std;
+// V[i][c] = 品物i番目までかつ重さcまでの解
+int V[110][10010];
+// i番目の品物の価値vと重さwのペアの配列
+pair<int, int>vw[110];
+int main()
+{
+	int n, w;
+	cin >> n >> w;
+	for (int a = 1; a <= n; a++)
+	{
+		int v, w;
+		cin >> v >> w;
+		vw[a].first = v;
+		vw[a].second = w;
+	}
+	// DP
+	for (int i = 0; i <= n; i++)
+	{
+		for (int c = 0; c <= w; c++)
+		{
+			if (i == 0 || c == 0)
+				V[i][c] = 0;
+			else if (c - vw[i].second < 0)
+				V[i][c] = V[i - 1][c];
+			else
+			{
+				V[i][c] = max(V[i - 1][c], vw[i].first + V[i - 1][c - vw[i].second]);
+			}
+			// cout << "V[" << i << "][" << c << "]は" << V[i][c] << " ";
+		}
+		// cout << endl;
+	}
+	cout << V[n][w] << endl;
+}

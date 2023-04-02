@@ -1,0 +1,127 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define INF 1020304050
+
+class LazySegTree {
+  vector<long long> dat,lazy;
+  vector<bool> change;
+
+public:
+  int n2 = 1;
+  LazySegTree(int m) {
+    while (n2 < m) n2 *= 2;
+    for (int i=0;i<n2*2-1;i++) {
+      dat.emplace_back(0);
+      lazy.emplace_back(0);
+      change.emplace_back(false);
+    }
+  }
+
+  void eval(int k, int l, int r) {
+    if (change[k]) {
+      dat[k] += lazy[k]/(r-l);
+      if (r-l > 1) {
+        lazy[k*2+1] += lazy[k]/2;
+        change[k*2+1] = true;
+        lazy[k*2+2] += lazy[k]/2;
+        change[k*2+2] = true;
+      }
+      change[k] = false;
+      lazy[k] = 0;
+    }
+  }
+
+  void update(int a, int b, long long v, int k, int l, int r) {
+    eval(k,l,r);
+    if (b <= l || r <= a) return;
+    if (a <= l && r <= b) {
+      change[k] = true;
+      lazy[k] += (r-l)*v;
+      eval(k,l,r);
+    }
+    else {
+      update(a,b,v,k*2+1,l,(l+r)/2);
+      update(a,b,v,k*2+2,(l+r)/2,r);
+      dat[k] = min(dat[k*2+1],dat[k*2+2]);
+    }
+  }
+
+  // update values of [a,b)
+  void put(int a, int b, int v) {
+    update(a,b,v,0,0,n2);
+  }
+
+  long long query(int a, int b, int k, int l, int r) {
+    if (r <= a || b <= l) return INF;
+    eval(k,l,r);
+    if (a <= l && r <= b) return dat[k];
+    long long vl = query(a,b,k*2+1,l,(l+r)/2);
+    long long vr = query(a,b,k*2+2,(l+r)/2,r);
+    return min(vl,vr);
+  }
+
+  // min of [a,b)
+  long long get(int a, int b) {
+    return query(a,b,0,0,n2);
+  }
+
+};
+
+int main() {
+  
+  ios::sync_with_stdio(false);
+  cin.tie(0);
+
+	int w;
+	cin >> w;
+	vector<int> a(w);
+	for (int i=0;i<w;i++) {
+		cin >> a[i];
+	}
+	LazySegTree lseg(w);
+	set<int> pos0;
+	for (int i=0;i<w;i++) {
+		if (a[i] == 0) pos0.insert(i);
+	}
+	pos0.insert(-INF);
+	pos0.insert(INF);
+	for (int i=0;i<w;i++) {
+		if (a[i] >= 0) {
+			lseg.put(i,i+1,INF-i);
+		}
+		else {
+			lseg.put(i,i+1,abs(a[i])-i);
+		}
+	}
+	int ans = 0;
+	for (int i=0;i<w;i++) {
+		if (a[i] <= 0) {
+			lseg.put(0,i+1,-1);
+			lseg.put(i+1,w,1);
+			continue;
+		}
+		auto it = pos0.lower_bound(i);
+		it--;
+		int vl = *it;
+		it++;
+		int vr = *it;
+		int lans = 0;
+		if (vl > -INF) {
+			int kans = a[i];
+			int shut = lseg.get(vl+1,i);
+			lans = min(kans,shut);
+		}
+		int rans = 0;
+		if (vr < INF) {
+			int kans = a[i];
+			int shut = lseg.get(i+1,vr);
+			rans = min(kans,shut);
+		}
+		ans += max({0,lans,rans});
+		lseg.put(0,i+1,-1);
+		lseg.put(i+1,w,1);
+	}
+	cout << ans << endl;
+}
+

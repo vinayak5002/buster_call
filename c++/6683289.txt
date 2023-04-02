@@ -1,0 +1,69 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main(){
+  int N;
+  cin >> N;
+  vector<pair<char, int>> A(N);
+  vector<string> G(9);
+  for(int i = 0; i < N; i++){
+    string S;
+    cin >> S;
+    A[i].first = S[0];
+    A[i].second = (int)(S[1] - '0');
+    G[A[i].second - 1] += A[i].first;
+  }
+  
+  vector<pair<char, int>> C = A, D = A;
+  int cnt = 0;
+  
+  //バブル
+  for(int i = 0; i < N; i++){
+    for(int j = N - 1; j >= i + 1; j--){
+      if(C[j - 1].second > C[j].second){
+        swap(C[j - 1], C[j]);
+      }
+    }
+  }        
+  
+  
+  //選択
+  for(int i = 0; i < N; i++){
+    int minn = i;
+    for(int j = i + 1; j < N; j++){
+      if(D[j].second < D[minn].second) minn = j;
+    }
+    swap(D[i], D[minn]);
+  }
+  
+  //バブル出力
+  for(int i = 0; i < N; i++){
+    if(i == 0) cout << C[i].first << C[i].second;
+    else cout << " " << C[i].first << C[i].second;
+  }
+  cout << endl;
+  cout << "Stable" << endl;
+  
+  //選択安定性判定
+  bool stable = true;
+  for(int i = 0; i < N; i++){
+    for(int j = i + 1; j < N; j++){
+      if(D[i].second == D[j].second){
+        int iti, itj;
+        for(int k = 0; k < (int)G[D[i].second - 1].size(); k++){
+          if(G[D[i].second - 1][k] == D[i].first) iti = k;
+          if(G[D[i].second - 1][k] == D[j].first) itj = k;
+        }
+        if(itj < iti) stable = false;
+      }
+    }
+  }
+  
+  //選択出力
+  for(int i = 0; i < N; i++){
+    if(i == 0) cout << D[i].first << D[i].second;
+    else cout << " " << D[i].first << D[i].second;
+  }
+  cout << endl;
+  cout << (stable ? "Stable" : "Not stable") << endl;
+}

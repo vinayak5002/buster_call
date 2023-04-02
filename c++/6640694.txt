@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+vector<vector<int>> matmul(vector<vector<int>> A, vector<vector<int>> B, int M) {
+    const int n = A.size();
+    const int m = B[0].size();
+    vector<vector<int>> C(n, vector<int>(m));
+    rep(i,0,n) rep(j,0,m) rep(k,0,B.size()) C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % M;
+    return C;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int N, M, A, B, C, T;
+        cin >> N >> M >> A >> B >> C >> T;
+        if (N == 0) break;
+        vector<int> S(N);
+        for (auto& x : S) cin >> x;
+
+        vector<vector<int>> X(N, vector<int>(N));
+        rep(i,0,N) {
+            if (i > 0) X[i][i-1] = C;
+            X[i][i] = B;
+            if (i+1 < N) X[i][i+1] = A;
+        }
+        vector<vector<int>> ans(1, vector<int>(N));
+        rep(i,0,N) ans[0][i] = S[i];
+        while (T) {
+            if (T & 1) {
+                ans = matmul(ans, X, M);
+            }
+            X = matmul(X, X, M);
+            T >>= 1;
+        }
+        rep(i,0,N) cout << ans[0][i] << (i < N-1 ? " " : "\n");
+    }
+}

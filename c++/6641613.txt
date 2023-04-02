@@ -1,0 +1,44 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+
+int clamp(int n){
+	return max(min(n,255),0);
+}
+
+int square(int n){
+	return n * n;
+}
+
+ll func(int n,int m){
+	vector<int> line(m);
+	for(auto &i:line)cin>>i;
+	const ll inf = 1e18;
+	vector<vector<ll>> dp(n+1,vector<ll>(256,inf));
+	dp[0][128] = 0;
+	for(int i=0;i<n;++i){
+		int v;
+		cin >> v;
+		for(int j=0;j<256;++j){
+			for(auto add:line){
+				dp[i+1][clamp(j+add)] = min(dp[i+1][clamp(j+add)],dp[i][j]+square(v-clamp(j+add)));
+			}
+		}
+	}
+	ll res = inf;
+	for(auto i:dp.back())res = min(res,i);
+	return res;
+}
+
+int main(){
+	while(true){
+		int n;
+		int m;
+		cin >> n >> m;
+		if(n==0)break;
+		cout << func(n,m) << endl;
+	}
+	return 0;
+}
+

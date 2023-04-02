@@ -1,0 +1,53 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+  int n;
+  cin >> n;
+  vector<string> a(n);
+  vector<int> x(n);
+  vector<pair<int, int>> p(n);
+  map<string, int> mp;
+  for(int i = 0; i < n; i++){
+    cin >> a[i] >> x[i];
+    mp[a[i]] = i;
+    p[i] = {x[i], i};
+  }
+  sort(p.begin(), p.end());
+  vector<vector<int>> G(n);
+  
+  int m;
+  cin >> m;
+  for(int i = 0; i < m; i++){
+    string s, t;
+    cin >> s >> t;
+    int a = mp[s];
+    int b = mp[t];
+    G[a].push_back(b);
+    G[b].push_back(a);
+  }
+  
+  int ans = 0;
+  vector<bool> seen(n, false);
+  for(int i = 0; i < n; i++){
+    if(seen[i]) continue;
+    seen[i] = true;
+    queue<int> que;
+    que.push(i);
+    int cnt = 1;
+    while(!que.empty()){
+      int v = que.front();
+      que.pop();
+      for(int nv : G[v]){
+        if(seen[nv]) continue;
+        seen[nv] = true;
+        cnt++;
+        que.push(nv);
+      }
+    }
+    ans += p[i].first * cnt;
+  }
+  cout << ans << endl;
+  return 0;
+}
+

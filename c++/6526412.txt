@@ -1,0 +1,58 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+
+using namespace std;
+using ul=unsigned long int;
+ul upper_lim = 500001;
+
+ul counter;
+
+template<typename T>
+void merge(vector<T>& A, ul left, ul mid, ul right){
+    ul n1 = mid - left;
+    ul n2 = right - mid;
+    vector<T> L(n1+1), R(n2+1);
+    for(ul i=0;i<n1;++i){
+        L[i] = A[left+i];
+    }
+    for(ul i=0; i<n2; ++i){
+        R[i] = A[mid+i];
+    }
+    L[n1] = upper_lim;
+    R[n2] = upper_lim;
+    ul i{0}, j{0};
+    for(ul k=left; k<right; ++k){
+        if(L[i] <= R[j]){
+            A[k] = L[i++];
+            ++counter;
+        }
+        else{
+            A[k] = R[j++];
+            ++counter;
+        }
+    }
+}
+template<typename T>
+void merge_sort(vector<T>& A, ul left, ul right){
+    if(left+1<right){
+        ul mid = (left+right)/2;
+        merge_sort(A, left, mid);
+        merge_sort(A, mid, right);
+        merge(A, left, mid, right);
+    }
+}
+
+int main(){
+    ul n;
+    cin>>n;
+    vector<ul> A(n);
+    for(ul i=0; i<n; ++i){
+        cin>>A[i];
+    }
+    merge_sort(A, 0, A.size());
+    for(ul i=0; i<A.size()-1; ++i){
+        cout<<A[i]<<" ";
+    } 
+    cout<<A.back()<<endl<<counter<<endl;
+}

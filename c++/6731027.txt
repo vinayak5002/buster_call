@@ -1,0 +1,330 @@
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <iomanip>
+#include <iostream>
+#include <utility>
+#include <vector>
+
+namespace luz {
+
+  using isize = std::ptrdiff_t;
+  using usize = std::size_t;
+
+  using i32 = std::int32_t;
+  using i64 = std::int64_t;
+  using u32 = std::uint32_t;
+  using u64 = std::uint64_t;
+  
+} // namespace luz
+
+namespace luz {
+
+  struct rep {
+    struct itr {
+      usize i;
+      constexpr itr(const usize i) noexcept : i(i) {}
+      void operator++() noexcept { ++i; }
+      constexpr usize operator*() const noexcept { return i; }
+      constexpr bool operator!=(const itr x) const noexcept { return i != x.i; }
+    };
+    const itr f, l;
+    constexpr rep(const usize f, const usize l) noexcept
+      : f(std::min(f, l)), l(l) {}
+    constexpr auto begin() const noexcept { return f; }
+    constexpr auto end() const noexcept { return l; }
+  };
+
+  struct rrep {
+    struct itr {
+      usize i;
+      constexpr itr(const usize i) noexcept : i(i) {}
+      void operator++() noexcept { --i; }
+      constexpr usize operator*() const noexcept { return i; }
+      constexpr bool operator!=(const itr x) const noexcept { return i != x.i; }
+    };
+    const itr f, l;
+    constexpr rrep(const usize f, const usize l) noexcept
+      : f(l - 1), l(std::min(f, l) - 1) {}
+    constexpr auto begin() const noexcept { return f; }
+    constexpr auto end() const noexcept { return l; }
+  };
+
+} // namespace luz
+
+namespace luz {
+
+  void set_fast_ios() {
+    std::ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+  }
+
+} // namespace luz
+
+namespace luz {
+
+  void io_set(usize precision) {
+    std::cout << std::fixed << std::setprecision(precision);
+    std::cerr << std::fixed << std::setprecision(precision);
+  }
+
+} // namespace luz
+
+namespace luz {
+
+  template< typename T = i64 > T input() {
+    T tmp;
+    std::cin >> tmp;
+    return tmp;
+  }
+
+} // namespace luz
+
+namespace luz {
+
+  template< typename T >
+  std::ostream &operator<<(std::ostream &os, std::vector< T > &vs) {
+    for (usize i: rep(0, vs.size())) {
+      os << vs[i] << (i + 1 != vs.size() ? " " : "");
+    }
+    return os;
+  }
+
+  template< typename T >
+  std::istream &operator>>(std::istream &is, std::vector< T > &vs) {
+    for (T &v: vs) {
+      is >> v;
+    }
+    return is;
+  }
+
+} // namespace luz
+
+namespace luz {
+
+  template< typename T1, typename T2 >
+  std::ostream &operator<<(std::ostream &os, std::pair < T1, T2 > &p) {
+    os << "(" << p.first << ", " << p.second << ")";
+    return os;
+  }
+
+  template< typename T1, typename T2 >
+  std::istream &operator>>(std::istream &is, std::pair< T1, T2 > &p) {
+    is >> p.first >> p.second;
+    return is;
+  }
+
+} // namespace luz
+
+namespace luz {
+
+  template <typename T>
+  std::vector<T> make_vector(usize a, T b) {
+    return std::vector<T>(a, b);
+  }
+
+  template <typename... Ts>
+  auto make_vector(usize a, Ts... ts) {
+    return std::vector<decltype(make_vector(ts...))>(a, make_vector(ts...));
+  }
+
+} // namespace luz
+
+namespace luz {
+
+  template <typename T1, typename T2>
+  inline bool chmax(T1 &a, T2 b) {
+    return a < b and (a = b, true);
+  }
+
+  template <typename T1, typename T2>
+  inline bool chmin(T1 &a, T2 b) {
+    return a > b and (a = b, true);
+  }
+
+} // namespace luz
+
+#include <limits>
+#include <queue>
+
+namespace luz {
+
+  template< typename cost_type >
+    class Edge {
+      public:
+        usize from, to;
+        cost_type cost;
+        usize id;
+        Edge() = default;
+        Edge(usize from_, usize to_, cost_type cost_, usize id_):
+          from(from_), to(to_), cost(cost_), id(id_) {}
+    };
+
+  template< typename cost_type >
+    using Edges = std::vector< Edge<cost_type> >;
+
+  template< typename cost_type >
+    class Graph {
+      std::vector< std::vector<Edge<cost_type>> > g;
+      usize edge_count;
+
+      public:
+      Graph() = default;
+      explicit Graph(usize n): g(n), edge_count(0) {}
+
+      usize size() const {
+        return g.size();
+      }
+
+      void add_directed_edge(usize from, usize to, cost_type cost = 1) {
+        g[from].emplace_back(from, to, cost, edge_count++);
+      }
+
+      void add_undirected_edge(usize u, usize v, cost_type cost = 1) {
+        g[u].emplace_back(u, v, cost, edge_count);
+        g[v].emplace_back(v, u, cost, edge_count++);
+      }
+
+      inline std::vector< Edge<cost_type> > &operator[](const usize &v) {
+        return g[v];
+      }
+
+      inline const std::vector< Edge<cost_type> > &operator[](const usize &v) const {
+        return g[v];
+      }
+    };
+
+}
+
+namespace luz {
+
+  template< typename cost_type >
+    class SSSPProblemSolver {
+      static constexpr usize undefined_ = std::numeric_limits<usize>::max();
+      static constexpr cost_type inf_ = std::numeric_limits<cost_type>::max();
+
+      Graph< cost_type > g;
+      usize g_size;
+      std::vector< cost_type > ds;
+      std::vector< usize > froms, ids;
+
+      void dijkstra(usize s) {
+        using pq_type = std::pair< cost_type, usize >;
+        std::priority_queue< pq_type, std::vector<pq_type>, std::greater<pq_type> > pq;
+
+        ds[s] = 0;
+        pq.emplace(ds[s], s);
+
+        while (not pq.empty()) {
+          auto [cost, v] = pq.top();
+          pq.pop();
+
+          if (ds[v] < cost) continue;
+          for (auto &e: g[v]) {
+            if (chmin(ds[e.to], cost + e.cost)) {
+              pq.emplace(ds[e.to], e.to);
+              froms[e.to] = v;
+              ids[e.to] = e.id;
+            }
+          }
+        }
+      }
+
+      public:
+      explicit SSSPProblemSolver(Graph< cost_type > &g_, usize source) : 
+        g(g_), g_size(g.size()), ds(g_size, inf_), 
+        froms(g_size, undefined_), ids(g_size, undefined_) {
+          dijkstra(source);
+        }
+
+      inline usize undefined() const {
+        return undefined_;
+      }
+
+      inline cost_type inf() const {
+        return inf_;
+      }
+
+      inline cost_type dist(const usize v) const {
+        return ds[v];
+      }
+
+      inline usize from_on_shortest_path_tree(const usize v) const {
+        return froms[v];
+      }
+
+      inline usize edge_label(const usize v) const {
+        return ids[v];
+      }
+
+      inline Graph< cost_type > get_original_graph() const {
+        return g;
+      }
+
+      inline std::vector< cost_type > get_distances() const {
+        return ds;
+      }
+
+      inline std::vector< usize > get_shortest_path_tree() const {
+        return froms;
+      }
+
+      inline std::vector< usize > get_edge_labels() const {
+        return ids;
+      }
+    };
+
+}
+
+namespace luz {
+
+  void solve(int n, int m, int l) {
+    int V = n * (l + 1);
+
+    auto to_v = [&](int g, int v) {
+      return g * n + v;
+    };
+
+    Graph< int > G(V);
+    for (usize ei: rep(0, m)) {
+      int u = input() - 1, v = input() - 1;
+      int d = input(), e = input();
+
+      for (usize g: rep(0, l + 1)) {
+        G.add_directed_edge(to_v(g, u), to_v(g, v), e);
+        G.add_directed_edge(to_v(g, v), to_v(g, u), e);
+      }
+
+      for (usize g: rep(d, l + 1)) {
+        G.add_directed_edge(to_v(g, u), to_v(g - d, v), 0);
+        G.add_directed_edge(to_v(g, v), to_v(g - d, u), 0);
+      }
+    }
+
+    SSSPProblemSolver sp(G, to_v(l, 0));
+    int ans = sp.inf();
+    for (usize g: rep(0, l + 1)) {
+      chmin(ans, sp.dist(to_v(g, n - 1)));
+    }
+
+    std::cout << ans << std::endl;
+  }
+
+  void main_() {
+    int n, m, l;
+
+    while (std::cin >> n >> m >> l, n) {
+      solve(n, m, l);
+    }
+  }
+
+} // namespace luz
+
+int main() {
+  luz::set_fast_ios();
+  luz::io_set(15);
+
+  luz::main_();
+}
+

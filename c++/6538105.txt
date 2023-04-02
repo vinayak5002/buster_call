@@ -1,0 +1,154 @@
+#include <iostream>
+
+using namespace std;
+
+typedef struct
+{
+  int T1;
+  int B6;
+  int E3;
+  int W4;
+  int S2;
+  int N5;
+} dice_t;
+
+void rotate(dice_t *p, char direction)
+{
+  int w;
+
+  switch (direction)
+  {
+  case 'E':
+    w = p->T1;
+    p->T1 = p->W4;
+    p->W4 = p->B6;
+    p->B6 = p->E3;
+    p->E3 = w;
+    break;
+  case 'W':
+    w = p->T1;
+    p->T1 = p->E3;
+    p->E3 = p->B6;
+    p->B6 = p->W4;
+    p->W4 = w;
+    break;
+  case 'S':
+    w = p->T1;
+    p->T1 = p->N5;
+    p->N5 = p->B6;
+    p->B6 = p->S2;
+    p->S2 = w;
+    break;
+  case 'N':
+    w = p->T1;
+    p->T1 = p->S2;
+    p->S2 = p->B6;
+    p->B6 = p->N5;
+    p->N5 = w;
+    break;
+  case 'R': // CW
+    w = p->S2;
+    p->S2 = p->E3;
+    p->E3 = p->N5;
+    p->N5 = p->W4;
+    p->W4 = w;
+    break;
+  case 'L': // CCW
+    w = p->S2;
+    p->S2 = p->W4;
+    p->W4 = p->N5;
+    p->N5 = p->E3;
+    p->E3 = w;
+    break;
+
+  default:
+    break;
+  }
+}
+
+void toTop(dice_t *p, int n)
+{
+
+  if (n == p->T1)
+  {
+    // Nop
+  }
+  if (n == p->S2)
+  {
+    rotate(p, 'N');
+  }
+  if (n == p->E3)
+  {
+    rotate(p, 'W');
+  }
+  if (n == p->W4)
+  {
+    rotate(p, 'E');
+  }
+  if (n == p->N5)
+  {
+    rotate(p, 'S');
+  }
+  if (n == p->B6)
+  {
+    rotate(p, 'S');
+    rotate(p, 'S');
+  }
+}
+
+void toFront(dice_t *p, int n)
+{
+
+  if (n == p->T1)
+  {
+    rotate(p, 'S');
+  }
+  if (n == p->S2)
+  {
+    // Nop
+  }
+  if (n == p->E3)
+  {
+    rotate(p, 'R');
+  }
+  if (n == p->W4)
+  {
+    rotate(p, 'L');
+  }
+  if (n == p->N5)
+  {
+    rotate(p, 'R');
+    rotate(p, 'R');
+  }
+  if (n == p->B6)
+  {
+    rotate(p, 'N');
+  }
+}
+
+int main()
+{
+
+  dice_t dice1, dice2;
+
+  cin >> dice1.T1 >> dice1.S2 >> dice1.E3 >> dice1.W4 >> dice1.N5 >> dice1.B6;
+  cin >> dice2.T1 >> dice2.S2 >> dice2.E3 >> dice2.W4 >> dice2.N5 >> dice2.B6;
+
+  //
+  toTop(&dice2, dice1.T1);
+  toFront(&dice2, dice1.S2);
+
+  if ((dice1.T1 == dice2.T1) && (dice1.S2 == dice2.S2) && (dice1.E3 == dice2.E3) &&
+      (dice1.W4 == dice2.W4) && (dice1.N5 == dice2.N5) && (dice1.B6 == dice2.B6))
+  {
+    cout << "Yes";
+  }
+  else
+  {
+    cout << "No";
+  }
+  cout << endl;
+
+  return 0;
+}
+

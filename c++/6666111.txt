@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using vi = vector<int>;
+using vl = vector<long long>;
+using vs = vector<string>;
+using vc = vector<char>;
+using vpii = vector<pair<int, int>>;
+using vpll = vector<pair<long long, long long>>;
+using vvi = vector<vector<int>>;
+using vvl = vector<vector<long long>>;
+using vvc = vector<vector<char>>;
+using vvvi = vector<vector<vector<int>>>;
+//#include <atcoder/all>
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define MAX 10000
+#define INFTY (1 << 30)
+// 浮動小数点の誤差を考慮した等式
+#define EPS (1e-10)
+#define equal(a, b) (fabs((a) - (b)) < EPS)
+ll llMax(ll x, ll y) { return (x >= y) ? x : y; }
+ll llMin(ll x, ll y) { return (x <= y) ? x : y; }
+
+template <typename T>
+inline bool chmax(T &a, T b) {
+  return ((a < b) ? (a = b, true) : (false));
+}
+template <typename T>
+inline bool chmin(T &a, T b) {
+  return ((a > b) ? (a = b, true) : (false));
+}
+
+// LIS: Longest Increasing Subsequence
+int main() {
+  /* input */
+  int n;
+  cin >> n;
+  vi a(n);
+  rep(i, n) cin >> a[i];
+
+  /* solve */
+  // 座標圧縮しちゃうか。
+  set<int> mySet;
+  rep(i, n) mySet.insert(a[i]);
+  map<int, int> mp;
+  int idx = 1;
+  for (auto v : mySet) {
+    mp[v] = idx;
+    idx++;
+  }
+  rep(i, n) a[i] = mp[a[i]];
+  //
+  int sz = (int)mySet.size();
+  static vvi dp(n, vi(sz + 1));
+  dp[0][a[0]] = 1;
+  rep(i, n - 1) {
+    rep(j, sz) {
+      chmax(dp[i + 1][j], dp[i][j]);
+      if (j < a[i + 1]) {
+        chmax(dp[i + 1][a[i + 1]], dp[i][j] + 1);
+      }
+    }
+  }
+
+  //
+  // rep(i, n) {
+  //   rep(j, sz) { cout << dp[i][j] << " "; }
+  //   cout << endl;
+  // }
+
+  // totaling
+  int ans = 0;
+  rep(i, sz + 1) chmax(ans, dp[n - 1][i]);
+
+  /* output */
+  cout << ans << endl;
+
+  return 0;
+}
+

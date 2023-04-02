@@ -1,0 +1,119 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+constexpr double eps = 1e-10;
+
+template <typename T>
+struct Fraction {
+    T num, den;
+    Fraction(T num = 0, T den = 1) : num(num), den(den) { reduce(); }
+    void reduce() {
+        T g = std::gcd(num, den);
+        num /= g, den /= g;
+        if (den < 0) num = -num, den = -den;
+    }
+    Fraction& operator+=(const Fraction& rhs) {
+        num = num*rhs.den + rhs.num*den;
+        den *= rhs.den;
+        reduce();
+        return *this;
+    }
+    Fraction& operator-=(const Fraction& rhs) {
+        num = num*rhs.den - rhs.num*den;
+        den *= rhs.den;
+        reduce();
+        return *this;
+    }
+    Fraction& operator*=(const Fraction& rhs) {
+        num *= rhs.num;
+        den *= rhs.den;
+        reduce();
+        return *this;
+    }
+    Fraction& operator/=(const Fraction& rhs) {
+        num *= rhs.den;
+        den *= rhs.num;
+        reduce();
+        return *this;
+    }
+    Fraction operator-() const { return Fraction(-num, den); }
+    Fraction operator+(const Fraction& rhs) const { return Fraction(*this) += rhs; }
+    Fraction operator-(const Fraction& rhs) const { return Fraction(*this) -= rhs; }
+    Fraction operator*(const Fraction& rhs) const { return Fraction(*this) *= rhs; }
+    Fraction operator/(const Fraction& rhs) const { return Fraction(*this) /= rhs; }
+    bool operator==(const Fraction& rhs) const { return num*rhs.den == rhs.num*den; }
+    bool operator!=(const Fraction& rhs) const { return !(*this == rhs); }
+    bool operator<(const Fraction& rhs) const { return num*rhs.den < rhs.num*den; };
+    bool operator>(const Fraction& rhs) const { return num*rhs.den > rhs.num*den; };
+    bool operator<=(const Fraction& rhs) const { return !(*this > rhs); };
+    bool operator>=(const Fraction& rhs) const { return !(*this < rhs); };
+    friend ostream &operator<<(ostream& os, const Fraction& p) { return os << p.num << "/" << p.den; }
+};
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int W, H, N;
+        cin >> W >> H >> N;
+        if (W == 0) break;
+        vector<pair<int, int>> pts(2*N);
+        for (auto& x : pts) cin >> x.first >> x.second;
+        sort(all(pts));
+        pts.insert(pts.begin(), {0, 0});
+        pts.insert(pts.begin()+1, {0, H});
+        pts.push_back({W, 0});
+        pts.push_back({W, H});
+        vector<Fraction<int>> slopes;
+        rep(i,0,pts.size()) rep(j,i+1,pts.size()) {
+            if (pts[i].first == pts[j].first) continue;
+            Fraction<int> slope(pts[j].second - pts[i].second, pts[j].first - pts[i].first);
+            if (slope < Fraction(-H, W) || Fraction(H, W) < slope) continue;
+            slopes.push_back(slope);
+        }
+        sort(all(slopes));
+        slopes.erase(unique(all(slopes)), slopes.end());
+        reverse(all(slopes));
+
+        auto calc = [&](int n) {
+            double l1 = -1, r1 = -1;
+            double ans = 0;
+            for (auto& m : slopes) {
+                vector<double> ys;
+                rep(i,2,pts.size()-2) {
+                    ys.push_back(pts[i].second - 1.0*m.num/m.den*pts[i].first);
+                }
+                sort(all(ys));
+                double l2 = ys[n];
+                double r2 = l2 + 1.0*m.num/m.den*W;
+                if (max(l2, r2) > H) {
+                    double d = max(l2, r2) - H;
+                    l2 -= d;
+                    r2 -= d;
+                }
+                if (min(l2, r2) < -eps) {
+                    continue;
+                }
+
+                if (l1 != -1 && l1+eps < l2) {
+                    ans += r1*(l2-l1) + l1*(r1-r2) - (r1-r2)*(l1+l2)/2;
+                }
+                l1 = l2;
+                r1 = r2;
+            }
+            ans /= H*H;
+            return ans;
+        };
+
+        cout << calc(N) - calc(N-1) << endl;
+    }
+}

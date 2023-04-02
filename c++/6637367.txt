@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const string ANS = "BCDEFGHIJKLMNOPA";
+const int MAXP = 4 + 2;
+const int FX[] = {0, 1, 0, -1, 0};
+const int FY[] = {0, 0, 1, 0, -1};
+char mp[MAXP][MAXP];
+map<string, bool> jl;
+int n;
+struct Num
+{
+	string zt;
+	int time;
+};
+
+inline void output()
+{
+	const int MAXW = 3;
+	for (int i = 1; i <= 4; ++i)
+	{
+		for (int j = 1; j <= 4; ++j)
+			cout << setw(MAXW) << mp[i][j];
+		cout << endl;
+	}
+	cout << endl;
+}
+
+int main()
+{
+	int x;
+	Num n;
+	n.zt.clear();
+	int sr[MAXP][MAXP];
+	for (int i = 1; i <= 4; ++i)
+		for (int j = 1; j <= 4; ++j)
+		{
+			cin >> x;
+			n.zt = n.zt + (char)(x + 'A');
+		}
+	n.time = 0;
+	queue<Num> q;
+	q.push(n);
+	while (!q.empty())
+	{
+		Num r = q.front();
+		q.pop();
+		map<string, bool>::iterator iter;  
+		iter = jl.find(r.zt);
+    	if (iter != jl.end()) continue;
+			else jl.insert(pair<string, bool> (r.zt, true));
+		if (r.zt == ANS)
+		{
+			cout << r.time << endl;
+			return 0;
+		}
+		memset(mp, 0, sizeof(mp));
+		int jx, jy;
+		for (int i = 1; i <= 4; ++i)
+			for (int j = 1; j <= 4; ++j)
+			{
+				mp[i][j] = r.zt[(i - 1) * 4 + j - 1];
+				if (mp[i][j] == 'A')
+				{
+					jx = i;
+					jy = j;
+				}
+			}
+		//output();
+		for (int i = 1; i <= 4; ++i)
+		{
+			int nx = jx + FX[i];
+			int ny = jy + FY[i];
+			if (mp[nx][ny] == 0) continue;
+			swap(mp[jx][jy], mp[nx][ny]);
+			Num newn;
+			newn.zt.clear();
+			newn.time = r.time + 1;
+			for (int i = 1; i <= 4; ++i)
+				for (int j = 1; j <= 4; ++j)
+					newn.zt = newn.zt + mp[i][j];
+			q.push(newn);
+			swap(mp[jx][jy], mp[nx][ny]);
+		}
+	}
+	return 0;
+}

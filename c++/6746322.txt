@@ -1,0 +1,66 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+typedef tuple<int, int, int> three;
+
+struct UnionFind {
+    vector<int> par;
+
+    UnionFind(int N) : par(N) {
+        for (int i = 0; i < N; i++) par.at(i) = i;
+    }
+
+    int root(int x) {
+        if (par.at(x) == x) return x;
+        else return root(par.at(x));
+    }
+
+    void unite(int x, int y) {
+        int rootx = root(x);
+        int rooty = root(y);
+        if (rootx != rooty) par.at(rootx) = rooty;
+        return;
+    }
+
+    bool same(int x, int y) {
+        return root(x) == root(y);
+    }
+};
+
+bool f(three a, three b) {
+    return get<0>(a) > get<0>(b);
+}
+
+int main() {
+
+    int v, e;
+    cin >> v >> e;
+
+    UnionFind tree(v);
+
+    priority_queue<three, vector<three>, greater<three>> que;
+
+    for (int i = 0; i < e; i++) {
+        int s, t, w;
+        cin >> s >> t >> w;
+        que.push(make_tuple(w, s, t));
+    }
+
+    int ans = 0;
+
+    while(!que.empty()) {
+        three t;
+        t = que.top();
+        que.pop();
+
+        if (!tree.same(get<1>(t), get<2>(t))){
+            ans += get<0>(t);
+            tree.unite(get<1>(t), get<2>(t));
+        }
+
+
+    }
+
+    cout << ans << endl;
+
+}

@@ -1,0 +1,69 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define ll long long
+#define rep(i,a,b) for(ll i = a; i < b; i++)
+#define REP(i,a,b) for(ll i = a; i <=b; i++)
+#define fore(i,a) for(auto &i : a)
+#define all(x) (x).begin(),(x).end()
+#define fix(i) fixed << setprecision(i)
+#define nextp(v) next_permutation(all(v))
+
+
+
+template<class T>bool chmax(T& a, const T& b) { if(a < b) { a = b; return 1; } return 0; }
+template<class T>bool chmin(T& a, const T& b) { if(b < a) { a = b; return 1; } return 0; }
+
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+using pq = priority_queue<int>;
+using pqll = priority_queue<ll>;
+using vpic = vector<pair<int, char>>;
+
+
+
+const ll INF = LLONG_MAX/2;
+const ll MOD = 1000000007;
+
+
+
+
+
+int main() {
+  using psi = pair<string, int>;
+  
+  int N, Q; cin >> N >> Q;
+  
+  queue<pii> q;
+  vector<string> a(N);
+  vector<psi> ans;
+  
+  rep(i,0,N) {
+    string S; int A; cin >> S >> A;
+    a[i] = S;
+    q.push({ i, A });
+  }
+  
+  int Cnt = 0;
+  while(!q.empty()) {
+    pii P = q.front();
+    q.pop();
+    
+    if(P.second <= Q) {
+      Cnt += P.second;
+      ans.push_back({ a[P.first], Cnt });
+    }else {
+      Cnt += Q;
+      q.push({ P.first, P.second - Q  });
+    }
+  }
+  auto comp = [](psi A, psi B) { return A.second < B.second; };
+  sort(all(ans), comp);
+  
+  fore(S, ans) {
+    printf("%s %d\n", S.first.c_str(), S.second);
+  }
+  
+  return 0;
+}

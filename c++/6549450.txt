@@ -1,0 +1,48 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <iomanip>
+
+using namespace std;
+double const eps = 1e-6;
+vector<pair<int, int> > f;
+
+inline int cmp(double x) {
+    if (fabs(x) < eps) return 0;
+    if (x < 0) return -1;
+    else return 1;
+}
+
+int main() {
+    int n, W;
+    cin >> n >> W;
+    for (int i = 0, v, w; i < n; i++) {
+        cin >> v >> w;
+        f.emplace_back(v, w);
+    }
+    sort(f.begin(), f.end(), [](const pair<int, int> &a, const pair<int, int> &b) -> bool {
+        return cmp((double) a.first / (double) a.second - (double) b.first / (double) b.second) == 1;
+    });
+#ifdef DEBUG
+    cout << "Sorted: " << endl;
+    for (auto it: f) cout << it.first << ' ' << it.second << endl;
+#endif
+    auto dw = (double) W;
+    double res = 0;
+    double target;
+    for (int i = 0; i < n && cmp(dw) > 0; i++) {
+        if (cmp(dw - f[i].second) >= 0) target = f[i].first, dw -= f[i].second;
+        else {
+            double tw = dw / (double) f[i].second;
+            dw -= tw;
+            target = tw * (double) f[i].first;
+        }
+        res += target;
+#ifdef DEBUG
+        cout << i << ' ' << target << endl;
+#endif
+    }
+    cout << fixed << setprecision(8) << res << endl;
+    return 0;
+}

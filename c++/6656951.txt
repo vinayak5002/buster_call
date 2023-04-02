@@ -1,0 +1,96 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+
+typedef struct node{
+	struct node *r;
+	struct node *l;
+	struct node *p;
+	int key;
+}Node;
+
+Node *KI,*NIL;
+
+void Ins(int);
+void Ino(Node *x);
+void Pre(Node *x);
+
+int main(void){
+	int i,n,g;
+	char t[9];
+	
+	scanf("%d",&n);
+	
+	for(i=0;i<n;i++){
+		scanf("%s",t);
+		if(t[0]=='i'){
+			scanf("%d",&g);
+			Ins(g);
+		}
+		else if(t[0]=='p'){
+			Ino(KI);
+			printf("\n");
+			Pre(KI);
+			printf("\n");
+		}
+	}
+	
+	return 0;
+}
+
+void Ins( int x ){
+	Node *a=NIL,*b=KI,*c;
+	
+	c=(Node*)malloc(sizeof(Node));
+	c->key=x;
+	c->l=NIL;
+	c->r=NIL;
+	
+	while( b != NIL){
+		a=b;
+		if( b->key > c->key){
+			b=b->l;
+		}
+		else{
+			b=b->r;
+		}
+		c->p=a;
+	}
+	if(a==NIL){
+		KI=c;
+	}
+	else{
+		if(a->key < c->key){
+			a->r=c;
+		}
+		else{
+			a->l=c;
+		}
+	}
+}
+
+void Ino( Node *x ){
+	if(x == NIL){
+		return;
+	}
+	if( x->l != NIL ){
+		Ino(x->l);
+	}
+	printf(" %d",x->key);
+	if( x->r != NIL ){
+		Ino(x->r);
+	}
+}
+
+void Pre( Node *x ){
+	if(x == NIL){
+		return;
+	}
+	printf(" %d",x->key);
+	if( x->l != NIL ){
+		Pre(x->l);
+	}
+	if( x->r != NIL ){
+		Pre(x->r);
+	}
+}

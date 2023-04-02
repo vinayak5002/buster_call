@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+bool is_digit(char c) {
+    return '0' <= c and c <= '9';
+}
+
+pair<int, long long> solve(const string &s, int r) {
+    int cnt = 0;
+    while (s[r - 1] == '>') ++cnt, --r;
+    assert(is_digit(s[r - 1]));
+    int l = r - 1;
+    while (l > 0 and is_digit(s[l - 1])) --l;
+    vector<long long> st { stoi(s.substr(l, r - l)) };
+    while (l - 1 >= 0 and s[l - 1] == '>') {
+        auto [pl, val] = solve(s, l - 2);
+        st.push_back(val);
+        l = pl;
+    }
+    long long v = st.back();
+    st.pop_back();
+    while (st.size()) v >>= min(32LL, st.back()), st.pop_back();
+    while (cnt --> 0) {
+        assert(l - 1 >= 0 and s[l - 1] == '<');
+        v = (v * v) % 1000000007;
+        --l;
+    }
+    return { l, v };
+}
+
+int main() {
+    while (true) {
+        string s;
+        getline(cin, s);
+        if (s == "#") break;
+        string t;
+        for (char c : s) if (c != ' ' and c != 'S') t += c;
+        cout << solve(t, t.size()).second << endl;
+    }
+}

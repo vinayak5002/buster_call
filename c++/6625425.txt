@@ -1,0 +1,171 @@
+#include <cstdio>
+#include <cstring>
+#include <iostream>
+#include <algorithm>
+#include <queue>
+#include <vector>
+#define min(a,b)    (((a) < (b)) ? (a) : (b))
+#define max(a,b)    (((a) > (b)) ? (a) : (b))
+#define abs(x)    ((x) < 0 ? -(x) : (x))
+#define INF 0x3f3f3f3f
+#define delta 0.85
+#define eps 1e-10
+#define PI 3.14159265358979323846
+using namespace std;
+
+#define MAX_V 102
+struct edge{
+	int to, cap, cost, rev;
+	edge(int to, int cap, int cost, int rev):to(to), cap(cap), cost(cost), rev(rev){}
+};
+
+int V;
+vector<edge> G[MAX_V];
+int h[MAX_V], dist[MAX_V];
+int prevv[MAX_V], preve[MAX_V];
+bool inq[MAX_V];
+
+void add_edge(int from, int to, int cap, int cost){
+	G[from].push_back(edge(to, cap, cost, G[to].size()));
+	G[to].push_back(edge(from, 0, -cost, G[from].size() - 1));
+}
+
+int min_cost_flow(int s, int t, int f){
+	int res = 0;
+	memset(h, 0, sizeof(h));
+	// Spfa
+	memset(inq, 0, sizeof(inq));
+	memset(dist, 0x3f, sizeof(dist));
+	queue<int> q;
+	dist[s] = 0;
+	q.push(s);
+	inq[s] = 1;
+	while(!q.empty()){
+		int v = q.front(); q.pop();
+		inq[v] = 0;
+		for(int i = 0; i < G[v].size(); i++){
+			edge &e = G[v][i];
+			int d2 = dist[v] + e.cost;
+			if(e.cap > 0 && dist[e.to] > d2){
+				dist[e.to] = d2;
+				if(!inq[e.to]){
+					q.push(e.to);
+					inq[e.to] = 1;
+				}
+			}
+		}
+	}
+	for(int v = 0; v < V; v++) h[v] = dist[v];
+	
+	while(f > 0){
+		// Dijkstra
+		priority_queue<pair<int, int>, vector<pair<int, int> >, greater<pair<int, int> > > que;
+		memset(dist, 0x3f, sizeof(dist));
+		dist[s] = 0;
+		que.push(pair<int, int>(0, s));
+		while(!que.empty()){
+			pair<int, int> p = que.top(); que.pop();
+			int v = p.second;
+			if(dist[v] < p.first) continue;
+			for(int i = 0; i < G[v].size(); i++){
+				edge &e = G[v][i];
+				int d2 = dist[v] + e.cost + h[v] - h[e.to];
+				if(e.cap > 0 && d2 < dist[e.to]){
+					dist[e.to] = d2;
+					prevv[e.to] = v;
+					preve[e.to] = i;
+					que.push(pair<int, int>(dist[e.to], e.to));
+				}
+			}
+		}
+		if(dist[t] == INF){
+			return -1;
+		}
+		for(int v = 0; v < V; v++) h[v] += dist[v];
+		int d = f;
+		for(int v = t; v != s; v = prevv[v]){
+			d = min(d, G[prevv[v]][preve[v]].cap);
+		}
+		f -= d;
+		res += d * h[t];
+		for(int v = t; v != s; v = prevv[v]){
+			edge &e = G[prevv[v]][preve[v]];
+			e.cap -= d;
+			G[v][e.rev].cap += d;
+		}
+	}
+	return res;
+}
+
+void clear_graph(){
+	for(int v = 0; v < V; v++) G[v].clear();
+}
+
+int spfa(int s, int t){
+	memset(inq, 0, sizeof(inq));
+	memset(dist, 0x3f, sizeof(dist));
+	queue<int> q;
+	dist[s] = 0;
+	q.push(s);
+	inq[s] = 1;
+	while(!q.empty()){
+		int v = q.front(); q.pop();
+		inq[v] = 0;
+		for(int i = 0; i < G[v].size(); i++){
+			edge &e = G[v][i];
+			int d2 = dist[v] + e.cost;
+			if(e.cap > 0 && dist[e.to] > d2){
+				dist[e.to] = d2;
+				if(!inq[e.to]){
+					q.push(e.to);
+					inq[e.to] = 1;
+				}
+			}
+		}
+	}
+	return dist[t];
+}
+
+#define MAX_N 100
+#define MAX_M 1000
+int N, M;
+int X[MAX_M], Y[MAX_M], S[MAX_M];
+int deg[MAX_N]; // deg[i] > 0, in_degree > out_degree
+
+void solve(){
+	int s = N, t = s + 1;
+	V = t + 1;
+	clear_graph();
+	
+	int res = 0, f = 0;
+	memset(deg, 0, sizeof(deg));
+	for(int i = 0; i < M; i++){
+		deg[X[i]]--, deg[Y[i]]++;
+		add_edge(X[i], Y[i], INF, -S[i]);
+		res -= S[i];
+	}
+	for(int i = 0; i < N; i++){
+		if(deg[i] > 0){
+			add_edge(s, i, deg[i], 0);
+			f += deg[i];
+		}
+		if(deg[i] < 0){
+			add_edge(i, t, -deg[i], 0);
+		}
+	}
+	add_edge(N - 1, 0, INF, -spfa(0, N - 1));
+	
+	res += min_cost_flow(s, t, f);
+	printf("%d\n", res);
+}
+
+int main(){
+	while(~scanf("%d%d", &N, &M)){
+		for(int i = 0; i < M; i++){
+			scanf("%d%d%d", X + i, Y + i, S + i);
+		}
+		solve();
+	}
+	return 0;
+}
+

@@ -1,0 +1,16 @@
+V,E=gets.split.map(&:to_i)
+g=Array.new(V) {[]}
+E.times do
+  s,t,d=gets.split.map(&:to_i)
+  g[s]<<[t,d]
+end
+table=Array.new(1<<V) {Array.new(V,2*10**5)}
+table[0][0]=0
+(1<<V).times do |i|
+  V.times do |j|
+    next if i!=0 && i&1<<j==0
+    g[j].each {|k| table[i|1<<k[0]][k[0]]=[table[i|1<<k[0]][k[0]],table[i][j]+k[1]].min if i&1<<k[0]==0}
+  end
+end
+puts (r=table[-1][0])==2*10**5 ? -1 : r
+

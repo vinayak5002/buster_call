@@ -1,0 +1,138 @@
+// https://qiita.com/DaikiSuyama/items/9dba963ba74396b9b7fd
+// https://luling.hatenablog.com/entry/2018/12/01/212805
+// https://zenn.dev/antyuntyun/articles/atcoder-cpp-template
+//
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef unsigned long long ull;
+
+// rep macro
+#define reps(i, a, n) for (ll i = (a); i < (ll)(n); ++i)
+#define rreps(i, a, n) for (ll i = (a); i > (ll)(n); --i)
+#define rep(i, n) reps(i, 0, n)
+#define rrep(i, n) reps(i, 1, n + 1)
+#define repd(i,n) for(ll i=n-1;i>=0;i--)
+#define rrepd(i,n) for(ll i=n;i>=1;i--)
+
+#define optimize_cin() cin.tie(0); ios::sync_with_stdio(false)
+
+#define pb push_back
+#define mp make_pair
+#define all(obj) (obj).begin(), (obj).end()
+#define YESNO(bool) if(bool){cout<<"YES"<<endl;}else{cout<<"NO"<<endl;}
+#define yesno(bool) if(bool){cout<<"yes"<<endl;}else{cout<<"no"<<endl;}
+#define YesNo(bool) if(bool){cout<<"Yes"<<endl;}else{cout<<"No"<<endl;}
+
+//定数
+#define INF32 2147483647           // 2.147483647 x 10^{9}:32bit整数のinf
+#define INF64 9223372036854775807  // 9.22337203685477580 x 10^{18}:64bit整数のinf
+#define MOD 1000000007             //問題による
+#define PI 3.14159265359           // 円周率
+
+//略記
+#define F first
+#define S second
+
+//出力(空白区切りで昇順に)
+#define dump(x)                                                 \
+  for (auto i = x.begin(); i != --x.end(); i++) cout << *i << " "; \
+  cout << *--x.end() << endl;
+#define echo(x) cout << (x) << endl;
+
+#define dumpLine(x) {                               \
+  for (auto i = x.begin(); i != x.end(); ++i) {     \
+    if (i != x.begin())                             \
+      cout << " " << *i;                            \
+    else                                            \
+      cout << *i;                                   \
+  }                                                 \
+  cout << endl;                                     \
+}
+
+#define dumpMatrix(ms, row, col) \
+for (auto i = 0; i < row; i++) { \
+  for (auto j = 0; j < col; j++) { \
+    if (j != 0) cout << " "; \
+    cout << ms[i][j]; \
+  } \
+  cout << endl; \
+}
+
+// aをbで割る時の繰上げ,繰り下げ
+ll _ceil(ll a, ll b) { return (a + (b - 1)) / b; }
+ll _floor(ll a, ll b) { return a / b; }
+
+// 大きい方、小さい方を残す
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return 1; } return 0; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return 1; } return 0; }
+
+// 参考 : https://tjkendev.github.io/procon-library/cpp/range_query/rmq_segment_tree.html
+//      : https://www.madopro.net/entry/2016/10/10/234858
+
+#define N 100007
+
+// RSQ
+class SegmentTree {
+ private:
+  int n, n0;
+  ll data[4 * N];
+
+ public:
+  SegmentTree(int n) {
+    n0 = 1;
+    while (n0 < n) n0 <<= 1;
+    rep(i, 2 * n0) data[i] = 0;
+  }
+
+  void update(int k, ll x) {
+    k += n0 - 1;
+    data[k] = x;
+    while (k > 0) {
+      k = (k - 1) / 2;
+      data[k] = data[2 * k + 1] + data[2 * k + 2];
+    }
+  }
+
+  /**
+   * [a, b)の合計を求める
+   * k : 節点の番号
+   * l, r : kに対応づいているセグメントの範囲[l, r)
+   */
+  ll _query(int a, int b, int k, int l, int r) {
+    // [a, b)が[l, r)を完全に含む場合
+    if (a <= l && r <= b) return data[k];
+    // [a, b)と[l, r)が交差しない
+    if (r <= a || b <= l) return 0;
+    int mid = (l + r) / 2;
+    ll lv = _query(a, b, 2 * k + 1, l, mid);
+    if (b <= mid) return lv;
+    ll rv = _query(a, b, 2 * k + 2, mid, r);
+    if (a >= mid) return rv;
+    return lv + rv;
+  }
+
+  /**
+   * [a, b)の範囲を検索する
+   */
+  ll query(int a, int b) { return _query(a, b + 1, 0, 0, n0); }
+};
+
+signed main() {
+  int n, q;
+  cin >> n >> q;
+  SegmentTree seg(n);
+  while (q--) {
+    int com;
+    ll x, y;
+    cin >> com >> x >> y;
+    if (com == 0) {  // add
+      seg.update(x, y);
+    } else if (com == 1) {  // get sum
+      echo(seg.query(x, y ));
+    } else {
+      return -1;
+    }
+  }
+}
+

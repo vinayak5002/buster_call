@@ -1,0 +1,30 @@
+fun main() {
+    val n = readLine()!!.toInt()
+    val a = readLine()!!.split(" ").map { it.toInt() }
+    readLine()!!.toInt()
+    val m = readLine()!!.split(" ").map { it.toInt() }
+
+    m.forEach { mi ->
+        val stack = ArrayDeque<Suretsu>()
+        stack.add(Suretsu(0, 0, mutableListOf()))
+        var collect = false
+
+        while (stack.size > 0){
+            val next = stack.removeLast()
+            if (next.sum == mi){
+                println("yes")
+                collect = true
+                break
+            }
+            if (next.sum > mi) continue
+            if (next.index < n){
+                stack.add(Suretsu(next.index + 1, next.sum + a[next.index], next.items.plus(a[next.index])))
+                stack.add(Suretsu(next.index + 1, next.sum, next.items))
+            }
+        }
+        if (!collect) println("no")
+
+    }
+}
+
+class Suretsu (val index: Int, val sum: Int, val items: List<Int>)

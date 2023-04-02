@@ -1,0 +1,30 @@
+class Dice():
+    def __init__(self, sequence):
+        self.sequence = sequence
+
+    def move(self, code):
+        return [self.sequence[int(idx)] for idx in str(code)]
+
+    def roll(self, ops):
+        for op in ops:
+            if op == 'N': self.sequence = self.move(152304)
+            elif op == 'E': self.sequence = self.move(310542)
+            elif op == 'S': self.sequence = self.move(402351)
+            elif op == 'W': self.sequence = self.move(215043)
+
+class NewDice(Dice):
+    def __init__(self, sequence):
+        super().__init__(sequence)
+        self.candidates = []
+        for ops in ('', 'N', 'W', 'E', 'S', 'NN'):
+            dice = Dice(self.sequence)
+            dice.roll(ops)
+            for _ in range(4):
+                dice.roll('NES')
+                self.candidates.append(dice.sequence)
+
+    def __eq__(self, other):
+        return min(self.candidates) == min(other.candidates)
+
+print('Yes' if NewDice(list(map(int, input().split()))) == NewDice(list(map(int, input().split()))) else 'No')
+

@@ -1,0 +1,68 @@
+#include<stdio.h>
+
+#define MAX 100000
+
+int am[MAX][MAX];
+
+void makeAM(int number,int relation){
+  	int vertex_s,vertex_t;
+	int i,j;
+	
+  	for(i=0;i<number;i++)
+  		for(j=0;j<number;j++)
+  			am[i][j]=0;
+  			
+  	for(i=0;i<relation;i++){
+		scanf("%d%d",&vertex_s,&vertex_t); 
+		am[vertex_s][vertex_t]=1;
+		am[vertex_t][vertex_s]=1;
+	}
+}
+
+void search(int i,int number,int vertex,int *visit_flag,int *print_flag){
+	int j;
+ 	
+ 	visit_flag[i]=1;
+	if(i==vertex){
+		printf("yes\n");
+		print_flag[i]=1;
+		return;
+	}
+	
+ 	for (j=0;j<number;j++){
+ 		if(am[i][j]==1&&visit_flag[j]==0){
+ 			search(j,number,vertex,visit_flag,print_flag);
+ 			
+ 		}
+ 	}
+ 	if(print_flag[vertex]!=1)
+ 		printf("no\n");
+}
+
+int main(void){
+	int number,relation;
+	int vertex_s,vertex_t;
+	int question_sum;
+	int vertex_a,vertex_b;
+ 	int i;
+ 	int visit_flag[MAX];
+	int print_flag[MAX];
+
+ 
+ 	scanf("%d%d",&number,&relation);
+ 	
+ 	makeAM(number,relation);
+ 
+ 	for(i=0;i<number;i++)
+ 		visit_flag[i]=0;
+ 		print_flag[i]=0;
+	scanf("%d",&question_sum);
+	
+	for(i=0;i<question_sum;i++){
+		
+		scanf("%d%d",&vertex_a,&vertex_b);
+		search(vertex_a,number,vertex_b,visit_flag,print_flag);
+	}
+ 	return 0;
+}
+

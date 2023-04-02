@@ -1,0 +1,43 @@
+#include<iostream>
+#include<algorithm>
+#include<map>
+#include<queue>
+#include<stack>
+#include<set>
+#include<bitset>
+#include<vector>
+#include<string>
+#include <iomanip>
+#include <deque>
+#include<list>
+#include<cmath>
+#define rep(i,n) for(int i=0;i<(n);i++)
+using namespace std;
+using ll=long long;
+using P=pair<int,int>;
+using P_S=pair<int,string>;
+using P_D=pair<double,int>;
+using T=tuple<int,int,char,ll,string>;
+
+int main()
+{
+  int N,W;
+  cin>>N>>W;
+  int v[N],w[N];
+  rep(i,N) cin>>v[i]>>w[i];
+  int dp[N][W+1];
+  rep(i,W+1) dp[0][i]=0;
+  dp[0][v[0]]=v[0];
+  for(int i=1;i<N;i++){
+    rep(j,W+1){
+      if(j-w[i]>=0)dp[i][j]=max(dp[i-1][j-w[i]]+v[i],dp[i-1][j]);
+      else dp[i][j]=dp[i-1][j];
+    }
+  }
+  int answer=0;
+  rep(i,W+1){
+    if(dp[N-1][i]>answer) answer=dp[N-1][i];
+  }
+  cout<<answer<<endl;
+}
+

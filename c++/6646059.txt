@@ -1,0 +1,109 @@
+#include <stdio.h>
+#define MAX(a, b) a = (a > b) ? a : b
+
+int main(){
+    int n;
+    int D[255][255];
+    int num = 0, save = 0, k = 0;
+    while(scanf("%d", &n) == 1)
+    {
+        if(n == 0) break;
+
+        save = 0;
+
+        // read in
+        for(int i = 0; i < n; i++) for(int j = 0; j < n; j++) scanf("%1d", &D[i][j]);
+
+        // horizontal
+        for(int i = 0; i < n; i++)
+        {
+            num = 0;
+            for(int j = 0; j < n; j++)
+            {
+                if(D[i][j]) num++;
+                else if(!D[i][j]) num = 0;
+
+                MAX(save, num);
+            }
+        }
+
+        // vertical
+        for(int i = 0; i < n; i++)
+        {
+            num = 0;
+            for(int j = 0; j < n; j++)
+            {
+                if(D[j][i]) num++;
+                else if(!D[j][i]) num = 0;
+
+                MAX(save, num);
+            }
+        }
+
+        // diaganl
+
+        // top right to bottom right
+        for(int i = n - 1; i >= 0; i--)
+        {
+            num = 0;
+            k = i;
+            for(int j = 0; j < n && k < n; j++)
+            {
+                if(D[j][k]) num++;
+                else if(!D[j][k]) num = 0;
+
+                MAX(save, num);
+                k++;
+            }
+        }
+
+        // top left to bottom right
+        for(int i = 1; i < n; i++)
+        {
+            num = 0;
+            k = i;
+            for(int j = 0; j < n && k < n; j++)
+            {
+                if(D[k][j])  num++;
+                else if(!D[k][j]) num = 0;
+                
+                MAX(save, num);
+                k++;
+            }
+            MAX(save, num);
+        }
+
+        // bottom right to bottom left
+        for(int i = n - 1; i >= 0; i--)
+        {
+            num = 0;
+            k = i;
+            for(int j = n - 1; j >= 0 && k < n; j--)
+            {
+                if(D[k][j]) num++;
+                else if(!D[k][j]) num = 0;
+
+                MAX(save, num);
+                k++;
+            }
+        }
+
+        // top right to bottm left
+        for(int i = n - 2; i >= 0; i--)
+        {
+            num = 0;
+            k = i;
+            for(int j = 0; j < n && k >= 0; j++)
+            {
+                if(D[j][k]) num++;
+                else if(!D[j][k]) num = 0;
+
+                MAX(save, num);
+                k--;
+            }
+        }
+
+        printf("%d\n", save);
+    }
+    return 0;
+}

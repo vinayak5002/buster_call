@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+template <typename T>
+ostream& operator<<(ostream& os, const vector<T>& v) {
+    for (int i = 0; i < (int) v.size(); ++i) os << v[i] << " ";
+    return os;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int W, N;
+        cin >> W >> N;
+        if (W == 0) break;
+        vector<ll> x(N);
+        for (auto& y : x) cin >> y;
+        x.push_back(1e9);
+        int lb = 0, ub = W;
+        while (ub - lb > 1) {
+            int m = (lb + ub) / 2;
+            vector<int> reachable(N+2);
+            ll small = x[0] + m, big = x[0] + 1;
+            int j = 0, k = 0;
+            reachable[0] = 1;
+            reachable[1] = -1;
+            bool ok = true;
+
+            rep(i,0,N) {
+                while (j < N && small < W+m) {
+                    small += x[++j] + m;
+                }
+                while (k < N && big <= W+1) {
+                    big += x[++k] + 1;
+                }
+                if (reachable[i] && min(j+1, N) < k+1) {
+                    ++reachable[min(j+1, N)];
+                    --reachable[k+1];
+                }
+                small -= x[i] + m;
+                big -= x[i] + 1;
+                reachable[i+1] += reachable[i];
+            }
+            if (reachable[N]) {
+                ub = m;
+            } else {
+                lb = m;
+            }
+        }
+        cout << ub << "\n";
+    }
+}

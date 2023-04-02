@@ -1,0 +1,109 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+std::vector<int> bfs(const std::vector<std::vector<int>>& G, int s) {
+    std::vector<int> dist(G.size(), -1);
+    dist[s] = 0;
+    std::queue<int> que;
+    que.push(s);
+
+    while (!que.empty()) {
+        int v = que.front();
+        que.pop();
+        for (int u : G[v]) {
+            if (dist[u] == -1) {
+                dist[u] = dist[v] + 1;
+                que.push(u);
+            }
+        }
+    }
+
+    return dist;
+}
+
+class RangeEdgeGraph {
+public:
+    RangeEdgeGraph() = default;
+    explicit RangeEdgeGraph(int n) {
+        size = 1;
+        while (size < n) size <<= 1;
+        G.resize(4 * size);
+        for (int i = 1; i < size; ++i) {
+            int l = 2 * i, r = 2 * i + 1;
+            G[i].emplace_back(l);
+            G[i].emplace_back(r);
+            G[l + 2 * size].emplace_back(i + 2 * size);
+            G[r + 2 * size].emplace_back(i + 2 * size);
+        }
+        for (int i = size; i < 2 * size; ++i) G[i].emplace_back(i + 2 * size);
+    }
+
+    void add_edge(int l1, int r1, int l2, int r2) {
+        int idx = G.size();
+        for (l1 += size, r1 += size; l1 < r1; l1 >>= 1, r1 >>= 1) {
+            if (l1 & 1) G[l1 + 2 * size].emplace_back(idx), ++l1;
+            if (r1 & 1) --r1, G[r1 + 2 * size].emplace_back(idx);
+        }
+        std::vector<int> node;
+        for (l2 += size, r2 += size; l2 < r2; l2 >>= 1, r2 >>= 1) {
+            if (l2 & 1) node.emplace_back(l2++);
+            if (r2 & 1) node.emplace_back(--r2);
+        }
+        G.push_back(node);
+    }
+
+    std::vector<int> dist(int s) const {
+        std::vector<int> dist = bfs(G, s + size);
+        return std::vector<int>(dist.begin() + size, dist.begin() + 2 * size);
+    }
+
+private:
+    int size;
+    std::vector<std::vector<int>> G;
+};
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int W, N;
+        cin >> W >> N;
+        if (W == 0) break;
+        vector<ll> x(N);
+        for (auto& y : x) cin >> y;
+        x.push_back(1e9);
+        int lb = 0, ub = 100;
+        while (ub - lb > 1) {
+            int m = (lb + ub) / 2;
+            RangeEdgeGraph G(N+1);
+            ll small = x[0] + m, big = x[0] + 1;
+            int j = 0, k = 0;
+            rep(i,0,N) {
+                while (j < N && small < W+m) {
+                    small += x[++j] + m;
+                }
+                while (k < N && big <= W+1) {
+                    big += x[++k] + 1;
+                }
+                G.add_edge(i, i+1, min(j+1, N), k+1);
+                small -= x[i] + m;
+                big -= x[i] + 1;
+            }
+            if (G.dist(0)[N] != -1) {
+                ub = m;
+            } else {
+                lb = m;
+            }
+        }
+        cout << ub << "\n";
+    }
+}

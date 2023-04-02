@@ -1,0 +1,117 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define REP(i,n) for(int i=0;i<int(n);i++)
+typedef long long ll;
+typedef pair<int,int> P;
+
+char c[10][10],d[10][10];
+bool inside(int x,int y){
+	if(1<=x && x<=8 && 1<=y && y<=8) return true;
+	else return false;
+}
+void f(int x,int y){
+	for(int i=1;i<8;i++){
+	for(int j=-1;j<=1;j++){
+		for(int k=-1;k<=1;k++){
+			if(j==0 && k==0) continue;
+			int nx=x+i*j,ny=y+i*k;
+			if(inside(nx,ny) && c[nx][ny]!='Q') c[nx][ny]='*';
+		}
+	}
+	}
+}
+
+bool g(int x,int y){
+	c[x][y]='Q';
+	bool f=true;
+	for(int i=1;i<8;i++){
+	for(int j=-1;j<=1;j++){
+		for(int k=-1;k<=1;k++){
+			if(j==0 && k==0) continue;
+			int nx=x+i*j,ny=y+i*k;
+			if(inside(nx,ny)){
+			if(c[nx][ny]=='Q' || c[nx][ny]=='*'){
+				f=false;
+				break;
+			}
+			}
+		}
+		if(!f) break;
+	}
+	if(!f) break;
+	}
+	return f;
+}
+
+int main(void){
+	int i,j,k;
+
+	cin.tie(0);  ios_base::sync_with_stdio(false);
+
+	int N;
+	vector<P> a;
+	cin >> N;
+	for(i=0;i<N;i++){
+		int x,y;
+		cin >> x >> y;
+		x++; y++;
+		c[x][y]='Q';
+		d[x][y]='Q';
+		f(x,y);
+		a.push_back(P(x,y));
+	}
+
+	vector<P> v;
+	for(i=1;i<=8;i++) for(j=1;j<=8;j++) if(c[i][j]!='Q' && c[i][j]!='*') v.push_back(P(i,j));
+
+	int n=v.size();
+	bool f=true;
+	for(i=0;i<1<<n;i++){
+		f=true;
+		vector<int> u;
+		int s=0;
+		for(j=0;j<n;j++){
+			if(i & (1<<j)){
+				u.push_back(j);
+				s++;
+			}
+		}
+		if(s!=8-N) continue;
+
+		for(j=0;j<8-N;j++){
+			if(!g(v[u[j]].first,v[u[j]].second)){
+				f=false;
+				break;
+			}
+		}
+
+		if(f){
+			for(j=0;j<8-N;j++) c[v[u[j]].first][v[u[j]].second]='Q';
+			for(j=1;j<=8;j++){
+				for(k=1;k<=8;k++){
+					if(c[j][k]=='Q'){
+						if(k!=8) cout << 'Q' << ' ';
+						else cout << 'Q' << endl;
+					}
+					else{
+						if(k!=8)cout << '.' << ' ';
+						else cout << '.' << endl;
+					}
+				}
+			}
+
+			break;
+
+		}else{
+
+			for(j=1;j<=8;j++) for(k=1;k<=8;k++) c[j][k]=d[j][k];
+		}
+
+
+	}
+
+	return 0;
+}
+

@@ -1,0 +1,53 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void init (int n, vector<int> r){
+    for (int i=0; i < n; i++) r.at(i) = i;
+}
+
+int root (int x, vector<int> r){
+    if (r.at(x) == x) return x;
+
+    return (r.at(x) = root(r.at(x), r));
+}
+
+bool is_same_set(int x, int y, vector<int> r){
+    return (root(x, r) == root(y, r));
+}
+
+void unite (int x, int y, vector<int> r) {
+    r.at(root(x, r)) = root(y, r);
+}
+
+int main(){
+    int n, q;
+    cin >> n >> q;
+
+    vector<int> r(n);
+    init(n, r);
+
+    vector<bool> answer;
+
+    for (q; q > 0; q--){
+        int com, x, y;
+        cin >> com >> x >> y;
+
+        if (com == 0)
+            unite(x, y, r);
+        if (com == 1) {
+            if (is_same_set(x, y, r))
+                answer.push_back(true);
+            else
+                answer.push_back(false);
+        }
+    }
+
+    for (int i=0; i < answer.size(); i++){
+        if (answer.at(i)) 
+            cout << 1 << endl;
+        else   
+            cout << 0 << endl;
+    }
+
+    return 0;
+}

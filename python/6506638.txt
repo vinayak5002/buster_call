@@ -1,0 +1,93 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+
+	const n = si[0].split(" ");
+	let num = [];
+	for (let i = 0; i < n.length; i++) {
+		num[i] = parseInt(n[i]);
+	}
+
+	var array = new Array(num[0]);
+
+	for (let i = 0; i < num[0]; i++) {
+		array[i] = [];
+	}
+
+	let length = new Array(num[0])
+
+	for (let i = 0; i < num[0]; i++) {
+		length[i] = 0;
+	}
+
+	for (let i = 1; i <= num[1]; i++) {
+		let order = si[i].split(" ");
+		let t = order[1];
+
+		switch (order[0]) {
+			case '0':
+				array[t].push(parseInt(order[2]));
+				length[t]++;
+				if (length[t] > 1) {
+					for (let j = length[t] - 1; ; j = Math.floor((j - 1) / 2)) {
+						let parent = Math.floor((j - 1) / 2);
+						if (array[t][j] >= array[t][parent]) {
+							let data = array[t][parent];
+							array[t][parent] = array[t][j];
+							array[t][j] = data;
+						} else {
+							break;
+						}
+					}
+				}
+
+				break;
+
+			case '1':
+				if (length[t] > 0) {
+					so.write(array[t][0] + '\n');
+				}
+
+				break;
+
+			case '2':
+				if (length[t] > 0) {
+					array[t][0] = array[t][length[t] - 1];
+					array[t].pop();
+					length[t]--;
+					for (let j = 0; ; ) {
+						let left = (j * 2) + 1;
+						let right = (j + 1) * 2;
+						let c;
+						if (left < length[t] && right < length[t]) {
+							if (array[t][left] < array[t][right]) {
+								c = right;
+							} else {
+								c = left;
+							}
+						} else if (left < length[t]) {
+							c = left;
+						} else {
+							break;
+						}
+						
+						if (array[t][j] < array[t][c]) {
+							let data = array[t][c];
+							array[t][c] = array[t][j];
+							array[t][j] = data;
+							j = c;
+						} else {
+							break;
+						}
+							
+						
+					}
+				}
+				//console.log(array[t]);
+				break;
+		}
+		//so.write(order[0] + ':'+ 'array['+t+']{' +array[t] + '} length : '+length[t]+'\n');
+	}
+}

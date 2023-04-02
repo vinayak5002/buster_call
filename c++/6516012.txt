@@ -1,0 +1,108 @@
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100000
+
+struct process {
+    char name[10];
+    int time;
+};
+
+int head, tail, n, q;
+
+void initialize()
+{
+    head = tail = 0;
+}
+
+bool isEmpty()
+{
+    return head == tail;
+}
+
+bool isFull()
+{
+    return head == (tail + 1) % MAX;
+}
+
+void enqueue(struct process* x, struct process a)
+{
+    if (isFull()) 
+    {
+        fprintf(stderr, "overflow\n");
+        exit(1);
+    }
+    
+    x[tail] = a;
+    
+    if (tail + 1 == MAX) 
+    {
+        tail = 0;
+    } 
+    
+    else {
+        tail++;
+    }
+}
+
+struct process dequeue(struct process* x)
+{
+    struct process a;
+    if (isEmpty()) 
+    {
+        fprintf(stderr, "underflow\n");
+        exit(1);
+    }
+    
+    a = x[head];
+
+    if (head + 1 == MAX) 
+    {
+        head = 0;
+    } 
+    
+    else 
+    {
+        head++;
+    }
+    return a;
+}
+
+int main(void)
+{
+    int count = 0;
+    struct process tmp;
+    struct process queue[MAX];
+    scanf("%d %d", &n, &q);
+
+    initialize();
+
+    for (int i = 0; i < n; i++) 
+    {
+        scanf("%s", tmp.name);
+        scanf("%d", &tmp.time);
+        enqueue(queue, tmp);//全てENQUEUE
+    }
+
+    while (!isEmpty()) 
+    {
+        if (queue[head].time <= q) 
+        {
+            count += queue[head].time;//時間を足していく
+            printf("%s %d\n",queue[head].name, count);//足してその都度表示
+            dequeue(queue);
+        } 
+        
+        else 
+        {
+            tmp = dequeue(queue);
+            tmp.time -= q;
+            enqueue(queue, tmp);
+            count += q;
+        }
+    }
+
+    return 0;
+}
+

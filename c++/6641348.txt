@@ -1,0 +1,81 @@
+#include <iostream>
+#include <stack>
+using namespace std;
+
+int n;                           //  頂点数
+#define MAX_n     100            //  n の最大数
+int d[MAX_n + 1];                //  d[v]: 頂点 v を初めて訪問（発見）した時間
+int f[MAX_n + 1];                //  f[v]: 頂点 v を去った（訪問を終えた）時間
+int Adj[MAX_n + 1][MAX_n + 1];   //  Adj[v]:  頂点 v の隣接リスト
+                                 //  Adj[v][n] = -1:  番兵
+int tm;                          //  時間
+
+void init(int n)
+{
+    // Adj の初期化
+    for (int j = 0; j < n; j++) 
+	Adj[0][j] = j + 1;
+    Adj[0][n] = -1;
+    for (int i = 1; i <= n; i++) 
+	for (int j = 0; j <= n; j++)
+	    Adj[i][j] = -1;
+    
+    // d, f の初期化
+    for (int i = 0; i <= n; i++)
+	d[i] = f[i] = -1;
+
+    tm = -1;
+    d[0] = 0;
+}
+
+void dfs()
+{ 
+    stack<int> S;
+    S.push(0);
+    while (!S.empty()) {
+	tm++;    // 時間を進めるのは一箇所にした方がよい
+	int u = S.top();  S.pop();  
+	int v;   // 次に訪問すべき頂点
+	for (int i = 0; ; i++) {      //  改善の余地あり
+	    v = Adj[u][i];
+	    if (v < 0 || d[v] < 0)
+		break;
+	}
+#ifdef TRACE
+	cout << u ;
+	if (u == 0 && v < 0)
+	    cout << endl;
+	else
+	    cout << " --> ";
+#endif
+	if (v >= 0 && d[v] < 0) {        // 未訪問の頂点あり
+	    S.push(u);                 // 新たな冒険を終えたら、戻ってくる
+	    S.push(v);
+	    d[v] = tm + 1;
+	} else
+	    f[u] = tm + 1;
+    }
+}
+
+int main()
+{
+    cin >> n;
+    init(n);
+    
+    for (int i = 0; i < n; i++) {
+	int u;
+	cin >> u;
+	int k;     // u に隣接する頂点の数
+	cin >> k;
+	for (int j = 0; j < k; j++)
+	    cin >> Adj[u][j];
+    }
+   
+    dfs();
+
+    for (int v = 1; v <= n; v++)
+	cout << v << ' ' << d[v] << ' ' << f[v] << endl;
+
+    return 0;
+}
+

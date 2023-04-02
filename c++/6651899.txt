@@ -1,0 +1,117 @@
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+#include <vector>
+#include <algorithm>
+#include <sstream>
+
+void setcout()
+{
+    std::cout << std::fixed << std::setprecision(10);
+}
+
+struct DICE
+{
+    int N = 5;
+    int E = 3;
+    int S = 2;
+    int W = 4;
+    int U = 1;
+    int D = 6;
+
+    void roll_N()
+    {
+        std::swap(U, S);
+        std::swap(S, D);
+        std::swap(D, N);
+    }
+    void roll_E()
+    {
+        std::swap(U, W);
+        std::swap(W, D);
+        std::swap(D, E);
+    }
+    void roll_S()
+    {
+        std::swap(U, N);
+        std::swap(N, D);
+        std::swap(D, S);
+    }
+    void roll_W()
+    {
+        std::swap(U, E);
+        std::swap(E, D);
+        std::swap(D, W);
+    }
+    void yaw_p()
+    {
+        std::swap(N, E);
+        std::swap(E, S);
+        std::swap(S, W);
+    }
+    void yaw_n()
+    {
+        std::swap(N, W);
+        std::swap(W, S);
+        std::swap(S, E);
+    }
+
+    void align(int xU, int xS)
+    {
+        int c = 0;
+        while (U != xU)
+        {
+            roll_N();
+            if (c++ == 4)
+            {
+                yaw_p();
+                c = 0;
+            }
+        }
+        while (S != xS)
+        {
+            yaw_p();
+        }
+    }
+} dice;
+
+bool isSameDice(DICE d1, DICE d2)
+{
+    for (int m = 0; m < 4; m++)
+    {
+        for (int n = 0; n < 4; n++)
+        {
+            for (int l = 0; l < 4; l++)
+            {
+                if (d1.U == d2.U && d1.N == d2.N && d1.E == d2.E && d1.S == d2.S && d1.W == d2.W && d1.D == d2.D)
+                {
+                    return true;
+                }
+                d2.yaw_p();
+            }
+            d2.roll_N();
+        }
+        d2.roll_E();
+    }
+    return false;
+}
+
+int main()
+{
+    int n = 0;
+    std::cin >> n;
+    std::vector<DICE> dv;
+    for(int i=0; i<n; i++){
+        DICE d;
+        std::cin >> d.U >> d.S >> d.E >> d.W >> d.N >> d.D;
+        dv.push_back(d);
+    }
+    for(int i=1; i<n; i++){
+        if(isSameDice(dv[0], dv[i])){
+            std::cout << "No" << std::endl;
+            return 0;
+        }
+    }
+    std::cout << "Yes" << std::endl;
+    return 0;
+}

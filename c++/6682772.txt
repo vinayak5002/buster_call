@@ -1,0 +1,49 @@
+#include <stdio.h>
+#define V_LEN 128
+
+int search(int V[][V_LEN], int V_search[][2], int index, int n, int time)
+{
+    time++;
+    V_search[index][0] = time;
+    for (int i = 1; i <= n; i++)
+    {
+        if (V[index][i] != 0 && V_search[i][0] == 0)
+        {
+            time = search(V, V_search, i, n, time);
+        }
+    }
+    V_search[index][1] = ++time;
+    return time;
+}
+
+int main(void)
+{
+    int V[V_LEN][V_LEN] = {{0}};
+    int V_search[V_LEN][2] = {{0}};
+    int n, k, v_k, u;
+    int time = 0;
+    scanf("%d", &n);
+    for (int i = 1; i <= n; i++)
+    {
+        scanf("%d %d", &u, &k);
+        for (int j = 0; j < k; j++)
+        {
+            scanf("%d", &v_k);
+            V[u][v_k] = 1;
+        }
+    }
+
+    for (int i = 1; i <= n; i++)
+    {
+        if (V_search[i][0] == 0)
+        {
+            time = search(V, V_search, i, n, time);
+        }
+    }
+
+    for (int i = 1; i <= n; i++)
+    {
+        printf("%d %d %d\n", i, V_search[i][0], V_search[i][1]);
+    }
+}
+

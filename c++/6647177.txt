@@ -1,0 +1,45 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for (int i = 0; i < (n); ++i)
+const int dx[] = {1, 1, 0, -1, -1, -1, 0, 1};
+const int dy[] = {0, 1, 1, 1, 0, -1, -1, -1};
+
+int w, h;
+int c[50][50];
+bool inside (int i, int j) {return 0<=i && i<h && 0<=j && j<w; }
+int seen[50][50];
+
+void dfs(int x, int y) {
+    seen[x][y] = 1;
+    rep(k,8) {
+        int nx = x + dx[k];
+        int ny = y + dy[k];
+        if (!inside(nx, ny)) continue;
+        if (!c[nx][ny]) continue;
+        if (seen[nx][ny]) continue;
+        dfs(nx, ny);
+    }
+}
+
+bool solve() {
+    cin >> w >> h;
+    if (h + w == 0) return false;
+    rep(i,h) rep(j,w) {
+        cin >> c[i][j];
+        seen[i][j] = 0;
+    }
+
+    int ans = 0;
+    rep(i,h) rep(j,w){
+        if (c[i][j] && !seen[i][j]) {
+            ans++;
+            dfs(i,j);
+        }
+    }
+    cout << ans << endl;
+    return true;
+}
+
+int main(){
+    while (solve());
+} 

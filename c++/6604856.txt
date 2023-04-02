@@ -1,0 +1,108 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+#define N 1000000
+
+int str_key(char str[])
+{
+	int key=0;
+	
+	for(int i=0; i<strlen(str); i++) key += str[i]*i;
+	
+	key+= strlen(str);
+	
+	return key;
+}
+
+int h1(int key, int n) { return key%n; }
+int h2(int key, int n) { return 1 + (key%(n-1)); }
+
+int hash(int key, int n, int i)
+{
+	return (h1(key, n) + i*h2(key, n))%(10*N);
+}
+
+void insert_find(char **dictionary, char str[], int n, int code)
+{
+	//codeはinsert=0, find=1
+	int end=1; //ループ条件
+	int i=0;
+	int h; //ハッシュ値
+	int tmp_k = str_key(str); //鍵の一時保存
+	char *p; //pはdictionaryの特定位置を指す
+	
+	while(end){
+		h = hash(tmp_k, n, i); //ハッシュ値の決定
+		
+		if(dictionary[h] == NULL && code == 0){
+			//insert命令で空き位置を見つけた場合
+			end=0;
+			p = malloc(sizeof(char)*(strlen(str)+1)); //pに動的割当
+			strcpy(p, str);
+			dictionary[h] = p;
+			
+		}else if(dictionary[h] != NULL && code == 1){
+			//find命令で格納済み位置を見つけた場合
+			if(strcmp(dictionary[h], str)==0){
+				end=0;
+				printf("yes\n");
+			}
+		}else if(dictionary[h] == NULL && code == 1){
+			//find命令で探索先が空き位置の場合
+			//あるいはループ数がnを超えた場合
+			end=0;
+			printf("no\n");
+		}
+		
+		i++;
+	}
+}
+
+int main(void)
+{
+	char s[30];
+	int n; //命令数
+	char com[10]; //命令を受け取る文字列
+	char str[15]; //辞書に挿入・探索する文字列
+	char *p;
+	char *tok_p; //トークンへのポインタ
+	char **dictionary; //文字列へのポインタの辞書
+	
+	int i;
+	
+	fgets(s, sizeof(s)-1, stdin);
+	sscanf(s, "%d", &n);
+	
+	dictionary = malloc(sizeof(char *)*10*N); //2n個のchar型ポインタの割当
+	
+	for(i=0; i<N; i++) dictionary[i][0] = '\0'; //dictionaryの初期化
+	
+	for(i=0; i<n; i++){
+		fgets(s, sizeof(s)-1, stdin);
+		//strtokで文字列を分割
+		p = s;
+		tok_p = strtok(p, " "); //tok_pはトークンへのポインタ
+		strcpy(com, tok_p); //comを受け取る
+		p = NULL; //pは残った文字列の先頭
+		tok_p = strtok(p, "\0");
+		strcpy(str, tok_p); //strを受け取る
+		
+		//文字列comの比較(insert, find)
+		if(!strcmp(com, "insert")){
+			//空き位置を見つけて格納
+			insert_find(dictionary, str, n, 0);
+		}else if(!strcmp(com, "find")){
+			//探索と判定を行う
+			insert_find(dictionary, str, n, 1);
+		}
+	}
+	
+	//free
+	for(i=0; i<N; i++){
+		free(dictionary[i]);
+	}
+	free(dictionary);
+	
+	return 0;
+}

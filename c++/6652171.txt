@@ -1,0 +1,185 @@
+#include <bits/extc++.h>
+
+using namespace std;
+
+#define rep(i,n) for(int i=0;i<(n);++i)
+#define reps(i,s,n) for(int i=(s);i<=(n);++i)
+#define all(x) begin(x), end(x)
+#define Fixed fixed << setprecision(12)
+constexpr int32_t INF  = 0x3f3f3f3f;
+constexpr int64_t LINF = 0x3f3f3f3f3f3f3f3fLL;
+constexpr int mod = 1e9+7;
+// constexpr int mod = 998244353;
+
+template <class Func>
+class FixPoint : Func {
+public:
+    explicit constexpr FixPoint(Func&& f) noexcept : Func(forward<Func>(f)) {}
+
+    template <class... Args>
+    constexpr decltype(auto) operator()(Args&&... args) const {
+        return Func::operator()(*this, std::forward<Args>(args)...);
+    }
+};
+
+template <class Func>
+static inline constexpr decltype(auto) makeFixPoint(Func&& f) noexcept {
+    return FixPoint<Func>{forward<Func>(f)};
+}
+
+template <class A, class B> inline bool chmax(A &a, const B &b) { return b > a && (a = b, true); }
+template <class A, class B> inline bool chmin(A &a, const B &b) { return b < a && (a = b, true); }
+
+template <class T> using max_heap = priority_queue<T>;
+template <class T> using min_heap = priority_queue<T,vector<T>,greater<T> >;
+template <class A, class B> using umap = unordered_map<A,B>;
+template <class A, class B> using uset = unordered_set<A,B>;
+
+template <class T> using Set = __gnu_pbds::tree<T, __gnu_pbds::null_type, less<T>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
+
+template <class T> inline void bye(T x) { cout << x << '\n'; exit(0); }
+
+inline int updiv(int a,int b){ return (a + b - 1) / b; }
+
+constexpr int dx[] = {1, 0, -1, 0, 1, 1, -1, -1};
+constexpr int dy[] = {0, -1, 0, 1, 1, -1, -1, 1};
+
+struct UnionFind{
+    int n;
+    vector<int> data;
+
+    UnionFind(int sz) : n(sz), data(sz, -1){}
+
+    bool unite(int x, int y){
+        x = find(x), y = find(y);
+        if(x == y) return (false);
+        if(data[x] > data[y]) swap(x, y);
+        data[x] += data[y];
+        data[y] = x;
+        return (true);
+    }
+
+    int find(int k){
+        if(data[k] < 0) return (k);
+        return (data[k] = find(data[k]));
+    }
+
+    int size(int k){
+        return (-data[find(k)]);
+    }
+
+    bool same(int x, int y){
+        return (find(x) == find(y));
+    }
+
+    vector<vector<int> > groups(){
+        vector<int> leader_buf(n), group_size(n);
+        for(int i = 0; i < n; ++i){
+            leader_buf[i] = find(i);
+            group_size[leader_buf[i]]++;
+        }
+        vector<vector<int> > res(n);
+        for(int i = 0; i < n; ++i){
+            res[i].reserve(group_size[i]);
+        }
+        for(int i = 0; i < n; ++i){
+            res[leader_buf[i]].emplace_back(i);
+        }
+        res.erase(
+            remove_if(res.begin(), res.end(),
+                      [&](const vector<int>& v){ return (v.empty()); }),
+            res.end());
+        return (res);
+    }
+};
+
+signed main() {
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+
+    int n, m;
+    while (cin >> n >> m, n) {
+        vector<int> h(n), v;
+        for (int i = 0; i < n; ++i) {
+            cin >> h[i];
+            v.emplace_back(h[i]);
+        }
+
+        sort(all(v));
+
+        v.erase(unique(all(v)), v.end());
+        int sz = v.size();
+
+        for (int i = 0; i < n; ++i) {
+            h[i] = (sz - (lower_bound(all(v), h[i]) - v.begin())) - 1;
+        }
+
+        vector<vector<int> > sink(sz);
+
+        for (int i = 0; i < n; ++i) {
+            sink[h[i]].emplace_back(i);
+        }
+
+        vector<vector<pair<int, int> > > edge(n);
+        vector<vector<tuple<int, int, int> > > edge_tp(sz);
+
+        for (int i = 0; i < m; ++i) {
+            int a, b, c;
+            cin >> a >> b >> c;
+            --a, --b;
+            // tie(a, b) = minmax({a, b});
+            edge[a].emplace_back(b, c);
+            edge[b].emplace_back(a, c);
+            edge_tp[max(h[a], h[b])].emplace_back(a, b, c);
+        }
+
+        for (int i = 0; i < n; ++i) {
+            sort(all(edge[i]));
+        }
+
+        int fs = min_element(all(h)) - h.begin();
+        UnionFind uf(n);
+        int disconnected = -1;
+        vector<bool> ng(n);
+
+        for (int i = 0; i < sz; ++i) {
+            for (auto [a, b, c] : edge_tp[i]) {
+                uf.unite(a, b);
+            }
+            bool ok = true;
+            for (int j = 0; j <= i; ++j) {
+                for (auto il : sink[j]) {
+                    ok &= uf.same(fs, il);
+                }
+            }
+            if (!ok) disconnected = i;
+        }
+
+        uf = UnionFind(n);
+        int64_t res = 0;
+        min_heap<tuple<int, int, int> > pq;
+
+        int cnt = 0;
+        for (int i = 0; i <= disconnected; ++i) {
+            for (auto [a, b, c] : edge_tp[i]) {
+                pq.emplace(c, a, b);
+            }
+        }
+        for (int i = disconnected + 1; i < sz; ++i) {
+            for (auto [a, b, c] : edge_tp[i]) {
+                pq.emplace(c, a, b);
+            }
+            while (!pq.empty()) {
+                auto [c, a, b] = pq.top();
+                if (uf.unite(a, b)) res += c;
+                pq.pop();
+            }
+        } 
+
+        cout << res << '\n';
+    }
+
+    return(0);
+}
+
+

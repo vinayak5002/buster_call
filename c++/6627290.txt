@@ -1,0 +1,80 @@
+#include<stdio.h>
+#define NIL -1
+#define MAX 1000000
+
+typedef struct{
+    int p,l,r;
+}Node;
+
+Node T[MAX];
+int D[MAX];
+
+void print(int id){
+    printf("node %d: ",id);
+    printf("parent= %d, " ,T[id].p);
+    printf("depth= %d, ",D[id]);
+    if(T[id].p==NIL){
+        printf("root,");
+    }
+    else if(T[id].l){
+        printf("leaf,");
+    }
+    else{
+        printf("internal node,");
+    }
+    printf("[");
+    for(int i=0,left=T[id].l; left!=NIL; i++,left=T[left].r){
+        if(i){
+            printf(",");
+        }
+        printf("%d",left);
+    }
+    printf("]\n");
+}
+
+void Depth(int id,int p){
+    D[id]=p;
+    if(T[id].r!=NIL){
+        Depth(T[id].r,p);
+    }
+    if(T[id].l!=NIL){
+        Depth(T[id].l,p+1);
+    }
+}
+
+int main(void){
+
+    int x,y,id,left,root,n;
+    scanf("%d",&n);
+    for(int i=0;i<n;i++){
+        T[i].p=T[i].l=T[i].r=NIL;
+    }
+    for(int i=0;i<n;i++){
+        scanf("%d",&id);
+        scanf("%d",&x);
+        for(int j=0;j<x;j++){
+            scanf("%d",&y);
+            if(j==0){
+                T[id].l=y;
+            }
+            else{
+                T[left].r=y;
+            }
+            left=y;
+            T[y].p=id;
+        }
+    }
+    for(int i=0;i<n;i++){
+        if(T[i].p==NIL){
+            root=i;
+        }
+    }
+    Depth(root,0);
+
+    for(int i=0;i<n;i++){
+        print(i);
+    }
+    return 0;
+
+
+}

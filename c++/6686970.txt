@@ -1,0 +1,144 @@
+#include <stdio.h>
+#include <string.h>
+
+#define ITEM_NUM 6
+
+typedef struct {
+    int top   ;
+    int south ;
+    int east  ;
+    int west  ;
+    int north ;
+    int bottom;
+} DICE_SURFACE;
+
+DICE_SURFACE defaultSet(int item[ITEM_NUM]);
+DICE_SURFACE moveNorth (DICE_SURFACE dice);
+DICE_SURFACE moveSouth (DICE_SURFACE dice);
+DICE_SURFACE moveEast  (DICE_SURFACE dice);
+DICE_SURFACE moveWest  (DICE_SURFACE dice);
+void         TestDebug (DICE_SURFACE test);
+
+int main (void) {
+
+    /* [Input]                                                                                *
+     * 1行目に各面の整数が、図に示すラベルの順番に空白区切りで与えられます。                  *
+     *                                                                                        *
+     * 2行目に命令を表す1つの文字列が与えられます。命令はそれぞれ図に示す4方向を表す文字E、N、*
+     * S、Wを含む文字列です。                                                                 */
+
+    DICE_SURFACE    diceSts        ;
+    int             input[ITEM_NUM];
+    int             i              ;
+    char            moveDirect[100];
+
+    for (i = 0; i < ITEM_NUM; i++) {
+        scanf("%d", &input[i]);
+    }
+
+    /* 初期ステータス設定 */
+    diceSts = defaultSet(input);
+//    TestDebug(diceSts);
+
+    scanf("%s", moveDirect);
+
+    for (i = 0; i < strlen(moveDirect); i++) {
+        switch (moveDirect[i]) {
+            case 'N':
+                diceSts = moveNorth(diceSts);
+                break;
+            case 'S':
+                diceSts = moveSouth(diceSts);
+                break;
+            case 'W':
+                diceSts = moveWest(diceSts);
+                break;
+            case 'E':
+                diceSts = moveEast(diceSts);
+                break;
+        }
+
+//        TestDebug(diceSts);
+    }
+
+    printf("%d\n", diceSts.top);
+
+    return 0;
+}
+
+DICE_SURFACE defaultSet(int item[ITEM_NUM]) {
+
+    DICE_SURFACE sts;
+
+    sts.top    = item[0];
+    sts.south  = item[1];
+    sts.east   = item[2];
+    sts.west   = item[3];
+    sts.north  = item[4];
+    sts.bottom = item[5];
+
+    return sts;
+}
+
+DICE_SURFACE moveNorth (DICE_SURFACE dice) {
+
+    DICE_SURFACE sts;
+
+    sts.top    = dice.south ;
+    sts.south  = dice.bottom;
+    sts.east   = dice.east  ;
+    sts.west   = dice.west  ;
+    sts.north  = dice.top   ;
+    sts.bottom = dice.north ;
+
+    return sts;
+}
+
+DICE_SURFACE moveSouth (DICE_SURFACE dice) {
+
+    DICE_SURFACE sts;
+
+    sts.top    = dice.north ;
+    sts.south  = dice.top   ;
+    sts.east   = dice.east  ;
+    sts.west   = dice.west  ;
+    sts.north  = dice.bottom;
+    sts.bottom = dice.south ;
+
+    return sts;
+}
+
+DICE_SURFACE moveEast  (DICE_SURFACE dice) {
+
+    DICE_SURFACE sts;
+
+    sts.top    = dice.west  ;
+    sts.south  = dice.south ;
+    sts.east   = dice.top   ;
+    sts.west   = dice.bottom;
+    sts.north  = dice.north ;
+    sts.bottom = dice.east  ;
+
+    return sts;
+}
+
+DICE_SURFACE moveWest  (DICE_SURFACE dice) {
+
+    DICE_SURFACE sts;
+
+    sts.top    = dice.east  ;
+    sts.south  = dice.south ;
+    sts.east   = dice.bottom;
+    sts.west   = dice.top   ;
+    sts.north  = dice.north ;
+    sts.bottom = dice.west  ;
+
+    return sts;
+}
+
+void TestDebug(DICE_SURFACE test) {
+    printf("      | %3d |\n", test.top);
+    printf("| %3d | %3d | %3d | %3d |\n", test.west, test.south, test.east, test.north);
+    printf("      | %3d |\n", test.bottom);
+}
+

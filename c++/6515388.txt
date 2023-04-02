@@ -1,0 +1,91 @@
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_DATA 101 //オペランドの最大個数は100個で、配列の0番目はスタックの0番地に用いる
+
+struct stack {
+    int arr[MAX_DATA];
+    int top;
+};
+
+void initialize(struct stack*);
+bool isEmpty(struct stack*);
+bool isFull(struct stack*);
+void push(struct stack*, int);
+int pop(struct stack*);
+
+int main()
+{
+    int x;
+    char s[100];
+    struct stack st;
+    initialize(&st);
+
+    while (scanf("%s", s) != EOF) { //スペース入力は区切りとして認識され都度EOFが存在する
+        if (s[0] == '+') {
+            if (st.top < 2) {
+                fprintf(stderr, "演算に使用する要素が不足しています。\n");
+                exit(1);
+            }
+            x = pop(&st);
+            push(&st, pop(&st) + x);
+        } else if (s[0] == '-') {
+            if (st.top < 2) {
+                fprintf(stderr, "演算に使用する要素が不足しています。\n");
+                exit(1);
+            }
+            x = pop(&st);
+            push(&st, pop(&st) - x);
+        } else if (s[0] == '*') {
+            if (st.top < 2) {
+                fprintf(stderr, "演算に使用する要素が不足しています。\n");
+                exit(1);
+            }
+            x = pop(&st);
+            push(&st, pop(&st) * x);
+        } else {
+            x = atoi(s);
+            push(&st, x);
+        }
+    }
+
+    printf("%d\n",st.arr[st.top]);
+
+    return 0;
+}
+
+void initialize(struct stack* st)
+{
+    st->top = 0;
+}
+
+bool isEmpty(struct stack* st)
+{
+    return st->top == 0;
+}
+
+bool isFull(struct stack* st)
+{
+    return st->top >= MAX_DATA - 1;
+}
+
+void push(struct stack* st, int x)
+{
+    if (isFull(st)) {
+        fprintf(stderr, "オーバーフローが発生しています。\n");
+        exit(1);
+    }
+    st->top++;
+    st->arr[st->top] = x;
+}
+
+int pop(struct stack* st)
+{
+    if (isEmpty(st)) {
+        fprintf(stderr, "アンダーフローが発生しています。\n");
+        exit(1);
+    }
+    st->top--;
+    return st->arr[st->top + 1];
+}

@@ -1,0 +1,58 @@
+#include<iostream>
+#include<vector>
+int V,E;
+std::vector<std::vector<int> > connection(100,std::vector<int>(100,-1));
+
+bool traverser_DFS(int now,std::vector<int> &visited,int mark){
+
+    if(visited[now]==mark){
+        return true;
+    }
+    else if(visited[now]==-1){
+        visited[now]=mark;
+
+        for(int next=0;next<V;next++){
+            if(connection[now][next]==1){
+                if(traverser_DFS(next,visited,mark)){
+                    return true;
+                }
+                else{
+                    return false;
+                }
+            }
+        }
+    }
+    else{
+        return false;
+    }
+    return false;
+}
+
+int main(){
+    int s,t;
+
+    std::cin>>V>>E;
+    std::vector<int> visited(V,-1);
+
+    for(int i = 0;i<E;i++){
+        std::cin>>s>>t;
+        connection[s][t]=1;
+    }
+
+    bool flag =false;
+
+    for(int start_point = 0;start_point<V;start_point++){
+        if(visited[start_point]==-1){
+            if(traverser_DFS(start_point,visited,start_point)){
+                flag=true;
+                break;
+            }
+        }
+    }
+    if(flag){
+        std::cout<<"1"<<std::endl;
+    }else{
+        std::cout<<"0"<<std::endl;
+    }
+    return 0;
+}

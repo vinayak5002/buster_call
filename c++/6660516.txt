@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using ld = long double;
+using P = pair<int, int>;
+using Graph = vector<vector<ll>>;
+using vi = vector<int>;
+using vl = vector<long>;
+using vll = vector<long long>;
+using vvi = vector<vi>;
+using vvl = vector<vl>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using vc = vector<char>;
+using vvc = vector<vc>;
+using pll = pair<long long, long long>;
+using vpll = vector<pll>;
+const long double EPS = 1e-18;
+const long long INF = 1e18;
+const long double PI = acos(-1.0L);
+#define reps(i, a, n) for (ll i = (a); i < (ll)(n); i++)
+#define rep(i, n) for (ll i = (0); i < (ll)(n); i++)
+#define rrep(i, n) for (ll i = (1); i < (ll)(n + 1); i++)
+#define repd(i, n) for (ll i = n - 1; i >= 0; i--)
+#define rrepd(i, n) for (ll i = n; i >= 1; i--)
+#define ALL(n) begin(n), end(n)
+#define IN(a, x, b) (a <= x && x < b)
+#define INIT                          \
+    std::ios::sync_with_stdio(false); \
+    std::cin.tie(0);
+template <class T>
+inline T CHMAX(T& a, const T b) {
+    return a = (a < b) ? b : a;
+}
+template <class T>
+inline T CHMIN(T& a, const T b) {
+    return a = (a > b) ? b : a;
+}
+vll totient(ll n) {
+    vll prime(n + 1, n + 1);
+    vector<bool> is_prime(n + 1, true);
+    is_prime.at(0) = is_prime.at(1) = false;
+    reps(i, 2, n + 1) {
+        if (is_prime.at(i)) {
+            prime.at(i) *= (i - 1);
+            prime.at(i) /= i;
+            for (ll j = 2 * i; j <= n; j += i) {
+                is_prime.at(j) = false;
+                prime.at(j) *= (i - 1);
+                prime.at(j) /= i;
+            }
+        }
+    }
+    return prime;
+}
+int main() {
+    vll phi = totient(1000000);
+    vll sum(1000001, 0);
+    sum.at(0) = 1;
+    rrep(i, 1000000) { sum.at(i) = sum.at(0) + phi.at(i); }
+    ll t;
+    cin >> t;
+    rep(i, t) {
+        ll n;
+        cin >> n;
+        cout << sum.at(n) << endl;
+    }
+}

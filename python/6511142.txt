@@ -1,0 +1,52 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let n = si[0];
+	let ele = si[1].split(" ");
+	let q = si[2];
+	let range = 2000;// (-10bilから１０bilまでの２０bil)/1mil
+	let count = new Array(range);
+	for (let i = 0; i < range; i++) {// 二次元配列をn個作成
+		let tmp = [];
+		count[i] = tmp;
+	}
+
+	// 数列に整数が追加されるたび, 整数ごとの配列に数列の番地が入る.
+	// 数列内の整数の個数は, 整数ごとの配列の長さでカウントする.
+	let zero = range / 2;// 整数0をカウントする配列の番地. 範囲が正負の方向に等距離の場合のみ
+
+	for (let j = 0; j < n; j++) {
+		if (Math.abs(ele[j]) > range / 2 ) {
+			tmp = count;
+			range = range * 2;
+			count = new Array(range);
+			for (let k = range / 4 ; k < range / 2; k++) {
+				count[k] = tmp[k]
+			}
+			zero = range / 2;
+		}
+		count[Number(ele[j]) + zero].push(j);
+	}
+	//console.log(count[zero + 1])// forDebug
+
+	let str = "";
+	for (let i = 0; i < q; i++) {// q回命令を繰り返す.
+		let pair = si[i + 3].split(" ");
+		let start = Number(pair[0]);
+		let end = Number(pair[1]) - 1;
+		let int = Number(pair[2]) + zero;
+		let counter = count[int].length;
+		//console.log(count[int].length);// forDebug
+
+		for (let j = 0; j < count[int].length; j++) {// 範囲外の場合は, (配列の長さ)を縮めて調整.
+			if (Number(count[int][j]) < start || Number(count[int][j]) > end) {
+				counter--;
+			}
+		}
+
+		str += counter + "\n";
+	}
+	so.write(str);
+}

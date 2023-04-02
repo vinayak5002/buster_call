@@ -1,0 +1,110 @@
+#include <bits/stdc++.h>
+#pragma GCC optimize("Ofast")
+#define _GLIBCXX_DEBUG
+using namespace std;
+using std::cout;
+using std::cin;
+using std::endl;
+using ll=long long;
+using ld=long double;
+ll ILL=1167167167167167167;
+const int INF=1050000000;
+const ll mod=1e9+7;
+#define rep(i,a) for (ll i=0;i<a;i++)
+#define all(p) p.begin(),p.end()
+template<class T> using _pq = priority_queue<T, vector<T>, greater<T>>;
+template<class T> ll LB(vector<T> &v,T a){return lower_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> ll UB(vector<T> &v,T a){return upper_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> bool chmin(T &a,const T &b){if(a>b){a=b;return 1;}else return 0;}
+template<class T> bool chmax(T &a,const T &b){if(a<b){a=b;return 1;}else return 0;}
+template<class T> void So(vector<T> &v) {sort(v.begin(),v.end());}
+template<class T> void Sore(vector<T> &v) {sort(v.begin(),v.end(),[](T x,T y){return x>y;});}
+void yneos(bool a){if(a) cout<<"Yes\n"; else cout<<"No\n";}
+template<class T> void vec_out(vector<T> &p){for(int i=0;i<(int)(p.size());i++){if(i) cout<<" ";cout<<p[i];}cout<<"\n";}
+
+
+void solve();
+// oddloop
+int main() {
+	
+	solve();
+}
+
+void solve(){
+	int N,L;
+	cin>>N>>L;
+	string S;
+	cin>>S;
+	vector<int> e(N*N);
+	rep(i,N*N) e[i]=i;
+	vector<char> C={'R','L','D','U'};
+	vector<vector<vector<int>>> p(4,vector<vector<int>>(N,e));
+	rep(j,N){
+		rep(k,N-1){
+			swap(p[0][j][j*N+k],p[0][j][j*N+k+1]);
+			swap(p[1][j][N+j*N-1-k],p[1][j][N+j*N-2-k]);
+			swap(p[2][j][j+k*N],p[2][j][j+k*N+N]);
+			swap(p[3][j][N*N-N-k*N+j],p[3][j][N*N-2*N-k*N+j]);
+		}
+	}
+	auto merge=[&](vector<int> A,vector<int> B)->vector<int>{
+		auto tmp=e;
+		rep(i,N*N) tmp[i]=B[A[i]];
+		return tmp;
+	};
+	auto g=[&](vector<int> s,int L)->vector<int>{
+		auto tmp=e;
+		while(L){
+			if(L&1){
+				tmp=merge(tmp,s);
+			}
+			L>>=1;
+			s=merge(s,s);
+		}
+		return tmp;
+	};
+	int ind=0;
+	auto f=[&](auto self)->vector<int>{
+		auto ans=e;
+		while(ind<L){
+			if(S[ind]==')') return ans;
+			if(S[ind]=='('){
+				ind++;
+				auto tmp=self(self);
+				ind++;
+				int L=0;
+				while('0'<=S[ind]&&S[ind]<='9'){
+					L*=10;
+					L+=(int)(S[ind]-'0');
+					ind++;
+				}
+				ans=merge(ans,g(tmp,L));
+			}else{
+				int x=-1,y=0;
+				rep(i,4){
+					if(S[ind]==C[i]) x=i;
+				}
+				ind++;
+				while('0'<=S[ind]&&S[ind]<='9'){
+					y*=10;
+					y+=(int)(S[ind]-'0');
+					ind++;
+				}
+				y--;
+				ans=merge(ans,p[x][y]);
+			}
+		}
+		return ans;
+	};
+	auto ans=f(f);
+	vector<int> rev(N*N);
+	rep(i,N*N) rev[ans[i]]=i;
+	rep(i,N){
+		rep(j,N){
+			if(j) cout<<" ";
+			cout<<rev[i*N+j]+1;
+		}
+		cout<<"\n";
+	}
+}
+

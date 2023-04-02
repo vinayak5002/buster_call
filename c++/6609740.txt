@@ -1,0 +1,487 @@
+#pragma GCC diagnostic ignored "-Wmisleading-indentation"
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+#pragma GCC diagnostic ignored "-Wunused-parameter" 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#include <bits/stdc++.h>
+using namespace std;
+//#include <atcoder/all>
+//using namespace atcoder;
+
+//#define BOOST
+#ifdef BOOST
+#include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/cpp_dec_float.hpp>
+#include <boost/integer/extended_euclidean.hpp>
+using mpi = boost::multiprecision::cpp_int;
+using mpf = boost::multiprecision::cpp_dec_float_100;
+#endif
+
+//#define LONG_LONG_INT
+#ifdef LONG_LONG_INT
+using ll = int; using ld = double;
+using ull = unsigned int;
+const ll inf = 1000000000;
+#else
+using ll = long long; using ld = long double;
+using ull = unsigned long long;
+const ll inf = 2000000000000000000;
+#endif
+
+/***** type *****/
+template <class T> using vec = vector<T>;
+template <class T> using vvec = vector<vector<T>>;
+using pll = pair<ll, ll>; using plb = pair<ll, bool>; using pcl = pair<char, ll>; using psl = pair<string, ll>;
+using vl = vec<ll>; using vb = vec<bool>; using vc = vec<char>; using vs = vec<string>;
+using vpll = vec<pll>; using vpsl = vec<psl>;
+using vvl = vvec<ll>; using vvb = vvec<bool>; using vvc = vvec<char>; using vvpll = vec<vec<pll>>;
+using dl = deque<ll>; using dc = deque<char>; using dpll = deque<pll>;
+using sl = set<ll>; using sc = set<char>; using spll = set<pll>;
+using mll = map<ll, ll>; using mlb = map<ll, bool>; using mcl = map<char, ll>; using msl = map<string, ll>;
+using umll = unordered_map<ll, ll>; using umlb = unordered_map<ll, bool>;
+using graph = vvl; using wgraph = vvpll;
+/***** define *****/
+#define all(c) (c).begin(), (c).end()            // begin to end
+#define allr(c) (c).rbegin(), (c).rend()         // rbegin to rend
+#define coutld cout << fixed << setprecision(10) // cout double
+#define pf first																 // pair::first
+#define ps second																 // pair::second
+#define rep(i, b, e) for (ll i = b; i < e; i++)  // repeat
+#define repr(i, b, e) for (ll i = b; e < i; i--) // repeat reverse
+#define fori(i, ...) if (ll i = -1) for(__VA_ARGS__) if (i++, 1)
+#define each(i, e, c) fori (i, auto&& e: c)      // for each
+/***** const value *****/
+const long long llong_max = 9223372036854775807; // 9 * 10^18
+const long double pi = 3.1415926535897932384626; // 3.14 ...
+const long double eps = LDBL_EPSILON;            // 2.22e-016
+const size_t not_find = string::npos;            // string::find()
+
+/**
+* 関数宣言
+**/
+
+template <class ... T> void bug(T ... args); // debug
+// 入力（fixは入力値の調整）
+template <class T> void inc(ll xs, T& c); // 一次元コンテナ入力
+template <class T> void inc(ll xs, T& c, ll fix); // 一次元コンテナ入力
+template <class T> void incc(ll ys, ll xs, T& cc); // 二次元コンテナ入力
+template <class T> void incc(ll ys, ll xs, T& cc, ll fix); // 二次元コンテナ入力
+void in_graph(ll v, ll e, graph& g, ll vfix = 0); // 頂点数v辺数eのグラフ入力
+void in_graph(ll v, ll e, wgraph& g, ll vfix = 0); // 頂点数v辺数eのグラフ入力
+void in_directed_graph(ll v, ll e, graph& g, ll vfix = 0); // 頂点数v辺数eの有向グラフ入力
+void in_directed_graph(ll v, ll e, wgraph& g, ll vfix = 0);  // 頂点数v辺数eの重み付き有向グラフ入力
+// 出力（ex=trueなら出力後にプログラムを終了する）
+template <class T> void outc(T& c, bool ex = true); // コンテナを直接出力
+template <class T> void outc(T& c, ll fix, bool ex = true); // コンテナを直接出力
+template <class T> void outcc(T& cc); // 二次元コンテナを直接出力
+template <class T> void outcc(T& cc, ll fix); // 二次元コンテナを直接出力
+template <class ... T> void outl(T ... args); // 可変引数を改行区切りで出力
+template <class T> void outlc(T& c, bool ex = true); // コンテナを改行区切りで出力
+template <class T> void outlc(T& c, ll fix, bool ex = true); // コンテナを改行区切りで出力
+template <class ... T> void outs(T ... args); // 可変引数をスペース区切りで出力
+template <class T> void outsc(T& c, bool ex = true); // コンテナをスペース区切りで出力
+template <class T> void outsc(T& c, ll fix, bool ex = true); // コンテナをスペース区切りで出力
+template <class T> void outscc(T& cc); // 二次元コンテナをスペース区切りで出力
+template <class T> void outscc(T& cc, ll fix = 0); // 二次元コンテナをスペース区切りで出力
+// 変換
+char ltoal(ll x); // ll -> char (alphabet lower case)
+char lton(ll x); // ll -> char (number)
+char ltoau(ll x); // ll -> char (alphabet upper case)
+ll altol(char c); // char (lower case) -> ll
+ll ntol(char c); // char (number) -> ll
+ll autol(char c); // char (upper case) -> ll
+string stosl(string& s); // 文字列を小文字に変換
+string stosu(string& s); // 文字列を大文字に変換
+graph to_graph(wgraph& g); // wgraph -> graph
+wgraph to_wgraph(graph& g, ll c = 0); // graph -> wgraph
+// ビット演算
+void bit_set(ll& x, ll i, ll b); // 整数xのi番目ビットをbに設定
+ll bit_cnt(ll x); // C++20 popcount
+ll bit_size(ll x); // 2進数にしたときのサイズを取得
+ll bit_test(ll x, ll i); // 整数xのi番目ビットが0か1か返す
+string bit_tostr(ll x); // 整数xをstringに変換
+// long long 型
+template <class C> ll lcnt(C& c); // c.count()をllで返す
+template <class C, class X> ll lcnt(C& c, X x); // c.count(x)をllで返す
+ll llog(ll a, ll b, bool u = false); // 底aのlog(b)切り捨て（u = trueならa進数bの桁数と同値）
+ll lpow(ll x, ll n); // xのn乗をllで返す
+template <class T> ll lsize(T& c); // c.size()をllで返す
+// 範囲チェック
+template <class T> bool range(ll x, vec<T>& v); // 配列の範囲内チェック
+template <class T> bool range(ll y, ll x, vvec<T>& v); // 二次元配列の範囲内チェック
+template <class T> bool orange(ll x, vec<T>& v); // 配列の範囲外チェック
+template <class T> bool orange(ll y, ll x, vvec<T>& v); // 二次元配列の範囲外チェック
+// その他
+template <class T> void itr_next(T& itr, ll INF = inf); // イテレータのインクリメント
+template <class T> void itr_prev(T& itr, ll INF = -inf); // イテレータのデクリメント
+template <class T> void vvmake(ll ys, ll xs, vvec<T>& vv, T fill = T(0)); // 二次元配列生成（fillは初期値）
+template <class T, class S> void vvfill(T& vv, S fill); // 二次元配列の初期化
+graph reverse_graph(graph& g); // 隣接リストを逆順にする
+wgraph reverse_graph(wgraph& g); // 重み付き隣接リストを逆順にする
+template <class T1, class ... T2> bool umax(T1& x, T2 ... args); // xを最大値に更新
+template <class T1, class ... T2> bool umin(T1& x, T2 ... args); // xを最小値に更新
+ll ceil_div(ll x, ll y); // 除算の天井関数 ceil(x / y)
+template <ll i, class T> void ptsort(T b, T e); // pairやtupleをi番目の要素でソート
+
+/**
+* 関数定義
+**/
+
+template <class ... T> void bug(T ... args) { for (auto e : { args ... }) cerr << " " << e; cerr << endl; }
+// 入力
+template <class T> void in(T& x) { cin >> x; }
+template <> void in<pll>(pll& x) { cin >> x.first >> x.second; }
+template <class T> void in(T& x, ll fix) { cin >> x; x += fix; }
+template <> void in<pll>(pll& x, ll fix) { cin >> x.first >> x.second; x.first += fix, x.second += fix; }
+template <class T> void inc(ll xs, T& c) { c.resize(xs); each(i, e, c) in(e); }
+template <class T> void inc(ll xs, T& c, ll fix) { c.resize(xs); each(i, e, c) in(e, fix); }
+template <class T> void incc(ll ys, ll xs, T& cc) { vvmake(ys, xs, cc); rep(y, 0, ys) rep(x, 0, xs) in(cc[y][x]); }
+template <class T> void incc(ll ys, ll xs, T& cc, ll fix) { vvmake(ys, xs, cc); rep(y, 0, ys) rep(x, 0, xs) in(cc[y][x], fix); }
+void in_graph(ll v, ll e, graph& g, ll vfix) { ll a, b; g.resize(v); rep(i, 0, e) cin >> a >> b, a += vfix, b += vfix, g[a].push_back(b), g[b].push_back(a); }
+void in_graph(ll v, ll e, wgraph& g, ll vfix) { ll a, b, w; g.resize(v); rep(i, 0, e) cin >> a >> b >> w, a += vfix, b += vfix, g[a].push_back({ b,w }), g[b].push_back({ a,w }); }
+void in_directed_graph(ll v, ll e, graph& g, ll vfix) { ll a, b; g.resize(v); rep(i, 0, e) cin >> a >> b, a += vfix, b += vfix, g[a].push_back(b); }
+void in_directed_graph(ll v, ll e, wgraph& g, ll vfix) { ll a, b, w; g.resize(v); rep(i, 0, e) cin >> a >> b >> w, a += vfix, b += vfix, g[a].push_back({ b,w }); }
+// 出力
+template <class T> void out(T x, bool s) { (s) ? cout << " " << x : cout << x; }
+template <> void out<pll>(pll x, bool s) { cout << x.first << " " << x.second; }
+template <class T> void outc(T& c, bool ex) { for (auto e : c) cout << e; cout << endl; if (ex) exit(0); }
+template <class T> void outc(T& c, ll fix, bool ex) { for (auto e : c) cout << e + fix; cout << endl; if (ex) exit(0); }
+template <class T> void outcc(T& cc) { for (auto e : cc) outc(e, false); exit(0); }
+template <class T> void outcc(T& cc, ll fix) { for (auto e : cc) outc(e, fix, false); exit(0); }
+template <class ... T> void outl(T ... args) { each(i, e, { args ... }) out(e, false), cout << endl; exit(0); }
+template <class T> void outlc(T& c, bool ex) { for (auto e : c) out(e, false), cout << endl; if (ex) exit(0); }
+template <class T> void outlc(T& c, ll fix, bool ex) { for (auto e : c) out(e + fix, false), cout << endl; if (ex) exit(0); }
+template <class ... T> void outs(T ... args) { each(i, e, { args ... }) out(e, i); cout << endl; exit(0); }
+template <class T> void outsc(T& c, bool ex) { each(i, e, c) out(e, i); cout << endl; if (ex) exit(0); }
+template <class T> void outsc(T& c, ll fix, bool ex) { each(i, e, c) out(e + fix, i); cout << endl; if (ex) exit(0); }
+template <class T> void outscc(T& cc) { for (auto e : cc) outcs(e, false); exit(0); }
+template <class T> void outscc(T& cc, ll fix) { for (auto e : cc) outcs(e + fix, false); exit(0); }
+// 変換
+char ltoal(ll x) { return char('a' + x); }
+char lton(ll x) { return char('0' + x); }
+char ltoau(ll x) { return char('A' + x); }
+ll altol(char c) { return ll(c) - ll('a'); }
+ll ntol(char c) { return ll(c) - ll('0'); }
+ll autol(char c) { return ll(c) - ll('A'); }
+string stosl(string& s) { string res; for (auto e : s) if ('a' <= e && e <= 'z') res.push_back(tolower(e)); return res; }
+string stosu(string& s) { string res; for (auto e : s) if ('a' <= e && e <= 'z') res.push_back(toupper(e)); return res; }
+graph to_graph(wgraph& g) { graph res(size(g)); each(i, e, g) for (auto& [af, c] : e) res[i].push_back(af); return res; }
+wgraph to_wgraph(graph& g, ll c) { wgraph res(size(g)); each(i, e, g) for (auto af : e) res[i].push_back({ af,c }); return res; }
+// ビット演算
+void bit_set(ll& x, ll i, ll b) { (b) ? x |= (1ll << i) : x &= ~(1ll << i); }
+ll bit_cnt(ll x) { bitset<64> b(x); return b.count(); }
+ll bit_size(ll x) { return llog(2, x, true); }
+ll bit_test(ll x, ll i) { return (i <= 62ll && (x & (1ll << i)) != 0) ? 1 : 0; }
+string bit_tostr(ll x) { string res; do { res += lton(x % 2), x /= 2; } while (x); reverse(all(res)); return res; }
+// long long 型
+template <class C> ll lcnt(C& c) { return ll(c.count()); }
+template <class C, class X> ll lcnt(C& c, X x) { return ll(count(all(c), x)); }
+ll llog(ll a, ll b, bool u) { ll now = 1, res = (u) ? 1 : 0; while (now < b) res++, now *= a; return (now != b) ? res - 1 : res; }
+ll lpow(ll x, ll n) { if (x == 2) return (1ll << n); ll z = 1; rep(i, 0, n) z *= x; return z; }
+template <class T> ll lsize(T& c) { return ll(c.size()); }
+// 範囲チェック
+template <class T> bool range(ll x, vec<T>& v) { return !orange(x, v); }
+template <class T> bool range(ll y, ll x, vvec<T>& v) { return !orange(y, x, v); }
+template <class T> bool orange(ll x, vec<T>& v) { return (x < 0 || ll(v.size()) <= x); }
+template <class T> bool orange(ll y, ll x, vvec<T>& v) { return (y < 0 || ll(v.size()) <= y || x < 0 || ll(v[y].size()) <= x); }
+// その他
+template <class T> void itr_next(T& itr, ll INF) { if (*itr != INF) ++itr; }
+template <class T> void itr_prev(T& itr, ll INF) { if (*itr != INF) --itr; }
+template <class T> void vvmake(ll ys, ll xs, vvec<T>& vv, T fill) { vv.resize(ys); rep(y, 0, ys) vv[y].resize(xs, fill); }
+template <class T, class S> void vvfill(T& vv, S fill) { rep(i, 0, lsize(vv)) std::fill(all(vv[i]), fill); }
+graph reverse_graph(graph& g) { graph res(lsize(g)); rep(i, 0, lsize(g)) for (auto& next : g[i]) res[next].push_back(i); return res; }
+wgraph reverse_graph(wgraph& g) { wgraph res(lsize(g)); rep(i, 0, lsize(g)) for (auto& [next, cost] : g[i]) res[next].push_back({ i, cost }); return res; }
+template <class T1, class ... T2> bool umax(T1& x, T2 ... args) { if (max({ args ... }) <= x) return false; x = max({ args ... }); return true; }
+template <class T1, class ... T2> bool umin(T1& x, T2 ... args) { if (x <= min({ args ... })) return false; x = min({ args ... }); return true; }
+ll ceil_div(ll x, ll y) { return (x % y == 0) ? x / y : x / y + 1; }
+template <ll i, class T> void ptsort(T b, T e) { sort(b, e, [&](const auto& l, const auto& r) { return get<i>(l) < get<i>(r); }); }
+
+/**
+* @brief 欲張りセット
+* @note
+* 標準コンテナの頻出関数を全部定義したセット
+**/
+
+template <class T = long long, class U = std::less<T>> struct DS_AhriSet
+{	// 降順は DS_NyaaAhriSet<greater<ll>> （デフォルトは昇順）
+	using ll = long long;
+	using it = typename std::set<T>::iterator;
+	std::set<T> s;
+	DS_AhriSet() {}
+	DS_AhriSet(std::vector<T>& v) { for (auto e : v) s.insert(v); }
+	// set interface
+	it begin() { return s.begin(); }
+	void clear() { s.clear(); }
+	bool empty() { return s.empty(); }
+	it end() { return s.end(); }
+	std::pair<it, it> equal_range(T x) { return s.equal_range(); }
+	void erase(T x) { s.erase(x); }
+	bool find(T x) { return s.find(x) != s.end(); }
+	void insert(T x) { s.insert(x); }
+	it lower_bound(T x) { return s.lower_bound(x); }
+	ll size() { return ll(s.size()); }
+	it upper_bound(T x) { return s.upper_bound(x); }
+	// deque interface
+	T back() { return *s.rbegin(); }
+	T front() { return *s.begin(); }
+	T pop_back() { T res = *s.rbegin(); s.erase(res); return res; }
+	T pop_front() { T res = *s.begin(); s.erase(res); return res; }
+	void push_back(T x) { s.insert(x); }
+	void push_front(T x) { s.insert(x); }
+	// priority queue interface
+	T pop() { T res = *s.begin(); s.erase(res); return res; }
+	void push(T x) { s.insert(x); }
+	T top() { *s.begin(); }
+	// original interface
+	T lower_bound_val(T x) { return *s.lower_bound(x); }
+	T upper_bound_val(T x) { return *s.upper_bound(x); }
+};
+
+/**
+* @brief 欲張りマルチセット
+* @note
+* 内部にunorderd_mapを持つことでcount(x)を定数時間に高速化
+* 標準コンテナの頻出関数を全部定義したマルチセット
+**/
+
+template <class T = long long, class U = std::less<T>, class F = std::hash<T>> struct DS_GwenSet
+{	// 降順は DS_NyaaPQMset<ll, greater<ll>> （デフォルトは昇順）
+	using ll = long long;
+	using it = typename std::multiset<T>::iterator;
+	std::multiset<T, U> s;
+	std::unordered_map<T, ll, F> m;
+	DS_GwenSet() {}
+	DS_GwenSet(std::vector<ll>& v) { for (auto e : v) push(e); }
+	// multiset interface
+	it begin() { return s.begin(); }
+	void clear(void) { s.clear(), m.clear(); }
+	ll count(T x) { return ((m.count(x) == 0) ? 0 : m[x]); }
+	bool empty(void) { return s.empty(); }
+	it end() { return s.end(); }
+	ll erase(T x) { m.erase(); return s.erase(x); }
+	bool find(T x) { return s.find(x); }
+	void insert(T x) { m[x]++, s.insert(x); }
+	it lower_bound(T x) { return s.lower_bound(x); }
+	ll size() { return ll(s.size()); }
+	it upper_bound(T x) { return s.upper_bound(x); }
+	bool operator == (const DS_GwenSet& gs) { return (s == gs.s); }
+	// deque interface
+	T back() { return *s.rbegin(); }
+	T front() { return *s.begin(); }
+	void push_back(T x) { m[x]++, s.insert(x); }
+	void push_front(T x) { m[x]++, s.insert(x); }
+	T pop_back()
+	{
+		auto res = *s.rbegin();
+		if (--m[res] == 0) m.erase(res);
+		s.erase(s.find(res));
+		return res;
+	}
+	T pop_front()
+	{
+		auto res = *s.begin();
+		if (--m[res] == 0) m.erase(res);
+		s.erase(s.find(res));
+		return res;
+	}
+	// priority queue interface
+	void push(T x) { m[x]++, s.insert(x); }
+	T top(void) { return *s.begin(); }
+	T pop(void)
+	{
+		T res = *s.begin();
+		if (--m[res] == 0) m.erase(res);
+		s.erase(s.find(res));
+		return res;
+	}
+	// original interface
+	ll lower_bound_val(T x) { return *s.lower_bound(x); }
+	ll unique_size() { return ll(m.size()); }
+	ll upper_bound_val(T x) { return *s.upper_bound(x); }
+	ll erase1(T x)
+	{
+		if (m.count(x) == 0) return 0;
+		if (m[x] == 1) s.erase(x), m.erase(x);
+		else s.erase(s.find(x)), m[x]--;
+		return 1;
+	}
+};
+
+/**
+* @brief 静的リスト
+* @note
+* ユニークな要素を扱うリスト
+* 要素の絶対位置を取得できる
+**/
+
+template <class T> struct DS_StaticList
+{
+	using ll = long long;
+	using it = typename std::deque<T>::iterator;
+	ll n = 0;
+	std::deque<T> val;
+	std::unordered_map<T, ll> idx;
+	template <class C> DS_StaticList() {}
+	template <class C> DS_StaticList(C& c) : n((ll)c.size()) { for (ll i = 0; i < n; i++) val.push_back(c[i]), idx[c[i]] = i; }
+	// deque interface
+	T& operator [](ll i) { return val[i]; }
+	T back(void) { return val.back(); }
+	it begin(void) { return val.begin(); }
+	it end(void) { return val.end(); }
+	T front(void) { return val.front(); }
+	void push_back(T x) { val.push_back(x); idx[x] = n++; }
+	void push_front(T x) { val.push_front(x); n++; for (ll i = 0; i < n; i++) idx[val[i]] = i; }
+	ll size(void) { return n; }
+	// original interface
+	void change_val(T x, T y) { if (find_val(x) && !find_val(y)) val[idx[x]] = y, idx[y] = idx[x], idx.erase(x); }
+	bool find_val(T x) { return (idx.find(x) != idx.end()); }
+	ll get_idx(T x) { return idx[x]; }
+	ll get_val(ll i) { return val[i]; }
+	T next_val(T x) { return (idx[x] == n - 1) ? x : val[idx[x] + 1]; }
+	T prev_val(T x) { return (idx[x] == 0) ? x : val[idx[x] - 1]; }
+	void sort_val(void) { std::sort(val.begin(), val.end()); for (ll i = 0; i < n; i++) idx[val[i]] = i; }
+	void swap_idx(ll i1, ll i2) { if (0 <= i1 && i1 < n && 0 <= i2 && i2 < n) std::swap(val[i1], val[i2]), std::swap(idx[val[i1]], idx[val[i2]]); }
+	void swap_val(T x1, T x2) { if (find_val(x1) && find_val(x2)) std::swap(val[idx[x1]], val[idx[x2]]), std::swap(idx[x1], idx[x2]); }
+};
+
+/**
+* @brief 動的リスト
+* @note
+* ユニークな要素を扱うリスト
+* 要素の相対位置を取得できる
+**/
+
+template <class T> struct DS_DynamicList
+{
+	using ll = long long;
+	ll n = 0;
+	ll inf = LLONG_MAX;
+	std::unordered_map<T, ll> next, prev;
+	DS_DynamicList(ll inf) : inf(inf) { clear(); }
+	template <class C> DS_DynamicList(C& c, ll inf) : n((ll)c.size()), inf(inf) { init(c); }
+	// list interface
+	void clear(void) { n = 0, next.clear(), prev.clear(), next[-inf] = inf, prev[-inf] = -inf, next[inf] = inf, prev[inf] = -inf; }
+	bool push_back(T x) { return next_insert(back(), x); }
+	bool push_front(T x) { return prev_insert(front(), x); }
+	ll size(void) { return n; }
+	// original interface
+	T back(void) { return prev[inf]; }
+	T begin_val(void) { return next[-inf]; }
+	T end_val(void) { return inf; }
+	bool find(T x) { return (next.find(x) != next.end()); }
+	T front(void) { return next[-inf]; }
+	T next_val(T x) { return (next.find(x) == next.end()) ? x : next[x]; }
+	T prev_val(T x) { return (prev.find(x) == prev.end()) ? x : prev[x]; }
+	bool change(T x, T y)
+	{
+		if (!find_val(x) || !find_val(y)) return false;
+		prev[y] = prev[x], next[y] = next[x], prev.erase(x), next.erase(x);
+		return true;
+	}
+	bool erase(T x)
+	{
+		if (!find(x)) return false;
+		ll y = prev[x]; ll z = next[x]; n--;
+		next[y] = z, prev[z] = y, next.erase(x), prev.erase(x);
+		return true;
+	}
+	template <class C> void init(C& c)
+	{
+		next.clear(), prev.clear();
+		next[-inf] = c[0], prev[-inf] = inf, next[inf] = inf, prev[inf] = c[n - 1];
+		next[c[0]] = c[1], prev[c[0]] = -inf, next[c[n - 1]] = inf, prev[c[n - 1]] = c[n - 2];
+		for (ll i = 1; i < n - 1; i++) prev[c[i]] = c[i - 1], next[c[i]] = c[i + 1];
+		if (next.size() != n - 2) next.clear(), prev.clear(), n = 0;
+	}
+	bool next_insert(T x, T y)
+	{
+		if (!(find(x)) || find(y)) return false;
+		ll temp = next[x]; n++;
+		next[x] = y, prev[y] = x, next[y] = temp, prev[temp] = y;
+		return true;
+	}
+	bool prev_insert(T x, T y)
+	{
+		if (!(find(x)) || find(y)) return false;
+		ll temp = prev[x]; n++;
+		prev[x] = y, prev[y] = temp, next[y] = x, next[temp] = y;
+		return true;
+	}
+	bool swap(T x, T y)
+	{
+		if (!find(x) || !find(y) || abs(x) == inf || abs(y) == inf) return false;
+		ll a = prev[x]; ll b = next[x]; ll c = prev[y]; ll d = next[y];
+		if (c == x) next[a] = y, next[y] = x, next[x] = d, prev[y] = a, prev[x] = y, prev[d] = x;
+		else if (d == x) next[c] = x, next[x] = y, next[y] = b, prev[x] = c, prev[y] = x, prev[b] = y;
+		else next[a] = y, next[y] = b, next[c] = x, next[x] = d, prev[y] = a, prev[b] = y, prev[x] = c, prev[d] = x;
+		return true;
+	}
+};
+
+/***************************************/
+/********** BEGIN OF NYAA LIB **********/
+/***************************************/
+
+namespace NyaaLIB {}
+
+namespace NyaaLIB
+{
+#ifndef _DS_FENWICK_TREE_
+#define _DS_FENWICK_TREE_
+
+	template <class T = long long> struct DS_FenwickTree
+	{
+		using ll = long long;
+		DS_FenwickTree() {}
+		DS_FenwickTree(ll n) : n(n), data(n) {}
+		T operator [](ll i) { return sum(i, i + 1); }
+		void resize(ll size) { n = size; data.resize(size); }
+		void add(ll i, T x)
+		{
+			assert(0 <= i && i < n);
+			i++; while (i <= n) data[i - 1] += x, i += i & -i;
+		}
+		T sum(ll l, ll r)
+		{
+			if (l < 0) l = 0;
+			if (n < r) r = n;
+			if (n < l || r < 0 || l == r) return 0;
+			assert(l < r);
+			return sum(r) - sum(l);
+		}
+	private:
+		ll n = 0;
+		std::vector<T> data;
+		T sum(ll r)
+		{
+			T s = 0;
+			while (r > 0) s += data[r - 1], r -= r & -r;
+			return s;
+		}
+	};
+
+#endif
+}
+
+/***************************************/
+/*********** END OF NYAA LIB ***********/
+/***************************************/
+
+using namespace NyaaLIB;
+//using mint = NT_ModINT< 998244353 >;
+//using mint = NT_ModINT< 1000000007 >;
+
+int main()
+{
+	ll n, q; cin >> n >> q;
+	DS_FenwickTree ft(n);
+
+	vl ans;
+	while (q--)
+	{
+		ll c, x, y; cin >> c >> x >> y;
+		if (c == 0) ft.add(--x, y);
+		else ans.push_back(ft.sum(--x, y));
+	}
+	outlc(ans);
+	return 0;
+}

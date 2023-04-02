@@ -1,0 +1,33 @@
+n, m = map(int, input().split())
+
+friends = [set() for _ in range(n)]
+for _ in range(m):
+    s, t = map(int, input().split())
+    friends[s].add(t)
+    friends[t].add(s)
+
+
+def BDS(s, g, visited):
+    visited[s] = True
+    for i in friends[s]:
+        if i == g:
+            return True
+        if not visited[i]:
+            if BDS(i, g, visited):
+                return True
+
+    return False
+
+
+q = int(input())
+ans = []
+for _ in range(q):
+    s, t = map(int, input().split())
+    visited = [False] * n
+    if BDS(s, t, visited):
+        ans.append("yes")
+    else:
+        ans.append("no")
+
+print(*ans, sep="\n")
+

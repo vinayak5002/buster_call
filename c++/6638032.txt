@@ -1,0 +1,57 @@
+#include<iostream>
+#include<cstdio>
+
+using namespace std;
+#define inf -1
+struct tree{
+	int p;
+	int r;
+	int l;
+}T[100001];
+int P[100001],D[100001];
+int setdepth(int u,int v){
+	D[u]=v;
+	if(T[u].r!=-1)setdepth(T[u].r,v);
+	if(T[u].l!=-1)setdepth(T[u].l,v+1);
+}
+void print(int i){
+	printf("node %d: ",i);
+	printf("parent = %d, ",T[i].p);
+	printf("depth = %d, ",D[i]);
+	if(T[i].p==-1)printf("root, ");
+	else if(T[i].l==-1)printf("leaf, ");
+	else printf("internal node, ");
+	printf("[");
+	int j=0,c;
+	for(j=0,c=T[i].l;c!=-1;j++,c=T[c].r){
+		if(j!=0)printf(", ");
+		printf("%d",c); 
+	}
+	printf("]\n");
+	
+}
+int main(){
+	int n;scanf("%d",&n);
+	for(int i=0;i<n;i++)T[i].p=T[i].r=T[i].l=-1;
+	int k,c,d,id,t;
+	for(int i=0;i<n;i++){
+		scanf("%d%d",&id,&k);
+		for(int j=0;j<k;j++){
+			if(j==0){
+			scanf("%d",&c);
+			T[id].l=c;T[c].p=id;
+			}
+			else{
+			 scanf("%d",&d);
+			 T[c].r=d;T[d].p=id;
+			 c=d;
+			} 
+		}
+	} 
+	int root;
+	for(int i=0;i<n;i++)if(T[i].p==-1)root=i;
+	setdepth(root,0);
+    for(int i=0;i<n;i++)print(i);
+}
+
+

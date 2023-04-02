@@ -1,0 +1,263 @@
+#include<iostream>
+#include<vector>
+#include<queue>
+#include<map>
+#include<algorithm>
+
+enum Move {
+	UP,
+	DOWN,
+	LEFT,
+	RIGHT,
+	NUM_MOVE
+};
+
+struct Element {
+	Move m;
+	Move m_pre; // 前回のMove
+	uint64_t enc;
+	int depth;
+};
+
+class Puzzle {
+public:
+	Puzzle(std::vector<int> b) {
+		const uint64_t enc = encode(b);
+		visited_.push_back(enc);
+		states_[enc] = NUM_MOVE;
+		depth_ = 0;
+	};
+
+	void step() {
+		// 次の深さを探索
+		depth_++;
+		std::map<uint64_t, Move> next_states_;
+		for (auto& state : states_) {
+			std::queue<Element> cand; // 移動候補
+			pushCand(cand, state);
+			const int num_cand = cand.size();
+			for (int i = 0; i < num_cand; i++) {
+				Element el = cand.front();
+				cand.pop();
+				const uint64_t ret = changeBoard(el);
+				if (std::find(visited_.begin(), visited_.end(), ret) != visited_.end()) {
+					// 探索済みの場合は打ち切り
+					continue;
+				}
+				visited_.push_back(ret);
+				next_states_[ret] = el.m;
+			}
+		}
+		states_ = next_states_;
+	}
+
+	int getDepth() const {
+		return depth_;
+	}
+
+	std::vector<uint64_t> getStates() {
+		std::vector<uint64_t> ret;
+		for (auto& state : states_) {
+			ret.push_back(state.first);
+		}
+		return ret;
+	}
+
+private:
+	uint64_t encode(const std::vector<int>& b) {
+		uint64_t s = 0;
+		for (int i = 0; i < 16; i++) {
+			s = s * 16 + b[i];
+		}
+		return s;
+	}
+	std::vector<int> decode(uint64_t enc) {
+		std::vector<int> dec(16);
+		for (int i = 0; i < 16; i++) {
+			dec[15 - i] = enc % 16;
+			enc /= 16;
+		}
+		return dec;
+	}
+	void pushCand(std::queue<Element>& cand, const std::pair<uint64_t, Move>& state) {
+		// 0の位置を探す
+		int idx = 0;
+		const std::vector<int> board = decode(state.first);
+		for (int i = 0; i < 16; i++) {
+			if (board[i] == 0) {
+				idx = i;
+				break;
+			}
+		}
+		uint64_t enc = state.first;
+		Move m_pre = state.second;
+
+		switch (idx) {
+		case 0:
+			if (m_pre != RIGHT) {
+				cand.push(Element{ LEFT, m_pre, enc });
+			}
+			if (m_pre != DOWN) {
+				cand.push(Element{ UP, m_pre, enc });
+			}
+			break;
+		case 1:
+		case 2:
+			if (m_pre != LEFT) {
+				cand.push(Element{ RIGHT, m_pre, enc });
+			}
+			if (m_pre != RIGHT) {
+				cand.push(Element{ LEFT, m_pre, enc });
+			}
+			if (m_pre != DOWN) {
+				cand.push(Element{ UP, m_pre, enc });
+			}
+			break;
+		case 3:
+			if (m_pre != LEFT) {
+				cand.push(Element{ RIGHT, m_pre, enc });
+			}
+			if (m_pre != DOWN) {
+				cand.push(Element{ UP, m_pre, enc });
+			}
+			break;
+		case 4:
+		case 8:
+			if (m_pre != UP) {
+				cand.push(Element{ DOWN, m_pre, enc });
+			}
+			if (m_pre != RIGHT) {
+				cand.push(Element{ LEFT, m_pre, enc });
+			}
+			if (m_pre != DOWN) {
+				cand.push(Element{ UP, m_pre, enc });
+			}
+			break;
+		case 5:
+		case 6:
+		case 9:
+		case 10:
+			if (m_pre != UP) {
+				cand.push(Element{ DOWN, m_pre, enc });
+			}
+			if (m_pre != LEFT) {
+				cand.push(Element{ RIGHT, m_pre, enc });
+			}
+			if (m_pre != RIGHT) {
+				cand.push(Element{ LEFT, m_pre, enc });
+			}
+			if (m_pre != DOWN) {
+				cand.push(Element{ UP, m_pre, enc });
+			}
+			break;
+		case 7:
+		case 11:
+			if (m_pre != UP) {
+				cand.push(Element{ DOWN, m_pre, enc });
+			}
+			if (m_pre != LEFT) {
+				cand.push(Element{ RIGHT, m_pre, enc });
+			}
+			if (m_pre != DOWN) {
+				cand.push(Element{ UP, m_pre, enc });
+			}
+			break;
+		case 12:
+			if (m_pre != UP) {
+				cand.push(Element{ DOWN, m_pre, enc });
+			}
+			if (m_pre != RIGHT) {
+				cand.push(Element{ LEFT, m_pre, enc });
+			}
+			break;
+		case 13:
+		case 14:
+			if (m_pre != UP) {
+				cand.push(Element{ DOWN, m_pre, enc });
+			}
+			if (m_pre != LEFT) {
+				cand.push(Element{ RIGHT, m_pre, enc });
+			}
+			if (m_pre != RIGHT) {
+				cand.push(Element{ LEFT, m_pre, enc });
+			}
+			break;
+		case 15:
+			if (m_pre != UP) {
+				cand.push(Element{ DOWN, m_pre, enc });
+			}
+			if (m_pre != LEFT) {
+				cand.push(Element{ RIGHT, m_pre, enc });
+			}
+			break;
+		}
+	}
+	uint64_t changeBoard(const Element& el) {
+		// 0の位置を探す
+		int idx = 0;
+		std::vector<int> board = decode(el.enc);
+		for (int i = 0; i < 16; i++) {
+			if (board[i] == 0) {
+				idx = i;
+				break;
+			}
+		}
+		switch (el.m) {
+		case UP:
+			board[idx] = board[idx + 4];
+			board[idx + 4] = 0;
+			break;
+		case DOWN:
+			board[idx] = board[idx - 4];
+			board[idx - 4] = 0;
+			break;
+		case RIGHT:
+			board[idx] = board[idx - 1];
+			board[idx - 1] = 0;
+			break;
+		case LEFT:
+			board[idx] = board[idx + 1];
+			board[idx + 1] = 0;
+			break;
+		}
+		return encode(board);
+	}
+
+	std::vector<uint64_t> visited_; // 探索済みのstate(encoded)
+	std::map<uint64_t, Move> states_; // 現在の深さの盤面候補, 前回の探索方向
+	int depth_; // 現在の深さ
+	//int goal_;
+};
+
+bool cmp_puzzle(Puzzle& s, Puzzle& g) {
+	std::vector<uint64_t> states_s(s.getStates());
+	std::vector<uint64_t> states_g(g.getStates());
+
+	for (uint64_t state_s : states_s) {
+		for (uint64_t state_g : states_g) {
+			if (state_s == state_g) return true;
+		}
+	}
+
+	return false;
+}
+
+int main() {
+	std::vector<int> board(16);
+	for (int i = 0; i < 16; i++) {
+		std::cin >> board[i];
+	}
+	Puzzle start(board);
+	Puzzle goal(std::vector<int>{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0});
+	int cnt = 0;
+	while (!cmp_puzzle(start, goal)) {
+		if (cnt % 2 == 0) {
+			start.step();
+		}
+		else {
+			goal.step();
+		}
+		cnt++;
+	}
+	std::cout << cnt << std::endl;
+}

@@ -1,0 +1,175 @@
+// https://vjudge.net/contest/496936#problem/A
+
+/*********************************DOCUMENTACION*********************************
+
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor
+
+Complejidad de tiempo = O(*) con *=?
+Complejidad de espacio = O(*) con *=?
+
+*******************************************************************************/
+
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define deb(x) cout << #x << ": " << x << endl;
+
+template<typename... T>
+void read(T&... args) {
+  ((cin >> args), ...);
+}
+
+template<typename... T>
+void write(T&&... args) {
+  ((cout << args << " "), ...);
+}
+
+template<typename T>
+ostream& operator<<(ostream& os, const vector<T>& v) {
+  for (auto it = v.begin(); it != v.end(); it++) {
+    os << *it;
+    if (next(it) != v.end()) {
+      os << " ";
+    }
+  }
+  return os;
+}
+
+template<typename T, typename U>
+ostream& operator<<(ostream& os, const pair<T, U>& p) {
+  os << "(" << p.first << ", " << p.second << ")";
+  return os;
+}
+
+#define F first
+#define S second
+#define PB push_back
+#define MP make_pair
+
+#define all(x) begin(x), end(x)
+#define sz(x) (long long)(x).size()
+#define FOR(i, a, b) for (long long i = (a); i < (b); i++)
+#define ROF(i, a, b) for (long long i = (a); i >= (b); i--)
+#define FEACH(a, b) for (auto& a : b)
+#define IN(i, l, r) (l < i && i < r)
+#define LINR(i, l, r) (l <= i && i <= r)
+#define LIN(i, l, r) (l <= i && i < r)
+#define INR(i, l, r) (l < i && i <= r)
+#define FASTIO ios_base::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+
+typedef string str;
+typedef long long ll;
+typedef long double ld;
+typedef unsigned long long ull;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+typedef pair<ld, ld> pld;
+typedef vector<int> vi;
+typedef vector<ll> vll;
+typedef vector<ld> vld;
+typedef vector<double> vd;
+typedef vector<char> vc;
+typedef vector<string> vs;
+typedef vector<bool> vb;
+
+ll n, e;
+
+vector<vll> coords;
+
+ll dist(ll u, ll v) {
+  return coords[u][v];
+}
+
+void solve() {
+  const ll start = 0;
+  ll ans = LLONG_MAX;
+  ll uu;
+
+  vector<vll> dp(n, vll((1 << n)));
+  vector<vll> parents(n, vll((1 << n)));
+
+  ROF(m, ((1 << n) - 1), 0) {
+    FOR(u, 0, n) {
+      if (m == ((1 << n) - 1)) {
+        dp[u][m] = dist(u, start);
+        continue;
+      }
+
+      dp[u][m] = LLONG_MAX;
+
+      FOR(op, 0, n) {
+        if ((m & (1 << op)) == 0) {
+          ll d = dist(u, op) + dp[op][m | (1 << op)];
+          dp[u][m] = min(dp[u][m], d);
+          /*           if (d < dp[u][m]) {
+                      dp[u][m] = d;
+                      parents[u][m] = op;
+                    } */
+        }
+      }
+
+      if (m == 0 && dp[u][m] < ans) {
+        ans = dp[u][m];
+        uu = u;
+      }
+    }
+  }
+
+  /*   ll u = uu;
+    ll m = (2 << u);
+    while (true) {
+      cout << u << endl;
+      if (m == ((1 << n) - 1)) {
+        break;
+      }
+      u = parents[u][m];
+      m = m | (2 << u);
+    } */
+
+    /*   cout << "------------" << endl;
+      FEACH(a, dp) {
+        cout << a << endl;
+      }
+      cout << ans << endl; */
+      // deb(dp[start][0]);
+  if (dp[start][0] > 1000) {
+    cout << -1 << endl;
+  }
+  else {
+    cout << dp[start][0] << endl;
+  }
+}
+
+int main(int argc, char const* argv[]) {
+  cin >> n >> e;
+  coords.clear();
+  coords = vector<vll>(n, vll(n, LLONG_MAX));
+
+  FOR(i, 0, e) {
+    ll u, v, w;
+    cin >> u >> v >> w;
+    coords[u][v] = w;
+  }
+
+  FOR(i, 0, n) {
+    FOR(j, 0, n) {
+      if (i == j) {
+        coords[i][j] = 0;
+      }
+      if (coords[i][j] == LLONG_MAX) {
+        coords[i][j] = 0;
+        // coords[i][j] -= 10000;
+        coords[i][j] = 1000;
+      }
+    }
+  }
+
+  /*   FEACH(a, coords) {
+      cout << a << endl;
+    } */
+
+  solve();
+
+  return 0;
+}

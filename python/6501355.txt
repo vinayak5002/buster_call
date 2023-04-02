@@ -1,0 +1,50 @@
+from collections import deque
+while True:
+    w,h=map(int,input().split())
+    if w==0:
+        break
+    
+    wall=[[[0,0,0,0] for _ in range(w+1)] for _ in range(h+1)] #left,right,top,down 0:F,1:T
+    
+    for i in range(h):
+        side_wall=[0]+list(map(int,input().split()))
+        if i==h-1:
+            ver_wall=[1]*w
+        else:
+            ver_wall=list(map(int,input().split()))
+        
+        for j in range(w):
+            if ver_wall[j]==1:
+                wall[i][j][3]=1
+                wall[i+1][j][2]=1
+            
+            if side_wall[j]==1:
+                wall[i][j-1][1]=1
+                wall[i][j][0]=1
+    #print(side_wall,ver_wall)
+    
+    q=deque()
+    q.append([0,0])
+    tf=[[-1]*w for _ in range(h)]
+    tf[0][0]=0
+    
+    while len(q)>0:
+        y,x=q.popleft()
+        wall_tf=0
+        for ny,nx in [[y+1,x],[y-1,x],[y,x+1],[y,x-1]]:
+            wall_tf=0
+            if 0<=ny<h and 0<=nx<w and tf[ny][nx]==-1 :
+                if ny==y+1 and nx==x:
+                    wall_tf=wall[y][x][3]
+                if ny==y-1 and nx==x:
+                    wall_tf=wall[y][x][2]
+                if ny==y and nx==x+1:
+                    wall_tf=wall[y][x][1]
+                if ny==y and nx==x-1:
+                    wall_tf=wall[y][x][0]
+                
+                if wall_tf==0:  
+                    q.append([ny,nx])
+                    tf[ny][nx]=tf[y][x]+1
+
+    print(tf[h-1][w-1]+1)

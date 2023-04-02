@@ -1,0 +1,101 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <queue>
+#include <vector>
+#include <set>
+using namespace std;
+
+const int maxn = 1E4+10;
+const int maxm = 4E4+10;
+
+struct Node
+{
+    int u, dis;
+    Node(int i, int j) : u(i), dis(j) {}
+    bool operator > (const Node &y) const
+    {return dis > y.dis;}
+};
+
+int head[maxn], edge[maxm], ne[maxm], cost[maxm], idx = 1, dis[maxn], fee[maxm], addfee[maxn];
+int n, m;
+
+void show(int a[])
+{
+    for(int i = 1; i <= n; i++)
+        cout << a[i] << ' ';
+    puts("");
+}
+int dijkstra(int s = 1)
+{
+    memset(dis, 0x3f, sizeof dis);
+    addfee[s] = dis[s] = 0;
+    priority_queue<Node, vector<Node>, greater<Node> > heap;
+    heap.push(Node(s, 0));
+    while(!heap.empty())
+    {
+        int u = heap.top().u, d = heap.top().dis;
+        heap.pop();
+        if(d > dis[u])
+            continue;
+        // show(dis);
+        for(int i = head[u]; i; i = ne[i])
+        {
+            int v = edge[i], nd = d + cost[i];
+            if(nd < dis[v])
+            {
+                dis[v] = nd;
+                heap.push(Node(v, nd));
+                addfee[v] = fee[i];
+                // printf("u = %d, v = %d, dis[v] = %d, addfee[v] = %d\n", u, v, dis[v], addfee[v]);
+
+            }
+            else if(nd == dis[v] && fee[i] < addfee[v])
+            {
+                addfee[v] = fee[i];
+            }
+        }
+        // show(addfee);
+    }
+    int ans = 0;
+    for(int i = 2; i <= n; i++)
+        ans += addfee[i];
+    return ans;
+}
+void add(int u, int v, int w, int f)//有权图加边
+{
+    edge[idx] = v;
+    cost[idx] = w;
+    fee[idx] = f;
+    ne[idx] = head[u];
+    head[u] = idx;
+    idx++;
+}
+
+void init()
+{
+    memset(head, 0, sizeof head);
+    idx = 1;
+}
+
+
+int main()
+{
+    // FILE *fp = fopen("input.txt", "r");
+    // while(fscanf(fp, "%d %d", &n, &m) && n + m)
+    while(scanf("%d %d", &n, &m) && n + m)
+    {
+        init();
+        int u, v, w, f;
+        while(m--)
+        {
+            // fscanf(fp, "%d %d %d %d", &u, &v, &w, &f);
+            scanf("%d %d %d %d", &u, &v, &w, &f);
+            add(u, v, w, f);
+            add(v, u, w, f);
+        }
+        cout << dijkstra() << endl;
+    }
+    return 0;
+}

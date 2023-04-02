@@ -1,0 +1,121 @@
+#include <bits/stdc++.h>
+using std::cin;
+using std::getline;
+using std::cout;
+using std::endl;
+using std::string;
+using std::bitset;
+using std::vector;
+using std::array;
+using std::stack;
+using std::queue;
+using std::priority_queue;
+using std::set;
+using std::map;
+using std::pair;
+using llong = long long;
+template<typename T> using nLimits = std::numeric_limits<T>;
+#define ALL(a) (a).begin(), (a).end()
+#define REP(i, n) for (llong i = 0; i < static_cast<llong>(n); ++i)
+#define RREP(i, n) for (llong i = static_cast<llong>(n) - 1; i >= 0; --i)
+#define FOR(i, a, b) for (llong i = static_cast<llong>(a); i < static_cast<llong>(b); ++i)
+#define RFOR(i, a, b) for (llong i = static_cast<llong>(a) - 1; i >= static_cast<llong>(b); --i)
+constexpr int INF = 1001001001;
+constexpr llong LINF = 1001001001001001001ll;
+
+template<typename T> inline bool chMin(T &a, T b) { return ((a > b) ? (a = b, true) : (false)); }
+template<typename T> inline bool chMax(T &a, T b) { return ((a < b) ? (a = b, true) : (false)); }
+template<typename T> void printArray(T a, int n = 0);
+
+
+class Graph {
+public:
+    Graph(int n_, int flag_use_adj_list_ = true) {
+        n = n_;
+        flag_use_adj_list = flag_use_adj_list_;
+        if (flag_use_adj_list) adj_lists.resize(n);
+        else adj_mat.resize(n, vector<int>(n, INF));
+        dists.resize(n, -1);
+        srcs.resize(n, -1);
+        d_ts.resize(n, -1);
+        f_ts.resize(n, -1);
+    }
+    
+    void AddPath(int from, int to, int weight = 1) {
+        if (flag_use_adj_list) adj_lists[from].emplace_back(pair<int, int>(weight, to));
+        else adj_mat[from][to] = weight;
+    }
+
+    void DFS(int start = 0) {
+        static int t = 0;
+        stack<int> st;
+        st.emplace(start);
+        d_ts[start] = ++t;
+        while(!st.empty()) {
+            auto u = st.top();
+            st.pop();
+            // d_ts[u] = ++t;
+            for (auto v : adj_lists[u]) {
+                if (d_ts[v.second] != -1) continue;
+                d_ts[v.second] = ++t;
+                st.emplace(v.second);
+            }
+            f_ts[u] = ++t;
+        }
+    }
+
+    void DFSRec(int curr = 0) {
+        static int t = 0;
+        d_ts[curr] = ++t;
+        for (auto &next : adj_lists[curr]) {
+            if (d_ts[next.second] > 0) continue;
+            DFSRec(next.second);
+        }
+        f_ts[curr] = ++t;
+    }
+
+    bool flag_use_adj_list;
+    int n;
+    vector<vector<pair<int, int>>> adj_lists;
+    vector<vector<int>> adj_mat;
+    vector<int> dists;
+    vector<int> srcs;
+    vector<int> d_ts, f_ts;
+};
+
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout << std::fixed << std::setprecision(20);
+
+    int N;
+    cin >> N;
+    Graph g(N);
+
+    REP(i, N) {
+        int u, k, v;
+        cin >> u >> k;
+        REP(j, k) {
+            cin >> v;
+            g.AddPath(u - 1, v - 1);
+        }
+    }
+
+    REP(i, N) {
+        if (g.d_ts[i] == -1) g.DFSRec(i);
+    }
+
+    REP(i, N) {
+        cout << i + 1 << " " << g.d_ts[i] << " " << g.f_ts[i] << endl;
+    }
+}
+
+
+template<typename T> 
+void printArray(T a, int n) {
+    string s = std::to_string(a[0]);
+    FOR(i, 1, n > 0 ? n : a.size()) s += " " + std::to_string(a[i]);
+    cout << s + "\n";
+}
+

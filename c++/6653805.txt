@@ -1,0 +1,78 @@
+#include<stdio.h>
+#define MAX 100000
+#define NIL -1
+
+typedef struct{
+	int parent;
+	int left;
+	int right;
+}Node;
+
+Node Tree[MAX];
+int Depth[MAX],Height[MAX];
+
+void getDepth(int node,int depth){
+	Depth[node]=depth;
+	if(Tree[node].left != NIL)getDepth(Tree[node].left,depth+1);
+	if(Tree[node].right != NIL)getDepth(Tree[node].right,depth+1);
+}
+	
+int getHeight(int node){
+	int h1=0,h2=0;
+	
+	if(Tree[node].left != NIL)h1=getHeight(Tree[node].left)+1;
+	if(Tree[node].right != NIL)h2=getHeight(Tree[node].right)+1;
+	
+	if(h1>h2)Height[node]=h1;
+	else Height[node]=h2;
+	
+	return Height[node];
+}
+
+int getSibling(int node){
+	if(Tree[node].parent==NIL)return NIL;
+	if(Tree[Tree[node].parent].left != node && Tree[Tree[node].parent].left != NIL)return Tree[Tree[node].parent].left;
+	if(Tree[Tree[node].parent].right != node && Tree[Tree[node].parent].right != NIL)return Tree[Tree[node].parent].right;
+	return NIL;
+}
+
+void print(int node){
+	int deg=0;
+	
+	printf("node %d: ",node);
+	printf("parent = %d, ",Tree[node].parent);
+	printf("sibling = %d, ",getSibling(node));
+	if(Tree[node].left != NIL)deg++;
+	if(Tree[node].right != NIL)deg++;
+	printf("degree = %d, ",deg);
+	printf("depth = %d, ",Depth[node]);
+	printf("height = %d, ",Height[node]);
+	
+	if(Tree[node].parent==NIL)printf("root\n");
+	else if(Tree[node].left==NIL && Tree[node].right==NIL )printf("leaf\n");
+	else printf("internal node\n");
+}
+int main(void){
+	int i,n,id,l,r,root=0;
+	
+	scanf("%d",&n);
+	for(i=0;i<n;i++)Tree[i].parent=NIL;
+	for(i=0;i<n;i++){
+		scanf("%d %d %d",&id,&l,&r);
+		Tree[id].left=l;
+		Tree[id].right=r;
+	    if(l!=NIL)Tree[l].parent=id;
+	    if(r!=NIL)Tree[r].parent=id;
+	 }
+	for(i=0;i<n;i++)if(Tree[i].parent==NIL)root=i;//親を持たない接点番号を探す
+	
+	getDepth(root,0);
+	getHeight(root);
+	
+	for(i=0;i<n;i++)print(i);
+	
+	return 0;
+}
+
+	
+	

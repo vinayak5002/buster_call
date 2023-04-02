@@ -1,0 +1,102 @@
+#line 1 "main.cpp"
+#define PROBLEM "https://onlinejudge.u-aizu.ac.jp/problems/DPL_5_A"
+
+#include <cstdint>
+#include <iostream>
+#line 1 "/home/anqooqie/.proconlib/tools/pow_mod.hpp"
+
+
+
+#line 1 "/home/anqooqie/.proconlib/tools/mod.hpp"
+
+
+
+#include <type_traits>
+#line 1 "/home/anqooqie/.proconlib/tools/quo.hpp"
+
+
+
+#line 5 "/home/anqooqie/.proconlib/tools/quo.hpp"
+
+namespace tools {
+
+  template <typename M, typename N>
+  constexpr ::std::common_type_t<M, N> quo(const M lhs, const N rhs) {
+    if (lhs >= 0) {
+      return lhs / rhs;
+    } else {
+      if (rhs >= 0) {
+        return -((-lhs - 1 + rhs) / rhs);
+      } else {
+        return (-lhs - 1 + -rhs) / -rhs;
+      }
+    }
+  }
+}
+
+
+#line 6 "/home/anqooqie/.proconlib/tools/mod.hpp"
+
+namespace tools {
+
+  template <typename M, typename N>
+  constexpr ::std::common_type_t<M, N> mod(const M lhs, const N rhs) {
+    if constexpr (::std::is_unsigned_v<M> && ::std::is_unsigned_v<N>) {
+      return lhs % rhs;
+    } else {
+      return lhs - ::tools::quo(lhs, rhs) * rhs;
+    }
+  }
+}
+
+
+#line 1 "/home/anqooqie/.proconlib/tools/prod_mod.hpp"
+
+
+
+namespace tools {
+
+  template <typename T1, typename T2, typename T3>
+  constexpr T3 prod_mod(const T1 x, const T2 y, const T3 m) {
+    using u128 = unsigned __int128;
+    u128 prod_mod = u128(x >= 0 ? x : -x) * u128(y >= 0 ? y : -y) % u128(m);
+    if ((x >= 0) ^ (y >= 0)) prod_mod = u128(m) - prod_mod;
+    return prod_mod;
+  }
+}
+
+
+#line 6 "/home/anqooqie/.proconlib/tools/pow_mod.hpp"
+
+namespace tools {
+
+  template <typename T1, typename T2, typename T3>
+  constexpr T3 pow_mod(const T1 x, T2 n, const T3 m) {
+    if (m == 1) return 0;
+    T3 r = 1;
+    T3 y = ::tools::mod(x, m);
+    while (n > 0) {
+      if ((n & 1) > 0) {
+        r = ::tools::prod_mod(r, y, m);
+      }
+      y = ::tools::prod_mod(y, y, m);
+      n /= 2;
+    }
+    return r;
+  }
+}
+
+
+#line 6 "main.cpp"
+
+using i64 = std::int_fast64_t;
+
+int main() {
+  std::cin.tie(nullptr);
+  std::ios_base::sync_with_stdio(false);
+
+  i64 n, k;
+  std::cin >> n >> k;
+  std::cout << tools::pow_mod(k, n, 1000000007) << '\n';
+  return 0;
+}

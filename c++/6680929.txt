@@ -1,0 +1,34 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const long long INF = 1LL<<60;
+const double PI = acos(-1.0);
+using Graph = vector<vector<ll>>;
+using Grid = vector<vector<char>>;
+template<class T> inline bool chmax(T& a, T b) { if (a < b) { a = b; return 1; } return 0; }
+template<class T> inline bool chmin(T& a, T b) { if (a > b) { a = b; return 1; } return 0; }
+
+int main()
+{
+    int N, W;
+    cin >> N >> W;
+    vector<int> v_vec(N), w_vec(N);
+    for (int i=0; i<N; i++)
+        cin >> v_vec[i] >> w_vec[i];
+        vector<vector<int>> dp(N+1, vector<int> (W+1, -1));
+    dp[0][0] = 0;
+    for (int i=0; i<N; i++) {
+        int v = v_vec[i];
+        int w = w_vec[i];
+        for (int j=0; j<=W; j++) {
+            dp[i+1][j] = dp[i][j];
+            if (j < w)
+                continue;
+            int prev = dp[i+1][j-w];
+            if (prev == -1)
+                continue;
+            dp[i+1][j] = max(prev + v, dp[i+1][j]);
+        }
+    }
+    cout << *max_element(dp[N].begin(), dp[N].end()) << endl;
+}

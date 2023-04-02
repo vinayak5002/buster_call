@@ -1,0 +1,78 @@
+import copy
+
+N = 4
+N2 = 16
+
+MDT = [[[0] for j in range(N2) ] for i in range(N2)]
+for i in range(N2):
+    for j in range(N2):
+        MDT[i][j] = abs(i//N - j//N) + abs(i%N - j%N);
+
+in_p = []
+in_s = -1
+for i in range(N):
+    row = list(map(int, input().split()))
+    for j in range(N):
+        if row[j] == 0:
+            in_p.append(N2)
+            in_s = i*N + j
+        else:
+            in_p.append(row[j])
+
+MD = 0
+state = copy.copy(in_p)
+space = in_s
+limit = 0
+
+def dfs(depth, prev):
+    global MD, state, space, limit
+
+    if MD == 0: return True
+    if depth + MD > limit:  return False;  # 枝を刈る
+
+    sx, sy = space // N, space % N
+
+    for r in range(4):
+        tx = sx + [0, -1, 0, 1][r]
+        ty = sy + [1, 0, -1, 0][r]
+        if tx < 0 or ty < 0 or tx >= N or ty >= N : continue
+        if max(prev, r)-min(prev, r) == 2 : continue
+        tmps = space
+        tmpm = MD
+        # マンハッタン距離の差分を計算しつつ、ピースをスワップ
+        MD -= MDT[tx*N+ty][state[tx*N+ty]-1]
+        MD += MDT[sx*N+sy][state[tx*N+ty]-1]
+        state[tx*N+ty], state[sx*N+sy] = state[sx*N+sy], state[tx*N+ty]
+        space = tx*N + ty
+        if dfs( depth + 1, r ) : return True
+        space = tmps;
+        state[tx*N+ty], state[sx*N+sy] = state[sx*N+sy], state[tx*N+ty]
+        MD = tmpm
+
+    return False
+
+def iterative_deepening():
+    global MD, limit, state, space
+
+    sMD = 0
+    for i in range(N2):
+        if in_p[i] != N2: sMD = sMD + MDT[i][in_p[i]-1]
+
+    limit = sMD
+    while limit <= 45:
+        MD, space = sMD, in_s
+        state = copy.copy(in_p)
+        if dfs(0, -100):
+            print(limit)
+            return
+        limit += 1
+
+    print("unsolvable")
+
+iterative_deepening()
+
+
+
+
+
+

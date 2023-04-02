@@ -1,0 +1,98 @@
+#include<stdio.h>
+#include<stdbool.h>
+
+typedef struct card
+{
+	char suit;
+	int value;
+}card;
+
+void swap(card *a, card *b)
+{
+	card hold = *a;
+	*a = *b;
+	*b = hold;
+}
+
+void bubble(card A[],int N)
+{
+	for(int i = 0; i<N-1; i++)
+	{
+		for(int j = N-1; j>i; j--)
+		{
+			if(A[j].value < A[j-1].value)
+			{
+				swap(&A[j],&A[j-1]);
+			}
+		}
+	}
+}
+
+void selection(card A[],int N)
+{
+	for(int i=0; i<N-1; i++)
+	{
+		int minj = i;
+		for(int j=i+1; j<N; j++)
+		{
+			if(A[j].value < A[minj].value) minj = j;
+		}
+		swap(&A[i],&A[minj]);
+	}
+}
+
+void print(card A[], int N)
+{
+	for(int i = 0; i<N-1; i++)
+	{
+		printf("%c%d ",A[i].suit,A[i].value);
+	}
+	printf("%c%d\n",A[N-1].suit,A[N-1].value);
+}
+
+bool isStable(card C1[], card C2[], int N)
+{
+	for(int i = 0; i < N; i++)
+	{
+		if(C1[i].suit != C2[i].suit)return false;
+	}
+	return true;
+}
+	
+int main()
+{
+	card C1[100],C2[100];
+	int N;
+		
+	scanf("%d\n",&N);
+	for(int i=0; i<N; i++)
+	{
+		scanf("%c",&C1[i].suit);
+		scanf("%d ",&C1[i].value);
+	}
+	
+	for(int i=0; i<N; i++)
+		{
+			C2[i] = C1[i];
+		}
+	
+	bubble(C1,N);
+	selection(C2,N);
+
+	print(C1,N);
+	printf("Stable\n");
+	print(C2,N);
+	
+	if(isStable(C1,C2,N))
+	{
+		printf("Stable\n");
+	}
+	else
+	{
+		printf("Not Stable\n");
+	}
+		
+	return 0;
+		
+}
+		

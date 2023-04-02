@@ -1,0 +1,87 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+ll n;
+vector<ll> val, b;
+
+void pri_vec(vector<ll> vec){
+    cout << "(";
+    rep(i, 0, SZ(vec)) cout << vec[i] << " ";
+    cout << ")" ;
+}
+
+vector<ll> sorting(vector<ll> vec){
+    ll len = vec.size();
+    if(len <= 1) return vec;
+    ll j, part, valp = INF;
+    rep(i, 0, len){
+        if(valp > val[vec[i]]){
+            valp = val[vec[i]];
+            j = i;
+        }
+    }
+
+    part = vec[j];
+    vector<ll> lef, rig;
+    rep(i, 0, len){
+        if(i < j) lef.push_back(vec[i]);
+        if(i > j) rig.push_back(vec[i]);
+    }
+    lef = sorting(lef);
+    rig = sorting(rig);
+    //pri_vec(lef);
+    //cout << vec[j];
+    //pri_vec(rig);
+    //cout << endl;
+    rep(i, 0, SZ(vec) - 1){
+        if(i < j) vec[i] = lef[i];
+        else vec[i] = rig[i - j];
+    }
+    vec.back() = part;
+    return vec;
+}
+
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  cin >> n;
+  val.resize(n + 1, INF);
+  b.resize(n);
+  rep(i, 0, n){
+      ll a;
+      cin >> a;
+      val[a] = i;
+  }
+  rep(i, 0, n) cin >> b[i];
+
+  auto c = sorting(b);
+
+  rep(i, 0, SZ(c)){
+      if(i) cout << " ";
+      cout << c[i];
+  }
+  cout << endl;
+
+
+
+
+  return 0;
+}

@@ -1,0 +1,34 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <tuple>
+
+using namespace std;
+
+using Int = int_fast64_t;
+
+const Int INF = 1LL << 62;
+
+int main()
+{
+	int N, M, L; cin >> N >> M >> L;
+	vector<tuple<int, int, int>> ABC(M);
+	for (auto& [A, B, C] : ABC) cin >> A >> B >> C;
+	vector<pair<Int, int>> D(N + 1, {INF, -1});
+	using T = tuple<int, Int, int>;
+	priority_queue<T, vector<T>, greater<T>> Q;
+	for (Q.push({0, 0, 1}); !Q.empty();) {
+		auto [r, d, n] = Q.top(); Q.pop();
+		if (D[n].first <= d || d > L) continue;
+		D[n] = {d, r};
+		if (n == N) break;
+		for (auto [A, B, C] : ABC) if (n == A) {
+			Q.emplace(r, d + C, B);
+		} else if (n == B) {
+			Q.emplace(r + 1, d + C, A);
+		}
+	}
+	cout << D[N].second << endl;
+	return 0;
+}
+

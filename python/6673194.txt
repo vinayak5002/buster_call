@@ -1,0 +1,90 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def calc_length2(v):
+    length = 0
+    for element in v:
+        length += element ** 2
+    return length
+
+
+def v_sum(v0, v1):
+    v_result = []
+    for i in range(len(v0)):
+        v_result.append(v0[i] + v1[i])
+    return v_result
+
+
+def v_diff(v0, v1):
+    dif = []
+    for i in range(len(v0)):
+        dif.append(v1[i] - v0[i])
+    return dif
+
+
+def v_mult_scalar(a, v):
+    mv = []
+    for i in range(len(v)):
+        mv.append(a * v[i])
+    return mv
+
+
+def cross_product2d(v0, v1):
+    return v0[0] * v1[1] - v0[1] * v1[0]
+
+
+def calc_circumscribed_circle_of_a_triangle(p0, p1, p2):
+    v01 = v_diff(p0, p1)
+    v02 = v_diff(p0, p2)
+
+    cp = cross_product2d(v01, v02)
+    if cross_product2d(v01, v02) < 0:
+        p1, p2 = p2, p1
+        cp *= -1
+
+    d01_2 = calc_length2(v_diff(p0, p1))
+    d12_2 = calc_length2(v_diff(p1, p2))
+    d20_2 = calc_length2(v_diff(p2, p0))
+    d01 = math.sqrt(d01_2)
+    d20 = math.sqrt(d20_2)
+
+    sin0 = cp / (d01 * d20)
+    r = 0.5 * math.sqrt(d12_2) / sin0
+    s = 0.5 * d01 * d20 * sin0
+    s2_16_inv = 1 / (16 * s**2)
+
+    v0 = v_mult_scalar(s2_16_inv * d12_2 * (d20_2 + d01_2 - d12_2), p0)
+    v1 = v_mult_scalar(s2_16_inv * d20_2 * (d01_2 + d12_2 - d20_2), p1)
+    v2 = v_mult_scalar(s2_16_inv * d01_2 * (d12_2 + d20_2 - d01_2), p2)
+
+    po = v_sum(v0, v1)
+    po = v_sum(po, v2)
+
+    return po, r
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    p0 = list(map(int, f.readline().split()))
+    p1 = list(map(int, f.readline().split()))
+    p2 = list(map(int, f.readline().split()))
+
+    po, r = calc_circumscribed_circle_of_a_triangle(p0, p1, p2)
+    print(f'{po[0]:.6f} {po[1]:.6f} {r:.6f}')
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

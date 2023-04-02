@@ -1,0 +1,52 @@
+d_L = [[-1,-1],[-1,0],[-1,1],[0,-1],[0,0],[0,1],[1,-1],[1,0],[1,1]]
+
+import sys
+from collections import defaultdict
+sys.setrecursionlimit(3000)
+
+
+
+
+def dfs(now_node,group_num):
+	if now_node in checked_s:return
+
+	global group_s
+	group_s.add(group_num)
+	checked_s.add(now_node)
+	
+	x,y = now_node
+	for dx,dy in d_L:
+		next_x,next_y = dx+x,dy+y
+
+		if (next_x,next_y) in checked_s:continue
+		if (next_x,next_y) not in field_s:continue
+		dfs((next_x,next_y),group_num)
+
+
+while True:
+	w,h = map(int,input().split())
+	if w == 0 and h == 0:
+		exit()
+	field_s = set()
+	for i in range(h):
+		tmp_L = list(map(int,input().split()))
+		for j,flg in enumerate(tmp_L):
+			if flg:
+				field_s.add((i,j))
+
+
+
+
+	checked_s = set()
+	group_s = set()
+	cnt = 1
+	for node in field_s:
+		dfs(node,cnt)
+		cnt+=1
+
+	
+	print(len(group_s))
+
+
+
+

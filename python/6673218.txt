@@ -1,0 +1,111 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def calc_length(v):
+    length = 0
+    for element in v:
+        length += element ** 2
+    return math.sqrt(length)
+
+
+def normalize(v):
+    length = calc_length(v)
+    nv = []
+    for element in v:
+        nv.append(element / length)
+    return nv
+
+
+def v_diff(v0, v1):
+    dif = []
+    for i in range(len(v0)):
+        dif.append(v1[i] - v0[i])
+    return dif
+
+
+def inner_product(v0, v1):
+    ip = 0
+    for i in range(len(v0)):
+        ip += v0[i] * v1[i]
+    return ip
+
+
+# nv0: normalized
+def calc_projection_point(p0, nv0, p):
+    v0p = v_diff(p0, p)
+    ip = inner_product(nv0, v0p)
+    v = []
+    projection_p = []
+    for i in range(len(nv0)):
+        projection_p.append(p0[i] + nv0[i] * ip)
+        v.append(nv0[i] * ip)
+    return projection_p
+
+
+def calc_intersection(circle, p0, p1):
+    v01 = v_diff(p0, p1)
+    nv01 = normalize(v01)
+    pl = calc_projection_point(p0, nv01, circle)
+    r = circle[2]
+    d2 = (pl[0] - circle[0])**2 + (pl[1] - circle[1])**2
+    if d2 == r**2:
+        return pl, pl
+
+    t = math.sqrt(r**2 - d2)
+    p0x = pl[0] + nv01[0] * t
+    p0y = pl[1] + nv01[1] * t
+    p1x = pl[0] - nv01[0] * t
+    p1y = pl[1] - nv01[1] * t
+    pi_list = [(p0x, p0y), (p1x, p1y)]
+    pi_list.sort()
+
+    return pi_list
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    x0, y0, r0 = map(int, f.readline().split())
+    x1, y1, r1 = map(int, f.readline().split())
+    circle0 = (x0, y0, r0)
+
+    a = 2 * (x1 - x0)
+    b = 2 * (y1 - y0)
+    c = x0**2 - x1**2 + y0**2 - y1**2 - r0**2 + r1**2
+
+    if a == 0:
+        y = -c / b
+        p0 = (1, y)
+        p1 = (-1, y)
+        pi_list = calc_intersection(circle0, p0, p1)
+    elif b == 0:
+        x = -c / a
+        p0 = (x, 1)
+        p1 = (x, -1)
+        pi_list = calc_intersection(circle0, p0, p1)
+    elif c == 0:
+        p0 = (0, 0)
+        p1 = (1, -a / b)
+        pi_list = calc_intersection(circle0, p0, p1)
+    else:
+        p0 = (0, -c / b)
+        p1 = (-c / a, 0)
+        pi_list = calc_intersection(circle0, p0, p1)
+
+    print(f'{pi_list[0][0]:.6f} {pi_list[0][1]:.6f} {pi_list[1][0]:.6f} {pi_list[1][1]:.6f}')
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

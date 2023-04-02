@@ -1,0 +1,68 @@
+import sys
+from copy import copy
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+m = -1
+n = -1
+d_list = []
+
+
+def is_ng(i, visited_set):
+    is_ng_ = True
+    for j in range(1, m):
+        ni = i + j
+        if ni >= n:
+            return False
+
+        ni += d_list[ni]
+        ni = max(0, ni)
+        n_visited_set = copy(visited_set)
+        if ni not in n_visited_set:
+            is_ng_ = False
+            n_visited_set.add(ni)
+            if is_ng(ni, n_visited_set):
+                is_ng_ = True
+                break
+
+    return is_ng_
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    while True:
+        global m, n, d_list
+        m = int(f.readline())
+        if m == 0:
+            break
+
+        n = int(f.readline())
+        d_list = [0]
+        min_d = 0
+        for _ in range(n):
+            d = int(f.readline())
+            d_list.append(d)
+            min_d = min(min_d, d)
+        d_list.append(0)
+        n += 1
+
+        if -min_d < m:
+            print('OK')
+        else:
+            m += 1
+            print('NG' if is_ng(0, {0}) else 'OK')
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

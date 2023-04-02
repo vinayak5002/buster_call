@@ -1,0 +1,51 @@
+#include <cstdio>
+#include <cstring>
+
+const int size = 100005;
+struct node {
+	char name[10];
+	int val;
+};
+
+struct  node q[size];
+int head , tail, n;
+
+void enqueue(node x) {
+	q[tail] = x;
+	tail = (tail + 1) % size;
+}
+
+node dequeue() {
+	node x = q[head];
+	head = (head + 1) % size;
+	return x;
+}
+
+int min(int a, int b) {
+	return a < b ? a : b;
+}
+
+int main()
+{
+	int n, time_, elaps = 0, c;
+	node temp;
+	scanf("%d %d", &n, &time_);
+	for (int i = 1; i <= n; ++i) {
+		scanf("%s", q[i].name);
+		scanf("%d", &q[i].val);
+	}
+	head = 1, tail = n + 1;
+	while (head != tail) {
+		temp = dequeue();
+		c = ::min(time_, temp.val);
+		temp.val -= c;
+		elaps += c;
+		if (temp.val > 0) {
+			enqueue(temp);
+		} else {
+			printf("%s %d\n", temp.name, elaps);
+		}
+	}
+	return 0;
+}
+

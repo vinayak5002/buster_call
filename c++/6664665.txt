@@ -1,0 +1,84 @@
+#define READ_FROM_FILE 0
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+typedef long long ll;
+
+
+#define MAX_COST (10000000000)
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n, m;
+	vector<vector<ll>> min_cost;
+	bool is_there_negative_cycle = false;
+
+	cin >> n >> m;
+	min_cost.resize(n);
+	for (int i = 0; i < n; i++) {
+		min_cost[i].resize(n, MAX_COST);
+		min_cost[i][i] = 0;
+	}
+	for (int i = 0; i < m; i++) {
+		int s, t, d;
+
+		cin >> s >> t >> d;
+		min_cost[s][t] = d;
+	}
+
+	for (int k = 0; k < n; k++) {
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				if (min_cost[i][j] == MAX_COST) {
+					if (min_cost[i][k] == MAX_COST || min_cost[k][j] == MAX_COST) {
+						min_cost[i][j] = MAX_COST;
+					}
+					else {
+						min_cost[i][j] = min_cost[i][k] + min_cost[k][j];
+					}
+				}
+				else {
+					min_cost[i][j] = min(min_cost[i][j], min_cost[i][k] + min_cost[k][j]);
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < n; i++) {
+		if (min_cost[i][i] < 0) {
+			is_there_negative_cycle = true;
+			break;
+		}
+	}
+
+	if (is_there_negative_cycle) {
+		cout << "NEGATIVE CYCLE" << endl;
+	}
+	else {
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; j++) {
+				if (min_cost[i][j] == MAX_COST) {
+					cout << "INF";
+				}
+				else {
+					cout << min_cost[i][j];
+				}
+				if (j < n - 1) {
+					cout << " ";
+				}
+			}
+			cout << endl;
+		}
+	}
+	return 0;
+}

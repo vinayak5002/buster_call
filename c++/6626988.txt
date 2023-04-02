@@ -1,0 +1,165 @@
+#include <stdio.h>
+
+#define M 100001
+#define N -1
+
+typedef struct
+{
+    int parent;
+    int left;
+    int right;
+} Node_t;
+
+Node_t a[M];
+
+int n;
+int depth[M];
+int h[M];
+
+void setDepth(int u, int d)
+{
+    if (u == N)
+    {
+        return;
+    }
+
+    depth[u] = d;
+
+    setDepth(a[u].left, d + 1);
+
+    setDepth(a[u].right, d + 1);
+}
+
+int setHeight(int u)
+{
+    int h1 = 0;
+    int h2 = 0;
+
+    if (a[u].left != N)
+    {
+        h1 = setHeight(a[u].left) + 1;
+    }
+
+    if (a[u].right != N)
+    {
+        h2 = setHeight(a[u].right) + 1;
+    }
+
+    if (h1 >= h2)
+    {
+        return h[u] = h1;
+    }
+
+    else if (h2 > h1)
+    {
+        return h[u] = h2;
+    }
+
+    else
+    {
+        return 0;
+    }
+}
+
+int getSibling(int u)
+{
+    if (a[u].parent == N)
+    {
+        return N;
+    }
+
+    if (a[a[u].parent].left != N && a[a[u].parent].left != u)
+    {
+        return a[a[u].parent].left;
+    }
+
+    if (a[a[u].parent].right != N && a[a[u].parent].right != u)
+    {
+        return a[a[u].parent].right;
+    }
+
+    return N;
+}
+
+void print(int u)
+{
+    int deg = 0;
+
+    printf("node %d:  parent = %d, sibling = %d, ", u, a[u].parent, getSibling(u));
+
+    if (a[u].left != N)
+    {
+        deg++;
+    }
+
+    if (a[u].right != N)
+    {
+        deg++;
+    }
+
+    printf("degree = %d, depth = %d, height = %d, ", deg, depth[u], h[u]);
+
+    if (a[u].parent == N)
+    {
+        printf("root\n");
+    }
+
+    else if (a[u].left == N && a[u].right == N)
+    {
+        printf("leaf\n");
+    }
+
+    else
+    {
+        printf("internal node\n");
+    }
+}
+
+int main()
+{
+    int i, x, l, r;
+    int root = 0;
+
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++)
+    {
+        a[i].parent = N;
+    }
+
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d %d %d", &x, &l, &r);
+
+        a[x].left = l;
+        a[x].right = r;
+
+        if (l != N)
+        {
+            a[l].parent = x;
+        }
+
+        if (r != N)
+        {
+            a[r].parent = x;
+        }
+    }
+
+    for (i = 0; i < n; i++)
+    {
+        if (a[i].parent == N)
+        {
+            root = i;
+        }
+    }
+
+    setDepth(root, 0);
+    setHeight(root);
+
+    for (i = 0; i < n; i++)
+    {
+        print(i);
+    }
+
+    return 0;
+}

@@ -1,0 +1,42 @@
+def kukan_dp(N,L):
+
+	dp = [[0]* (N + 1) for _ in range(N + 1)]
+
+# しのさん式区間DP
+	for r in range(N+1):
+		for l in range(r-2,-1,-1):
+
+			# ブロック2個なら、差が1以下なら2個消える、そうじゃないなら消えない
+			if r - l == 2:
+				if abs(L[l] - L[r-1]) <= 1:
+					dp[l][r] = 2
+				else:
+					dp[l][r] = 0
+				continue
+
+			# 区間の両端を落とした内側が全部消えてるなら、
+			if dp[l+1][r-1] == r-l-2:
+				# 両端が消えるなら、全消し可能
+				if abs(L[l] - L[r-1]) <= 1:
+					dp[l][r] = r-l
+					continue
+				# 消えないなら、2つ残るね
+				else:
+					dp[l][r] = r-l-2
+
+			# 区間を分割して、最大スコアを確認、取得
+			tmp = dp[l][r]
+			for mid in range(l+1,r-2):
+				tmp = max(tmp, dp[l][mid]+dp[mid+1][r])
+			dp[l][r] = tmp
+
+	# 上から下までの最高スコアがほしいでござる
+	return dp[0][N]
+
+while True:
+	N = int(input())
+	if N == 0:
+		exit()
+	L = list(map(int,input().split()))
+
+	print(kukan_dp(N,L))

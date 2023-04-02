@@ -1,0 +1,26 @@
+
+rxs = lambda: [*map(int, input().split())]
+N, Q = rxs()
+Qs = (rxs() for _ in range(Q))
+bit = [0]*(N+1)
+
+def add(s, x):
+    while s <= N:
+        bit[s] += x
+        s += s & -s
+
+def getsum(s):
+    ans = 0
+    while s > 0:
+        ans += bit[s]
+        s -= s & -s
+    return ans
+
+for q, *params in Qs:
+    if q:
+        lft, rht = params
+        print(getsum(rht) - getsum(lft-1))
+    else:
+        s, x = params
+        add(s, x)
+

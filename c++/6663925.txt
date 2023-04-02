@@ -1,0 +1,98 @@
+#include <bits/stdc++.h>
+using namespace std;
+using vi = vector<int64_t>;
+using vii = vector<vi>;
+using pii = pair<int64_t, int64_t>;
+
+#define rep(i, n) for (int64_t i = 0; i < (int64_t)(n); i++)
+#define all(v) v.begin(), v.end()
+
+int64_t inf = 1e18;
+
+// 以下可変
+template <typename T>
+void upgrade(T &LEFT, const T &RIGHT)
+{
+    if (LEFT < RIGHT)
+        LEFT = RIGHT;
+
+    return;
+}
+template <typename T>
+void downgrade(T &LEFT, const T &RIGHT)
+{
+    if (LEFT > RIGHT)
+        LEFT = RIGHT;
+
+    return;
+}
+
+vi Bellman_Ford(int64_t &start, vii edge, int64_t &N){
+    // スタート地点・edgeの入ったベクター・ノードの数
+    vi Sdis(N, inf);
+    vi parent(N, -1);
+    Sdis[start] = 0;
+
+    rep(i, edge.size())
+    {
+        bool flag = false;
+
+        for (vi Nedge : edge)
+        {
+            if(Sdis[Nedge[0]] != inf)
+            {
+                if(Sdis[Nedge[1]] > Sdis[Nedge[0]] + Nedge[2])
+                {
+                    Sdis[Nedge[1]] = Sdis[Nedge[0]] + Nedge[2];
+                    parent[Nedge[1]] = Nedge[0];
+                    flag = true;
+                }
+            }
+        }
+        if(i == edge.size() - 1 && flag)
+        {
+            // 負の閉路あり
+            return vi(0);
+        }
+    }
+
+    return Sdis; // parent を返してもいい
+}
+
+    /////////////////////////////////////////////////////////////
+    int
+    main()
+{
+    int64_t N, K, r;
+    cin >> N >> K >> r;
+
+    vii edge(0);
+
+    for (int64_t i = 1; i <= K; i++)
+    {
+        int64_t nst, nto, dis;
+        cin >> nst >> nto >> dis;
+        edge.push_back({nst, nto, dis});
+    }
+
+    vi ans = Bellman_Ford(r, edge, N);
+    if(ans.size() == 0)
+    {
+        cout << "NEGATIVE CYCLE" << endl;
+        return 0;
+    }
+
+    rep(i, N)
+    {
+        if(ans[i] == inf)
+        {
+            cout << "INF" << endl;
+            continue;
+        }
+        cout << ans[i] << endl;
+        
+    }
+
+    return 0;
+}
+

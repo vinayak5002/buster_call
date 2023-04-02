@@ -1,0 +1,63 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+
+int time_stamp = 0;
+vector<int> d;
+vector<int> f;
+
+void dfs(const vector<vector<int> >& adjacency_list, vector<bool>& is_searched, int i) {
+	if (is_searched[i]) {
+		return;
+	}
+	is_searched[i] = true;
+	time_stamp++;
+	d[i] = time_stamp;
+
+	for (int j = 0; j < adjacency_list[i].size(); j++) {
+		dfs(adjacency_list, is_searched, adjacency_list[i][j]);
+	}
+	time_stamp++;
+	f[i] = time_stamp;
+	return;
+}
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n, u, k, v;
+	vector<vector<int> > adjacency_list;
+	vector<bool> is_searched;
+
+	cin >> n;
+	adjacency_list.resize(n);
+	is_searched.resize(n, false);
+	d.resize(n, 0);
+	f.resize(n, 0);
+	for (int i = 0; i < n; i++) {
+		cin >> u >> k;
+		adjacency_list[u - 1].resize(k);
+		for (int j = 0; j < k; j++) {
+			cin >> v;
+			adjacency_list[u - 1][j] = v - 1;
+		}
+	}
+
+	for (int i = 0; i < n; i++) {
+		dfs(adjacency_list, is_searched, i);
+	}
+
+	for (int i = 0; i < n; i++) {
+		cout << i + 1 << " " << d[i] << " " << f[i] << endl;
+	}
+	return 0;
+}

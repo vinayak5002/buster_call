@@ -1,0 +1,200 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using ull = unsigned long long;
+using ld = long double;
+using vl = vector<ll>;
+template<class T> using vc = vector<T>;
+template<class T> using vvc = vector<vector<T>>;
+
+#define eb emplace_back
+#define all(x) (x).begin(), (x).end()
+#define rep(i, n) for (ll i = 0; i < (n); i++)
+#define repr(i, n) for (ll i = (n)-1; i >= 0; i--)
+#define repe(i, l, r) for (ll i = (l); i < (r); i++)
+#define reper(i, l, r) for (ll i = (r)-1; i >= (l); i--)
+#define repa(i,n) for (auto& i: n)
+
+template<class T1, class T2> inline bool chmax(T1 &a, const T2 &b) {if (a<b) { a=b; return 1;} return 0;}
+template<class T1, class T2> inline bool chmin(T1 &a, const T2 &b) {if (b<a) { a=b; return 1;} return 0;}
+
+struct init{init(){cin.tie(0);ios::sync_with_stdio(false);cout<<fixed<<setprecision(15);cerr<<fixed<<setprecision(15);}}init_;
+
+template <typename T, typename U> ostream& operator<<(ostream&out,const pair<T, U>&a){return out<<a.first<<' '<<a.second;}
+template <typename T> ostream& operator<<(ostream&out, const vector<T>&a){for(auto it=a.begin();it!= a.end();){out<<*it;if(++it!=a.end())out<<' ';}return out;}
+template <typename T, size_t N> ostream& operator<<(ostream&out, const array<T, N>&a){for(auto it=a.begin();it!= a.end();){out<<*it;if(++it!=a.end())out<<' ';}return out;}
+template <typename T> ostream& operator<<(ostream&out, const set<T>&a){for(auto it=a.begin();it!=a.end();){out<<*it;if(++it!=a.end())out<<' ';}return out;}
+template <typename T, typename U> ostream& operator<<(ostream&out, const map<T, U>&a){for(auto it=a.begin();it!=a.end();){out<<*it;if(++it!=a.end())out<<'\n';}return out;}
+
+#ifdef DEBUG
+template <class T, class N> void verr(const vector<T>& a, const N& n) { rep(i, n) cerr << a[i] << " "; cerr << endl; }
+template <class T, class N, size_t AN> void verr(const array<T, AN>& a, const N& n) { rep(i, n) cerr << a[i] << " "; cerr << endl; }
+ll dbgt = 1; void err() { cerr << "passed " << dbgt++ << endl; }
+template<class H, class... T> void err(H&& h,T&&... t){ cerr<< h << (sizeof...(t)?" ":"\n") << flush; if(sizeof...(t)>0) err(forward<T>(t)...); }
+#else
+void err(){}
+template <class H, class... T>
+void err(H &&h, T &&...t) {}
+template <class H, class... T>
+void verr(H &&h, T &&...t) {}
+#endif
+
+const ll INF = 4e18;
+const ld EPS = 1e-11;
+const ld PI = acos(-1.0L);
+// const ll MOD = 1e9 + 7;
+const ll MOD = 998244353;
+//--------------------------------------------------------------------------------//
+struct point {
+    int x, y, z;
+    point(){}
+    point(int x, int y, int z): x(x), y(y), z(z){}
+};
+
+struct UnionFind {
+private:
+    vector<int> par;
+    vector<int> count;
+    vector<int> rank;
+public:
+    UnionFind(int N) {
+        count.assign(N, 1);
+        rank.assign(N, 0);
+        par.assign(N, 0);
+        rep(i, N) par[i] = i;
+    }
+
+    int root(int x) {
+        if (par[x] == x)
+            return x;
+        else {
+            par[x] = root(par[x]);
+            return par[x];
+        }
+    }
+
+    void unite(int x, int y) {
+        x = root(x), y = root(y);
+        if (x == y) return;
+        if (rank[x] < rank[y])
+            swap(x, y);
+        else if (rank[x] == rank[y])
+            rank[y]++;
+        par[y] = x;
+        count[x] += count[y];
+        return;
+    }
+
+    int size(int x) {
+        return count[root(x)];
+    }
+
+    bool issame(int x, int y) {
+        return root(x) == root(y);
+    }
+};
+using UF = struct UnionFind;
+
+
+void solve(int N, int K, int S){
+    // err(N, K, S);
+    vc<point> ps(N);
+    rep(i, N) cin >> ps[i].x >> ps[i].y >> ps[i].z;
+    if(K == 1) {
+        cout << 6 * S * S << endl;
+        return;
+    }
+
+    auto dup = [&](point p1, point p2) -> int {
+        ll s = 1, ssum = 0;
+        if (p1.x >= p2.x + S or p2.x >= p1.x + S) return 0;
+        int dx = min(p1.x + S - p2.x, p2.x + S - p1.x);
+        if(p1.y >= p2.y + S or p2.y >= p1.y + S) return 0;
+        int dy = min(p1.y + S - p2.y, p2.y + S - p1.y);
+        if (p1.z >= p2.z + S or p2.z >= p1.z + S) return 0;
+        int dz = min(p1.z + S - p2.z, p2.z + S - p1.z);
+        ssum = 2 * (dx * dy + dy * dz + dz * dx);
+        return ssum;
+    };
+
+    UF ufall(N);
+    vvc<pair<int, int>> G(N);
+    rep(i, N) repe(j, i + 1, N) {
+        auto s = dup(ps[i], ps[j]);
+        if(s > 0) {
+            G[i].eb(j, s);
+            G[j].eb(i, s);
+            ufall.unite(i, j);
+        }
+    }
+
+    ll ans = INF;
+    rep(rt, N) {
+        priority_queue<tuple<ll, ll, ll>> pq;
+        for(auto&[to, ts]: G[rt]) {
+            pq.emplace(ts, rt, to);
+        }
+
+        UF uf(N);
+        vl ss(N), used(N);
+        used[rt] = true;
+        while (!pq.empty()) {
+            auto [s, v1, v2] = pq.top();
+            pq.pop();
+            if (uf.issame(v1, v2)) {
+                continue;
+            }
+            int s1 = ss[uf.root(v1)], s2 = ss[uf.root(v2)];
+            uf.unite(v1, v2);
+            ss[uf.root(v1)] = s1 + s2 + s;
+
+            assert(used[v1] ^ used[v2]);
+            if (!used[v1]) {
+                used[v1] = true;
+                for (auto [to, ts] : G[v1]) {
+                    // if (to == v2) continue;
+                    // if (uf.issame(to, v1)) {
+                    //     ss[uf.root(v1)] += ts;
+                    //     continue;
+                    // }
+                    pq.emplace(ts, v1, to);
+                }
+            } else if (!used[v2]) {
+                used[v2] = true;
+                for (auto [to, ts] : G[v2]) {
+                    // if (to == v1) continue;
+                    // if(uf.issame(to, v2)) {
+                    //     ss[uf.root(v2)] += ts;
+                    //     continue;
+                    // }
+                    pq.emplace(ts, v2, to);
+                }
+            }
+            if(uf.size(v1) == K) {
+                if(ufall.size(v1) == K) {
+                    ll sum = 0;
+                    rep(i, N) {
+                        if (!uf.issame(i, v1)) continue;
+                        for(auto[to, ts]: G[i]) {
+                            if (uf.issame(i, to)) sum += ts;
+                        }
+                    }
+                    chmin(ans, K * 6 * S * S - sum / 2);
+                    err("diff", sum / 2, ss[uf.root(v1)]);
+                } else {
+                    chmin(ans, K * 6 * S * S - ss[uf.root(v1)]);
+                }
+            }
+        }
+    }
+    cout << (ans == INF ? -1 : ans) << endl;
+}
+
+int main() {
+    while(true) {
+        int N, K, S;
+        cin >> N >> K >> S;
+        if (N == 0) break;
+        solve(N, K, S);
+    }
+}

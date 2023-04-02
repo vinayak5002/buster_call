@@ -1,0 +1,79 @@
+class UnionFind():
+
+    def __init__(self, n):
+        self.n = n
+        self.par = [-1] * n
+        self.cnt = 0
+    
+    def find(self, x):
+        if self.par[x] < 0:
+            return x
+        else:
+            self.par[x] = self.find(self.par[x])
+            return self.par[x]
+    
+    def union(self, x, y):
+        x = self.find(x)
+        y = self.find(y)
+        if x == y:
+            return
+        if self.par[x] > self.par[y]:
+            x, y = y, x
+        self.par[x] += self.par[y]
+        self.par[y] = x
+        self.cnt += 1
+
+    def size(self, x):
+        return - self.par[self.find(x)]
+    
+    def same(self, x, y):
+        return self.find(x) == self.find(y)
+
+    def members(self, x):
+        root = self.find(x)
+        return [i for i in range(self.n) if self.find(i) == root]
+
+    def roots(self):
+        return [i for i, x in enumerate(self.parents) if x < 0]
+
+    def group_count(self):
+        return len(self.roots())
+
+N, M = map(int, input().split())
+edges = []
+
+for i in range(M):
+    s, d, c = map(int, input().split())
+    edges.append((c, s - 1, d - 1, i))
+
+edges.sort()
+uf = UnionFind(N)
+used, unused = [], []
+
+for c, s, d, i in edges:
+    if uf.same(s, d) == False:
+        uf.union(s, d)
+        used.append((c, s, d, i))
+    else:
+        unused.append((c, s, d, i))
+
+ans1, ans2 = 0, 0
+for cj, sj, dj, j in used:
+    uf = UnionFind(N)
+    ok = 1
+    for c, s, d, i in used:
+        if i == j:
+            continue
+        uf.union(s, d)
+    for c, s, d, i in unused:
+        if uf.same(s, d) == False:
+            uf.union(s, d)
+            if c == cj:
+                ok = 0
+                break
+    if ok:
+        ans1 += 1
+        ans2 += cj
+
+print(ans1, ans2)
+

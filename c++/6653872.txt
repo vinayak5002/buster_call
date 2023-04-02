@@ -1,0 +1,262 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+#define all(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+
+
+struct quot{
+    ll de,nu;//de分母
+    quot()=default;
+    quot(ll nu,ll de):de(de),nu(nu){init(*this);}
+    quot(ll z):de(1),nu(z){init(*this);}
+    void init(quot &a){
+        if(a.nu==0){
+            a.de=1;
+        }
+        else{
+            ll g=GcD(a.de,a.nu);
+            a.de/=g;
+            a.nu/=g;
+            if(a.de<0){
+                a.de*=-1;
+                a.nu*=-1;
+            }
+        }
+    }
+    ll GcD(ll(a), ll(b)) {
+        ll c = a;
+        while (a % b != 0) {
+            c = a % b;
+            a = b;
+            b = c;
+        }
+        return b;
+    }
+
+    quot operator *(const quot& p) {
+        quot res;
+        res.de = this->de * p.de;
+        res.nu = this->nu * p.nu;
+        init(res);
+        return res;
+    };
+    quot operator +(const quot& p) {
+        quot res;
+        res.de = this->de * p.de;
+        res.nu = this->nu * p.de+this->de*p.nu;
+        init(res);
+        return res;
+    };
+
+    quot operator-()const{
+        quot res;
+        res.de = this->de;
+        res.nu =- this->nu;
+        return res;
+    };
+    quot operator -(const quot& p) {
+        return *this + (-p);  
+    };
+    quot inv(quot q){
+        quot res;
+        res.de=q.nu;
+        res.nu=q.de;
+        return res;
+    }
+    quot operator/(const quot&q){
+        return *this*inv(q);
+    }
+
+    bool operator==(const quot&q){
+        return (this->de==q.de&&this->nu==q.nu);
+    }
+
+    bool operator>(const quot&q){
+        return (this->nu*q.de-this->de*q.nu>0);
+    }
+    bool operator<(const quot&q){
+        return !(*this==q||*this>q);
+    }
+
+    double tod(const quot&q){
+        return (double(nu)/double(de));
+    }
+
+    void print(){
+        cout<<nu<<" "<<de<<endl;
+    }
+
+    void printd(){
+        cout<<tod(*this)<<endl;
+    }
+};
+
+
+
+
+
+
+
+#include <complex>
+using Field=double;
+const Field EPS = 1e-6;
+//const Field pi = atan2(1, 1) * 4.0;
+struct Point {
+    Field x, y,norm;
+    Point() = default;
+    Point(Field x,Field y):x(x),y(y),norm(sqrt(x*x+y*y)){}
+
+    void normalization() {
+        norm = sqrt(x * x + y * y);
+        x /= norm;
+        y /= norm;
+        norm = 1.0;
+    }
+    Point operator *(const Point& p) {
+        Point res;
+        res.x = this->x * p.x - this->y * p.y;
+        res.y = this->x * p.y + this->y * p.x;
+        return res;
+    };
+    Point operator *(const Field& p) {
+        Point res;
+        res.x = this->x * p;
+        res.y = this->y * p;
+        return res;
+    };
+    Point operator +(const Point& p) {
+        Point res;
+        res.x = this->x + p.x;
+        res.y = this->y + p.y;
+        return res;
+    };
+
+    bool operator ==(const Point& p) const
+    {
+        return (abs(x - p.x) < EPS && abs(y - p.y) < EPS);
+    }
+    bool operator !=(const Point& p) const
+    {
+        return !(*this == p);
+    }
+    Point operator-() const {
+        Point res;
+        res.x = -this->x;
+        res.y = -this->y;
+        return res;
+    }
+    Point operator -(const Point& p) {
+        return *this + (-p);
+    };
+
+    void print() {
+        cout << x << " " << y << endl;
+    }
+};
+
+
+struct Line {
+    Point p1, p2;
+    Line() = default;
+    Line(const Point& p1, const Point& p2) :p1(p1), p2(p2) {}
+};
+
+struct Circle {
+    Point O;
+    double R;
+    Circle() = default;
+    Circle(const Point& O, double R) : O(O), R(R) {}
+};
+
+using Polygon = vector<Point>;
+
+double dot(Point a, Point b) {
+    return a.x * b.x + a.y * b.y;
+}
+double cross(Point a, Point b) {
+    return a.x * b.y - a.y * b.x;
+}
+double dis(Point a, Point b) {
+    return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) + (a.y - b.y));
+}
+
+Point projection(Point p1, Point p2, Point p) {
+    Point m = (p2 - p1);
+    m.normalization();
+    return p1 + m * dot(p - p1, m);
+}
+
+Point refrection(Point p1, Point p2, Point p) {
+    Point pr = projection(p1, p2, p);
+    return p + (pr - p) * 2.0;
+}
+
+
+
+
+bool chmax(ll& p, ll q) {
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+bool chmin(ll& p, ll q) {
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+ll gcd(ll(a), ll(b)) {
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    ll Q;
+    cin>>Q;
+    rep(q,Q){
+        vll D(8);
+        rep(i,8)cin>>D[i];
+
+        quot A(D[2]-D[0],D[3]-D[1]);
+        quot B(D[6]-D[4],D[7]-D[5]);
+
+        if(A==B){
+            cout<<2<<endl;
+            continue;
+        }
+
+        if(A*B==quot(-1,1)||A*B==quot(0,1)){
+            cout<<1<<endl;
+        }
+        else cout<<0<<endl;
+
+    }
+    
+}

@@ -1,0 +1,114 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+template<class T = int>
+struct Edge {
+  int from, to, idx;
+  T cost;
+
+  Edge() = default;
+  Edge(int from, int to, T cost = 1, int idx = -1) : from(from), to(to), cost(cost), idx(idx) {}
+
+  bool operator < (const Edge& e) const { return cost < e.cost; }
+};
+
+template<class T = int>
+struct Graph {
+  vector<vector<Edge<T>>> g;
+  int es;
+
+  Graph() = default;
+  Graph(int n) : g(n), es(0) {}
+
+  size_t size() const { return g.size(); }
+  void add_directed_edge(int from, int to, T cost = 1) {
+    g[from].emplace_back(from, to, cost, es++);
+  }
+  void add_edge(int from, int to, T cost = 1) {
+    g[from].emplace_back(from, to, cost, es++);
+    g[to].emplace_back(to, from, cost, es++);
+  }
+
+  inline vector<Edge<T>> &operator[](const int &k) { return g[k]; }
+  inline const vector<Edge<T>> &operator[](const int &k) const { return g[k]; }
+};
+
+template<class T = int>
+using Edges = vector<Edge<T>>;
+
+
+/*
+  LowLink: 無向グラフの関節点・橋を列挙する構造体
+  作成: O(E+V)
+  関節点の集合: vector<int> aps
+  橋の集合: vector<pair<int,int>> bridges
+*/
+
+
+template<class G>
+struct LowLink {
+  const G& g;
+  vector<int> used, ord, low, aps;
+  vector<pair<int,int>> bridges;
+
+  LowLink(const G& g) : g(g) {
+    used.assign(g.size(), 0);
+    ord.assign(g.size(), 0);
+    low.assign(g.size(), 0);
+
+    int k = 0;
+    for (int i = 0; i < g.size(); ++i) {
+      if (!used[i]) k = dfs(i, k, -1);
+    }
+
+    sort(begin(aps), end(aps));
+    sort(begin(bridges), end(bridges));
+  }
+
+  int dfs(int id, int k, int par) {
+    used[id] = true;
+    ord[id] = k++;
+    low[id] = ord[id];
+    bool is_aps = false;
+    int cnt = 0;
+
+    for (auto& e : g[id]) {
+      if (!used[e.to]) {
+        ++cnt;
+        k = dfs(e.to, k, id);
+        low[id] = min(low[id], low[e.to]);
+
+        if (par != -1 && ord[id] <= low[e.to]) is_aps = true;
+        if (ord[id] < low[e.to]) bridges.emplace_back(min(id, e.to), max(id, e.to));
+      } else if (e.to != par) {
+        low[id] = min(low[id], ord[e.to]);
+      }
+    }
+
+    if (par == -1 && cnt >= 2) is_aps = true;
+    if (is_aps) aps.push_back(id);
+
+    return k;
+  }
+};
+
+int main(void) {
+  int V, E;
+  cin >> V >> E;
+
+  Graph<int> G(V);
+
+  for (int i = 0; i < E; ++i) {
+    int a, b;
+    cin >> a >> b;
+
+    G.add_edge(a, b);
+  }
+
+  LowLink L(G);
+
+  for (auto [a, b] : L.bridges) cout << a << " " << b << endl;
+  return 0;
+}
+

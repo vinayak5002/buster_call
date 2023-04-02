@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include<string.h>
+
+#ifndef Boolean         
+#define Boolean int
+#endif
+
+#ifndef TRUE           
+#define TRUE 1
+#endif
+
+#ifndef FALSE           
+#define FALSE 0
+#endif
+
+struct cards{
+    char suit;
+    int number;
+};
+
+void bubbleSort (struct cards A[], int N) {
+    int i, j;
+    struct cards tmp;
+    for(i = 0; i < N - 1; i++){
+        for (j = N - 1; j >= i + 1; j--){ 
+            if (A[j].number < A[j-1].number) {
+                tmp = A[j];
+                A[j] = A[j-1];
+                A[j-1] = tmp;
+            }
+        }
+    }
+}
+
+void selectionSort (struct cards A[], int N) {
+    int i, j, minj;
+    struct cards tmp;
+    for(i = 0; i < N - 1; i++){
+        minj = i;
+        for (j = i + 1; j < N; j++){ 
+            if (A[j].number < A[minj].number) {
+                minj = j;
+            }
+        }
+        tmp = A[i];
+        A[i] = A[minj];
+        A[minj] = tmp;
+    }
+}
+
+Boolean isStable(struct cards A[], struct cards B[], int N){
+    int i;
+    for(int i=0; i < N; i++){
+        if(A[i].suit != B[i].suit) return (FALSE);
+    }
+}
+
+int main() {
+    struct cards A[36];
+    struct cards B[36];
+    int N , i;
+
+    scanf("%d", &N);
+    for(int i = 0; i < N; i++) scanf("%*c%c%d",&A[i].suit,&A[i].number);
+    for(int i = 0; i < N; i++) B[i] = A[i];
+
+    bubbleSort(A ,N);
+    selectionSort(B, N);
+
+    for(int i = 0; i < N; i++){
+        if(i > 0) printf(" ");
+        printf("%c%d",A[i].suit, A[i].number);
+    }
+    printf("\n");
+    printf("%s\n", "Stable");
+
+    for(int i = 0; i < N; i++){
+        if(i > 0) printf(" ");
+        printf("%c%d",B[i].suit, B[i].number);
+    }
+    printf("\n");
+    if(isStable(A, B, N)){
+        printf("%s\n", "Stable");
+    }else{
+        printf("%s\n", "Not stable");
+    }
+
+    return 0;
+}

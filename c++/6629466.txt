@@ -1,0 +1,73 @@
+#include <iostream>
+#include <string.h> 
+#include <string>
+#include <map>
+#include <queue>
+#include <set>
+using namespace std;
+int a[10];
+struct W{
+	string s;
+	int t;
+};
+map<string,int> ma;
+void solve(){
+	W w;
+	w.s="01234567";
+	w.t=0;
+	set<string> st;
+	st.insert(w.s);
+	ma.insert(make_pair(w.s,w.t));
+	queue<W> q;
+	q.push(w);
+	int pos;
+	while(!q.empty()){
+		W w=q.front();
+		q.pop();
+		pos=w.s.find('0');
+		string t=w.s;
+		W w1;
+		w1.t=w.t+1;
+		w1.s=t;
+		w1.s[pos]=t[(pos+4)%8];
+		w1.s[(pos+4)%8]=t[pos];
+		int size=st.size();
+		st.insert(w1.s);
+		if(st.size()>size){
+			q.push(w1);
+			ma.insert(make_pair(w1.s,w1.t));
+		}
+		if(pos!=0&&pos!=4){
+			w1.s=t;
+			w1.s[pos]=t[pos-1];
+			w1.s[pos-1]=t[pos];
+			size=st.size();
+			st.insert(w1.s);
+			if(st.size()>size){
+				q.push(w1);
+				ma.insert(make_pair(w1.s,w1.t));
+			}
+		}
+		if(pos!=3&&pos!=7){
+			w1.s=t;
+			w1.s[pos]=t[pos+1];
+			w1.s[pos+1]=t[pos];
+			size=st.size();
+			st.insert(w1.s);
+			if(st.size()>size){
+				q.push(w1);
+				ma.insert(make_pair(w1.s,w1.t));
+			}
+		}
+	}
+}
+int main(){
+	solve();
+	while(scanf("%d %d %d %d %d %d %d %d",&a[0],&a[1],&a[2],&a[3],&a[4],&a[5],&a[6],&a[7])!=EOF){
+		char ch[9];
+		sprintf(ch,"%d%d%d%d%d%d%d%d",a[0],a[1],a[2],a[3],a[4],a[5],a[6],a[7]);
+		int ans=ma[ch];
+		printf("%d\n",ans);
+	}
+	return 0;
+}

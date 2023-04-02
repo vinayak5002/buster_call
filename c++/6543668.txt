@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <cmath>
+#include <algorithm>
+#include <cfloat>
+#include <stack>
+#include <queue>
+#include <vector>
+using namespace std ;
+
+
+
+int N = 1;
+int* table;
+
+
+class Range_Minimum_Query{
+public:    
+
+
+void init(int first_N){
+	while(N < first_N)N *= 2;
+}
+
+void update(int loc,int value){
+	loc += N-1;
+
+	table[loc] = value;
+
+	if(N == 1)return;
+
+	int parent = (loc-1)/2;
+
+	while(true){
+		table[parent] = min(table[2*parent+1],table[2*parent+2]);
+
+		if(parent == 0)break;
+		else{
+			parent = (parent-1)/2;
+		}
+	}
+}
+
+
+
+ll query(int search_left,int search_right,int node_id,int node_left,int node_right){
+
+	if(search_right < node_left || search_left > node_right)return NUM;
+
+	if(search_left <= node_left && search_right >= node_right){
+		return table[node_id];
+	}
+
+	int left_min = query(search_left,search_right,2*node_id+1,node_left,(node_left+node_right)/2);
+	int right_min = query(search_left,search_right,2*node_id+2,(node_left+node_right)/2+1,node_right);
+
+	return min(left_min,right_min);
+}
+
+};
+
+Range_Minimum_Query RMQ;
+
+int main(){
+
+	int NN,Q;
+	table = new int[1000000];
+
+	cin>>N>>Q ;
+
+	RMQ.init(first_N);
+
+	rep(i,0,2*N-2)table[i] = INF;
+
+	for(ll i = 0; i < Q; i++){
+		int t,l,r ;
+                cin>>t>>l>>r ;
+
+		if(t == 0){
+			RMQ.update(left,right);
+		}else{
+			C << RMQ.query(l,r,0,0,N-1) << E
+		}
+	}
+
+	re
+}
+

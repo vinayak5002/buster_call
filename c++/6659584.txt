@@ -1,0 +1,109 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100005
+
+struct node{
+  struct node *right;
+  struct node *left;
+  struct node *parent;
+  int key;
+};
+typedef struct node * Node;
+Node root;
+
+void insert(int i){
+  Node y = NULL;
+  Node x = root;
+  Node z;
+
+  z = malloc(sizeof(struct node));
+  z->key = i;
+  z->left = NULL;
+  z->right = NULL;
+
+  while(x != NULL){
+      y = x;
+      if(z->key < x->key){
+          x = x->left;
+      }
+      else{
+          x = x->right;
+      }
+  }
+  
+  z->parent = y;
+  if(y==NULL){
+      root = z;
+  }
+  else{
+      if(z->key < y->key){
+          y->left = z;
+      }
+      else{
+          y->right = z;
+      }
+  }
+}
+
+void preorder(Node i){
+    if(i==NULL){
+        return;
+    }
+    printf(" %d", i->key);
+    preorder(i->left);
+    preorder(i->right);
+}
+
+void inorder(Node i){
+    if(i==NULL){
+        return;
+    }
+    inorder(i->left);
+    printf(" %d", i->key);
+    inorder(i->right);
+}
+
+void find(int n, Node i){
+    if(i==NULL){
+        printf("no\n");
+        return;
+    }
+    if(i->key==n){
+        printf("yes\n");
+        return;
+    }
+    else if(i->key<n){
+        find(n, i->right);
+    }
+    else if(i->key>n){
+        find(n, i->left);
+    }
+
+}
+
+
+
+int main(void){
+    int i, total, self, left, right, num;
+    char com[10];
+    scanf("%d", &total);
+
+    for(i=0; i<total; i++){
+       scanf("%s", com);
+       if ( com[0] == 'i' ){
+           scanf("%d", &num);
+	        insert(num);
+	   }
+       else if(com[0] == 'f'){
+           scanf("%d", &num);
+           find(num, root);
+       }
+       else {
+           inorder(root);
+           printf("\n");
+           preorder(root);
+           printf("\n");
+       }
+    }
+}

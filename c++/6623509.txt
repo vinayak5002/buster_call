@@ -1,0 +1,133 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+ll n;
+vector<ll> G[30];
+ll par[30], sib[30], deg[30], dep[30], hei[30], le[30], ri[30];
+
+void print_lis(ll i){
+    cout << "[";
+    rep(j, 0, G[i].size()){
+        if(j) cout << ", ";
+        cout << G[i][j];
+    }
+    cout << "]" << endl;
+}
+
+ll dfs_hei(ll i, ll par = -1){
+    ll res = 0;
+    rep(j, 0, G[i].size()){
+        if(par != G[i][j]) res = max(res, 1 + dfs_hei(G[i][j], i));
+    }
+    return hei[i] = res;
+}
+
+void dfs_dep(ll i, ll par = -1){
+    rep(j, 0, G[i].size()){
+        if(G[i][j] != par){
+            dep[G[i][j]] = dep[i] + 1;
+            dfs_dep(G[i][j], i);
+        }
+    }
+}
+
+void print(ll i){
+    vector<string> str = {"node ", ": parent = ", ", sibling = ", ", degree = ", ", depth = ", ", height = ", ", "};
+    string tmp;
+    if(par[i] == -1) tmp = "root";
+    else if(G[i].size() == 0) tmp = "leaf";
+    else tmp = "internal node";
+    string res = str[0] + to_string(i) + str[1] + to_string(par[i]) + str[2] + to_string(sib[i]) + str[3] + to_string(deg[i]) + str[4] + to_string(dep[i]) + str[5] + to_string(hei[i]) + str[6] + tmp;
+    cout << res << endl;;
+}
+
+void dfs(ll i, ll par = -1){
+    rep(j, 0, G[i].size()){
+        if(G[i][j] != par){
+            dep[G[i][j]] = dep[i] + 1;
+            dfs(G[i][j] , i);
+        }
+    }
+}
+
+void preorder(ll i){
+    cout << " " << i;
+    if(le[i] != -1) preorder(le[i]);
+    if(ri[i] != -1) preorder(ri[i]);
+}
+
+void inorder(ll i){
+    if(le[i] != -1) inorder(le[i]);
+    cout << " " << i;
+    if(ri[i] != -1) inorder(ri[i]);
+}
+
+void postorder(ll i){
+    if(le[i] != -1) postorder(le[i]);
+    if(ri[i] != -1) postorder(ri[i]);
+    cout << " " << i;
+}
+
+
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll n;
+  cin >> n;
+  rep(i, 0, n){
+      par[i] = sib[i] = le[i] = ri[i] = -1;
+  }
+
+  rep(i, 0, n){
+      ll id, lef, rig;
+      cin >> id >> lef >> rig;
+      if(lef != -1){
+          par[lef] = id;
+          sib[lef] = rig;
+          G[id].push_back(lef);
+          deg[id]++;
+          le[id] = lef;
+      }
+      if(rig != -1){
+          par[rig] = id;
+          sib[rig] = lef;
+          G[id].push_back(rig);
+          deg[id]++;
+          ri[id] = rig;
+      }
+  }
+
+  ll p;
+  rep(i, 0, n) if(par[i] == -1) p = i;
+
+  cout << "Preorder" << endl;
+  preorder(p);
+  cout << endl;
+  cout << "Inorder" << endl;
+  inorder(p);
+  cout << endl;
+  cout << "Postorder" << endl;
+  postorder(p);
+  cout << endl;
+
+
+  return 0;
+}

@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <string.h>
+
+int main()
+{
+    char wrd[101][31];
+    char temp[101];
+    int page[1001];
+    int cnt=0;
+    int cnt2;
+    int temp2=0;
+    int same;
+    for(int j=0;j<1000;j++) page[j]=0;
+    while(scanf("%s%d", wrd[cnt], &page[cnt])!=EOF)
+    {
+        cnt++;
+    }
+    for(int j=1; j<cnt; j++)         /* Char Insertion Sort */
+    {
+        if(strcmp(wrd[j-1], wrd[j]) > 0)
+        {
+            strcpy(temp, wrd[j-1]);
+            strcpy(wrd[j-1], wrd[j]);
+            strcpy(wrd[j], temp);          /* Synchronize page numbers and words */
+            temp2 = page[j-1];
+            page[j-1] = page[j];
+            page[j] = temp2;
+        }
+        for(int k=j; k>0; k--)
+        {
+            if(strcmp(wrd[k-1], wrd[k]) > 0)
+            {
+                strcpy(temp, wrd[k-1]);
+                strcpy(wrd[k-1], wrd[k]);         /* Synchronize page numbers and words */
+                strcpy(wrd[k], temp);
+                temp2 = page[k-1];
+                page[k-1] = page[k];
+                page[k] = temp2;
+            }
+        }
+    }
+    for(int j=0; j<cnt;j=j+same)
+    {
+        cnt2=1;         /* cnt2 counts the number of times the page number is printed */
+        same = 1;
+        while(strcmp(wrd[j], wrd[j+same]) == 0)   /* Check and Count the same word */
+        {
+            cnt2++;
+            same++;
+        }
+        if(same >= 2)
+        {
+            for(int x=0;x<same;x++)
+            {
+                for(int y=j+same;y>0;y--)      /* Rearranging the page number of THE SAME WORD */
+                {
+                    if(page[y-1] > page[y])
+                    {
+                        temp2 = page[y-1];
+                        page[y-1] = page[y];
+                        page[y] = temp2;
+                    }
+                }
+            }
+        }
+        printf("%s\n", wrd[j]);    /* Print the word first, And j=j+same can avoid printing the same word */
+        for(int k=0;k<cnt2;k++)
+        {
+            printf("%d", page[j+k]);
+            if(k != cnt2-1)
+            {
+                printf(" ");
+            }
+            else printf("\n");
+        }
+    }
+    return 0;
+}
+

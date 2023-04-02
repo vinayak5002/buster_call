@@ -1,0 +1,72 @@
+#include <iostream>
+#include <queue>
+#include <cstring>
+using namespace std;
+int dir[4][2] = {{0, -1}, {0, 1}, {-1, 0}, {1, 0}};
+int map[4][4];
+struct node{
+	int map[4][4], last;
+};
+bool isans(int map[4][4]) {
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			if (map[i][j] != (i * 4 + j + 1) % 16) return false;
+		}
+	}
+	return true;
+}
+bool notlast(int l1, int l2) {
+	if (l1 == 1 && l2 == 0 || l1 == 0 && l2 == 1) return false;
+	if (l1 == 2 && l2 == 3 || l1 == 3 && l2 == 2) return false;
+	return true;
+}
+int bfs() {
+	queue<node> q;
+	node t;
+	memcpy(t.map, map, sizeof(t.map));
+	t.last = -1;
+	q.push(t);
+	int steps = 0;
+	while (!q.empty()) {
+		int sz = q.size();
+		for (int i = 0; i < sz; i++) {
+			node cur = q.front();
+			q.pop();
+			if (isans(cur.map)) return steps;
+			int x, y;
+			for (int i = 0; i < 16; i++) {
+				if (cur.map[i / 4][i % 4] == 0) {
+					x = i / 4, y = i % 4;
+					break;
+				}
+			}
+			memcpy(map, cur.map, sizeof(map));
+			int cmap[4][4];
+			memcpy(cmap, map, sizeof(cmap));
+			for (int j = 0; j < 4; j++) {
+				memcpy(map, cmap, sizeof(map));
+				int tx = x + dir[j][0];
+				int ty = y + dir[j][1];
+			    if (tx >= 0 && tx < 4 && ty >= 0 && ty < 4 && notlast(j, cur.last)) {
+			    	swap(map[x][y], map[tx][ty]);
+			    	node t;
+			    	memcpy(t.map, map, sizeof(t.map));
+			    	t.last = j;
+			    	q.push(t);
+				}
+			}
+		}
+		steps++;
+	}
+}
+int main() {
+	for (int i = 0; i < 4; i++) {
+		cin >> map[i][0] >> map[i][1] >> map[i][2]  >> map[i][3];
+	}
+	cout << bfs() << endl;
+	return 0;
+}
+//1 2 3 4
+//6 7 8 0
+//5 10 11 12
+//9 13 14 15

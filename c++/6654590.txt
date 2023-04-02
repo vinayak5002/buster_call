@@ -1,0 +1,95 @@
+#include<stdio.h>
+#define MAX 100001
+#define NIL -1
+
+int parent[MAX], left[MAX], right[MAX]; //親、左の子、右の兄弟の配列
+
+int n, Deep[MAX], H[MAX];//節点の数、深さ、高さの行列
+
+void setDepth(int u, int d){
+	if(u == NIL) return;
+	Deep[u] = d;
+	setDepth(left[u], d+1);//左と右のこは親より深さが１大きい
+	setDepth(right[u], d+1);
+}
+
+int setHeight(int u){
+	int h1=0, h2 = 0;
+	if(left[u] != NIL){
+		h1 = setHeight(left[u]) + 1;
+	}
+	if(right[u] != NIL){
+		h2 = setHeight(right[u]) + 1;
+	}
+	if( h1 > h2 ){//左も右も親から一番深い所まで数えて、大きい方を選ぶという方法
+		return H[u] = h1;
+	}else{ return H[u] = h2;}
+	
+}
+
+int getSibling(int u){
+	if(parent[u] == NIL){
+		return NIL;
+	}
+	if(right[parent[u]] == u && left[parent[u]] != NIL){//親の右ノ子は自分かつ左のこは存在する場合、左のこを返す
+		return left[parent[u]];
+	}
+	if(left[parent[u]] == u && right[parent[u]] != NIL){//親の左ノ子は自分かつ右のこは存在する場合、右のこを返す
+		return right[parent[u]];
+	}
+	return NIL;
+}
+
+void print(int u){
+    int degree = 0;
+
+    printf("node %d: parent = %d, sibling = %d, ", u, parent[u], getSibling(u));
+	if(left[u] != NIL){
+		degree++;
+	}
+	if(right[u] != NIL){
+		degree++;
+	}
+	printf("degree = %d, depth = %d, height = %d, ", degree, Deep[u], H[u]);
+    if(parent[u] == NIL){
+        printf("root\n");
+    }else if(left[u] == NIL && right[u] == NIL){
+        printf("leaf\n");
+    }else{printf("internal node\n");}
+
+}
+
+int main(void){
+    int l, r, v;
+	int root = 0;
+	
+	scanf("%d", &n);
+	
+	for(int i = 0; i < n; i++){
+		parent[i] =NIL;
+	}
+	
+	for(int i = 0; i < n; i++){
+		scanf("%d %d %d", &v, &l, &r);
+		left[v] = l;
+		right[v] = r;
+		if(l != NIL){parent[l] = v;}
+		if(r != NIL){parent[r] = v;}
+	}
+	
+	for(int i = 0; i < n; i++){//親を探す
+		if(parent[i] == NIL){
+			root = i;
+		}
+	}
+	setDepth(root, 0);//親から深さを設定する
+	setHeight(root);
+	
+	for(int i = 0; i < n; i++){
+		print(i);
+	}
+	
+	return 0;
+	
+}
+

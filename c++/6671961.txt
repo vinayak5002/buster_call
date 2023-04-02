@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for(int i=0; i<(n); i++)
+#define INF ((1LL<<62)-(1LL<<31))
+#define all(a)  (a).begin(),(a).end()
+#define rall(a)  (a).rbegin(),(a).rend()
+typedef long long ll;
+typedef pair<ll,ll> pl;
+
+int main() {
+    while(true) {
+        int h;
+        cin >> h;
+        if(h==0) break;
+        vector<vector<int>> v(h,vector<int> (5));
+        rep(i,h) rep(j,5) cin >> v[i][j];
+        int score=0,pre=-1;
+        while(true) {
+            if(score==pre) break;
+            pre=score;
+            for(int i=h-1;i>=0;i--) {
+                int cnt=1,num=-1,ma=0;
+                for(int j=1;j<5;j++) {
+                    if(v[i][j]==v[i][j-1]) cnt++;
+                    else cnt=1;
+                    if(cnt>=3&&v[i][j]>0) {
+                        ma=max(ma,cnt);
+                        num=v[i][j];
+                    }
+                }
+                score+=num*ma;
+                rep(j,5) if(v[i][j]==num) v[i][j]=0;
+            }
+            for(int i=h-1;i>=0;i--) {
+                rep(j,5) {
+                    if(v[i][j]==0) {
+                        for(int k=i-1;k>=0;k--) {
+                            if(v[k][j]!=0) {
+                                swap(v[i][j],v[k][j]);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        cout << score << endl;
+    }
+    return 0;
+}

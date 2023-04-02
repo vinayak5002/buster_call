@@ -1,0 +1,96 @@
+#include <iostream>
+#include <vector>
+
+void insert(std::vector<std::string>& dict, std::string str)
+{
+    bool is_inserted = false;
+
+    for (auto itr = dict.begin() ; itr < dict.end() ; ++itr)
+    {
+        if (str == *itr)
+        {
+            return;
+        }
+        else if (str < *itr)
+        {
+            dict.insert(itr, str);
+            is_inserted = true;
+            break;
+        }
+        else
+        {
+            /* nop */
+        }
+    }
+
+    if (is_inserted == false)
+    {
+        dict.push_back(str);
+    }
+
+    return;
+}
+
+bool find(std::vector<std::string>& dict, std::string key)
+{
+    int left = 0;
+    int right = dict.size();
+    int mid;
+
+    while (left < right)
+    {
+        mid = (left + right) / 2;
+
+        if (dict[mid] == key)
+        {
+            return true;
+        }
+        else if (key < dict[mid])
+        {
+            right = mid;
+        }
+        else
+        {
+            left = mid + 1;
+        }
+    }
+
+    return false;
+}
+
+int main()
+{
+    int n;
+
+    std::cin >> n;
+
+    std::vector<std::string> dict;
+    std::string cmd, str;
+    for (int i = 0 ; i < n ; ++i)
+    {
+        std::cin >> cmd >> str;
+
+        if (cmd == "insert")
+        {
+            insert(dict, str);
+        }
+        else if (cmd == "find")
+        {
+            if (find(dict, str) == true)
+            {
+                std::cout << "yes" << std::endl;
+            }
+            else
+            {
+                std::cout << "no" << std::endl;
+            }
+        }
+        else
+        {
+            /* nop */
+        }
+    }
+
+    return 0;
+}
+

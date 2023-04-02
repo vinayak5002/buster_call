@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void trace(vector<int>& data){
+    for(int i = 0; i < data.size() - 1; i++){
+        cout << data.at(i) << " ";
+    }
+    cout << data.back() << endl;
+}
+
+int SelectionSort(vector<int>& data){
+    int SortCnt = 0;
+    auto begin_itr = data.begin();
+
+    for(auto i = 0; i < data.size(); i++, begin_itr++){
+        int min_index = distance(data.begin(), min_element(begin_itr, data.end()));
+        if( i < min_index){
+            swap(data.at(i), data.at(min_index));
+            SortCnt++;
+        }
+    }
+
+    return SortCnt;
+}
+
+int main(){
+    int MaxNum, SortCnt;
+    cin >> MaxNum;
+
+    vector<int> data(MaxNum);
+    for(auto &value : data){
+        cin >> value;
+    }
+
+    SortCnt = SelectionSort(data);
+    trace(data);
+    cout << SortCnt << endl;
+
+    return 0;
+}

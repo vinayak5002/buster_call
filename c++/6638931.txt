@@ -1,0 +1,66 @@
+#include <iostream>
+using namespace std;
+
+struct process
+{
+    string name;
+    int time;
+};
+
+process queue[100001];
+int q, n, current;
+
+void push_last();
+void exit_task();
+
+int main(int argc, char const *argv[])
+{
+    cin >> n >> q;
+    for (int i = 0; i < n; i++)
+    {
+        process tmp;
+        cin >> tmp.name >> tmp.time;
+        queue[i] = tmp;
+    }
+    
+    while (n > 0)
+    {
+        process first = queue[0];
+        if (first.time > q) {
+            push_last();
+        }
+        else {
+            exit_task();
+        }
+    }
+    
+    return 0;
+}
+
+void push_last()
+{
+    process tmp = queue[0];
+    tmp.time -= q;
+    current += q;
+
+    for (int i = 1; i < n; i++)
+    {
+        queue[i-1] = queue[i];
+    }
+    queue[n-1] = tmp;   
+}
+
+void exit_task() 
+{
+    process tmp = queue[0];
+    current += tmp.time;
+
+    cout << tmp.name << " " << current << endl;
+    
+    for (int i = 1; i < n; i++)
+    {
+        queue[i-1] = queue[i];
+    }
+    n--;
+    
+}

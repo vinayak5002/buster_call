@@ -1,0 +1,67 @@
+import sys
+input = sys.stdin.readline
+def MI(): return map(int, input().split())
+def LI(): return list(map(int, input().split()))
+def LS(): return list(input().rstrip())
+
+class UnionFind:
+    def __init__(self, n):
+        self.n=n
+        self.parent_size=[-1]*n
+
+    def union(self, a, b):
+        x, y=self.find(a), self.find(b)
+        if x == y:
+            return 
+        if abs(self.parent_size[x])<abs(self.parent_size[y]):
+            x, y=y, x
+        self.parent_size[x] += self.parent_size[y] 
+        self.parent_size[y]=x
+        return
+
+    def same(self, a, b):
+        return self.find(a) == self.find(b)
+        
+    def find(self, a):
+        if self.parent_size[a]<0:
+            return a
+        self.parent_size[a]=self.find(self.parent_size[a])
+        return self.parent_size[a]
+
+    def size(self, a):
+        return abs(self.parent_size[self.find(a)])
+
+    def groups(self):
+        result=[[] for _ in range(self.n)]
+        for i in range(self.n):
+            result[self.find(i)].append(i)
+        return [r for r in result if r != []]
+
+def length(a, b):
+    x1, y1, z1, r1 = a
+    x2, y2, z2, r2 = b
+    return ((x1-x2)**2 + (y1-y2)**2 + (z1-z2)**2)**(1/2)
+
+while True:
+    n = int(input())
+    if n == 0:
+        break
+    point = [list(map(float, input().split())) for _ in range(n)]
+    edge = []
+    for i in range(n):
+        for j in range(i+1, n):
+            tmp = max(length(point[i], point[j])-(point[i][3]+point[j][3]), 0)
+            edge.append((tmp, i, j))
+    count = len(edge)
+    edge.sort()
+    uf = UnionFind(n)
+
+    ans = 0
+    for i in range(count):
+        w, s, t = edge[i]
+        if uf.same(s, t):
+            continue
+        ans += w
+        uf.union(s, t)
+
+    print(f'{ans:.03f}')

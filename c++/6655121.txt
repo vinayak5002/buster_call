@@ -1,0 +1,63 @@
+#define quick ios::sync_with_stdio(false), cin.tie(0), cout.tie(0)
+#define rep(i, n) for (int i = 0; i < n; i++)
+#define reps(i, n) for (int i = 1; i <= n; i++)
+#include <bits/stdc++.h>
+using namespace std;
+int maximalRectangle(vector<vector<int>> &matrix)
+{
+    int m = matrix.size();
+    if (m == 0)
+    {
+        return 0;
+    }
+    int n = matrix[0].size();
+    vector<vector<int>> left(m, vector<int>(n, 0));
+
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if (matrix[i][j] == 0)
+            {
+                left[i][j] = (j == 0 ? 0 : left[i][j - 1]) + 1;
+            }
+        }
+    }
+
+    int ret = 0;
+    for (int i = 0; i < m; i++)
+    {
+        for (int j = 0; j < n; j++)
+        {
+            if (matrix[i][j] == 1)
+            {
+                continue;
+            }
+            int width = left[i][j];
+            int area = width;
+            for (int k = i - 1; k >= 0; k--)
+            {
+                width = min(width, left[k][j]);
+                area = max(area, (i - k + 1) * width);
+            }
+            ret = max(ret, area);
+        }
+    }
+    return ret;
+}
+
+int H, W;
+int main()
+{
+    quick;
+    cin >> H >> W;
+    vector<vector<int>> G(H, vector<int>(W));
+    rep(i, H)
+    {
+        rep(j, W)
+        {
+            cin >> G[i][j];
+        }
+    }
+    cout << maximalRectangle(G) << endl;
+}

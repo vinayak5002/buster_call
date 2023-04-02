@@ -1,0 +1,128 @@
+
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef unsigned long long ull;
+#define REP(i, n) for (ll i = 0; i < ll(n); i++)
+#define RREP(i, n) for (ll i = (ll)(n - 1); i >= 0; i--)
+#define REPE(i, l, n) for (ll i = l; i <= ll(n); i++)
+#define RREPE(i, l, n) for (ll i = ll(n); i >= l; i--)
+#define FORA(i, I) for (const auto &i : I)
+#define ALL(v) v.begin(), v.end()
+#define UQ(v) v.erase(unique(ALL(v)), v.end())
+#define ACM(v) accumulate(ALL(v), 0LL)
+#define C cin >>
+#define P(str) cout << str << endl
+#define PLL pair<ll, ll>
+#define PDBL pair<double, double>
+#define TULL tuple<ll, ll, ll>
+#define VPLL vector<PLL>
+#define VLL vector<ll>
+#define VVLL vector<VLL>
+#define VVVLL vector<VVLL>
+#define VDBL vector<double>
+#define DLL deque<ll>
+#define INCANT cin.tie(nullptr), ios::sync_with_stdio(false)
+#define INT(...)     \
+    int __VA_ARGS__; \
+    IN(__VA_ARGS__)
+#define LL(...)     \
+    ll __VA_ARGS__; \
+    IN(__VA_ARGS__)
+#define STR(...)        \
+    string __VA_ARGS__; \
+    IN(__VA_ARGS__)
+#define CHR(...)      \
+    char __VA_ARGS__; \
+    IN(__VA_ARGS__)
+#define DBL(...)        \
+    double __VA_ARGS__; \
+    IN(__VA_ARGS__)
+template <typename T>
+inline bool chmax(T &a, T b) {
+    return ((a < b) ? (a = b, true) : (false));
+}
+template <typename T>
+inline bool chmin(T &a, T b) {
+    return ((a > b) ? (a = b, true) : (false));
+}
+int scan() { return getchar(); }
+void scan(int &a) { cin >> a; }
+void scan(long long &a) { cin >> a; }
+void scan(char &a) { cin >> a; }
+void scan(double &a) { cin >> a; }
+void scan(string &a) { cin >> a; }
+template <class T, class S>
+void scan(pair<T, S> &p) {
+    scan(p.first), scan(p.second);
+}
+template <class T>
+void scan(vector<T> &);
+template <class T>
+void scan(vector<T> &a) {
+    for (auto &i : a) scan(i);
+}
+template <class T>
+void scan(T &a) {
+    cin >> a;
+}
+void IN() {}
+template <class Head, class... Tail>
+void IN(Head &head, Tail &...tail) {
+    scan(head);
+    IN(tail...);
+}
+const long long INF = 1100000000000000000;
+
+class RAQ {
+    ll len = 1LL;
+    VLL seg;
+
+    public:
+    RAQ(ll n) {
+        while (len < n) len = len << 1;
+        seg.resize(len * 2, 0LL);
+    }
+    void add(ll l, ll r, ll x) {
+        l += len;
+        r += len;
+        while(l < r){
+            if(l % 2 == 1){
+                seg[l] += x;
+                ++l;
+            }
+            l /= 2;
+            if(r % 2 == 1){
+                seg[r - 1] += x;
+                --r;
+            }
+            r /= 2;
+        }
+    }
+    ll get(ll idx) { idx += len;
+        ll res = seg[idx];
+        while(1){
+            idx /= 2;
+            if (idx <= 0) break;
+            res += seg[idx];
+        }
+        return res;
+    }
+};
+
+int main() {
+    INCANT;
+    LL(n, q);
+    RAQ tree(n);
+    REP(i, q) {
+        LL(c);
+        if (c == 0) {
+            LL(l, r, x);
+            tree.add(l, r + 1, x);
+        } else {
+            LL(idx);
+            P(tree.get(idx));
+        }
+    }
+}
+

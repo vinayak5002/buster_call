@@ -1,0 +1,72 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <queue>
+#include <array>
+#include <algorithm>
+#include <numeric>
+#include <unordered_map>
+#include <unordered_set>
+#include <map>
+#include <set>
+#include <cassert>
+#include <iterator>
+#include <random>
+
+
+constexpr int MOD = 1'000'000'007;
+int main() {
+	int n; std::cin >> n;
+	std::vector<std::pair<bool, int>> infos(2 * n);
+	for (auto& [in, id] : infos) {
+		char t; std::cin >> t >> id; --id;
+		in = t == 'I';
+	}
+	std::vector<bool> has_in(n, false), has_out(n, false);
+	for (const auto [in, id] : infos) {
+		if (id >= 0) {
+			if (in) {
+				has_in[id] = true;
+			}
+			else {
+				has_out[id] = true;
+			}
+		}
+	}
+	std::vector<long long int> memo(n + 1, 0); memo[0] = 1;
+	int in_rest{ 0 };
+	for (const auto [in, id]: infos) {
+		if (id >= 0 && has_in[id] && has_out[id]) continue;
+		if (in) {
+			++in_rest;
+			if (id == -1) {
+				for (auto i = in_rest; i > 0; --i) {
+					memo[i] = memo[i - 1];
+				}
+				memo[0] = 0;
+			}
+		}
+		else {
+			if (id == -1) {
+				for (auto i = 0; i < in_rest; ++i) {
+					memo[i] = ((i + 1) * memo[i + 1] + (in_rest - i) * memo[i]) % MOD;
+				}
+				memo[in_rest] = 0;
+			}
+			else {
+				for (auto i = 0; i < in_rest; ++i) {
+					memo[i] = (i + 1) * memo[i + 1] % MOD;
+				}
+				memo[in_rest] = 0;
+			}
+			--in_rest;
+		}
+	}
+	auto result = memo[0];
+	int free_count{ 0 };
+	for (auto i = 0; i < n; ++i) {
+		if (has_in[i] || has_out[i]) continue;
+		result = result * ++free_count % MOD;
+	}
+	std::cout << result << '\n';
+}

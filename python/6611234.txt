@@ -1,0 +1,89 @@
+// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_2_D&lang=ja
+
+
+fn join(nums_list: &Vec<u32>, replace: &str) -> String {
+    let nums_list: Vec<String> = nums_list
+        .iter()
+        .map(|x| x.to_string())
+        .collect();
+
+    return nums_list.join(replace);
+}
+
+fn selection_sort(
+    sort_list: &mut Vec<u32>,
+    length: usize,
+    interval: usize,
+) -> u64 {
+    let mut count: u64 = 0;
+
+    for i in interval..length {
+        let min_value = sort_list[i as usize];
+        let mut interval_num = i as isize - interval as isize;
+
+        while interval_num >= 0 && sort_list[interval_num as usize] > min_value {
+            sort_list[interval_num as usize + interval] = sort_list[interval_num as usize];
+            interval_num -= interval as isize;
+            count += 1;
+        }
+
+        sort_list[interval_num as usize + interval] = min_value;
+    }
+
+    count
+}
+
+fn shell_sort(
+    sort_list: &mut Vec<u32>,
+    length: usize,
+) -> (Vec<u32>, u64) {
+    let mut count: u64 = 0;
+
+    let mut intervals: Vec<u32> = Vec::new();
+    let mut h: u32 = 0;
+
+    while !(h > length as u32) {
+        intervals.push(h);
+        h = (h * 3) + 1;
+    }
+
+    for interval in intervals.iter() {
+        count += selection_sort(sort_list, length, *interval as usize);
+    }
+
+    (intervals, count)
+}
+
+fn main() {
+    let mut n = String::new();
+    let mut nums: Vec<u32> = Vec::new();
+
+    std::io::stdin().read_line(&mut n).ok();
+
+    let n: usize = n
+        .trim()
+        .parse()
+        .unwrap();
+
+    for _i in 0..n {
+        let mut num = String::new();
+        std::io::stdin().read_line(&mut num).ok();
+        let num: u32 = num
+            .trim()
+            .parse()
+            .unwrap();
+
+        nums.push(num);
+    }
+
+    let (intervals, cnt) = shell_sort(&mut nums, n);
+
+    println!("{}", intervals.len());
+    println!("{}", join(&intervals, " "));
+    println!("{}", cnt);
+
+    for num in nums.iter() {
+        println!("{}", num);
+    }
+}
+

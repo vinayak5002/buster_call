@@ -1,0 +1,44 @@
+class Dice:
+    def __init__(
+        self,
+        initial_face
+    ):
+        (top_face, south_face, east_face, west_face, north_face, bottom_face) = initial_face
+        self.top_face = top_face
+        self.bottom_face = bottom_face
+        self.south_face = south_face
+        self.east_face = east_face
+        self.west_face = west_face
+        self.north_face = north_face
+    def N(self):
+        (self.top_face,self.bottom_face,self.south_face,self.north_face) = (self.south_face, self.north_face, self.bottom_face, self.top_face)
+    def W(self):
+        (self.top_face, self.west_face, self.east_face, self.bottom_face) = (self.east_face, self.top_face, self.bottom_face, self.west_face)
+    def E(self):
+        (self.top_face, self.west_face, self.east_face, self.bottom_face) = (self.west_face, self.bottom_face, self.top_face, self.east_face)
+    def S(self):
+        (self.top_face,self.bottom_face,self.south_face,self.north_face) = (self.north_face, self.south_face, self.top_face, self.bottom_face)
+
+dice1 = Dice([int(i) for i in input().split()])
+order_num = int(input())
+order = list()
+for i in range(order_num):
+    order.append([int(j) for j in input().split()])
+# 天面に来るべき数字がW,Eにあるか？あれば天面にくるまで操作"W"(or "E")を繰り返す。
+# W,Eになければ、天面にくるまで操作"N"(or "S")を繰り返す
+for i in range(order_num):
+    if order[i][1] == dice1.south_face:
+        while dice1.top_face != order[i][0]:
+            dice1.W()
+    elif order[i][1] == dice1.north_face:
+        dice1.S()
+        dice1.S()
+        while dice1.top_face != order[i][0]:
+            dice1.W()
+    else:
+        while dice1.top_face != order[i][1]:
+            dice1.W()
+        dice1.S()
+        while dice1.top_face != order[i][0]:
+            dice1.W()
+    print(dice1.east_face)

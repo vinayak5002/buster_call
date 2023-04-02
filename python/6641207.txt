@@ -1,0 +1,51 @@
+using System;
+using System.Linq;
+using System.Collections.Generic;
+
+internal class Program
+{
+    static void Main()
+    {
+        while (true)
+        {
+            int n = int.Parse(Console.ReadLine());
+            int m = int.Parse(Console.ReadLine());
+            if (n == 0 && m == 0)
+            {
+                break;
+            }
+            List<List<int>> graph = new List<List<int>>();
+            for(int i = 0; i < n; ++i)
+            {
+                graph.Add(new List<int>());
+            }
+
+            for(int i = 0; i < m; ++i)
+            {
+                int[] xs = Console.ReadLine().Split().Select(int.Parse).ToArray();
+                xs[0] -= 1;
+                xs[1] -= 1;
+                graph[xs[0]].Add(xs[1]);
+                graph[xs[1]].Add(xs[0]);
+            }
+
+            List<bool> visited = new List<bool>();
+            for(int i = 0; i < n; ++i)
+            {
+                visited.Add(false);
+            }
+            foreach(int i in graph[0])
+            {
+                visited[i] = true;
+                foreach(int k in graph[i])
+                {
+                    visited[k] = true;
+                }
+            }
+            visited[0] = false;
+            int res = visited.Where(x => x).Count();
+            Console.WriteLine(res);
+        }
+    }
+}
+

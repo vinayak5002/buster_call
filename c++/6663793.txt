@@ -1,0 +1,54 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <string>
+#include <deque>
+using namespace std;
+
+typedef pair<int, int> Pii;
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	string str;
+	deque<Pii> answer;
+	deque<int> s;
+	int sum_area = 0;
+
+	cin >> str;
+	for (int i = 0; i < str.size(); i++) {
+		if (str.at(i) == '\\') {
+			s.push_back(i);
+		}
+		else if (str.at(i) == '/' && !s.empty()) {
+			int sp = s.back();
+			int area = i - sp;
+
+			s.pop_back();
+			while (!answer.empty() && sp <= answer.back().first) {
+				area += answer.back().second;
+				answer.pop_back();
+			}
+			answer.push_back(Pii(sp, area));
+		}
+	}
+
+	for (int i = 0; i < answer.size(); i++) {
+		sum_area += answer[i].second;
+	}
+
+	cout << sum_area << endl;
+	cout << answer.size();
+	for (int i = 0; i < answer.size(); i++) {
+		cout << " " << answer[i].second;
+	}
+	cout << endl;
+	return 0;
+}

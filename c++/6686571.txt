@@ -1,0 +1,210 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <ctime>
+using namespace std;
+
+struct Node {
+	int id;
+	int key;
+	Node* left, * right, *parent;
+};
+
+Node* root = NULL;
+Node* NIL = NULL;
+
+void insert(Node* z)
+{
+	Node* y = NIL;
+	Node* x = root;
+
+	while (x != NIL)
+	{
+		y = x;
+		if (z->key < x->key)
+			x = x->left;
+		else
+			x = x->right;
+	}
+	z->parent = y;
+
+	if (y == NIL) {
+		root = z;
+	}
+	else if (z->key < y->key) {
+		y->left = z;
+	}
+	else if (z->key > y->key) {
+		y->right = z;
+	}
+}
+
+void print_InOrder(Node * node) {
+	if (node == NIL) {
+		return;
+	}
+	print_InOrder(node->left);
+	cout << " " << node->key;
+	print_InOrder(node->right);
+}
+
+void print_PreOrder(Node* node) {
+	if (node == NIL) {
+		return;
+	}
+	cout << " " << node->key;
+	print_PreOrder(node->left);
+	print_PreOrder(node->right);
+}
+
+bool find_key(Node * root, int key) {
+	Node* node = root;
+	while (node != NIL) {
+		if (node->key == key) {
+			return true;
+		}
+		else {
+			if (key < node->key) {
+				node = node->left;
+			}
+			else {
+				node = node->right;
+			}
+		}
+	}
+	return false;
+}
+
+void reconst(Node* node) {
+	while (1) {
+		if (node->left == NIL && node->right == NIL) {
+			if (node->parent->left == node) {
+				node->parent->left = NIL;
+				delete node;
+			}
+			else {
+				node->parent->right = NIL;
+				delete node;
+			}
+			return;
+		}
+		else if (node->left != NIL && node->right == NIL) {
+			if (node->parent->left == node) {
+				node->parent->left = node->left;
+				node->left->parent = node->parent;
+				delete node;
+			}
+			else {
+				node->parent->right = node->left;
+				node->left->parent = node->parent;
+				delete node;
+			}
+			return;
+		}
+		else if (node->left == NIL && node->right != NIL) {
+			if (node->parent->left == node) {
+				node->parent->left = node->right;
+				node->right->parent = node->parent;
+				delete node;
+			}
+			else {
+				node->parent->right = node->right;
+				node->right->parent = node->parent;
+				delete node;
+			}
+			return;
+		}
+		else {
+			Node* firstInOrderNode = node;
+			while (firstInOrderNode->left == NIL)firstInOrderNode = firstInOrderNode->left;
+			node->key = firstInOrderNode->key;
+			node = firstInOrderNode;
+		}
+	}
+	
+}
+
+void deleteNode(int key)
+{
+	Node* node = root;
+	// find key node
+	while (node != NIL) {
+		if (node->key == key) {
+			break;
+		}
+		else {
+			if (key < node->key) {
+				node = node->left;
+			}
+			else {
+				node = node->right;
+			}
+		}
+	}
+	// cannot find key node
+	if (node == NIL) {
+		return;
+	}
+	reconst(node);
+	
+
+}
+
+int main() {
+	int n;
+	cin >> n;
+	string cmd;
+	int param;
+	Node* add;
+
+	
+
+	// 何かの処理
+
+	
+
+	
+
+
+	for (int i = 0; i < n; i++) {
+		cin >> cmd;
+		if (cmd == "insert") {
+
+			cin >> param;
+			add = new Node();
+			add->key = param;
+			add->left = NIL;
+			add->right = NIL;
+			insert(add);
+
+		}
+		else if (cmd == "print") {
+
+			print_InOrder(root);
+			cout << endl;
+			print_PreOrder(root);
+			cout << endl;
+
+		}
+		else if (cmd == "find") {
+
+			cin >> param;
+			if (find_key(root, param)) {
+				cout << "yes" << endl;
+			}
+			else {
+				cout << "no" << endl;
+			}
+
+		}
+		else if (cmd == "delete") {
+
+			cin >> param;
+			deleteNode(param);
+
+		}
+	}
+
+
+	return 0;
+}

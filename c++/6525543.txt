@@ -1,0 +1,198 @@
+#include <bits/stdc++.h>
+
+#include <iostream>
+#include <string>
+using namespace std;
+
+int ctoi(char a) {
+    return a - '0';
+}
+
+#define rep(i, from, to) for (int i = from; i <= (int)(to); i++)
+
+typedef long long ll;
+typedef pair<ll, ll> P;
+
+int counter = 0;
+
+
+template <typename T>
+class LazySegmentTree {
+
+  private:
+    int n_leafs;
+    int n_data;
+    int n_nodes;
+    T inf = 0x7FFFFFFFFFFFFFFF;
+    vector<T> nodes;
+    vector<T> lazys;
+    vector<bool> lazys_flag;
+
+    //
+    T comparator(T one, T two) {
+        return min(one, two);
+    }
+
+
+  public:
+    // 1-indexed
+    // array: {-1, a1, a2, a3, a4, .., an};
+    LazySegmentTree(vector<T> &array, T worst_val) {
+
+        n_data = array.size();
+        inf = worst_val;
+
+        // 完全２部木のため、葉は2のべき乗数
+        n_leafs = 1;
+        while (n_data > n_leafs) {
+            n_leafs *= 2;
+        }
+
+        n_nodes = n_leafs * 2 - 1;
+
+        nodes.resize(n_nodes + 1, inf);
+        lazys.resize(n_nodes + 1, inf);
+        lazys_flag.resize(n_nodes + 1);
+
+        for (int i = 1; i < n_data; i++) {
+            nodes[n_leafs + i - 1] = array[i];
+        }
+        for (int i = n_leafs - 1; i >= 1; i--) {
+            nodes[i] = comparator(nodes[2 * i], nodes[2 * i + 1]);
+        }
+    }
+
+
+    void __update(int from, int to, T val, int idx, int l, int r) {
+        // cout << "start: " << from << " " << to << " " << val << " " << idx << " " << l << " " << r << endl;
+
+        // 遅延情報を更新する。
+        eval(idx);
+
+        // 全く重なっていない場合、何もしない。
+        if (from > r || to < l) {
+            return;
+        }
+
+        // 完全に覆いかぶさっている場合
+        if ((from <= l) && (r <= to)) {
+            lazys[idx] = val;
+            lazys_flag[idx] = true;
+            eval(idx);  // このタイミングで遅延情報がnodeに保存される。
+        } else {
+            __update(from, to, val, 2 * idx, l, (l + r) / 2);
+            __update(from, to, val, 2 * idx + 1, (r + l) / 2 + 1, r);
+            nodes[idx] = comparator(nodes[2 * idx], nodes[2 * idx + 1]);
+        }
+    }
+
+    // [from, to]のノードに対して値valを追加するする。
+    void update(int from, int to, T val) {
+        __update(from, to, val, 1, 1, n_leafs);
+    }
+
+    // k番目のノードに関して、遅延評価を行う。
+    void eval(int k) {
+
+        if (!lazys_flag[k]) return;
+
+        if (!__is_leaf_node(k)) {
+            if (lazys_flag[k]) {
+                lazys[2 * k] = lazys[2 * k + 1] = lazys[k];
+                lazys_flag[2 * k] = lazys_flag[2 * k + 1] = true;
+            }
+        }
+        nodes[k] = lazys[k];
+        lazys[k] = inf;
+        lazys_flag[k] = false;
+    }
+
+    // 引数で指定した番号のノードが葉であるか否か
+    //
+    // arg:
+    //    int k: ノード番号
+    //  return:
+    //      True: 葉ノード
+    //      False: 　葉ノードでない。
+    bool __is_leaf_node(int k) {
+        return (n_leafs <= k) && (2 * n_leafs - 1 >= k);
+    }
+
+    // [from, to]間で最適のものを抽出する。
+    T query(int from, int to) {
+        return __query(from, to, 1, 1, n_leafs);
+    }
+
+
+    T __query(int from, int to, int idx, int a, int b) {
+        // 全く重なっていない場合
+        if (from > b || to < a) {
+            return inf;
+        }
+        eval(idx);
+
+        // 完全に覆いかぶさっている場合
+        if ((from < a) && (b < to)) {
+            return nodes[idx];
+        }
+
+        if (a == b) {
+            return nodes[idx];
+        }
+
+        ll vl = __query(from, to, idx * 2, a, (a + b) / 2);
+        ll vr = __query(from, to, idx * 2 + 1, (a + b) / 2 + 1, b);
+        return comparator(vl, vr);
+    }
+
+    void display_nodes() {
+        for (auto s : nodes) {
+            cout << s << " ";
+        }
+        cout << endl;
+    }
+    void display_lazys() {
+        for (auto s : lazys) {
+            cout << s << " ";
+        }
+        cout << endl;
+    }
+};
+
+
+int main() {
+
+    int n, q;
+
+    cin >> n >> q;
+
+
+    ll inf = (1ll << 31) - 1ll;
+
+    vector<ll> arr(n + 1, inf);
+    LazySegmentTree rmq(arr, inf);
+
+    rep(i, 1, q) {
+        ll com, x, y, z;
+        cin >> com;
+
+        if (com == 0) {
+            cin >> x >> y >> z;
+            x++;
+            y++;
+
+            rmq.update(x, y, z);
+            // cout << "-------------------------" << endl;
+            // rmq.display_nodes();
+            // rmq.display_lazys();
+        } else {
+            cin >> x >> y;
+            x++;
+            y++;
+            cout << rmq.query(x, y) << endl;
+        }
+    }
+
+    // cerr << "as";
+    return 0;
+}

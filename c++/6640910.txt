@@ -1,0 +1,122 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+#define all(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+bool chmax(ll& p, ll q) {
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+bool chmin(ll& p, ll q) {
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+ll sti(string S) {
+    ll res = 0;
+    rep(i, S.size()) {
+        res += S[i] - '0';
+        res *= 10;
+    }
+    return res / 10;
+}
+
+string ist(ll n, ll L = -1) {
+    string res = "";
+    if (L >= 0)rep(l, L)res += '0';
+    ll p = L - 1;
+    if (L != -1)while (n > 0) {
+        res[p] = char(n % 10 + '0');
+        p--;
+        n /= 10;
+    }
+    else {
+        while (n > 0) {
+            res.push_back(char(n % 10 + '0'));
+            p--;
+            n /= 10;
+        }
+        reverse(all(res));
+    }
+    return res;
+}
+
+ll gcd(ll(a), ll(b)) {
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+map<vll,ll> MA;
+vector<ll> DP;
+vector<string> S;
+ll M,N;
+ll dfs(vll D){
+    ll n=D.size();
+    if(n<=1)return 0;
+    ll res=1e18;
+    rep(m,M){
+        vll P,Q;
+        rep(i,n){
+            if(S[D[i]][m]=='1'){
+                P.push_back(D[i]);
+            }
+            else{
+                Q.push_back(D[i]);
+            }
+        }
+        if(P.size()==0||Q.size()==0){
+            continue;
+        }
+        if(!MA.count(P))MA[P]=dfs(P);
+        if(!MA.count(Q))MA[Q]=dfs(Q);
+        chmin(res,max(MA[P],MA[Q]));
+    }
+    return res+1;
+}
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    while (1) {
+        
+        cin>>M>>N;
+        if(M==0&&N==0)return 0;
+
+        ll an=10000;
+        S.resize(N);
+        rep(i,N)cin>>S[i];
+        DP.assign(N,1e18);
+
+        vll D(N);
+        rep(i,N)D[i]=i;
+        MA.clear();
+        cout<<dfs(D)<<endl;
+
+    }
+
+}

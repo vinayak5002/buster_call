@@ -1,0 +1,28 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+bool f(const vector<pair<int, int>>& XY, int V, int D, int M)
+{
+	for (int i = 0, j = 0, X = -1; j < (int) XY.size(); ++j) {
+		if (XY[j].second < V) continue;
+		if (X >= 0 && XY[j].first - X < D) continue;
+		X = XY[j].first;
+		if (++i >= M) return true;
+	}
+	return false;
+}
+
+int main()
+{
+	int N, M, D, V = 0; cin >> N >> M >> D;
+	vector<pair<int, int>> XV(N); for (auto& [X, V] : XV) cin >> X >> V;
+	sort(XV.begin(), XV.end());
+	for (int d = 1 << 29; d > 0; d /= 2) if (f(XV, V + d, D, M)) V += d;
+	cout << (V == 0 ? -1 : V) << endl;
+
+	return 0;
+}
+

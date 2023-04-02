@@ -1,0 +1,68 @@
+#include <iostream>
+#include <vector>
+#include <list>
+#include <stack>
+using namespace std;
+
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+    string s;
+    cin >> s;
+    int n = 1, tmp = 0;
+    int cnt = 0;
+    vector<int> ls;
+    stack<int> stk;
+    stack<pair<int, int>> stk2;
+    for(int i = 0; i<s.size(); i++)
+    {
+        if(s[i]=='\\')
+        {
+            stk.push(n++);
+        }
+        else if(s[i]=='_')
+        {
+            n++;
+        }
+        else
+        {
+            if(!stk.empty())
+            {
+                cnt += n - stk.top();
+                int tmp = stk.top();
+                stk.pop();
+                int a = n-tmp;
+                n++;
+                while(!stk2.empty() && stk2.top().first > tmp)
+                {
+                    a += stk2.top().second;
+                    stk2.pop();
+                }
+                stk2.emplace(tmp, a);
+            }
+            else
+            {
+                continue;
+            }
+        }
+    }
+    cout << cnt <<endl;
+
+
+    while(!stk2.empty())
+    {
+        ls.push_back(stk2.top().second);
+        stk2.pop();
+    }
+
+    cout << ls.size();
+    for(int i= ls.size()-1; i> -1;i--)
+    {
+        cout << " " << ls[i];
+    }
+    cout << endl;
+    return 0;
+}
+

@@ -1,0 +1,66 @@
+#include<stdio.h>
+
+void diceS(int x[])
+{
+    int w = x[0];
+    x[0] = x[4];
+    x[4] = x[5];
+    x[5] = x[1];
+    x[1] = w;
+}
+
+void diceNES(int x[])
+{
+    int w = x[1];
+    x[1] = x[3];
+    x[3] = x[4];
+    x[4] = x[2];
+    x[2] = w;
+}
+
+void check(const int a[], const int b[])
+{
+    int one;
+    int second[6];
+    for(one=0;one<6;one++){
+        second[one] = b[one];
+    }
+    for(one=0;one<4;one++){
+        int three;
+        for(three=0;three<6;three++){
+            if(a[three]!=second[three]){
+                break;
+            }
+            if(three>=6){
+                printf("Yes");
+                exit(0);
+            }
+            diceNES(second);
+        }
+    }
+}
+
+int main(void){
+    int dice1[6],dice2[6];
+    int c;
+    for(c=0;c<6;c++){
+        scanf("%d", &dice1[c]);
+    }
+    for(c=0;c<6;c++){
+        scanf("%d", &dice2[c]);
+    }
+    check(dice1,dice2);
+    for(c=0;c<4;c++){
+        diceNES(dice2);
+        diceS(dice2);
+        check(dice1,dice2);
+        diceS(dice2);
+        diceS(dice2);
+        diceS(dice2);
+    }
+    diceS(dice2);
+    diceS(dice2);
+    check(dice1,dice2);
+    printf("No");
+    return 0;
+}

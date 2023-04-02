@@ -1,0 +1,79 @@
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <vector>
+
+using namespace std;
+using Int = int_fast64_t;
+const Int BASE = (Int) 1e9, OFFSET = BASE * 4;
+
+int conv(const string& S, int s, int e)
+{
+	return s >= e ? 0 : conv(S, s, e - 1) * 10 + S[e - 1] - '0';
+}
+
+pair<bool, vector<int>> in()
+{
+	string S; cin >> S;
+	vector<int> R;
+	int n, s = S[0] == '-' ? 1 : 0;
+	for (n = (int) S.size() - 9; n >= s; n -= 9) R.push_back(conv(S, n, n + 9));
+	R.push_back(conv(S, s, n + 9));
+	if (R.back() == 0) R.pop_back();
+	return {S[0] == '-', R};
+}
+
+vector<int> add(const vector<int>& A, const vector<int>& B)
+{
+	Int c = 0;
+	vector<int> C;
+	for (int n = 0, a = A.size(), b = B.size(), N = max(a, b); n < N; ++n) {
+		if (n < a) c += A[n];
+		if (n < b) c += B[n];
+		C.push_back(c % BASE); c /= BASE;
+	}
+	C.push_back((int) c);
+	return C;
+}
+
+pair<bool, vector<int>> sub(const vector<int>& A, const vector<int>& B)
+{
+	Int c1 = 0, c2 = 0;
+	vector<int> C1, C2;
+	for (int n = 0, a = A.size(), b = B.size(), N = max(a, b); n < N; ++n) {
+		if (n < a) {c1 += A[n]; c2 -= A[n];}
+		if (n < b) {c1 -= B[n]; c2 += B[n];}
+		C1.push_back((c1 + OFFSET) % BASE); c1 = (c1 - C1.back()) / BASE;
+		C2.push_back((c2 + OFFSET) % BASE); c2 = (c2 - C2.back()) / BASE;
+	}
+	if (c1 < 0) {
+		C2.push_back((int) c2);
+		return {true, C2};
+	}
+	C1.push_back((int) c1);
+	return {false, C1};
+}
+
+void p(bool is_minus, vector<int> C)
+{
+	while (!C.empty() && C.back() == 0) C.pop_back();
+	if (C.empty()) cout << 0 << endl; else {
+		if (is_minus) cout << '-';
+		auto p = C.crbegin();
+		cout << *p;
+		for (++p; p != C.crend(); ++p) cout << setw(9) << setfill('0') << *p;
+		cout << endl;
+	}
+}
+
+int main()
+{
+	auto [a, A] = in();
+	auto [b, B] = in();
+	if (a != b) p(a, add(A, B)); else {
+		auto [c, C] = sub(A, B);
+		p(a != c, C);
+	}
+	return 0;
+}
+

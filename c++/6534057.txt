@@ -1,0 +1,91 @@
+#include<bits/stdc++.h>
+using namespace::std;
+
+const int N = 10;
+const int M = 64;
+
+unsigned long long flag;
+unsigned long long pot[M];
+unsigned long long mask[N];
+
+int is_set(int x){
+	return (flag & pot[x]) > 0;
+}
+
+int all(int x){
+	return (flag & mask[x]) == mask[x];
+}
+
+int any(int x){
+	return (flag & mask[x]) > 0;
+}
+
+int none(int x){
+	return (flag & mask[x]) == 0;
+}
+
+void set_up(int x){
+	flag |= mask[x];
+}
+
+void flip(int x){
+	flag ^= mask[x];
+}
+
+int cnt(int x){
+	int res = 0;
+	unsigned long long r = flag & mask[x];
+	while(r > 0){
+		res++;
+		r &= r - 1;
+	}
+	return res;
+}
+
+void clear(int x){
+	flag &= ~mask[x];
+}
+
+int main(){
+	int n;
+	pot[0] = 1;
+	for(int i = 1; i < M; i++) pot[i] = pot[i - 1] << 1;
+	scanf("%d", &n);
+	for(int i = 0; i < n; i++){
+		int len;
+		scanf("%d", &len);
+		for(int j = 0; j < len; j++){
+			int x;
+			scanf("%d", &x);
+			mask[i] |= pot[x];
+		}
+	}
+	int q;
+	int op, x;
+	scanf("%d", &q);
+	while(q--){
+		scanf("%d %d", &op, &x);
+		switch(op){
+			int i;
+			case 0: printf("%c\n", '0' + is_set(x));
+				break;
+			case 1: set_up(x);
+				break;
+			case 2: clear(x);
+				break;
+			case 3: flip(x);
+				break;
+			case 4: printf("%c\n", '0' + all(x));
+				break;
+			case 5: printf("%c\n", '0' + any(x));
+				break;
+			case 6: printf("%c\n", '0' + none(x));
+				break;
+			case 7: printf("%d\n", cnt(x));
+				break;
+			case 8: printf("%llu\n", flag & mask[x]);
+				break;
+		}
+	}
+	return 0;
+}

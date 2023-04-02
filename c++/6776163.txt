@@ -1,0 +1,105 @@
+#include <bits/stdc++.h>
+using namespace std;
+#ifdef tabr
+#include "library/debug.cpp"
+#else
+#define debug(...)
+#endif
+
+const long double eps = 1e-12L;
+const long double pi = acosl(-1);
+
+template <typename T>
+struct Tpoint {
+    T x;
+    T y;
+    Tpoint(T _x = 0, T _y = 0) : x(_x), y(_y) {}
+    Tpoint &operator+=(Tpoint other) {
+        x += other.x;
+        y += other.y;
+        return *this;
+    }
+    Tpoint &operator-=(Tpoint other) {
+        x -= other.x;
+        y -= other.y;
+        return *this;
+    }
+    Tpoint &operator*=(T other) {
+        x *= other;
+        y *= other;
+        return *this;
+    }
+    Tpoint &operator/=(T other) {
+        x /= other;
+        y /= other;
+        return *this;
+    }
+    Tpoint operator-() { return Tpoint(*this) *= -1; }
+    Tpoint operator+(Tpoint rhs) { return Tpoint(*this) += rhs; }
+    Tpoint operator-(Tpoint rhs) { return Tpoint(*this) -= rhs; }
+    Tpoint operator*(T rhs) { return Tpoint(*this) *= rhs; }
+    Tpoint operator/(T rhs) { return Tpoint(*this) /= rhs; }
+    bool operator==(Tpoint rhs) { return (abs(x - rhs.x) < eps && abs(y - rhs.y) < eps); }
+    bool operator!=(Tpoint rhs) { return (abs(x - rhs.x) > eps || abs(y - rhs.y) > eps); }
+};
+// template <typename T>
+// bool operator<(Tpoint<T> a, Tpoint<T> b) {
+//     return (abs(a.x - b.x) < eps ? a.y < b.y : a.x < b.x);
+//     return (atan2l(a.y, a.x) < atan2l(b.y, b.x));
+// }
+template <typename T>
+string to_string(Tpoint<T> a) {
+    return "(" + to_string(a.x) + ", " + to_string(a.y) + ")";
+}
+template <typename T>
+T dot(Tpoint<T> a, Tpoint<T> b) {
+    return a.x * b.x + a.y * b.y;
+}
+template <typename T>
+T cross(Tpoint<T> a, Tpoint<T> b) {
+    return a.x * b.y - a.y * b.x;
+}
+template <typename T>
+T dist2(Tpoint<T> a, Tpoint<T> b) {
+    return dot(a - b, a - b);
+}
+template <typename T>
+long double dist(Tpoint<T> a, Tpoint<T> b) {
+    return sqrtl(dist2(a, b));
+}
+template <typename T>
+long double norm(Tpoint<T> a) {
+    return sqrtl(dot(a, a));
+}
+template <typename T>
+long double arg(Tpoint<T> a) {
+    return atan2l(a.y, a.x);
+}
+
+// using point = Tpoint<long long>;
+using point = Tpoint<long double>;
+
+point projection(point p, point a, point b) {
+    return a + (b - a) * dot(p - a, b - a) / dist2(a, b);
+}
+
+point reflection(point p, point a, point b) {
+    return projection(p, a, b) * 2 - p;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    point p1, p2;
+    cin >> p1.x >> p1.y >> p2.x >> p2.y;
+    int q;
+    cin >> q;
+    cout << fixed << setprecision(12);
+    while (q--) {
+        point r;
+        cin >> r.x >> r.y;
+        point res = reflection(r, p1, p2);
+        cout << res.x << " " << res.y << '\n';
+    }
+    return 0;
+}

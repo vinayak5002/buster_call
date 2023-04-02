@@ -1,0 +1,66 @@
+class Node:
+    def __init__(self):#コンストラクタ
+        self.parent = -1
+        self.left = -1
+        self.right = -1
+        self.sibling = -1
+        self.degree = 0
+
+def Maxamount(lh, rh):#2変数の最大値を求める
+    if(lh >= rh):
+        maxheight=lh
+    else:
+        maxheight=rh
+    return maxheight
+
+def height(node):#高さを調べる
+    lh = 0
+    rh=0
+    if tree[node].left !=-1:
+        lh=1+height(tree[node].left)
+    if tree[node].right !=-1:
+        rh=1+height(tree[node].right)
+    tree[node].height = Maxamount(lh, rh)
+
+
+def depth(node, d=0):#深さ探索
+    tree[node].depth = d
+    if tree[node].left !=-1:
+        depth(tree[node].left, d+1)
+    if tree[node].right !=-1:
+        depth(tree[node].right, d+1)
+    return d
+
+N = int(input())
+tree = [Node() for i in range(N)]#ノードを格納したN個の配列を作る
+
+#木を作る
+for i in range(N):
+    #id, 子供の数k, c_0~c_k
+    treeinf = list(map(int, input().split()))#文字列を入力しint型に変換してから配列を作る
+    node = treeinf[0]
+    left = treeinf[1]
+    right = treeinf[2]
+    if i==0:
+        tree[node].type="root"
+
+
+    if left == -1 and right ==-1:#子供なし
+        tree[node].type = "leaf"
+    else:#子供あり
+        tree[node].degree = 2
+        tree[node].type = "internal node"
+        tree[left].sibling=right
+        tree[right].sibling=left
+        
+        
+    
+tree[node].depth=depth(node)
+tree[node].height=height(node)
+#根の探索
+
+
+
+#要素と番号の出力
+for i, t in enumerate(tree):
+    print("node {}: parent = {}, sibling = {}, degree = {}, depth = {}, height = {}, {}".format(i, t.parent, t.sibling, t.degree, t.depth, t.height, t.type))

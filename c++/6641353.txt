@@ -1,0 +1,81 @@
+#include<bits/stdc++.h>
+using namespace std;
+// P[a]は点aの親を記憶する
+int P[110];
+// 最初はバラバラ、つまり全て根
+void initP(int n)
+{
+	for (int a = 0; a < n; a++)
+		P[a] = a;
+}
+// 特定の点の根を返す
+int Root(int vertex)
+{
+	// 再帰的に根まで到達
+	if (vertex == P[vertex])
+		return vertex;
+	return Root(P[vertex]);
+}
+// 2点が同じ根を持つかを返す
+bool isSame_set(int a, int b)
+{
+	return Root(a) == Root(b);
+}
+// 2点の連結
+void unite(int a, int b)
+{
+	// 点bの根を点aの根の子にする
+	P[Root(b)] = Root(a);
+}
+// n*n行列の一時記憶先
+int nxn[110][110];
+// (重み,始点,終点)のtuple
+tuple<int, int, int>ValueNodes[10000];
+int main()
+{
+	int n;
+	cin >> n;
+	for (int a = 0; a < n; a++)
+	{
+		for (int b = 0; b < n; b++)
+			cin >> nxn[a][b];
+	}
+	int NodeCnt = 0;
+	for (int a = 0; a < n - 1; a++)
+	{
+		for (int b = a + 1; b < n; b++)
+		{
+			if (nxn[a][b] == -1)
+				continue;
+			ValueNodes[NodeCnt] = make_tuple(nxn[a][b], a, b);
+			NodeCnt++;
+		}
+	}
+	// 辺の重み昇順ソート
+	sort(&ValueNodes[0], &ValueNodes[NodeCnt]);
+	// UnionFindTree初期化
+	initP(n);
+	int ans = 0;
+	// nodes = n - 1で終了
+	int nodes = 0;
+	// ValueNodesをどこまで見たのか記憶するindex
+	int index = 0;
+	// n点連結させるのに必要なn-1本の辺を決める
+	while (nodes < n - 1)
+	{
+		int value, first, last;
+		value = get<0>(ValueNodes[index]);
+		first = get<1>(ValueNodes[index]);
+		last = get<2>(ValueNodes[index]);
+		if (isSame_set(first, last))
+		{
+			index++;
+			continue;
+		}
+		unite(first, last);
+		nodes++;
+		index++;
+		ans += value;
+	}
+	cout << ans << endl;
+}

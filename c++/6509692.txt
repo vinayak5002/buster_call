@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define LEN 100005
+
+typedef struct pp{
+  char name[100];
+  int t;
+}P;
+
+P Q[LEN+1];
+int head, tail, n;
+
+void initialize()
+{
+	head = tail =0;
+}
+
+int isEmpty()
+{
+	return head == tail;
+}
+
+int isFull()
+{
+	return head == (tail+1) % LEN;
+}
+void enqueue(P x)
+{
+	if(isFull()==1)
+	{
+		exit(1);
+	}
+	Q[tail] = x;
+	if(tail+1== LEN)
+	{
+		tail =0;
+	}
+	else
+	{
+		tail++;
+	}
+
+}
+
+P dequeue()
+{
+	P x;
+	if(isEmpty()==1)
+	{
+		exit(1);
+	}
+	x=Q[head];
+	if(head+1 == LEN)
+	{
+		head=0;
+	}
+	else
+	{
+		head++;
+	}
+	return x;
+	
+}
+
+
+int main(){
+  int elaps = 0, c;
+  int i, q;
+  P x;
+  scanf("%d %d", &n, &q);
+	initialize();
+  for ( i = 1; i <= n; i++){
+    scanf("%s", Q[i].name);
+    scanf("%d", &Q[i].t);
+  	enqueue(Q[i]);
+  }
+	for(i=0;head!=tail;i++)
+	{
+		dequeue(Q[i]);
+		if(i>=LEN)
+		{
+			i=0;
+		}
+		if(Q[i].t>100)
+		{
+			elaps+=100;
+			Q[i].t=Q[i].t-100;
+			enqueue(Q[i]);
+		}
+		else
+		{
+			elaps+=Q[i].t;
+			printf("%s %d\n", Q[i].name, elaps);
+		}
+		
+	}
+
+  
+  return 0;
+}

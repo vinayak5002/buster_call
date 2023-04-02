@@ -1,0 +1,15 @@
+#include "stdio.h"
+
+int main(void) {
+    int n, x[100];
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++ ) {
+        scanf("%d", &x[i]);
+    }
+
+    for (int i = n - 1; i >= 1; i-- ) {
+        printf("%d ", x[i]);
+    }
+    printf("%d\n", x[0]);
+    return 0;
+}

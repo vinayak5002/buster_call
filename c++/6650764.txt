@@ -1,0 +1,147 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using State = string::const_iterator;
+
+bool valid = true;
+
+int factor(State &begin);
+int expression(State &begin);
+int term(State &begin);
+int number(State &begin);
+
+int factor(State &begin) {
+  if (*begin == '(') {
+    begin++;
+    int ret = expression(begin);
+    begin++;
+    return ret;
+  } else {
+    return number(begin);
+  }
+}
+
+int expression(State &begin) {
+  int ret = term(begin);
+
+  while (true) {
+    if (*begin == '+') {
+      begin++;
+      ret += term(begin);
+    } else if (*begin == '-') {
+      begin++;
+      ret -= term(begin);
+    } else {
+      break;
+    }
+  }
+
+  return ret;
+}
+
+int term(State &begin) {
+  int ret = factor(begin);
+
+  while (true) {
+    if (*begin == '*') {
+      begin++;
+      ret *= factor(begin);
+    } else if (*begin == '/') {
+      begin++;
+      int f = factor(begin);
+      if (f == 0) {
+        valid = false;
+        return 0;
+      }
+      ret /= f;
+    } else {
+      break;
+    }
+  }
+
+  return ret;
+}
+
+int number(State &begin) {
+  int ret = 0;
+  while (isdigit(*begin)) {
+    ret *= 10;
+    ret += *begin - '0';
+    begin++;
+  }
+  return ret;
+}
+
+void solve(string in) {
+  string u = '(' + in + ')';
+
+  vector< int > idxs;
+  for (int i = 0; i < (int)u.size(); i++) {
+    if (u[i] == '+' or u[i] == '-' or u[i] == '*' or u[i] == '/') {
+      idxs.emplace_back(i);
+    }
+  }
+
+  set< int > st;
+  // cerr << s << endl;
+  do {
+    string s = u;
+    auto is = idxs;
+    for (int qi = 0; qi < (int)is.size(); qi++) {
+      int i = is[qi];
+      int l = i;
+      int cntl = 0;
+      while (cntl != 1) {
+        l--;
+        if (s[l] == '(') cntl++;
+        if (s[l] == ')') cntl--;
+      }
+      // cerr << "l: " << l << endl;
+
+      int r = i;
+      int cntr = 0;
+      while (cntr != 1) {
+        r++;
+        if (s[r] == ')') cntr++;
+        if (s[r] == '(') cntr--;
+      }
+      // cerr << "r: " << r << endl;
+
+      s = s.substr(0, l) + '(' + s.substr(l, i - l) + ')' + s[i] + '(' + s.substr(i + 1, r - i) + ')' + s.substr(r + 1, s.size());
+      // cerr << s.substr(0, l) << ", " << s.substr(l, i - l) << ", " << s[i] << ", " << s.substr(i + 1, r - i) << endl;
+      // cerr << s << endl;
+      // for  (auto &j: is) cerr << j << " ";
+      // cerr << endl;
+      for (int j = 0; j < (int)is.size(); j++) {
+        if (l <= is[j]) is[j]++;
+        if (i <= is[j]) is[j]++;
+        if (i + 3 <= is[j]) is[j]++;
+        if (r + 3 <= is[j]) is[j]++;
+      }
+
+      // for  (auto &j: is) cerr << j << " ";
+      // cerr << endl;
+
+      // for (auto &j: is) cerr << s[j] << endl;
+      // break;
+    }
+
+    State begin = s.begin();
+    valid = true;
+
+    int res = factor(begin);
+    if (valid) st.insert(res);
+    // break;
+  } while (next_permutation(idxs.begin(), idxs.end()));
+
+  cout << st.size() << endl;
+}
+
+int main() {
+  string s;
+
+  while (cin >> s, s.front() != '#') {
+    solve(s);
+  }
+}
+

@@ -1,0 +1,116 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using P = pair<int, int>;
+#define test cout << "test:"
+const int inf = 1073741824;
+const long long linf = 1152921504606846976;
+// const int mod = 998244353;
+// const int mod = 1000000007;
+const int dx[] = {1, 0, -1, 0}, dy[] = {0, 1, 0, -1};
+
+void _main()
+{
+	int n;
+	cin >> n;
+	vector<int> a(n);
+	for (int i = 0; i < n; i++)
+		cin >> a[i];
+
+	set<int> loop;
+	for (int i = 0; i < n; i++)
+	{
+		if (loop.count(i))
+			continue;
+
+		if (a[i] == 0)
+			continue;
+
+		int now = i;
+		vector<bool> vis(n, false);
+		vis[now] = true;
+		vector<int> history;
+		history.push_back(i);	
+
+		while (!vis[now] and now <= n - 1)
+		{
+			if (a[now] == 0)
+				break;
+
+			now += a[now];
+			now = min(n - 1, now);
+			now = max(0, now);
+
+			if (now == 0 or now == n - 1)
+				break;
+
+			history.push_back(now);
+
+			if (vis[now])
+			{
+				for (int i : history)
+					loop.insert(i);
+
+				break;
+			}
+
+			vis[now] = true;
+		}
+	}
+
+	vector<int> ans(n, inf);
+	queue<P> q;
+	q.push({0, 0});
+
+	while (!q.empty())
+	{
+		auto [now, cnt] = q.front();
+		q.pop();
+		// test;
+		// cout << now << '\n';
+
+		if (now >= n - 1)
+		{
+			ans[n - 1] = min(ans[n - 1], cnt);
+			continue;
+		}
+
+		if (cnt >= ans[now])
+			continue;
+
+		else
+			ans[now] = cnt;
+
+		if (a[now] != 0)
+		{
+			if (!loop.count(now + a[now]))
+			{
+				int next = now + a[now];
+				next = min(n - 1, next);
+				next = max(0, next);
+				q.push({next, cnt});
+			}
+		}
+
+		else for (int i = 1; i <= 6; i++)
+		{
+			// test;
+			if (loop.count(i + now))
+				continue;
+
+			else
+				q.push({now + i, cnt + 1});
+		}
+	}
+
+	cout << ans[n - 1] << '\n';
+	return;
+}
+
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin.tie(0);
+	cout << fixed << setprecision(15);
+	_main();
+}

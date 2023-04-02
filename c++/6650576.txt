@@ -1,0 +1,68 @@
+#include <stdio.h>
+
+// 頂点 v が 集合 S に属する時 S[v] = 1, 属さないとき S[v] = 0
+
+void connect(int n, int C[][n])
+{
+    for (int i = 0; i < n/2; i++) {  // 以下のことを n/2 回繰り返す
+	for (int s = 0; s < n; s++) {
+	    for (int t = 0; t < s; t++) {
+		if (C[s][t] != 1)             
+		    continue;
+		for (int u = 0; u < n; u++) {
+		    if (C[s][u] == 1)
+			C[t][u] = C[u][t] = 1;
+		    if (C[t][u] == 1)
+			C[s][u] = C[u][s] = 1;
+		}
+	    }
+	}
+    }
+}
+		       
+int main()
+{
+    int n;      // 頂点の数
+    scanf("%d", &n);
+    //  s と t が同じ成分内なら C[s][t] = 1, そうでないか未知なら 0
+    int C[n][n];    
+    //  C を初期化
+    for (int i = 0; i < n; i++) {
+	C[i][i] = 1;
+	for (int j = 0; j < i; j++)
+	    C[i][j] = C[j][i] = 0;
+    }
+
+    int m;    //  辺の数
+    scanf("%d", &m);
+    for (int i = 0; i < m; i++) {
+	int s, t;
+	scanf("%d %d", &s, &t);
+	C[s][t] = C[t][s] = 1;
+    }
+
+    connect(n, C);
+#ifdef DBG	
+	for (int u = 0; u < n; u++) {
+	    for (int v = 0; v < n; v++) {
+		printf(" %2d", C[u][v]);
+	    }
+	    printf("\n");
+	}
+#endif
+
+    int q;    // 質問の数
+    scanf("%d", &q);
+    for (int i = 0; i < q; i++) {
+	int s, t;
+	scanf("%d %d", &s, &t);
+	if (C[s][t] == 1)
+	    printf("yes\n");
+	else
+	    printf("no\n");
+
+    }
+
+    return 0;
+} 
+

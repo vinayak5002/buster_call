@@ -1,0 +1,94 @@
+
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class Main {
+    static int Maxdis = 1000000;
+
+    public static void main(String[] args) {
+
+
+        //creat graph
+        Scanner scan = new Scanner(System.in);
+        int v = scan.nextInt();
+        int e = scan.nextInt();
+        int r = scan.nextInt();
+
+        int[][] Mgraph = new int[v][v];
+        for (int i = 0; i < v; i++)
+            for (int j = 0; j < v; j++)
+                Mgraph[i][j] = -1;
+
+        //insert edge
+        for (int i = 0; i < e; i++) {
+            int s = scan.nextInt();
+            int t = scan.nextInt();
+            int d = scan.nextInt();
+            Mgraph[s][t] = d;
+        }
+        scan.close();
+        //Dijkstra
+
+        int[] dis = Dijkstra(Mgraph, r, v);
+
+        for (int i = 0; i < v; i++) {
+            if (dis[i] != Maxdis)
+                System.out.println(dis[i]);
+            else
+                System.out.println("INF");
+        }
+
+
+    }
+
+    public static int[] Dijkstra(int[][] Mgraph, int r, int v) {
+
+
+        int[] dis = new int[v];
+        boolean[] collected = new boolean[v];
+
+        Arrays.fill(dis, Maxdis);
+        Arrays.fill(collected, false);
+        dis[r] = 0;
+        //------------
+        while (true) {
+            int vertex = min_uncollected(dis, collected);
+
+            if (vertex == -1)
+                break;
+
+            for (int i = 0; i < v; i++) {
+                if (Mgraph[vertex][i] >= 0 && dis[vertex] + Mgraph[vertex][i] <= dis[i] && !collected[i]) {
+                    dis[i] = dis[vertex] + Mgraph[vertex][i];
+                }
+            }
+
+        }
+        return dis;
+
+
+    }
+
+    public static int min_uncollected(int[] dis, boolean[] collected) {
+        int temp = 99999999;
+        int res = -1;
+
+        for (int i = 0; i < dis.length; i++) {
+
+            if (dis[i] < temp && !collected[i]) {
+                temp = dis[i];
+                res = i;
+
+            }
+        }
+        if (res != -1)
+            collected[res] = true;
+        return res;
+
+
+    }
+
+
+}
+
+

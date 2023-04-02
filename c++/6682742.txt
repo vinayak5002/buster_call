@@ -1,0 +1,96 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+struct node {
+    int key;
+    struct node *left;
+    struct node *right;
+    struct node *parent;
+} ;
+
+typedef struct node * Node;
+Node root;
+#define NIL NULL
+
+void insert(int point)
+{
+    Node y = NIL;
+    Node x = root;
+    Node z;
+
+    z=malloc(sizeof(struct node));
+    z->key=point;
+    z->left=NIL;
+    z->right=NIL;
+
+    while(x!=NIL)
+    {
+        y=x;
+        if(z->key < x->key)
+        {
+            x=x->left;
+        }
+        else
+        {
+            x=x->right;
+        }
+    }
+    z->parent=y;
+    if(y==NIL)
+    {
+        root = z;
+    }
+    else
+    {
+        if(z->key < y->key)
+        {
+            y->left=z;
+        }
+        else
+        {
+            y->right=z;
+        }
+    }
+}
+
+void f_print(Node x)
+{
+    if(x==NIL) return;
+    f_print(x->left);
+    printf(" %d", x->key);
+    f_print(x->right);
+}
+
+void s_print(Node x)
+{
+    if(x==NIL) return;
+    printf(" %d", x->key);
+    s_print(x->left);
+    s_print(x->right);
+}
+
+int main(void)
+{
+    int n, x, i;
+    char cmd[10];
+
+    scanf("%d", &n);
+
+    for(i=0;i<n;i++)
+    {
+        scanf("%s", cmd);
+        if(cmd[0]=='i')
+        {
+            scanf("%d", &x);
+            insert(x);
+        }
+        else if(cmd[0]=='p')
+        {
+            f_print(root);
+            printf("\n");
+            s_print(root);
+            printf("\n");
+        }
+    }
+    return 0;
+}

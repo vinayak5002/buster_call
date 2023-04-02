@@ -1,0 +1,150 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define fi first
+#define se second
+const int M=1e9+7;
+int n,c[100004],e[100004];
+ll x,a[100004],b[100004],d[100004];
+vector<pair<ll,int> >ask[100004];
+vector<pair<ll,int> >tr[100004];
+bool vis[100004];
+vector<int>sta,cir;
+vector<pair<ll,pair<int,int> > >v[100004];
+int h[100004],m;
+ll p[100004];
+map<ll,int>mp;
+int nxt[100004],dep[100004],val[100004];
+int tot;
+map<ll,int>MP[100004];
+void dfs(int x,int rt,int pa,ll d){
+	vis[x]=1;
+	int lst=mp[a[x]+d];
+	mp[a[x]+d]=x;
+	for(auto z:ask[x]){
+		ll t=z.fi;int i=z.se;
+		if(mp[d+t]!=0)nxt[i]=mp[d+t],val[i]=dep[x]-dep[nxt[x]]+1;
+		else v[rt].push_back({t+d,{dep[x],i}});
+	}
+	for(auto y:tr[x])if(y.se!=pa)
+		dep[y.se]=dep[x]+1,dfs(y.se,rt,-1,d+y.fi);
+	mp[a[x]+d]=lst;
+}
+int main(){
+	scanf("%d%lld",&n,&x),ask[1].push_back({x,0});
+	for(int i=0;i<=n+1;i++)nxt[i]=-1;
+	for(int i=1;i<=n;i++){
+		scanf("%lld%lld%d%lld%d",&a[i],&b[i],&c[i],&d[i],&e[i]);
+		if(c[i]!=n+1)ask[c[i]].push_back({a[i]+b[i],i});
+		else nxt[i]=n+1,val[i]=1;
+		tr[e[i]].push_back({d[i],i});
+	}
+	for(int t=1;t<=n+1;t++)if(!vis[t]){
+		sta.clear(),cir.clear();
+		int cur=t;
+		for(;;){
+			vis[cur]=1,sta.push_back(cur);
+			if(cur==n+1)break;
+			cur=e[cur];if(vis[cur])break;
+		}
+		if(cur==n+1)cir.push_back(n+1);
+		else{
+			bool exi=0;
+			for(auto x:sta){
+				if(x==cur)exi=1;
+				if(exi)cir.push_back(x);
+			}
+		}
+		m=cir.size();
+		for(int i=0;i<m;i++)h[i]=cir[i];
+		h[m]=cir[0];
+		for(int i=1;i<=m;i++){
+			for(auto x:tr[h[i]])
+				if(x.se==h[i-1])p[i]=x.fi;
+			mp.clear();
+			dfs(h[i],h[i],h[i-1],0);		
+		}
+//		cout<<m<<"\n";
+//		for(int i=1;i<=m;i++)cout<<h[i]<<" "<<p[i]<<"\n";
+//		break;
+//		return 0;
+		if(h[1]==n+1){
+			for(auto x:v[n+1])nxt[x.se.se]=n+1,val[x.se.se]=(x.se.fi+1)%M;
+			continue;
+		}
+		ll all=0;
+		vector<pair<ll,pair<int,int> > >vec;
+		mp.clear();
+		for(int i=m;i;i--){
+			for(auto z:v[h[i]]){
+				ll w=z.fi+all;
+				if(mp[w]>0){
+					nxt[z.se.se]=h[mp[w]];
+					val[z.se.se]=z.se.fi+mp[w]-i;
+				}else vec.push_back({w,{z.se.fi+m-i,z.se.se}});
+			}
+			mp[a[h[i]]+all]=i,all+=p[i];
+		}
+//		cout<<m<<" "<<all<<"\n";
+//		for(int i=1;i<=m;i++)cout<<h[i]<<" "<<p[i]<<"\n";
+//		for(auto x:vec)cout<<x.fi<<" "<<x.se.fi<<" "<<x.se.se<<"?\n";
+//		puts("");
+//		return 0;
+//		continue;
+		mp.clear();ll pre=0;
+		for(int i=1;i<=m;i++){
+			ll T,t=a[h[i]]-pre;pre+=p[i];
+			if(all==0)T=t;
+			else{
+				ll q=abs(all);
+				T=(t%q+q)%q;
+			}
+			if(!mp[T])mp[T]=++tot,MP[tot].clear();
+			int id=mp[T];
+//			cout<<T<<" "<<t<<" "<<i<<"!\n";
+			if(!MP[id].count(t))MP[id][t]=i;
+		}
+//		puts("");
+		for(auto x:vec){
+			ll T,t=x.fi;
+			if(all==0)T=t;
+			else{
+				ll q=abs(all);
+				T=(t%q+q)%q;
+			}
+			if(!mp.count(T))continue;
+			int id=mp[T];
+			if(all==0)nxt[x.se.se]=id,val[x.se.se]=x.se.fi+id;
+			if(all<0){
+				auto it=MP[id].upper_bound(t);
+				if(it==MP[id].begin())continue;--it;
+				int ps=(*it).se;ll tm=(*it).fi;
+				int g=(tm-t)/all%M;
+				nxt[x.se.se]=h[ps],val[x.se.se]=(x.se.fi+g+1)%M;
+			}
+			if(all>0){
+				auto it=MP[id].lower_bound(t);
+				if(it==MP[id].end())continue;
+				int ps=(*it).se;ll tm=(*it).fi;
+//				cout<<ps<<" "<<tm<<" "<<x.se.se<<"\n";
+				int g=(tm-t)/all%M;
+				nxt[x.se.se]=h[ps],val[x.se.se]=(x.se.fi+g+1)%M;
+			}
+		}
+//		break;
+//		return 0;
+	}
+//	for(int i=0;i<=n;i++)cout<<nxt[i]<<" "<<val[i]<<"\n";
+//	return 0;
+	int cur=0,ans=0,cnt=0;
+	for(;;){
+		cnt++;
+		if(cnt>n+5||cur<0){
+			puts("-1");return 0;
+		}
+		(ans+=val[cur])%=M,cur=nxt[cur];
+		if(cur==n+1)break;
+	}
+//	return 0;
+	printf("%d\n",(ans+M-1)%M);
+}

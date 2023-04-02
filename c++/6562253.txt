@@ -1,0 +1,236 @@
+#include <iostream>
+#include <cstdio>
+#include <algorithm>
+#include <cstring>
+#include <cmath>
+#include <string>
+using namespace std;
+//给出一个点集，求它的凸包
+//输出时以逆时针给出点坐标，第一个点为y最小且x最小的点
+const double eps = 1e-8;
+const double inf = 1e20;
+const double pi = acos(-1.0);
+const int maxp = 101000;
+//`Compares a double to zero`
+int sgn(double x)
+{
+	if(fabs(x) < eps)return 0;
+	if(x < 0)return -1;
+	else return 1;
+}
+//square of a double
+inline double sqr(double x){return x*x;}
+
+struct Point
+{
+	double x, y;
+	Point(){}
+	Point(double _x,double _y){x = _x, y = _y;}
+	void input(){scanf("%lf%lf",&x,&y);}
+	void output(){printf("%.2f %.2f\n",x,y);}
+	bool operator == (Point b)const{return sgn(x-b.x) == 0 && sgn(y-b.y) == 0;}
+	bool operator < (Point b)const{return sgn(y-b.y)== 0?sgn(x-b.x)<0:y<b.y;}
+	Point operator -(const Point &b)const{return Point(x-b.x,y-b.y);}
+	//叉积
+	double operator ^(const Point &b)const{return x*b.y - y*b.x;}
+	//点积
+	double operator *(const Point &b)const{return x*b.x + y*b.y;}
+	//返回长度
+	double len(){return hypot(x,y);/*库函数*/}
+	//返回长度的平方
+	double len2(){return x*x + y*y;}
+	//返回两点的距离
+	double distance(Point p){return hypot(x-p.x,y-p.y);}
+	Point operator +(const Point &b)const{return Point(x+b.x,y+b.y);}
+	Point operator *(const double &k)const{return Point(x*k,y*k);}
+	Point operator /(const double &k)const{return Point(x/k,y/k);}
+}; 
+
+struct Line
+{
+	Point s,e;
+	Line(){}
+	Line(Point _s,Point _e){s = _s, e = _e;}
+	bool operator ==(Line v){return (s == v.s)&&(e == v.e);}
+	//`根据一个点和倾斜角angle确定直线,0<=angle<pi`
+	Line(Point p,double angle)
+	{
+		s = p;
+		if(sgn(angle-pi/2) == 0){e = (s + Point(0,1));}
+		else{e = (s + Point(1,tan(angle)));}
+	}
+	// 点在线段上的判断
+	bool pointonseg(Point p){return sgn((p-s)^(e-s)) == 0 && sgn((p-s)*(p-e)) <= 0;}
+};
+
+struct polygon
+{
+	int n;
+	Point p[maxp];
+	Line l[maxp];
+	void input(int _n){
+		n = _n;
+		for(int i = 0;i < n;i++)
+			p[i].input();
+	}
+	void add(Point q){
+		p[n++] = q;
+	}
+	void getline(){
+		for(int i = 0;i < n;i++){
+			l[i] = Line(p[i],p[(i+1)%n]);
+		}
+	}
+	struct cmp{
+		Point p;
+		cmp(const Point &p0){p = p0;}
+		bool operator()(const Point &aa,const Point &bb){
+			Point a = aa, b = bb;
+			int d = sgn((a-p)^(b-p));
+			if(d == 0){
+				return sgn(a.distance(p)-b.distance(p)) < 0;//极角相同，距离原点近的靠前 
+			}
+			return d > 0;
+		}
+	};
+	//`进行极角排序`
+	//`首先需要找到最左下角的点`
+	//`需要重载号好Point的 < 操作符(min函数要用) `
+	void norm(){
+		Point mi = p[0];
+		for(int i = 1;i < n;i++)mi = min(mi,p[i]);
+		sort(p,p+n,cmp(mi));
+	}
+	//`得到凸包`
+	//`得到的凸包里面的点编号是0$\sim$n-1的`
+	//`两种凸包的方法`
+	//`注意如果有影响，要特判下所有点共点，或者共线的特殊情况`
+	//`测试 LightOJ1203  LightOJ1239`
+	void getconvex(polygon &convex){
+		sort(p,p+n);
+		convex.n = n;
+		for(int i = 0;i < min(n,2);i++){
+			convex.p[i] = p[i];
+		}
+		if(convex.n == 2 && (convex.p[0] == convex.p[1]))convex.n--;//特判
+		if(n <= 2)return;
+		int &top = convex.n;
+		top = 1;
+		for(int i = 2;i < n;i++){
+			while(top && sgn((convex.p[top]-p[i])^(convex.p[top-1]-p[i])) <= 0)
+				top--;
+			convex.p[++top] = p[i];
+		}
+		int temp = top;
+		convex.p[++top] = p[n-2];
+		for(int i = n-3;i >= 0;i--){
+			while(top != temp && sgn((convex.p[top]-p[i])^(convex.p[top-1]-p[i])) <= 0)
+				top--;
+			convex.p[++top] = p[i];
+		}
+		if(convex.n == 2 && (convex.p[0] == convex.p[1]))convex.n--;//特判
+		convex.norm();//`原来得到的是顺时针的点，排序后逆时针`
+	}
+	//`得到凸包的另外一种方法`
+	//`测试 LightOJ1203  LightOJ1239`
+	void Graham(polygon &convex){
+		norm();
+		int &top = convex.n;
+		top = 0;
+		if(n == 1){
+			top = 1;
+			convex.p[0] = p[0];
+			return;
+		}
+		if(n == 2){
+			top = 2;
+			convex.p[0] = p[0];
+			convex.p[1] = p[1];
+			if(convex.p[0] == convex.p[1])top--;
+			return;
+		}
+		convex.p[0] = p[0];
+		convex.p[1] = p[1];
+		top = 2;
+		for(int i = 2;i < n;i++){
+			while( top > 1 && sgn((convex.p[top-1]-convex.p[top-2])^(p[i]-convex.p[top-2])) <= 0 )
+				top--;
+			convex.p[top++] = p[i];
+		}
+		if(convex.n == 2 && (convex.p[0] == convex.p[1]))convex.n--;//特判
+	}
+	//`判断是不是凸的`
+	bool isconvex(){
+		bool s[3];
+		memset(s,false,sizeof(s));
+		for(int i = 0;i < n;i++){
+			int j = (i+1)%n;
+			int k = (j+1)%n;
+			s[sgn((p[j]-p[i])^(p[k]-p[i]))+1] = true;
+			if(s[0] && s[2])return false;
+		}
+		return true;
+	}
+	//`得到周长`，点要相邻 
+	//`测试 LightOJ1239`
+	double getcircumference(){
+		double sum = 0;
+		for(int i = 0;i < n;i++)
+			sum += p[i].distance(p[(i+1)%n]);
+		return sum;
+	}
+	//`得到面积`，点要相邻 
+	double getarea()
+	{
+		double sum = 0;
+		for(int i = 0;i < n;i++)
+			sum += (p[i]^p[(i+1)%n]);
+		return fabs(sum)/2;
+	}
+	//`判断点和任意多边形的关系`
+	//` 3 点上`
+	//` 2 边上`
+	//` 1 内部`
+	//` 0 外部`
+	int relationpoint(Point q){
+		for(int i = 0;i < n;i++){
+			if(p[i] == q)return 3;
+		}
+		getline();
+		for(int i = 0;i < n;i++){
+			if(l[i].pointonseg(q))return 2;
+		}
+		int cnt = 0;
+		for(int i = 0;i < n;i++){//图形学上的内外测试 
+			int j = (i+1)%n;
+			int k = sgn((q-p[j])^(p[i]-p[j]));//向右侧引一条射线 
+			int u = sgn(p[i].y-q.y);
+			int v = sgn(p[j].y-q.y);
+			if(k > 0 && u < 0 && v >= 0)cnt++;//向量两点y值小的被截断一部分 
+			if(k < 0 && v < 0 && u >= 0)cnt--;
+		}
+		return cnt != 0;
+	}
+};
+
+polygon a, con, ans;
+ 
+signed main()
+{
+	cin >> a.n;
+	a.input(a.n);
+	a.Graham(con);
+	for(int i = 0; i < a.n; i++)
+		if(con.relationpoint(a.p[i]) >= 2)
+			ans.add(a.p[i]);
+	ans.norm();
+	int k;
+	for(k = ans.n-1; k >= 0; k--)
+		if(sgn((ans.p[k]-ans.p[0])^(ans.p[k-1]-ans.p[0])) != 0)
+			break; 
+	reverse(ans.p+k, ans.p+ans.n);
+	cout << ans.n << endl;
+	for(int i = 0; i < ans.n; i++)
+		printf("%d %d\n", (int)ans.p[i].x, (int)ans.p[i].y);
+    return 0;
+}

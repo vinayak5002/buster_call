@@ -1,0 +1,56 @@
+#include <vector>
+#include <iostream>
+#include <string>
+#include <utility>
+
+using namespace std;
+using ll = long double ;
+using vec_ll = vector<ll>;
+using vec_i = vector<int>;
+bool mat[100][100];
+enum class node_color{
+    white, gray, black
+};
+node_color color[100];
+int n, tt, d[100], f[100];
+void dfs(int u){
+    color[u] = node_color::gray;
+    d[u]=++tt;
+    for(int v=0; v<n; v++){
+        if(mat[u][v]&&color[v]==node_color::white){
+            dfs(v);
+        }
+    }
+    color[u]=node_color::black;
+    f[u] = ++tt;
+}
+void dfs_init(){
+    tt=0;
+    for(int i=0; i<n; i++){
+        color[i]=node_color::white;
+    }
+    for(int u=0; u<n; u++){
+        if(color[u]==node_color::white)dfs(u);
+    }
+} 
+int main(){
+    cin>>n;
+    for(int i=0; i<n; ++i){
+        for(int k=0; k<n; ++k){
+            mat[i][k]=false;
+        }
+    }
+    for(int i=0; i<n; ++i){
+        int num, k;
+        cin>>num>>k;
+        for(int j=0; j<k; ++j){
+            int u;
+            cin>>u;
+            mat[num-1][u-1]=true;
+        }
+    }
+    dfs_init();
+    for(int i=0; i<n; ++i){
+        cout<<i+1<<" "<<d[i]<<" "<<f[i]<<endl;
+    }
+}

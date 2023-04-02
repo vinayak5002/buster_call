@@ -1,0 +1,70 @@
+#include <iostream>
+#include <vector>
+#include <numeric>
+using namespace std;
+
+struct Edge {
+    int to, cap, rev;
+    Edge(int t, int c, int r) : to(t), cap(c), rev(r) {}
+};
+
+vector<vector<Edge>> G;
+
+void AddEdge(int f, int t) {
+    G[f].emplace_back(t, 1, G[t].size());
+    G[t].emplace_back(f, 0, G[f].size() - 1);
+}
+
+vector<int> U;
+
+int DFS(int s, int t, int f = 1 << 30) {
+    if (s == t) return f;
+    U[s] = 1;
+    for (auto& e : G[s]) {
+        if (e.cap == 0) continue;
+        if (U[e.to]) continue;
+        int nf = DFS(e.to, t, min(f, e.cap));
+        if (nf > 0) {
+            e.cap -= nf;
+            G[e.to][e.rev].cap += nf;
+            return nf;
+        }
+    }
+    return 0;
+}
+
+int main(int argc, const char * argv[]) {
+    while (1) {
+        int M, N;
+        cin >> M >> N;
+        if (M == 0) break;
+        
+        int T = M + N + 2;
+        G.clear();
+        G.resize(T);
+        
+        vector<int> B(M), R(N);
+        for (int m = 0; m < M; ++m) cin >> B[m];
+        for (int n = 0; n < N; ++n) cin >> R[n];
+        
+        for (int m = 0; m < M; ++m) {
+            for (int n = 0; n < N; ++n) {
+                if (gcd(B[m], R[n]) > 1) AddEdge(m, n + M);
+            }
+        }
+        for (int m = 0; m < M; ++m) AddEdge(T - 2, m);
+        for (int n = 0; n < N; ++n) AddEdge(n + M, T - 1);
+        
+        int Ans = 0;
+        while (1) {
+            U.assign(T, 0);
+            int F = DFS(T - 2, T - 1);
+            if (F == 0) break;
+            Ans += F;
+        }
+        cout << Ans << endl;
+    }
+    
+    return 0;
+}
+

@@ -1,0 +1,27 @@
+#include<iostream>
+using namespace std;
+
+int main() {
+	int x, n;
+	char c;
+	bool A[52] = {};
+	char C[] = { 'S', 'H', 'C', 'D' };
+
+	cin >> n;
+
+	for (int i = 0; i < n; i++)
+	{
+		cin >> c >> x;
+		int j = 0;
+		while (C[j] != c) j++;
+
+		A[13 * j + x - 1] = true;
+	}
+
+	for (int i = 0; i < 52; i++)
+	{
+		if (!A[i]) {
+			cout << C[i / 13] << " " << i % 13 + 1 << endl;
+		}
+	}
+}

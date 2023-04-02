@@ -1,0 +1,131 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+
+	const n = parseInt(si[0].split(" "));
+	let array = si[1].split(" ");
+	let list = new List();
+	
+	for (let i = 0; i < n; i++) {
+		list.insertLast(array[i]);
+	}
+	
+	list.searchDelete();
+	
+	let answer = list.getValue_all();
+	let length = list.getLength();
+	let ans = '';
+	for (let i = 0; i < length; i++) {
+		ans += answer[i];
+		if (i < length - 1) {
+			ans += ' ';
+		}
+	}
+	ans += '\n';
+	so.write(ans);
+}
+
+
+class Node {
+	constructor(value) {
+		this.data = value;
+		this.prev = null;
+		this.next = null;
+	}
+
+	getData() {
+		return this.data;
+	}
+	
+	getPrev() {
+		return this.prev;
+	}
+
+	setPrev(node) {
+		this.prev = node;
+	}
+
+	getNext() {
+		return this.next;
+	}
+
+	setNext(node) {
+		this.next = node;
+	}
+}
+
+class List {
+	constructor() {
+		this.dummy = new Node(null);
+		this.end = new Node(null);
+		this.dummy.setPrev(null);
+		this.dummy.setNext(this.end);
+		this.end.setPrev(this.dummy);
+		this.end.setNext(null);
+		
+		this.cursor = this.end;
+		this.cursor2 = this.end;
+		this.length = 0;
+	}
+
+	insertLast(vol) {
+		let node = new Node(vol);
+		node.setPrev(this.end.prev);
+		node.setNext(this.end);
+		this.end.prev.setNext(node);
+		this.end.setPrev(node);
+		this.length++;
+	}
+	
+	deleteCursor() {
+		if (this.length === 0 || this.cursor === this.end) {
+			return;
+		}
+		
+		let prev = this.cursor.getPrev();
+		let next = this.cursor.getNext();
+		
+		this.cursor = next;
+		this.cursor.setPrev(prev);
+		this.cursor.prev.setNext(this.cursor);
+		
+		this.length--;
+		
+	}
+	
+	searchDelete() {
+		this.cursor = this.dummy;
+		while(this.cursor !== this.end.prev){
+			this.cursor = this.cursor.getNext();
+			this.cursor2 = this.cursor.getNext();
+			while(this.cursor2 !== this.end){
+				if (this.cursor.getData() === this.cursor2.getData()) {
+					this.cursor2.prev.setNext(this.cursor2.getNext());
+					this.cursor2.next.setPrev(this.cursor2.getPrev());
+					this.length--;
+				}
+				this.cursor2 = this.cursor2.getNext();
+			}
+		}
+	}
+
+	getValue_all() {
+		if (this.length === 0) {
+			return;
+		}
+
+		let point = this.dummy;
+		let values = [];
+		for (let i = 0; i < this.length; i++) {
+			point = point.getNext();
+			values.push(point.getData());
+		}
+		return values;
+	}
+
+	getLength() {
+		return this.length;
+	}
+}

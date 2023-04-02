@@ -1,0 +1,119 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+HOUSE = 1
+CHURCH = 2
+
+dx_dy_tuple = ((1, 0), (0, 1), (-1, 0), (0, -1))
+width = -1
+height = -1
+index_grid = []
+church_x = -1
+church_y = -1
+num_houses = -1
+dp = {}
+
+
+def count_visited_houses(visited_houses):
+    counter = 0
+    v = visited_houses
+    for i in range(num_houses):
+        counter += v & 1
+        v >>= 1
+        if v == 0:
+            break
+
+    return counter
+
+
+def can_go_ahead(x, y, visited_houses, num_visited_houses):
+    if x == church_x and y == church_y:
+        if num_visited_houses < num_houses:
+            return True
+        else:
+            return False
+
+    if index_grid[y][x] < 0:
+        return True
+
+    c_idx = index_grid[y][x]
+    return visited_houses & (1 << c_idx)
+
+
+def dfs(dp_state, x, y):
+    num_visited_houses = count_visited_houses(dp_state)
+    c_idx = index_grid[y][x] if index_grid[y][x] >= 0 else 255
+
+    if num_visited_houses >= num_houses:
+        if x == church_x and y == church_y:
+            return 1
+
+    dp_state = dp_state & ((1 << num_houses) - 1) | (c_idx << num_houses)
+    if dp_state in dp:
+        return dp[dp_state]
+
+    num_paths = 0
+    for dx, dy in dx_dy_tuple:
+        nx = x + dx
+        ny = y + dy
+
+        while 0 <= nx < width and 0 <= ny < height and can_go_ahead(nx, ny, dp_state, num_visited_houses):
+            nx += dx
+            ny += dy
+
+        if not (0 <= nx < width and 0 <= ny < height):
+            continue
+
+        n_idx = index_grid[ny][nx]
+        n_dp_state = dp_state
+        if n_idx >= 0:
+            n_dp_state |= (1 << n_idx)
+        num_paths += dfs(n_dp_state, nx, ny)
+
+    dp[dp_state] = num_paths
+    return num_paths
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    while True:
+        global width, height
+        width, height = list(map(int, f.readline().split()))
+        if width == height == 0:
+            break
+
+        grid = [list(map(int, f.readline().split())) for _ in range(height)]
+        global index_grid, num_houses, church_x, church_y
+        index_grid = [[-1] * width for _ in range(height)]
+        num_houses = 0
+        church_x = -1
+        church_y = -1
+
+        for y in range(height):
+            for x in range(width):
+                if grid[y][x] == HOUSE:
+                    index_grid[y][x] = num_houses
+                    num_houses += 1
+                elif grid[y][x] == CHURCH:
+                    church_x = x
+                    church_y = y
+
+        global dp
+        dp = {0: 0}
+        num_paths = dfs(0, church_x, church_y)
+        print(num_paths)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

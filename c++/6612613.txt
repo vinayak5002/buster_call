@@ -1,0 +1,35 @@
+#include <iostream>
+#include <vector>
+#define ll long long
+using namespace std;
+using Graph = vector<vector<ll>>;
+ll INF = (1LL<<33);
+Graph g;
+Graph dp;
+ll n, m, start;
+int main() {
+	cin >> n >> m;
+	g.resize(n, vector<ll>(n, INF));
+	for (ll i = 0; i < m; i++) {
+		ll s, t, d; cin >> s >> t >> d;
+		g[s][t] = d;
+	}
+
+	dp.resize(1<<n, vector<ll>(n, INF));
+	start = 0;
+	dp[0][start] = 0;
+	
+	for (ll S = 0; S < (1<<n); S++) {
+		for (ll v = 0; v < n; v++) {
+			for (ll nv = 0; nv < n; nv++) {
+				if (v == nv) continue;
+				if (S != 0 && !(S & (1<<v))) continue; // have not passed
+				if (S & (1<<nv)) continue; // already passed
+				ll nS = S | (1<<nv);
+				dp[nS][nv] = min(dp[nS][nv], dp[S][v] + g[v][nv]);
+			}
+		}
+	}
+	ll ans =  dp[(1<<n)-1][start];
+	cout << (ans == INF ? -1 : ans) << endl;
+}

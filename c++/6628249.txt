@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+    int h, w;
+    cin >> h >> w;
+    vector<string> s(h);
+    for (int i = 0; i < h; ++i) {
+        cin >> s[i];
+    }
+
+    long long count = 0;
+    for (int i = 0; i < h; ++i) {
+        // 'J'を探す
+        string::size_type j_pos = s[i].find('J');
+        deque<int> o_pos;  // 'O'の位置を保存するキュー
+        while (j_pos != string::npos) {  // 見つからなければ終了
+            vector<int> joi(3, 0);
+            joi[0]++;
+            if (o_pos.empty()) {  // キューが空ならあらたに探す
+                // 横方向に'O'を探す
+                string::size_type pos = s[i].find('O', j_pos + 1);
+                // 見つからなければ終了
+                if (pos == string::npos) break;
+                while (pos != string::npos) {
+                    joi[1]++;
+                    o_pos.push_back(pos);
+                    pos = s[i].find('O', ++pos);
+                }
+            } else {  // 空でなければ'J'の左側を削除
+                while (true) {
+                    int left = o_pos.front();
+                    if (left < j_pos) {
+                        o_pos.pop_front();
+                    } else {
+                        break;
+                    }
+                }
+                joi[1] = o_pos.size();
+            }
+            bool flg = false;  // 'I'が見つかったかのフラグ
+            // 縦方向に'I'を探す
+            for (int i_pos = i + 1; i_pos < h; ++i_pos) {
+                if (s[i_pos][j_pos] == 'I') {
+                    joi[2]++;
+                    flg = true;
+                }
+            }
+            // 見つかったら'J','O','I'の個数をかけ合わせる
+            if (flg) count += joi[0] * joi[1] * joi[2];
+            j_pos = s[i].find('J', ++j_pos);
+        }
+    }
+    cout << count << endl;
+    return 0;
+}
+

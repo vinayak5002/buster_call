@@ -1,0 +1,50 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = __importStar(require("fs"));
+const projection = (p1, p2) => (t) => {
+    const p = { x: p2.x - p1.x, y: p2.y - p1.y };
+    const len = (Math.pow(p.x, 2) + Math.pow(p.y, 2));
+    const tp = { x: t.x - p1.x, y: t.y - p1.y };
+    const dot = p.x * tp.x + p.y * tp.y;
+    console.log(dot);
+    return { x: p.x * dot / len, y: p.y * dot / len };
+};
+const input = fs.readFileSync('/dev/stdin', 'utf8');
+const inputArray = input.trim().split('\n');
+const basePointElm = inputArray[0].split(' ').map(Number);
+const p1 = { x: basePointElm[0], y: basePointElm[1] };
+const p2 = { x: basePointElm[2], y: basePointElm[2] };
+const queryCount = Number(inputArray[1]);
+inputArray.shift();
+inputArray.shift();
+const resolve = projection(p1, p2);
+for (let i = 0; i < queryCount; i++) {
+    const queryPointElem = inputArray[i].split(' ').map(Number);
+    const t = { x: queryPointElem[0], y: queryPointElem[1] };
+    const result = resolve(t);
+    console.log(`${result.x} ${result.y}`);
+}
+

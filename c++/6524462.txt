@@ -1,0 +1,28 @@
+#include<bits/stdc++.h>
+using namespace std;
+int func(int total , int id , vector<int>& arr , vector<vector<int>>& dp)
+{
+    if(total==0)
+        return 0;
+    if(id==0)
+        return 500010;
+    if(dp[id][total]!=-1) return dp[id][total];
+
+    int x;
+    if(arr[id-1]<=total)
+        x=min(1+func(total-arr[id-1] , id , arr , dp) , func(total , id-1 , arr , dp));
+    else
+        x=func(total , id-1 , arr , dp);
+    return dp[id][total]=x;
+}
+int main()
+{
+    int n , m;
+    cin>>n>>m;
+    vector<int> arr(m);
+    vector<vector<int>> dp(m+1 , vector<int>(n+1 , -1));
+    for(int i=0;i<m;i++)
+        cin>>arr[i];
+    int ans=func(n , m , arr , dp);
+    cout<<ans<<"\n";
+}

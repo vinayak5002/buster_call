@@ -1,0 +1,71 @@
+#include<iostream>
+using namespace std;
+
+int main(){
+    int N, i, j, k;
+    char C[72], v;
+    cin >> N;
+    for (i = 0; i < 2N; i++ ) cin >> C[i];
+    
+    char B[72];
+    for (i = 0; i < 2N; i++ ) B[i] = C[i];
+    for ( i = 1; i < 2N; i += 2 ){
+        for ( j = 2N-1; j >= i+2; j -= 2 ){
+            if ( B[j] < B[j-2] ){
+                v = B[j];
+                B[j] = B[j-2];
+                B[j-2] = v;
+                v = B[j-1];
+                B[j-1] = B[j-3];
+                B[j-3] = v;
+            }
+        }
+    }
+    
+    for ( i = 0; i < 2N; i++ ){
+        if ( i == 0 ) cout << B[i];
+        else if ( i % 2 == 1 ) cout << B[i];
+        else cout << " " << B[i];
+    }
+    cout << endl;
+    cout << "Stable" << endl;
+    
+    string S[72];
+    int minj;
+    for (i = 0; i < 2N; i++ ) S[i] = C[i];
+    for ( i = 1; i < 2N; i += 2 ){
+        minj = i;
+        for ( j = i; j < 2N; j += 2 ){
+            if ( S[j] < S[minj] ){
+                minj = j;
+            }
+        }
+        v = S[i];
+        S[i] = S[minj];
+        S[minj] = v;
+        v = S[i-1];
+        S[i-1] = S[minj - 1];
+        S[minj - 1] = v;
+    }
+    
+    for ( i = 0; i < 2N; i++ ){
+        if ( i == 0 ) cout << S[i];
+        else if ( i % 2 == 1 ) cout << S[i];
+        else cout << " " << S[i];
+    }
+    cout << endl;
+    
+    bool s;
+    for ( i = 0; i < 2N; i++ ){
+        if ( S[i] != B[i] ){
+            s = 0;
+            break;
+        }
+        else s = 1;
+    }
+    if ( s == 1 ) cout << "Stable" << endl;
+    else cout << "Not stable" << endl;
+    
+    return 0;
+}
+

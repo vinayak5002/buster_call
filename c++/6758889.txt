@@ -1,0 +1,66 @@
+#!/usr/bin/env pypy3
+from collections import Counter, deque, defaultdict
+from itertools import permutations, combinations, accumulate, product, chain
+from functools import lru_cache
+from bisect import bisect, bisect_left, insort, insort_left
+from heapq import heapify, heappush, heappop
+from array import array
+from decimal import Decimal
+from copy import deepcopy
+from pprint import pprint
+from string import ascii_uppercase, ascii_lowercase, ascii_letters
+from math import factorial, floor, ceil, sqrt, log, log2, log10
+import math
+import sys
+sys.setrecursionlimit(1<<30)
+
+read = sys.stdin.read
+readline = sys.stdin.readline
+readlines = sys.stdin.readlines
+
+class UnionFind():
+    def __init__(self, n):
+        self.n = n
+        self.parents = [-1] * n
+    def find(self, x):
+        if self.parents[x] < 0:
+            return x
+        else:
+            self.parents[x] = self.find(self.parents[x])
+            return self.parents[x]
+    def union(self, x, y):
+        xp = self.find(x)
+        yp = self.find(y)
+        if xp == yp:
+            return False
+        if self.parents[xp] > self.parents[yp]:
+            xp, yp = yp, xp
+        self.parents[xp] += self.parents[yp]
+        self.parents[yp] = xp
+        return True
+
+if __name__ == '__main__':
+    while True:
+        N = int(readline())
+        if N == 0:
+            break
+        A = [list(map(float, readline().split())) for _ in range(N)]
+        que = list()
+        uf = UnionFind(N)
+        for i in range(N):
+            x1, y1, z1, r1 = A[i]
+            for j in range(i+1, N):
+                x2, y2, z2, r2 = A[j]
+                dist = sqrt((x1-x2)**2+(y1-y2)**2+(z1-z2)**2)
+                if dist > r1+r2:
+                    heappush(que, [dist-r1-r2, i, j])
+                else:
+                    heappush(que, [0, i, j])
+        ans = 0
+        while que:
+            dist, p1, p2 = heappop(que)
+            if uf.union(p1, p2):
+                ans += dist
+        print(f'{ans:.3f}')
+
+

@@ -1,0 +1,71 @@
+import java.util.Scanner;
+
+class GasApplication{
+    public static void main(String[] args){
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int m = sc.nextInt();
+        Gas[] obj = new Gas[11];
+        int[] cnt = new int[11];
+
+        for(int i = 1; i <= n; i++){
+            obj[i] = new Gas(m);
+            cnt[i] = 0;
+        }
+
+        for(int i = 1; i <= m; i++){
+            int det = sc.nextInt();
+            if(det == 0){
+                int lane = sc.nextInt();
+                obj[lane].dequeue();
+                cnt[lane]--;
+            }
+            else{
+                int tmp = 0;
+                while(true){
+                    boolean b = false;
+                    for(int j = 1; j <= n; j++){
+                        if(tmp == cnt[j]){
+                            int car = sc.nextInt();
+                            obj[j].enqueue(car);
+                            cnt[j]++;
+                            b = true;
+                            break;
+                        }
+                    }
+                    if(b == true){
+                        break;
+                    }
+                    tmp++;
+                }
+            }
+        }
+    }
+}
+
+class Gas{
+    private int[] q;
+    private int head;
+    private int tail;
+    private int m;
+
+    Gas(int m){
+        q = new int[m];
+        head = 0;
+        tail = 0;
+        this.m = m;
+    }
+
+    void enqueue(int car){
+        q[tail] = car;
+        tail++;
+        tail %= m;
+    }
+
+    void dequeue(){
+        System.out.println(q[head]);
+        head++;
+        head %= m;
+    }
+}
+

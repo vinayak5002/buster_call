@@ -1,0 +1,81 @@
+#include<stdio.h>
+#define MAX 10000
+#define NIL -1
+
+typedef struct Node {
+    int parent;
+    int left;
+    int right;
+} t;
+
+t T[MAX];
+int D[MAX], H[MAX];
+
+//根、左分木、右分木の順で出力
+void preParse(int u)
+{
+    if(u == NIL){return;}
+    printf(" %d", u);
+    preParse(T[u].left);
+    preParse(T[u].right);
+}
+
+//左分木、根、右分木
+void inParse(int u)
+{
+    if(u == NIL){return;}
+    inParse(T[u].left);
+    printf(" %d", u);
+    inParse(T[u].right);
+}
+
+//左分木、右分木、根
+void postParse(int u)
+{
+    if(u == NIL){return;}
+    postParse(T[u].left);
+    postParse(T[u].right);
+    printf(" %d", u);
+}
+
+int main()
+{
+    int n, i, value, l, r;
+    int root = 0;
+    int deg;
+    scanf("%d", &n);
+    //親ノード初期化
+    for(i=0; i<n; i++)
+    {
+        T[i].parent = NIL;
+    }
+
+    //ノード配置
+    for(i=0; i<n; i++)
+    {
+        scanf("%d %d %d", &value, &l, &r);
+        T[value].left = l;
+        T[value].right = r;
+        if(l != NIL){T[l].parent = value;}
+        if(r != NIL){T[r].parent = value;}
+    }
+
+    for(i=0; i<n; i++)
+    {
+        if(T[i].parent == NIL)
+        {root = i;}
+    }
+    
+    //結果の表示
+    printf("Preorder\n");
+    preParse(root);
+    printf("\n");
+    printf("Inorder\n");
+    inParse(root);
+    printf("\n");
+    printf("Postorder\n");
+    postParse(root);
+    printf("\n");
+    
+    return 0;
+}

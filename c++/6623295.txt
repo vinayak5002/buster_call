@@ -1,0 +1,91 @@
+#include <stdio.h>
+#define MAX 100000
+#define NIL -1 //-1として定義（何も存在しないものとして定義）
+
+typedef struct
+{
+    int parent;
+    int left_child; //最も左の子
+    int right; //兄弟
+} Node;
+
+Node Tree[MAX];
+int N, Depth[MAX];
+
+void print_node(int node_num);
+void CulcDepth(int node_num, int depth);
+
+int main(void)
+{
+    int i, j, N_child, node_num, child_num, left_child, right, root;
+    scanf("%d", &N);
+
+    for (i = 0; i < N; i++) {
+        Tree[i].parent = NIL;
+        Tree[i].left_child = NIL;
+        Tree[i].right = NIL;
+    }
+
+    for (i = 0; i < N; i++) {
+        scanf("%d %d", &node_num, &N_child); //接点番号と子の数を代入
+
+        for (j = 0; j < N_child; j++) {
+            scanf("%d", &child_num); //各子の接点番号を代入
+
+            if (j == 0) //親から見て深さが等しい子の内最も左のものに代入
+                Tree[node_num].left_child = child_num;
+            else
+                Tree[left_child].right = child_num; //最も左の子でない場合はひとつ左の子の兄弟として管理
+
+            left_child = child_num; //基準点である左の子を更新
+            Tree[child_num].parent = node_num; //子の親を記憶
+        }
+    }
+
+    /* rootノードを見つける */
+    for (i = 0; i < N; i++)
+        if (Tree[i].parent == NIL)
+            root = i;
+
+    CulcDepth(root, 0); //根の深さを代入し、再帰的にすべての要素に代入していく。
+
+    for (i = 0; i < N; i++)
+        print_node(i);
+
+    return 0;
+}
+
+void print_node(int node_num)
+{
+    int i, child_node;
+    printf("node %d: ", node_num);
+    printf("parent = %d, ", Tree[node_num].parent);
+    printf("depth = %d, ", Depth[node_num]);
+
+    if (Tree[node_num].parent == NIL)
+        printf("root, ");
+    else if (Tree[node_num].left_child == NIL)
+        printf("leaf, ");
+    else
+        printf("internal node, ");
+
+    printf("[");
+
+    for (i = 0, child_node = Tree[node_num].left_child; child_node != NIL; i++, child_node = Tree[child_node].right) {
+        if (i) {
+            printf(", ");
+        }
+        printf("%d", child_node);
+    }
+    printf("]\n");
+}
+
+void CulcDepth(int node_num, int depth) //親以外を再帰的に計算
+{
+    Depth[node_num] = depth;
+    if (Tree[node_num].right != NIL)
+        CulcDepth(Tree[node_num].right, depth);
+    if (Tree[node_num].left_child != NIL)
+        CulcDepth(Tree[node_num].left_child, depth + 1);
+}
+

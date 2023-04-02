@@ -1,0 +1,34 @@
+
+object Main extends App { 
+  val rpel = io.StdIn.readLine().split(' ').toList
+
+  def toOptInt(s:String):Option[Int] = {
+    try {
+      Some(s.toInt)
+    } catch {
+      case e: Exception => None
+    }    
+  }
+
+  def solver(rpe:List[String], st:List[Int]):List[Int] = {
+    if (rpe.isEmpty) st
+    else {
+      val e = rpe.head
+      toOptInt(e) match {
+        case Some(n) => solver(rpe.tail, n::st)
+        case None => {
+          val a = st.head
+          val b = st.tail.head
+          e match {
+            case "+" => solver(rpe.tail, (a+b)::(st.tail.tail))
+            case "-" => solver(rpe.tail, (b-a)::(st.tail.tail))
+            case "*" => solver(rpe.tail, (a*b)::(st.tail.tail))
+          }
+        }
+      }
+    }
+  }
+
+  println(solver(rpel, List[Int]()).head)
+}
+

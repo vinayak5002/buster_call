@@ -1,0 +1,85 @@
+#include<stdio.h>
+#define INF = 2e9
+#define LINF = 1e18
+#define rep(i, n) for(int i = 0; i < (int)(n); i++)
+
+typedef struct{
+    char suit, value;
+    //value(値)も整数値なのでcharを使える
+}Card;
+
+void swapCard(Card* a, Card* b){
+    Card t = *a;
+    *a = *b;
+    *b = t;
+}
+
+void str2Card(Card* card, char str[]){
+    card->suit = str[0];
+    card->value = str[1] - '0';
+}
+
+void bubbleSort(Card* C, int N){
+    int i, j;
+    for(i = 0; i < N; i++){
+        for(j = N-1; j > i; j--){
+            if(C[j].value < C[j-1].value)swapCard(&C[j], &C[j-1]);
+        }
+    }
+}
+
+void selectionSort(Card* C, int N){
+    int i, j;
+    for(i = 0; i < N; i++){
+        int minj = i;
+        for(j = i+1; j < N; j++){
+            if(C[j].value < C[minj].value)minj = j;
+        }
+        swapCard(&C[i], &C[minj]);
+    }
+}
+
+short isStable(Card* Cb, Card* Cs, int N){
+    int i;
+    for(i = 0; i < N; i++){
+        if(Cb[i].suit != Cs[i].suit)return 0;
+    }
+    return 1;
+}
+
+void print(Card C[], int N){
+    int i;
+    for(i = 0; i < N; i++){
+        if(i)printf(" ");
+        printf("%c%d", C[i].suit, C[i].value);
+    }
+    printf("\n");
+}
+
+int main(void){
+    
+    int N;
+    char str[3];
+    Card Cb[100], Cs[100];
+
+    scanf("%d", &N);
+
+    int i;
+    for(i = 0; i < N; i++){
+        scanf("%s", str);
+        str2Card(&Cb[i], str);
+        Cs[i] = Cb[i];
+    }
+
+    bubbleSort(Cb, N);
+    selectionSort(Cs, N);
+
+    print(Cb, N);
+    printf("Stable\n");
+
+    print(Cs, N);
+    printf("%s\n", isStable(Cb, Cs, N) ? "Stable" : "Not stable");
+
+    return 0;
+
+}

@@ -1,0 +1,71 @@
+#include <stdio.h>
+
+#define N 1000
+#define Q 200000
+
+int main(void) {
+	int n, q, query, t, x, i, j, parent, child, tmp, Lchild, Rchild, maxnum;
+	int queue[N][Q];
+	int size[N];
+
+	scanf("%d %d", &n, &q);
+
+	for (i = 0; i < n; i++){
+		size[i] = 0;
+	}
+
+	for (i = 0; i < q; i++){
+		scanf("%d %d", &query, &t);
+		if (query == 0){
+			scanf("%d", &x);
+			queue[t][size[t]] = x;
+			child = size[t];
+			size[t]++;
+			while (child > 0) {
+				parent = (child + 1) / 2 - 1;
+				if (queue[t][child] > queue[t][parent]){
+					tmp = queue[t][child];
+					queue[t][child] = queue[t][parent];
+					queue[t][parent] = tmp;
+					child = parent;
+				}
+				else{
+					break;
+				}
+			}
+		}
+
+		else if (query == 1){
+			if (size[t] != 0){
+				printf("%d\n", queue[t][0]);
+			}
+		}
+
+		else if (query == 2){
+			if (size[t] != 0){
+				queue[t][0] = queue[t][size[t] - 1];
+				size[t]--;
+				parent = 0;
+				while (1){
+					Lchild = parent * 2 + 1;
+					Rchild = parent * 2 + 2;
+					maxnum = parent;
+					if (Lchild < size[t] && queue[t][maxnum] < queue[t][Lchild]){
+						maxnum = Lchild;
+					}
+					if (Rchild < size[t] && queue[t][maxnum] < queue[t][Rchild]){
+						maxnum = Rchild;
+					}
+					if (maxnum==parent){
+						break;
+					}
+					tmp = queue[t][parent];
+					queue[t][parent] = queue[t][maxnum];
+					queue[t][maxnum] = tmp;
+					parent = maxnum;
+				}
+			}
+		}
+	}
+	return 0;
+}

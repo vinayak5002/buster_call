@@ -1,0 +1,154 @@
+#include <iostream>
+#include <stdio.h>
+#include <string>
+#include <stdlib.h>
+
+using namespace std;
+
+
+struct Node {
+	int key;
+	Node* parent, * left, * right;
+};
+
+Node* root, * NIL;
+
+Node* getMinimum(Node* x) {
+
+	while (x->left != NIL) {
+		x = x->left;
+	}
+	return x;
+}
+
+Node* getSuccessor(Node* x) {
+	Node* y;
+	if (x->right != NIL) return getMinimum(x->right);
+
+	y = x->parent;
+	while (y != NIL && x == y->right) {
+		x = y;
+		y = y->parent;
+	}
+
+	return y;
+}
+
+void deleteNode(Node* u) {
+	Node* y;
+	Node* x;
+
+	if (u->left == NIL || u->right == NIL) y = u;
+	else y = getSuccessor(u);
+
+	if (y->left != NIL) x = y->left;
+	else x = y->right;
+
+	if (x != NIL) x->parent = y->parent;
+
+	if (y->parent == NIL) root = x;
+	else if (y == y->parent->left) y->parent->left = x;
+	else y->parent->right = x;
+
+	if (y != u) u->key = y->key;
+
+}
+
+Node* find(Node* u, int k) {
+
+	while (u != NIL && k != u->key) {
+		if (k < u->key) {
+			u = u->left;
+		}
+		else {
+			u = u->right;
+		}
+	}
+
+	return u;
+}
+
+void insert(int k) {
+
+	Node* y = NIL;
+	Node* x = root;
+	Node* z;
+	z = (Node*)malloc(sizeof(Node));
+	z->key = k;
+	z->left = NIL;
+	z->right = NIL;
+
+	while (x != NIL) {
+		y = x;
+		if (z->key < x->key) {
+			x = x->left;
+		}
+		else {
+			x = x->right;
+		}
+	}
+	z->parent = y;
+
+	if (y == NIL) {
+		root = z;
+	}
+	else if (z->key < y->key) {
+		y->left = z;
+	}
+	else {
+		y->right = z;
+	}
+
+}
+
+void inorder(Node* u) {
+
+	if (u == NIL)return;
+	inorder(u->left);
+	printf(" %d", u->key);
+	inorder(u->right);
+
+}
+
+void preorder(Node* u) {
+
+	if (u == NIL)return;
+	printf(" %d", u->key);
+	preorder(u->left);
+	preorder(u->right);
+
+}
+
+int main() {
+
+	int n, f;
+	string fig;
+
+	scanf("%d", &n);
+
+	for (int i = 0; i < n; i++) {
+		cin >> fig;
+		if (fig == "insert") {
+			scanf("%d", &f);
+			insert(f);
+		}
+		else if (fig == "find") {
+			scanf("%d", &f);
+			Node* tmp = find(root, f);
+			if (tmp != NIL) printf("yes\n");
+			else printf("no\n");
+		}
+		else if (fig == "print") {
+			inorder(root);
+			printf("\n");
+			preorder(root);
+			printf("\n");
+		}
+		else if (fig == "delete") {
+			scanf("%d", &f);
+			deleteNode(find(root, f));
+		}
+	}
+
+	return 0;
+}

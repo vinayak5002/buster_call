@@ -1,0 +1,66 @@
+#include <stdio.h>
+
+#define H 500001
+#define MISSING -2000000001
+
+int heap[H];
+int left(int i){
+	return 2 * i;
+}
+int right(int i){
+	return 2 * i + 1;
+}
+
+int h;
+
+void maxHeapify(int A[], int i){
+	int l,r;
+	int temp;
+	int largest;
+	
+    l = left(i);
+    r = right(i);
+
+    if (l <= h && A[l] > A[i]){
+        largest = l;
+    } else {
+        largest = i;
+    }
+    
+	if( r <= h && A[r] > A[largest]){
+         largest = r;
+	}
+    if( largest != i){
+         temp = A[i];
+         A[i] = A[largest];
+         A[largest] = temp;
+         maxHeapify(A, largest); // 再帰的に呼び出し
+    }
+}
+int  buildMaxHeap(int A[]){
+	int i;
+    for( i = h/2; i >= 1; i--){
+    	maxHeapify(A, i);
+    }
+}
+int main(void) {
+	// your code goes here
+	int i;
+	
+	scanf("%d",&h);
+	for(i=1;i<=H;i++){
+		heap[i] = MISSING;
+	}	
+	for(i=1;i<=h;i++){
+		scanf("%d",&heap[i]);
+	}
+	buildMaxHeap(heap);
+	for(i=1;i<=h;i++){
+		printf(" %d",heap[i]);
+		
+	}
+	printf("\n");
+	return 0;
+}
+
+

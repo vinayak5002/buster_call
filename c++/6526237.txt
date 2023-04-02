@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < (n); i++)
+using namespace std;
+using pii = pair<int, int>;
+using ll = long long;
+
+template<typename T> struct SegmentTree {
+	int n;
+	vector<T> node;
+
+	SegmentTree(int n_) {
+		n = 1;
+		while (n < n_) n *= 2;
+		node.resize(2 * n - 1);
+	}
+
+	void add(int i, T x) {
+		i += n - 1;
+		node[i] += x;
+		while (i > 0) {
+			i = (i - 1) / 2;
+			node[i] = node[i * 2 + 1] + node[i * 2 + 2];
+		}
+	}
+
+	T getsum(int a, int b, int k = 0, int l = 0, int r = -1) {
+		if (r < 0) r = n;
+		if (b <= l || r <= a) return 0;
+		if (a <= l && r <= b) return node[k];
+		T vl = getsum(a, b, 2 * k + 1, l, (l + r) / 2);
+		T vr = getsum(a, b, 2 * k + 2, (l + r) / 2, r);
+		return vl + vr;
+	}
+};
+
+int main() {
+	int n, q;
+	cin >> n >> q;
+
+	SegmentTree<int> seg(n);
+
+	rep(i, q) {
+		int com, x, y;
+		cin >> com >> x >> y;
+		x--;
+		if (com == 0) {
+			seg.add(x, y);
+		}
+		else {
+			cout << seg.getsum(x, y) << endl;
+		}
+	}
+	return 0;
+}
+

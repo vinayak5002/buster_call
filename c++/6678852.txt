@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+using namespace std;
+
+#define all(x) (x).begin(),(x).end()
+#define print(x) cout << (x) << '\n'
+typedef long long ll;
+typedef long double ld;
+using P = pair<int,int>;
+using pll = pair<ll,ll>;
+using Graph = vector<vector<int>>;
+
+//const ll MOD = 1000000007;
+//const ll MOD = 998244353;
+
+template <typename T> inline bool chmax(T &a, T b) {return a < b ? a = b, true : false;}
+template <typename T> inline bool chmin(T &a, T b) {return a > b ? a = b, true : false;}
+
+template <typename T>
+void vin(vector<T> &v) {
+    int l = v.size();
+    for(int i = 0; i < l; i++) cin >> v[i];
+}
+
+template <typename T>
+void vout(vector<T> &v) {
+    int l = v.size();
+    for(int i = 0; i < l; i++) cout << v[i] << (i < l - 1 ? ' ' : '\n');
+}
+
+//gdc(x, y) = 1, nx + my = 1となるn, mを返す
+pll extgcd(ll x, ll y) {
+    ll ps = 1LL;
+    ll pt = 0LL;
+    ll s = 0LL;
+    ll t = 1LL;
+    while (y != 0LL) {
+        ll q = x > 0LL ? x / y : y > 0LL ? -((y - x - 1LL) / y) : (x + y + 1LL) / y;
+        ll tx = x - q * y;
+        x = y;  y = tx;
+        ll ts = ps - q * s;
+        ps = s; s = ts;
+        ll tt = pt - q * t;
+        pt = t; t = tt;
+    }
+    return make_pair(ps, pt);
+}
+
+int main() {
+    cin.tie(0); cout.tie(0);
+    ios::sync_with_stdio(false);
+    cout << fixed << setprecision(18);
+
+    ll a, b;
+    cin >> a >> b;
+    pll P = extgcd(a, b);
+    ll c = gcd(a, b);
+    a /= c;
+    b /= c;
+    pll p = extgcd(a, b);
+    int u = p.first;
+    int v = p.second;
+    int g = abs(u) + abs(v);
+    int aa = u;
+    int bb = v;
+    for(int t = -1; t <= 1; t++) {
+        int A = u + t * v;
+        int B = v - t * u;
+        if(abs(A) + abs(B) < g) {
+            aa = A;
+            bb = B;
+            g = abs(aa) + abs(bb);
+        } else if(abs(A) + abs(B) == g) {
+            if(A > B) continue;
+        }
+    }
+    cout << aa << " " << bb << endl;
+    return 0;
+}

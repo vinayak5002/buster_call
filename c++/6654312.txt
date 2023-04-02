@@ -1,0 +1,135 @@
+#pragma GCC optimize("Ofast")
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <map>
+#include <queue>
+#include <cstdio>
+#include <ctime>
+#include <assert.h>
+#include <chrono>
+#include <random>
+#include <numeric>
+#include <set>
+#include <deque>
+#include <stack>
+#include <sstream>
+#include <utility>
+#include <cstring>
+#include <unordered_map>
+#include <unordered_set>
+#include <tuple>
+#include <array>
+#include <bitset>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long ull;
+
+mt19937_64 rng(chrono::steady_clock::now().time_since_epoch().count());
+ll myRand(ll B) {
+    return (ull)rng() % B;
+}
+inline double time() {
+    return static_cast<long double>(chrono::duration_cast<chrono::nanoseconds>(chrono::steady_clock::now().time_since_epoch()).count()) * 1e-9;
+}
+
+// 嘘解法+chalケース
+// https://onlinejudge.u-aizu.ac.jp/solutions/problem/2376/review/4908870/KKT89/C++14
+
+struct UnionFind{
+    vector<int> par,num;
+    UnionFind(int n):par(n),num(n,1){
+        iota(par.begin(),par.end(),0);  //include<numeric>
+    }
+    int find(int v){
+        return (par[v]==v)?v:(par[v]=find(par[v]));
+    }
+    void unite(int u,int v){
+        u=find(u),v=find(v);
+        if(u==v)return;
+        if(num[u]<num[v])swap(u,v);
+        num[u]+=num[v];
+        par[v]=u;
+    }
+    bool same(int u,int v){
+        return find(u) == find(v);
+    }
+    int size(int v){
+        return num[find(v)];
+    }
+};
+
+int main(){
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    int n; cin >> n;
+    vector<string> g(n);
+    UnionFind uf(n);
+    for(int i=0;i<n;i++){
+        cin >> g[i];
+        for(int j=0;j<n;j++){
+            if(g[i][j] == 'Y'){
+                uf.unite(i,j);
+            }
+        }
+    }
+    vector<int> e(n),v(n);
+    for(int i=0;i<n;i++){
+        v[uf.find(i)]++;
+        for(int j=i+1;j<n;j++){
+            if(g[i][j] == 'Y'){
+                e[uf.find(i)]++;
+            }
+        }
+    }
+    int od = 0;
+    int ev = 0;
+    int rm = 0;
+    for(int i=0;i<n;i++){
+        if(uf.find(i) == i){
+            if(v[i]%2) od++;
+            else ev++;
+            rm += v[i]*(v[i]-1)/2 - e[i];
+        }
+    }
+    rm %= 2;
+
+    using T = tuple<int,int,int>;
+    map<T,bool> mp;
+
+    auto solve=[&](auto solve,int o,int e,int r)->bool{
+        if(mp.find(T(e,o,r)) != mp.end()) return mp[T(o,e,r)];
+        bool res = false;
+        // o+eの最小値は2(連結にした時点でゲーム終了なので)
+        if(o+e == 2){
+            if(r%2 == 0) res = false;
+            else res = true;
+        }
+        else{
+            // 全ての行動を試せば良い
+            // 遷移が実はDAGになっていそう
+            if(r == 1){
+                if(!solve(solve,o,e,0)) res = true;
+            }
+            if(o >= 2){
+                if(!solve(solve,o-2,e+1,r)) res = true;
+            }
+            if(e >= 2){
+                if(!solve(solve,o,e-1,r^1)) res = true;
+            }
+            if(o and e){
+                if(!solve(solve,o,e-1,r^1)) res = true;
+            }
+        }
+
+        mp[T(o,e,r)] = res; 
+        return res;
+    };
+    if(solve(solve, od, ev, rm)){
+        cout << "Taro" << endl;
+    }
+    else{
+        cout << "Hanako" << endl;
+    }
+}
+

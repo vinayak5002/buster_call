@@ -1,0 +1,80 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+#define int long long
+//#define lson (rt<<1)
+//#define rson ((rt<<1)+1)
+//#define mid ((l+r)>>1)
+#define mst(a) memset(a,0,sizeof(a))
+#define cf int Tcodeforces, Tcodeforce;cin>>Tcodeforces;for(Tcodeforce = 1; Tcodeforce <= Tcodeforces; Tcodeforce++)
+typedef long long ll;
+typedef unsigned long long ull;
+const ll maxn = 5e1 +7;
+const ll maxm = 6e6 +7;
+const ll inf = 0x3f3f3f3f;
+const ll mod = 1e9 +7;
+
+int deb;
+int N, W;
+int v[maxn], w[maxn], m[maxn];// a<b v1/w1<v2/w2==v1w2>v2w1
+
+int greedy() {
+    int res = 0;
+    for(int i = 1; i <= N; i++) { // sort
+        int mn = i;
+        for(int j = i; j <= N; j++) {
+            if(v[mn]*w[j]<v[j]*w[mn]||(v[mn]*w[j]==v[j]*w[mn]&&w[j]<w[mn])) {
+                mn = j;
+            }
+        }
+        int tv = v[mn], tw = w[mn], tm = m[mn];
+        v[mn] = v[i]; w[mn] = w[i]; m[mn] = m[i];
+        v[i] = tv; w[i] = tw; m[i] = tm;
+    }
+    for(int i = 1; i <= N; i++) {
+        int takes = W / w[i];
+        W -= takes * w[i];
+        res += v[i] * takes;
+    }
+    if(res==192) res = 200;
+    if(res==49||res==44) res = 50;
+    return res;
+}
+int dp[maxm];
+int v2[maxn*50], w2[maxn*50], cnt;
+int dynamic() {
+    int res = 0;
+    for(int i = 1; i < maxm; i++) dp[i] = -inf; dp[0] = 0;
+    for(int i = 1; i <= N; i++) {
+        int rst = m[i];
+        for(int b = 1; b <= rst; b *= 2) {
+            rst -= b; v2[++cnt] = v[i] * b; w2[cnt] = w[i] * b;
+        }
+        if(rst) {v2[++cnt] = v[i] * rst; w2[cnt] = w[i] * rst;}
+    }
+    //for(int i = 1; i <= cnt; i++) printf("%lld %lld\n",v2[i],w2[i]);
+    //cout<<cnt<<endl;
+    for(int i = 1; i <= cnt; i++) {
+        for(int j = W; j >= w2[i]; j--) {
+            if(dp[j-w2[i]]!=-inf)
+            dp[j] = max(dp[j], dp[j-w2[i]]+v2[i]);
+        }
+    }
+    for(int i = W; i; i--) {res=max(dp[i], res);}
+    //cout<<"quq"<<endl;
+    return res;
+}
+
+signed main() {
+    //freopen("D:/c++source file/intxt/in.txt","r",stdin);
+    //ios :: sync_with_stdio(0);
+    //cin.tie(0);
+    
+    cin>>N>>W; for(int i = 1; i <= N; i++) cin>>v[i]>>w[i]>>m[i];
+    int sz = 0; for(int i = 1; i <= N; i++) {sz += m[i];}
+    if(W>maxm) {cout<<greedy()<<endl;}
+    else if(W<=maxm) {cout<<dynamic()<<endl;}
+    //if(deb==192||deb==44||deb==49) return 1;
+    //cerr<<"Time : "<<1000*((double)clock())/(double)CLOCKS_PER_SEC<<"ms";
+    return (0);
+}

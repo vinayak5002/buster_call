@@ -1,0 +1,158 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using ull = unsigned long long;
+using ld = long double;
+using vl = vector<ll>;
+template<class T> using vc = vector<T>;
+template<class T> using vvc = vector<vector<T>>;
+
+#define eb emplace_back
+#define all(x) (x).begin(), (x).end()
+#define rep(i, n) for (ll i = 0; i < (n); i++)
+#define repr(i, n) for (ll i = (n)-1; i >= 0; i--)
+#define repe(i, l, r) for (ll i = (l); i < (r); i++)
+#define reper(i, l, r) for (ll i = (r)-1; i >= (l); i--)
+#define repa(i,n) for (auto& i: n)
+
+template<class T1, class T2> inline bool chmax(T1 &a, const T2 &b) {if (a<b) { a=b; return 1;} return 0;}
+template<class T1, class T2> inline bool chmin(T1 &a, const T2 &b) {if (b<a) { a=b; return 1;} return 0;}
+
+struct init{init(){cin.tie(0);ios::sync_with_stdio(false);cout<<fixed<<setprecision(15);cerr<<fixed<<setprecision(15);}}init_;
+
+template <typename T, typename U> ostream& operator<<(ostream&out,const pair<T, U>&a){return out<<a.first<<' '<<a.second;}
+template <typename T> ostream& operator<<(ostream&out, const vector<T>&a){for(auto it=a.begin();it!= a.end();){out<<*it;if(++it!=a.end())out<<' ';}return out;}
+template <typename T, size_t N> ostream& operator<<(ostream&out, const array<T, N>&a){for(auto it=a.begin();it!= a.end();){out<<*it;if(++it!=a.end())out<<' ';}return out;}
+template <typename T> ostream& operator<<(ostream&out, const set<T>&a){for(auto it=a.begin();it!=a.end();){out<<*it;if(++it!=a.end())out<<' ';}return out;}
+template <typename T, typename U> ostream& operator<<(ostream&out, const map<T, U>&a){for(auto it=a.begin();it!=a.end();){out<<*it;if(++it!=a.end())out<<'\n';}return out;}
+
+#ifdef DEBUG
+template <class T, class N> void verr(const vector<T>& a, const N& n) { rep(i, n) cerr << a[i] << " "; cerr << endl; }
+template <class T, class N, size_t AN> void verr(const array<T, AN>& a, const N& n) { rep(i, n) cerr << a[i] << " "; cerr << endl; }
+ll dbgt = 1; void err() { cerr << "passed " << dbgt++ << endl; }
+template<class H, class... T> void err(H&& h,T&&... t){ cerr<< h << (sizeof...(t)?" ":"\n") << flush; if(sizeof...(t)>0) err(forward<T>(t)...); }
+#else
+void err(){}
+template <class H, class... T>
+void err(H &&h, T &&...t) {}
+template <class H, class... T>
+void verr(H &&h, T &&...t) {}
+#endif
+
+const ll INF = 4e18;
+const ld EPS = 1e-11;
+const ld PI = acos(-1.0L);
+// const ll MOD = 1e9 + 7;
+const ll MOD = 998244353;
+//--------------------------------------------------------------------------------//
+
+void solve(int N){
+    string S;
+    cin >> S;
+    vvc<int> L;
+    vc<int> C;
+    repa(c, S) {
+        if(c == 'u') {
+            if (C.size() > 0) L.eb(C);
+            C.clear();
+        }else{
+            C.eb(c - '0');
+        }
+    }
+    if (C.size() > 0) L.eb(C);
+    int on = L.size();
+
+    // repa(l, L) err(l);
+
+    // assert(false);
+
+    // 各列iでjが出るまでに出現する命令集合K
+    vc<vvc<int>> ops(on, vvc<int>(10, vc<int>(10)));
+    rep(i, on) {
+        vc<int> ps(10);
+        repa(v, L[i]) {
+            if(ps[v]) {
+                cout << "UNSAFE\n";
+                return;
+            }
+            ps[v] = 1;
+            ops[i][v] = ps;
+        }
+    }
+
+    // i->jの順序で出る列
+    vc<vvc<int>> ijs(10, vvc<int>(10));
+
+    rep(i, 10) rep(j, 10) {
+        if (i == j) continue;
+        rep(opi, on) {
+            if(ops[opi][j][i]) {
+                ijs[i][j].eb(opi);
+            }
+        }
+    }
+
+    // (使った, 始点, 最後)
+    int used[1 << 10][10][10];
+    rep(i, 1 << 10) rep(j, 10) rep(k, 10) used[i][j][k] = 0;
+    queue<tuple<int, int, int>> q;
+    rep(i, 10) q.emplace(1 << i, i, i), used[1 << i][i][i] = 1;
+
+    while(!q.empty()) {
+        const auto [S, start, now] = q.front();
+        q.pop();
+
+        rep(to, 10) {
+            if (to != start and S >> to & 1) continue;
+            repa(opi, ijs[now][to]) {
+                bool dup = false;
+                int T = S;
+                rep(i, 10) {
+                    if (i == now or i == to) continue;
+                    if (ops[opi][to][i]) {
+                        if(S >> i & 1) dup = true;
+                        T |= 1 << i;
+                    }
+                }
+                T |= 1 << to;
+                // err(S, start, now, to, used[T][start][to], dup);
+                if(!dup and !used[T][start][to]) {
+                    used[T][start][to] = true;
+                    q.emplace(T, start, to);
+                    if(start == to) {
+                        cout << "UNSAFE\n";
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
+    // bool ok = true;
+    // rep(i, 10) rep(j, 10) {
+    //     if (i == j) continue;
+    //     repa(ij1, ijs[i][j]) {
+    //         repa(ij2, ijs[j][i]) {
+    //             bool dup = false;
+    //             rep(k, 10) {
+    //                 if (k == i or k == j) continue;
+    //                 if (ops[ij1][j][k] and ops[ij2][i][k]) dup = true;
+    //             }
+    //             if(!dup) {
+    //                 ok = false;
+    //             }
+    //         }
+    //     }
+    // }
+
+    cout << "SAFE" << '\n';
+}
+
+int main() {
+    while(true) {
+        int N;
+        cin >> N;
+        if (N == 0) break;
+        solve(N);
+    }
+}

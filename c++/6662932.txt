@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+using namespace std;
+using vi = vector<int64_t>;
+using vii = vector<vi>;
+using pii = pair<int, int>;
+
+#define rep(i, n) for (int64_t i = 0; i < (int64_t)(n); i++)
+#define all(v) v.begin(), v.end()
+
+int64_t inf = 1e18;
+
+// 以下可変
+template <typename T>
+void upgrade(T &LEFT, const T &RIGHT)
+{
+    if (LEFT < RIGHT)
+        LEFT = RIGHT;
+
+    return;
+}
+template <typename T>
+void downgrade(T &LEFT, const T &RIGHT)
+{
+    if (LEFT > RIGHT)
+        LEFT = RIGHT;
+
+    return;
+}
+
+
+
+int main()
+{
+    int64_t N, K;
+    cin >> N >> K;
+    vii d(N, vi(N, inf));
+    rep(i, N)
+    {
+        d[i][i] = 0;
+    }
+
+    rep(i, K)
+    {
+        int64_t a, b, dis;
+        cin >> a >> b >> dis;
+        downgrade(d[a][b], dis);
+    }
+
+    for (int k = 0; k < N; k++)
+    { // 経由する頂点
+        for (int i = 0; i < N; i++)
+        { // 始点
+            for (int j = 0; j < N; j++)
+            { // 終点
+                if (d[i][k] == inf || d[k][j] == inf)
+                {
+                    continue;
+                }
+                    d[i][j] = min(d[i][j], d[i][k] + d[k][j]);
+            }
+        }
+    }
+
+    rep(i,N)
+    {
+        if(d[i][i] < 0){
+            cout << "NEGATIVE CYCLE" << endl;
+            return 0;
+        }
+    }
+
+    rep(i,N)rep(j,N){
+        if(d[i][j] == inf)
+        {
+            cout << "INF";
+        }
+        else{
+            cout << d[i][j];
+        }
+        if(j == N-1)
+        {
+            cout << endl;
+        }
+        else{
+            cout << " ";
+        }
+    }
+
+    return 0;
+}
+

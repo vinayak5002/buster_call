@@ -1,0 +1,99 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+#include <cstdlib>
+#include <cmath>
+#include <algorithm>
+#include <vector>
+#include <set>
+#include <map>
+#include <queue>
+#include <stack>
+#include <list>
+#include <iterator>
+#include <cassert>
+#include <numeric>
+#include <functional>
+#include <ctime>
+#include <bitset>
+#pragma warning(disable:4996) 
+
+//#define ATCODER
+#ifdef ATCODER
+#include <atcoder/all>
+#endif
+
+typedef long long ll;
+typedef unsigned long long ull;
+#define LINF  9223300000000000000
+#define LINF2 1223300000000000000
+#define LINF3 1000000000000
+#define INF 2140000000
+const long long MOD = 1000000007;
+//const long long MOD = 998244353;
+
+using namespace std;
+#ifdef ATCODER
+using namespace atcoder;
+#endif
+
+
+void solve()
+{
+    int n, m, r;
+    scanf("%d%d%d", &n, &m, &r);
+    
+    set<pair<int, int>> z;    // w[id] ,id
+    vector<vector<int>> g(n);    // toedge
+    vector<int> s(m), t(m), w(m);
+    for (int i = 0; i < m; i++) {
+        scanf("%d%d%d", &s[i], &t[i], &w[i]);
+        g[s[i]].push_back(i);
+    }
+    ll ans = 0;
+    vector<int> vis(n);
+    queue<int> que;
+    que.push(r);
+    while ( 1 ) {
+        while(!que.empty()) {
+            int tmp = que.front();
+            que.pop();
+            vis[tmp] = 1;
+            for (int i = 0; i < (int)g[tmp].size(); i++) {
+                int id = g[tmp][i];
+                if (vis[t[id]]) continue;
+                z.insert(make_pair(w[id], id));
+            }
+        }
+        if (z.empty()) {
+            break;
+        }
+        auto it = z.begin();
+        int w0 = it->first;
+        int id = it->second;
+        if (vis[t[id]] == 0) {
+            que.push(t[id]);
+            ans += w0;
+        }
+        z.erase(*it);
+    }
+    printf("%lld\n", ans);
+
+    return;
+}
+
+int main()
+{
+#if 1
+    solve();
+#else
+    int T, t;
+    scanf("%d", &T);
+    for (t = 0; t < T; t++) {
+        //printf("Case #%d: ", t + 1);
+        solve();
+    }
+#endif
+    return 0;
+}
+

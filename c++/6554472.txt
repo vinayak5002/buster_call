@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+#define INF 100000000
+#define rep(i,n) for(int i=0;i<n;i++)
+#define FS first
+#define SD second
+using namespace std;
+using P=pair<int,int>;
+const int dx[]={-1,0,0,1},dy[]={0,-1,1,0};
+template<typename T>bool chmax(T &a,const T &b){if(a<b){a=b;return true;}return false;}
+template<typename T>bool chmin(T &a,const T &b){if(a>b){a=b;return true;}return false;}
+int main(void) {
+   cin.tie(0);
+   ios::sync_with_stdio(0);
+   int h,w,n; cin >> h >> w >> n;
+   vector<string> s(h);
+   rep(i,h) cin >> s[i];
+   vector<P> p(n);
+   rep(i,n) cin >> p[i].FS >> p[i].SD;
+   vector ans(h,vector<int>(w,INF));
+   rep(i,h) rep(j,w) {
+      if(s[i][j]!='.') continue;
+      ans[i][j]=0;
+      vector dist(h,vector<int>(w,INF));
+      dist[i][j]=0;
+      deque<P> q;
+      q.push_back(make_pair(i,j));
+      while(!q.empty()) {
+         int x,y;
+         tie(x,y)=q.back();
+         q.pop_back();
+         rep(k,4) {
+            int nx=x+dx[k],ny=y+dy[k];
+            if(!(0<=nx && nx<h && 0<=ny && ny<w) || s[nx][ny]=='#') continue;
+            int d=(s[nx][ny]=='@');
+            if(chmin(dist[nx][ny],dist[x][y]+d)) {
+               if(d==1) q.push_front(make_pair(nx,ny));
+               else q.push_back(make_pair(nx,ny));
+            }
+         }
+      }
+      for(auto k:p) chmax(ans[i][j],dist[k.FS-1][k.SD-1]);
+   }
+   int rx=0,ry=0;
+   rep(i,h) rep(j,w) if(ans[rx][ry]>ans[i][j]) {
+      rx=i;
+      ry=j;
+   }
+   if(ans[rx][ry]==INF) cout << "-1 -1" << endl;
+   else cout << rx+1 << ' ' << ry+1 << endl;
+   return 0;
+}
+

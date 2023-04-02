@@ -1,0 +1,89 @@
+#include<iostream>
+#include<vector>
+#include<algorithm>
+#include<map>
+#include<set>
+#include<queue>
+#define rep(i,n) for (int i = 0; i < (n); i++)
+#define all(v) v.begin(), v.end()
+using namespace std;
+using ll = long long;
+template<typename T> bool chmax(T &a, const T b) {
+    if (a < b) {a = b; return true;} else return false; }
+template<typename T> bool chmin(T &a, const T b) {
+    if (a > b) {a = b; return true;} else return false; }
+
+int n,w,d;
+
+void solve(){
+    vector<int> p(n),s(n);
+    rep(i,n)cin >> p[i] >> s[i];
+    queue<pair<int,int>> Q;
+    queue<pair<int,int>> Q2;
+    Q.emplace(w,d);
+    rep(i,n){
+        int id = 1;
+        if(i!=0){
+            Q=Q2;
+            while(Q2.size())Q2.pop();
+        }
+        pair<int,int> tgt;
+        while(!Q.empty()){
+            auto tmp = Q.front(); Q.pop();
+            if(id==p[i])tgt = tmp;
+            else Q2.push(tmp);
+            id++;
+        }
+        auto [tw,td] = tgt;
+        s[i] %= (2*tw+2*td);
+        if(s[i]<tw){
+            Q2.emplace(min(s[i],tw-s[i]),td);
+            Q2.emplace(max(s[i],tw-s[i]),td);
+            continue;
+        }
+        s[i] -= tw;
+        if(s[i]<td){
+            Q2.emplace(tw,min(s[i],td-s[i]));
+            Q2.emplace(tw,max(s[i],td-s[i]));
+            continue;
+        }
+        s[i] -= td;
+        if(s[i]<tw){
+            Q2.emplace(min(s[i],tw-s[i]),td);
+            Q2.emplace(max(s[i],tw-s[i]),td);
+            continue;
+        }
+        s[i] -= tw;
+        if(s[i]<td){
+            Q2.emplace(tw,min(s[i],td-s[i]));
+            Q2.emplace(tw,max(s[i],td-s[i]));
+            continue;
+        }
+    }
+    vector<int> v;
+
+    while(!Q2.empty()){
+        v.push_back(Q2.front().first*Q2.front().second);
+        Q2.pop();        
+    }
+    sort(all(v));
+    rep(i,v.size()){
+        if(i!=0)cout <<" ";
+        cout << v[i];
+    }
+    cout << endl;
+}
+
+int main(){
+    while(true){
+        cin >> n >> w >> d;
+        if(n==0&&w==0&&d==0)break;
+        if(n==0){
+            cout << w*d << endl;
+        }
+        else solve();
+    }
+    return 0;
+}
+
+

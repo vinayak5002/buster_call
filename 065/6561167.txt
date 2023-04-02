@@ -1,0 +1,91 @@
+#include<iostream>
+#include<vector>
+
+class Graph {
+public:
+	Graph(const int num_nodes) : num_nodes(num_nodes) {
+		edges.assign(num_nodes, std::vector<int>(num_nodes, 0));
+		detected_time.assign(num_nodes, -1);
+		explored_time.assign(num_nodes, -1);
+	}
+
+	~Graph() {
+		edges.clear();
+		detected_time.clear();
+		explored_time.clear();
+	}
+
+	void addEdge(const int n, const int v) {
+		edges[n-1][v-1] = 1;
+	}
+
+	void printMatrix() {
+		for (int i = 0; i < num_nodes; i++) {
+			for (int j = 0; j < num_nodes; j++) {
+				std::cout << edges[i][j];
+				if (j != num_nodes - 1) {
+					std::cout << " ";
+				}
+			}
+			std::cout << std::endl;
+		}
+	}
+
+	void DFS() {
+		int time = 0;
+		for (int i = 0; i < num_nodes; i++) {
+			if (explored_time[i] != -1) continue;
+			time++;
+			time = exploreNode(i, time);
+		}
+	}
+
+	// print id d f
+	void printTimes() {
+		for (int i = 0; i < num_nodes; i++) {
+			std::cout << i + 1 << " " << detected_time[i] << " " << explored_time[i] << std::endl;
+		}
+	}
+
+private:
+	// Depth First Search
+	int exploreNode(const int n, int time) {
+		if (detected_time[n] == -1) {
+			detected_time[n] = time;
+		}
+
+		for (int i = 0; i < num_nodes; i++) {
+			if (edges[n][i] == 1 && explored_time[i] == -1) {
+				time++;
+				time = exploreNode(i, time);
+			}
+		}
+		time++;
+		explored_time[n] = time;
+		return time;
+	}
+
+	std::vector<std::vector<int>> edges;
+	int num_nodes;
+	std::vector<int> detected_time;
+	std::vector<int> explored_time;
+};
+
+int main() {
+	int num_nodes;
+	std::cin >> num_nodes;
+	Graph graph(num_nodes);
+	// read edge
+	for (int i = 0; i < num_nodes; i++) {
+		int n, k;
+		std::cin >> n >> k;
+		for (int j = 0; j < k; j++) {
+			int v;
+			std::cin >> v;
+			graph.addEdge(n, v);
+		}
+	}
+	//graph.printMatrix();
+	graph.DFS();
+	graph.printTimes();
+}

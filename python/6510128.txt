@@ -1,0 +1,35 @@
+CHAR_DIC_NUM = [1] * 13
+CHAR_TYPE_DIC = {'A': 1, 'G': 2, 'C': 3, 'T': 4}
+CHAR_TYPES_NUM = 4
+
+# 4の累乗をセットする
+for i in range(1, len(CHAR_DIC_NUM)):
+    CHAR_DIC_NUM[i] = CHAR_DIC_NUM[i - 1] * len(CHAR_TYPE_DIC)
+
+N = int(input())
+
+# 4の累乗が登録された一番大きい数分、用意する
+CHAR_DIC_BOOL = [False] * CHAR_DIC_NUM[12]
+
+def getCharNum(str):
+    global CHAR_DIC_NUM, CHAR_TYPE_DIC
+    ret = -1
+    # 入力された文字列の文字を一つ一つCHAR_DIC_NUMリストを参照して合計をとる
+    for i in range(len(str)):
+        # CHAR_DIC_NUMの要素は4倍して次の要素になるから
+        # 入力された文字を1~4のどれかの数字に変換 x 4の累乗[文字の番目]
+        # 入力された文字の種別が4であっても、次の文字と被ることはない
+        ret += CHAR_TYPE_DIC[str[i]] * CHAR_DIC_NUM[i]
+    return ret
+
+
+for _ in range(N):
+    command, str = map(str, input().split())
+    if command[0] == 'i':
+        # insert で 辞書の該当箇所に
+        CHAR_DIC_BOOL[getCharNum(str)] = True
+    else:
+        if CHAR_DIC_BOOL[getCharNum(str)]:
+            print("yes")
+        else:
+            print("no")

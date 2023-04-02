@@ -1,0 +1,75 @@
+#include <stdio.h>
+
+#define NIL -1
+#define M 100005
+
+void printChildren(int);
+void setDepth(int, int);
+
+typedef struct node{
+  int parent;
+  int left;
+  int right;
+} node_t;
+
+node_t T[M];
+int D[M];
+
+int main( void ){
+
+  int n, d, v, c, l, root;
+
+  scanf("%d", &n);
+
+  for( int i = 0; i < n; i++ ){
+    T[i].parent = NIL;
+    T[i].left = NIL;
+    T[i].right = NIL;
+  }
+
+  for( int i = 0; i < n; i++ ){
+    scanf("%d %d", &v, &d);
+    for( int j = 0; j < d; j++ ){
+      scanf("%d", &c);
+      if( j == 0 ) T[v].left = c;
+      else T[l].right = c;
+      l = c;
+      T[c].parent = v;
+    }
+  }
+  for( int i = 0; i < n; i++ ){
+    if( T[i].parent == NIL ) root = i;
+  }
+
+  setDepth(root,0);
+
+  for( int i = 0; i < n; i++ ){
+    printf("node %d: parent = %d, depth = %d, ", i, T[i].parent, D[i]);
+    if( i == root ) printf("root, ");
+    else if( T[i].left == NIL ) printf("leaf, ");
+    else printf("internal node, ");
+    printf("[");
+    printChildren(i);
+    printf("]\n");
+  }
+
+  return 0;
+}
+
+void printChildren( int i ){
+  int c = T[i].left;
+  if( c != NIL) printf("%d", c);
+  while( c != NIL && T[c].right != NIL ){
+    printf(", ");
+    printf("%d", T[c].right );
+    c = T[c].right;
+
+  }
+ }
+
+ void setDepth( int u, int p ){
+   D[u] = p;
+   if( T[u].right != NIL ) setDepth( T[u].right, p );
+   if( T[u].left != NIL ) setDepth( T[u].left, p+1 );
+ }
+

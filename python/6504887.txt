@@ -1,0 +1,45 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let pair = si[0].split(" ");
+	let n = Number(pair[0]);
+	let q = Number(pair[1]);
+
+	let array = [n];
+	for (let i = 0; i < n; i++) {// 二次元配列をn個作成
+		let tmp = [];
+		array[i] = tmp;
+	}
+	
+	let str = "";
+	for (let i = 0; i < q; i++) {// q回命令を実行.
+		pair = si[i + 1].split(" ");
+		let leftN = Number(pair[0]);
+		let midN = Number(pair[1]);
+		let rightN = Number(pair[2]);
+
+		switch (leftN) {
+			case 0:
+				array[midN].push(rightN);
+				break;
+
+			case 1:
+				if (array[midN].length > 0) {
+					str += array[midN][0] + "\n";
+				} // 要素がない場合はなにもしない
+				break;
+
+			case 2:
+				if (array[midN].length > 0) {
+					for (let j = 0; j < array[midN].length - 1; j++) {// 2つ目以降の要素を手前にずらす
+						array[midN][j] = array[midN][j + 1];
+					}
+					array[midN].length--;
+				}// 要素がない場合はなにもしない
+				break;
+		}
+	}
+	so.write(str);
+}

@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define rep(i, st, n) for (ll i = (ll)st; i < (ll)st + (ll)n; i++)
+ll a, b, c, d, n, m, k, cnt, ans;
+ll memo[205][200005];
+int v[205], w[205];
+ll knapsack_rec(ll i, ll b) {
+    if (memo[i][b] != 0) {  // 既に計算したことがあるなら再利用
+        return memo[i][b];
+    }
+    ll ret;
+    if (i == n) {
+        ret = 0;
+    } else if (b < w[i]) {
+        ret = knapsack_rec(i + 1, b);
+    } else {
+        ll use = knapsack_rec(i + 1, b - w[i]) + v[i];
+        ll no_use = knapsack_rec(i + 1, b);
+        ret = max(use, no_use);
+    }
+    memo[i][b] = ret;  // 結果をメモ
+    return ret;
+}
+int main() {
+    // 入力
+    cin >> n >> b;
+    rep(i, 0, n) cin >> v[i] >> w[i];
+    cout << knapsack_rec(0, b) << endl;  // 答えの出力
+}

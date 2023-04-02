@@ -1,0 +1,107 @@
+#include<cstdio>
+#include<algorithm>
+#include<vector>
+#include<queue>
+#include<stack>
+#include<cstring>
+#include<set>
+#include<map>
+#include<cmath>
+#include<iostream>
+#define IOS ios::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+#define Inf 0x3f3f3f3f
+//#define emplace push
+//#define emplace_back push_back
+using namespace std;
+typedef long long LL;
+typedef pair<int,int> P;
+typedef pair<P,P> PP;
+const int MAXX=100005;
+const double eps=0.0000001;
+
+LL n,q,a[MAXX],tree[MAXX<<2],laze[MAXX<<2];
+LL init=2147483647;
+
+void push_up(LL rt){
+	tree[rt]=min(tree[rt<<1],tree[rt<<1|1]);
+}
+
+void build(LL l,LL r,LL rt){
+	if(l==r){
+		tree[rt]=a[l];
+		return;
+	}
+	LL mid=(l+r)>>1;
+	build(l,mid,rt<<1);
+	build(mid+1,r,rt<<1|1);
+	push_up(rt);
+}
+
+void push_down(LL rt,LL ln,LL rn){
+	if(laze[rt]!=init){
+		tree[rt<<1]=min(tree[rt<<1],laze[rt]);
+		tree[rt<<1|1]=min(tree[rt<<1|1],laze[rt]);
+		laze[rt<<1]=min(laze[rt<<1],laze[rt]);
+		laze[rt<<1|1]=min(laze[rt<<1|1],laze[rt]);
+		laze[rt]=init;
+	}
+}
+
+void updata(LL L,LL R,LL jj,LL l,LL r,LL rt){
+	if(L<=l&&r<=R){
+//		laze[rt]=min(laze[rt],jj);
+		tree[rt]=jj;
+		return;
+	}
+	LL mid=(l+r)>>1;
+//	push_down(rt,mid-l+1,r-mid);
+	if(L<=mid)
+		updata(L,R,jj,l,mid,rt<<1);
+	if(R>mid)
+		updata(L,R,jj,mid+1,r,rt<<1|1);
+	push_up(rt);
+}
+
+LL getmin(LL L,LL R,LL l,LL r,LL rt){
+	if(L<=l&&R>=r){
+		return tree[rt];
+	}
+	LL mid=(l+r)>>1,ret=init;
+//	push_down(rt,mid-l+1,r-mid);
+	if(L<=mid)
+		ret=min(ret,getmin(L,R,l,mid,rt<<1));
+	if(R>mid)
+		ret=min(ret,getmin(L,R,mid+1,r,rt<<1|1));
+	return ret;
+}
+//build(1,n,1);
+//updata(l,r,k,1,n,1);
+//getmin(l,r,1,n,1);
+
+inline void solve_it(){
+	scanf("%lld%lld",&n,&q);
+	for(LL i=1;i<=n;++i)
+		a[i]=laze[i]=init;
+	build(1,n,1);
+	while(q--){
+		LL ch,l,r;
+		scanf("%lld%lld%lld",&ch,&l,&r);
+		if(ch==0LL){
+			updata(l+1,l+1,r,1,n,1);
+		}
+		else{
+			printf("%lld\n",getmin(l+1,r+1,1,n,1));
+		}
+	}
+	
+	
+}
+
+signed main(){
+//	IOS
+//	int T;scanf("%d",&T);
+//	while(T--)
+		solve_it();
+	
+	return 0;
+}

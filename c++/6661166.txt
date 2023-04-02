@@ -1,0 +1,94 @@
+#include <vector>
+#include <iostream>
+using namespace std;
+
+template <class T>
+bool chmax(T &a, const T &b)
+{
+    if (a < b)
+    {
+        a = b;
+        return 1;
+    }
+    return 0;
+}
+template <class T>
+bool chmin(T &a, const T &b)
+{
+    if (b < a)
+    {
+        a = b;
+        return 1;
+    }
+    return 0;
+}
+
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define all(x) (x).begin(), (x).end()
+
+typedef long long ll;
+const long long INF = 1LL << 60;
+
+ll w,h;
+ll ans = 0;
+vector<vector<int> > c;
+vector<vector<int> > memo;
+
+ll dfs(int y, int x, int d)
+{
+    if(c[y][x] == 0) {
+        return 0;
+    }
+    if(memo[y][x] == 1) {
+        return 0;
+    }
+
+    if(d==0) ans++;
+
+    memo[y][x] = 1;
+
+    if(y >= 1) dfs(y-1,x,d+1);
+    if(y <= h-2) dfs(y+1,x,d+1);
+    if(x >= 1) dfs(y,x-1,d+1);
+    if(x <= w-2) dfs(y,x+1,d+1);
+
+    if(y >= 1 && x >= 1) dfs(y-1,x-1,d+1);
+    if(y >= 1 && x <= w-2) dfs(y-1,x+1,d+1);
+    if(y <= h-2 && x >= 1) dfs(y+1,x-1,d+1);
+    if(y <= h-2 && x <= w-2) dfs(y+1,x+1,d+1);
+    
+    return 0;
+}
+
+int main()
+{
+    while(true) {
+        ans = 0;
+        cin >> w >> h;
+
+        if(w==0 && h==0) return 0;
+
+        c.assign(h, vector<int>(w,0));
+        memo.assign(h, vector<int>(w,0));
+
+        rep(i,h){
+            rep(j,w) {
+                cin >> c[i][j];
+            }
+        }
+
+        rep(i,h){
+            rep(j,w) {
+                dfs(i,j,0);
+            }
+        }
+
+        cout << ans << endl;
+    }
+}
+/**
+R G B
+G R B
+
+ *
+ */

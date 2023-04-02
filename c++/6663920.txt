@@ -1,0 +1,108 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+using namespace std;
+
+
+class Node {
+public:
+	Node* parent;
+	Node* l;
+	Node* r;
+	long key;
+
+	Node() : parent(NULL), l(NULL), r(NULL), key(0) {
+		return;
+	}
+	~Node() {
+		if (l != NULL) { delete l; l = NULL; }
+		if (r != NULL) { delete r; r = NULL; }
+	}
+};
+
+void insert(Node** root_handle, long key) {
+	Node* y = NULL;
+	Node* x = *root_handle;
+
+	while (x != NULL) {
+		y = x;
+		if (key < x->key) {
+			x = x->l;
+		}
+		else {
+			x = x->r;
+		}
+	}
+
+	Node* z = new Node;
+	z->parent = y;
+	z->key = key;
+
+	if (y == NULL) {
+		*root_handle = z;
+	}
+	else if (z->key < y->key) {
+		y->l = z;
+	}
+	else {
+		y->r = z;
+	}
+	return;
+}
+
+void print_inorder(Node* n) {
+	if (n->l != NULL) {
+		print_inorder(n->l);
+	}
+	cout << " " << n->key;
+
+	if (n->r != NULL) {
+		print_inorder(n->r);
+	}
+	return;
+}
+
+void print_preorder(Node* n) {
+	cout << " " << n->key;
+	if (n->l != NULL) {
+		print_preorder(n->l);
+	}
+
+	if (n->r != NULL) {
+		print_preorder(n->r);
+	}
+	return;
+}
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n, a;
+	string str;
+	Node* root = NULL;
+
+	cin >> n;
+	while (n--) {
+		cin >> str;
+		if (str[0] == 'i') {
+			cin >> a;
+			insert(&root, a);
+		}
+		else {
+			print_inorder(root);
+			cout << endl;
+			print_preorder(root);
+			cout << endl;
+		}
+	}
+
+	if (root != NULL) { delete root; root = NULL; }
+	return 0;
+}

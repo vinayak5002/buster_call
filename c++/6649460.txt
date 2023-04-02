@@ -1,0 +1,79 @@
+# 個々のノードのクラス（idはリストの番目になるから持たない）
+class Node:
+    def __init__(self):
+        self.parent_id = -1
+        self.left = -1
+        self.right = -1
+        self.sibling = -1
+        self.degree = 0
+        self.depth = 0
+        self.height = 0
+        self.type = ""
+
+global nodes
+
+# 再帰処理で深さをセット
+def set_depth_height(id, depth):
+
+    height1 = 0
+    height2 = 0
+
+    nodes[id].depth = depth
+    
+    if nodes[id].type == "":
+        nodes[id].type = "leaf" if nodes[id].left == -1 and nodes[id].right == -1 else "internal node"
+    
+    if nodes[id].left != -1:
+        height1 = set_depth_height(nodes[id].left, depth + 1) + 1
+    if nodes[id].right != -1:
+        height2 = set_depth_height(nodes[id].right, depth + 1) + 1
+
+    nodes[id].height = max(height1, height2)
+    
+    return nodes[id].height
+
+# 再帰処理で深さをセット
+def set_height(id, height):
+    None
+
+n = int(input())
+
+# n個のノードを登録しておく
+# キーはリストの番目になる
+nodes = [Node() for _ in range(n)]
+
+# のーどごとのくり返し
+for i in range(n):
+    # 入力値
+    params = list(map(int,input().split()))
+
+    degree = 0
+    
+    # 子ノード左の設定
+    if params[1] > -1:
+        nodes[params[1]].parent_id = params[0]
+        nodes[params[1]].sibling = params[2]
+        degree += 1
+    
+    # 子ノード右の設定
+    if params[2] > -1:
+        nodes[params[2]].parent_id = params[0]
+        nodes[params[2]].sibling = params[1]
+        degree += 1
+
+    # 自ノードの設定
+    nodes[params[0]].left = params[1]
+    nodes[params[0]].right = params[2]
+    nodes[params[0]].degree = degree
+        
+# 根を探して、深さを計算する
+for i in range(n):
+    if nodes[i].parent_id == -1:
+        nodes[i].type = "root"
+        set_depth_height(i, 0)
+        break
+
+# 出力
+for i in range(n):
+    print(f"node {i}: parent = {nodes[i].parent_id}, sibling = {nodes[i].sibling}, degree = {nodes[i].degree}, depth = {nodes[i].depth},  height = {nodes[i].height}, type = {nodes[i].type}")
+    

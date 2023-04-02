@@ -1,0 +1,44 @@
+#include <iostream>
+#include <vector>
+#include <map>
+using namespace std;
+
+void solve(int n,int m){
+  vector<long long> A(n),B(m);
+  for(int i = 0; n > i; i++){
+    cin>>A[i];
+  }
+  for(int j = 0; m > j; j++){
+    cin>>B[j];
+  }
+  vector<long long> aA(n+1),bB(m+1);
+  for(int i = 1; n >= i; i++){
+    aA[i] = aA[i-1]+A[i-1];
+  }
+  for(int i = 1; m >= i; i++){
+    bB[i] = bB[i-1]+B[i-1];
+  }
+  map<long long,long long> X,Y;
+  for(int i = 0; n >= i; i++){
+    for(int j = i+1; n >= j; j++){
+      X[aA[j]-aA[i]]++;
+    }
+  }
+  for(int i = 0; n >= i; i++){
+    for(int j = i+1; m >= j; j++){
+      Y[bB[j]-bB[i]]++;
+    }
+  }
+  long long ans = 0;
+  for(auto x: X){
+    ans += x.second*Y[x.first];
+  }
+  cout << ans << endl;
+}
+
+int main(){
+  int n,m;
+  while(cin>>n>>m,n){
+    solve(n,m);
+  }
+}

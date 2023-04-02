@@ -1,0 +1,80 @@
+
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class Main{
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		
+		int n = sc.nextInt();
+		var activity = new int[2][n];
+		var participation = new ArrayList<Integer>();
+		
+		for(int i=0;i<n;i++) {
+			activity[0][i] = sc.nextInt();
+			activity[1][i] = sc.nextInt();
+		}
+		quickSort(activity,0,n-1);
+		
+		adopt(participation,activity,n);
+		
+		System.out.println(participation.size());
+		
+//		print(activity,n);
+	}
+	
+	static void print(int[][] activity,int n) {
+		for(int i=0;i<n;i++) {
+			System.out.println(activity[0][i]+" "+activity[1][i]);
+		}
+	}
+	
+	static void quickSort(int[][] arr, int begin, int end) {
+	    if (begin < end) {
+	        int partitionIndex = partition(arr, begin, end);
+
+	        quickSort(arr, begin, partitionIndex-1);
+	        quickSort(arr, partitionIndex+1, end);
+	    }
+	}
+	
+	static int partition(int[][] arr, int begin, int end) {
+	    int pivot = arr[1][end];
+	    int i = (begin-1);
+
+	    for (int j = begin; j < end; j++) {
+	        if (arr[1][j] <= pivot) {
+	            i++;
+
+	            int swapTemp0 = arr[0][i];
+	            int swapTemp1 = arr[1][i];
+	            arr[0][i] = arr[0][j];
+	            arr[1][i] = arr[1][j];
+	            arr[0][j] = swapTemp0;
+	            arr[1][j] = swapTemp1;
+	        }
+	    }
+
+	    int swapTemp0 = arr[0][i+1];
+	    int swapTemp1 = arr[1][i+1];
+	    arr[0][i+1] = arr[0][end];
+	    arr[1][i+1] = arr[1][end];
+	    arr[0][end] = swapTemp0;
+	    arr[1][end] = swapTemp1;
+
+	    return i+1;
+	}
+	
+	static void adopt(ArrayList<Integer> participation,int[][] activity,int n) {
+		int end = 0;
+		for(int i=0;i<n;i++) {
+			if(end < activity[0][i]) {
+				participation.add(activity[0][i]);
+				end = activity[1][i];
+			}
+		}
+	}
+	
+	
+}
+

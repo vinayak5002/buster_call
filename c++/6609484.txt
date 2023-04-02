@@ -1,0 +1,151 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define NIL NULL;
+
+struct node{
+  	int key;
+  	struct node *parent;
+  	struct node *right;
+  	struct node *left;
+};
+typedef struct node *Node;
+Node T;
+
+void Insert(int key){
+  	Node y,x,z;
+  	
+  	y=NIL;
+  	x=T;
+  	z=malloc(sizeof(struct node));
+  	z->key=key;
+  	z->left=NIL;
+  	z->right=NIL;
+  	while(x!=NULL){
+    	y=x;
+    	if( z->key < x->key )
+    		x=x->left;
+    	else
+    		x=x->right;
+ 	}
+  	z->parent=y;
+  	if(y==NULL)
+  		T=z;
+ 	else if(z->key<y->key)
+ 		y->left=z;
+  	else
+  		y->right=z;
+}
+
+Node Find(int key){
+  	Node TT;
+  	
+  	TT=T;
+  	while(TT!=NULL && TT->key!=key){
+    	if(key<TT->key)
+    		TT=TT->left;
+    	else
+    		TT=TT->right;
+  	}
+  	if(TT==NULL)
+  		return NULL;
+  	else
+  		return TT;
+}
+
+Node Minimum(Node TT){
+  	while(TT->left!=NULL)
+    	TT=TT->left;
+  
+  	return TT;
+}
+
+Node Successor(Node Z){
+  	Node X;
+  
+  	if(Z->right!=NULL)
+  		return Minimum(Z->right);
+  	X=Z->parent;
+  	while(X!=NULL && Z==X->right){
+    	Z=X;
+    	X=X->parent;
+  	}
+  	return X;
+}
+
+void Delete(int key){
+  	Node X,Y,Z=Find(key);  
+
+  	if(Z->left==NULL||Z->right==NULL)
+  		Y=Z;
+  	else
+     	Y=Successor(Z);
+   
+  	if(Y->left!=NULL)
+  		X=Y->left;
+  	else
+     	X=Y->right;
+  	
+  	if(X!=NULL)
+  		X->parent=Y->parent;
+  	if(Y->parent==NULL)
+  		T=X;
+  	else if(Y==Y->parent->left)
+  		Y->parent->left=X;
+  	else
+  		Y->parent->right=X;
+ 
+  	if(Y!=Z)
+  		Z->key=Y->key;
+}
+
+void Preorder(Node T){
+    if(T!=NULL){
+        printf(" %d",T->key);
+        Preorder(T->left);
+        Preorder(T->right);
+    }
+}
+
+void Inorder(Node T){
+    if (T!=NULL){
+        Inorder(T->left);
+        printf(" %d",T->key);
+        Inorder(T->right);
+    }
+}
+
+int main(void){
+  	int n,i,key;
+  	char S[10];
+  
+  	scanf("%d",&n);
+
+  	for(i=0;i<n;i++){
+    	scanf("%s",S);
+    	if(S[0]=='i'){
+      		scanf("%d",&key);
+      		Insert(key);
+    	}
+    	else if(S[0]=='f'){
+      		scanf("%d",&key);
+      		if(Find(key)!=NULL)
+      			printf("yes\n");
+      		else
+      			printf("no\n");
+    	}
+    	else if(S[0]=='d'){
+      		scanf("%d",&key);
+      		Delete(key);
+    	}
+    	else{
+      		Inorder(T);
+      		printf("\n");
+      		Preorder(T);
+      		printf("\n");
+    	}
+  	}
+  	return 0;
+}
+
+

@@ -1,0 +1,56 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+
+vector<int> counting_sort(const vector<int>& a_vec, int k) {
+	vector<int> c_vec(k + 1, 0);
+	vector<int> b_vec(a_vec.size(), 0);
+
+	for (int i = 0; i < a_vec.size(); i++) {
+		c_vec[a_vec[i]]++;
+	}
+
+	for (int i = 1; i < c_vec.size(); i++) {
+		c_vec[i] += c_vec[i - 1];
+	}
+
+	for (int i = b_vec.size() - 1; i >= 0; i--) {
+		b_vec[c_vec[a_vec[i]] - 1] = a_vec[i];
+		c_vec[a_vec[i]]--;
+	}
+	return b_vec;
+}
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n = 0;
+	vector<int> a_vec;
+	vector<int> b_vec;
+	int k = 0;
+
+	cin >> n;
+	a_vec.resize(n, -1);
+	for (int i = 0; i < n; i++) {
+		cin >> a_vec[i];
+		k = max(k, a_vec[i]);
+	}
+	b_vec = counting_sort(a_vec, k);
+
+	cout << b_vec[0];
+	for (int i = 1; i < n; i++) {
+		cout << " " << b_vec[i];
+	}
+	cout << endl;
+	return 0;
+}

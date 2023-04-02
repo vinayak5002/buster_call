@@ -1,0 +1,41 @@
+main :: IO ()
+main = do
+  _ <- getLine
+  wv <- fmap (V.unfoldr (B.readInt . B.dropWhile isSpace)) B.getLine
+  print $ solve wv
+
+solve :: V.Vector Int -> Int
+solve wv = V.sum $ V.map (getCost (V.minimum wv)) cv where
+  fv = getFlags wv
+  cv = getCycles wv fv
+
+getFlags :: V.Vector Int -> V.Vector Bool
+getFlags wv = runST $ do
+  fv <- VM.replicate 10001 True
+  V.forM_ wv $ \i  -> do
+    VM.write fv i False
+  V.freeze fv
+
+getCycles :: V.Vector Int -> V.Vector Bool -> V.Vector (V.Vector Int)
+getCycles costs fv = V.map V.fromList $ runST $ do
+  fmv <- V.thaw fv
+  V.mapM (getCycle costs sorted fmv []) costs
+  where sorted = M.fromList $ zip (L.sort $ V.toList costs) [0..]
+
+getCycle costs sorted fv cycle c = do
+  isValid <- VM.read fv c
+  if isValid then return cycle
+  else do
+    VM.write fv c True
+    getCycle costs sorted fv (c:cycle) (costs V.! (sorted M.! c))
+
+getCost :: Int -> V.Vector Int -> Int
+getCost minV costs = case n of
+  0 -> 0
+  1 -> 0
+  _ -> if minV `V.elem` costs then sum1 else min sum1 sum2
+  where
+    sum1 = V.sum costs + (n - 2) * mc
+    sum2 = V.sum costs + mc + (n + 1) * minV
+    n = V.length costs
+    mc = V.minimum costs

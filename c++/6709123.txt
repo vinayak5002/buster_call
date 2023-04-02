@@ -1,0 +1,59 @@
+#include<iostream>
+#include<cstdio>
+#include<vector>
+#include<string>
+#include<map>
+using namespace std;
+int re()
+{
+	int s=0,f=1;char ch=getchar();
+	while(ch>'9'||ch<'0')
+	{
+		if(ch=='-')f=-1;
+		ch=getchar();
+	}
+	while(ch>='0'&&ch<='9')
+		s=s*10+ch-48,ch=getchar();
+	return s*f;
+}
+void wr(int s)
+{
+	if(s<0)putchar('-'),s=-s;
+	if(s>9)wr(s/10);
+	putchar(s%10+48);
+}
+const int inf=1e5+7;
+int n;
+map<string,vector<int> >h;
+int main()
+{
+	n=re();
+	for(int i=1;i<=n;i++)
+	{
+		int op=re();
+		string s="";cin>>s;
+		if(op==0)h[s].push_back(re());
+		if(op==1)
+		{
+			int len=h[s].size();
+			for(int j=0;j<len;j++)
+				wr(h[s][j]),putchar('\n');
+		}
+		if(op==2)h[s].clear();
+		if(op==3)
+		{
+			string l=s,r="";cin>>r;
+			map<string,vector<int> >::iterator il=h.lower_bound(l),ir=h.upper_bound(r);
+			for(map<string,vector<int> >::iterator IT=il;IT!=ir;IT++)
+			{
+				cout<<IT->first<<" ";
+				int len=IT->second.size();
+				for(int j=0;j<len-1;j++)
+					wr(IT->second[j]),putchar(' ');
+				wr(IT->second[len-1]),putchar('\n');
+			}
+		}
+	}
+	return 0;
+}
+

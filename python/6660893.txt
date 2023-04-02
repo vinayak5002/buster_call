@@ -1,0 +1,73 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class RangeAddQuery:
+    def __init__(self, n):
+        self._n = 1
+        while self._n < n:
+            self._n <<= 2
+        self._lazy = [0] * (2 * self._n - 1)
+        return
+
+    def _add_sub(self, s, t, x, k, left, right):
+        if right <= s or t <= left:
+            return
+        if s <= left and right <= t:
+            self._lazy[k] += x
+            return
+
+        mid = (left + right) // 2
+        k2 = 2 * k
+        self._add_sub(s, t, x, k2 + 1, left, mid)
+        self._add_sub(s, t, x, k2 + 2, mid, right)
+        return
+
+    """i: zero-based"""
+    def get(self, i):
+        i += self._n - 1
+
+        result = self._lazy[i]
+        i = (i - 1) // 2
+        while i >= 0:
+            result += self._lazy[i]
+            i = (i - 1) // 2
+        return result
+
+    """[s, t), zero-based"""
+    def add(self, s, t, x):
+        self._add_sub(s, t, x, 0, 0, self._n)
+        return
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, q = map(int, f.readline().split())
+    raq = RangeAddQuery(n)
+
+    for _ in range(q):
+        query_list = list(map(int, f.readline().split()))
+        if query_list[0] == 0:
+            s = query_list[1] - 1
+            t = query_list[2]
+            x = query_list[3]
+            raq.add(s, t, x)
+        else:
+            i = query_list[1] - 1
+            val = raq.get(i)
+            print(val)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

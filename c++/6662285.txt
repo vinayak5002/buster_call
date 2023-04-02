@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+vector<int> dis;
+
+
+int main(){
+    int n,u,k,vnum;
+    cin>>n;
+    
+    vector<vector<int>> graph(n);
+    vector<bool> used(n);
+    vector<int> d(n, -1);
+    dis=vector<int>(n);
+    
+    for(int i=0;i<n;i++){
+        cin>>u>>k;
+        for(int j=0;j<k;j++){
+            cin>>vnum;
+            graph[u-1].push_back(vnum);
+        }
+    }
+
+  // graphに入力する
+  // graph[0].push_back(2); で 0→2に辺をはれる
+  
+  // BFSで最短経路を求めてみる
+  queue<pair<int, int>> q;
+  q.push(make_pair(0, 0));
+  while(!q.empty()){
+    auto [cur, dist] = q.front();
+    q.pop();
+    if(used[cur]) continue;
+    used[cur] = true;
+    d[cur] = dist;
+    for(auto&& nx:graph[cur]){
+      if(used[nx]) continue;
+      q.push(make_pair(nx, dist+1));
+    }
+  }
+
+    for(int i=0;i<n;i++)cout<<i+1<<" "<<dis[i]<<endl;
+}

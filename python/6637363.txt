@@ -1,0 +1,48 @@
+n, k = [int(i) for i in input().split()]
+w = []
+for i in range(n):
+    w.append(int(input()))
+
+def BinarySearch(start:int, end:int, fn:callable, k:int):
+    """[start, end)の範囲でバイナリサーチ
+
+    Args:
+        start (int): 範囲の右端
+        end (int): 範囲の左端
+        fn (function): バイナリサーチの関数、広義単調増加
+        k (int): 探す値（左端）
+
+    Returns:
+        int: 見つかった値
+    """
+    left = start
+    right = end
+
+    while left + 1 != right:
+        c = left + (right - left) // 2
+        if fn(c) > k:
+            left = c
+        else:
+            right = c
+    return left, right
+
+def calc(ip):
+    c = 0
+    out = 0
+    for i in w:
+        c += i
+        if c == ip:
+            c = 0
+            out += 1
+        elif c > ip:
+            c = i
+            out += 1
+    if c != 0:
+        out += 1
+    return out
+c = BinarySearch(max(w), sum(w) + 1, calc, k)
+for i in c:
+    if calc(i) == k:
+        print(i)
+        break
+

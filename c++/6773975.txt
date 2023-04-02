@@ -1,0 +1,374 @@
+#include <bits/stdc++.h>
+////#include <atcoder/all>
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using vvvb = vector<vvb>;
+using vd = vector<double>;
+using vvd = vector<vd>;
+using vvvd = vector<vvd>;
+#define all(A) A.begin(),A.end()
+#define ALL(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q, bool C = 1) {
+    if (C == 0 && p == q) {
+        return 1;
+    }
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+template<class T>
+bool chmin(T& p, T q, bool C = 1) {
+    if (C == 0 && p == q) {
+        return 1;
+    }
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+ll gcd(ll(a), ll(b)) {
+    if (b == 0)return a;
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+vector<ll> fact, factinv, inv;
+ll mod = 1e9 + 7;
+void prenCkModp(ll n) {
+    fact.resize(n + 5);
+    factinv.resize(n + 5);
+    inv.resize(n + 5);
+    fact.at(0) = fact.at(1) = 1;
+    factinv.at(0) = factinv.at(1) = 1;
+    inv.at(1) = 1;
+    for (ll i = 2; i < n + 5; i++) {
+        fact.at(i) = (fact.at(i - 1) * i) % mod;
+        inv.at(i) = mod - (inv.at(mod % i) * (mod / i)) % mod;
+        factinv.at(i) = (factinv.at(i - 1) * inv.at(i)) % mod;
+    }
+
+}
+ll nCk(ll n, ll k) {
+    if (k < 0)return 0;
+    if (n < k) return 0;
+    return fact.at(n) * (factinv.at(k) * factinv.at(n - k) % mod) % mod;
+}
+
+vll invy(2011);//mod2011での逆元
+vector<string> S;
+void initinv() {
+    rep(i, 2011) {
+        rep(j, 2011) {
+            if ((i * j)%2011 == 1)invy[i] = j;
+        }
+    }
+}//逆元計算 OK
+ll find_base(ll U, ll T, ll L, ll R);
+ll term_to_factor(ll U, ll T, ll L, ll R);
+ll expr_to_term(ll U, ll T, ll L, ll R);
+ll factor_to_some(ll U, ll T, ll L, ll R);
+ll frac_to_expr(ll U, ll T, ll L, ll R);
+
+ll find_base(ll U, ll T, ll L, ll R) {
+    for (ll k = T; k <= U; k++) {
+        if (S[k][L] != '.')return k;
+    }
+    return -1;
+}//基準業を探す
+
+ll frac_to_expr(ll U, ll T, ll L, ll R) {
+
+    ll b = find_base(U, T, L, R);
+    ll NLB=-1,NRB=-1, NLS=-1, NRS=-1;//次の分母分子の上下
+    for (ll i = L; i <= R; i++) {
+        for (ll k = T; k < b; k++) {
+            if (S[k][i] != '.') {
+                if(NLS==-1)NLS = i;
+            }
+        }
+    }
+    for (ll i = R; i >= L; i--) {
+        for (ll k = T; k < b; k++) {
+            if (S[k][i] != '.') {
+                if (NRS == -1)NRS = i;
+            }
+        }
+    }
+    for (ll i = L; i <= R; i++) {
+        for (ll k = b+1; k <= U; k++) {
+            if (S[k][i] != '.') {
+                if (NLB == -1)NLB = i;
+            }
+        }
+    }
+    for (ll i = R; i >= L; i--) {
+        for (ll k = b + 1; k <= U; k++) {
+            if (S[k][i] != '.') {
+                if (NRB == -1)NRB = i;
+            }
+        }
+    }
+
+    ll bunbo = expr_to_term(U,b+1, NLB, NRB);
+    bunbo %= 2011;
+    bunbo += 2011;
+    ll bunsi = expr_to_term(b-1, T, NLS, NRS);
+    ll res = bunsi * invy[bunbo % 2011];
+
+    return res % 2011;
+}
+
+
+ll factor_to_some(ll U, ll T, ll L, ll R) {
+    ll res = 0;
+    ll b = find_base(U, T, L, R);
+
+
+    if (S[b][L] == '-' && S[b][L + 1] != '-') {
+        return -factor_to_some(U, T, L + 2, R);
+    }//マイナスの抽出
+
+    if (S[b][L] == '-') {
+        for (ll i = L; i <= R; i++) {
+            if (S[b][i] != '-') {
+                return frac_to_expr(U, T, L, i - 1);
+            }
+        }
+        return frac_to_expr(U, T, L, R);
+
+    }//分数の抽出
+
+
+    if (S[b][L] == '(') {
+        for (ll i = L; i <= R; i++) {
+            if (S[b][i] == ')') {
+
+                res=expr_to_term(U, T, L+2, i -2);
+                if (b != 0 && i != R) {
+                    if (S[b - 1][i + 1] != '.') {
+                        ll ex = S[b - 1][i + 1] - '0';
+                        ll d = 1;
+                        rep(exx, ex) {
+                            d *= res;
+                            d %= 2011;
+                        }
+                        res = d % 2011;
+                    }
+                }
+                return res;
+                break;
+            }
+            
+        }
+    }//括弧の抽出
+
+    res = S[b][L] - '0';
+    if (b != 0 && L != R) {
+        if (S[b - 1][L + 1] != '.') {
+            ll ex = S[b - 1][L + 1] - '0';
+            ll d = 1;
+            rep(exx, ex) {
+                d *= res;
+                d %= 2011;
+            }
+            res = d % 2011;
+        }
+    }//単項
+    return res;
+
+}
+
+ll term_to_factor(ll U, ll T, ll L, ll R) {
+    ll res = 1;
+
+    ll b = find_base(U, T, L, R);
+
+    bool FIRST = 1;
+    ll kak = 0;
+
+    for (ll i = L; i <= R; i++) {
+        if (S[b][i] == '(') {
+            kak++;
+        }
+        if (S[b][i] == ')') {
+            kak--;
+        }
+        if (S[b][i] == '*'&&kak==0) {
+            if (FIRST) {
+                res*=factor_to_some(U, T, L, i - 2);
+                FIRST = 0;
+            }
+
+            bool USE = 0;
+            ll kakko = 0;
+            for (ll j = i + 1; j <= R; j++) {
+                if (S[b][j] == '(')kakko++;
+                if (S[b][j] == '(')kakko--;
+                if (kakko != 0)continue;
+                if (S[b][j] == '*') {
+                    res *= factor_to_some(U, T, i + 2, j - 2);
+                    USE = 1;
+                    break;
+                }
+            }
+            if (!USE) {
+                res *= factor_to_some(U, T, i + 2, R);
+            }
+            res %= 2011;
+
+        }
+    }
+
+    if (FIRST) {
+        res *= factor_to_some(U, T, L, R);
+    }
+    return res;
+
+}
+
+
+ll expr_to_term(ll U, ll T, ll L, ll R) {
+    ll res = 0;
+
+    ll b = find_base(U, T, L, R);
+    
+    bool FIRST = 1;
+    ll kak = 0;
+    bool fac = 0;
+    bool DI = 0;
+    for (ll i = L; i <= R; i++) {
+       
+        
+        if (S[b][i] == '*') {
+            fac = 1;
+            DI = 1;
+        }
+        if (S[b][i] == '(') {
+            DI = 1;
+            kak++;
+            fac = 0;
+        }
+        if (S[b][i] == ')') {
+            kak--;
+            fac = 0;
+        }
+
+        if (S[b][i] <= '9' && '0' <= S[b][i]) {
+            fac = 0;
+            DI = 1;
+        }
+
+        if (kak==0&&S[b][i] == '+') {
+            if (FIRST)res = term_to_factor(U, T, L, i - 2);
+            FIRST = 0;
+            fac = 0;
+            DI = 1;
+            bool USE = 0;
+            ll kakko = 0;
+            for (ll j = i + 1; j <= R; j++) {
+                if (S[b][j] == '(')kakko++;
+                if (S[b][j] == ')')kakko--;
+                if (kakko != 0)continue;
+                if (j != L && j != R && S[b][j] == '+' || (S[b][j] == '-' && S[b][j + 1] != '-' && S[b][j - 1] != '-')) {
+                    res += term_to_factor(U, T, i + 2, j - 2);
+                    USE = 1;
+                    break;
+                }
+            }
+            if (!USE) {
+                res += term_to_factor(U, T, i + 2, R);
+            }
+            DI = 0;
+        }
+        if (i != R && S[b][i] == '-' && S[b][i + 1] == '-') {
+            DI = 1;
+            continue;
+        }
+        if (DI&&i!=L&&i!=R&&kak==0&&!fac&&S[b][i] == '-'&& S[b][i-1] != '-'&& S[b][i+1] != '-') {
+
+            fac = 0;
+
+            if (FIRST) {
+                res = term_to_factor(U, T, L, i - 2);
+                FIRST = 0;
+            }
+            
+
+            bool USE = 0;
+            ll kakko = 0;
+            for (ll j = i + 1; j <= R; j++) {
+                if (S[b][j] == '(')kakko++;
+                if (S[b][j] == ')')kakko--;
+                if (kakko != 0)continue;
+
+                if (j != L && j != R && S[b][j] == '+' || (S[b][j] == '-'&&S[b][j+1]!='-'&& S[b][j - 1] != '-')) {
+                    if (j == i + 2)continue;
+                    res -= term_to_factor(U, T, i + 2, j - 2);
+                    USE = 1;
+
+                    break;
+                }
+            }
+            if (!USE) {
+                res -= term_to_factor(U, T, i + 2, R);
+            }
+            DI = 0;
+        }
+    }
+    if (FIRST) {
+        res += term_to_factor(U, T, L, R);
+    }
+
+    return res;
+}
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    initinv();
+
+    while (1) {
+        ll N;
+        cin >> N;
+        if (N == 0)return 0;
+        S.clear();
+        rep(i, N) {
+            string T;
+            cin >> T;
+            S.push_back(T);
+        }
+        ll an = expr_to_term(N - 1, 0, 0, S[0].size() - 1);
+        an %= 2011;
+        cout << (an+2011)%2011 << endl;
+    }
+
+}
+
+
+

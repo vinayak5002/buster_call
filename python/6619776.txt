@@ -1,0 +1,315 @@
+import java.io.*
+import java.util.*
+import kotlin.math.*
+
+fun main() {
+    
+    // val T = nextInt()
+    // repeat(T) {solve()}
+    // pw.flush()
+    
+    solve()
+    pw.flush()
+    
+}
+
+fun solve() {
+    
+    val N = nextInt()
+    val Q = nextInt()
+    val ls = LazySegmentTree(N)
+    
+    for( q in 0 until Q ) {
+        val f = nextInt()
+        val s = nextInt()
+        val t = nextInt()+1
+        if( f == 0 ) {
+            val x = nextInt()
+            ls.update(s, t, x)
+        }else {
+            pw.println(ls.rmq(s, t))
+        }
+    }
+    
+}
+
+fun printArray(a: Array<Int>) {
+    
+    a.forEach{ print("$it ") }
+    println()
+    
+}
+
+/* struct begin */
+
+
+data class Point(val x: Int, val y: Int)
+data class Edge(val from: Int, val to: Int, val w: Long)
+
+class LazySegmentTree(n: Int) {
+    
+    private val id = -1
+    private val inf = 2147483647
+    private val t = intceil(log2(n.toDouble()))
+    private val N = 1 shl t
+    private var a = Array<Int>(2*N) {inf}
+    private var lzy = Array<Int>(N) {id}
+    
+    fun update(L: Int, R: Int, x: Int) {
+        
+        var l = L+N
+        var r = R+N
+        
+        for( i in t downTo 0 ) {
+            propagate(l shr i)
+            propagate((r-1) shr i)
+        }
+        
+        while( l < r ) {
+            if( l%2 == 1 ) {
+                applyLazy(l, x)
+                l++
+            }
+            if( r%2 == 1 ) {
+                r--
+                applyLazy(r, x)
+            }
+            l /= 2
+            r /= 2
+        }
+        
+        l = L+N
+        r = R+N
+        
+        for( i in 1..t ) {
+            if( ((l shr i) shl i) != l ) calcNode(l shr i)
+            if( ((r shr i) shl i) != r ) calcNode((r-1) shr i)
+        }
+        
+    }
+    
+    fun rmq(L: Int, R: Int): Int {
+        
+        var l = L+N
+        var r = R+N
+        var res = inf
+        
+        for( i in t downTo 0 ) {
+            propagate(l shr i)
+            propagate((r-1) shr i)
+        }
+        
+        while( l < r ) {
+            if( l%2 == 1 ) {
+                res = min(res, a[l])
+                l++
+            }
+            if( r%2 == 1 ) {
+                r--
+                res = min(res, a[r])
+            }
+            l /= 2
+            r /= 2
+        }
+        
+        return res
+        
+    }
+    
+    private fun calcNode(p: Int) { if( p < N ) a[p] = min(a[2*p], a[2*p+1])}
+    
+    private fun applyLazy(p: Int, x: Int) {
+        
+        if( x != id ) a[p] = x
+        if( p < N && x != id ) lzy[p] = x
+        
+    }
+    
+    private fun propagate(p: Int) {
+        
+        if( 1 <= p && p < N ) {
+            applyLazy(p, lzy[p])
+            applyLazy(2*p, lzy[p])
+            applyLazy(2*p+1, lzy[p])
+            lzy[p] = id
+        }
+        
+    }
+    
+}
+
+class SegmentTree(n: Int) {
+    
+    val N = n
+    var a = Array<Long>(2*N) {0L}
+    
+    fun add(L: Int, R: Int, x: Long) {
+        
+        var l = L+N
+        var r = R+N
+        
+        while( l < r ) {
+            if( l%2 == 1 ) { a[l] += x; l++ }
+            if( r%2 == 1 ) { r--; a[r] += x }
+            l /= 2
+            r /= 2
+        }
+        
+    }
+    
+    fun get(i: Int): Long {
+        
+        var res = 0L
+        var idx = i+N
+        
+        while( idx > 0 ) {
+            res += a[idx]
+            idx /= 2
+        }
+        
+        return res
+        
+    }
+    
+}
+
+class BinaryIndexedTree(n: Int) {
+    
+    val N = n
+    var a = Array<Long>(N+1) {0L}
+    
+    fun sum(i: Int): Long {
+        
+        var idx = i+1
+        var res = 0L
+        while( idx > 0 ) {
+            res += a[idx]
+            idx -= idx and (-idx)
+        }
+        
+        return res
+        
+    }
+    
+    fun add(i: Int, x: Long) {
+        
+        var idx = i+1
+        while( idx <= N ) {
+            a[idx] += x
+            idx += idx and (-idx)
+        }
+        
+    }
+    
+}
+
+class UnionFind(N: Int) {
+    
+    var parent = Array<Int>(N) {it}
+    var rank = Array<Int>(N) {1}
+    var size = Array<Int>(N) {1}
+    
+    fun root(x: Int): Int {
+        
+        if( parent[x] == x ) {
+            return x
+        }else {
+            parent[x] = root(parent[x])
+            return parent[x]
+        }
+        
+    }
+    
+    fun unite(x: Int, y: Int) {
+        
+        val rx = root(x)
+        val ry = root(y)
+        if( rx == ry ) return
+        
+        if( rank[rx] > rank[ry] ) {
+            parent[ry] = rx
+            size[rx] += size[ry]
+        }else {
+            parent[rx] = ry
+            size[ry] += size[rx]
+            if( rank[rx] == rank[ry] ) rank[ry]++
+        }
+        
+    }
+    
+    fun same(x: Int, y: Int): Boolean = (root(x) == root(y))
+    fun getSize(x: Int): Int = size[root(x)]
+    
+}
+
+/* struct end */
+
+/* math begin */
+
+fun intceil(x: Double) = ceil(x).toInt()
+fun intfloor(x: Double) = floor(x).toInt()
+
+fun gcd(x: Int, y: Int): Int {
+    
+    var a = max(x, y)
+    var b = min(x, y)
+    var r: Int
+    
+    do {
+        r = a%b
+        a = b
+        b = r
+    }while( r > 0 )
+    
+    return a
+    
+}
+
+fun modpow(X: Long, T: Long, P: Long = 9223372036854775807L): Long {
+    
+    var x = X
+    var t = T
+    
+    if( t == 0L ) {
+        return 1L
+    }else {
+        var res = 1L
+        while( t > 0 ) {
+            if( t%2L == 1L ) {
+                res *= x
+                res %= P
+                t -= 1L
+            }
+            x *= x
+            x %= P
+            t /= 2
+        }
+        return res%P
+    }
+    
+}
+
+/* math end */
+
+/* I/O begin */
+
+var st = StringTokenizer("")
+val br = System.`in`.bufferedReader()
+val pw = PrintWriter(System.out, false)
+
+fun nextInt() = next().toInt()
+fun nextLong() = next().toLong()
+fun nextLine() = br.readLine()!!
+fun nextDouble() = next().toDouble()
+fun nextIntarr(n: Int) = Array<Int>(n) {nextInt()}
+fun nextStrarr(n: Int) = Array<String>(n) {next()}
+fun nextLongarr(n: Int) = Array<Long>(n) {nextLong()}
+
+fun next(): String {
+    
+    while( !st.hasMoreTokens() ) st = StringTokenizer(br.readLine()!!)
+    return st.nextToken()
+    
+}
+
+/* I/O end */

@@ -1,0 +1,149 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        ArrayList<ArrayList<Integer>> swapableDigit = new ArrayList<ArrayList<Integer>>();
+        swapableDigit = setSwapableDigit(swapableDigit);
+
+        Scanner sc = new Scanner(System.in);
+        while (sc.hasNext()) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 8; i++) {
+                sb.append(sc.next());
+            }
+            String input = sb.toString();
+
+            HashMap<String, Integer> ans = BFS(swapableDigit);
+            // for (var item : ans.entrySet()) {
+            // System.out.println(item);
+            // }
+            System.out.println(ans.get(input));
+        }
+
+        sc.close();
+    }
+
+    static HashMap<String, Integer> BFS(ArrayList<ArrayList<Integer>> swapableDigit) {
+        LinkedList<String> queue = new LinkedList<>();
+        HashMap<String, Integer> count = init();
+        count.put("01234567", 0);
+        queue.offer("01234567"); // Enqueue
+
+        while (queue.size() > 0) {
+            var current = queue.poll(); // Dequeue
+            var indexOfZero = current.indexOf('0');
+            for (Integer item : swapableDigit.get(indexOfZero)) {
+                String next;
+                if (indexOfZero < item) {
+                    next = swapChar(current, indexOfZero, item);
+                } else {
+                    next = swapChar(current, item, indexOfZero);
+                }
+                if (count.get(next) == -1) {
+                    count.put(next, count.get(current) + 1);
+                    queue.offer(next); // Enqueue
+                }
+            }
+        }
+        return count;
+    }
+
+    static HashMap<String, Integer> init() {
+        HashMap<String, Integer> dict = new HashMap<>();
+        ArrayList<String> keyList = Permutation("01234567");
+        for (String string : keyList) {
+            dict.put(string, -1);
+        }
+        return dict;
+    }
+
+    static ArrayList<String> Permutation(String arg) {
+        ArrayList<String> res = new ArrayList<>();
+        if (arg.length() == 1) {
+            res.add(arg);
+            return res;
+        }
+        for (int i = 0; i < arg.length(); i++) {
+            for (String str : Permutation(arg.substring(0, i) + arg.substring(i + 1))) {
+                res.add(arg.charAt(i) + str);
+            }
+        }
+        return res;
+    }
+
+    static String swapChar(String str, int index1, int index2) {
+        char c1 = str.charAt(index1);
+        char c2 = str.charAt(index2);
+        StringBuilder res = new StringBuilder();
+        res.append(str.substring(0, index1));
+        res.append(Character.toString(c2));
+        res.append(str.substring(index1 + 1, index2));
+        res.append(Character.toString(c1));
+        res.append(str.substring(index2 + 1));
+        return res.toString();
+    }
+
+    static ArrayList<ArrayList<Integer>> setSwapableDigit(ArrayList<ArrayList<Integer>> list) {
+        for (int i = 0; i < 8; i++) {
+            list.add(new ArrayList<Integer>());
+        }
+        // 0
+        ArrayList<Integer> child0 = new ArrayList<>();
+        child0.add(1);
+        child0.add(4);
+        list.set(0, child0);
+
+        // 1
+        ArrayList<Integer> child1 = new ArrayList<>();
+        child1.add(0);
+        child1.add(2);
+        child1.add(5);
+        list.set(1, child1);
+
+        // 2
+        ArrayList<Integer> child2 = new ArrayList<>();
+        child2.add(1);
+        child2.add(3);
+        child2.add(7);
+        list.set(2, child2);
+
+        // 3
+        ArrayList<Integer> child3 = new ArrayList<>();
+        child3.add(2);
+        child3.add(7);
+        list.set(3, child3);
+
+        // 4
+        ArrayList<Integer> child4 = new ArrayList<>();
+        child4.add(0);
+        child4.add(5);
+        list.set(4, child4);
+
+        // 5
+        ArrayList<Integer> child5 = new ArrayList<>();
+        child5.add(1);
+        child5.add(4);
+        child5.add(6);
+        list.set(5, child5);
+
+        // 6
+        ArrayList<Integer> child6 = new ArrayList<>();
+        child6.add(2);
+        child6.add(5);
+        child6.add(7);
+        list.set(6, child6);
+
+        // 7
+        ArrayList<Integer> child7 = new ArrayList<>();
+        child7.add(3);
+        child7.add(6);
+        list.set(7, child7);
+
+        return list;
+    }
+}
+

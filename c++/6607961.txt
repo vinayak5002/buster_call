@@ -1,0 +1,93 @@
+#include<cstdio>
+#include<queue>
+#include<cmath>
+using namespace std;
+
+const int maxn=10000+50;
+
+int par[maxn],height[maxn];
+
+void init(int n)
+{
+    for(int i=0;i<n;i++)
+    {
+        par[i]=i;
+        height[i]=0;
+    }
+}
+
+int find(int x)
+{
+    if(par[x]==x)return x;
+    return par[x]=find(par[x]);
+}
+
+void unit(int x,int y)
+{
+    x=find(x);y=find(y);
+    if(height[x]<height[y])par[x]=y;
+    else
+    {
+        par[y]=x;
+        if(height[x]==height[y])height[x]++;
+    }
+}
+bool same(int x,int y)
+{
+    return find(x)==find(y);
+}
+
+struct edge
+{
+    int u,v;
+    double c;
+    edge(int u,int v,double c):u(u),v(v),c(c){}
+    bool operator<(const edge& e)const
+    {
+        return c<e.c;
+    }
+};
+
+int N,M;
+int x[maxn],y[maxn];
+
+void solve()
+{
+    priority_queue<edge>que;
+
+    scanf("%d%d",&N,&M);
+    for(int i=1;i<=N;i++)
+    {
+        scanf("%d%d",&x[i],&y[i]);
+    }
+    for(int i=0;i<M;i++)
+    {
+        int u,v;
+        scanf("%d%d",&u,&v);
+        que.push(edge(u,v,sqrt(pow(x[u]-x[v],2)+pow(y[u]-y[v],2))));
+    }
+
+    init(N+10);
+
+    double res=0;
+
+    while(!que.empty())
+    {
+        edge e=que.top();que.pop();
+        if(same(e.u,e.v))res+=e.c;
+        else unit(e.u,e.v);
+    }
+    printf("%.3f\n",res);
+}
+
+int main()
+{
+    solve();
+}
+
+
+
+
+
+
+

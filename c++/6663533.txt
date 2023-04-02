@@ -1,0 +1,124 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+template <typename T>
+struct Edge {
+    int from, to;
+    T weight;
+    Edge() = default;
+    Edge(int to, T weight) : from(-1), to(to), weight(weight) {}
+    Edge(int from, int to, T weight) : from(from), to(to), weight(weight) {}
+};
+
+template <typename T>
+std::vector<T> dijkstra(const std::vector<std::vector<Edge<T>>>& G, int s) {
+    std::vector<T> dist(G.size(), std::numeric_limits<T>::max());
+    dist[s] = 0;
+    using P = std::pair<T, int>;
+    std::priority_queue<P, std::vector<P>, std::greater<P>> pq;
+    pq.emplace(0, s);
+
+    while (!pq.empty()) {
+        T d;
+        int v;
+        std::tie(d, v) = pq.top();
+        pq.pop();
+        if (dist[v] < d) continue;
+        for (auto& e : G[v]) {
+            if (dist[e.to] > d + e.weight) {
+                dist[e.to] = d + e.weight;
+                pq.emplace(dist[e.to], e.to);
+            }
+        }
+    }
+
+    return dist;
+}
+
+template <typename T>
+class RangeEdgeGraph {
+public:
+    RangeEdgeGraph() = default;
+    explicit RangeEdgeGraph(int n) {
+        size = 1;
+        while (size < n) size <<= 1;
+        G.resize(4 * size);
+        for (int i = 1; i < size; ++i) {
+            int l = 2 * i, r = 2 * i + 1;
+            G[i].emplace_back(l, 0);
+            G[i].emplace_back(r, 0);
+            G[l + 2 * size].emplace_back(i + 2 * size, 0);
+            G[r + 2 * size].emplace_back(i + 2 * size, 0);
+        }
+        for (int i = size; i < 2 * size; ++i) G[i].emplace_back(i + 2 * size, 0);
+    }
+
+    void add_edge(int l1, int r1, int l2, int r2, T w) {
+        int idx = G.size();
+        for (l1 += size, r1 += size; l1 < r1; l1 >>= 1, r1 >>= 1) {
+            if (l1 & 1) G[l1 + 2 * size].emplace_back(idx, 0), ++l1;
+            if (r1 & 1) --r1, G[r1 + 2 * size].emplace_back(idx, 0);
+        }
+        std::vector<Edge<T>> node;
+        for (l2 += size, r2 += size; l2 < r2; l2 >>= 1, r2 >>= 1) {
+            if (l2 & 1) node.emplace_back(l2++, w);
+            if (r2 & 1) node.emplace_back(--r2, w);
+        }
+        G.push_back(node);
+    }
+
+    std::vector<T> dist(int s) const {
+        std::vector<T> dist = dijkstra(G, s + size);
+        return std::vector<T>(dist.begin() + size, dist.begin() + 2 * size);
+    }
+
+private:
+    int size;
+    std::vector<std::vector<Edge<T>>> G;
+};
+
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        int W, N;
+        cin >> W >> N;
+        if (W == 0) break;
+        vector<ll> x(N);
+        for (auto& y : x) cin >> y;
+        x.push_back(1e9);
+        int lb = 0, ub = 100;
+        while (ub - lb > 1) {
+            int m = (lb + ub) / 2;
+            RangeEdgeGraph<int> G(N+1);
+            ll small = x[0] + m, big = x[0] + 1;
+            int j = 0, k = 0;
+            rep(i,0,N) {
+                while (j < N && small < W+m) {
+                    small += x[++j] + m;
+                }
+                while (k < N && big <= W+1) {
+                    big += x[++k] + 1;
+                }
+                G.add_edge(i, i+1, min(j+1, N), k+1, 0);
+                small -= x[i] + m;
+                big -= x[i] + 1;
+            }
+            if (G.dist(0)[N] == 0) {
+                ub = m;
+            } else {
+                lb = m;
+            }
+        }
+        cout << ub << endl;
+    }
+}

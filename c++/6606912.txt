@@ -1,0 +1,47 @@
+#include<bits/stdc++.h>
+using namespace::std;
+
+const int N = 100000 + 5;
+const long long inf = 1e18;
+
+int n;
+int m;
+long long D[N];
+vector<pair<int, int>> G[N];
+
+void Dijkstra(int src){
+	for(int i = 0; i < n; i++) D[i] = inf;
+	D[src] = 0;
+	priority_queue<pair<long long, int>> Q;
+	Q.emplace(make_pair(0, src));
+	while(!Q.empty()){
+		int u;
+		long long dis;
+		tie(dis, u) = Q.top();
+		dis = -dis;
+		Q.pop();
+		if(dis != D[u]) continue;
+		for(auto e : G[u]){
+			if(D[e.first] > D[u] + e.second){
+				D[e.first] = D[u] + e.second;
+				Q.emplace(make_pair(-D[e.first], e.first));
+			}
+		}
+	}
+}
+
+int main(){
+	int s;
+	scanf("%d %d %d", &n, &m, &s);
+	for(int i = 0; i < m; i++){
+		int u, v, w;
+		scanf("%d %d %d", &u, &v, &w);
+		G[u].emplace_back(make_pair(v, w));
+	}
+	Dijkstra(s);
+	for(int i = 0; i < n; i++){
+		if(D[i] == inf) puts("INF");
+		else printf("%lld\n", D[i]);
+	}
+	return 0;
+}

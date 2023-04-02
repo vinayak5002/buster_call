@@ -1,0 +1,102 @@
+#include <algorithm>
+#include <iomanip>
+#include <array>
+#include <bitset>
+#include <cassert>
+#include <cmath>
+#include <cstdio>
+#include <deque>
+#include <functional>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <queue>
+#include <set>
+#include <list>
+#include <string>
+#include <sstream>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <numeric>
+#include <vector>
+#include <climits>
+using namespace std;
+#if __has_include(<atcoder/all>)
+#include <atcoder/all>
+using namespace atcoder;
+#endif
+#define GET_MACRO(_1, _2, _3, NAME, ...) NAME
+#define _rep(i, n) _rep2(i, 0, n)
+#define _rep2(i, a, b) for(int i = (int)(a); i < (int)(b); i++)
+#define rep(...) GET_MACRO(__VA_ARGS__, _rep2, _rep)(__VA_ARGS__)
+#define all(x) (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+using i64 = long long;
+template<class T, class U>
+bool chmin(T& a, const U& b) { return (b < a) ? (a = b, true) : false; }
+template<class T, class U>
+bool chmax(T& a, const U& b) { return (b > a) ? (a = b, true) : false; }
+
+template<typename T>istream& operator>>(istream&i,vector<T>&v){rep(j,v.size())i>>v[j];return i;}
+template<typename T>string join(vector<T>&v){stringstream s;rep(i,v.size())s<<' '<<v[i];return s.str().substr(1);}
+template<typename T>ostream& operator<<(ostream&o,vector<T>&v){if(v.size())o<<join(v);return o;}
+template<typename T>string join(vector<vector<T>>&vv){string s="\n";rep(i,vv.size())s+=join(vv[i])+"\n";return s;}
+template<typename T>ostream& operator<<(ostream&o,vector<vector<T>>&vv){if(vv.size())o<<join(vv);return o;}
+template<class T> using pq = priority_queue<T, vector<T>, greater<T>>;
+
+int calc(int ui, int di, int lj, int rj, vector<vector<int>>& table) {
+	if(abs(di - ui) <= 1 or abs(lj - rj) <= 1) return 0;
+	// cout << "ui : " << ui << " di : " << di << endl;
+	// cout << "lj : " << ui << " rj : " << rj << endl;
+	int min_ = 1e9;
+	rep(i, ui, di + 1) chmin(min_, table[i][lj]);
+	rep(i, ui, di + 1) chmin(min_, table[i][rj]);
+	rep(j, lj, rj + 1) chmin(min_, table[ui][j]);
+	rep(j, lj, rj + 1) chmin(min_, table[di][j]);
+	int ans = 0;
+	// cout << "kita" << endl;
+	// cout << "min : " << min_ << endl;
+	rep(i, ui + 1, di) {
+		rep(j, lj + 1, rj) {
+			if(table[i][j] >= min_){
+				// cout << "i : " << i << endl;
+				// cout << "j : " << j << endl;
+				// cout << "table : " << table[i] << endl;
+				// cout << "table_val : " << table[i][j] << endl;
+				return 0;
+			}
+			ans += min_ - table[i][j];
+		}
+	}
+	// cout << "ans : " << ans << endl;
+	return ans;
+}
+
+void solve(int d, int w, vector<vector<int>>& table) {
+	int ans = 0;
+	rep(ui, d) {
+		rep(di, ui, d) {
+			rep(lj, w) {
+				rep(rj, lj, w) {
+					chmax(ans, calc(ui, di, lj, rj, table));
+				}
+			}
+		}
+	}
+	cout << ans << endl;
+}
+
+int main() {
+	while (true)
+	{
+		int d, w;
+		cin >> d >> w;
+		if(d == 0 and w == 0) break;
+		vector table(d, vector<int>(w));
+		for(auto& v : table) cin >> v;
+		solve(d, w, table);
+	}
+	
+	return 0;
+}

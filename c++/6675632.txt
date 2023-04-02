@@ -1,0 +1,143 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+using namespace std;
+
+
+template<class T>
+class List {
+private:
+	class Node {
+	public:
+		T key;
+		Node* prev;
+		Node* next;
+		bool is_end;
+
+		Node() : key(T()), prev(NULL), next(NULL), is_end(false) {
+			return;
+		}
+		~Node() {
+			return;
+		}
+	};
+
+private:
+	Node* head_;
+	Node* cur_;
+
+public:
+	List() : head_(NULL), cur_(NULL) {
+		head_ = new Node();
+		cur_ = new Node();
+		head_->next = cur_;
+		cur_->prev = head_;
+		cur_->is_end = true;
+		return;
+	}
+
+	~List() {
+		while (cur_ != NULL) {
+			Node* tmp = cur_;
+
+			cur_ = cur_->next;
+			delete tmp;
+		}
+		return;
+	}
+
+	void insert(const T& x) {
+		Node* n = new Node();
+
+		n->key = x;
+		n->next = cur_;
+		cur_->prev->next = n;
+		n->prev = cur_->prev;
+		cur_->prev = n;
+		cur_ = n;
+		return;
+	}
+
+	void move(int d) {
+		if (d > 0) {
+			for (int i = 0; i < d; i++) {
+				cur_ = cur_->next;
+			}
+		}
+		else {
+			for (int i = d; i < 0; i++) {
+				cur_ = cur_->prev;
+			}
+		}
+		return;
+	}
+
+	void erase() {
+		Node* prev = cur_->prev;
+		Node* tmp = cur_;
+
+		prev->next = cur_->next;
+		cur_ = cur_->next;
+		cur_->prev = prev;
+		delete tmp;
+		return;
+	}
+
+	void move_to_first() {
+		cur_ = head_->next;
+		return;
+	}
+
+	T get_cur_key() const {
+		return cur_->key;
+	}
+
+	bool is_end() const {
+		return cur_->is_end;
+	}
+};
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int q = -1;
+	int key = -1;
+	List<int> list;
+
+	cin >> q;
+	for (int i = 0; i < q; i++) {
+		int op = -1;
+		cin >> op;
+		if (op == 0) {
+			int x = -1;
+
+			cin >> x;
+			list.insert(x);
+		}
+		else if (op == 1) {
+			int d = -1;
+
+			cin >> d;
+			list.move(d);
+		}
+		else {
+			list.erase();
+		}
+	}
+
+	list.move_to_first();
+	while (!list.is_end()) {
+		key = list.get_cur_key();
+		cout << key << endl;
+		list.move(1);
+	}
+
+	return 0;
+}

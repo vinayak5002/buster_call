@@ -1,0 +1,147 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+
+public class Main {
+
+	static int[] parent, left, right, ver;
+	static StringBuilder sb = new StringBuilder();
+
+	public static void main(String[] args) throws IOException{
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		PrintWriter out = new PrintWriter(System.out);
+
+		int n = Integer.parseInt(br.readLine());
+
+		parent = new int[n-1];
+		left = new int[n-1];
+		right = new int[n-1];
+		ver = new int[n-1];
+
+		String[] num;
+		String input, pre, in;
+		int x = 0;
+
+		for(int i=0; i<n-1; i++) {
+			parent[i] = -1;
+			left[i] = -1;
+			right[i] = -1;
+			ver[i] = -1;
+		}
+
+		//入力&格納
+		for(int i=0; i<n; i++) {
+
+			input = br.readLine();
+
+			if(input.charAt(0) == 'i') {
+				num = input.split(" ");
+
+				insert(Integer.parseInt(num[1]), i);
+				//System.out.println(i + ", " + left[i] + ", " + right[0] + ", " + ver[i]);
+			}
+			else {
+				in = inOrder(x);
+				pre = preOrder(x);
+
+				out.println(in);
+				out.println(pre);
+
+			}
+
+		}
+
+		/*for(int i=0; i<n-1; i++) {
+
+			System.out.println(i + ", " + ver[i] + ", " + left[i] + ", " + right[i]);
+		}*/
+
+
+		out.flush();
+	}
+
+	//ぶちこみ
+	//この番号：接点番号*2 + 1 or + 2
+	//欠けているのならその分引けばいいのでは？
+	static void insert(int x, int i) {
+
+		int z = 0;
+		int y = 0;
+		int p = -1;
+		int h;
+
+		while(true) {
+
+			//System.out.println(z + ", " + ver[z] + ", " + left[z] + ", " + right[z]);
+
+			if(ver[z] != -1) {
+
+				if(ver[z] > x) {
+
+					if(left[z] != -1)
+						z = left[z];
+
+					else {
+						y = z;
+						z = i;
+						ver[z] = x;
+						left[y] = z;
+						break;
+					}
+
+				}
+
+				else {
+
+					if(right[z] != -1)
+						z = right[z];
+
+					else {
+						y = z;
+						z = i;
+						ver[z] = x;
+						right[y] = z;
+						break;
+					}
+				}
+			}
+			else {
+				ver[z] = x;
+				break;
+			}
+		}
+	}
+
+	//前順
+	static String preOrder(int x) {
+
+		String s = " " + ver[x];
+		if(left[x] != -1)
+			s += preOrder(left[x]);
+
+		if(right[x] != -1)
+			s += preOrder(right[x]);
+
+		return s;
+	}
+
+	//中順
+	//エラー拍の刃多分xがinsertの値だから　→xを0 - n-1にする
+	static String inOrder(int x) {
+
+		String s = "";
+
+		if(left[x] != -1)
+			s += inOrder(left[x]);
+
+		s += " " + ver[x];
+
+		if(right[x] != -1)
+			s += inOrder(right[x]);
+
+		return s;
+
+	}
+}

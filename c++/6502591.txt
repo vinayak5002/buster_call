@@ -1,0 +1,74 @@
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <vector>
+
+using namespace std;
+using Int = int_fast64_t;
+const Int BASE = (Int) 1e9, OFFSET = BASE * 4;
+
+int conv(const string& S, int s, int e)
+{
+	return s >= e ? 0 : conv(S, s, e - 1) * 10 + S[e - 1] - '0';
+}
+
+pair<bool, vector<int>> in()
+{
+	string S; cin >> S;
+	vector<int> R;
+	int n, s = S[0] == '-' ? 1 : 0;
+	for (n = (int) S.size() - 9; n >= s; n -= 9) R.push_back(conv(S, n, n + 9));
+	R.push_back(conv(S, s, n + 9));
+	if (R.back() == 0) R.pop_back();
+	return {S[0] == '-', R};
+}
+
+void operator += (vector<int>& A, const vector<int>& B)
+{
+	vector<int> C;
+	Int c = 0;
+	int a = (int) A.size(), b = (int) B.size(), N = min(a, b);
+	for (int i = 0; i < N; ++i, c /= BASE) C.push_back((int) ((c += (Int) A[i] + (Int) B[i]) % BASE));
+	for (int i = a; i < b; ++i, c /= BASE) C.push_back((int) ((c += (Int) B[i]) % BASE));
+	for (int i = b; i < a; ++i, c /= BASE) C.push_back((int) ((c += (Int) A[i]) % BASE));
+	C.push_back(c);
+	A = C;
+}
+
+vector<int> mul(vector<int>& A, int b, int s)
+{
+	vector<int> C(s, 0);
+	Int c = 0;
+	int N = (int) A.size();
+	for (int i = 0; i < N; ++i, c /= BASE) C.push_back((int) ((c += (Int) A[i] * (Int) b) % BASE));
+	C.push_back(c);
+	return C;
+}
+
+vector<int> operator * (vector<int>& A, const vector<int>& B)
+{
+	vector<int> C;
+	for (int i = 0, N = (int) B.size(); i < N; ++i) C += mul(A, B[i], i);
+	return C;
+}
+
+void p(bool is_minus, vector<int> C)
+{
+	while (!C.empty() && C.back() == 0) C.pop_back();
+	if (C.empty()) cout << 0 << endl; else {
+		if (is_minus) cout << '-';
+		auto p = C.crbegin();
+		cout << *p;
+		for (++p; p != C.crend(); ++p) cout << setw(9) << setfill('0') << *p;
+		cout << endl;
+	}
+}
+
+int main()
+{
+	auto [a, A] = in();
+	auto [b, B] = in();
+	p(a != b, A * B);
+	return 0;
+}
+

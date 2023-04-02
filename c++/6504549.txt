@@ -1,0 +1,72 @@
+#include <iostream>
+#include <array>
+#include <vector>
+#include <iomanip>
+#include <cmath>
+
+using Point2D = std::array<double, 2>;
+using Vector2D = std::array<double, 2>;
+
+void read_point(Point2D &p)
+{
+    std::cin >> p[0] >> p[1];
+}
+
+Vector2D generate_vector(const Point2D &start_point, const Point2D &end_point)
+{
+    Vector2D v;
+    v[0] = (fabs(end_point[0] - start_point[0]) < 1.0e-10) ? 0.0 : end_point[0] - start_point[0];
+    v[1] = (fabs(end_point[1] - start_point[1]) < 1.0e-10) ? 0.0 : end_point[1] - start_point[1];
+    return v;
+}
+
+double inner_product(const Vector2D &v1, const Vector2D &v2)
+{
+    double value = 0;
+    value += v1[0] * v2[0];
+    value += v1[1] * v2[1];
+    return value;
+}
+
+double subtended_angle(const Vector2D &a, const Vector2D &b)
+{
+    double value = inner_product(a, b) / (std::sqrt(inner_product(a, a) * inner_product(b, b)));
+    return std::acos(value);
+}
+
+Vector2D projection(const Vector2D &a, const Vector2D &b)
+{
+    Vector2D v_proj;
+    double x = inner_product(a, b) / inner_product(a, a);
+
+    v_proj[0] = x * a[0];
+    v_proj[1] = x * a[1];
+
+    return v_proj;
+}
+
+int main()
+{
+    Point2D p1, p2;
+
+    read_point(p1);
+    read_point(p2);
+
+    auto vec_a = generate_vector(p1, p2);
+
+    double q;
+    std::cin >> q;
+
+    for (int i = 0; i < q; i++)
+    {
+        Point2D p{};
+        read_point(p);
+
+        auto vec_b = generate_vector(p1, p);
+        auto proj_vec = projection(vec_a, vec_b);
+        Point2D crossing_p = {p1[0] + proj_vec[0], p1[1] + proj_vec[1]};
+
+        Point2D reflection_p = {2 * crossing_p[0] - p[0], 2 * crossing_p[1] - p[1]};
+        printf("%.10f %.10f\n", reflection_p[0], reflection_p[1]);
+    }
+}

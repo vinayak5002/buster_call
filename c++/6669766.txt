@@ -1,0 +1,112 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+using ll=long long;
+
+template<typename F>
+struct Dual_Segment_Tree{
+    int n, depth=0;
+    const function<F(F,F)> comp;
+    vector<F> lazy; const F id;
+
+    public:
+    Dual_Segment_Tree(int size, const function<F(F,F)> comp, const F id):
+        n(), comp(comp), id(id){
+        int m=1;
+        while (size>m) depth++,m*=2;
+        n=m;
+        lazy.assign(2*m, id);
+        }
+
+    Dual_Segment_Tree(const vector<F> &vec, const function<F(F,F)> comp, const F id):
+        Dual_Segment_Tree(vec.size(), comp, id){
+            for (int k=0; k<vec.size(); k++) lazy[k+n]=vec[k];
+        }
+
+    private:
+    void propagate_at(int m){
+        if (m<n){
+            if (lazy[m]!=id){
+                lazy[m<<1]  =comp(lazy[m], lazy[m<<1]);
+                lazy[m<<1|1]=comp(lazy[m], lazy[m<<1|1]);
+                lazy[m]=id;
+            }
+        }
+    }
+
+    void propagate_above(int m){
+        int h=0, mm=m;
+        for (mm; mm; mm>>=1, h++){}
+        for (h--; h>=0; h--) propagate_at(m>>h);
+    }
+
+    pair<int,int> range_propagate(int l, int r){
+        int X=l+n, Y=r+n-1, L0=-1, R0=-1;
+        while (X<Y){
+            if (X&1) L0=max(L0,X++);
+            if ((Y&1)==0) R0=max(R0,Y--);
+
+            X>>=1; Y>>=1;
+        }
+        L0=max(L0,X); R0=max(R0,Y);
+        propagate_above(L0); propagate_above(R0);
+        return make_pair(L0,R0);
+    }
+
+    public:
+    inline F operator[](int k){
+        int m=k+n;
+        propagate_above(m);
+        return lazy[m];
+    }
+
+    void operate(int l, int r, F a){
+        int L0,R0;
+        tie(L0,R0)=range_propagate(l,r);
+
+        int L=l+n, R=r+n;
+        while (L<R){
+            if (L&1) lazy[L]=comp(a, lazy[L]), L++;
+            if (R&1) R--, lazy[R]=comp(a, lazy[R]);
+
+            L>>=1; R>>=1;
+        }
+    }
+
+    void update(int k, F a){operate(k,k+1,a);}
+
+    void refresh(){
+        for (int m=1; m<n; m++){
+            if (lazy[m]!=id){
+                lazy[m<<1]  =comp(lazy[m], lazy[m<<1]);
+                lazy[m<<1|1]=comp(lazy[m], lazy[m<<1|1]);
+                lazy[m]=id;
+            }
+        }
+    }
+};
+
+template<typename F>
+Dual_Segment_Tree<F> Add_Dual_Segment_Tree(const int &n, const F &id){
+    auto comp=[](F a, F b) -> F {return a+b;};
+    return Dual_Segment_Tree<F>(n, comp, id);
+}
+
+int main(){
+    int N,Q; cin >> N >> Q;
+
+    auto D=Add_Dual_Segment_Tree(N,0);
+    int m,i,x,s,t;
+    for (int q=0; q<Q; q++){
+        scanf("%d",&m);
+
+        if (m==0){
+            scanf("%d%d%d",&s,&t,&x);
+            D.operate(s,t+1,x);
+        }else{
+            scanf("%d",&i);
+            cout << D[i] << "\n";
+        }
+    }
+}
+

@@ -1,0 +1,295 @@
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <deque>
+#include <exception>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <iosfwd>
+#include <cassert>
+#include <iostream>
+#include <istream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <locale>
+#include <map>
+#include <memory>
+#include <new>
+#include <numeric>
+#include <ostream>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <stdexcept>
+#include <streambuf>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <valarray>
+#include <vector>
+const long long INF = 1e9;
+const long long MOD = 1e9 + 7;
+// const long long MOD = 998244353;
+const long long LINF = 1e18;
+using namespace std;
+
+#define YES(n) cout << ((n) ? "YES" : "NO") << endl
+#define Yes(n) cout << ((n) ? "Yes" : "No") << endl
+#define POSSIBLE(n) cout << ((n) ? "POSSIBLE" : "IMPOSSIBLE") << endl
+#define Possible(n) cout << ((n) ? "Possible" : "Impossible") << endl
+#define dump(x) cout << #x << " = " << (x) << endl
+#define FOR(i, a, b) for (int i = (a); i < (b); ++i)
+#define REP(i, n) for (int i = 0; i < (n); ++i)
+#define REPR(i, n) for (int i = n; i >= 0; i--)
+#define COUT(x) cout << (x) << endl
+#define SCOUT(x) cout << (x) << " "
+#define VECCOUT(x)                              \
+  for (auto &youso_ : (x))                      \
+    cout << right << setw(10) << youso_ << " "; \
+  cout << endl
+#define ENDL cout << endl
+#define CIN(...)   \
+  int __VA_ARGS__; \
+  CINT(__VA_ARGS__)
+#define LCIN(...)        \
+  long long __VA_ARGS__; \
+  CINT(__VA_ARGS__)
+#define SCIN(...)     \
+  string __VA_ARGS__; \
+  CINT(__VA_ARGS__)
+#define VECCIN(x)          \
+  for (auto &youso_ : (x)) \
+  cin >> youso_
+#define mp make_pair
+#define PQ priority_queue<long long>
+#define PQG priority_queue<long long, V, greater<long long>>
+
+typedef long long ll;
+typedef vector<long long> vl;
+typedef vector<long long> vi;
+typedef vector<bool> vb;
+typedef vector<char> vc;
+typedef vector<vl> vvl;
+typedef vector<vi> vvi;
+typedef vector<vb> vvb;
+typedef vector<vc> vvc;
+typedef pair<long long, long long> pll;
+
+#define COUT(x) cout << (x) << endl
+void CINT()
+{
+}
+template <class Head, class... Tail>
+void CINT(Head &&head, Tail &&...tail)
+{
+  cin >> head;
+  CINT(move(tail)...);
+}
+template <class T>
+void mod(T &x)
+{
+  x %= MOD;
+  x += MOD;
+  x %= MOD;
+}
+
+ll GCD(ll a, ll b)
+{
+  if (b == 0)
+    return a;
+  else
+    return GCD(b, a % b);
+}
+
+struct COMB
+{
+  vl fact, fact_inv, inv;
+  void init_nCk(long long SIZE)
+  {
+    fact.resize(SIZE + 5);
+    fact_inv.resize(SIZE + 5);
+    inv.resize(SIZE + 5);
+    fact.at(0) = fact.at(1) = fact_inv.at(0) = fact_inv.at(1) = inv.at(1) = 1;
+    for (long long i = 2; i < SIZE + 5; i++)
+    {
+      fact.at(i) = fact.at(i - 1) * i % MOD;
+      inv.at(i) = MOD - inv.at(MOD % i) * (MOD / i) % MOD;
+      fact_inv.at(i) = fact_inv.at(i - 1) * inv.at(i) % MOD;
+    }
+  }
+  long long nCk(long long n, long long k)
+  {
+    assert(!(n < k));
+    assert(!(n < 0 || k < 0));
+    return fact.at(n) * (fact_inv.at(k) * fact_inv.at(n - k) % MOD) % MOD;
+  }
+};
+ll extGCD(ll a, ll b, ll &x, ll &y)
+{
+  if (b == 0)
+  {
+    x = 1;
+    y = 0;
+    return a;
+  }
+  ll d = extGCD(b, a % b, y, x);
+  y -= a / b * x;
+  return d;
+}
+
+int d2_d1(int i, int j, int H, int W)
+{
+  return i * W + j;
+}
+pair<int, int> d1_d2(int x, int H, int W)
+{
+  return mp(x / W, x % W);
+}
+
+void Main()
+{
+  LCIN(H, W);
+  vvl m(H + 2, vl(W + 2, 1));
+  ll start_i, start_j;
+  ll goal_i, goal_j;
+  set<int> goal;
+  char dir;
+  for (int i = 0; i < H; i++)
+  {
+    SCIN(S);
+    for (int j = 0; j < W; j++)
+    {
+      if (S.at(j) == 'G')
+      {
+        goal_i = i;
+        goal_j = j;
+      }
+      if (S.at(j) == '<' ||
+          S.at(j) == '>' ||
+          S.at(j) == 'v' ||
+          S.at(j) == '^')
+      {
+        start_i = i;
+        start_j = j;
+        dir = S.at(j);
+      }
+      m.at(i + 1).at(j + 1) = (S.at(j) == '#');
+    }
+  }
+  goal.insert(d2_d1(goal_i, goal_j, H + 1, W + 1));
+  // dump(d2_d1(goal_i, goal_j, H + 1, W + 1));
+  goal.insert(d2_d1(goal_i, goal_j + 1, H + 1, W + 1));
+  // dump(d2_d1(goal_i, goal_j + 1, H + 1, W + 1));
+  goal.insert(d2_d1(goal_i + 1, goal_j, H + 1, W + 1));
+  // dump(d2_d1(goal_i + 1, goal_j, H + 1, W + 1));
+  goal.insert(d2_d1(goal_i + 1, goal_j + 1, H + 1, W + 1));
+  // dump(d2_d1(goal_i + 1, goal_j + 1, H + 1, W + 1));
+  vvl paint_map = m;
+  vvl G((H + 1) * (W + 1));
+  vl d((H + 1) * (W + 1), INF);
+  vl last((H + 1) * (W + 1), -1);
+  for (int i = 0; i < H + 1; i++)
+  {
+    for (int j = 0; j < W + 1; j++)
+    {
+      // dump("-----in");
+      // cout << i << ' ' << j << endl;
+      if (m.at(i).at(j + 1) != m.at(i + 1).at(j + 1))
+      {
+        G.at(d2_d1(i, j, H + 1, W + 1)).push_back(d2_d1(i, j + 1, H + 1, W + 1));
+        G.at(d2_d1(i, j + 1, H + 1, W + 1)).push_back(d2_d1(i, j, H + 1, W + 1));
+      }
+      if (m.at(i + 1).at(j) != m.at(i + 1).at(j + 1))
+      {
+        G.at(d2_d1(i, j, H + 1, W + 1)).push_back(d2_d1(i + 1, j, H + 1, W + 1));
+        G.at(d2_d1(i + 1, j, H + 1, W + 1)).push_back(d2_d1(i, j, H + 1, W + 1));
+      }
+      // dump("-----last");
+    }
+  }
+  priority_queue<int> pq;
+  int next;
+  if (dir == '<')
+  {
+    d.at(d2_d1(start_i, start_j + 1, H + 1, W + 1)) = 0;
+    d.at(d2_d1(start_i, start_j, H + 1, W + 1)) = 1;
+    pq.push(d2_d1(start_i, start_j, H + 1, W + 1));
+    next = d2_d1(start_i, start_j, H + 1, W + 1);
+  }
+  if (dir == '>')
+  {
+    d.at(d2_d1(start_i + 1, start_j, H + 1, W + 1)) = 0;
+    d.at(d2_d1(start_i + 1, start_j + 1, H + 1, W + 1)) = 1;
+    pq.push(d2_d1(start_i + 1, start_j + 1, H + 1, W + 1));
+    next = d2_d1(start_i + 1, start_j + 1, H + 1, W + 1);
+  }
+  if (dir == 'v')
+  {
+    d.at(d2_d1(start_i, start_j, H + 1, W + 1)) = 0;
+    d.at(d2_d1(start_i + 1, start_j, H + 1, W + 1)) = 1;
+    pq.push(d2_d1(start_i + 1, start_j, H + 1, W + 1));
+    next = d2_d1(start_i + 1, start_j, H + 1, W + 1);
+  }
+  if (dir == '^')
+  {
+    d.at(d2_d1(start_i + 1, start_j + 1, H + 1, W + 1)) = 0;
+    d.at(d2_d1(start_i, start_j + 1, H + 1, W + 1)) = 1;
+    pq.push(d2_d1(start_i, start_j + 1, H + 1, W + 1));
+    next = d2_d1(start_i, start_j + 1, H + 1, W + 1);
+  }
+  ll ans = 0;
+  pair<int, int> now = d1_d2(next, H + 1, W + 1);
+  for (int i = 0; i < 2; i++)
+  {
+    for (int j = 0; j < 2; j++)
+    {
+      if (paint_map.at(now.first + i).at(now.second + j) == false)
+        ans++;
+      paint_map.at(now.first + i).at(now.second + j) = true;
+    }
+  }
+  while (true)
+  {
+    // cout << next << endl;
+    if (goal.count(next))
+    {
+      cout << ans << endl;
+      return;
+    }
+    bool done = true;
+    for (int i = 0; i < G.at(next).size(); i++)
+    {
+      int nn = G.at(next).at(i);
+      if (d.at(nn) == INF)
+      {
+        d.at(nn) = d.at(next) + 1;
+        next = nn;
+        done = false;
+      }
+    }
+    if (done)
+      break;
+    pair<int, int> now = d1_d2(next, H + 1, W + 1);
+    for (int i = 0; i < 2; i++)
+    {
+      for (int j = 0; j < 2; j++)
+      {
+        if (paint_map.at(now.first + i).at(now.second + j) == false)
+          ans++;
+        paint_map.at(now.first + i).at(now.second + j) = true;
+      }
+    }
+  }
+  cout << -1 << endl;
+}
+
+int main()
+{
+  cout << fixed << setprecision(15);
+  Main();
+  return 0;
+}

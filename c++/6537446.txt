@@ -1,0 +1,53 @@
+#include <iostream>
+#include <vector>
+#include <utility>
+
+using namespace std;
+using ul=unsigned long int;
+
+ul partition(vector<tuple<ul, char, ul>>& A, ul p, ul r){
+    auto x=get<0>(A[r]);
+    auto i=p-1;
+    for(ul j=p;j<r;++j){
+        if(get<0>(A[j])<=x){
+            i+=1;
+            swap(A[i], A[j]);
+        }
+    }
+    swap(A[i+1], A[r]);
+    return i+1;
+}
+void quick_sort(vector<tuple<ul, char, ul>>& A, ul p, ul r){
+    if(p<r){
+        auto q = partition(A, p, r);
+        quick_sort(A, p, q-1);
+        quick_sort(A, q+1, r);
+    }
+}
+bool check(vector<tuple<ul, char, ul>>& vec){
+    for(ul i=0; i<vec.size()-1; ++i){
+        if(get<0>(vec[i])==get<0>(vec[i+1])){
+            if(get<2>(vec[i])>get<2>(vec[i+1]))return false;
+        }
+    }
+    return true;
+}
+int main(){
+    ul n;
+    cin>>n;
+    vector<tuple<ul, char, ul>> vec(n);
+    ul num;
+    char type;
+    ul index;
+    for(ul i=0; i<n; ++i){
+        cin>>type>>num;
+        index=i;
+        vec[i]=make_tuple(num, type, index);
+    }
+    quick_sort(vec, 0, vec.size()-1);
+    auto stable=check(vec);
+    cout<<(stable ? "Stable":"Not Stable")<<endl;
+    for(auto x : vec){
+        cout<<get<1>(x)<<" "<<get<0>(x)<<endl;
+    }
+}

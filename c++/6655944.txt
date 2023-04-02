@@ -1,0 +1,53 @@
+#include <bits/stdc++.h>
+//#include <atcoder/dsu>
+using namespace std;
+// using namespace atcoder;
+#define SZ(x) (int)(x).size()
+#define ALL(s) (s).begin(), (s).end()
+#define so(V) sort(ALL(V))
+#define rev(V) reverse(ALL(V))
+typedef pair<int, int> P;
+typedef pair<long, long> Pl;
+typedef vector<vector<int>> vvi;
+
+int main()
+{
+    string S1, S2;
+    cin >> S1 >> S2;
+    int fil = SZ(S1) + SZ(S2) + 1;
+    vector<vector<int>> dp = vector<vector<int>>(SZ(S1) + 1, vector<int>(SZ(S2) + 1, fil));
+    for (int i = 0; i <= SZ(S1); i++)
+    {
+        for (int j = 0; j <= SZ(S2); j++)
+        {
+            if (i == 0 && j == 0)
+            {
+                dp[i][j] = 0;
+            }
+            else
+            {
+                if (i != 0)
+                {
+                    dp[i][j] = min(dp[i][j], dp[i - 1][j] + 1);
+                }
+                if (j != 0)
+                {
+                    dp[i][j] = min(dp[i][j], dp[i][j - 1] + 1);
+                }
+                if (i != 0 && j != 0)
+                {
+                    int a = dp[i - 1][j - 1];
+                    if (S1[i - 1] != S2[j - 1])
+                    {
+                        a++;
+                    }
+                    dp[i][j] = min(dp[i][j], a);
+                }
+            }
+        }
+    }
+
+    cout << dp[SZ(S1)][SZ(S2)] << endl;
+
+    return 0;
+}

@@ -1,0 +1,48 @@
+#include<cstdio>
+#include<vector>
+#include<algorithm>
+using namespace std;
+typedef pair<double, int> PA;
+const double INF = 100100100;
+int n, t[10];
+vector<PA> edge[33];
+double dfs(int now, int end, int tosi, int bit){
+    if(now == end) return 0;
+    double res = INF;
+    for(int i=0;i<edge[now].size();i++){
+        double cost = edge[now][i].first;
+        int next = edge[now][i].second;
+        if((tosi & 1<<next) != 0) continue;
+        for(int j=0;j<n;j++){
+            if((bit & 1<<j) == 0){
+                double dis = cost/t[j];
+                res = min(res, dfs(next, end, (tosi| 1<<next), (bit | 1<<j))+dis);
+            }
+        }
+    }
+    return res;
+}
+int main(){
+    int m, p, a, b, x, y;
+    double z;
+    while(scanf("%d %d %d %d %d", &n, &m, &p, &a, &b), n!=0){
+        for(int i=0;i<n;i++){
+            scanf("%d", &t[i]);
+        }
+        for(int i=0;i<33;i++){
+            edge[i].clear();
+        }
+        for(int i=0;i<p;i++){
+            scanf("%d %d %lf", &x, &y, &z);
+            edge[x].push_back(PA(z, y));
+            edge[y].push_back(PA(z, x));
+        }
+        double ans = dfs(a, b, 0, 0);
+        if(ans == INF){
+            puts("Impossible");
+        } else {
+            printf("%lf\n", ans);
+        }
+    }
+    return(0);
+}

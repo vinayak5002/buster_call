@@ -1,0 +1,64 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using Long = long long;
+
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+
+    int n, a;
+    cin >> n >> a;
+    string s;
+    cin >> s;
+    s = "X" + s + "X";
+    deque<int> l_que, r_que;
+
+    for (int i = 0; i < (int)s.length(); ++i) {
+        if (s[i] == '#') {
+            if (i < a) {
+                // 初期位置より左にある#の位置
+                l_que.push_front(i);
+            } else if (i > a) {
+                // 初期位置より右にある#の位置
+                r_que.push_back(i);
+            }
+        }
+    }
+
+    Long count = 0;
+    int pos = a;
+    while (!l_que.empty() || !r_que.empty()) {
+        // 右に#があればその位置まで移動
+        if (!r_que.empty()) {
+            int r = r_que.front();
+            r_que.pop_front();
+            count += r - pos;
+            pos = r;
+        } else {
+            // 右に#がなく、左に#が残っていれば、右端まで移動
+            if (!l_que.empty()) {
+                count += n + 1 - pos;
+                pos = n + 1;
+            }
+        }
+        // 左に#があればその位置まで移動
+        if (!l_que.empty()) {
+            int l = l_que.front();
+            l_que.pop_front();
+            count += pos - l;
+            pos = l;
+        } else {
+            // 左に#がなく、右に#が残っていれば、左端まで移動
+            if (!r_que.empty()) {
+                count += pos;
+                pos = 0;
+            }
+        }
+    }
+    cout << count << endl;
+
+    return 0;
+}
+

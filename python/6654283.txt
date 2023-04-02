@@ -1,0 +1,95 @@
+package main
+
+import (
+	"container/heap"
+	"fmt"
+)
+
+type Edge struct {
+	Dst  int
+	Cost int64
+}
+
+type DijkstraNode struct {
+	Distance int64
+	Vertex   int
+}
+
+type DijkstraNodeHeap []DijkstraNode
+
+func (h DijkstraNodeHeap) Len() int           { return len(h) }
+func (h DijkstraNodeHeap) Less(i, j int) bool { return h[i].Distance < h[j].Distance }
+func (h DijkstraNodeHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+
+func (h *DijkstraNodeHeap) Push(x interface{}) {
+	*h = append(*h, x.(DijkstraNode))
+}
+
+func (h *DijkstraNodeHeap) Pop() interface{} {
+	old := *h
+	n := len(old)
+	x := old[n-1]
+	*h = old[0 : n-1]
+	return x
+}
+
+func dijkstra(start int, graph [][]Edge) []int64 {
+	const INF64 int64 = 1000000000000000018
+
+	var n int = len(graph)
+
+	var dist []int64 = make([]int64, n)
+	for i := 0; i < n; i++ {
+		dist[i] = INF64
+	}
+	dist[start] = 0
+
+	h := &DijkstraNodeHeap{}
+	heap.Init(h)
+
+	heap.Push(h, DijkstraNode{Distance: 0, Vertex: start})
+
+	for h.Len() > 0 {
+		cur := heap.Pop(h).(DijkstraNode)
+		if dist[cur.Vertex] < cur.Distance {
+			continue
+		}
+		for _, v := range graph[cur.Vertex] {
+			var next_vertex int = v.Dst
+			var cost int64 = v.Cost
+
+			if dist[cur.Vertex]+cost < dist[next_vertex] {
+				dist[next_vertex] = dist[cur.Vertex] + cost
+				heap.Push(h, DijkstraNode{Distance: dist[next_vertex], Vertex: next_vertex})
+			}
+		}
+	}
+
+	return dist
+}
+
+func main() {
+	var n int
+	fmt.Scan(&n)
+
+	graph := make([][]Edge, n)
+	for i := 0; i < n; i++ {
+		graph[i] = make([]Edge, 0)
+	}
+
+	for i := 0; i < n; i++ {
+		var u, k int
+		fmt.Scan(&u, &k)
+		for j := 0; j < k; j++ {
+			var v int
+			var c int64
+			fmt.Scan(&v, &c)
+			graph[u] = append(graph[u], Edge{Dst: v, Cost: c})
+		}
+	}
+
+	dist := dijkstra(0, graph)
+	for i := 0; i < n; i++ {
+		fmt.Println(i, dist[i])
+	}
+}

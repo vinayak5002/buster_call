@@ -1,0 +1,43 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void solve() {
+  int n, cap;
+  cin >> n >> cap;
+
+  vector< int > ws(n);
+  for (auto &w: ws) cin >> w;
+
+  sort(ws.begin(), ws.end());
+
+  constexpr int mod = 1000000007;
+  int ans = 0;
+  int s = 0;
+  for (int k = 0; k < n; k++) {
+    int dpsize = cap - s + 1;
+    if (dpsize <= 0) break;
+    vector< int > dp(dpsize);
+    dp[0] = 1;
+
+    for (int i = k + 1; i < n; i++) {
+      int w = ws[i];
+      for (int c = dpsize - 1; c - w >= 0; c--) {
+        (dp[c] += dp[c - w]) %= mod;
+      }
+    }
+
+    for (int c = max(0, cap - (s + ws[k]) + 1); c < dpsize; c++) {
+      (ans += dp[c]) %= mod;
+    }
+
+    s += ws[k];
+  }
+
+  cout << ans << endl;
+}
+
+int main() {
+  solve();
+}
+
+

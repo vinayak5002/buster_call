@@ -1,0 +1,75 @@
+#include<stdio.h>
+#define MAX 100001
+#define NIL -1
+
+int parent[MAX], left[MAX], right[MAX]; //親、左の子、右の兄弟の配列
+
+int n, Deep[MAX];//節点の数と深さの行列
+
+void print(int u){
+    int i, c;
+
+    printf("node %d: parent = %d, depth = %d, ", u, parent[u], Deep[u]);
+
+    if(parent[u] == NIL){
+        printf("root, ");
+    }else if(left[u] == NIL){
+        printf("leaf, ");
+    }else{printf("internal node, ");}
+
+    printf("[");
+
+    for(i=0, c=left[u]; c!=NIL; i++, c=right[c]){//毎回ｃの出力が終わったら、ｃの右の兄弟をｃに代入する
+        if(i){printf(", ");}
+        printf("%d", c);
+    }
+
+    printf("]\n");
+}
+
+int rec(int u, int p){
+    Deep[u] = p;
+    if( right[u] != NIL ){
+        rec(right[u], p);//右の兄弟は全部同じ深さ
+    }
+    if( left[u] != NIL ){
+        rec(left[u], p+1);//一番左の子は自分の深さ＋１
+    }
+}
+
+int main(void){
+    int i, j, v, d, c, l, r;
+
+    scanf("%d", &n);
+
+    for(i = 0; i<n; i++){//初期化
+        parent[i]=NIL;
+        left[i]=NIL;
+        right[i]=NIL;
+    }
+
+    for(i = 0; i<n; i++){
+        scanf("%d %d", &v, &d);//ノードとその子の数
+        for(j=0; j<d; j++){
+            scanf("%d", &c);//子を読み込む
+            if(j==0){
+                left[v] = c;
+                l = c;//子を保存する（次ｊ！＝０のとき元のｃの値を使いたいため）
+            }else{
+                right[l]=c;
+                l = c; 
+            }
+            parent[c] = v;
+        }
+    }
+    for(i = 0; i < n; i++){
+        if(parent[i] == NIL){ r= i;}//根を探す
+    }
+    rec(r, 0);
+
+    for(i = 0; i<n; i++){
+        print(i);
+    }
+
+    return 0;
+}

@@ -1,0 +1,176 @@
+#include <bits/stdc++.h>
+
+/*
+    M: T->T->Tの集計用monoid
+    MC: C->C->Cの操作まとめ用monoid 新しい操作を左に置く
+    LU: T->C->Int->Tの操作用monoid Intとして区間の長さをとる
+*/
+
+template <class T, class M, class TC, class MC, class LU>
+class lazy_segtree
+{
+private:
+    long long N;
+    long long LEAF_INIT;
+    T ID;
+    M OP;
+    TC IDC;
+    MC OPC;
+    LU OPU;
+    std::vector<T> data;
+    std::vector<TC> lazy;
+    std::vector<std::pair<long long, long long>> range;
+
+    void push_kernel(const long long i, const long long j, const long long ii)
+    {
+        if (i >= j || range[ii] == std::make_pair(i, j))
+        {
+        }
+        else
+        {
+            const long long c = (range[ii].first + range[ii].second) / 2;
+            const long long iic = 2 * (ii + 1) - 1;
+            const long long lc = range[iic].second - range[iic].first;
+            data[iic] = OPU(data[iic], lazy[ii], lc);
+            lazy[iic] = OPC(lazy[ii], lazy[iic]);
+            data[iic + 1] = OPU(data[iic + 1], lazy[ii], lc);
+            lazy[iic + 1] = OPC(lazy[ii], lazy[iic + 1]);
+            lazy[ii] = IDC;
+            push_kernel(i, std::min({ j, c }), iic);
+            push_kernel(std::max({ i, c }), j, iic + 1);
+            data[ii] = OP(data[iic], data[iic + 1]);
+        }
+    }
+
+    void place_kernel(const long long i, const long long j, const long long ii, const TC& control)
+    {
+        if (i >= j)
+        {
+        }
+        else if (range[ii] == std::make_pair(i, j))
+        {
+            data[ii] = OPU(data[ii], control, range[ii].second - range[ii].first);
+            lazy[ii] = OPC(control, lazy[ii]);
+        }
+        else
+        {
+            const long long c = (range[ii].first + range[ii].second) / 2;
+            const long long iic = 2 * (ii + 1) - 1;
+            place_kernel(i, std::min({ j, c }), iic, control);
+            place_kernel(std::max({ i, c }), j, iic + 1, control);
+            data[ii] = OP(data[iic], data[iic + 1]);
+        }
+    }
+
+    T get_kernel(const long long i, const long long j, const long long ii) const
+    {
+        if (i >= j)
+        {
+            return ID;
+        }
+        else if (range[ii] == std::make_pair(i, j))
+        {
+            return data[ii];
+        }
+        else
+        {
+            const long long c = (range[ii].first + range[ii].second) / 2;
+            const long long iic = 2 * (ii + 1) - 1;
+            return OP(get_kernel(i, std::min({ j, c }), iic), get_kernel(std::max({ i, c }), j, iic + 1));
+        }
+    }
+
+public:
+    lazy_segtree(void) = default;
+    lazy_segtree(const lazy_segtree&) = default;
+    lazy_segtree(lazy_segtree&&) noexcept = default;
+    lazy_segtree& operator=(const lazy_segtree&) & = default;
+    lazy_segtree& operator=(lazy_segtree&&) & noexcept = default;
+
+    lazy_segtree(const long long _N, const T& _ID, const M& _OP, const TC& _IDC, const MC& _OPC, const LU& _OPU)
+        : N(_N)
+        , ID(_ID)
+        , OP(_OP)
+        , IDC(_IDC)
+        , OPC(_OPC)
+        , OPU(_OPU)
+    {
+        assert(N >= 1);
+        long long n_pow2 = 1;
+        while (n_pow2 < N)
+        {
+            n_pow2 *= 2;
+        }
+        LEAF_INIT = n_pow2 - 1;
+        data.assign(2 * n_pow2 - 1, ID);
+        lazy.assign(data.size(), IDC);
+        range.resize(data.size());
+        for (long long ii = LEAF_INIT; ii < static_cast<long long>(range.size()); ++ii)
+        {
+            range[ii] = { ii - LEAF_INIT, ii - LEAF_INIT + 1 };
+        }
+        for (long long ii = LEAF_INIT - 1; ii >= 0; --ii)
+        {
+            const long long iic = 2 * (ii + 1) - 1;
+            range[ii] = { range[iic].first, range[iic + 1].second };
+        }
+    }
+
+    T get(const long long i, const long long j)
+    {
+        assert(0 <= i && i < N);
+        assert(0 < j && j <= N);
+        assert(i < j);
+        push_kernel(i, j, 0);
+        return get_kernel(i, j, 0);
+    }
+
+    void modify(const long long i, const long long j, const TC& control)
+    {
+        assert(0 <= i && i < N);
+        assert(0 < j && j <= N);
+        assert(i < j);
+        push_kernel(i, j, 0);
+        place_kernel(i, j, 0, control);
+    }
+};
+
+int main(void)
+{
+    long n, q;
+    std::cin >> n >> q;
+    const auto opm = [](auto i, auto j)
+    { return i + j; };
+    const auto opc = [](auto i, auto j)
+    {
+        return i + j;
+    };
+    const auto opu = [](auto i, auto j, auto l)
+    {
+        return i + j * l;
+    };
+    lazy_segtree<long, decltype(opm), long, decltype(opc), decltype(opu)> test(n, 0, opm, 0, opc, opu);
+    for (long i = 0; i < q; ++i)
+    {
+        long long c, s, t, x;
+        std::cin >> c;
+        if (c == 0)
+        {
+            std::cin >> s >> t >> x;
+            --s;
+            --t;
+            test.modify(s, t + 1, x);
+        }
+        else
+        {
+            // std::cin >> s;
+            // --s;
+            // std::cout << test.get(s, s + 1) << std::endl;
+            std::cin >> s >> t;
+            --s;
+            --t;
+            std::cout << test.get(s, t + 1) << std::endl;
+        }
+    }
+    return 0;
+}

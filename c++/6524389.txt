@@ -1,0 +1,166 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define Vector Point
+const double eps = 1e-10, pi = acos(-1.0);
+inline double Sqr(const double &x) {
+	return x * x;
+}
+inline int Dcmp(const double &x) {
+	return x < -eps ? -1 : x > eps ? 1 : 0;
+}
+struct Point {
+	double x, y;
+	Point(double x = 0, double y = 0) : x(x), y(y) {}
+	inline int operator == (const Point &rhs) const {
+		return Dcmp(x - rhs.x) == 0 && Dcmp(y - rhs.y) == 0;
+	}
+	inline Point operator + (const Point &rhs) const {
+		return Point(x + rhs.x, y + rhs.y);
+	}
+	inline Point operator - (const Point &rhs) const {
+		return Point(x - rhs.x, y - rhs.y);
+	}
+	inline Point operator * (const double &k) const {
+		return Point(x * k, y * k);
+	}
+	inline Point operator / (const double &k) const {
+		return Point(x / k, y / k);
+	}
+	inline double operator ^ (const Point &rhs) const {
+		return x * rhs.y - y * rhs.x;
+	}
+	inline double operator * (const Point &rhs) const {
+		return x * rhs.x + y * rhs.y;
+	}
+	inline double len2() {
+		return x * x + y * y;
+	}
+	inline double len() {
+		return sqrt(len2());
+	}
+	inline Point Rotate90() {
+		return Point(-y, x);
+	}
+	inline Point Rotate(const double &rad) { // counterclockwise
+		return Point(x * cos(rad) - y * sin(rad), x * sin(rad) + y * cos(rad));
+	}
+	inline Point Unit() {
+		double l = len();
+		return (*this) / l;
+	}
+}bomb, alice;
+struct Seg {
+	Point s, t;
+	Seg(Point s = Point(), Point t = Point()) : s(s), t(t) {}
+};
+Point poly[105][105], s[505];
+int safe[105][105], id[105][105], n, tot[105], vis[505];
+double dis[505], rd[505][505];
+struct Node {
+	double dis;
+	int id;
+	Node(double dis = 0, int id = 0) : dis(dis), id(id) {}
+	inline bool operator < (const Node &rhs) const {
+		return Dcmp(dis - rhs.dis) > 0;
+	}
+};
+inline int Intersect(Seg s1, Seg s2) {
+// cerr << s1.s.x << " " << s1.s.y << " " << s1.t.x << " " << s1.t.y << endl;
+// cerr << s2.s.x << " " << s2.s.y << " " << s2.t.x << " " << s2.t.y << endl;
+// cerr << ((s1.t - s1.s) ^ (s2.s - s1.s)) * ((s1.t - s1.s) ^ (s2.t - s1.s)) << endl;
+// cerr << ((s2.t - s2.s) ^ (s1.s - s2.s)) * ((s2.t - s2.s) ^ (s1.t - s2.s)) << endl;
+	return Dcmp(((s1.t - s1.s) ^ (s2.s - s1.s)) * ((s1.t - s1.s) ^ (s2.t - s1.s))) < 0 && Dcmp(((s2.t - s2.s) ^ (s1.s - s2.s)) * ((s2.t - s2.s) ^ (s1.t - s2.s))) < 0;
+}
+inline int Can(Point a, Point b) {
+	Seg now = Seg(a, b);
+	for(int i = 1; i <= n; ++ i)
+		for(int j = 0; j < tot[i]; ++ j)
+			if(Intersect(now, Seg(poly[i][j], poly[i][j + 1])))
+				return 0;
+	return 1;
+}
+inline Point Inter(Seg l1, Seg l2) {
+// cerr << l1.s.x << " " << l1.s.y << " " << l1.t.x << " " << l1.t.y << endl;
+// cerr << l2.s.x << " " << l2.s.y << " " << l2.t.x << " " << l2.t.y << endl;
+	double a1 = (l2.t - l2.s) ^ (l1.s - l2.s), a2 = (l2.t - l2.s) ^ (l1.t - l2.s);
+// cerr << a1 << " " << a2 << endl;
+	return (l1.s * a2 - l1.t * a1) / (a2 - a1);
+}
+inline Point Vertical(Point p, Seg s) {
+	Point v = s.t - s.s;
+	v = v.Rotate90();
+	return Inter(Seg(p, p + v), s);
+}
+inline int OnSeg(Point p, Seg s) {
+	if(Dcmp((p - s.s) * (s.t - s.s)) < 0)
+		return 0;
+	if(Dcmp((p - s.t) * (s.s - s.t)) < 0)
+		return 0;
+	return 1;
+}
+priority_queue<Node>q;
+int main() {
+	while(scanf("%d", &n) && n) {
+		scanf("%lf%lf", &bomb.x, &bomb.y);
+		int cnt = 0;
+		for(int i = 1; i <= n; ++ i) {
+			scanf("%d", &tot[i]);
+			for(int j = 0; j < tot[i]; ++ j)
+				scanf("%lf%lf", &poly[i][j].x, &poly[i][j].y);
+			poly[i][tot[i]] = poly[i][0];
+			for(int j = 0; j < tot[i]; ++ j)
+				if(Dcmp((poly[i][j] - bomb) ^ (poly[i][j + 1] - bomb)) > 0)
+					safe[i][j] = 1;
+				else
+					safe[i][j] = 0;
+			for(int j = 1; j <= tot[i]; ++ j)
+				s[++ cnt] = poly[i][j], vis[cnt] = safe[i][j - 1] | safe[i][j];
+		}
+// cerr << "????" << cnt << endl;
+		if(!Can(s[0], bomb)) {
+			printf("%.15f\n", 0.0);
+			continue;
+		}
+		for(int i = 0; i <= cnt; ++ i) {
+// cerr << s[i].x << " " << s[i].y << endl;
+			rd[i][i] = 0;
+			for(int j = i + 1; j <= cnt; ++ j)
+				if(Can(s[i], s[j]))
+					rd[i][j] = rd[j][i] = (s[i] - s[j]).len();
+				else
+					rd[i][j] = rd[j][i] = 1e18;
+		}
+		for(int i = 1; i <= cnt; ++ i)
+			dis[i] = 1e18;
+		q.push(Node(0, 0));
+		while(!q.empty()) {
+			Node now = q.top();
+			q.pop();
+			int id = now.id;
+			if(Dcmp(dis[id] - now.dis))
+				continue;
+			for(int i = 1; i <= cnt; ++ i) {
+				if(id == i)
+					continue;
+				if(dis[i] > dis[id] + rd[id][i])
+					dis[i] = dis[id] + rd[id][i], q.push(Node(dis[i], i));
+			}
+		}
+		double ans = 1e18;
+		for(int i = 0; i <= cnt; ++ i) {
+// cerr << dis[i] << endl;
+			if(dis[i] > 1e17)
+				continue;
+			if(vis[i])
+				ans = min(ans, dis[i]);
+			for(int j = 1; j <= cnt; ++ j)
+				if(vis[j] && Dcmp((s[i] - s[j]) * (bomb - s[j])) <= 0) {
+		// cerr << i << " " << j << endl;
+					Point v = Vertical(s[i], Seg(s[j], bomb));
+		// cerr << (s[i] - v).len() << endl;
+					ans = min(ans, dis[i] + (s[i] - v).len());
+				}
+		}
+		printf("%.10f\n", ans);
+	}
+}

@@ -1,0 +1,65 @@
+import java.util.Scanner;
+
+class lane {
+    private final int N = 10000;
+    private int head = 0;
+    private int tail = 0;
+    private int queue[];
+
+    lane() {
+        this.head = 0;
+        this.tail = 0;
+        this.queue = new int[N];
+    }
+
+    void enqueue(int value) {
+        this.queue[tail] = value;
+        this.tail++;
+    }
+
+    int dequeue() {
+        int res = this.queue[head];
+        this.head++;
+        return res;
+    }
+
+    int size() {
+        return this.tail - this.head;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        int N = sc.nextInt();
+        int M = sc.nextInt();
+
+        lane[] la = new lane[N];
+
+        for (int i = 0; i < N; i++) {
+            la[i] = new lane();
+        }
+
+        for (int i = 0; i < M; i++) {
+            int a = sc.nextInt();
+            int b = sc.nextInt();
+            if (a == 0)
+                System.out.println(la[b - 1].dequeue());
+            else if (a == 1) {
+                int c = la[0].size();
+                int number = 0;
+                for (int j = 0; j < N; j++) {
+                    if (c > la[j].size()) {
+                        c = la[j].size();
+                        number = j;
+                    }
+                }
+                la[number].enqueue(b);
+            }
+        }
+        sc.close();
+    }
+}
+

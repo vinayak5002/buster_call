@@ -1,0 +1,157 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using vvvb = vector<vvb>;
+using vd = vector<double>;
+using vvd = vector<vd>;
+using vvvd = vector<vvd>;
+#define all(A) A.begin(),A.end()
+#define ciN cin
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q) {
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+template<class T>
+bool chmin(T& p, T q) {
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+ll gcd(ll(a), ll(b)) {
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+
+ll dfs(string S) {
+    ll n = S.size();
+
+    if (S[0] != '[') {
+        ll res = 0;
+        rep(i, n) {
+            res += S[i] - '0';
+            res *= 10;
+        }
+        res /= 10;
+        return res / 2 + 1;
+    }
+    ll L = -1;
+    ll k = 0;
+    vll D;
+    rep(i, n) {
+        if (S[i] == '[') {
+            if (L == -1) {
+                L = i;
+            }
+            k++;
+        }
+        else if (S[i] == ']') {
+            k--;
+            if (k == 0) {
+
+                ll P = dfs(S.substr(L + 1, i - L - 1));
+                L = -1;
+                D.push_back(P);
+            }
+        }
+    }
+    sort(all(D));
+    ll an = 0;
+    rep(i, D.size() / 2 + 1) {
+        an += D[i];
+    }
+    return an;
+}
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+    while (1) {
+        ll N, M, C;
+        cin >> N >> M >> C;
+        C *= 10;
+        if (N == 0)return 0;
+        string S, T;
+        cin >> S >> T;
+        map<string, map<string, ll>> G;
+        rep(i, N) {
+            string A, B;
+            ll W;
+            cin >> A >> B >> W;
+            G[A][B] = W;
+            G[B][A] = W;
+        }
+        set<string> GAS;
+        rep(i, M) {
+            string g;
+            cin >> g;
+            GAS.insert(g);
+        }
+
+        map<pair<string, ll>, ll> dist;
+        dist[{S, C}] = 0;
+        set<pair<string, ll>> seen;
+        priority_queue<pair<ll, pair<string, ll>>, vector<pair<ll, pair<string, ll>>>, greater<pair<ll, pair<string, ll>>>> Q;
+
+        Q.push({ 0,{S,C} });
+        while (!Q.empty()) {
+            auto p = Q.top();
+            Q.pop();
+            if (seen.count(p.second))continue;
+            seen.insert(p.second);
+
+            for (auto v : G[p.second.first]) {
+                string nv = v.first;
+                ll d = v.second;
+                if (d > p.second.second) {
+                    continue;
+                }
+
+                ll z = p.second.second-d;
+                if (GAS.count(nv))z = C;
+                pair<string, ll> NV = { nv,z };
+                
+                if (seen.count(NV))continue;
+                if (dist.count(NV) && dist[NV] <= p.first + d)continue;
+                dist[NV] = p.first + d;
+                Q.push({ dist[NV],NV });
+            }
+
+        }
+        ll an = 1e18;
+        rep(i, C + 1) {
+            if (dist.count({ T,i })) {
+                chmin(an, dist[{T, i}]);
+            }
+        }
+        cout << (an < 1e17 ? an : -1) << endl;
+    }
+
+
+}
+

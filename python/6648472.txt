@@ -1,0 +1,75 @@
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs = __importStar(require("fs"));
+const str = fs.readFileSync('/dev/stdin', 'utf8');
+const inputs = str.trim().split('\n');
+const count = Number(inputs.shift());
+const tree = [...Array(count)].map(_ => ({ parentIndex: -1 }));
+inputs.forEach(input => {
+    const [id, childCount, ...rest] = input.split(' ').map(Number);
+    const node = tree[id];
+    node.childIndex = rest[0];
+    if (rest[0] !== undefined) {
+        tree[rest[0]].parentIndex = id;
+    }
+    for (let i = 0; i < rest.length - 1; i++) {
+        tree[rest[i]].parentIndex = id;
+        tree[rest[i]].siblingIndex = rest[i + 1];
+        tree[rest[i + 1]].parentIndex = id;
+    }
+});
+const depth = [...Array(count)].map(_ => 0);
+const setDepth = (index, d) => {
+    depth[index] = d;
+    if (tree[index].siblingIndex !== undefined) {
+        setDepth(tree[index].siblingIndex, d);
+    }
+    if (tree[index].childIndex !== undefined) {
+        setDepth(tree[index].childIndex, d + 1);
+    }
+};
+let rootIndex = 0;
+for (let i = 0; i < count; i++) {
+    if (tree[i].parentIndex === -1) {
+        rootIndex = i;
+    }
+}
+setDepth(rootIndex, 0);
+tree.forEach((node, index) => {
+    const type = node.parentIndex === -1
+        ? 'root'
+        : node.childIndex === undefined
+            ? 'leaf'
+            : 'internal node';
+    const children = [];
+    let idx = node.childIndex;
+    while (idx !== undefined) {
+        children.push(idx);
+        idx = tree[idx].siblingIndex;
+    }
+    console.log(`node ${index}: parent = ${node.parentIndex}, depth = ${depth[index]}, ${type}, [${children.join(', ')}]`);
+});
+

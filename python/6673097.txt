@@ -1,0 +1,212 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+EPS = 1e-10
+
+
+def cross_product2d(v0, v1):
+    return v0[0] * v1[1] - v0[1] * v1[0]
+
+
+def calc_length(v):
+    length = 0
+    for element in v:
+        length += element ** 2
+    return math.sqrt(length)
+
+
+def normalize(v):
+    length = calc_length(v)
+    nv = []
+    for element in v:
+        nv.append(element / length)
+    return nv
+
+
+def v_diff(v0, v1):
+    dif = []
+    for i in range(len(v0)):
+        dif.append(v1[i] - v0[i])
+    return dif
+
+
+def inner_product(v0, v1):
+    ip = 0
+    for i in range(len(v0)):
+        ip += v0[i] * v1[i]
+    return ip
+
+
+"""v01: normalized"""
+def calc_projection_point(p0, v01, p2):
+    v0p = v_diff(p0, p2)
+    ip = inner_product(v01, v0p)
+    projection_p = []
+    for i in range(len(v01)):
+        projection_p.append(p0[i] + v01[i] * ip)
+    return projection_p
+
+
+def is_on_segment(p2, p0, p1):
+    v01 = v_diff(p0, p1)
+    v12 = v_diff(p1, p2)
+    if p0[0] == p1[0] == p2[0]:
+        if p0[1] <= p2[1] <= p1[1] or p1[1] <= p2[1] <= p0[1]:
+            return True
+        else:
+            return False
+    elif p0[1] == p1[1] == p2[1]:
+        if p0[0] <= p2[0] <= p1[0] or p1[0] <= p2[0] <= p0[0]:
+            return True
+        elif p2[0] < p0[0] < p1[0] or p2[0] > p0[0] > p1[0]:
+            return False
+    else:
+        cp = cross_product2d(v01, v12)
+        if cp > EPS:
+            return False
+        elif cp < -EPS:
+            return False
+        else:
+            ip = inner_product(v01, v12)
+            l0 = calc_length(v01)
+            l1 = calc_length(v12)
+
+            if abs(ip) < EPS:
+                return True
+            elif ip > EPS:
+                return False
+            else:
+                if l0 < l1:
+                    return False
+                else:
+                    return True
+
+
+def calc_intersection(circle, p0, p1):
+    v01 = normalize(v_diff(p0, p1))
+    pl = calc_projection_point(p0, v01, circle)
+    r = circle[2]
+    r2 = r**2
+    d2 = (pl[0] - circle[0])**2 + (pl[1] - circle[1])**2
+    if d2 > r2:
+        return []
+    if d2 == r2:
+        return [pl, pl]
+
+    t = math.sqrt(r2 - d2)
+    x0 = pl[0] + v01[0] * t
+    y0 = pl[1] + v01[1] * t
+    x1 = pl[0] - v01[0] * t
+    y1 = pl[1] - v01[1] * t
+    if t <= 0.5:
+        return [(x0, y0), (x1, y1)]
+    else:
+        return [(x1, y1), (x0, y0)]
+
+
+"""In the case where one of p0, p1 is inside the circle and the other is outside the circle."""
+def calc_circle_segment_intersection(circle, p0, p1):
+    ip_list = calc_intersection(circle, p0, p1)
+    v0i = v_diff(p0, ip_list[0])
+    v01 = v_diff(p0, p1)
+    if inner_product(v0i, v01) > 0:
+        d0i = calc_length(v0i)
+        d01 = calc_length(v01)
+        if d0i <= d01:
+            return ip_list[0]
+        else:
+            return ip_list[1]
+    else:
+        return ip_list[1]
+
+
+def calc_difference_of_declination(p0, p1):
+    theta0 = math.atan2(p0[1], p0[0])
+    theta1 = math.atan2(p1[1], p1[0])
+    theta = theta1 - theta0
+    if theta > math.pi:
+        theta -= 2 * math.pi
+    elif theta < -math.pi:
+        theta += 2 * math.pi
+
+    return theta
+
+
+def calc_area_of_circle_and_polygon(circle, n, p_list):
+    r = circle[2]
+    po = (0, 0)
+    r2 = r * r
+    if circle[0] != 0 or circle[1] != 0:
+        dx = -circle[0]
+        dy = -circle[1]
+        circle = (circle[0] + dx, circle[1] + dy, r)
+        for p in p_list:
+            p[0] += dx
+            p[1] += dy
+
+    area = 0
+    for i in range(n):
+        p0 = p_list[i - 1]
+        p1 = p_list[i]
+
+        d0 = calc_length(p0)
+        d1 = calc_length(p1)
+
+        if d0 <= r and d1 <= r:  # OK
+            a = cross_product2d(p0, p1) * 0.5
+            area += a
+        elif d0 <= r < d1:  # OK
+            pi = calc_circle_segment_intersection(circle, p0, p1)
+            a0 = cross_product2d(p0, pi) * 0.5
+            pi1 = calc_circle_segment_intersection(circle, po, p1)
+
+            theta = calc_difference_of_declination(pi, pi1)
+            a1 = r2 * theta * 0.5
+            area += a0 + a1
+        elif d1 <= r < d0:  # OK
+            pi = calc_circle_segment_intersection(circle, p0, p1)
+            a0 = cross_product2d(pi, p1) * 0.5
+
+            theta = calc_difference_of_declination(p0, pi)
+            a1 = r2 * theta * 0.5
+            area += a0 + a1
+        else:
+            ip_list = calc_intersection(circle, p0, p1)
+            if ip_list and ip_list[0] != ip_list[1] and\
+                    is_on_segment(ip_list[0], p0, p1) and is_on_segment(ip_list[1], p0, p1):
+                theta0 = calc_difference_of_declination(p0, ip_list[0])
+                theta1 = calc_difference_of_declination(ip_list[1], p1)
+                area += r2 * (theta0 + theta1) * 0.5
+                area += cross_product2d(ip_list[0], ip_list[1]) * 0.5
+            else:  # OK
+                theta = calc_difference_of_declination(p0, p1)
+                a = r2 * theta * 0.5
+                area += a
+
+    return area
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, r = map(int, f.readline().split())
+    circle = (0, 0, r)
+    p_list = [tuple(map(int, f.readline().split())) for _ in range(n)]
+
+    area = calc_area_of_circle_and_polygon(circle, n, p_list)
+    print(f'{area:5f}')
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

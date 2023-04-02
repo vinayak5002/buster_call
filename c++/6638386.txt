@@ -1,0 +1,87 @@
+#include<stdio.h>
+
+#define gridsize 255
+
+void initial(int array[][gridsize], int *size);
+void find_max(int *maximum, int array[][gridsize], int *size);
+void leftmax(int *maximum, int array[][gridsize], int *size);
+void rightmax(int *maximum, int array[][gridsize], int *size);
+
+int main(void){
+	int n;
+	while(scanf("%d", &n)!=EOF||(n>=2 && n<=255)){
+      	int max=0;
+      	int d[gridsize][gridsize]={0};
+      	
+		initial(d, &n);
+		find_max(&max, d, &n);
+		leftmax(&max, d, &n);
+      	rightmax(&max, d, &n);
+      	
+      	printf("%d\n", max);
+	}
+	return 0;
+}
+
+void initial(int array[][gridsize], int *size){
+	for (int i=0; i<*size; i++){
+		for (int j=0; j<*size; j++){
+			scanf("%d", &array[i][j]);
+		}
+	}
+}
+void find_max(int *maximum, int array[][gridsize], int *size){
+	for (int i=0; i<*size; i++){
+		int rowsum=0, colsum=0;
+		for (int j=0; j<*size; j++){
+			rowsum += array[i][j];
+      		colsum += array[j][i];
+		}
+		if(rowsum>*maximum){
+			*maximum=rowsum;
+		}
+    	if(colsum>*maximum){
+			*maximum=colsum;
+		}
+	}
+}
+void leftmax(int *maximum, int array[][gridsize], int *size){
+	for (int k=1; k<*size; k++){
+		int leftsum=0;
+		for (int i=0; i<=k; i++){
+			leftsum += array[i][k-i];
+		}
+		if(leftsum>*maximum){
+			*maximum=leftsum;
+		}
+	}
+	for (int k=*size; k<*size*2-2; k++){
+		int leftsum=0;
+		for (int i=k-*size+1; i<*size; i++){
+			leftsum += array[i][k-i];
+		}
+		if(leftsum>*maximum){
+			*maximum=leftsum;
+		}
+	}
+}
+void rightmax(int *maximum, int array[][gridsize], int *size){
+  	for(int k=0; k<*size-1; k++){
+  		int rightsum=0;
+  		for (int i=k; i<*size; i++){
+  			rightsum += array[i][i-k];
+		}
+		if (rightsum>*maximum){
+			*maximum=rightsum;
+		}
+	}
+	for (int k=-1; k>-*size+1; k--){
+		int rightsum=0;
+		for (int i=0; i<*size+k; i++){
+			rightsum += array[i][i-k];
+		}
+		if (rightsum>*maximum){
+			*maximum=rightsum;
+		}
+	}
+}

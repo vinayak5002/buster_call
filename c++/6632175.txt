@@ -1,0 +1,105 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+class edge{
+    public:
+        ll to, dist;
+        edge() {}
+        edge(ll to, ll dist): to(to), dist(dist) {}
+};
+
+const ll nmax = 100 + 10;
+ll n;
+vector<edge> G[nmax];
+ll d[nmax];
+ll seen[nmax];
+
+void dijkstra(ll s){
+    using pll = pair<ll, ll>;
+    d[s] = 0;
+
+    priority_queue<pll, vector<pll>, greater<pll>> que;
+
+    que.push({0, s});
+
+    while(!que.empty()){
+        auto p = que.top();
+        que.pop();
+        ll u = p.second;
+        seen[u] = 1;
+
+        if(d[u] < p.first) continue;
+        rep(i, 0, SZ(G[u])){
+            edge e = G[u][i];
+            if(d[e.to] > d[u] + e.dist){
+                d[e.to] = d[u] + e.dist;
+                que.push({d[e.to], e.to});
+            }
+        }
+    }
+
+    while(1){
+        ll v;
+        ll mindist = INF;
+        rep(i, 0, n){
+            if(seen[i] == 0 && d[i] < mindist){
+                mindist = d[i];
+                v = i;
+            }
+        }
+        if(mindist == INF) break;
+
+        seen[v] = 1;
+        rep(i, 0, SZ(G[v])){
+            edge e = G[v][i];
+            if(d[e.to] > d[v] + e.dist){
+                d[e.to] = d[v] + e.dist;
+            }
+        }
+    }
+}
+
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  cin >> n;
+  rep(i, 0, n){
+      d[i] = INF;
+      ll a, k;
+      cin >> a >> k;
+      rep(j, 0, k){
+          ll b, c;
+          cin >> b >> c;
+          G[a].push_back({b, c});
+      }
+  }
+
+  dijkstra(0);
+  rep(i, 0, n){
+      cout << i << " ";
+      if(d[i] == INF) d[i] = -1;
+      cout << d[i] << endl;
+  }
+
+
+
+  return 0;
+}

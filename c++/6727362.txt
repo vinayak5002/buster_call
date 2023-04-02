@@ -1,0 +1,140 @@
+#include <iostream>
+#include <vector>
+#include <climits>
+
+struct Card
+{
+    char mark;
+    int number;
+    bool operator==(const Card &rhv) const //中身が変わらないですよ～のconst
+    {
+        return this->mark == rhv.mark && this->number == rhv.number;
+    }
+    bool operator<=(const Card &rhv) const //中身が変わらないですよ～のconst
+    {
+        return this->number <= rhv.number;
+    }
+    bool operator<(const Card &rhv) const //中身が変わらないですよ～のconst
+    {
+        return this->number < rhv.number;
+    }
+};
+
+int merge(std::vector<Card> &S, int left, int mid, int right)
+{
+    int n1 = mid - left;
+    int n2 = right - mid;
+    std::vector<Card> L(n1);
+    std::vector<Card> R(n2);
+    for (int m = 0; m < n1; m++)
+    {
+        L[m] = S[left + m];
+    }
+    for (int n = 0; n < n2; n++)
+    {
+        R[n] = S[mid + n];
+    }
+    Card tmp = {'a',INT_MAX};
+    L.push_back(tmp);
+    R.push_back(tmp);
+    int i = 0;
+    int j = 0;
+    for (int k = left; k < right; k++)
+    {
+        if (L[i] <= R[j])
+        {
+            S[k] = L[i];
+            i++;
+        }
+        else
+        {
+            S[k] = R[j];
+            j++;
+        }
+    }
+    return right - left; // for分の繰り返しの回数
+}
+
+int mergeSort(std::vector<Card> &S, int left, int right)
+{
+    if (left + 1 >= right) //判定に入らないものを先に除外する
+    {
+        return 0;
+    }
+
+    int mid = (left + right) / 2;
+    int count = 0;
+    count += mergeSort(S, left, mid);
+    count += mergeSort(S, mid, right);
+    count += merge(S, left, mid, right);
+    return count;
+}
+
+int partition(std::vector<Card> &A, int p, int r)
+{
+    Card x = A[r];
+    int i = p - 1;
+    for (int j = p; j < r; j++)
+    {
+        if (A[j] <= x)
+        {
+            i++;
+            std::swap(A[i], A[j]);
+        }
+    }
+
+    std::swap(A[i + 1], A[r]);
+    return i + 1;
+}
+
+void quickSort(std::vector<Card> &A, int p, int r)
+{
+    if (p < r)
+    {
+        int q = partition(A, p, r);
+        quickSort(A, p, q - 1);
+        quickSort(A, q + 1, r);
+    }
+}
+
+bool isStable(std::vector<Card> &A, std::vector<Card> &B)
+{
+    for (size_t i = 0; i < A.size(); i++)
+    {
+        if (A[i].mark != B[i].mark)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+int main()
+{
+    int n;
+    std::cin >> n;
+    std::vector<Card> A(n);
+    for (int i = 0; i < n; i++)
+    {
+        std::cin >> A[i].mark >> A[i].number;
+    }
+
+    std::vector<Card> Bubble = A;
+
+    mergeSort(Bubble, 0, n);
+    quickSort(A, 0, n - 1);
+
+    std::cout << (isStable(A, Bubble) ? "Stable" : "Not stable") << std::endl;
+
+    for (size_t j = 0; j < A.size(); j++)
+    {
+        std::cout << A[j].mark << " " << A[j].number << std::endl;
+    }
+
+    return 0;
+}
+
+// 2
+// S 1
+// H 1
+//の時「H 1」が変な数字になる（消える）

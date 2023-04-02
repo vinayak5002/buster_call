@@ -1,0 +1,86 @@
+import java.io.*;
+import java.util.*;
+
+public class Main {
+    private static final int MAX = 100000;
+    private static final int INF = Integer.MAX_VALUE / 2;
+    private static final int WHITE = 0;
+    private static final int GRAY = 1;
+    private static final int BLACK = 2;
+
+    private static int n;
+    private static ArrayList<int[]>[] adj = new ArrayList[MAX];
+
+    public static void dij() {
+        PriorityQueue<int[]> pq = new PriorityQueue<>(Comparator.comparingInt(p -> p[1]));
+        int[] color = new int[MAX];
+        int[] d = new int[MAX];
+        Arrays.fill(d, 0, n, INF);
+        Arrays.fill(color, 0, n, WHITE);
+        d[0] = 0;
+        pq.offer(new int[] {0, 0});
+        color[0] = GRAY;
+        while (!pq.isEmpty()) {
+            int[] p = pq.poll();
+            int u = p[0];
+
+            color[u] = BLACK;
+
+            // fetch the minimum, if not then ignore it;
+            if (d[u] < p[1]) continue;
+
+            for (int i = 0; i < adj[u].size(); i++) {
+                int v = adj[u].get(i)[0];
+                if (color[v] == BLACK) continue;
+                if (d[v] > d[u] + adj[u].get(i)[1]) {
+                    d[v] = d[u] + adj[u].get(i)[1];
+                    pq.offer(new int[] {v, d[v]});
+                    color[v] = GRAY;
+                }
+            }
+        }
+
+        for (int i = 0; i < n; i++) {
+            System.out.println(i + " " + (d[i] == INF ? -1 : d[i]));
+        }
+    }
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+        Reader in = new Reader();
+        int k, u, v, c;
+        n = in.nextInt();
+        for (int i = 0; i < n; i++) {
+            u = in.nextInt(); k = in.nextInt();
+            adj[u] = new ArrayList<>();
+            for (int j = 0; j < k; j++) {
+                v = in.nextInt();
+                c = in.nextInt();
+                adj[u].add(new int[] {v, c});
+            }
+        }
+
+        dij();
+    }
+
+
+    static class Reader {
+        StreamTokenizer st = new StreamTokenizer(new BufferedReader(new InputStreamReader(System.in)));
+
+        public String next() throws IOException {
+            st.nextToken();
+            return st.sval;
+        }
+
+        public double nextDouble() throws IOException {
+            st.nextToken();
+            return st.nval;
+        }
+
+        public int nextInt() throws IOException {
+            return (int) nextDouble();
+        }
+
+        public long nextLong() throws IOException {
+            return (long) nextDouble();
+        }
+    }
+}

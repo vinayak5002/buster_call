@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main()
+{
+  int V, E, r;
+  cin >> V >> E >> r;
+  vector<vector<pair<int, int>>> G(V);
+  for (int i = 0; i < E; i++) {
+    int s, t, d;
+    cin >> s >> t >> d;
+    G.at(s).push_back({t, d});
+  }
+  auto cmp = [](pair<int, int> p, pair<int, int> q) {
+    return p.second > q.second;
+  };
+  priority_queue<pair<int, int>, vector<pair<int, int>>, decltype(cmp)>
+    que(cmp);
+  que.push({r, 0});
+  vector<bool> visited(V);
+  int const INF = numeric_limits<int>::max() / 2;
+  vector<int> c(V, INF);
+  c.at(r) = 0;
+  while (!que.empty()) {
+    int v, d;
+    tie(v, d) = que.top();
+    que.pop();
+    visited.at(v) = true;
+    for (pair<int, int> p : G.at(v)) {
+      int nv, nd;
+      tie(nv, nd) = p;
+      if (!visited.at(nv)) {
+        c.at(nv) = min(c.at(nv), c.at(v) + nd);
+        que.push({nv, c.at(nv)});
+      }
+    }
+  }
+  for (int i : c) {
+    if (i >= INF)
+      cout << "INF";
+    else
+      cout << i;
+    cout << '\n';
+  }
+}
+

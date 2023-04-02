@@ -1,0 +1,77 @@
+
+import sys
+# import pypyjit
+# pypyjit.set_param('max_unroll_recursion = -1')
+
+sys.setrecursionlimit(500005)
+stdin = sys.stdin
+
+ns = lambda: stdin.readline().strip()
+ni = lambda: int(ns())
+na = lambda: list(map(int, stdin.readline().split()))
+nz = lambda: list(map(lambda x: int(x)-1, stdin.readline().split())) # 遅い
+mod = 1000000007 # 998244353
+inf = 10 ** 18
+
+from random import randrange
+class Rolling_Hash:
+    M = (1 << 61) - 1
+    R = randrange(M)
+    Positivisor = M * 4
+    mask_31 = (1 << 31) - 1
+    mask_30 = (1 << 30) - 1
+    mask_61 = M
+
+    def __init__(self, A):
+        self.H = [0]
+        for a in A:
+            self.H.append(self.calc_mod(self.calc_mul(self.H[-1], self.R) + a))
+        
+        self.PowMemo = [1]
+        for _ in range(len(A)):
+            self.PowMemo.append(self.calc_mod(self.calc_mul(self.PowMemo[-1], self.R)))
+
+    def calc_mul(self, a, b):
+        au = a >> 31
+        ad = a & self.mask_31
+        bu = b >> 31
+        bd = b & self.mask_31
+        mid = au * bd + bu * ad
+        mu = mid >> 30
+        md = mid & self.mask_30
+        return 2 * au * bu + mu + (md << 31) + ad * bd
+
+    def calc_mod(self, x):
+        xu = x >> 61
+        xd = x & self.mask_61
+        return (xu + xd) % self.M
+    
+    def get_hash(self, L, R):
+        """
+        半開区間 [L, R) の区間のHash
+        """
+        # L, R = L+1, R+1
+        Hh = self.H[R] - self.calc_mul(self.H[L], self.PowMemo[R - L])
+        Hh = self.calc_mod(Hh + self.Positivisor)
+        return Hh
+
+
+T = list(ns())
+for i in range(len(T)):
+    T[i] = ord(T[i]) + 1
+
+P = list(ns())
+for i in range(len(P)):
+    P[i] = ord(P[i]) + 1
+
+THash = Rolling_Hash(T)
+PHash = Rolling_Hash(P)
+
+Ph = PHash.H[-1]
+leng = len(P)
+for i in range(len(T) - len(P) + 1):
+    gh = THash.get_hash(i, i + leng)
+    if gh == Ph:
+        print(i)
+
+

@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+using namespace std;
+using P = pair<int, int>;
+#define sz(x) int(x.size())
+#define rep(i,n) for (int i = 0; i < (n); ++i)
+bool comp(P &p, P &q) {
+    return p.first * p.second < q.first * q.second;
+}
+bool solve() {
+    int n, w, d;
+    cin >> n >> w >> d;
+    if (n+d+w == 0) return false;
+    vector<P> v;
+    v.push_back({w, d});
+
+    rep(_,n) {
+        int p, s;
+        cin >> p >> s;
+        --p;
+        int a = v[p].first;
+        int b = v[p].second;
+        vector<P> nv;
+        rep(i,sz(v)) {
+            if (i != p) nv.push_back(v[i]);
+        }
+
+        s %= (a + b);
+        if (s < a) {
+            if (s < a - s) {
+                nv.push_back({s, b});
+                nv.push_back({a - s, b});
+            } else {
+                nv.push_back({a - s, b});
+                nv.push_back({s, b});
+            }
+        } else {
+            s -= a;
+            if (s < b - s) {
+                nv.push_back({a, s});
+                nv.push_back({a, b - s});
+            } else {
+                nv.push_back({a, b - s});
+                nv.push_back({a, s});
+            }
+        }
+        v = nv;
+    }
+
+    sort(v.begin(), v.end(), comp);
+    rep(i,sz(v)) {
+        cout << v[i].first * v[i].second;
+        if (i == sz(v)-1) cout << endl;
+        else cout << ' ';
+    }
+    return true;
+}
+int main(){
+    while (solve()) {}
+} 

@@ -1,0 +1,56 @@
+from heapq import heapify, heappop, heappush
+
+
+class Filesystem:
+
+    def __init__(self):
+        self.data = [(0, 10 ** 9, -1)]
+    
+    def write(self, i, num):
+        data2 = []
+        while num > 0:
+            l, r, j = heappop(self.data)
+            if j == -1:
+                if num >= r - l + 1:
+                    data2.append((l, r, i))
+                    num -= r - l + 1
+                else:
+                    data2.append((l, l + num - 1, i))
+                    data2.append((l + num, r, -1))
+                    num = 0
+            else:
+                data2.append((l, r, j))
+        for t in data2:
+            heappush(self.data, t)
+
+    def delete(self, i):
+        for j in range(len(self.data)):
+            l, r, n = self.data[j]
+            if n == i:
+                self.data[j] = l, r, -1
+    
+    def read(self, i):
+        for j in range(len(self.data)):
+            l, r, n = self.data[j]
+            if l <= i <= r:
+                return n
+        return -1
+
+while True:
+    N = int(input())
+    if N == 0:
+        exit()
+    f = Filesystem()
+    for _ in range(N):
+        c = list(map(str, input().split(' ')))
+        if c[0] == 'W':
+            i, num = int(c[1]), int(c[2])
+            f.write(i, num)
+        elif c[0] == 'D':
+            i = int(c[1])
+            f.delete(i)
+        else:
+            i = int(c[1])
+            ans = f.read(i)
+            print(ans)
+    print()

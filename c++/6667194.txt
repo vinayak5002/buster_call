@@ -1,0 +1,178 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+using ll=long long;
+
+const double EPS=1e-7;
+
+template<typename T>
+int sign(T a){return (a<-EPS)?-1:(a>EPS)?1:0;}
+
+template<typename T, typename U>
+int cmp(T a, U b){
+    /* a<b: -1, a==b: 0, a>b: 1 */
+    return sign(a-b);}
+
+template<typename T>
+struct Point{
+    T x,y;
+
+    Point(): x(0), y(0){}
+    Point(T x, T y): x(x), y(y){}
+
+    // マイナス
+    Point operator-() const { return Point(-x,-y);}
+
+    // 和
+    Point& operator+=(const Point &P){
+        x+=P.x; y+=P.y;
+        return *this;
+    }
+
+    Point operator+(const Point &P) const {return Point(*this)+=P;}
+
+    // 差
+    Point& operator-=(const Point &P){
+        x-=P.x; y-=P.y;
+        return *this;
+    }
+
+    Point operator-(const Point &P) const {return Point(*this)-=P;}
+
+    // 積
+    Point operator*(const Point &P) const {
+        T a=x*P.x-y*P.y, b=x*P.y+y*P.x;
+        return Point<T>(a,b);
+    }
+
+    //スカラー倍
+    Point& operator*=(const T &a){
+        x*=a; y*=a;
+        return *this;
+    }
+
+    Point operator*(const T &a) const {return Point(*this)*=a;}
+
+    Point& operator/=(const T &a){
+        x/=a; y/=a;
+        return *this;
+    }
+
+    Point operator/(const T &a) const {return Point(*this)/=a;}
+
+    // ノルム
+    T norm_2() const {return x*x+y*y;}
+    double norm() const {return sqrt(x*x+y*y);}
+
+    // クロス積
+    T cross(const Point &P) const {return x*P.y-y*P.x;}
+    T det(const Point &P) const {return x*P.y-y*P.x;}
+
+    // ドット積
+    T dot(const Point &P) const {return x*P.x+y*P.y;}
+
+    // 角度
+    double arg() const {return atan2(y,x);}
+
+    // 比較
+    bool operator<(const Point &P){
+        if (cmp(x,P.x)) return cmp(x,P.x)<0;
+        return cmp(y,P.y)<0;
+    }
+
+    // 入力
+    friend istream &operator>>(istream &is, Point &P) {is >> P.x >> P.y; return (is);}
+
+    // 出力
+    friend ostream &operator<<(ostream &os, const Point &P) {return os << P.x << " " << P.y;}
+};
+
+template<typename T, typename U>
+Point<U> operator*(const T &a, const Point<U> &P){return Point<U>(a*P.x, a*P.y);}
+
+template<typename T>
+struct Line{
+    Point<T> begin, end;
+
+    Line(const Point<T> &P, const Point<T> &Q): begin(P), end(Q){}
+
+    Point<T> vectorize() const {return end-begin;}
+    Point<T> counter_vectorize() const {return begin-end;}
+
+    bool is_on(const Point<T> &P){
+        return sign((begin-P).cross(end-P))==0;
+    }
+};
+
+template<typename T, typename U>
+struct Circle{
+    Point<T> center;
+    U radius;
+
+    Circle<T,U> (const Point<T> &P, const U &r): center(P), radius(r){}
+
+    bool is_on(const Point<T> &P){
+        return cmp((P-center).norm(), radius)==0;
+    }
+};
+
+template<typename T>
+struct Triangle{
+    Point<T> A,B,C;
+
+    Triangle<T> (const Point<T> &A, const Point<T> &B, const Point<T> &C): A(A), B(B), C(C) {}
+
+    tuple<Point<T>, Point<T>, Point<T>> edges() const {return make_tuple(C-B, A-C, B-A);}
+    tuple<double, double, double> edges_length() const {return make_tuple((C-B).norm(), (A-C).norm(), (B-A).norm());}
+
+    T area() const {return abs((B-A).cross(C-A))/2;}
+};
+
+// 直線同士の交点 (平行でないことが前提!!)
+template<typename T>
+Point<T> Cross_Point(const Line<T> &L, const Line<T> &M){
+    auto A=L.begin, B=L.end, C=M.begin, D=M.end;
+    T k=(C-A).cross(D-C)/(B-A).cross(D-C);
+    return A+k*(B-A);
+}
+
+// 角の二等分線
+template<typename T>
+Line<T> Angle_Bisector(const Point<T> &P, const Point<T> &Q, const Point<T> &R){
+    double x=(Q-P).norm(), y=(R-P).norm();
+    Point<T> S=(y*Q+x*R)/(x+y);
+    return Line(P,S);
+}
+
+// 内心
+template<typename E>
+Point<E> Incenter(const Triangle<E> &T){
+    Line<E> l1=Angle_Bisector(T.A, T.B, T.C);
+    Line<E> l2=Angle_Bisector(T.B, T.A, T.C);
+    return Cross_Point(l1,l2);
+}
+
+// 内接円
+template<typename E>
+Circle<E, double> Inscribed_Circle(const Triangle<E> &T){
+    Point<E> center=Incenter(T);
+    auto [x,y,z]=T.edges_length();
+    double r=(2*T.area())/(x+y+z);
+    return Circle(center, r);
+}
+
+
+int main(){
+    Point<double> A,B,C;
+    cin >> A >> B >> C;
+
+    Triangle<double> T(A,B,C);
+    Circle<double, double> E= Inscribed_Circle(T);
+    
+    if (sign(E.center.x)==0) E.center.x=0.0;
+    if (sign(E.center.y)==0) E.center.y=0.0;
+    if (sign(E.radius)==0) E.radius=0.0;
+    
+	cout << setprecision(15) << E.center << " " << E.radius << endl;
+}
+

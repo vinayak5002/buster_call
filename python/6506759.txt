@@ -1,0 +1,68 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Scanner;
+
+public class Main {
+    public static final int[][] swapableDigit = {
+            { 1, 4 },
+            { 0, 2, 5 },
+            { 1, 3, 6 },
+            { 2, 7 },
+            { 0, 5 },
+            { 1, 4, 6 },
+            { 2, 5, 7 },
+            { 3, 6 },
+    };
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        while (sc.hasNext()) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 8; i++) {
+                sb.append(sc.next());
+            }
+            String input = sb.toString();
+
+            HashMap<String, Integer> ans = BFS();
+            System.out.println(ans.get(input));
+        }
+
+        sc.close();
+    }
+
+    static HashMap<String, Integer> BFS() {
+        HashMap<String, Integer> count = new HashMap<String, Integer>();
+        LinkedList<String> queue = new LinkedList<String>();
+        count.put("01234567", 0);
+        queue.offer("01234567"); // Enqueue
+
+        while (queue.size() > 0) {
+            String current = queue.poll(); // Dequeue
+            int indexOfZero = current.indexOf('0');
+            for (Integer item : swapableDigit[indexOfZero]) {
+                String next;
+                if (indexOfZero < item) {
+                    next = swapChar(current, indexOfZero, item);
+                } else {
+                    next = swapChar(current, item, indexOfZero);
+                }
+                if (!count.containsKey(next)) {
+                    count.put(next, count.get(current) + 1);
+                    queue.offer(next); // Enqueue
+                }
+            }
+        }
+        return count;
+    }
+
+    static String swapChar(String str, int index1, int index2) {
+        char c1 = str.charAt(index1);
+        char c2 = str.charAt(index2);
+        StringBuilder res = new StringBuilder(str);
+        res.setCharAt(index1, c2);
+        res.setCharAt(index2, c1);
+        return res.toString();
+    }
+}
+

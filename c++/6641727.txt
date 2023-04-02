@@ -1,0 +1,37 @@
+#include<bits/stdc++.h>
+#define rep(i, N) for(int i = 0; i < N; i++)
+using namespace std;
+using ll = int64_t;
+const ll LINF = 100100100100100100ll;
+
+int main(){
+  while(1){
+    int N, M; cin >> N >> M;
+    if(N == 0 && M == 0) break;
+    vector<int> C(M), X(N);
+    for(int i = 0; i < M; i++) cin >> C[i];
+    for(int i = 0; i < N; i++) cin >> X[i];
+
+    vector<vector<ll>> dp(N + 10, vector<ll>(256, LINF));
+    dp[0][128] = 0;
+    
+    rep(i, N){
+      rep(j, 256){
+	if(dp[i][j] == LINF) continue;
+	rep(k, M){
+	  int num = j + C[k];
+	  if(num > 255) num = 255;
+	  if(num < 0) num = 0;
+	  ll diff = X[i] - num;
+	  dp[i + 1][num] = min(dp[i + 1][num], dp[i][j] + diff * diff);
+	}
+      }
+    }
+
+    ll ans = LINF;
+    rep(i, 256) ans = min(ans, dp[N][i]);
+    cout << ans << endl;
+  }
+  return 0;
+}
+

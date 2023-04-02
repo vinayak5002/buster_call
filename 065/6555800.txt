@@ -1,0 +1,242 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+#define mit map<ll,int>::iterator
+#define sit set<int>::iterator
+#define itrm(g,x) for(mit g=x.begin();g!=x.end();g++)
+#define itrs(g,x) for(sit g=x.begin();g!=x.end();g++)
+#define ltype int
+#define rep(i,j,k) for(ltype(i)=(j);(i)<=(k);(i)++)
+#define rap(i,j,k) for(ltype(i)=(j);(i)<(k);(i)++)
+#define per(i,j,k) for(ltype(i)=(j);(i)>=(k);(i)--)
+#define pii pair<int,int>
+#define fi first
+#define se second
+#define mpr make_pair
+#define pb push_back
+#define fastio ios::sync_with_stdio(false)
+#define check(x) if(x>=mod) x-=mod
+const int inf=0x3f3f3f3f,mod=1000000007;
+const double pi=3.1415926535897932,eps=1e-6;
+void chmax(int &x,int y){if(x < y) x = y;}
+void chmin(int &x,int y){if(x > y) x = y;}
+int n;ll x0;
+int c[100005],e[100005],en[100005],dep[100005],at[100005],xd[100005];ll a[100005],b[100005],d[100005],P[100005];
+int id[100005],totc,tt[100005],tick;
+vector<int> cyc[100005],path;vector<ll> pre[100005];bool on[100005],vis[100005];
+ll sumc[100005];//555
+bool walk2[100005];
+vector<int> r[100005];
+void dfs(int x){
+    if(x == n + 1) {path.clear();return;}
+    if(tt[x]) {
+        if(on[x] || vis[x]){path.clear();return;}
+        rap(i,tt[x]-1,path.size()) cyc[totc].pb(path[i]),on[path[i]] = vis[path[i]] = 1,at[path[i]]=totc,xd[path[i]] = i-tt[x]+1;
+        path.clear();
+        totc++;
+        en[x] = x;
+        return;
+    }
+    tt[x] = ++tick;
+    path.pb(x);
+    dfs(e[x]);
+    if(!on[e[x]]) P[x] = P[e[x]];
+    P[x] += d[x], en[x] = en[e[x]];
+    vis[x] = 1;//completed
+}
+map<ll,int> vals;
+int rt[400005];
+struct segtree{
+    int dat[10500000],ls[10500000],rs[10500000],n,top,num;
+    void build(int nn)
+    {
+        n=1;
+        while(n<=nn) n<<=1;
+        for(int i=0;i<2*n-1;i++) {
+            if(i<n-1) ls[i]=(i<<1)+1,rs[i]=(i<<1)+2;
+            else ls[i] = rs[i] = -1;
+        }
+        top = 2 * n - 2;
+    }
+    int clone(int x){
+        top++;
+        dat[top] = dat[x];
+        ls[top] = ls[x];
+        rs[top] = rs[x];
+        return top;
+    }
+    void update(int x,int k){
+        num++;
+        rt[num] = top + 1;
+        update(rt[num-1],0,n,x,k);
+    }
+    int update(int k,int l,int r,int a,int x){
+        k = clone(k);
+        if(r - l == 1) {
+            dat[k] = x;
+            return k;
+        }
+        if(a < ((l + r) >> 1)) {ls[k] = update(ls[k],l,(l+r)>>1,a,x);}
+        else {rs[k] = update(rs[k],(l+r)>>1,r,a,x);}
+        return k;
+    }
+    int query(int l,int r,int x){
+        return query(l,r+1,rt[x],0,n);
+    }
+    int query(int a,int b,int k,int l,int r){
+        if(r<=a||b<=l) return inf;
+        if(a<=l&&r<=b) return dat[k];
+        return min(query(a,b,ls[k],l,(l+r)>>1),query(a,b,rs[k],(l+r)>>1,r));
+    }
+}seg;
+int jiyi[100005],Cnt;
+void deal(int x,int fa){
+    int ps = vals[P[x] + a[x]];
+    int pr = seg.query(ps, ps, seg.num);
+    seg.update(ps, x);
+    jiyi[x] = seg.num;
+    for(int to : r[x]) {
+        if(to == fa) continue;
+        dep[to] = dep[x] + 1;
+        deal(to, x);
+    }
+    seg.update(ps, pr);
+}
+void fail(){puts("-1");exit(0);}
+map<pair<int,ll>,int> ID;vector<pair<ll,int>> duliu[200005],wtf[200005];
+bool cmp(pair<ll,int> x,pair<ll,int> y){if(x.fi != y.fi) return x.fi > y.fi;return x.se < y.se;}
+int dis(int x,int y,int l){return x > y ? l - x + y : y - x;}
+void mark(int x){if(walk2[x])fail();walk2[x]=1;}
+int main()
+{
+    //freopen("in.in", "r", stdin);
+	//freopen("out1.out", "w", stdout);
+    scanf("%d%lld",&n,&x0);
+    rep(i,1,n) {
+        scanf("%lld%lld%d%lld%d",a+i,b+i,c+i,d+i,e+i);
+        r[e[i]].pb(i);
+    }
+    rep(i,1,n){
+        if(!tt[i]){tick=0;dfs(i);}
+    }
+    int asdf = 0;
+    rap(i,0,totc) {
+        pre[i].pb(0);
+        rap(j,0,(int)cyc[i].size()-1) {
+            pre[i].pb(d[cyc[i][j]]);
+            pre[i][j + 1] += pre[i][j];
+        }//for(int x : cyc[i]) printf("%d ",x);puts("");
+        //for(ll x : pre[i]) printf("%lld ",x);puts("");
+        ll sum = pre[i].back() + d[cyc[i].back()];
+        sumc[i] = sum;
+        sum = abs(sum);
+        if(sum)
+        rap(j,0,cyc[i].size()) {
+            ID[mpr(i, ((-pre[i][j]+a[cyc[i][j]]) % sum + sum) % sum)] = 0;
+        }
+        else{ID[mpr(i, 0x3f3f3f3f3f3f3f3f)] = 0;}
+    }
+    for(auto it = ID.begin();it != ID.end();it++) it->se = ++asdf;
+    rap(i,0,totc) {
+        ll sum = abs(sumc[i]);
+        rap(j,0,cyc[i].size()) {
+            int id;
+            if(sum){id = ID[mpr(i, ((-pre[i][j]+a[cyc[i][j]]) % sum + sum) % sum)];
+            duliu[id].pb(mpr(-pre[i][j]+a[cyc[i][j]],j));}
+            id = ID[mpr(i, 0x3f3f3f3f3f3f3f3f)];
+            duliu[id].pb(mpr(-pre[i][j]+a[cyc[i][j]],j));
+        }
+    }
+    rep(i,1,asdf) sort(duliu[i].begin(),duliu[i].end());
+    rep(i,1,asdf) {wtf[i] = duliu[i];sort(wtf[i].begin(),wtf[i].end(),cmp);}
+
+    int CNT = 0;
+    rep(i,1,n) if(!on[i]) {
+        vals[P[i] + a[i]] = 0;
+    }
+    itrm(it, vals) it->se = ++CNT;
+
+    seg.build(n);
+    rep(i,1,n+1) if(!en[i]) en[i] = n + 1;
+    rep(i,1,n + 1) if(on[i] || i == n + 1) {
+        for(int to : r[i]) {
+            if(!on[to]) {
+                deal(to, i);
+            }
+        }
+    }
+    int pos = 1;int ans = 0;
+    while(1) {
+        if(pos == n + 1) break;
+        if(!on[pos]) {
+            ll qwq = x0 + P[pos];
+            if(vals.count(qwq)) {
+                int res = seg.query(vals[qwq],vals[qwq],jiyi[pos]);
+                if(res > 0) {
+                    mark(res);
+                    ans += dep[pos] - dep[res] + 1;
+                    check(ans);
+                    x0 += P[pos] - P[res] + b[res];
+                    pos = c[res];
+                    continue;
+                }
+            }
+            ans += dep[pos] + 1;
+            check(ans);
+            x0 += P[pos];
+            pos = en[pos];
+        }
+        if(pos == n + 1) break;
+        int id = at[pos];ll &pr = pre[id][xd[pos]];
+        ll sum = sumc[id];
+        if(!sum) {
+            int g = ID[mpr(id,0x3f3f3f3f3f3f3f3f)];
+            int fuck = lower_bound(duliu[g].begin(),duliu[g].end(),mpr(x0 - pr,xd[pos])) - duliu[g].begin();
+            if(fuck == duliu[g].size() || duliu[g][fuck].fi != x0 - pr) {
+                fuck = lower_bound(duliu[g].begin(),duliu[g].end(),mpr(x0 - pr,0)) - duliu[g].begin();
+                if(fuck == duliu[g].size() || duliu[g][fuck].fi != x0 - pr) fail();
+            }
+            int pos0 = duliu[g][fuck].se;
+            mark(cyc[id][pos0]);
+            ans += dis(xd[pos], pos0, duliu[g].size()) + 1;
+            check(ans);
+            pos0 = cyc[id][pos0];
+            x0 = a[pos0] + b[pos0];
+            pos = c[pos0];
+            continue;
+        }
+        int g = ID[mpr(id,((x0 - pr)% abs(sum) + abs(sum)) % abs(sum))];
+        if(!g || duliu[g].empty()) fail();
+        if(sum > 0) {
+            int fuck = lower_bound(duliu[g].begin(),duliu[g].end(),mpr(x0 - pr,xd[pos])) - duliu[g].begin();
+            if(fuck == duliu[g].size()) {
+                fail();
+            }
+            pair<ll,int> &pir = duliu[g][fuck];
+            ll nums = (pir.fi - x0 + pr) / sum;
+            ans += ((ll)pre[id].size() * nums + pir.se - xd[pos]) % mod;check(ans);
+            pos = cyc[id][pir.se];
+            x0 = a[pos];
+        }
+        else if(sum < 0){
+            int fuck = lower_bound(wtf[g].begin(),wtf[g].end(),mpr(x0 - pr,xd[pos]),cmp) - wtf[g].begin();
+            if(fuck == wtf[g].size()) {
+                fail();
+            }
+            pair<ll,int> &pir = wtf[g][fuck];
+            ll nums = (x0 - pr - pir.fi) / abs(sum);
+            ans += ((ll)pre[id].size() * nums + pir.se - xd[pos]) % mod;check(ans);
+            pos = cyc[id][pir.se];
+            x0 = a[pos];
+        }
+        else {
+        }
+        ans++;check(ans);
+        mark(pos);
+        x0 += b[pos];
+        pos = c[pos];
+        if(pos == n + 1)break;
+    }//ohhhhhhhhhhhhhhhh
+    printf("%d\n",ans);
+    return 0;
+}

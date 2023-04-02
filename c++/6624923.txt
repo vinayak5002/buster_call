@@ -1,0 +1,112 @@
+#include<stdio.h>
+
+#define SIZE 100001
+
+typedef struct{
+    int parent;
+    int left;
+    int right;
+}node_t;
+
+node_t tree[SIZE];
+int deep[SIZE];
+
+int getdepth(int x)
+{
+    int deep = 0;
+    while(tree[x].parent != -1)
+    {
+        x = tree[x].parent;
+        deep++;
+    }
+
+    return deep;
+}
+
+void node_print(int x)
+{
+    int child;
+    printf("node %d: parent = %d, depth = %d, ",x, tree[x].parent, deep[x]);
+
+    if( tree[x].parent == -1 )
+    {
+        printf("root, ");
+    }
+    else if (tree[x].left == -1)
+    {
+        printf("leaf, ");
+    }
+    else
+    {
+        printf("internal node, ");
+    }
+
+    printf("[");
+
+    child = tree[x].left;
+    if(child == -1)
+    {
+        printf("]\n");
+    }
+    else
+    {
+        printf("%d",child);
+        while(tree[child].right != -1)
+        {
+            child = tree[child].right;
+            printf(", %d",child);
+        }
+        printf("]\n");
+    }
+
+}
+
+int main(void)
+{
+    int n;//the number of input(nodes)
+    scanf("%d",&n);
+
+    int i,j;// for loop
+    int id,child,c_num;
+
+    for( i = 0; i < n; i++ )
+    {
+        tree[i].parent = -1;
+        tree[i].left = -1;
+        tree[i].right = -1;
+    }//tree[]初期化
+
+    for( i = 0; i < n; i++ )
+    {
+        int child1;
+        scanf("%d %d", &id, &c_num);
+        for( j = 0; j < c_num; j++)
+        {
+            scanf("%d",&child);
+            if(j == 0)
+            {
+                tree[id].left = child;
+                child1 = child;
+                tree[child1].parent = id;
+            }
+            else
+            {
+                tree[child1].right = child;
+                tree[child].parent = id;
+                child1 = child;
+            }
+        }
+    }
+
+    for( i = 0; i < n; i++ )
+    {
+        deep[i] = getdepth(i);
+    }
+
+    for( i = 0; i < n; i++ )
+    {
+        node_print(i);
+    }
+
+    return 0;
+}

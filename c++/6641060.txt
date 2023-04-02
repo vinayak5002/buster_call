@@ -1,0 +1,41 @@
+#include<bits/stdc++.h>
+using namespace std;
+// P[a]は点aの親を記憶する
+int P[10010];
+// 特定の点の根を返す
+int Root(int node)
+{
+	// 再帰的に根まで到達
+	if (node == P[node])
+		return node;
+	return Root(P[node]);
+}
+// 2点が同じ根を持つかを返す
+bool isSame_set(int a, int b)
+{
+	return Root(a) == Root(b);
+}
+// 2点の連結
+void unite(int a, int b)
+{
+	// 点bの根を点aの根の子にする
+	P[Root(b)] = Root(a);
+}
+int main()
+{
+	int n, q;
+	cin >> n >> q;
+	// 最初全ての点はバラバラ、つまり根
+	for (int a = 0; a < n; a++)
+		P[a] = a;
+	// q個のクエリ
+	for (int a = 0; a < q; a++)
+	{
+		int com, x, y;
+		cin >> com >> x >> y;
+		if (com == 0)
+			unite(x, y);
+		else
+			cout << isSame_set(x, y) << endl;
+	}
+}

@@ -1,0 +1,38 @@
+const a = require('fs').readFileSync('/dev/stdin', 'utf8').split("\n")
+const num = Number(a.shift())
+const arr = a.map(el => el.split(" "))
+let cards = {
+  S: [],
+  H: [],
+  C: [],
+  D: [],
+}
+
+arr.forEach(el => {
+  if (el[0] === 'S') {
+    cards.S.push(el)
+  } else if (el[0] === 'H') {
+    cards.H.push(el)
+  } else if (el[0] === 'C') {
+    cards.C.push(el)
+  } else if (el[0] === 'D') {
+    cards.D.push(el)
+  }
+})
+
+let ans = []
+let current = 1
+for (const [suit, arr] of Object.entries(cards)) {
+  arr.sort((a,b) => (a[1] - b[1]));
+  for(let i = 0; i < arr.length; i++) {
+		const n = parseInt(arr[i][1])
+    if (current != n) {
+			for (let j = current; j < n; j++) {
+        ans.push([`${suit}`, current])
+      }
+      current = n
+    }
+    current++;
+  }
+}
+console.log(ans.map(el => el.join(" ")).join("\n").trim())

@@ -1,0 +1,61 @@
+#include <bits/stdc++.h>
+#define rep(i, st, n) for (ll i = (ll)st; i < (ll)st + (ll)n; i++)
+#define repd(i, st, gl, c) for(ll i = ll(st); i <= ll(gl); i += ll(c))
+#define rrep(i, st, n) for (ll i = (ll)st; i > (ll)st - (ll)n; i--)
+#define rrepd(i, st, gl, c) for(ll i = ll(st); i >= ll(gl); i -= ll(c))
+#define fi first
+#define se second
+#define pb push_back
+using namespace std;
+using ll = long long;
+using Graph = vector<vector<ll>>;
+ll a, b, n, cnt, ans, m;
+vector<bool> seen;
+vector<ll> first_order, last_order;
+
+void dfs(const Graph &G, int v, ll& first_ptr, ll& last_ptr){
+    first_order[v] = first_ptr++;
+    seen[v] = true;
+    for(auto next_v: G[v]){
+        if(seen[next_v]) continue;
+        dfs(G, next_v, first_ptr, last_ptr);
+    }
+
+    last_order[v] = last_ptr++;
+}
+void dfs2(const Graph &G, ll v, ll& ptr) {
+    // 行きがけ順をインクリメントしながらメモ
+    first_order[v] = ptr++;
+    seen[v] = true; 
+    for (auto next_v : G[v]) { 
+        if (seen[next_v]) continue;
+        dfs2(G, next_v, ptr);
+    }
+
+    // 帰りがけ順をインクリメントしながらメモ
+    last_order[v] = ptr++;
+}
+
+int main(){
+    cin >> n;
+    Graph G(n);
+    rep(i, 0, n){
+        cin >> a >> a;
+        rep(j, 0, a){
+            cin >> b;
+            G[i].pb(b - 1);
+            G[b - 1].pb(i);
+        }
+    }
+
+    seen.assign(n, false);
+    first_order.resize(n);
+    last_order.resize(n);
+    ll first_ptr = 1, last_ptr = 0;
+    dfs2(G, 0, first_ptr);
+
+    rep(i, 0, n){
+        cout << i + 1 << " " << first_order[i] << " " << last_order[i] << endl;
+    }
+
+}

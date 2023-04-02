@@ -1,0 +1,136 @@
+#include <stdio.h>
+#include <stdlib.h>
+#define Max 256
+
+int main(int argc, char *argv[]){
+
+    int i, j, k, h;
+    int n;
+    int res, res1;
+    int num, count;
+    int grid[Max][Max], ent[Max], tot1[Max], tot2[Max], tot3[Max];
+    int print[Max];
+    char c, ch;
+
+    k = 0;
+
+    while(scanf("%d", &n)!=EOF && n!=0){
+        tot1[0]=0;
+        tot2[0]=0;
+
+
+        for(i=1;i<=n; i++){
+            ent[i]=getchar();
+            for(j=1;j<=n;j++){
+                if(n>=2){
+                    grid[i][j]=getchar();
+                }
+            }
+        }
+        for(i=1;i<=n; i++){
+            num =0;
+            count =0;
+            for(j=1;j<=n;j++){
+                if(grid[i][j]=='1'){
+                    num++;
+                }
+                if(grid[j][i]=='1'){
+                    count++;
+                }
+            }
+            tot1[i] = num;
+            tot2[i] = count;
+
+            if(tot1[0]<tot1[i]){
+                tot1[0]=tot1[i];
+            }
+            if(tot2[0]<tot2[i]){
+                tot2[0]=tot2[i];
+            }
+        }
+
+        num = 0;
+        res = 0;
+        res1 = 0;
+        for(i=1; i<=n;i++){
+            num = 0;
+            for(j=0; j<=i; j++){
+                if(grid[1+j][i-j]=='1'){
+                    num++;
+                }
+            }
+            res1 = num;
+            if(res<res1){
+                res=res1;
+            }
+        }
+
+        h=0;
+        num = 0;
+        res1=0;
+        for(i=n; i>=1;i--){
+            num = 0;
+            for(j=0; j<=h; j++){
+                if(grid[i+j][n-j]=='1'){
+                    num++;
+                }
+            }
+            h++;
+            res1=num;
+            if(res<res1){
+                res=res1;
+            }
+        }
+
+        num = 0;
+        res1 = 0;
+        for(i=1; i<=n;i++){
+            num = 0;
+            for(j=0; j<=i; j++){
+                if(grid[i-j][n-j]=='1'){
+                    num++;
+                }
+            }
+            res1 = num;
+            if(res<res1){
+                res=res1;
+            }
+        }
+
+        num = 0;
+        res1 = 0;
+        for(i=1; i<=n;i++){
+            num = 0;
+            for(j=0; j<=i; j++){
+                if(grid[n-j][i-j]=='1'){
+                    num++;
+                }
+            }
+            res1 = num;
+            if(res<res1){
+                res=res1;
+            }
+        }
+
+
+
+        if(tot1[0]<tot2[0] && res<tot2[0]){
+            print[k]=tot2[0];
+        }else if(tot2[0]<tot1[0] && res<tot1[0]){
+            print[k]=tot1[0];
+        }else if(tot1[0]<res && tot2[0]<res){
+            print[k]=res;
+        }
+
+        if(tot1[0]==tot2[0] && tot2[0]==res){
+            print[k]=tot2[0];
+        }
+
+        k++;
+    }
+
+    for(i=0; i<k; i++){
+        printf("%d\n", print[i]);
+    }
+}
+

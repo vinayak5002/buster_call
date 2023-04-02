@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+
+#define rep(i, to) for (int i=0; i<to; i++)
+#define repr(i, from, to) for (int i=from; i<to; i++)
+#define in(x, from, to) (from <= x && x < to)
+
+using namespace std;
+using ll = long long;
+using P = pair<int, int>;
+
+#ifdef DEBUG
+#include "debug.hpp"
+#else
+template<class T> void print(T v) { cout << v << endl; }
+void _main(); int main() { _main(); }
+#endif
+
+// ================================================================================ //
+
+using Graph = vector<vector<int>>;
+
+void _main() {
+    int N; cin >> N;
+    Graph graph(N);
+    rep(_, N) {
+        int u, k; cin >> u >> k; u--;
+        rep(_, k) { int v; cin >> v; v--; graph[u].push_back(v); }
+    }
+        
+    auto que = queue<int>();
+    auto dist = vector<int>(N, -1);
+    
+    que.push(0);
+    dist[0] = 0;
+    
+    while (que.size()) {
+        auto p = que.front(); que.pop();
+        auto d = dist[p]+1;
+        for (auto e: graph[p]) if (dist[e] == -1) {
+            dist[e] = d;
+            que.push(e);
+        }
+    }
+    
+    rep(i, N) {
+        cout << i+1 << " " << dist[i] << endl;
+    }
+    cout << endl;
+}
+

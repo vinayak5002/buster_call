@@ -1,0 +1,421 @@
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Scanner;
+
+public class Main {
+	
+	static class Line{
+		int sx;
+		int sy;
+		int gx;
+		int gy;
+		double a;
+		double b;
+		int parentsx;
+		int parents;
+		int child;
+		int childx;
+		ArrayList<Integer> al = new ArrayList<>();
+		HashMap<Integer,ArrayList<Double>> hm = new HashMap<>();
+		
+		Line(int sx,int sy,int gx,int gy){
+			this.sx = sx;
+			this.sy = sy;
+			this.gx = gx;
+			this.gy = gy;
+			if(gx-sx != 0) {
+				this.a = (double)(gy-sy)/(gx-sx);
+				this.b = sy-a*sx;
+			}else {
+				this.a = -12345;
+				this.b = -12345;
+			}
+//			System.out.println(a + " " + b);
+			if(sy > gy) {
+				parents = sy;
+				child = gy;
+			}else {
+				parents = gy;
+				child = sy;
+			}
+			
+			if(sx > gx) {
+				parentsx = sx;
+				childx = gx;
+			}else {
+				parentsx = gx;
+				childx = sx;
+			}
+		}
+		
+		void cross(int n) {
+			this.al.add(n);
+		}
+	}
+	
+	//グローバル変数的な
+	static HashSet<Integer> hs = new HashSet<>();
+	static int point,pre,prepre,con = 0,sx,sy,gx,gy,end_point = 0,point_m;
+	static double min = 1234567;
+	static double crossx,crossy;
+	static ArrayList<Integer> list = new ArrayList<>(); 
+	static double ans;
+	
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		int n = sc.nextInt();
+		
+		while(n != 0) {
+		
+			Line[] line = new Line[n];
+			int s_point=0;
+			var stack = new ArrayDeque<Integer>();
+			
+			for(int i=0;i<n;i++) {
+				line[i] = new Line(sc.nextInt(),sc.nextInt(),sc.nextInt(),sc.nextInt());
+			}
+			
+			for(int i=0;i<n;i++) {
+				for(int j=i+1;j<n;j++) {
+					if(decision(line[i],line[j])) {
+						line[i].al.add(j);
+						line[j].al.add(i);
+						ArrayList<Double> kou = new ArrayList<>();
+						kou.add(crossx);
+						kou.add(crossy);
+						line[i].hm.put(j,kou);
+						line[j].hm.put(i,kou);
+					}
+				}
+			}
+			
+	//		for(int i=0;i<n;i++) {
+	//			System.out.println(line[i].hm);
+	//		}
+			
+			sx = sc.nextInt();
+			sy = sc.nextInt();
+			gx = sc.nextInt();
+			gy = sc.nextInt();
+			
+			for(int i=0;i<n;i++) {
+				if(line[i].a == -12345) {
+					if(line[i].sx == sx && sy >= line[i].child && sy <= line[i].parents) {
+						s_point = i;
+					}else if(line[i].gx == gx && gy >= line[i].child && sy <= line[i].parents) {
+						end_point = i;
+					}
+				}else {
+					if(line[i].a*sx + line[i].b == sy && sx>=line[i].childx && sx<=line[i].parentsx && 
+							sy>=line[i].child && sy<=line[i].parents) {
+						s_point = i;
+					}else if(line[i].a*gx + line[i].b == gy && gx>=line[i].childx && gx<=line[i].parentsx && 
+							gy>=line[i].child && gy<=line[i].parents) {
+						end_point = i;
+					}
+				}
+			}
+			
+	//		System.out.println(s_point + " " + end_point);
+			
+	//		どこが交差しているのかhsに取り入れることと、初期位置とゴールの位置の解析は終了している
+	//		ここから深さ優先探索！！！！！！
+	//		エラーが起きるとしたらここから下のせい
+			
+			stack.push(s_point);
+			
+			while(stack.size() > 0) {
+				search(stack,line);
+	//			System.out.println("stack:" + stack);
+	//			System.out.println("list:" + list);
+	//			System.out.println("hs:" + hs);
+	//			System.out.println("point:" + point);
+	//			System.out.println("ans:" + ans);
+	//			System.out.println("con:" + con);
+	//			System.out.println();
+	//			ans -= angle_last(line);
+			}
+			
+			if(min == 1234567) {
+				System.out.println(-1);
+			}else {
+				System.out.println(min);
+			}
+			
+			hs.clear();
+			point = 0; 
+			pre = 0; 
+			prepre = 0;
+			con = 0;
+			end_point = 0;
+			point_m = 0;
+			min = 1234567;
+			crossx = 0;
+			crossy = 0;
+			list.clear(); 
+			ans = 0;
+			
+			n = sc.nextInt();
+			
+		}
+		
+		sc.close();
+	}
+	
+	
+	
+	
+	static void search(ArrayDeque<Integer> stack,Line[] line) {
+		int i = 0,back = 0;
+		point_m = point ;
+		point = stack.pop();
+//		if(hs.contains(point)) {
+//			hs.remove(pre);
+//			list.remove(con);
+//			con--;
+//			ans -= angle(line);
+//		}else {
+		hs.add(point);
+			
+			if(point == end_point /*|| line[point].al.size() == 1*/) {//ゴールにたどり着いた場合
+				list.add(point);
+				con = list.size();
+				ans += angle(line);
+				double last_angle = angle_last(line);
+				ans += last_angle;
+				if(min >= ans) min = ans;
+				ans -= last_angle;
+				ans -= angle(line);
+				if(!stack.isEmpty()) stack.push(list.get((list.size()-2)));
+				if(con >= 3) pre = list.get(list.size()-3);
+				if(con >= 4) prepre = list.get(list.size()-4);
+//				hs.remove(pre);
+				list.remove(list.size()-1);
+				con = list.size();
+			}else if(ans >= min) {//いままでゴールにたどり着いた角度より大きくなってしまった場合
+				list.add(point);
+				con = list.size();
+				ans += angle(line);
+				hs.remove(point_m);
+				ans -= angle(line);
+				stack.push(list.get((list.size()-2)));
+				pre = list.get(list.size()-3);
+				prepre = list.get(list.size()-4);
+				list.remove(list.size()-1);
+				con = list.size();
+				
+			}else {//ゴールにはたどり着いておらず、探索を続ける場合
+		
+				while(line[point].al.size() > i) {
+					int num = line[point].al.get(i);
+					if(!stack.isEmpty()) {
+						if(stack.peek() == num) {
+							back = -1234567;
+							break;
+						}
+					}
+					
+					if(!hs.contains(num)) {
+						stack.push(num);
+					}else {
+						back++;
+					}
+					i++;
+				}
+				
+				if(back < 0) {
+//					hs.remove(point_m);
+				}else if(back == i) {
+					hs.remove(point_m);
+					ans -= angle(line);
+					if(!stack.isEmpty()) stack.push(list.get((list.size()-2)));
+					list.remove(list.size()-1);
+					con = list.size();
+					
+				}else {
+					list.add(point);
+					con = list.size();
+					ans += angle(line);
+				}
+				
+				if(con >= 2) prepre = list.get(con-2);
+				if(con >= 1) pre = list.get(con-1);
+			}
+//		}
+	}
+	
+	
+	static double angle_last(Line[] line) {
+		int pp,p;
+		double ppx,ppy,px,py;
+		var ppoint = new ArrayList<Double>();
+		var pointa = new ArrayList<Double>();
+		if(con >= 3) {
+			pp = list.get(con-3);
+			p = list.get(con-2);
+			ppoint = line[pp].hm.get(p);
+			ppy = ppoint.get(1);
+			ppx = ppoint.get(0);
+			pointa = line[p].hm.get(point);
+			py = pointa.get(1);
+			px = pointa.get(0);
+			
+			double ux,uy,vx,vy;
+			ux = px - ppx;
+			uy = py - ppy;
+			vx = gx - px;
+			vy = gy - py;
+			
+			return shita(ux,uy,vx,vy);
+		}else if(con <=1) {
+			return 0;
+		}else {
+			p = list.get(con-2);
+			pointa = line[p].hm.get(point);
+			py = pointa.get(1);
+			px = pointa.get(0);
+			
+			double ux,uy,vx,vy;
+			ux = px - sx;
+			uy = py - sy;
+			vx = gx - px;
+			vy = gy - py;
+			
+			return shita(ux,uy,vx,vy);
+		}
+	}
+	
+	
+	
+	static double angle(Line[] line) {
+		int ppp,pp,p;
+		double pppx,pppy,ppx,ppy,px,py;
+		var pppoint = new ArrayList<Double>();
+		var ppoint = new ArrayList<Double>();
+		var pointa = new ArrayList<Double>();
+		if(con-3 >=1) {
+			ppp = list.get(con-4);
+			pp = list.get(con-3);
+			p = list.get(con-2);
+			pppoint = line[pp].hm.get(ppp);
+			pppy = pppoint.get(1);
+			pppx = pppoint.get(0);
+			ppoint = line[pp].hm.get(p);
+			ppy = ppoint.get(1);
+			ppx = ppoint.get(0);
+			pointa = line[p].hm.get(point);
+			py = pointa.get(1);
+			px = pointa.get(0);
+			
+			double ux,uy,vx,vy;
+			ux = ppx - pppx;
+			uy = ppy - pppy;
+			vx = px - ppx;
+			vy = py - ppy;
+			
+			return shita(ux,uy,vx,vy);
+		}else if(con-2 >= 1){
+			pp = list.get(con-3);
+			p = list.get(con-2);
+			ppoint = line[pp].hm.get(p);
+			ppy = ppoint.get(1);
+			ppx = ppoint.get(0);
+			pointa = line[p].hm.get(point);
+			py = pointa.get(1);
+			px = pointa.get(0);
+			
+			double ux,uy,vx,vy;
+			ux = ppx - sx;
+			uy = ppy - sy;
+			vx = px - ppx;
+			vy = py - ppy;
+			
+			return shita(ux,uy,vx,vy);
+		}
+		
+		return 0;
+	}
+	
+	
+	static double shita(double ux,double uy,double vx,double vy) {
+		double l,r,pru,prv,ans;
+		l = ux*vx + uy*vy;
+		pru = Math.sqrt(ux*ux + uy*uy);
+		prv = Math.sqrt(vx*vx + vy*vy);
+		r = pru*prv;
+		
+		ans = Math.acos(l/r);
+		
+		return 180/Math.PI*ans;
+	}
+	
+	
+	
+	
+	static boolean decision(Line line1,Line line2) {
+		
+		if(line1.a == -12345 && line2.a == -12345) {
+			if(line1.sx != line2.sx) {
+				return false;
+			}else {
+				
+				if(line2.sy >= line1.child && line2.sy <= line1.parents) {
+					crossx = line1.sx;
+					crossy = line2.sy;
+					return true;
+				}else if(line2.gy >= line1.child && line2.gy <= line1.parents) {
+					crossx = line1.sx;
+					crossy = line2.gy;
+					return true;
+				}
+				
+				if(line1.sy >= line2.child && line1.sy <= line2.parents) {
+					crossx = line1.sx;
+					crossy = line1.sy;
+					return true;
+				}
+				
+				return false;
+			}
+		}else if(line1.a == -12345 && line2.a != -12345) {
+			crossx = line1.sx;
+			crossy = line1.sx*line2.a + line2.b;
+			if(crossx <= line1.parentsx && crossx >= line1.childx && crossx <= line2.parentsx && crossx >= line2.childx
+					&& crossy <= line1.parents && crossy >= line1.child && crossy <= line2.parents && crossy >= line2.child) {
+				
+				return true;
+			}else {
+				return false;
+			}
+			
+		}else if(line2.a == -12345 && line1.a != -12345) {
+			crossx = line2.sx;
+			crossy = line2.sx*line1.a + line1.b;
+			if(crossx <= line1.parentsx && crossx >= line1.childx && crossx <= line2.parentsx && crossx >= line2.childx
+					&& crossy <= line1.parents && crossy >= line1.child && crossy <= line2.parents && crossy >= line2.child) {
+				
+				return true;
+			}else {
+				return false;
+			}
+			
+		}else {
+			double det = (line1.sx - line1.gx) * (line2.gy - line2.sy) - (line2.gx - line2.sx) * (line1.sy - line1.gy);
+			double t = ((line2.gy - line2.sy) * (line2.gx - line1.gx) + (line2.sx - line2.gx) * (line2.gy - line1.gy)) / det;
+			crossx = t * line1.sx + (1.0 - t) * line1.gx;
+			crossy = t * line1.sy + (1.0 - t) * line1.gy;
+					  
+			if(crossx <= line1.parentsx && crossx >= line1.childx && crossx <= line2.parentsx && crossx >= line2.childx
+					&& crossy <= line1.parents && crossy >= line1.child && crossy <= line2.parents && crossy >= line2.child) {
+				return true;
+			}else {
+				return false;
+			}
+		}
+	}
+	
+
+}
+

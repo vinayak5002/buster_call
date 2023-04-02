@@ -1,0 +1,117 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	const bitSize = 32
+	let zeroPadding = (n) => (Array(bitSize).join("0") + n.toString(2)).slice(-bitSize)
+	
+	let maskNum = Number(si[0])
+	let maskFront = new Array(maskNum).fill(0)
+	let maskBuck = new Array(maskNum).fill(0)
+	for (let i = 0; i < maskNum; i++) {
+		let maskQuery = si[i + 1].split(" ")
+		let maskQueryNum = maskQuery[0]
+		for (let j = 1; j <= maskQueryNum; j++) {
+			if (32 <= maskQuery[j]) {
+				maskFront[i] += Math.pow(2, maskQuery[j] - 32)
+			} else {
+				maskBuck[i] += Math.pow(2, maskQuery[j])
+			}
+			
+		}
+	}
+	
+	let flagFront = 0
+	let flagBuck = 0
+	let queryNum = Number(si[maskNum + 1])
+	let output =""
+	
+	for (let i = 1; i <= queryNum; i++) {
+		let query = si[maskNum + 1 + i].split(" ").map(val => Number(val))
+		let order = query[0]
+		let maskElem =query[1]
+		if(order == 0) {
+			// flagがON(1)のとき1、OFF(0)のとき0を表示
+			if (flagFront.toString(2).charAt(maskElem) == 1 || flagBuck.toString(2).charAt(maskElem)) {
+				output += "1\n"
+			} else {
+				output += "0\n"
+			}
+		} else if(order == 1) {
+			// 指定されたflagをON
+			flagFront = flagFront | maskFront[maskElem]
+			flagBuck = flagBuck | maskBuck[maskElem]
+		} else if(order == 2) {
+			// 指定されたflagをOFF
+			flagFront = flagFront & ( ~ maskFront[maskElem])
+			flagBuck = flagBuck & ( ~ maskBuck[maskElem])
+		} else if(order == 3) {
+			// 指定されたflagを反転
+			flagFront = flagFront ^ maskFront[maskElem]
+			flagBuck = flagBuck ^ maskBuck[maskElem]
+		} else if(order == 4) {
+			// flagがすべてONで1、そうでないなら0
+			if ((flagFront & maskFront[maskElem]) == maskFront[maskElem] && (flagBuck & maskBuck[maskElem]) == maskBuck[maskElem]){
+				output += "1\n"
+			} else {
+				output += "0\n"
+			}
+		} else if(order == 5) {
+			// いずれかのflagがONで1、そうでないなら0
+			if ((flagFront & maskFront[maskElem]) != 0 || (flagBuck & maskBuck[maskElem]) != 0) {
+				output += "1\n"
+			} else {
+				output += "0\n"
+			}
+		} else if(order == 6) {
+			// flagがすべてOFFで1、そうでないなら0
+			if ((flagFront & maskFront[maskElem]) == 0 && (flagBuck & maskBuck[maskElem]) == 0) {
+				output += "1\n"
+			} else {
+				output += "0\n"
+			}
+		} else if(order == 7) {
+			// ONになってるflagの数を表示
+			extractFlagFront = (flagFront & maskFront[maskElem]).toString(2)
+			extractFlagBuck = (flagBuck & maskBuck[maskElem]).toString(2)
+			let onFlagCount = 0
+			for (let frontElem of extractFlagFront) {
+				if (frontElem == 1) {
+					onFlagCount++
+				}
+			}
+			for (let buckElem of extractFlagBuck) {
+				if (buckElem == 1) {
+					onFlagCount++
+				}
+			}
+			output += onFlagCount + "\n"
+		} else if(order == 8) {
+			// flagの整数値を表示
+			let flagFrontBin =zeroPadding(flagFront & maskFront[maskElem])
+			let flagBuckBin = zeroPadding(flagBuck & maskBuck[maskElem])
+			flagBinary = flagFrontBin + flagBuckBin
+			let tmp = String(rui(flagBinary, 64)).slice(-9)
+			let intVal = String(parseInt(flagBinary, 2)).slice(0, -tmp.length)
+			if (intVal == 0) {
+				intVal = tmp
+			} else {
+				intVal += tmp
+			}
+			output += intVal + "\n"
+		}
+	}
+	so.write(output)
+	
+	function rui (array, digit){
+		let ans = 0
+		let rank = 1
+		for (let i = digit - 1;0 <= i; i--){
+			ans += array[i] * rank
+			rank *= 2
+			rank %= Math.pow(10, 10)
+		}
+		return ans
+	}
+}

@@ -1,0 +1,49 @@
+import java.io.*;
+class Main
+{
+    static int num_w;
+    static int num_t;
+    static int[] W;
+    public static void main(String[] args) throws IOException
+    {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        String[] tmp_str = br.readLine().split("\\s");
+        num_w = Integer.parseInt(tmp_str[0]);
+        num_t = Integer.parseInt(tmp_str[1]);
+        long sum = 0;
+        W = new int[num_w];
+        for(int i=0; i<num_w; i++){
+            W[i] = Integer.parseInt(br.readLine());
+            sum += W[i];
+        }
+        long left = 0, right = sum, mid = (left + right) / 2;
+        long ans = right;
+        
+        while(left<=right){
+            
+            if(is_OK(mid)){
+                ans = mid;
+                right = mid - 1;
+            }else{
+                left = mid + 1;
+            }
+            mid = (left + right) / 2; 
+        }
+        System.out.println(ans);
+    }
+    static boolean is_OK(long p)
+    {
+        long tmp_sum = 0; 
+        int index_w = 0, index_t = 0;
+        while(index_w < num_w && index_t < num_t){
+            tmp_sum = 0;
+            while(index_w < num_w && tmp_sum + W[index_w] <= p){
+                tmp_sum += W[index_w];
+                index_w++;
+            }
+            index_t++;
+        }
+        return index_t==num_t;
+        
+    }
+}

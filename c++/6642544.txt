@@ -1,0 +1,46 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+void dfs(int which, int y, int x, vector<int>& anstate, vector<int>& ansyoko, vector<vector<int>>& flag, vector<vector<int>>& grid) {
+    flag[y][x] = 1;
+
+    if (which == 0) {
+        anstate[y] = 1;
+        for (int i = 0 ; i < grid[0].size() ; i++) if (grid[y][i] != 200) if (flag[y][i] == 0) {
+            dfs(1, y, i, anstate, ansyoko, flag, grid);
+        }
+    }
+
+    if (which == 1) {
+        ansyoko[x] = 1;
+        for (int i = 0 ; i < grid.size() ; i++) if (grid[i][x] != 200) if (flag[i][x] == 0) {
+            dfs(0, i, x, anstate, ansyoko, flag, grid);
+        }
+    }
+}
+
+void solve(vector<vector<int>>& grid) {
+    vector<vector<int>> flag(grid.size(), vector<int>(grid[0].size(), 0));
+    vector<int> anstate(grid.size(), 0), ansyoko(grid[0].size(), 0);
+    ansyoko[0] = 1;
+    for (int i = 0 ; i < grid.size() ; i++) if (grid[i][0] != 200) dfs(0, i, 0,  anstate, ansyoko, flag, grid);
+    bool ok = true;
+    for (int i = 0 ; i < grid.size() ; i++) if (anstate[i] == 0) ok = false;
+    for (int i = 0 ; i < grid[0].size() ; i++) if (ansyoko[i] == 0) ok = false;
+    cout << (ok ? "Yes\n" : "No\n");
+}
+
+int main() {
+    while(1) {
+        int w, h; cin >> w >> h;
+        if (w == 0 and h == 0) break;
+        vector<vector<int>> grid = vector<vector<int>>(h, vector<int>(w, 200));
+        for (int _ = 0 ; _ < w + h - 1 ; _++) {
+            int x, y, n; cin >> x >> y >> n;
+            grid[y - 1][x - 1] = n;
+        }
+        solve(grid);
+    }
+}
+

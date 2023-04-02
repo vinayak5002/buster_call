@@ -1,0 +1,109 @@
+#include<stdio.h>
+#define Max 100000
+#define NIL -1
+
+struct Node{
+    int p;
+    int l;
+    int r;
+};
+
+struct Node T[Max];
+int n,D[Max],H[Max];
+
+void Depth(int a, int b){
+    if(a==NIL){
+        return;
+    }
+    D[a]=b;
+    Depth(T[a].l,b+1);
+    Depth(T[a].r,b+1);
+}
+
+int Height(int c){
+    int h1=0,h2=0;
+    if(T[c].l!=NIL){
+        h1=Height(T[c].l)+1;
+    }
+    if(T[c].r!=NIL){
+        h2=Height(T[c].r)+1;
+    }
+    if(h1<h2){
+        return H[c]=h2;
+    }
+    else{
+        return H[c]=h1;
+    }
+}
+
+int Sibling(int d){
+    if(T[d].p==NIL){
+        return NIL;
+    }
+    if(T[T[d].p].l!=NIL && T[T[d].p].l!=d){
+        return T[T[d].p].l;
+    }
+     if(T[T[d].p].r!=NIL && T[T[d].p].r!=d){
+        return T[T[d].p].r;
+    }
+    return NIL;
+}
+
+void print(int e){
+    printf("node %d: ",e);
+    printf("parent = %d, ",T[e].p);
+    printf("sibling = %d, ",Sibling(e));
+    int count=0;
+    if(T[e].l!=NIL){
+        count+=1;
+    }
+     if(T[e].r!=NIL){
+        count+=1;
+    }
+    printf("degree = %d, ",count);
+    printf("depth = %d, ",D[e]);
+    printf("height = %d, ",H[e]);
+    if(T[s].p==NIL){
+        printf("root\n");
+    }
+    else if(T[e].l==NIL && T[e].r==NIL){
+        printf("leaf\n");
+    }
+    else{
+        printf("internal node\n");
+    }
+}
+
+int main(void){
+    int x,y,z,root=0,n;
+    scanf("%d",&n);
+
+    for(int i=0;i<n;i++){
+        T[i].p=NIL;
+    }
+
+    for(int i=0;i<n;i++){
+        scanf("%d %d %d",&x,&y,&z);
+        T[x].l=y;
+        T[x].r=z;
+        if(y!=NIL){
+            T[y].p=x;
+        }
+        if(z!=NIL){
+            T[z].p=x;
+        }
+    }
+    for(int i=0;i<n;i++){
+        if(T[i].p=NIL){
+            root=i;
+        }
+    }
+    Depth(root,0);
+    Height(root);
+
+    for(int i=0;i<n;i++){
+        print(i);
+    }
+
+    return 0;
+}

@@ -1,0 +1,62 @@
+#include<stdio.h>
+#define MAX 100001
+#define NIL -1
+
+int parent[MAX], left[MAX], right[MAX]; //親、左の子、右の兄弟の配列
+
+int n;//節点の数
+
+void preParse(int u){
+	if(u == NIL) return;
+	printf(" %d", u);
+	preParse(left[u]);
+	preParse(right[u]);
+}
+
+void inParse(int u){
+	if(u == NIL) return;
+	inParse(left[u]);
+	printf(" %d", u);
+	inParse(right[u]);
+}
+
+void postParse(int u){
+	if(u == NIL) return;
+	postParse(left[u]);
+	postParse(right[u]);
+	printf(" %d", u);
+}
+int main(void){
+    int l, r, v;
+	int root = 0;
+	
+	scanf("%d", &n);
+	
+	for(int i = 0; i < n; i++){
+		parent[i] =NIL;
+	}
+	
+	for(int i = 0; i < n; i++){
+		scanf("%d %d %d", &v, &l, &r);
+		left[v] = l;
+		right[v] = r;
+		if(l != NIL){parent[l] = v;}
+		if(r != NIL){parent[r] = v;}
+	}
+	
+	for(int i = 0; i < n; i++){//親を探す
+		if(parent[i] == NIL){
+			root = i;
+		}
+	}
+
+	printf("Preorder\n");
+	preParse(root);
+	printf("Inorder\n");
+	inParse(root);
+	printf("Postorder\n");
+	postParse(root);
+
+	return 0;
+	
+}

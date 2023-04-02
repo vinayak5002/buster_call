@@ -1,0 +1,84 @@
+import java.util.Scanner;
+public class Card{
+private char mark;
+private int rank;
+
+public Card(char mark,int rank){
+this.mark=mark;
+this.rank=rank;
+}
+public char getMark(){return mark;}
+public void setMark(char mark){this.mark=mark;}
+public int getRank(){return rank;}
+public void setRank(int rank){this.rank=rank;}
+public void display(){System.out.println(mark+" "+rank);}
+}
+public class Cards{
+Card[] cards;
+
+public Cards(int n){
+cards=new Card[n];
+}
+public void marksort(){
+char[] marks={'S','H','C'};
+int[] numpt=new int[13];
+int numcnt=0;
+int pt=0;
+for(int i=0;i<3;i++){
+for(int j=pt;j<cards.length;j++){
+if(marks[i]==cards[j].getMark()){numpt[numcnt++]=j;}
+}
+for(int j=0;j<numcnt;j++){
+Card tmp;
+tmp=cards[pt+j];cards[pt+j]=cards[numpt[j]];cards[numpt[j]]=tmp;
+}
+pt+=numcnt;numcnt=0;
+}
+}
+public int serchPt(char mark){
+	int i=0;
+for(;i<cards.length;i++){
+if(cards[i].getMark()==mark){break;}
+}
+return i;
+}
+}
+public class Main1{
+public static void main(String[] args){
+Scanner sc=new Scanner(System.in);
+int n=sc.nextInt();
+Cards hascards=new Cards(n);
+for(int i=0;i<n;i++){
+char mark=sc.next().charAt(0);
+int rank=sc.nextInt();
+hascards.cards[i]=new Card(mark,rank);
+}
+hascards.marksort();
+int spt=0;
+int hpt=hascards.serchPt('H');
+int cpt=hascards.serchPt('C');
+int dpt=hascards.serchPt('D');
+int[] pts={spt,hpt,cpt,dpt};
+int[] num={1,2,3,4,5,6,7,8,9,10,11,12,13};
+char[] marks={'S','H','C','D'};
+Cards allcards=new Cards(52);
+for(int i=0;i<52;i++){
+allcards.cards[i]=new Card(marks[i/13],num[i%13]);
+}
+Cards misscards=new Cards(52-n);
+int cardspt;
+int k=0;
+boolean flg=false;
+for(int i=0;i<52;i++){
+flg=false;
+cardspt=pts[i/13];
+for(int j=0;j+cardspt<hascards.cards.length&&(hascards.cards[j+cardspt].getMark()==allcards.cards[i].getMark());j++){
+if(hascards.cards[j+cardspt].getRank()==allcards.cards[i].getRank()){flg=true;break;}
+}
+if(flg==false){misscards.cards[k++]=allcards.cards[i];}
+if(k==52-n){break;}
+}
+for(int i=0;i<k;i++){misscards.cards[i].display();}
+sc.close();
+}
+}

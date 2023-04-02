@@ -1,0 +1,47 @@
+#include <iostream>
+#include <vector>
+#include <numeric>
+#include <iomanip>
+
+class UnionFindTree {
+    std::vector<int> parent;
+
+public:
+    UnionFindTree(int n) : parent(n) {
+        std::iota(parent.begin(), parent.end(), 0); // parent = [0, 1, .., n-1]
+    }
+
+    int root(int node) {
+        if (parent[node] == node) {
+            return node;
+        } else {
+            return (parent[node] = root(parent[node]));
+        }
+    }
+
+    void merge(int node0, int node1) {
+        int root0 = root(node0);
+        int root1 = root(node1);
+        parent[root0] = root1;
+    }
+
+    bool same(int node0, int node1) {
+        return root(node0) == root(node1);
+    }
+};
+
+
+int main() {
+    int n, q;
+    std::cin >> n >> q;
+    UnionFindTree uft(n);
+    for (int i = 0, ci, xi, yi; i < q; i++) {
+        std::cin >> ci >> xi >> yi;
+        if (ci) {
+            std::cout << uft.same(xi, yi) << '\n';
+        } else {
+            uft.merge(xi, yi);
+        }
+    }
+    return 0;
+}

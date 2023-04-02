@@ -1,0 +1,200 @@
+#include <vector>
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <algorithm>
+#include <map>
+#include <cmath>
+#include <queue>
+#include <sstream>
+#include <set>
+#include<stack>
+#include <utility>
+#include <tuple>
+#include <unordered_map>
+#include <string.h>
+#include <iomanip>
+#include <deque>
+#include <climits>
+#include <list>
+#include <bitset>
+//const long long MOD = 1000000000+7;
+//const long long MOD = 998244353;
+//const long long MAX = 1000000000000000001;
+const long long MOD = 1000000000000000007;
+
+using namespace std;
+typedef long long llong;
+typedef unsigned long long ullong;
+#define INF (1LL<<60)
+#define DEBUG cout << "Hello" << endl;
+//int isalpha(char ch): ch がアルファベットなら true を返す
+//int isdigit(char ch): ch が数字なら true を返す
+//int islower(char ch): ch が小文字なら true を返す
+//int isupper(char ch): ch が大文字なら true を返す
+//int tolower(char ch): ch の小文字を返す
+//int toupper(char ch): ch の大文字を返す
+
+//string型
+//sort(s.begin(), s.end(), greater<char>())
+//size()	文字数を返す
+//Insert()	（指定した場所に）文字・文字列を挿入する
+//erase()	（指定した場所の）文字・文字列を削除する
+//clear()	すべての文字を削除する
+//substr()	文字列の（指定した）部分文字列を返す
+//replace()	（指定した）部分文字列を新しい文字列に置換する
+//c_str()変換
+//文字列の比較は、<=や==などを使え
+//replace関数を使い、簡単に文字列を置換
+//リバース関数：reverse(str.begin(), str.end());
+//map<type, type> dict;で宣言
+//グラフ理論用変数
+//vector<vector<llong> > graph(N);
+
+//ソート
+//降順sort(v.begin(), v.end(), std::greater<Type>());
+
+//大文字から小文字へんかん
+//w[i] = w[i]-'A'+'a';
+
+//vector
+//assignメソッド　引数：サイズ、値
+//与えられたサイズと値でvectorを初期化する
+
+//queueクラス
+//find()次に取り出す値の表示をする。
+//pop()値を取り出す。戻り値はなし
+//push()キューに値をプッシュする
+
+//priority_queueクラス
+
+//切り上げ
+//ceil
+//floor
+
+//size()で返すのは、符号無し整c数
+//vectorが0の時は、
+//for(int k=0; k<(int)temp_list.size()-1; k++)
+
+/***
+vector<llong> v;
+do{
+
+}while(next_permutation(v.begin(), v.end()));
+***/
+
+//二分探索カンニング
+/***
+llong right, left, middle;
+right = 2e9;//2000000000
+left  = 0;
+while (right-left>1){
+    middle = left + (right - left) / 2;
+***/
+
+//double型
+//小数点以下10桁
+//printf("%.10lf\n", ans);
+ 
+//llong dx[4] = { 0, 1, 0, -1 };
+//llong dy[4] = { 1, 0, -1, 0 };
+
+//llongの最大値 :  9223372036854775807, 10進数で19桁
+//10の18乗までは自由に表現できる。
+//llongの最小値 : -9223372036854775808
+
+//数値から文字列に変換
+
+//ダイクストラ法ライブラリ
+
+//余りを考えずにするためのライブラリ
+//const llong mod = 1000000007;
+const llong mod = 998244353;
+class mint {
+    public:
+        llong x; 
+        mint(llong x=0):x((x%mod+mod)%mod){}
+        mint operator-() const { return mint(-x);}
+        mint& operator+=(const mint a) {
+        if ((x += a.x) >= mod) x -= mod;
+        return *this;
+        }
+        mint& operator-=(const mint a) {
+        if ((x += mod-a.x) >= mod) x -= mod;
+        return *this;
+        }
+        mint& operator*=(const mint a) { (x *= a.x) %= mod; return *this;}
+        mint operator+(const mint a) const { return mint(*this) += a;}
+        mint operator-(const mint a) const { return mint(*this) -= a;}
+        mint operator*(const mint a) const { return mint(*this) *= a;}
+        mint pow(llong t) const {
+        if (!t) return 1;
+        mint a = pow(t>>1);
+        a *= a;
+        if (t&1) a *= *this;
+        return a;
+        }
+
+        mint inv() const { return pow(mod-2);}
+        mint& operator/=(const mint a) { return *this *= a.inv();}
+        mint operator/(const mint a) const { return mint(*this) /= a;}
+};
+
+//ベルマンフォード法用の構造体
+typedef struct _Edge{
+    llong from;
+    llong to;
+    llong w;
+}Edge;
+
+llong V, E;
+
+//trueならば負の閉路がある。
+bool bellman_ford(const vector<Edge>& Edges, vector<llong>& dist){
+    for(int i=0; i<V; i++){
+        for(int j=0; j<E; j++){
+            Edge e = Edges[j];
+            if(dist[e.to] > dist[e.from]+e.w){
+                dist[e.to] = dist[e.from]+e.w;
+                if(i==V-1){
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+string num2string(llong num){
+    ostringstream oss;
+    oss << num;
+    return oss.str();
+}
+
+int main(){     
+    cin >> V >> E;
+    vector<Edge> edges(E);
+    for(int i=0; i<E; i++){
+        llong s, t, d;
+        cin >> s >> t >> d;
+        edges[i] = {s, t, d};
+    }
+    vector<vector<llong>> D(V, vector<llong>(V, INF)); 
+    for(int s=0; s<V; s++){
+        vector<llong> dist(V, INF);
+        dist[s] = 0;
+        if(bellman_ford(edges, dist)){
+            cout << "NEGATIVE CYCLE" << endl;
+            return 0;
+        }
+        D[s] = dist;
+    }
+    for(int i=0; i<V; i++){
+        for(int j=0; j<V-1; j++){
+            cout << ((D[i][j]!=INF)? (num2string(D[i][j])):("INF")) << " ";
+        }
+        cout << ((D[i][V-1]!=INF)? (num2string(D[i][V-1])):("INF"));
+        cout << endl;
+    }
+}

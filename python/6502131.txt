@@ -1,0 +1,25 @@
+def find (l,r,lx,rx,x)
+  if rx<=l || lx>=r then
+    2**31-1
+  elsif (l<=lx && rx<=r) then
+    $a[x]
+  else
+    [find(l,r,lx,(lx+rx)/2,x*2+1),find(l,r,(lx+rx)/2,rx,x*2+2)].min
+  end
+end
+n,q=gets.split.map(&:to_i)
+n=2*2**Math.log(n,2).ceil
+$a=Array.new(n,2**31-1)
+q.times do
+  com,x,y=gets.split.map(&:to_i)
+  if com==0 then
+    x=n-1+x
+    $a[x]=y
+    while x>0 do
+      x=(x-1)/2
+      $a[x]=[$a[x],y].min
+    end
+  else
+    puts find(x,y+1,0,n,0)
+  end
+end

@@ -1,0 +1,221 @@
+/**
+ *    author:  gary
+ *    created: 30.04.2022 13:03:07
+**/
+#include<bits/stdc++.h>
+#define rb(a,b,c) for(int a=b;a<=c;++a)
+#define rl(a,b,c) for(int a=b;a>=c;--a)
+#define rep(a,b) for(int a=0;a<b;++a)
+#define LL __int128_t
+// #define LL long long
+#define PB push_back
+#define POB pop_back
+#define II(a,b) make_pair(a,b)
+#define FIR first
+#define SEC second
+#define SRAND mt19937 rng(chrono::steady_clock::now().time_since_epoch().count())
+#define random(a) rng()%a
+#define ALL(a) a.begin(),a.end()
+#define check_min(a,b) a=min(a,b)
+#define check_max(a,b) a=max(a,b)
+using namespace std;
+const int INF=0x3f3f3f3f;
+typedef pair<int,int> mp;
+const int MOD=1e9+7;
+const int MAXN=1e5+10;
+int to[MAXN];
+LL l[MAXN];
+int n,c[MAXN],e[MAXN];
+LL a[MAXN],b[MAXN],d[MAXN],x0;
+bool vis[MAXN];
+int bf(){
+    int x=1;
+    LL y=x0;
+    rb(T,0,n){
+        if(x==n+1) return T;
+        if(y==a[x]){
+            tie(x,y)=II(c[x],y+b[x]);
+        }
+        else{
+            tie(x,y)=II(e[x],y+d[x]);
+        }
+    }
+    return -1;
+}
+vector<pair<LL,int> > que[MAXN];
+int deg[MAXN];
+bool incyc[MAXN];
+vector<pair<int,LL> > g[MAXN];
+set<pair<pair<LL,int>,int> > se[MAXN];
+LL tag[MAXN];
+int ste[MAXN];
+void dfs(int now){
+    for(auto it:g[now]){
+        if(!incyc[it.first]){
+            dfs(it.first);
+            tag[it.first]+=it.second;
+            ste[it.first]++;
+            int v=it.first;
+            if(se[now].size()<se[v].size()){se[now].swap(se[v]),swap(tag[now],tag[v]),swap(ste[now],ste[v]);}
+            for(auto it:se[v]) se[now].insert(II(II(it.first.first+tag[v]-tag[now],it.first.second+ste[v]-ste[now]),it.second));
+        }
+    }
+    if(now==n+1) return;
+    auto tmp=se[now].lower_bound(II(II(a[now]-tag[now],-INF),-INF));
+    while (tmp!=se[now].end()&&tmp->first.first==a[now]-tag[now]){
+        to[tmp->second]=now;
+        l[tmp->second]=tmp->first.second+ste[now];
+        // cout<<tmp->second<<" "<<c[tmp->second]<<" "<<now<<" "<<(int)(l[tmp->second])<<endl;
+        tmp=se[now].erase(tmp);
+    }
+}
+LL pre[MAXN<<1];
+int Mod(LL x,LL y){
+    if(x>0) return x%y;
+    return (x+((-x+y)/y)*y)%y;
+}
+void Insert(map<LL,pair<LL,int> > & M,LL fir,LL sec,int sec2){
+    auto Ite=M.lower_bound(fir);
+    if(Ite!=M.end()&&Ite->second.first<=sec) return;
+    // cout<<fir<<"*"<<sec<<" "<<sec2<<endl;
+    M[fir]=II(sec,sec2);
+    while (true){
+        Ite=M.find(fir);
+        if(Ite==M.begin()||prev(Ite)->second.first<sec) break;
+        M.erase(prev(Ite));
+    }
+}
+void solve(vector<vector<pair<pair<LL,int>,int> > > Que,int N,vector<int> Cyc){
+    //  cout<<"____\n";
+    LL L=pre[N+1];
+    //  for(auto it:Cyc) cout<<it<<',';
+    //  cout<<endl;
+    //  rb(i,1,N){
+    //      cout<<i<<":";
+    //      for(auto it:Que[i]) cout<<(long long)(it.first.first)<<' '<<it.first.second<<" "<<it.second<<endl;
+    //  }
+    if(L<0){
+        rl(i,2*N,1) pre[i]-=pre[i-1];
+        rb(i,1,2*N) pre[i]*=-1;
+        rb(i,1,2*N) pre[i]+=pre[i-1];
+        for(auto & it:Que) for(auto &itt:it) itt.first.first*=-1;
+        for(auto it:Cyc) a[it]=-a[it];
+        L*=-1;
+    }
+    set<pair<pair<LL,int>,int> > Se;
+    LL Ta=0;
+    int St=0;
+    rb(i,1,2*N){
+        Ta+=pre[i]-pre[i-1];
+        St++;
+        if(i<=N){
+            for(auto it:Que[i]) Se.insert(II(II(it.first.first-Ta,it.first.second-St),it.second));
+        }
+        int v=Cyc[(i-1)%N];
+        auto tmp=Se.lower_bound(II(II(a[v]-Ta,-INF),-INF));
+        while (tmp!=Se.end()&&tmp->first.first==a[v]-Ta){
+            to[tmp->second]=v;
+            l[tmp->second]=tmp->first.second+St;
+            tmp=Se.erase(tmp);
+        }
+    }
+    if(L==0) return;
+    map<LL,map<LL,pair<LL,int> > > Best;
+    rb(i,N+1,2*N){
+        int v=Cyc[(i-1)%N];
+        Insert(Best[Mod(a[v]-pre[i],L)],(a[v]-pre[i]),(LL)(llround(floor((double)(a[v]-pre[i])/L)))*N+i,v);
+    }
+    rb(i,1,N){
+        for(auto it:Que[i]){
+            LL A=it.first.first;
+            if(to[it.second]==INF);
+            else continue;
+            // cout<<it.second<<" "<<i<<"##"<<" "<<(long long)(A-pre[i])<<" "<<(long long)(L)<<" "<<endl;
+            auto ite=Best[Mod(A-pre[i],L)].lower_bound(A-pre[i]);
+            if(ite!=Best[Mod(A-pre[i],L)].end()){
+                to[it.second]=ite->second.second;
+                l[it.second]=(ite->second.first-i-(LL)(llround(floor((double)(A-pre[i])/L)))*N+it.first.second)%MOD;
+            }
+        }
+    }
+}
+void init(){
+    rb(i,1,n) deg[e[i]]++,g[e[i]].PB(II(i,d[i]));
+    queue<int> q;
+    rb(i,1,n+1) incyc[i]=1;
+    rb(i,1,n+1) if(!deg[i]) q.push(i);
+    while (!q.empty()){
+        int now=q.front();
+        q.pop();
+        incyc[now]=0;
+        deg[e[now]]--;
+        if(!deg[e[now]]) q.push(e[now]);
+    }
+    rb(i,1,n+1) for(auto it:que[i]) se[i].insert(II(II(it.first,0),it.second));
+    rb(i,1,n+1) if(incyc[i]||i==n+1) dfs(i);
+    for(auto it:se[n+1]){
+        to[it.second]=-1;
+        l[it.second]=it.first.second+ste[n+1];
+    }
+    rb(i,1,n) if(incyc[i]&&!vis[i]){
+        vector<int> cyc;
+        int now=i;
+        int N=0;
+        do{
+            ++N;
+            vis[now]=1;
+            cyc.PB(now);
+            pre[N+1]=d[now];
+            now=e[now];
+        } while (now!=i);
+        rb(i,N+2,N*2) pre[i]=pre[(i-1)%N+1];
+        rb(i,1,N*2) pre[i]+=pre[i-1];
+        vector<vector<pair<pair<LL,int>,int> > > Que(N+1);
+        rb(i,1,N){
+            for(auto it:se[cyc[i-1]])
+            Que[i].PB(II(II(it.first.first+tag[cyc[i-1]],it.first.second+ste[cyc[i-1]]),it.second));
+        }
+        solve(Que,N,cyc);
+    }
+}
+__int128_t Read(){
+    long long x;
+    scanf("%lld",&x);
+    return x;
+}
+int main(){
+    n=Read(),x0=Read();
+    rb(i,1,n) a[i]=Read(),b[i]=Read(),c[i]=Read(),d[i]=Read(),e[i]=Read();
+    rb(i,1,n+1) to[i]=INF,l[i]=INF;
+    int ans1=bf();
+    if(ans1!=-1){
+        printf("%d\n",ans1);
+        return 0;
+    }
+    rb(i,1,n) que[c[i]].PB(II(a[i]+b[i],i));
+    que[1].PB(II(x0,n+1));
+    init();
+    memset(vis,0,sizeof(vis));
+    int now=n+1;
+    LL pre=0;
+    // cout<<to[12]<<' '<<(int)(l[12])<<endl;
+    while (true){
+        if(vis[now]){
+            puts("-1");
+            return 0;
+        }
+        vis[now]=1;
+        if(to[now]==INF){
+            puts("-1");
+            return 0;
+        }
+        pre=pre+l[now]+(now!=(n+1));
+        pre%=MOD;
+        if(to[now]==-1){
+            printf("%d\n",(int)(pre));
+            break;
+        }
+        now=to[now];
+    }
+    return 0;
+}

@@ -1,0 +1,42 @@
+from math import inf
+from operator import itemgetter
+from itertools import count, islice
+
+rxs = lambda: map(int, input().split())
+N, Q = rxs()
+Qs = [tuple(rxs()) for _ in range(Q)]
+m = 1
+while m < N: m*=2;
+u_tree = [0] * (2*m-1)
+f_tree = [0] * (2*m-1)
+
+def add(s, t, x, node=0, lft=0, rht=m):
+    if t <= lft or  rht <= s: return
+    if s <= lft and rht <= t:
+        u_tree[node] += x
+        return
+    f_tree[node] += x*(min(rht, t) - max(lft, s))
+    mid = (lft+rht)//2
+    add(s, t, x, 2*node+1, lft, mid)
+    add(s, t, x, 2*node+2, mid, rht)
+
+def getsum(s, t, node=0, lft=0, rht=m):
+    if t <= lft or  rht <= s: return 0
+    u_sum = u_tree[node] * (min(rht, t) - max(lft, s))
+    if s <= lft and rht <= t:
+        return f_tree[node] + u_sum
+    mid = (lft+rht)//2
+    u_sum += getsum(s, t, node*2+1, lft, mid)
+    u_sum += getsum(s, t, node*2+2, mid, rht)
+    return u_sum
+
+ans = []
+for q in Qs:
+    if q[0] == 0:
+        add(q[1]-1, q[2], q[3])
+    else:
+        ans.append(getsum(q[1]-1, q[2]))
+
+print("\n".join(map(str, ans)))
+
+

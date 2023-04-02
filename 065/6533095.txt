@@ -1,0 +1,104 @@
+#include <iostream>
+#include <climits>
+
+template<typename T> class sequence {
+    int cap, sz, fr, bk;
+    T* ptr;
+
+    void replace(int n, int c) {
+        T* p = new T[c];
+        for (int i = 0; i < sz; i++) p[i + (c - n) / 2] = ptr[fr + i];
+        std::swap(ptr, p);
+        delete[] p;
+        cap = c;
+        sz = n;
+        fr = (c - n) / 2;
+        bk = fr + sz - 1;
+    }
+public :
+    sequence() : cap(0), sz(0), fr(0), bk(-1), ptr(nullptr) { }
+    sequence(int n, T x) : cap(n * 2), sz(n), fr(n / 2), bk(fr + sz - 1), ptr(new T[cap]) {
+        for (int i = 0; i < sz; i++) ptr[i + sz / 2] = x;
+    }
+    ~sequence() { delete[] ptr; }
+    int size() const { return sz; }
+    void resize(int n) {
+        if (n == 0) clear();
+        else if (fr + n <= cap) bk = fr + n - 1, sz = n;
+        else replace(n, n * 2);
+    }
+    bool empty() const { return sz == 0; }
+    void shrink_to_fit() { replace(sz, sz); }
+    T& operator[](int i) { return ptr[fr + i]; }
+    T& front() { return ptr[fr]; }
+    T& back() { return ptr[bk]; }
+    void push_front(T x) {
+        if (fr <= 0) {
+            replace(sz + 1, std::max((sz + 1) * 2, sz + 3));
+            ptr[--fr] = x;
+            bk--;
+        } else {
+            ptr[--fr] = x;
+            sz++;
+        }
+    }
+    void push_back(T x) {
+        if (bk >= cap - 1) {
+            replace(sz + 1, std::max((sz + 1) * 2, sz + 3));
+            ptr[bk] = x;
+        } else {
+            ptr[++bk] = x;
+            sz++;
+        }
+    }
+    void pop_front() { fr++; sz--; }
+    void pop_back() { bk--; sz--; }
+    void swap(sequence<T>& sq) {
+        std::swap(sz, sq.sz);
+        std::swap(cap, sq.cap);
+        std::swap(fr, sq.fr);
+        std::swap(bk, sq.bk);
+        std::swap(ptr, sq.ptr);
+    }
+    void clear() {
+        sz = 0;
+        fr = cap / 2;
+        bk = fr - 1;
+    }
+    void debug() {
+        std::cout << "################\n";
+        std::cout << "sz: " << sz << '\n';
+        std::cout << "cap: " << cap << '\n';
+        std::cout << "fr: " << fr << '\n';
+        std::cout << "bk: " << bk << '\n';
+        for (int i = 0; i < cap; i++) {
+            if (i < fr || bk < i) std::cout << "null ";
+            else std::cout << ptr[i] << ' ';
+        }std::cout << '\n';
+        std::cout << "################\n";
+    }
+};
+
+int main() {
+    int q;
+    std::cin >> q;
+
+    sequence<int> A;
+
+    while (q--) {
+        int t, d, x, p;
+        std::cin >> t;
+        if (t == 0) {
+            std::cin >> d >> x;
+            if (d == 0) A.push_front(x);
+            else A.push_back(x);
+        } else if (t == 1) {
+            std::cin >> p;
+            std::cout << A[p] << '\n';
+        } else {
+            std::cin >> d;
+            if (d == 0) A.pop_front();
+            else A.pop_back();
+        }
+    }
+}

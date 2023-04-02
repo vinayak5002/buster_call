@@ -1,0 +1,473 @@
+#line 1 "a.cpp"
+#define PROBLEM ""
+#line 2 "/home/kuhaku/home/github/algo/lib/template/template.hpp"
+#pragma GCC target("avx2,bmi2")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+#include <bits/stdc++.h>
+using namespace std;
+template <class T, class U>
+bool chmax(T &a, const U &b) {
+    return a < b ? a = b, true : false;
+}
+template <class T, class U>
+bool chmin(T &a, const U &b) {
+    return b < a ? a = b, true : false;
+}
+constexpr int64_t INF = 1000000000000000003;
+constexpr int Inf = 1000000003;
+constexpr int MOD = 1000000007;
+constexpr int MOD_N = 998244353;
+constexpr double EPS = 1e-7;
+constexpr double PI = M_PI;
+#line 2 "/home/kuhaku/home/github/algo/lib/math/pow.hpp"
+
+int64_t pow_int(int64_t a, int64_t n) {
+    assert(n >= 0);
+    int64_t res = 1, mul = a;
+    for (; n > 0; n >>= 1) {
+        if (n & 1) res *= mul;
+        mul *= mul;
+    }
+    return res;
+}
+
+int64_t inv_mod(int64_t a, int64_t mod) {
+    int64_t b = mod, u = 1, v = 0, t;
+    while (b > 0) {
+        t = a / b;
+        swap(a -= t * b, b);
+        swap(u -= t * v, v);
+    }
+    return u >= 0 ? u % mod : (mod - (-u) % mod) % mod;
+}
+
+int64_t pow_mod(int64_t a, int64_t n, int64_t mod) {
+    if (n < 0) return inv_mod(pow_mod(a, -n, mod), mod);
+    int64_t res = 1, mul = a;
+    for (; n > 0; n >>= 1) {
+        if (n & 1) (res *= mul) %= mod;
+        (mul *= mul) %= mod;
+    }
+    return res;
+}
+
+int ceil_pow2(int n) {
+    int x = 0;
+    while ((1U << x) < (unsigned int)(n)) x++;
+    return x;
+}
+#line 2 "/home/kuhaku/home/github/algo/lib/segment_tree/monoid.hpp"
+
+template <class T>
+struct Add {
+    using value_type = T;
+    static constexpr T id = T(0);
+    static constexpr T op(const T &lhs, const T &rhs) { return lhs + rhs; }
+
+    template <class U>
+    static constexpr U f(T lhs, U rhs) {
+        return lhs + rhs;
+    }
+};
+
+template <class T>
+struct And {
+    using value_type = T;
+    static constexpr T id = T(0);
+    static constexpr T op(const T &lhs, const T &rhs) { return lhs & rhs; }
+
+    template <class U>
+    static constexpr U f(T lhs, U rhs) {
+        return lhs & rhs;
+    }
+};
+
+template <class T>
+struct Or {
+    using value_type = T;
+    static constexpr T id = T(0);
+    static constexpr T op(const T &lhs, const T &rhs) { return lhs | rhs; }
+
+    template <class U>
+    static constexpr U f(T lhs, U rhs) {
+        return lhs | rhs;
+    }
+};
+
+template <class T>
+struct Xor {
+    using value_type = T;
+    static constexpr T id = T(0);
+    static constexpr T op(const T &lhs, const T &rhs) { return lhs ^ rhs; }
+
+    template <class U>
+    static constexpr U f(T lhs, U rhs) {
+        return lhs ^ rhs;
+    }
+};
+
+template <class T>
+struct Min {
+    using value_type = T;
+    static constexpr T id = numeric_limits<T>::max();
+    static constexpr T op(const T &lhs, const T &rhs) { return min(lhs, rhs); }
+
+    template <class U>
+    static constexpr U f(T lhs, U rhs) {
+        return min((U)lhs, rhs);
+    }
+};
+
+template <class T>
+struct Max {
+    using value_type = T;
+    static constexpr T id = numeric_limits<T>::min();
+    static constexpr T op(const T &lhs, const T &rhs) { return max(lhs, rhs); }
+
+    template <class U>
+    static constexpr U f(T lhs, U rhs) {
+        return max((U)lhs, rhs);
+    }
+};
+
+template <class T>
+struct Update {
+    using value_type = T;
+    static constexpr T id = numeric_limits<T>::max();
+    static constexpr T op(const T &lhs, const T &rhs) { return lhs == Update::id ? rhs : lhs; }
+
+    template <class U>
+    static constexpr U f(T lhs, U rhs) {
+        return lhs == Update::id ? rhs : lhs;
+    }
+};
+#line 4 "/home/kuhaku/home/github/algo/lib/segment_tree/dual_segment_tree.hpp"
+
+/**
+ * @brief 双対セグメント木
+ *
+ * @tparam M
+ */
+template <class M>
+struct dual_segment_tree {
+    using T = typename M::value_type;
+
+    dual_segment_tree(int _n, T _e = M::id) { this->init(_n, _e); }
+
+    void init(int n, T e) {
+        this->_log = ceil_pow2(n);
+        this->_size = 1 << this->_log;
+        this->data.assign(this->_size << 1, e);
+    }
+
+    T at(int k) { return this->get(k); }
+    T get(int k) {
+        assert(0 <= k && k < this->_size);
+        k += this->_size;
+        for (int i = this->_log; i >= 1; --i) this->push(k >> i);
+        return this->data[k];
+    }
+
+    void apply(int a, T val) { this->apply(a, a + 1, val); }
+    void apply(int a, int b, T val) {
+        assert(0 <= a && a <= this->_size);
+        assert(0 <= b && b <= this->_size);
+        a += this->_size, b += this->_size;
+        for (int i = _log; i >= 1; --i) {
+            if (((a >> i) << i) != a) this->push(a >> i);
+            if (((b >> i) << i) != b) this->push((b - 1) >> i);
+        }
+
+        for (; a < b; a >>= 1, b >>= 1) {
+            if (a & 1) this->all_apply(a++, val);
+            if (b & 1) this->all_apply(--b, val);
+        }
+    }
+
+  private:
+    int _size, _log;
+    vector<T> data;
+
+    void all_apply(int k, T val) { this->data[k] = M::op(val, this->data[k]); }
+    void push(int k) {
+        this->all_apply(2 * k, this->data[k]);
+        this->all_apply(2 * k + 1, this->data[k]);
+        this->data[k] = M::id;
+    }
+};
+#line 3 "/home/kuhaku/home/github/algo/lib/template/atcoder.hpp"
+using ll = int64_t;
+using ld = long double;
+#define FOR(i, m, n) for(int i = (m); i < int(n); ++i)
+#define FORR(i, m, n) for(int i = (m)-1; i >= int(n); --i)
+#define FORL(i, m, n) for(int64_t i = (m); i < int64_t(n); ++i)
+#define rep(i, n) FOR(i, 0, n)
+#define repn(i, n) FOR(i, 1, n+1)
+#define repr(i, n) FORR(i, n, 0)
+#define repnr(i, n) FORR(i, n+1, 1)
+#define all(s) (s).begin(), (s).end()
+template<class T, class U>
+std::istream &operator>>(std::istream &is, std::pair<T, U> &p) { is >> p.first >> p.second; return is; }
+template <class T>
+std::istream &operator>>(std::istream &is, std::vector<T> &v) { for (T &i : v) is>>i; return is; }
+template <class T, class U>
+std::ostream &operator<<(std::ostream &os, const std::pair<T, U> &p) {
+    return os<<'('<<p.first<< ','<<p.second<<')';
+}
+template <class T>
+std::ostream &operator<<(std::ostream &os, const std::vector<T> &v) {
+    for (auto it=v.begin(); it!=v.end(); ++it) { os<<(it==v.begin()?"":" ")<<*it; } return os;
+}
+template <class Head, class... Tail>
+void co(Head&& head, Tail&&... tail) {
+    if constexpr(sizeof...(tail)==0) std::cout<<head<<'\n'; else std::cout<<head<<' ',co(forward<Tail>(tail)...);
+}
+template <class Head, class... Tail>
+void ce(Head&& head, Tail&&... tail) {
+    if constexpr(sizeof...(tail)==0) std::cerr<<head<<'\n'; else std::cerr<<head<<' ',ce(forward<Tail>(tail)...);
+}
+template<typename T, typename... Args>
+auto make_vector(T x, int arg, Args ...args) {
+    if constexpr(sizeof...(args)==0) return std::vector<T>(arg,x); else return std::vector(arg,make_vector<T>(x,args...));
+}
+void sonic() { std::ios::sync_with_stdio(false); std::cin.tie(nullptr); }
+void setp(const int n) { std::cout<<std::fixed<<std::setprecision(n); }
+void Yes(bool is_correct=true) { std::cout<<(is_correct?"Yes":"No")<<std::endl; }
+void No(bool is_not_correct=true) { Yes(!is_not_correct); }
+void YES(bool is_correct=true) { std::cout<<(is_correct?"YES":"NO")<<std::endl; }
+void NO(bool is_not_correct=true) { YES(!is_not_correct); }
+void Takahashi(bool is_correct=true) { std::cout<<(is_correct?"Takahashi":"Aoki")<<std::endl; }
+void Aoki(bool is_not_correct=true) { Takahashi(!is_not_correct); }
+#line 3 "/home/kuhaku/home/github/algo/lib/graph/graph.hpp"
+
+/**
+ * @brief 重み付きグラフ
+ *
+ * @tparam T 辺の重みの型
+ */
+template <class T>
+struct Graph {
+  private:
+    struct _edge {
+        constexpr _edge() : _from(), _to(), _weight() {}
+        constexpr _edge(int from, int to, T weight) : _from(from), _to(to), _weight(weight) {}
+        bool operator<(const _edge &rhs) const { return this->weight() < rhs.weight(); }
+        bool operator>(const _edge &rhs) const { return rhs < *this; }
+
+        constexpr int from() const { return this->_from; }
+        constexpr int to() const { return this->_to; }
+        constexpr T weight() const { return this->_weight; }
+
+      private:
+        int _from, _to;
+        T _weight;
+    };
+
+  public:
+    using edge_type = typename Graph<T>::_edge;
+
+    Graph(int v) : _size(v), edges(v) {}
+
+    const auto &operator[](int i) const { return this->edges[i]; }
+    auto &operator[](int i) { return this->edges[i]; }
+    const auto begin() const { return this->edges.begin(); }
+    auto begin() { return this->edges.begin(); }
+    const auto end() const { return this->edges.end(); }
+    auto end() { return this->edges.end(); }
+    constexpr int size() const { return this->_size; }
+
+    void add_edge(const edge_type &e) { this->edges[e.from()].emplace_back(e); }
+    void add_edge(int from, int to, T weight = T(1)) {
+        this->edges[from].emplace_back(from, to, weight);
+    }
+    void add_edges(int from, int to, T weight = T(1)) {
+        this->edges[from].emplace_back(from, to, weight);
+        this->edges[to].emplace_back(to, from, weight);
+    }
+
+    void input_edge(int m, int base = 1) {
+        for (int i = 0; i < m; ++i) {
+            int from, to;
+            T weight;
+            cin >> from >> to >> weight;
+            this->add_edge(from - base, to - base, weight);
+        }
+    }
+    void input_edges(int m, int base = 1) {
+        for (int i = 0; i < m; ++i) {
+            int from, to;
+            T weight;
+            cin >> from >> to >> weight;
+            this->add_edges(from - base, to - base, weight);
+        }
+    }
+
+  private:
+    int _size;
+    std::vector<std::vector<edge_type>> edges;
+};
+
+template <>
+struct Graph<void> {
+  private:
+    struct _edge {
+        constexpr _edge() : _from(), _to() {}
+        constexpr _edge(int from, int to) : _from(from), _to(to) {}
+
+        constexpr int from() const { return this->_from; }
+        constexpr int to() const { return this->_to; }
+        constexpr int weight() const { return 1; }
+        bool operator<(const _edge &rhs) const { return false; }
+        bool operator>(const _edge &rhs) const { return rhs < *this; }
+
+      private:
+        int _from, _to;
+    };
+
+  public:
+    using edge_type = typename Graph<void>::_edge;
+
+    Graph(int v) : _size(v), edges(v) {}
+
+    const auto &operator[](int i) const { return this->edges[i]; }
+    auto &operator[](int i) { return this->edges[i]; }
+    const auto begin() const { return this->edges.begin(); }
+    auto begin() { return this->edges.begin(); }
+    const auto end() const { return this->edges.end(); }
+    auto end() { return this->edges.end(); }
+    constexpr int size() const { return this->_size; }
+
+    void add_edge(const edge_type &e) { this->edges[e.from()].emplace_back(e); }
+    void add_edge(int from, int to) { this->edges[from].emplace_back(from, to); }
+    void add_edges(int from, int to) {
+        this->edges[from].emplace_back(from, to);
+        this->edges[to].emplace_back(to, from);
+    }
+
+    void input_edge(int m, int base = 1) {
+        for (int i = 0; i < m; ++i) {
+            int from, to;
+            cin >> from >> to;
+            this->add_edge(from - base, to - base);
+        }
+    }
+    void input_edges(int m, int base = 1) {
+        for (int i = 0; i < m; ++i) {
+            int from, to;
+            cin >> from >> to;
+            this->add_edges(from - base, to - base);
+        }
+    }
+
+  private:
+    int _size;
+    std::vector<std::vector<edge_type>> edges;
+};
+#line 3 "/home/kuhaku/home/github/algo/lib/tree/eular_tour.hpp"
+
+/**
+ * @brief オイラーツアー
+ * @details [参考](https://github.com/beet-aizu/library/blob/master/tree/eulertourforvertex.cpp)
+ *
+ * @tparam T 辺の重みの型
+ */
+template <class T>
+struct eular_tour {
+    eular_tour(const Graph<T> &_g, int r = 0) : g(_g), ls(_g.size()), rs(_g.size()), pos() {
+        this->build(r);
+    }
+
+    std::pair<int, int> operator[](int i) const { return {this->ls[i], this->rs[i]}; }
+
+    int size() const { return this->pos; }
+
+    int get_l(int i) const { return this->ls[i]; }
+    int get_r(int i) const { return this->rs[i]; }
+
+    template <class F>
+    void query(int v, const F &f) const {
+        f(this->ls[v], this->rs[v]);
+    }
+
+  private:
+    const Graph<T> &g;
+    std::vector<int> ls, rs;
+    int pos;
+
+    void build(int r = 0) {
+        this->pos = 0;
+        this->dfs(r, -1);
+    }
+
+    void dfs(int v, int p) {
+        this->ls[v] = this->pos++;
+        for (auto &e : this->g[v]) {
+            if (e.to() != p) this->dfs(e.to(), v);
+        }
+        this->rs[v] = this->pos;
+    }
+};
+#line 3 "/home/kuhaku/home/github/algo/lib/tree/tree_dist.hpp"
+
+/**
+ * @brief 木の距離を求める
+ *
+ * @tparam T 辺の重みの型
+ * @param g 木
+ * @param r 根
+ * @return std::vector<int>
+ */
+template <class T>
+std::vector<int> tree_dist(const Graph<T> &g, int r = 0) {
+    std::vector<int> res(g.size(), -1);
+    std::stack<int> st;
+    res[r] = 0;
+    st.emplace(r);
+    while (!st.empty()) {
+        auto index = st.top();
+        st.pop();
+        for (auto &e : g[index]) {
+            if (res[e.to()] != -1) continue;
+            res[e.to()] = res[index] + e.weight();
+            st.emplace(e.to());
+        }
+    }
+    return res;
+}
+#line 6 "a.cpp"
+
+int main(void) {
+    sonic();
+    while (true) {
+        int n, q;
+        cin >> n >> q;
+        if (!n)
+            break;
+        vector<int> p(n - 1);
+        cin >> p;
+        Graph<void> g(n);
+        rep(i, n - 1) g.add_edges(i + 1, p[i] - 1);
+
+        auto depth = tree_dist(g);
+        eular_tour et(g);
+        dual_segment_tree<Max<pair<int, int>>> st(et.size());
+        st.apply(0, et.size(), {0, 0});
+
+        ll ans = 0;
+        rep(i, q) {
+            char c;
+            int x;
+            cin >> c >> x;
+            if (c == 'M') {
+                st.apply(et.get_l(x - 1), et.get_r(x - 1), {depth[x - 1], x - 1});
+            } else {
+                ans += st.get(et.get_l(x - 1)).second + 1;
+            }
+        }
+        co(ans);
+    }
+
+    return 0;
+}
+

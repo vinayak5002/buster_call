@@ -1,0 +1,64 @@
+#include <stdio.h>
+#define N 10000
+#define NIL -1
+
+typedef struct{
+	int p,l,r;
+}Node;
+Node tree[N];
+
+void preParse(int u) //先行順巡回//
+{
+	if(u==NIL) return;
+	printf(" %d",u);
+	preParse(tree[u].l);
+	preParse(tree[u].r);
+}
+void inParse(int u) //中間順//
+{
+	if(u==NIL) return;
+	inParse(tree[u].l);
+	printf(" %d",u);
+	inParse(tree[u].r);
+}
+void postParse(int u) //後攻順//
+{
+	if(u==NIL) return;
+	postParse(tree[u].l);
+	postParse(tree[u].r);
+	printf(" %d",u);
+}
+
+int main(void)
+{
+	int n,i,s,l,p,r,root;
+	scanf("%d",&n);
+	for(i=0;i<n;i++)
+	{
+		tree[i].p=NIL;
+	}
+	for(i=0;i<n;i++)
+	{
+		scanf("%d %d %d",&s,&l,&r);
+		tree[s].l=l;
+		tree[s].r=r;
+		if(l!=NIL) tree[l].p=s;
+		if(r!=NIL) tree[r].p=s;
+	}
+	for(i=0;i<n;i++)
+	{
+		if(tree[i].p==NIL) root=i;
+	}
+		
+		printf("Preorder\n");
+		preParse(root);
+		printf("\n");
+		printf("Inorder\n");
+		inParse(root);
+		printf("\n");
+		printf("Postorder\n");
+		postParse(root);
+		printf("\n");
+	return 0;
+}
+	

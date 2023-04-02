@@ -1,0 +1,86 @@
+#include <stdio.h>
+
+#define MAX 25
+#define NIL -1
+
+
+struct Node
+{
+	int parent;
+	int left;
+	int right;
+};
+
+
+struct Node T[MAX];
+
+
+void preParse(int u)
+{
+	if(u == NIL){ return; }
+	printf(" %d", u);
+	preParse(T[u].left);
+	preParse(T[u].right);
+}
+
+
+void inParse(int u)
+{
+	if(u == NIL){ return; }
+	inParse(T[u].left);
+	printf(" %d", u);
+	inParse(T[u].right);
+}
+
+
+void postParse(int u)
+{
+	if(u == NIL){ return; }
+	postParse(T[u].left);
+	postParse(T[u].right);
+	printf(" %d", u);
+}
+
+
+int main (void)
+{
+	int n; //節点の個数
+	scanf("%d", &n);
+	
+	int i, node, left, right, root;
+	/* 根付き木 T の初期化 */
+	for(i = 0; i < n; i++)
+	{
+		T[i].parent = NIL;
+	}
+	
+	
+	/* 二分木 T にデータを格納 */
+	for(i = 0 ; i < n; i++)
+	{
+		scanf("%d %d %d", &node, &left, &right);
+		T[node].left = left;
+		T[node].right = right;
+		if(left != NIL){ T[left].parent = node; }
+		if(right != NIL){ T[right].parent = node; }
+	}
+	
+	/* rootノードを見つける */
+	for(i = 0; i < n; i++)
+	{
+		if(T[i].parent == NIL){ root = i; }
+	}
+	
+	printf("Preorder\n");
+	preParse(root);
+	printf("\n");
+	printf("Inorder\n");
+	inParse(root);
+	printf("\n");
+	printf("Posrorder\n");
+	postParse(root);
+	printf("\n");
+	
+	return 0;
+}
+

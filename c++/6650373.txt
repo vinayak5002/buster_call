@@ -1,0 +1,44 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void chmax(int &l, int r) {
+  l = max(l, r);
+}
+
+void solve(int n) {
+  vector< int > ws(n);
+  for (auto &w: ws) cin >> w;
+
+  auto check = [ws](int u, int v) {
+    return (abs(ws[u] - ws[v]) <= 1) ? 2 : 0;
+  };
+
+  vector< vector< int > > dp(n + 1, vector(n + 1, 0));
+  for (int d = 2; d <= n; d++) {
+    for (int l = 0; l + d < n + 1; l++) {
+      int r = l + d;
+      // dp[l][r]
+      chmax(dp[l][r], dp[l + 2][r - 0] + check(l, l + 1));
+      if (dp[l + 1][r - 1] == d - 2) {
+        chmax(dp[l][r], dp[l + 1][r - 1] + check(l, r - 1));
+      }
+      chmax(dp[l][r], dp[l + 0][r - 2] + check(r - 2, r - 1));
+      chmax(dp[l][r], dp[l + 1][r]);
+      chmax(dp[l][r], dp[l][r - 1]);
+    }
+  }
+ 
+  int ans = 0;
+  for (auto v: dp) chmax(ans, *max_element(v.begin(), v.end()));
+  cout << ans << endl;
+}
+
+int main() {
+  int n;
+
+  while (cin >> n, n) {
+    solve(n);
+  }
+}
+
+

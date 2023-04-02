@@ -1,0 +1,47 @@
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+	int t;
+	cin >> t;
+
+	//t回繰り返す
+	for (int j = 0; j < t; j++) {
+		int n, k;
+		cin >> n >> k;
+		int a[100009], b[100009]{ 0 };
+		//aは入力を受け取る配列（＝家の位置を受け取る配列）
+		//bは隣合う家の距離を保持する配列
+
+		for (int i = 0; i < n; i++)
+		{
+			//a[i]に値を入れつつb[i]も値をいれる。b[-1]が出ないように例外処理をする（もっといい例外処理もあると思うが）
+			cin >> a[i];
+			if (i > 0) {
+				b[i - 1] = a[i] - a[i - 1];
+			}
+		}
+	    int sum = a[n - 1]-a[0];
+		//sumには隣り合う家の距離をすべて足す
+
+		//家の数より発電機が多いとき
+		if (n <= k) {
+			cout << 0 << endl;
+		}
+		else {
+			//まず、隣り合う家の距離をsortする
+			sort(b, b + n - 1);
+			//まず電線ですべての家をつなぎ、その後距離が長いところを
+			//切っていくと考えた。発電機の数ぶんだけこれをおこなう。
+			for (int i = 0; i < k; i++)
+			{
+				sum -= b[n - 1 - i];
+			}
+			cout << sum << endl;
+		}
+	}
+	return 0;
+
+}

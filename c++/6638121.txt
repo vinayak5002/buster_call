@@ -1,0 +1,326 @@
+#include<stdio.h>
+#include<stdlib.h>
+#define MAX_SIZE 256
+unsigned int search(unsigned char array[][MAX_SIZE],unsigned int size,unsigned int row,unsigned int column);
+unsigned int	search2				(	unsigned char		array[][N_MAX_SIZE]	,
+							unsigned int		size			,
+							unsigned int		row_idx			,
+							unsigned int		col_idx			,
+							unsigned char		*direction
+						) ;
+
+int main(void)
+{
+    unsigned char arr[MAX_SIZE][MAX_SIZE];
+    int num,loop_i,loop_j,local_max,global_max;
+    char entry;
+    unsigned char running = 1;
+	unsigned char	direction	;
+
+    while(running==1) {
+
+        if(scanf("%d",&num)==EOF) {
+            running=0;
+        }
+        else if(num==0) {
+            running=0;
+        }
+
+        if(running==1) {
+            loop_i=0;
+            loop_j=0;
+            while(loop_i<num&&loop_j<num) {
+                scanf("%c",&entry);
+                if(entry=='1'||entry=='0') {
+                    arr[loop_i][loop_j] =   entry-'0';
+                    loop_j++;
+                }
+                if(loop_j==num)
+                {
+                    loop_j=0;
+                    loop_i++;
+                }
+            }
+        }
+
+
+       /* for(int loop_i=0;loop_i<num;loop_i++) {
+            for(int loop_j=0;loop_j<num;loop_j++) {
+                printf("%x",arr[loop_i][loop_j]);
+
+            }
+                printf("\n");
+         }
+*/
+         if(    running==1      ) {
+                global_max=0;
+            for(int loop_i=0;loop_i<num;loop_i++)
+            {
+                for(int loop_j=0;loop_j<num;loop_j++)
+                {
+                    if(arr[loop_i][loop_j]!=0)
+                    {
+			local_max	=	search2	(arr, num, loop_i, loop_j, &direction)	;
+//                          local_max= search(arr,num,loop_i,loop_j);
+                               // printf("(%d,%d)=%d\n",loop_i,loop_j,local_max);
+
+                       if(global_max<local_max)
+                                global_max=local_max;
+
+                    }
+                }
+            }
+                printf("%d\n",global_max);
+         }
+    }
+
+    return 0;
+}
+
+
+
+
+unsigned int search(unsigned char array[][MAX_SIZE],unsigned int size,unsigned int row,unsigned int column)
+{
+    int counter [5] ;
+    int row_temp,column_temp;
+
+            counter     [4] =       0           ;
+
+//horizontal (beign)
+            counter     [0] =       1           ;
+    //scanning left
+            row_temp        =       row+0       ;
+            column_temp     =       column-1    ;
+    while(      column_temp>=0                      &&
+                array[row_temp][column_temp]!=0     ) {
+            column_temp             --          ;
+            counter     [0]         ++          ;
+    }
+
+    //scanning right
+//          row_temp        =       row+0       ;
+            column_temp     =       column+1    ;
+    while(      column_temp<size                    &&
+                array[row_temp][column_temp]!=0     ) {
+            column_temp             ++          ;
+            counter     [0]         ++          ;
+    }
+//horizontal (end)
+
+
+//vertical (beign)
+           counter     [1] =       1           ;
+    //scanning up
+            row_temp        =       row-1       ;
+            column_temp     =       column+0   ;
+    while(      row_temp>=0                      &&
+                array[row_temp][column_temp]!=0     ) {
+           row_temp             --          ;
+            counter     [1]         ++          ;
+    }
+
+    //scanning down
+           row_temp        =        row+1      ;
+            column_temp     =       column+0   ;
+    while(      column_temp<size                    &&
+                array[row_temp][column_temp]!=0     ) {
+            row_temp             ++          ;
+            counter     [1]         ++          ;
+    }
+//vertical (end)
+
+
+//diagonal left to right(start)
+
+ counter     [2] =       1           ;
+    //scanning up
+            row_temp        =       row-1       ;
+            column_temp     =       column-1 ;
+    while(      row_temp>=0                      &&
+                array[row_temp][column_temp]!=0   &&
+                column_temp>=0 )                    {
+           row_temp             --              ;
+           column_temp          --              ;
+            counter     [2]         ++          ;
+    }
+
+    //scanning down
+           row_temp        =        row+1      ;
+            column_temp     =       column+1  ;
+    while(      column_temp<size                    &&
+                array[row_temp][column_temp]!=0     &&
+                 row_temp<size  ) {
+            row_temp             ++          ;
+            column_temp          ++          ;
+            counter     [2]      ++          ;
+    }
+    //diagonal left to right(end)
+
+
+
+//diagonal right to left(begin)
+
+counter     [3] =       1           ;
+    //scanning up
+            row_temp        =       row-1       ;
+            column_temp     =       column+1 ;
+    while(      row_temp>=0                      &&
+                array[row_temp][column_temp]!=0   &&
+                column_temp<size )                    {
+           row_temp             --              ;
+           column_temp          ++              ;
+            counter     [3]         ++          ;
+    }
+
+    //scanning down
+           row_temp        =        row+1      ;
+            column_temp     =       column-1  ;
+    while(      column_temp>=0                    &&
+                array[row_temp][column_temp]!=0     &&
+                 row_temp<size  ) {
+            row_temp             ++          ;
+            column_temp          --          ;
+            counter     [3]      ++          ;
+    }
+    //diagonal right to left(end)
+
+    for(int loop=0;loop<4;loop++)
+    {
+        if(counter[loop]>counter[4])
+            counter[4]=counter[loop];
+    }
+    return  counter     [4] ;
+}
+
+unsigned int	search2				(	unsigned char		array[][N_MAX_SIZE]	,
+							unsigned int		size			,
+							unsigned int		row_idx			,
+							unsigned int		col_idx			,
+							unsigned char		*direction
+						) {
+		int		result=0		;
+		int 		row_tmp			;
+		int 		col_tmp			;
+		int		count	[5]		;		//{ver,hor,lurd,ldru,max}
+
+				*direction		=		MAXC_IDX		;
+				count	[MAXC_IDX]	=		0			;
+		//vertical scanning (begin)
+				count	[VERT_IDX]	=		1			;
+		//up (row:-,col:0)
+				row_tmp			=		row_idx-1		;
+				col_tmp			=		col_idx+0		;
+		while (			row_tmp>=0			&&
+//					col_idx>=0			&&
+					array[row_tmp][col_tmp]!=0	) {
+				row_tmp			-=		1			;
+//				col_tmp			-=		1			;
+				count	[VERT_IDX]	+=		1			;
+		}
+		//dn (row:+,col:0)
+				row_tmp			=		row_idx+1		;
+				col_tmp			=		col_idx+0		;
+		while (			row_tmp<size			&&
+//					col_tmp<size			&&
+					array[row_tmp][col_tmp]!=0	) {
+				row_tmp			+=		1			;
+//				col_tmp			+=		1			;
+				count	[VERT_IDX]	+=		1			;
+		}
+		if(			count[VERT_IDX]>count[MAXC_IDX]		) {
+				*direction		=		VERT_IDX		;
+				count	[MAXC_IDX]	=		count	[VERT_IDX]	;
+		}
+		//vertical scanning (end)
+
+		//horizontal scanning (begin)
+				count	[HORI_IDX]	=		1			;
+		//left (row:0,col:-)
+				row_tmp			=		row_idx+0		;
+				col_tmp			=		col_idx-1		;
+		while (	//		row_tmp>=0			&&
+					col_tmp>=0			&&
+					array[row_tmp][col_tmp]!=0	) {
+//				row_tmp			-=		1			;
+				col_tmp			-=		1			;
+				count	[HORI_IDX]	+=		1			;
+		}
+		//right (row:0,col:+)
+				row_tmp			=		row_idx+0		;
+				col_tmp			=		col_idx+1		;
+		while (	//		row_tmp<size			&&
+					col_tmp<size			&&
+					array[row_tmp][col_tmp]!=0	) {
+//				row_tmp			+=		1			;
+				col_tmp			+=		1			;
+				count	[HORI_IDX]	+=		1			;
+		}
+		if(			count[HORI_IDX]>count[MAXC_IDX]		) {
+				*direction		=		HORI_IDX		;
+				count	[MAXC_IDX]	=		count	[HORI_IDX]	;
+		}
+		//horizontal scanning (end)
+
+		//bottom left top right (begin)
+				count	[BLTR_IDX]	=		1			;
+		//bottom left  (row:+,col:-)
+				row_tmp			=		row_idx+1		;
+				col_tmp			=		col_idx-1		;
+		while (			row_tmp<size			&&
+					col_tmp>=0			&&
+					array[row_tmp][col_tmp]!=0	) {
+				row_tmp			+=		1			;
+				col_tmp			-=		1			;
+				count	[BLTR_IDX]	+=		1			;
+		}
+		//top right (row:-,col:+)
+				row_tmp			=		row_idx-1		;
+				col_tmp			=		col_idx+1		;
+		while (			row_tmp>=0			&&
+					col_tmp<size			&&
+					array[row_tmp][col_tmp]!=0	) {
+				row_tmp			-=		1			;
+				col_tmp			+=		1			;
+				count	[BLTR_IDX]	+=		1			;
+		}
+		if(			count[BLTR_IDX]>count[MAXC_IDX]		) {
+				*direction		=		BLTR_IDX		;
+				count	[MAXC_IDX]	=		count	[BLTR_IDX]	;
+		}
+		//bottom left top right (end)
+
+		//bottom right top left (begin)
+				count	[BRTL_IDX]	=		1			;
+		//bottom right (row:+,col:+)
+				row_tmp			=		row_idx+1		;
+				col_tmp			=		col_idx+1		;
+		while (			row_tmp<size			&&
+					col_tmp<size			&&
+					array[row_tmp][col_tmp]!=0	) {
+				row_tmp			+=		1			;
+				col_tmp			+=		1			;
+				count	[BRTL_IDX]	+=		1			;
+		}
+		//top left (row:-,col:-)
+				row_tmp			=		row_idx-1		;
+				col_tmp			=		col_idx-1		;
+		while (			row_tmp>=0			&&
+					col_tmp>=0			&&
+					array[row_tmp][col_tmp]!=0	) {
+				row_tmp			-=		1			;
+				col_tmp			-=		1			;
+				count	[BRTL_IDX]	+=		1			;
+		}
+		if(			count[BRTL_IDX]>count[MAXC_IDX]		) {
+				*direction		=		BRTL_IDX		;
+				count	[MAXC_IDX]	=		count	[BRTL_IDX]	;
+		}
+		//bottom right top left (end)
+
+				result			=		count	[MAXC_IDX]	;
+
+
+		return	result		;
+}
+

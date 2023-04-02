@@ -1,0 +1,61 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+struct edge{
+	int to,cost,val;
+	edge(){}
+	edge(int a,int b,int c){
+		to=a;
+		cost=b;
+		val=c;
+	}
+};
+int maxn=10000;
+vector<edge> G[10001];
+int d[10001];
+int val[10001];
+typedef pair<int,int> P;
+int V;
+int INF=0x3f3f3f3f;
+void dijkstra(int s){
+	priority_queue<P,vector<P>,greater<P> > que;
+	fill(val,val+V,INF);
+	fill(d,d+V,INF);
+	d[s]=0;
+	que.push(P(0,s));
+	while(!que.empty()){
+		P p=que.top();
+		que.pop();
+		int v=p.second;
+		if(d[v]<p.first) continue;
+		for(int i=0;i<G[v].size();i++){
+			edge e=G[v][i];
+			if(d[e.to]>d[v]+e.cost){
+				d[e.to]=d[v]+e.cost;
+				val[e.to]=e.val;
+				que.push(P(d[e.to],e.to));
+			}else if(d[e.to]==d[v]+e.cost){
+				val[e.to]=min(e.val,val[e.to]);
+			}
+		}
+	}
+}
+int main(){
+	int N,M;
+	int a1,a2,a3,a4;
+	while(scanf("%d%d",&N,&M),N&&M){
+		V=N;
+		for(int i=0;i<=10000;i++) G[i].clear();
+		for(int i=0;i<M;i++){
+			scanf("%d%d%d%d",&a1,&a2,&a3,&a4);
+			G[a1].push_back(edge(a2,a3,a4));
+			G[a2].push_back(edge(a1,a3,a4));
+		}
+		int ans=0;
+		dijkstra(0);
+		for(int i=1;i<N;i++) ans+=val[i];
+		printf("%d\n",ans);
+	}	
+	return 0;
+}

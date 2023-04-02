@@ -1,0 +1,36 @@
+n = int(input())
+w = list(map(int, input().split()))
+
+
+def minimumCostSort(targetList):
+    totalCost = 0
+    sortedTargetList = sorted(targetList)
+    minimumItem = sortedTargetList[0]
+    for i in range(len(targetList)):
+        indexInSortedList = sortedTargetList.index(targetList[i])
+        if indexInSortedList == i:
+            continue
+        sumOfItemInLoop = 0
+        minimumItemInLoop = 10**4 + 1
+        loopCount = 0
+        while True:
+            loopCount += 1
+            sumOfItemInLoop += targetList[i]
+            minimumItemInLoop = min(minimumItemInLoop, targetList[i])
+            if indexInSortedList == i:
+                break
+            targetList[indexInSortedList], targetList[i] = (
+                targetList[i],
+                targetList[indexInSortedList],
+            )
+
+            indexInSortedList = sortedTargetList.index(sortedTargetList[i])
+        totalCostOnlyItemsInLoop = sumOfItemInLoop + (loopCount - 2) * minimumItemInLoop
+        totalCostWithItemOutOfLoop = (
+            sumOfItemInLoop + minimumItemInLoop + (loopCount + 1) * minimumItem
+        )
+        totalCost += min(totalCostOnlyItemsInLoop, totalCostWithItemOutOfLoop)
+    return totalCost
+
+
+print(minimumCostSort(w))

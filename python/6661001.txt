@@ -1,0 +1,109 @@
+// #define _GLIBCXX_DEBUG
+#include <bits/stdc++.h>
+
+using namespace std;
+#define ll long long
+#define LLMAX numeric_limits<ll>::max()
+#define LLMIN numeric_limits<ll>::min()
+#define INTMAX numeric_limits<int>::max()
+#define INTMIN numeric_limits<int>::min()
+#define rep(i, n) for (decltype(n) i = 0; i < (n); i++)
+#define rep1(i, n) for (decltype(n) i = 1; i <= (n); i++)
+#define rep2(i, k, n) for (decltype(n) i = k; i <= (n); i++)
+#define repr(i, n) for (decltype(n) i = (n)-1; i >= 0; i--)
+#define repr1(i, n) for (decltype(n) i = (n); i > 0; i--)
+#define repr2(i, k, n) for (decltype(n) i = n; i >= k; i--)
+auto chmax = [](auto& a, auto b) {bool ret=a<b; if(ret)a=b; return ret; };
+auto chmin = [](auto& a, auto b) {bool ret=a>b; if(ret)a=b; return ret; };
+template <typename T>
+using pq_inv = priority_queue<T, vector<T>, greater<T>>;
+
+struct Solver {
+    int N=8;
+    vector<int> sum(vector<vector<int>>& X, int axis) {
+        vector<int> ret;
+        rep(i, N) {
+            int tmp = 0;
+            rep(j, N) {
+                if (axis == 0) {
+                    tmp += X[i][j];
+                } else {
+                    tmp += X[j][i];
+                }
+            }
+            ret.push_back(tmp);
+        }
+        return ret;
+    }
+    bool check(vector<vector<int>>& board) {
+        bool ok=true;
+        rep(i,N){
+            int tmpx=0;
+            int tmpy=0;
+            rep(j,N){
+                tmpx+=board[i][j];
+                tmpy+=board[j][i];
+            }
+            ok &= (tmpx==1&&tmpy==1);
+        }
+        rep(i,N){
+            int tmpx=0;
+            int tmpy=0;
+            rep(j,N-i){
+                tmpx+=board[j][j+i];
+            }
+            rep(j,N-i){
+                tmpy+=board[j][N-(j+i)-1];
+            }
+            ok &= (tmpx<=1 && tmpy<=1);
+        }
+        return ok;
+    }
+    void solve() {
+        int k;
+        cin >> k;
+        vector<vector<int>> board(N, vector<int>(N));
+        vector<int> usedx(N), usedy(N);
+        rep(i, k) {
+            int x, y;
+            cin >> x >> y;
+            x--;
+            y--;
+            board[x][y] = 1;
+            usedx[x] = 1;
+            usedy[y] = 1;
+        }
+        vector<int> cand;
+        rep(i, N) if (usedx[i] == 0) cand.push_back(i);
+        vector<vector<int>> eval_board;
+        do {
+            eval_board = board;
+            int cand_used = 0;
+            for (int y = 0; y < N; y++) {
+                if (usedy[y] == 1) continue;
+                eval_board[cand[cand_used++]][y] = 1;
+            }
+            if (check(board)) break;
+
+        } while (next_permutation(cand.begin(), cand.end()));
+        rep(i, N) {
+            rep(j, N) {
+                if (eval_board[i][j] == 0) {
+                    cout << '.' ;
+                }else{
+                    cout << 'Q';
+                }
+            }
+            cout << endl;
+        }
+    };
+};
+
+int main() {
+    std::cin.tie(nullptr);
+    Solver solver;
+    solver.solve();
+    return 0;
+}
+
+

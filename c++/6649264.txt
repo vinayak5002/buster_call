@@ -1,0 +1,58 @@
+#include <cstdio>
+#include <iostream>
+#include <cstring>
+#include <queue>
+#include <bitset>
+using namespace std;
+typedef pair<int,int> pi;
+const int G=1005;
+const int INF=1e9;
+int R,C,N;
+char grid[G][G];
+int dp[G][G],pos[10][2];
+int dr[4]={1,-1,0,0},dc[4]={0,0,-1,1};
+bool notOK(int x, int y){
+    return x<0||R<=x||y<0||C<=y||grid[x][y]=='X';
+}
+int bfs(int sx, int sy, int ex, int ey){
+    memset(dp,0, sizeof(dp));
+    queue<pi> q;
+    q.push({sx,sy});
+    dp[sx][sy]=1;
+    while(q.size()){
+        pi f=q.front();q.pop();
+        int r=f.first, c=f.second;
+        for(int k=0;k<4;++k){
+            int x=r+dr[k],y=c+dc[k];
+            if(notOK(x,y)||dp[x][y]) continue;
+            if(x==ex&&y==ey) return dp[r][c];
+            dp[x][y]=dp[r][c]+1;
+            q.push({x,y});
+        }
+    }
+    return -INF;
+}
+
+// #define LOCAL
+int main(){
+    #ifdef LOCAL
+        freopen("input.txt","r",stdin);
+        freopen("output.txt","w",stdout);
+    #endif
+    scanf("%d %d %d",&R,&C,&N);
+    for(int r=0;r<R;++r){
+        for(int c=0;c<C;++c){
+            scanf(" %c",&grid[r][c]);
+            if(grid[r][c]=='S') pos[0][0]=r,pos[0][1]=c;
+            if(isdigit(grid[r][c])){
+                int v=grid[r][c]-'0';
+                pos[v][0]=r,pos[v][1]=c;
+            }
+        }
+    }
+    int ans=0;
+    for(int i=0;i<N;++i){
+        ans+=bfs(pos[i][0],pos[i][1],pos[i+1][0],pos[i+1][1]);
+    }
+    printf("%d\n",ans);
+}

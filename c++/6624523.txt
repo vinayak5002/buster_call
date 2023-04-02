@@ -1,0 +1,192 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+template<class T>
+class BT{
+  private:
+    struct Node{
+      T key;
+      Node *par, *lef, *rig;
+    };
+    Node *NIL, *root;
+  public:
+    BT(){
+      NIL = NULL;
+      root = NULL;
+    }
+    void insert(T k){
+      Node *y = NIL;
+      Node *x = root;
+      Node *z;
+
+      z = (Node*)malloc(sizeof(Node));
+      z->key = k;
+      z->lef = NIL;
+      z->rig = NIL;
+
+      while(x != NIL){
+        y = x;
+        if(k < x->key) x = x->lef;
+        else x = x->rig;
+      }
+      z->par = y;
+      if(y == NIL) root = z;
+      else if(z->key < y->key) y->lef = z;
+      else y->rig = z;
+    }
+
+    Node *find_node(T k, Node *t){
+      if(t == NIL) return NIL;
+      if(t->key == k) return t;
+      if(k < t->key) return find_node(k,t->lef);
+      else return find_node(k,t->rig);
+    }
+    bool find(T k){
+      Node *t = find_node(k,root);
+      if(t == NIL) return false;
+      else return true;
+    }
+
+    Node *mini_t(Node *t){
+      while(t->lef != NIL) t = t->lef;
+      return t;
+    }
+    T mini(Node *t){
+      return mini_t(root)->key;
+    }
+
+
+    void del(T k){
+      Node *tmp = find_node(k,root);
+      if(tmp == NIL) return;
+
+      Node *p = tmp->par;
+      if(tmp->lef == NIL && tmp->rig == NIL){
+        if(p->lef == tmp) p->lef = NIL;
+        else p->rig = NIL;
+        free(tmp);
+      }
+      else if(tmp->lef == NIL){
+        if(p->lef == tmp){
+          p->lef = tmp->rig;
+          tmp->rig->par = p;
+        }
+        else{
+          p->rig = tmp->rig;
+          tmp->rig->par = p;
+        }
+        free(tmp);
+      }
+      else if(tmp->rig == NIL){
+        if(p->lef == tmp){
+          p->lef = tmp->lef;
+          tmp->lef->par = p;
+        }
+        else{
+          p->rig = tmp->lef;
+          tmp->lef->par = p;
+        }
+        free(tmp);
+      }
+      else{
+        Node *m = mini_t(tmp->rig);
+        Node *q = m->par;
+        tmp->key = m->key;
+        if(m->rig == NIL){
+          if(q->lef == m){
+            q->lef = NIL;
+          }
+          else{
+            q->rig = NIL;
+          }
+        }
+        else{
+          if(q->lef == m){
+            q->lef = m->rig;
+            m->rig->par = q;
+          }
+          else{
+            q->lef = m->rig;
+            m->lef->par = q;
+          }
+        }
+        free(m);
+      }
+    }
+
+    void pmid(Node *t){
+      if(t == NIL) return;
+      pmid(t->lef);
+      cout << " " << t->key;
+      pmid(t->rig);
+    }
+
+    void ppre(Node *t){
+      if(t == NIL) return;
+      cout << " " << t->key;
+      ppre(t->lef);
+      ppre(t->rig);
+    }
+
+    void pr(){
+      pmid(root);
+      cout <<endl;
+      ppre(root);
+      cout <<endl;
+    }
+};
+
+
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  BT<ll> bt;
+
+  ll q;
+  cin >> q;
+  while(q--){
+      string s;
+      cin >> s;
+      if(s == "insert"){
+          ll key;
+          cin >> key;
+          bt.insert(key);
+      }
+      if(s == "find"){
+          ll key;
+          cin >> key;
+          if(bt.find(key)) cout << "yes" << endl;
+          else cout << "no" << endl;
+      }
+      if(s == "delete"){
+          ll key;
+          cin >> key;
+          bt.del(key);
+      }
+      if(s == "print"){
+          bt.pr();
+      }
+  }
+
+
+
+  return 0;
+}

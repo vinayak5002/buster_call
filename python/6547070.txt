@@ -1,0 +1,21 @@
+n,m = map(int,input().split())
+c = list(map(int,input().split()))
+
+# dp[i][j] = コインをi種類使ってj円払うときの最小枚数
+INF = float("inf")
+dp = [[INF]*(n+1) for _ in range(m)]
+dp[0][0] = 0
+
+for i in range(m):
+    for j in range(n+1):
+        if j == 0:
+            dp[i][j] = 0
+        if i == 0:
+            if c[i] <= j:
+                dp[i][j] = dp[i][j - c[i]] + 1
+        else:
+            dp[i][j] = dp[i-1][j]
+            if c[i] <= j:
+                dp[i][j] = min(dp[i][j], dp[i][j - c[i]] + 1)
+
+print(dp[-1][-1])

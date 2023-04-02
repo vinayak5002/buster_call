@@ -1,0 +1,82 @@
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+    static List<ArrayList<Integer>> map;
+    static int h, w;
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        while (true) {
+            map = new ArrayList<ArrayList<Integer>>();
+            w = sc.nextInt();
+            h = sc.nextInt();
+            if (w == 0 && h == 0)
+                break;
+
+            for (int i = 0; i < h * w; i++) {
+                map.add(new ArrayList<>());
+            }
+            for (int i = 0; i < 2 * h - 1; i++) {
+                switch (i % 2) {
+                    case 0: // 横の壁
+                        for (int j = 0; j < w - 1; j++) {
+                            if (sc.nextInt() == 0) {
+                                map.get(encord(i / 2, j)).add(encord(i / 2, j + 1));
+                                map.get(encord(i / 2, j + 1)).add(encord(i / 2, j));
+                            }
+                        }
+                        break;
+    
+                    case 1: // 下の壁
+                        for (int j = 0; j < w; j++) {
+                            if (sc.nextInt() == 0) {
+                                map.get(encord(i / 2, j)).add(encord(i / 2 + 1, j));
+                                map.get(encord(i / 2 + 1, j)).add(encord(i / 2, j));
+                            }
+                        }
+                        break;
+                }
+            }
+            int ans = BFS();
+            System.out.println(ans == -1 ? 0 : ans);
+        }
+
+        sc.close();
+    }
+
+    static int BFS(){
+        int[] count = new int[h * w];
+        for (int i = 0; i < count.length; i++) {
+            count[i] = -1;
+        }
+        LinkedList<Integer> queue = new LinkedList<Integer>();
+        count[0] = 1;
+        queue.offer(0);
+        while (queue.size() > 0) {
+            int current = queue.poll();
+            for (int item : map.get(current)) {
+                if (count[item] == -1) {
+                    count[item] = count[current] + 1;
+                    queue.offer(item);
+                }
+            }
+        }
+        return count[h * w - 1];
+    }
+
+   static int decordW(int n) {
+        return n % w;
+    }
+
+    static int decordH(int n) {
+        return n / w;
+    }
+
+    static int encord(int _h, int _w) {
+        return _w + _h * w;
+    }
+}
+

@@ -1,0 +1,93 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+using ll=long long;
+
+template<typename M>
+struct Segment_Tree{
+    int n;
+    using Fm=function<M(M,M)>; const Fm calc;
+    const M unit;
+    vector<M> data;
+
+    public:
+    Segment_Tree(int size, const Fm calc, const M unit): n(), calc(calc), unit(unit){
+        int m=1;
+        while (size>m) m*=2;
+        n=m;
+        data.assign(2*m,unit);
+    }
+
+    Segment_Tree(const vector<M> &vec, const Fm calc, const M unit):
+        Segment_Tree(vec.size(), calc, unit){
+            for (int k=0; k<vec.size(); k++) data[k+n]=vec[k];
+            for (int k=n-1; k>0; k--) recalc(k);
+        }
+
+    private:
+    void recalc(int k){
+        data[k]=calc(data[k<<1],data[k<<1|1]);
+    }
+
+    public:
+    void update(int k, M x){
+        k+=n;
+        data[k]=x;
+        while (k){
+            k>>=1;
+            recalc(k);
+        }
+    }
+
+    public:
+    M product(int l, int r){
+        l+=n; r+=n;
+        M vl=unit, vr=unit;
+        while (l<r){
+            if (l&1){
+                vl=calc(vl, data[l]);
+                l++;
+            }
+
+            if (r&1){
+                r--;
+                vr=calc(data[r], vr);
+            }
+
+            l>>=1; r>>=1;
+        }
+
+        return calc(vl,vr);
+    }
+
+    public:
+    M all_product(){return data[1];}
+
+};
+
+template<typename T>
+Segment_Tree<T> Range_Minimum_Query(const int &n, const T &unit){
+    auto calc=[](T x, T y) -> T {return min(x,y);};
+    return Segment_Tree<T>(n, calc, unit);
+}
+
+int main(){
+    int N,Q; cin >> N >> Q;
+
+    int unit=2147483647;
+    Segment_Tree<int> S=Range_Minimum_Query(N, unit);
+
+    int m,i,x,s,t;
+    for (int q=0; q<Q; q++){
+        scanf("%d",&m);
+
+        if (m==0){
+            scanf("%d%d",&i,&x);
+            S.update(i,x);
+        }else{
+            scanf("%d%d",&s,&t);
+            cout << S.product(s,t+1) << "\n";
+        }
+    }
+}
+

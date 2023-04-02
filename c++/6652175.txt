@@ -1,0 +1,185 @@
+#include <bits/extc++.h>
+
+using namespace std;
+
+#define rep(i,n) for(int i=0;i<(n);++i)
+#define reps(i,s,n) for(int i=(s);i<=(n);++i)
+#define all(x) begin(x), end(x)
+#define Fixed fixed << setprecision(12)
+#define int int64_t
+using pii = pair<int,int>;
+constexpr int32_t INF  = 0x3f3f3f3f;
+constexpr int64_t LINF = 0x3f3f3f3f3f3f3f3fLL;
+constexpr int mod1 = 1e9+7;
+constexpr int mod2 = 998244353;
+
+template <class Func>
+class FixPoint : Func {
+public:
+    explicit constexpr FixPoint(Func&& f) noexcept : Func(forward<Func>(f)) {}
+
+    template <class... Args>
+    constexpr decltype(auto) operator()(Args&&... args) const {
+        return Func::operator()(*this, std::forward<Args>(args)...);
+    }
+};
+
+template <class Func>
+static inline constexpr decltype(auto) makeFixPoint(Func&& f) noexcept {
+    return FixPoint<Func>{forward<Func>(f)};
+}
+
+template <class A, class B> inline bool chmax(A &a, const B &b) { return b > a && (a = b, true); }
+template <class A, class B> inline bool chmin(A &a, const B &b) { return b < a && (a = b, true); }
+
+template <class T> using max_heap = priority_queue<T>;
+template <class T> using min_heap = priority_queue<T,vector<T>,greater<T> >;
+template <class A, class B> using umap = unordered_map<A,B>;
+
+template <class T> using Set = __gnu_pbds::tree<T, __gnu_pbds::null_type, less<T>, __gnu_pbds::rb_tree_tag, __gnu_pbds::tree_order_statistics_node_update>;
+
+template <class T> inline void bye(T x) { cout << x << '\n'; exit(0); }
+
+inline int updiv(int a,int b){ return (a + b - 1) / b; }
+
+constexpr int dx[] = {1,0,-1,0,1,1,-1,-1};
+constexpr int dy[] = {0,-1,0,1,1,-1,-1,1};
+
+
+signed main() {
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+
+    int h, w;
+    cin >> h >> w;
+
+    vector<string> mat(h);
+
+    for (int i = 0; i < h; ++i) cin >> mat[i];
+    reverse(all(mat));
+
+    vector<pair<int, int> > points;
+
+    auto inside = [&](int y, int x) {
+        return (0 <= y && y < h && 0 <= x && x < w);
+    };
+
+    for (int i = 0; i < h; ++i) {
+        for (int j = 0; j < w; ++j) {
+            if (mat[i][j] != '#') continue;
+            for (int k = 4; k < 8; ++k) {
+                vector<bool> flg(4);
+                int y = i + dy[k], x = j + dx[k];
+                if (inside(y, x) && mat[y][x] != '.') continue;
+                if (y == -1 && x == -1) continue;
+                // cout << i << ' ' << j << " : " << y << ' ' << x << '\n';
+                for (int s = 0; s < 4; ++s) {
+                    int ty = y + dy[s], tx = x + dx[s];
+                    if (inside(ty, tx) && mat[ty][tx] == '#') {
+                        flg[s] = true;
+                    }
+                }
+                if (k == 4) {
+                    if (flg[1] == flg[2]) points.emplace_back(i + 1, j + 1);
+                } else if (k == 5) {
+                    if (flg[3] == flg[2]) points.emplace_back(i, j + 1);
+                } else if (k == 6) {
+                    if (flg[0] == flg[3]) points.emplace_back(i, j);
+                } else {
+                    if (flg[0] == flg[1]) points.emplace_back(i + 1, j);
+                }
+            }
+        }
+    }
+
+    sort(all(points), [](const auto &a, const auto &b) -> bool {
+        return (atan2l(a.first, a.second) < atan2l(b.first, b.second));
+    });
+
+    points.erase(unique(all(points)), points.end());
+
+    // for (auto [y, x] : points) {
+    //     cout << y << ' ' << x << ' ' << atan2l(y, x) << '\n';
+    // }
+
+    vector<vector<pair<int, int> > > points2;
+
+    for (auto [y, x] : points) {
+        if (points2.empty() || atan2l(points2.back().back().first, points2.back().back().second) != atan2l(y, x)) {
+            points2.emplace_back(vector<pair<int, int> >(1, make_pair(y, x)));
+        } else {
+            points2.back().emplace_back(y, x);
+        }
+    }
+
+    for (auto &v : points2) {
+        sort(all(v), [](const auto &a, const auto &b) {
+            return (a.second != b.second ? a.second < b.second : a.first < b.first);
+        });
+    }
+
+    auto Tile = [&](int y, int x) {
+        return !(!inside(y, x) || mat[y][x] == '.');
+    };
+    auto Type = [&](int y, int x) {
+        if (Tile(y - 1, x - 1)) {
+            if (Tile(y - 1, x) && Tile(y, x - 1)) return (0);
+            if (!Tile(y - 1, x) && !Tile(y, x - 1)) return (1);
+        }
+        if (Tile(y, x - 1)) {
+            if (Tile(y, x) && Tile(y - 1, x - 1)) return (2);
+            if (!Tile(y, x) && !Tile(y - 1, x - 1)) return (3);
+        }
+        if (Tile(y, x)) {
+            if (Tile(y, x - 1) && Tile(y - 1, x)) return (4);
+            if (!Tile(y, x - 1) && !Tile(y - 1, x)) return (5);
+        }
+        if (Tile(y - 1, x)) {
+            if (Tile(y, x) && Tile(y - 1, x - 1)) return (6);  
+            if (!Tile(y, x) && !Tile(y - 1, x - 1)) return (7);
+        }
+        return (-1);
+    };
+
+    int sz = points2.size(), cnt = 0, res = 0;
+    for (int i = 0; i < sz - 1; ++i) {
+        for (auto [y, x] : points2[i]) {
+            // cout << y << ' ' << x << '\n';
+            switch (Type(y, x)) {
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    cnt -= 2;
+                    break;
+                case 3:
+                    cnt += 2;
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    break;
+                case 6:
+                    cnt += 2;
+                    break;
+                case 7:
+                    cnt -= 2;
+                    break;
+                default:
+                    // cout << "Error\n";
+                    break;
+            }
+        }
+        // cout << "-----\n>";
+        // cout << cnt << '\n';
+        // cout << "-----\n";
+        chmax(res, cnt);
+    }
+
+    cout << res / 2 + 1 << '\n';
+
+    return(0);
+}
+
+

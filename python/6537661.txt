@@ -1,0 +1,181 @@
+// https://qiita.com/DaikiSuyama/items/9dba963ba74396b9b7fd
+// https://luling.hatenablog.com/entry/2018/12/01/212805
+// https://zenn.dev/antyuntyun/articles/atcoder-cpp-template
+//
+#include <bits/stdc++.h>
+#include <unordered_map>
+using namespace std;
+typedef long long ll;
+
+// rep macro
+#define reps(i, a, n) for (ll i = (a); i < (ll)(n); ++i)
+#define rep(i, n) reps(i, 0, n)
+#define rrep(i, n) reps(i, 1, n + 1)
+#define repd(i,n) for(ll i=n-1;i>=0;i--)
+#define rrepd(i,n) for(ll i=n;i>=1;i--)
+
+#define optimize_cin() cin.tie(0); ios::sync_with_stdio(false)
+
+#define pb push_back
+#define mp make_pair
+#define all(obj) (obj).begin(), (obj).end()
+#define YESNO(bool) if(bool){cout<<"YES"<<endl;}else{cout<<"NO"<<endl;}
+#define yesno(bool) if(bool){cout<<"yes"<<endl;}else{cout<<"no"<<endl;}
+#define YesNo(bool) if(bool){cout<<"Yes"<<endl;}else{cout<<"No"<<endl;}
+
+//定数
+#define INF32 2147483647           // 2.147483647 x 10^{9}:32bit整数のinf
+#define INF64 9223372036854775807  // 9.22337203685477580 x 10^{18}:64bit整数のinf
+#define MOD 1000000007             //問題による
+
+//略記
+#define F first
+#define S second
+
+//出力(空白区切りで昇順に)
+#define dump(x)                                                 \
+  for (auto i = x.begin(); i != --x.end(); i++) cout << *i << " "; \
+  cout << *--x.end() << endl;
+#define echo(x) cout << x << endl;
+
+// aをbで割る時の繰上げ,繰り下げ
+ll _ceil(ll a, ll b) { return (a + (b - 1)) / b; }
+ll _floor(ll a, ll b) { return a / b; }
+
+// 大きい方、小さい方を残す
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return 1; } return 0; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return 1; } return 0; }
+
+typedef struct {
+  string previous;
+  string next;
+  ll value;
+} DoubleLinked;
+
+string uuid() {
+  struct timespec ts;
+  timespec_get(&ts, TIME_UTC);
+  return to_string(ts.tv_sec) + to_string(ts.tv_nsec);
+}
+
+void dumpMap(unordered_map<string, DoubleLinked> mp, string firstPt, int n) {
+  if (firstPt.empty()) {
+    return;
+  }
+  string currentPt = firstPt;
+  rep(i, n) {
+    if (currentPt.empty()) {
+      break;
+    }
+    if (i != 0) {
+      cout << " ";
+    }
+    DoubleLinked info = mp[currentPt];
+    cout << info.value;
+    currentPt = info.next;
+  }
+  cout << endl;
+}
+
+string _deleteFirst(unordered_map<string, DoubleLinked> &mp, string &firstPt, string &lastPt) {
+  DoubleLinked &firstInfo = mp[firstPt];
+  string deletePt = firstPt;
+  if (firstInfo.next.empty()) {
+    // 要素が１つしかない場合はポインタを削除
+    firstPt = "";
+    lastPt = "";
+  } else {
+    DoubleLinked &nextInfo = mp[firstInfo.next];
+    nextInfo.previous = "";
+    firstPt = firstInfo.next;
+  }
+  return deletePt;
+}
+
+string _deleteLast(unordered_map<string, DoubleLinked> &mp, string &firstPt, string &lastPt) {
+  DoubleLinked &lastInfo = mp[lastPt];
+  string deletePt = lastPt;
+  if (lastInfo.previous.empty()) {
+    // 要素が１つしかない場合はポインタを削除
+    firstPt = "";
+    lastPt = "";
+  } else {
+    DoubleLinked &prevInfo = mp[lastInfo.previous];
+    prevInfo.next = "";
+    lastPt = lastInfo.previous;
+  }
+  return deletePt;
+}
+
+void _insert(unordered_map<string, DoubleLinked> &mp, string &firstPt, string &lastPt, ll value) {
+  string nextPt;
+  string currentPt = uuid();
+  if (firstPt.empty()) {
+    firstPt = currentPt;
+    lastPt = currentPt;
+  } else {
+    DoubleLinked &next = mp[firstPt];
+    next.previous = currentPt;
+    nextPt = firstPt;
+  }
+  firstPt = currentPt;
+  mp[currentPt] = {
+    "",
+    nextPt,
+    value,
+  };
+}
+
+signed main() {
+  int n;
+  cin >> n;
+  unordered_map<string, DoubleLinked> mp;
+  string firstPt;
+  string lastPt;
+  rep(i, n) {
+    string op;
+    ll value;
+    cin >> op;
+    string deletePt;
+    if (op == "insert") {
+      cin >> value;
+      _insert(mp, firstPt, lastPt, value);
+    } else if (op == "delete") {
+      cin >> value;
+      string currentPt = firstPt;
+      rep(i, n) {
+        if (currentPt.empty()) {
+          break;
+        }
+        DoubleLinked &info = mp[currentPt];
+        if (info.value == value) {
+          if (currentPt == firstPt) {
+            deletePt = _deleteFirst(mp, firstPt, lastPt);
+          } else if (currentPt == lastPt) {
+            deletePt = _deleteLast(mp, firstPt, lastPt);
+          } else {
+            // 前後のデータの参照更新
+            DoubleLinked &prevInfo = mp[info.previous];
+            prevInfo.next = info.next;
+            DoubleLinked &nextInfo = mp[info.next];
+            nextInfo.previous = info.previous;
+            deletePt = currentPt;
+          }
+          break;
+        }
+        currentPt = info.next;
+      }
+    } else if (op == "deleteFirst") {
+      deletePt = _deleteFirst(mp, firstPt, lastPt);
+    } else if (op == "deleteLast") {
+      deletePt = _deleteLast(mp, firstPt, lastPt);
+    }
+    //dumpMap(mp, firstPt, n);
+    if (!deletePt.empty()) {
+      mp.erase(deletePt);
+    }
+  }
+  dumpMap(mp, firstPt, n);
+}
+
+

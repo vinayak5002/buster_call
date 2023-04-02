@@ -1,0 +1,40 @@
+from collections import deque
+
+#隣接リスト形式で入力を行う関数
+def input_Adjacency_list():
+    N = int(input()) # the number of nodes
+    G = [None for i in range(N)] # adjacency list
+    for i in range(N):
+        u, k, *vs = map(int, input().split())
+        #print("u",u,"k",k,"vs",vs)
+        G[u-1] = [e-1 for e in vs] 
+    return G, N
+
+#depth-first search(深さ優先探索)をする関数の定義
+def dfs(v, t):
+    t += 1
+    discovered[v] = t
+
+    for i in G[v]:
+        if discovered[i] == -1:
+            t = dfs(i, t)
+    t += 1
+    finished[v] = t
+    return t
+
+
+#main
+G, N = input_Adjacency_list()
+
+discovered = [-1]*N # discovered time by DFS
+finished = [-1]*N # finished time by DFS
+
+t = 0 
+v = 0 #t = dfs(0, 0)
+
+for v in range(N):
+    if(discovered[v] == -1):
+        t = dfs(v, t)
+
+for i in range(N):
+    print(i+1, discovered[i], finished[i])

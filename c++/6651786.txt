@@ -1,0 +1,92 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <queue>
+#include <array>
+#include <algorithm>
+#include <numeric>
+#include <unordered_map>
+#include <unordered_set>
+#include <map>
+#include <set>
+#include <cassert>
+#include <iterator>
+#include <random>
+#include <stack>
+#include <climits>
+#include <chrono>
+#include <iomanip>
+
+void push_placement(const int position, const int max_size, std::vector<std::vector<bool>>& state, std::vector<std::vector<int>> &dest) {
+	constexpr std::array<std::pair<int, int>, 4> coordinate{ std::make_pair(0, 0),  std::make_pair(1, 0), std::make_pair(0, 1), std::make_pair(1, 1) };
+	if (position + 1 == max_size) {
+		int upper{ 0 }, lower{ 0 };
+		for (auto i = 0; i < max_size; ++i) {
+			upper = (upper << 1) + state[0][i];
+			lower = (lower << 1) + state[1][i];
+		}
+		dest[upper].push_back(lower);
+		return;
+	}
+	push_placement(position + 1, max_size, state, dest);
+	for (auto x = 0; x < 4; ++x) {
+		bool is_valid{ true };
+		for (auto i = 0; i < 4; ++i) {
+			if (i == x) continue;
+			const auto [x, y] = coordinate[i];
+			if (state[x][position + y]) {
+				is_valid = false;
+			}
+		}
+		if (is_valid) {
+			for (auto i = 0; i < 4; ++i) {
+				if (i == x) continue;
+				const auto [x, y] = coordinate[i];
+				state[x][position + y] = true;
+			}
+			push_placement(position + 1, max_size, state, dest);
+			for (auto i = 0; i < 4; ++i) {
+				if (i == x) continue;
+				const auto [x, y] = coordinate[i];
+				state[x][position + y] = false;
+			}
+		}
+	}
+}
+
+int main() {
+	std::vector<std::vector<std::vector<int>>> next_state(9);
+	for (auto i = 2; i <= 8; ++i) {
+		std::vector<std::vector<bool>> state(2, std::vector<bool>(i, false));
+		next_state[i].resize(1 << i);
+		push_placement(0, i, state, next_state[i]);
+	}
+	while (true) {
+		int height, width; std::cin >> height >> width;
+		if (height == 0 && width == 0) break;
+		std::vector<int> state(height);
+		for (auto i = 0; i < height; ++i) {
+			std::string line; std::cin >> line;
+			int s{ 0 };
+			for (auto j = 0; j < width; ++j) {
+				s = (s << 1) + (line[j] == '#');
+			}
+			state[i] = s;
+		}
+		const auto mask = (1 << width) - 1;
+		std::vector<long long int> result(1 << width, 0); result[state[0]] = 1;
+		for (auto i = 1; i < height; ++i) {
+			std::vector<long long int> dest(1 << width, 0);
+			const auto last = state[i];
+			for (auto pattern = 0; pattern < result.size(); ++pattern) {
+				if (result[pattern] == 0) continue;
+				for (const auto next: next_state[width][pattern ^ mask]) {
+					if (next & last) continue;
+					dest[next | last] += result[pattern];
+				}
+			}
+			std::swap(result, dest);
+		}
+		std::cout << result.back() << '\n';
+	}
+}

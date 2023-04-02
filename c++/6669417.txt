@@ -1,0 +1,87 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+using ll=long long;
+
+template<typename G>
+struct Binary_Indexed_Tree{
+    int n,index;
+    vector<G> data;
+    G unit;
+    const function<G(G,G)> calc;
+    const function<G(G)> inv;
+
+    // 初期化
+    public:
+    Binary_Indexed_Tree(int n, const function<G(G,G)> calc, const G unit, const function<G(G)> inv, const int index):
+        n(n), calc(calc), unit(unit), inv(inv), index(index){
+        data.assign(n+1,unit);
+    }
+
+    public:
+    Binary_Indexed_Tree(const vector<G> &vec, const function<G(G,G)> calc, const G unit, const function<G(G)> inv, const int index):
+        Binary_Indexed_Tree(vec.size(), calc, unit, inv, index){
+            for (int k=1; k<=n; k++){
+                data[k]=calc(data[k],vec[k-1]);
+                int l=k+(k&(-k));
+                if (l<=n) data[l]=calc(data[l], data[k]);
+            }
+        }
+    // 第 k 要素に x を左から加える.
+    void add(int k, G x){
+        k+=1-index;
+        for (k; k<=n; k+=(k&(-k))) data[k]=calc(data[k], x);
+    }
+
+    // 第 k 要素を x に変更する.
+    void update(int k ,G x){
+        add(k, calc(inv((*this)[k]), x));
+    }
+
+    // 右半開区間 [index, k) における総和を求める.
+    G sum(int k) const{
+        k+=-index;
+        if (k<=0) return unit;
+
+        G y=unit;
+        for (k; k>0; k-=(k&(-k))) y=calc(y, data[k]);
+
+        return y;
+    }
+
+    // 右半開区間 [l, r) における総和を求める.
+    G sum(int l, int r) const{
+        if (l>=r) return unit;
+        else return calc(inv(sum(l)),sum(r));
+    }
+
+    // 第 k 要素を取得する.
+    inline G operator[](int k) const {return sum(k,k+1);}
+};
+
+template<typename G>
+Binary_Indexed_Tree<G> Group_Binary_Indexed_Tree(int n, G zero, int index){
+    auto add=[](G x, G y) -> G {return x+y;};
+    auto inv=[](G x) -> G {return -x;};
+    return Binary_Indexed_Tree<G>(n, add, zero, inv, index);
+}
+
+int main(){
+    int N,Q; cin >> N >> Q;
+
+    Binary_Indexed_Tree<int> B=Group_Binary_Indexed_Tree(N,0,1);
+
+    int m,i,x,s,t;
+    for (int q=0; q<Q; q++){
+        scanf("%d",&m);
+
+        if (m==0){
+            scanf("%d%d",&i,&x);
+            B.add(i,x);
+        }else{
+            scanf("%d%d",&s,&t);
+            cout << B.sum(s,t+1) << "\n";
+        }
+    }
+}
+

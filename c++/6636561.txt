@@ -1,0 +1,100 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+struct puzzle{
+  ll f[9];
+  ll space; // 空のピースの場所
+  string path;
+
+  bool operator < (const puzzle & p) const{
+    for(ll i = 0; i < 9; i++){
+      if(f[i] == p.f[i]) continue;
+      return f[i] > p.f[i];
+    }
+    return false;
+  }
+};
+
+vector<ll> dx = {0, 0, 1, -1};
+vector<ll> dy = {1, -1, 0, 0};
+string dir = "rldu";
+
+bool is_target(puzzle p){
+  for(ll i = 0; i < 9; i++){
+    if(p.f[i] != (i + 1)) return false;
+  }
+  return true;
+}
+
+string bfs(puzzle s){
+  queue<puzzle> que;
+  map<puzzle, bool> V;
+  puzzle u, v;
+  s.path = "";
+  que.push(s);
+  V[s] = true;
+
+  while(!que.empty()){
+    u = que.front();
+    que.pop();
+    if(is_target(u)) return u.path;
+    ll sx = u.space / 3;
+    ll sy = u.space % 3;
+
+    for(ll k = 0; k < 4; k++){
+      ll tx = sx + dx[k];
+      ll ty = sy + dy[k];
+      if(tx < 0 || ty < 0 || tx >= 3 || ty >= 3) continue;
+      v = u;
+      swap(v.f[u.space], v.f[tx * 3 + ty]);
+      v.space = tx * 3 + ty;
+      if(!V[v]){
+        V[v] = 1;
+        v.path += dir[k];
+        que.push(v);
+      }
+    }
+  }
+  return "unsolvable";
+}
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  puzzle init;
+
+  for(ll i = 0; i < 9; i++){
+    cin >> init.f[i];
+    if(init.f[i] == 0){
+      init.space = i;
+      init.f[i] = 9;
+    }
+  }
+
+  string ans = bfs(init);
+
+  cout << ans.size() << endl;
+
+  //cout << ans << endl;
+
+
+
+  return 0;
+}

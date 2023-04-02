@@ -1,0 +1,88 @@
+/*
+ * Created by karayuu on 2022/04/27.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Node {
+  int key;
+  struct Node* parent;
+  struct Node* left;
+  struct Node* right;
+};
+
+typedef struct Node Node;
+
+// 返り値は 根のポインタ
+Node* tree_insert(Node* root, int key) {
+  Node* inserted_node = (Node*) malloc(sizeof(Node));
+  inserted_node->key = key;
+  inserted_node->left = NULL; inserted_node->right = NULL;
+
+  Node* now = root;
+  Node* next = NULL;
+
+  if (root == NULL) {
+    return inserted_node;
+  }
+
+  if (root->key < key) {
+    next = root->right;
+  } else {
+    next = root->left;
+  }
+
+  while (next != NULL) {
+    now = next;
+    if (now->key < key) {
+      next = now->right;
+    } else {
+      next = now->left;
+    }
+  }
+
+  inserted_node->parent = now;
+  if (now->key < key) {
+    now->right = inserted_node;
+  } else {
+    now->left = inserted_node;
+  }
+
+  return root;
+}
+
+void print_inorder(Node* root) {
+  if (root != NULL) {
+    print_inorder(root->left);
+    printf(" %d", root->key);
+    print_inorder(root->right);
+  }
+}
+
+void print_preorder(Node* root) {
+  if (root != NULL) {
+    printf(" %d", root->key);
+    print_preorder(root->left);
+    print_preorder(root->right);
+  }
+}
+
+
+int main() {
+  int n;
+  scanf("%d\n", &n);
+  Node* root = NULL;
+
+  for (int i = 0; i < n - 1; i++) {
+    char* _ = (char*)  malloc(sizeof(char) * 6);
+    int key;
+
+    scanf("%s %d\n", _, &key);
+    root = tree_insert(root, key);
+  }
+  print_inorder(root);
+  printf("\n");
+  print_preorder(root);
+  printf("\n");
+}

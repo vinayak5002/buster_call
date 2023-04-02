@@ -1,0 +1,67 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int N;
+vector<int> T, L;
+
+void Eval(int k, int l, int r) {
+    if (L[k] == 0) return;
+    if (r - l > 1) {
+        L[2 * k + 1] += L[k];
+        L[2 * k + 2] += L[k];
+    }
+    T[k] += L[k];
+    L[k] = 0;
+}
+
+void Add(int s, int t, int x, int k, int l, int r) {
+    Eval(k, l, r);
+    if (r <= s || t <= l) return;
+    if (s <= l && r <= t) {
+        L[k] = x;
+        Eval(k, l, r);
+        return;
+    }
+    Add(s, t, x, 2 * k + 1, l, (l + r) / 2);
+    Add(s, t, x, 2 * k + 2, (l + r) / 2, r);
+    T[k] = min(T[2 * k + 1], T[2 * k + 2]);
+}
+
+int Find(int s, int t, int k, int l, int r) {
+    Eval(k, l, r);
+    if (r <= s || t <= l) return 1 << 30;
+    if (s <= l && r <= t) return T[k];
+    int lv = Find(s, t, 2 * k + 1, l, (l + r) / 2);
+    int rv = Find(s, t, 2 * k + 2, (l + r) / 2, r);
+    return min(lv, rv);
+}
+
+int main(int argc, const char * argv[]) {
+    int Q;
+    cin >> N >> Q;
+    
+    int K = 1;
+    while (K < N) K *= 2;
+    N = K;
+    
+    T.resize(2 * N);
+    L.resize(2 * N);
+    
+    for (int q = 0; q < Q; ++q) {
+        int c;
+        cin >> c;
+        if (c == 0) {
+            int s, t, x;
+            cin >> s >> t >> x;
+            Add(s, t + 1, x, 0, 0, N);
+        } else {
+            int s, t;
+            cin >> s >> t;
+            cout << Find(s, t + 1, 0, 0, N) << '\n';
+        }
+    }
+    
+    return 0;
+}
+

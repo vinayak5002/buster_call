@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+const ll mod = 998244353;
+const int INF = (1 << 30);
+
+int pls(int n, int m) {
+    int l = n + m;
+    if(255 < l) {
+        return 255;
+    }
+    if(l < 0) {
+        return 0;
+    }
+    return l;
+}
+
+int njs(int n, int m) {
+    return (n-m)*(n-m);
+}
+
+int main() {
+    while(true) {
+        /* inputs */
+        int N, M;
+        cin >> N >> M;
+        if(!N && !M) break;
+        vector<int> C(M);
+        for(int i = 0; i < M; i++) cin >> C[i];
+        vector<int> X(N);
+        for(int i = 0; i < N; i++) cin >> X[i];
+        /* dp[i+1][j] = X[i] made-kangaeta-toki-ni Y[i] = j no-toki-no nijousa-no-wa */
+        vector<vector<int>> dp(N+1, vector<int>(256, INF));
+        dp[0][128] = 0;
+        for(int i = 0; i < N; i++) {
+            for(int j = 0; j < 256; j++) {
+                if(dp[i][j] == INF) continue;
+                for(int k = 0; k < M; k++) {
+                    dp[i+1][pls(j, C[k])] = min(dp[i][j] + njs(pls(j, C[k]), X[i]), dp[i+1][pls(j, C[k])]);
+                }
+            }
+        }
+        int ans = INF;
+        for(int j = 0; j < 256; j++) {
+            ans = min(ans, dp[N][j]);
+        }
+        cout << ans << endl;
+    }
+	return 0;
+}

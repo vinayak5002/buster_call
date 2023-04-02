@@ -1,0 +1,97 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <deque>
+#include <queue>
+#include <string>
+#include <iomanip>
+#include <set>
+#include <unordered_set>
+#include <map>
+#include <unordered_map>
+#include <utility>
+#include <stack>
+#include <random>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+#include <assert.h>
+#if __has_include(<atcoder/all>)
+#include <atcoder/all>
+using namespace atcoder;
+#endif
+using namespace std;
+using ll=long long;
+#define read(x) cin>>(x);
+#define readll(x) ll (x);cin>>(x);
+#define readS(x) string (x);cin>>(x);
+#define readvll(x,N) vector<ll> (x)((N));for(int i=0;i<(N);i++){cin>>(x)[i];}
+#define rep(i,N) for(ll (i)=0;(i)<(N);(i)++)
+#define rep2d(i,j,H,W) for(ll (i)=0;(i)<(H);(i)++)for(ll (j)=0;(j)<(W);j++)
+#define is_in(x,y) (0<=(x) && (x)<H && 0<=(y) && (y)<W)
+#define yn {cout<<"Yes"<<endl;}else{cout<<"No"<<endl;}
+
+long long powll(long long x,long long n){
+  long long res=1;
+  while(n>0){
+    if(n&1){
+      res*=x;
+    }
+    x*=x;
+    n>>=1;
+  }
+  return res;
+}
+
+void solve(string S){
+  ll N=S.size();
+  ll M=powll(2,N);
+  vector<string> ans;
+  ans.reserve(M);
+  for(ll i=0;i<M;i++){
+    string T=S;
+    vector<ll> C(26,N);
+    for(ll j=0;j<N;j++){
+      if((i>>j)&1){
+        T[j]++;
+      }
+      C[T[j]-'a']=min(C[T[j]-'a'],j);
+    }
+    string U=T;
+    for(ll j=1;j<26;j++){
+      if(C[j]==N)continue;
+      U[C[j]]--;
+    }
+    if(U==S){
+      ans.push_back(T);
+    }
+  }
+  sort(ans.begin(),ans.end());
+  if((ll)ans.size()<10){
+    cout<<ans.size()<<endl;
+    for(ll i=0;i<(ll)ans.size();i++){
+      cout<<ans[i]<<endl;
+    }
+  }else{
+    cout<<ans.size()<<endl;
+    for(ll i=0;i<5;i++){
+      cout<<ans[i]<<endl;
+    }
+    for(ll i=(ll)ans.size()-5;i<(ll)ans.size();i++){
+      cout<<ans[i]<<endl;
+    }
+  }
+}
+
+int main(){
+  string S;
+  while(1){
+    cin>>S;
+    if(S=="#"){
+      break;
+    }
+    solve(S);
+  }
+}
+

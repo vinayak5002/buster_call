@@ -1,0 +1,145 @@
+#include <bits/stdc++.h>
+
+
+#include <vector>
+
+namespace rklib {
+
+template <class T = int>
+struct Edge {
+    int from, to;
+    T cost;
+    int idx;
+
+    Edge() = default;
+
+    Edge(int from, int to, T cost = 1, int idx = 0)
+        : from(from), to(to), cost(cost), idx(idx) {}
+};
+
+template <class T = int>
+struct Graph {
+    std::vector<std::vector<Edge<T>>> es;
+    int edge_num;
+
+    Graph(int n) : edge_num(0) { es.resize(n); }
+
+    int size() { return es.size(); }
+
+    void add_edge(int from, int to, T cost, int idx) {
+        es[from].emplace_back(from, to, cost, idx);
+        ++edge_num;
+    }
+
+    std::vector<Edge<T>> edges() {
+        std::vector<Edge<T>> res(edge_num);
+        for (int v = 0; v < (int)es.size(); ++v) {
+            for (auto& e : es[v]) {
+                res[e.idx] = e;
+            }
+        }
+        return res;
+    }
+
+    std::vector<Edge<T>>& operator[](int i) { return es[i]; }
+};
+
+}  // namespace rklib
+
+
+#include <algorithm>
+#include <cassert>
+#include <vector>
+
+namespace rklib {
+
+template <class T>
+bool chmax(T &a, const T &b) {
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template <class T>
+bool chmin(T &a, const T &b) {
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template <class T>
+bool chmin_non_negative(T &a, const T &b) {
+    if (a < 0 || a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template <class T>
+T div_floor(T a, T b) {
+    if (b < 0) a *= -1, b *= -1;
+    return a >= 0 ? a / b : (a + 1) / b - 1;
+}
+
+template <class T>
+T div_ceil(T a, T b) {
+    if (b < 0) a *= -1, b *= -1;
+    return a > 0 ? (a - 1) / b + 1 : a / b;
+}
+
+}  // namespace rklib
+
+
+#define For(i, a, b) for (int i = (int)(a); (i) < (int)(b); ++(i))
+#define rFor(i, a, b) for (int i = (int)(a)-1; (i) >= (int)(b); --(i))
+#define rep(i, n) For(i, 0, n)
+#define rrep(i, n) rFor(i, n, 0)
+#define fi first
+#define se second
+
+using namespace std;
+using namespace rklib;
+
+using lint = long long;
+using pii = pair<int, int>;
+using pll = pair<lint, lint>;
+
+void dfs(int v, Graph<int> &gr, vector<pll> &dp) {
+    if (dp[v].fi >= 0) return;
+    dp[v] = {0, 0};
+    for (auto &e : gr[v]) {
+        dfs(e.to, gr, dp);
+        dp[v].fi += dp[e.to].fi;
+        dp[v].se += dp[e.to].se + dp[e.to].fi;
+    }
+}
+
+int main() {
+    int n, m;
+    scanf("%d%d", &n, &m);
+    Graph<int> gr(n), rgr(n);
+    rep(i, m) {
+        int a, b;
+        scanf("%d%d", &a, &b);
+        --a;
+        --b;
+        gr.add_edge(a, b, 1, i);
+        rgr.add_edge(b, a, 1, i);
+    }
+    vector<pll> dp_f(n, {-1, -1}), dp_b(n, {-1, -1});
+    dp_f[n - 1] = {1, 0};
+    dp_b[0] = {1, 0};
+    dfs(0, gr, dp_f);
+    dfs(n - 1, rgr, dp_b);
+    rep(i, n) {
+        auto [fn, fs] = dp_f[i];
+        auto [bn, bs] = dp_b[i];
+        printf("%lld\n", fn * bs + fs * bn);
+    }
+}
+

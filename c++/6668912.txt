@@ -1,0 +1,106 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+struct Node
+{
+    struct Node *parent;
+    struct Node *left;
+    struct Node *right;
+	int key;
+};
+
+
+struct Node *root, *NIL;
+int n;
+
+void insert(int k){
+
+	struct Node *y = NIL;
+	struct Node *x = root;
+	struct Node *z = NULL;
+	
+	z = (struct Node *)malloc(sizeof(struct Node));
+  	z->key = k;
+  	z->left = NIL;
+  	z->right = NIL;
+	
+	while( x != NIL)
+	{
+		y = x;
+		if(z->key < x->key)
+		{
+			x = x->left;
+		}
+		else
+		{
+			x = x->right;
+		}
+		
+	}
+	z->parent = y;
+	
+	if(y == NIL)
+	{
+		root = z;
+	}
+	else 
+	{
+		if(z->key < y->key)
+		{
+			y->left = z;
+		}
+		else
+		{
+			y->right = z;
+		}
+	}
+}
+
+void printInorder(struct Node *u)
+{
+	if(u != NIL)
+	{
+		printInorder(u->left);
+		printf(" %d", u->key);
+		printInorder(u->right);
+	}
+}
+
+void printPreorder(struct Node *u)
+{
+	if(u != NIL)
+	{
+		printf(" %d", u->key);
+		printPreorder(u->left);
+		printPreorder(u->right);
+	}
+}
+
+int main(void){
+	
+	int i,n, x;
+	char com[6];
+	
+	scanf("%d\n", &n);
+	
+	for(i = 0; i < n; i++)
+	{
+		scanf("%s", com);
+		
+		if( com[0] == 'i')
+		{
+			scanf("%d", &x);
+			insert(x);
+		}
+		else if( com[0] == 'p')
+		{
+			printInorder(root);
+			printf("\n");
+			printPreorder(root);
+			printf("\n");
+		}
+	}
+	
+	return 0;
+}

@@ -1,0 +1,55 @@
+#include<bits/stdc++.h>
+
+#define INF 1e9
+#define rep(i,n)for(int i=0;(i)<(int)(n);i++)
+#define REP(i,a,b)for(int i=(int)(a);(i)<=(int)(b);i++)
+#define ALL(a)  (a).begin(),(a).end()
+#define chmax(a, b) a = max(a, b)
+#define chmin(a, b) a = min(a, b)
+#define pb push_back
+#define fi first
+#define se second
+#define sz(x) ((int)x.size())
+
+using namespace std;
+using ld = long double;
+using ll = long long;
+using P = pair<ll, ll>;
+using Graph = vector<vector<int>>;
+
+const ll ZER = 0;
+const ll MOD = 998244353;
+
+int main() {
+    int c;
+    long long  h, w, d;
+    cin >> w >> d >> h >> c;
+    long long s = (w * d + d * h + h * w) * 2;
+    map<pair<int, int>, int> mp;
+    vector<int> X(c), Y(c), Z(c);
+    rep(i, c){
+        cin >> X[i] >> Y[i] >> Z[i];
+        int x, y, z;
+        x = X[i];
+        y = Y[i];
+        z = Z[i];
+        // まだ(x,y)を見てないとき
+        if(mp.count(P(x, y)) == 0){
+            mp[P(x, y)] = h;
+        } 
+        mp[P(x, y)] -= z;
+    }
+    map<P, int> seen;
+    rep(i, c){
+        int x, y;
+        x = X[i];
+        y = Y[i];
+        if(seen[P(x, y)])continue;
+
+        auto func = [&](int a, int b){
+            return max(mp[P(a, b)] - mp[P(x, y)], 0);
+        };
+        s += func(x-1, y) + func(x+1, y) + func(x, y-1) + func(x, y+1);
+    }
+    cout << s << endl;
+}

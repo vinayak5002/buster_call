@@ -1,0 +1,100 @@
+#include<stdio.h>
+#define MAX 100000
+
+/*プロセスを表す構造体*/
+typedef struct pp{
+    int name[100];
+    int t;
+}P;
+
+P Q[MAX];
+int head,tail;
+
+intialize(){  /*キューを空にする*/
+    head=tail=0;
+}
+
+isEmpty(){  /*キューが空か判定する*/
+    return head==tail;
+}
+
+isFull(){  /*キューが満杯か調べる*/
+    return  head==(tail+1)%MAX;
+}
+
+void enqueue(P x){  /*tailがさす場所にxを追加する*/
+    if(isFull()){
+        printf("満杯\n");
+        return;
+    }
+    Q[tail]=x;
+    if(tail+1==MAX){
+        tail=0;
+    }
+    else{tail++;}
+}
+   
+
+P dequeue(){   /*tailがさすキューの先頭の要素を変数xに一時的に記録し、headを1増やしてからxを返す。*/
+    if(isEmpty()){
+        printf("空\n");
+        return;
+    }
+    P x=Q[head];
+    if(head+1==MAX){
+    head=0;
+    }
+    else{
+        head++;
+    }
+    return x;
+}
+
+int main(){
+    int elaps=0,c;
+    int i,q,n;
+    P u;
+    scanf("%d %d",&n,&q);
+    
+    for(i=0;i<n;i++){ /*すべてのプロセスをキューに順番に追加する*/
+        scanf("%s",Q[i].name);
+        scanf("%d",&Q[i].t);
+    }
+    head=0;tail=n;
+    
+    while(head!=tail){  /*シミュレーション*/
+        u=dequeue();
+        if(q<u.t){  /*qまたは必要な時間u.tだけ処理を行う*/
+        c=q;
+        }
+        else{
+            c=u.t;
+        }
+        u.t -= c;  /*残りの必要時間を計算*/
+        elaps += c;  /*経過時間を加算*/
+        if(u.t>0)enqueue(u);  /*処理が完了していなければキューに追加*/
+        else{
+            printf("%s %d\n",u.name,elaps);
+        }
+    }
+    
+    return 0;
+}
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

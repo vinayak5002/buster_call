@@ -1,0 +1,59 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <queue>
+#include <algorithm>
+typedef long long ll;
+using namespace std;
+int n;
+int D[110];
+int F[110];
+int K[110];
+bool is_reached[110];
+vector<vector<int> > graph;
+int ti;
+
+void dfs(int start) {
+  is_reached[start]=true;
+  ti++;
+  D[start]=ti;
+  for(int i=0;i<K[start];i++) {
+    int next_index=graph[start][i];
+    if(!is_reached[next_index]) {
+      dfs(next_index);
+    }
+  }
+  ti++;
+  F[start]=ti;
+  return;
+}
+
+int main() {
+  cin >> n;
+  graph.assign(n,vector<int>());
+  for(int i=0;i<n;i++) {
+    int u,k;
+    cin >> u >> k;
+    u--;//頂点を0インデックスに変換
+    K[u]=k;
+    for(int i=0;i<k;i++) {
+      int x;
+      cin >>x;x--;
+      graph[u].push_back(x);
+    }
+  }
+  for(int i=0;i<n;i++) {
+    D[i]=F[i]=-1;
+    is_reached[i]=false;
+  }
+  ti=0;
+
+  for(int i=0;i<n;i++) {
+    if(is_reached[i]==false) dfs(i);
+  }
+  for(int i=0;i<n;i++) {
+    cout << i+1 <<" " << D[i] << " " << F[i] << endl;
+  }
+  return 0;
+}
+

@@ -1,0 +1,87 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class WeightedUnionFindTree:
+    def __init__(self, num_elements):
+        self._num_elements = num_elements
+        self._parents = [i for i in range(num_elements)]
+        self._rank = [0] * num_elements
+        self._diff_weight = [0] * num_elements
+        return
+
+    def _find(self, idx):
+        parent = self._parents[idx]
+        if parent == idx:
+            return idx
+        self._parents[idx] = self._find(parent)
+        self._diff_weight[idx] += self._diff_weight[parent]
+        return self._parents[idx]
+
+    def _weight(self, idx):
+        self._find(idx)
+        return self._diff_weight[idx]
+
+    def diff(self, idx0, idx1):
+        root0 = self._find(idx0)
+        root1 = self._find(idx1)
+        if root0 != root1:
+            return math.inf
+
+        return self._weight(idx1) - self._weight(idx0)
+
+    def relate(self, idx0, idx1, w):
+        w0 = self._weight(idx0)
+        w1 = self._weight(idx1)
+        w += w0 - w1
+
+        root0 = self._find(idx0)
+        root1 = self._find(idx1)
+
+        if root0 == root1:
+            return False
+
+        if self._rank[root0] < self._rank[root1]:
+            root0, root1 = root1, root0
+            w = -w
+        if self._rank[root0] == self._rank[root1]:
+            self._rank[root0] += 1
+
+        self._parents[root1] = root0
+        self._diff_weight[root1] = w
+        return True
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, q = list(map(int, f.readline().split()))
+    w_uft = WeightedUnionFindTree(n)
+    for _ in range(q):
+        query_list = list(map(int, f.readline().split()))
+        x = query_list[1]
+        y = query_list[2]
+        if query_list[0] == 0:
+            w = query_list[3]
+            w_uft.relate(x, y, w)
+        else:
+            diff_w = w_uft.diff(x, y)
+            if diff_w != math.inf:
+                print(diff_w)
+            else:
+                print('?')
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

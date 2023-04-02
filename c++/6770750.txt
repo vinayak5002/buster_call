@@ -1,0 +1,62 @@
+#include<stdio.h>
+#define MAX 100
+#define INF 10000000
+
+int q[MAX], head, tail;
+int m[MAX][MAX], d[MAX];
+
+void enqueue(int x){
+   q[tail] = x;
+   tail = (tail+1) % MAX;
+}
+
+int dequeue(void){
+   int x = q[head];
+   head = (head+1) % MAX;
+   return x;
+}
+
+void bfs(int t, int n){
+   head = 0; tail = n; 
+   enqueue(t);
+   for(int i = 0; i < n; i++) d[i] = INF;
+   d[t] = 0;
+   int u;
+   while(head != tail ){
+       u = dequeue();
+       for(int v = 0; v < n; v++){
+          if(m[u][v] == 0) continue;
+          if(d[v] != INF) continue;
+          d[v] = d[u] + 1;
+          enqueue(v); 
+       }
+   }
+   for(int i = 0; i < n; i++){
+      printf("%d ",i+1);
+      if(d[i] != INF){
+        printf("%d\n",d[i]);
+      } 
+      else{
+        printf("-1\n");
+      } 
+   }
+}
+ 
+int main(){
+    int n, u, k, v;
+    scanf("%d",&n);
+    for(int i = 0; i < n; i++){
+       for(int j = 0; j < n; j++){
+            m[i][j] = 0;
+       } 
+    }
+    for(int i = 0; i < n; i++){
+       scanf("%d%d",&u,&k);
+       for(int j = 0; j < k; j++){
+          scanf("%d",&v);
+          m[u-1][v-1] = 1;
+       }
+    }
+    bfs(1, n);
+    return 0;
+}

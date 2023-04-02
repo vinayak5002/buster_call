@@ -1,0 +1,107 @@
+#include<iostream>
+#include<string>
+using namespace std;
+struct Dice{
+    public:
+  int s[6];
+  void roll(char c){
+    int b;
+    if(c=='E'){
+      b=s[0];
+      s[0]=s[3];
+      s[3]=s[5];
+      s[5]=s[2];
+      s[2]=b;
+    }
+    else if(c=='W'){
+      b=s[0];
+      s[0]=s[2];
+      s[2]=s[5];
+      s[5]=s[3];
+      s[3]=b;
+    }
+    else if(c=='N'){
+      b=s[0];
+      s[0]=s[1];
+      s[1]=s[5];
+      s[5]=s[4];
+      s[4]=b;
+    }
+    else if(c=='S'){
+      b=s[0];
+      s[0]=s[4];
+      s[4]=s[5];
+      s[5]=s[1];
+      s[1]=b;
+    }
+    else if(c=='R'){
+        b=s[1];
+        s[1]=s[2];
+        s[2]=s[4];
+        s[4]=s[3];
+        s[3]=b;
+    }
+  }
+  int top() {
+    return s[0];
+  }
+  int front(){
+      return s[1];
+  }
+  int right(){
+      return s[2];
+  }
+};
+int main(){
+    
+    int num; cin>>num;
+    Dice d[num];
+    for(int i=0;i<num;i++){
+        cin>>d[i].s[i];
+    }
+    for(int hikaku1=0;hikaku1<num;hikaku1++){
+        for(int hikaku2=0;hikaku2<num;hikaku2++){
+            bool judge=true;
+            if(hikaku1==hikaku2){
+                break;
+            }
+            for(int i=0;i<num;i++){
+                cin>>d[hikaku2].s[i];
+            }
+            if(d[hikaku2].s[0]==d[hikaku1].s[2]||d[hikaku2].s[0]==d[hikaku1].s[3]) d[hikaku1].roll('E');
+            int count1=0;
+            while(d[hikaku2].s[0]!=d[hikaku1].s[0]){
+                d[hikaku1].roll('N');
+                count1++;
+                if(count1==4){
+                    judge=false;
+                    break;
+                }
+            }
+            if(!judge){
+                break;
+            }
+            int count2=0;
+            while(d[hikaku2].s[1]!=d[hikaku1].s[1]){
+                d[hikaku1].roll('R');
+                count2++;
+                if(count2==4){
+                    judge=false;
+                    break;
+                }
+            }
+            if(!judge){
+                break;
+            }
+            for(int i=0;i<6;i++){
+                if(d[hikaku1].s[i]==d[hikaku2].s[i]){
+                    cout<<"No"<<endl;
+                    return 0;
+                }
+            }
+        }
+    }
+    cout<<"Yes"<<endl;
+    return 0;
+}
+

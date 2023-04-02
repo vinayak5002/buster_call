@@ -1,0 +1,41 @@
+from sys import stdin
+
+n = int(stdin.readline().rstrip())
+graph = []
+for i in range(n):
+    graph.append([int(x) for x in stdin.readline().rstrip().split()])
+
+todo = []
+seenStack = []
+seen = [0 for x in range(n)]
+finish = [0 for x in range(n)]
+
+
+todo.append(1)
+timestamp = 1
+
+while True:
+    if len(todo) == 0:
+        break
+
+    nodeNum = todo.pop()
+    if not nodeNum == -1:
+        if seen[nodeNum-1] == 0:
+            seenStack.append(nodeNum-1)
+
+            node = graph[nodeNum-1]
+            seen[nodeNum-1] = timestamp
+            todo.append(-1)
+            for i in range(node[1]):
+                todo.append(node[node[1]+1-i])
+            timestamp += 1
+    else:
+        finish[seenStack.pop()] = timestamp
+        timestamp += 1
+
+result = ""
+text = "{} {} {}\n"
+for i in range(n):
+    result += text.format(i+1,seen[i],finish[i])
+
+print(result)

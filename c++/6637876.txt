@@ -1,0 +1,35 @@
+#include <stdio.h>
+#include <cmath>
+#include <algorithm>
+#include <stack>
+
+using namespace std;
+
+int main(){
+
+	long long data[31];
+
+	data[1] = 1;
+	data[2] = 2;
+	data[3] = 4;
+
+	for(int i=4; i < 31; i++){
+		data[i] = data[i-1] + data[i-2] + data[i-3];
+	}
+
+	int n,num;
+
+	while(true){
+		scanf("%d",&n);
+		if(n == 0)break;
+
+		num = 0;
+
+		num += data[n]/3650;
+		if(data[n]%3650 > 0)num++;
+
+		printf("%d\n",num);
+	}
+
+    return 0;
+}

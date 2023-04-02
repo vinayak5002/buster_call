@@ -1,0 +1,66 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+num_nodes = 0
+adjacent_list = []
+current_time = 0
+is_visited = []
+found_time = []
+search_finished_time = []
+
+
+def dfs(v):
+    global current_time
+    if is_visited[v]:
+        return
+    found_time[v] = current_time
+    is_visited[v] = True
+    current_time += 1
+
+    for u in adjacent_list[v]:
+        if is_visited[u]:
+            continue
+        dfs(u)
+    search_finished_time[v] = current_time
+    current_time += 1
+    return
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    global num_nodes, found_time, search_finished_time, adjacent_list, is_visited, current_time
+    num_nodes = int(f.readline())
+    found_time = [0] * num_nodes
+    search_finished_time = [0] * num_nodes
+    is_visited = [False] * num_nodes
+
+    adjacent_list = [[] for _ in range(num_nodes)]
+    for _ in range(num_nodes):
+        adjacent = list(map(int, f.readline().split()))
+        cn = adjacent[0] - 1
+        adjacent = adjacent[2:]
+        for i in range(len(adjacent)):
+            adjacent[i] -= 1
+        adjacent_list[cn] += adjacent
+
+    current_time = 1
+    for i in range(num_nodes):
+        dfs(i)
+
+    for i in range(num_nodes):
+        print(i + 1, found_time[i], search_finished_time[i])
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

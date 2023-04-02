@@ -1,0 +1,100 @@
+
+#include <iostream>
+#include <math.h>
+#include <vector>
+#include <string>
+#include <iomanip>
+#include <utility>
+#include <algorithm>
+#include <map>
+#include <set>
+#include <queue>
+//#include <unordered_set>
+//#include <unordered_map>
+using namespace std;
+
+#undef SHRT_MIN
+#undef SHRT_MAX
+#undef USHRT_MAX
+#undef INT_MIN
+#undef UINT_MAX
+#undef LONG_MIN
+#undef LONG_MAX
+#undef ULONG_MAX
+#undef LLONG_MAX
+#undef LLONG_MIN
+#undef ULLONG_MAX
+#define SHRT_MIN    (-32768)
+#define SHRT_MAX      32767
+#define USHRT_MAX     0xffff
+#define INT_MIN     (-2147483647 - 1)
+#define INT_MAX       2147483647
+#define UINT_MAX      0xffffffff
+#define LONG_MIN    (-2147483647L - 1)
+#define LONG_MAX      2147483647L
+#define ULONG_MAX     0xffffffffUL
+#define LLONG_MAX     9223372036854775807
+#define LLONG_MIN   (-9223372036854775807 - 1)
+#define ULLONG_MAX    0xffffffffffffffffu
+
+#define vecALL(vec) (vec).begin() , (vec).end() 
+
+#define vecSORT(vec) sort(vecALL(vec))
+#define vecrSORT(vec) sort(vec.rbegin(), vec.rend())
+
+#define coutALL(vec) for(size_t dklj=0;dklj<vec.size();dklj++){cout<<vec[dklj]<<" ";}
+
+typedef long long llong;
+typedef unsigned long long ullong;
+
+//オーバーフロー対策
+#define int llong
+#define uint ullong
+
+struct OmosaEdge {
+    int to;
+    int cost;
+};
+typedef vector<vector<int> > Graph;
+typedef vector<vector<OmosaEdge> > OmomiGraph;
+
+//graph[n].first->辺 、 -.second->重み
+//minkyoriの各要素はINFにして渡してね☆
+void Daikusutorahou(int shitenidx, OmomiGraph& graph, vector<int>& minkyori) {
+    //pair<int,int>->最短距離カッコカリ,頂点番号
+    priority_queue<pair<int, int>, vector<pair<int, int> >, greater<pair<int, int> > > q;
+    int nowV = shitenidx;//nowVertex
+    minkyori[nowV] = 0;
+    q.push({minkyori[nowV], nowV});
+    while (!q.empty()) {
+        pair<int, int>tempV = q.top();
+        q.pop();
+        int Vnum = tempV.second;
+        if (minkyori[Vnum] < tempV.first)continue;//最短距離候補でないので無視無視
+        for (auto &e : graph[Vnum]) {
+            if (minkyori[e.to] > minkyori[Vnum] + e.cost) {//最短距離候補  
+                minkyori[e.to] = minkyori[Vnum] + e.cost;
+                q.push({ minkyori[e.to], e.to });
+            }
+        }
+    }
+}
+signed main() {
+    //ios::sync_with_stdio(false);
+    //cin.tie(nullptr);
+
+    int V, E, r; cin >> V >> E >> r;
+    OmomiGraph graph(V, vector<OmosaEdge>());
+    for (int e = 0; e < E; e++) {
+        int s, t, d; cin >> s >> t >> d;
+        graph[s].emplace_back(OmosaEdge{ t, d });
+    }
+    vector<int>minkyori(V, INT_MAX);
+    Daikusutorahou(r, graph, minkyori);
+    for (int v = 0; v < V; v++) {
+        if (minkyori[v] == INT_MAX)cout << "INF";
+        else cout << minkyori[v];
+        cout << endl;
+    }
+    return 0;
+}

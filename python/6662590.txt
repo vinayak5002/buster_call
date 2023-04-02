@@ -1,0 +1,113 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+ON_SEGMENT = 0
+ONLINE_BACK = 1
+ONLINE_FRONT = 2
+COUNTER_CLOCKWISE = 3
+CLOCKWISE = 4
+
+EPS = 1e-10
+
+
+def calc_length(v):
+    length = 0
+    for element in v:
+        length += element ** 2
+    return math.sqrt(length)
+
+
+def v_diff(v0, v1):
+    dif = []
+    for i in range(len(v0)):
+        dif.append(v1[i] - v0[i])
+    return dif
+
+
+def inner_product(v0, v1):
+    ip = 0
+    for i in range(len(v0)):
+        ip += v0[i] * v1[i]
+    return ip
+
+
+def cross_product2d(v0, v1):
+    return v0[0] * v1[1] - v0[1] * v1[0]
+
+
+def calc_3points_positional_relation(p0, p1, p2):
+    v01 = v_diff(p0, p1)
+    v12 = v_diff(p1, p2)
+    if p0[0] == p1[0] == p2[0]:
+        if p0[1] <= p2[1] <= p1[1] or p1[1] <= p2[1] <= p0[1]:
+            return ON_SEGMENT
+        elif p2[1] < p0[1] < p1[1] or p2[1] > p0[1] > p1[1]:
+            return ONLINE_BACK
+        else:
+            return ONLINE_FRONT
+    elif p0[1] == p1[1] == p2[1]:
+        if p0[0] <= p2[0] <= p1[0] or p1[0] <= p2[0] <= p0[0]:
+            return ON_SEGMENT
+        elif p2[0] < p0[0] < p1[0] or p2[0] > p0[0] > p1[0]:
+            return ONLINE_BACK
+        else:
+            return ONLINE_FRONT
+    else:
+        cp = cross_product2d(v01, v12)
+        if cp > EPS:
+            return COUNTER_CLOCKWISE
+        elif cp < -EPS:
+            return CLOCKWISE
+        else:
+            ip = inner_product(v01, v12)
+            l0 = calc_length(v01)
+            l1 = calc_length(v12)
+
+            if abs(ip) < EPS:
+                return ON_SEGMENT
+            elif ip > EPS:
+                return ONLINE_FRONT
+            else:
+                if l0 < l1:
+                    return ONLINE_BACK
+                else:
+                    return ON_SEGMENT
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    x0, y0, x1, y1 = list(map(int, f.readline().split()))
+    p0 = (x0, y0)
+    p1 = (x1, y1)
+
+    q = int(f.readline())
+    for _ in range(q):
+        px, py = list(map(int, f.readline().split()))
+        p2 = (px, py)
+        pr = calc_3points_positional_relation(p0, p1, p2)
+        if pr == ON_SEGMENT:
+            print('ON_SEGMENT')
+        elif pr == ONLINE_BACK:
+            print('ONLINE_BACK')
+        elif pr == ONLINE_FRONT:
+            print('ONLINE_FRONT')
+        elif pr == COUNTER_CLOCKWISE:
+            print('COUNTER_CLOCKWISE')
+        elif pr == CLOCKWISE:
+            print('CLOCKWISE')
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

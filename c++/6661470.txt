@@ -1,0 +1,169 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+#define all(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q) {
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+template<class T>
+bool chmin(T& p, T q) {
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+ll gcd(ll(a), ll(b)) {
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+double s3 = sqrt(3);
+double EPS = 1e-8;
+
+double y(double l, double r) {
+    return (l + r) / 2.0;
+}
+
+double area(double yp, double yu) {
+    return (yp - yu) / s3 * 6.0;
+}
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+
+
+    while (1) {
+        ll N;
+        cin >> N;
+        if (N == 0)return 0;
+
+        ll K;
+        cin >> K;
+
+
+        vector<pair<ll, ll>> P(N);
+        vector<pair<double, double>> LR(N);
+        vector<pair<double, ll>> U(N), R(N), L(N);
+        rep(i, N) {
+            double X, Y;
+            cin >> X >> Y;
+            P[i] = { X,Y };
+            LR[i] = { Y - s3 * X,Y + s3 * X };
+            U[i] = { double(Y),i };//下端の値とindex
+            L[i] = { Y - s3 * X,i };//左端の値と
+            R[i] = { Y + s3 * X,i };
+        }
+        sort(all(U)), sort(all(R)), sort(all(L));
+
+        double an = 1e18;
+
+        rep(i, N) {
+            ll naka = 0;//内部の梨の数
+
+            for (ll jj = N - 1; jj >= 0; jj--) {//下端を全探索
+                ll j = U[jj].second;
+                //if (i == j)continue;
+
+                if (LR[j].first < LR[i].first + EPS && LR[j].second < LR[i].second + EPS) {
+                    naka++;
+
+                    if (naka == N - K) {
+                        double dy = P[i].second - U[jj].first;
+                        chmin(an, dy / s3 * 6.0);
+                        break;
+                    }
+                }
+            }
+        }//上の頂点が梨の木
+
+        rep(i, N) {//左端の頂点全探索
+            ll Uindex = -1;//下端
+
+            ll r = N - 1;
+            ll rindex = R[r].second;
+            ll lindex = L[i].second;
+            while (LR[lindex].first + EPS < LR[rindex].first) {
+                r--;
+                if (r < 0)break;
+            }
+
+            if (r < 0)continue;
+            rindex = R[r].second;
+            ll naka = 0;
+
+            for (ll u = N - 1; u >= 0; u--) {
+                ll uindex = U[u].second;
+                if (LR[uindex].first > EPS + LR[lindex].first || LR[uindex].second > EPS + LR[rindex].second)continue;
+
+                naka++;
+                if (naka == N - K) {
+                    Uindex = u;
+                    break;
+                }
+
+
+            }
+            if (Uindex == -1)continue;
+            //cout << Uindex << endl;
+
+            double py = y(LR[lindex].first, LR[rindex].second);
+            chmin(an, area(py, U[Uindex].first));
+
+            for (ll nr = r - 1; nr >= 0; nr--) {
+
+                ll nrindex = R[nr].second;
+                if (rindex == lindex || LR[lindex].first + EPS < LR[rindex].first)continue;
+                bool OK = true;
+                while (Uindex > 0) {
+                    Uindex--;
+                    ll uindex = U[Uindex].second;
+                    if (LR[uindex].first > EPS + LR[lindex].first || LR[uindex].second > EPS + LR[nrindex].second)continue;
+                    else {
+                        OK = false;
+                        break;
+                    }
+                }
+                if (!OK && Uindex >= 0) {
+                    py = y(LR[lindex].first, LR[nrindex].second);
+                    chmin(an, area(py, U[Uindex].first));
+                }
+                if (LR[i].first + EPS < LR[i].second) {
+                    continue;
+                }
+
+
+            }
+
+        }
+        cout << fixed << setprecision(15);
+        cout << an << endl;
+
+
+    }
+
+
+}

@@ -1,0 +1,120 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define e -1
+
+typedef struct node{
+	int id; //節点番号
+	int p; //親の節点番号
+	int bro; //兄弟の節点番号
+	int l; //左の子の節点番号
+	int r; //右の子の節点番号
+	
+} node_t;
+
+int degree(node_t N)
+{
+	if(N.l != e && N.r != e){ //子が二人
+		return 2;
+	}else if(N.l == e && N.r == e){ //子がいない
+		return 0;
+	}else{
+		return 1;
+	}
+}
+
+int depth(node_t *N, int u)
+{
+	int r=0; //返す値
+	
+	while(N[u].p != e){ //親がいる限り
+		r++;
+		u = N[u].p;
+	}
+	
+	return r;
+}
+
+int height(node_t *N, int u)
+{
+	int h=0; //高さ
+	int max=0; //高さの最大値
+	
+	if(N[u].l != e){ //左の子がいる
+		h = height(N, N[u].l) + 1;
+		if(max < h){
+			max = h;
+		}
+	}
+	
+	if(N[u].r != e){
+		h = height(N, N[u].r) + 1;
+		if(max < h){
+			max = h;
+		}
+	}
+	
+	return max;
+}
+
+int main(void)
+{
+	char str[16];
+	int n; //節点の個数
+	node_t *N; //必要なint型変数全てを揃えた構造体
+	int deg; //節点の子の数
+	int dep; //節点の深さ
+	int h; //節点の高さ
+	int i;
+	
+	fgets(str, sizeof(str), stdin);
+	sscanf(str, "%d", &n);
+	
+	//動的割り当て
+	N = malloc(sizeof(node_t)*(n+1));
+	
+	//初期化
+	for(i=0; i<n; i++){
+		N[i].p = e;
+		N[i].bro = e;
+		N[i].l = e;
+		N[i].r = e;
+	}
+	
+	for(i=0; i<n; i++){
+		fgets(str, sizeof(str), stdin);
+		sscanf(str, "%d%d%d", &N[i].id, &N[i].l, &N[i].r);
+		//左の子
+		if(N[i].l != e){
+			N[N[i].l].p = N[i].id; //左の子に親の値を与える
+			N[N[i].l].bro = N[i].r; //左の子に兄弟の値を与える
+		}
+		//右の子
+		if(N[i].r != e){
+			N[N[i].r].p = N[i].id; //右の子に親の値を与える
+			N[N[i].r].bro = N[i].l; //右の子に兄弟の値を与える
+		}
+		
+	}
+	
+	for(i=0; i<n; i++){
+		printf("node %d: parent = %d, sibling = %d, ", N[i].id, N[i].p, N[i].bro);
+		//printf("l = %d, r = %d\n", N[i].l, N[i].r);
+		deg = degree(N[i]);
+		dep = depth(N, i);
+		h = height(N, i);
+		printf("degree = %d, depth = %d, height = %d, ", deg, dep, h);
+		if(N[i].p == e){ //親がいない
+			printf("root\n");
+		}else if(N[i].l == e && N[i].r == e){ //子がいない
+			printf("leaf\n");
+		}else{ //それ以外
+			printf("internal node\n");
+		}
+	}
+	
+	//free
+	free(N);
+	
+	return 0;
+}

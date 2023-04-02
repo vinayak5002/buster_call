@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+#define INF 1e18
+#define rep(i, n) for(int (i) = 0; (i) < (n); (i)++)
+#define all(x) (x).begin(), (x).end()
+typedef pair<int, int> P;
+typedef pair<int, P> PP;
+const int mod = 1000000007;
+//const int mod = 998244353;
+
+int n, m;
+vector<int> s;
+
+int Abs(int x){return max(x, -x);}
+bool is_ok(int x){
+    int lev = 1;
+    if(s[0] >= lev + x)return false;
+    int cnt = 0, who = 0;
+    while(1){
+        if(s[n-1] < lev + x){
+            cnt++;
+            break;
+        }
+        for(;;who++){
+            int now = max(1LL, x - Abs(lev - s[who])), nxt = max(1LL, x - Abs(lev - s[who+1]));
+            if(x < Abs(lev - s[who]) && x < Abs(lev - s[who+1])){
+                if(lev - s[who] > 0 && lev - s[who+1] > 0)continue;
+                else break;
+            }
+            if(now >= nxt)break;
+        }
+        cnt++;
+        lev += max(1LL, x - Abs(lev - s[who]));
+    }
+    return cnt >= m;
+}
+
+signed main(){
+    cout << fixed << setprecision(18);
+
+    while(1){
+        cin >> n >> m;
+        if(n == 0)break;
+        s.resize(n);
+        rep(i, n)cin >> s[i];
+        s.push_back(INF);
+        int ok = 0, ng = INF;
+        while(ng - ok > 1){
+            int mid = (ok + ng) / 2;
+            if(is_ok(mid))ok = mid;
+            else ng = mid;
+        }
+        if(!is_ok(ok))ok = -1;
+        cout << ok << endl;
+    }
+}

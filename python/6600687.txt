@@ -1,0 +1,58 @@
+import sys
+import heapq
+from collections import defaultdict
+
+input = sys.stdin.readline
+
+
+def main():
+    def dijkstra(edges, s, cap):    # 隣接リスト(dict)，始点(str)
+        node = defaultdict(lambda: float("inf"))
+        node[s] = 0
+        node_name = []
+        heapq.heappush(node_name, s)
+
+        while node_name:
+            p = heapq.heappop(node_name)
+            for goal, cost in edges[p].items():
+                if node[p] + cost < node[goal] and cost <= cap * 10:
+                    node[goal] = node[p] + cost
+                    heapq.heappush(node_name, goal)
+
+        return node
+
+    while True:
+        n, m, cap = map(int, input().split())
+        if n == 0:
+            break
+        src, dest = input().split()
+        edges = defaultdict(lambda: defaultdict(int))
+        for _ in range(n):
+            s, g, c = input().split()
+            edges[s][g] = int(c)
+            edges[g][s] = int(c)
+        LPGs = [input().rstrip() for _ in range(m)]
+
+        # print(n, m, cap)
+        # print(src, dest)
+        # print(edges)
+        # print(LPGs)
+
+        nodes = {}
+        points = [src] + LPGs + [dest]
+        for pos in points:
+            nodes[pos] = {}
+            for k, v in dijkstra(edges, pos, float("inf")).items():
+                if k in points and k != pos:
+                    nodes[pos][k] = v
+
+        ans = dijkstra(nodes, src, cap)[dest]
+        if ans == float("inf"):
+            print(-1)
+        else:
+            print(ans)
+
+
+if __name__ == "__main__":
+    main()
+

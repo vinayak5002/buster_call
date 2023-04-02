@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+constexpr ll inf = (1LL << 62);
+template <typename T>
+bool chmax(T& a, const T& b)
+{
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+template <typename T>
+bool chmin(T& a, const T& b)
+{
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+ll dp[110][10010];
+
+int main()
+{
+    ll N;
+    ll W;
+    cin >> N >> W;
+    vector<ll> v(N), w(N);
+
+    for (ll i = 0; i < N; ++i) {
+        cin >> v[i] >> w[i];
+    }
+    for (ll i = 0; i < 10010; ++i) {
+        dp[0][i] = 0;
+    }
+    for (ll i = 0; i < N; ++i) {
+        for (ll j = 0; j <= W; ++j) {
+            if (w[i] <= j) {
+                chmax(dp[i + 1][j], dp[i][j - w[i]] + v[i]);
+            }
+            chmax(dp[i + 1][j], dp[i][j]);
+        }
+    }
+    cout << dp[N][W] << endl;
+}

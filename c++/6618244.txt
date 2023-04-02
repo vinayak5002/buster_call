@@ -1,0 +1,80 @@
+#include<bits/stdc++.h>
+using namespace std;
+const double eps = 1e-10;
+const int maxn = 16;
+inline int Dcmp(double x) {
+	return x < -eps ? -1 : x > eps ? 1 : 0;
+}
+struct Point {
+	double x, y;
+	Point(double x = 0, double y = 0) : x(x), y(y) {}
+	inline Point operator + (const Point &rhs) const {
+		return Point(x + rhs.x, y + rhs.y);
+	}
+	inline Point operator - (const Point &rhs) const {
+		return Point(x - rhs.x, y - rhs.y);
+	}
+	inline double operator * (const Point &rhs) const {
+		return x * rhs.x + y * rhs.y;
+	}
+	inline double operator ^ (const Point &rhs) const {
+		return x * rhs.y - y * rhs.x;
+	}
+	inline double len2() {
+		return x * x + y * y;
+	}
+	inline double len() {
+		return sqrt(len2());
+	}
+};
+struct Line {
+	Point s, t;
+	Line(Point s = Point(), Point t = Point()) : s(s), t(t) {}
+};
+struct Circle {
+	Point c;
+	double r;
+	Circle(Point c = Point(), double r = 0) : c(c), r(r) {}
+};
+struct Coin {
+	Circle s, t;
+	Coin(Circle s = Circle(), Circle t = Circle()) : s(s), t(t) {}
+}c[maxn];
+int n, dp[(1 << 16) + 5], ans;
+inline double DisToSeg(Line s, Point p) {
+	Point v1 = s.t - s.s, v2 = p - s.s, v3 = p - s.t;
+	if(Dcmp(v1 * v2) < 0)
+		return v2.len();
+	if(Dcmp(v1 * v3) > 0)
+		return v3.len();
+	return fabs(v1 ^ v2) / v1.len();
+}
+int main() {
+	scanf("%d", &n);
+	for(int i = 0, r, sx, sy, tx, ty; i < n; ++ i)
+		scanf("%d%d%d%d%d", &r, &sx, &sy, &tx, &ty), c[i] = Coin(Circle(Point(sx, sy), r), Circle(Point(tx, ty), r));
+	dp[0] = 1;
+	for(int i = 0; i < 1 << n; ++ i) {
+		if(!dp[i])
+			continue;
+		ans = max(ans, __builtin_popcount(i));
+		for(int j = 0; j < n; ++ j) {
+			if(i >> j & 1)
+				continue;
+			int flg = 1;
+			for(int k = 0; k < n; ++ k) {
+				if(j == k)
+					continue;
+// cerr << j << " " << k << " " << c[j].s.r << " " << c[k].s.r << " " << DisToSeg(Line(c[j].s.c, c[j].t.c), i >> k & 1 ? c[k].t.c : c[k].s.c) << endl;
+				if(Dcmp(c[j].s.r + c[k].s.r - DisToSeg(Line(c[j].s.c, c[j].t.c), i >> k & 1 ? c[k].t.c : c[k].s.c)) > 0) {
+					flg = 0;
+					break;
+				}
+			}
+// cerr << i << " " << j << " " << flg << endl;
+			if(flg)
+				dp[i ^ (1 << j)] = 1;
+		}
+	}
+	printf("%d\n", ans);
+}

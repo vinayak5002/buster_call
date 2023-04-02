@@ -1,0 +1,167 @@
+import java.io.*;
+import java.util.*;
+
+/* Use fast reading input class provided by Flatfoot on Codeforces 
+ * - https://codeforces.com/blog/entry/7018
+ */
+class Main {
+    public static void main(String[] args) {
+        MyScanner sc = new MyScanner();
+        out = new PrintWriter(new BufferedOutputStream(System.out));
+
+        int n = sc.nextInt();
+        MyList list = new MyList();
+        for (int i = 0; i < n; i++) {
+            String[] l = sc.nextLine().split(" ");
+            switch (l[0]) {
+                case "insert":
+                    list.insert(Integer.parseInt(l[1]));
+                    break;
+                case "delete":
+                    list.delete(Integer.parseInt(l[1]));
+                    break;
+                case "deleteFirst":
+                    list.deleteFirst();
+                    break;
+                case "deleteLast":
+                    list.deleteLast();
+                    break;
+            }
+        }
+        list.printList();
+        // Start writing your solution here. -----------------------------------
+
+        /*
+         * int n = sc.nextInt(); // read input as integer
+         * long k = sc.nextLong(); // read input as long
+         * double d = sc.nextDouble(); // read input as double
+         * String str = sc.next(); // read input as String
+         * String s = sc.nextLine(); // read whole line as String
+         * 
+         * int result = 3*n;
+         * out.println(result); // print via PrintWriter
+         */
+
+        // Stop writing your solution here. ------------------------------------
+        out.close();
+    }
+
+    public static class Node {
+        int val;
+        Node prev, next;
+        public Node(int n) {
+            this.val = n;
+            this.prev = null;
+            this.next = null;
+        }
+    }
+
+    public static class MyList {
+        Node head = null;
+
+        public MyList() {
+            head = new Node(0);
+            head.next = null;
+        }
+
+        public void insert(int x) {
+            Node tmp = new Node(x);
+            if (head.next != null) {
+                tmp.next = head.next;
+                head.next.prev = tmp;   
+            }
+            head.next = tmp;
+            tmp.prev = head;   
+        }
+
+        public Node search(int x) {
+            Node tmp = head.next;
+            while (tmp != null && tmp.val != x) tmp = tmp.next;
+            return tmp;
+        }
+
+        public void delete(int x) {
+            Node node = search(x);
+            if (node == null) return;
+            node.prev.next = node.next;
+            if (node.next != null)
+                node.next.prev = node.prev;
+        }
+
+        public void deleteFirst() {
+            if (head.next == null) return;
+            head.next = head.next.next;
+            if (head.next != null)
+                head.next.prev = head;
+        }
+
+        public void deleteLast() {
+            Node tmp = head;
+            while (tmp.next != null && tmp.next.next != null) tmp = tmp.next;
+            tmp.next = null;
+            
+        }
+
+        public void printList() {
+            Node tmp = head.next;
+            if (tmp == null) out.println();
+            StringBuilder sb = new StringBuilder();
+            while (tmp != null && tmp.next != null) {
+                sb.append(tmp.val).append(" ");
+                tmp = tmp.next;
+            }
+            sb.append(tmp.val);
+            out.println(sb.toString());
+        }
+    }
+
+
+    // -----------PrintWriter for faster output---------------------------------
+    public static PrintWriter out;
+
+    // -----------MyScanner class for faster input----------
+    public static class MyScanner {
+        BufferedReader br;
+        StringTokenizer st;
+
+        public MyScanner() {
+            br = new BufferedReader(new InputStreamReader(System.in));
+        }
+
+        String next() {
+            while (st == null || !st.hasMoreElements()) {
+                try {
+                    st = new StringTokenizer(br.readLine());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            return st.nextToken();
+        }
+
+        int nextInt() {
+            return Integer.parseInt(next());
+        }
+
+        long nextLong() {
+            return Long.parseLong(next());
+        }
+
+        double nextDouble() {
+            return Double.parseDouble(next());
+        }
+
+        String nextLine() {
+            String str = "";
+            try {
+                str = br.readLine();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return str;
+        }
+
+    }
+    // --------------------------------------------------------
+}
+

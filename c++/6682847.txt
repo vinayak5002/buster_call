@@ -1,0 +1,82 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#define MAX 500000
+
+int n;
+
+typedef struct N{
+	int key;
+	struct N *p;
+	struct N *l;
+	struct N *r;
+}Node;
+Node T[MAX];
+
+Node *root,*NIL;
+
+void preParse(Node *u){
+	if(u==NIL)return;
+	printf(" %d",u->key);
+	preParse(u->l);
+	preParse(u->r);
+}
+void inParse(Node *u){
+	if(u==NULL)return;
+	inParse(u->l);
+	printf(" %d", u->key);
+	inParse(u->r);
+}
+void insert(int k){
+	Node *y=NIL;
+	Node *x=root;
+	Node *z;
+	
+	z=(Node*)malloc(sizeof(Node));
+	z->key=k;
+	z->l=NULL;
+	z->r=NULL;
+	
+	while(x!=NULL){
+		y=x;
+		if(z->key < x->key){
+			x=x->l;
+		}
+		else{
+			x=x->r;
+		}
+	}
+	z->p=y;
+	if(y==NULL){
+		root=z;
+	}
+	else{
+		if(z->key < y->key){
+			y->l=z;
+		}
+		else{
+			y->r=z;
+		}
+	}
+}
+
+int main(){
+	int n, i, x;
+  char com[20];
+  scanf("%d", &n);
+
+  for ( i = 0; i < n; i++ ){
+    scanf("%s", com);
+    if ( com[0] == 'i' ){
+      scanf("%d", &x);
+      insert(x);
+    }
+  	else if ( com[0] == 'p' ){
+      inParse(root);
+      printf("\n");
+      preParse(root);
+      printf("\n");
+    }
+  }
+  return 0;
+}

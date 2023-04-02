@@ -1,0 +1,392 @@
+#pragma GCC target("avx2")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef long double ld;
+#define inf 1000000007
+#define MP make_pair
+#define MT make_tuple
+#define PB push_back
+#define fi first
+#define se second
+#define rep(i,n) for(int i = 0; i < (int)(n); ++i)
+#define rrep(i,n) for(int i = (int)n-1; i >= 0; --i)
+#define srep(i,a,b) for(int i = (int)a; i < (int)(b); ++i)
+#define all(x) (x).begin(),(x).end()
+#define SUM(v) accumulate(all(v), 0LL)
+#define MIN(v) *min_element(all(v))
+#define MAX(v) *max_element(all(v))
+#define lb(c, x) distance((c).begin(), lower_bound(all(c), (x)))
+#define ub(c, x) distance((c).begin(), upper_bound(all(c), (x)))
+#define UNIQUE(x) sort(all(x)), x.erase(unique(all(x)), x.end())
+#define SZ(c) (int)(c).size()
+template<typename T>
+ostream& operator << (ostream& os, vector<T>& vec) {
+    os << "{";
+    for (int i = 0; i<(int)vec.size(); i++) {
+        os << vec[i] << (i + 1 == (int)vec.size() ? "" : ", ");
+    }
+    os << "}";
+    return os;
+}
+// pair出力
+template<typename T, typename U>
+ostream& operator << (ostream& os, pair<T, U> pair_var) {
+    os << "(" << pair_var.first << ", " << pair_var.second << ")";
+    return os;
+}
+// map出力
+template<typename T, typename U>
+ostream& operator << (ostream& os, map<T, U>& map_var) {
+    os << "{";
+    for(auto itr = map_var.begin(); itr != map_var.end(); itr++){
+        os << "(" << itr->first << ", " << itr->second << ")";
+        itr++;
+        if(itr != map_var.end()) os << ", ";
+        itr--;
+    }
+    os << "}";
+    return os;
+}
+// set 出力
+template<typename T>
+ostream& operator << (ostream& os, set<T>& set_var) {
+    os << "{";
+    for(auto itr = set_var.begin(); itr != set_var.end(); itr++){
+        os << (*itr);
+        ++itr;
+        if(itr != set_var.end()) os << ", ";
+        itr--;
+    }
+    os << "}";
+    return os;
+}
+// tuple 出力
+template<int N,class Tuple>
+void out(ostream &os,const Tuple &t){}
+template<int N,class Tuple,class H,class ...Ts>
+void out(ostream &os,const Tuple &t){
+    if(N)os<<", ";
+    os<<get<N>(t);
+    out<N+1,Tuple,Ts...>(os,t);
+}
+template<class ...Ts>
+ostream& operator<<(ostream &os, const tuple<Ts...> &t){
+    os<<"(";
+    out<0,tuple<Ts...>,Ts...>(os,t);
+    os<<")";
+    return os;
+}
+#define overload2(_1, _2, name, ...) name
+#define vec(type, name, ...) vector<type> name(__VA_ARGS__)
+#define VEC(type, name, size)                                                                                                                                  \
+    vector<type> name(size);                                                                                                                                   \
+    IN(name)
+#define vv(type, name, h, ...) vector<vector<type>> name(h, vector<type>(__VA_ARGS__))
+#define VV(type, name, h, w)                                                                                                                                   \
+    vector<vector<type>> name(h, vector<type>(w));                                                                                                             \
+    IN(name)
+#define vvv(type, name, h, w, ...) vector<vector<vector<type>>> name(h, vector<vector<type>>(w, vector<type>(__VA_ARGS__)))
+#define vvvv(type, name, a, b, c, ...)                                                                                                                         \
+    vector<vector<vector<vector<type>>>> name(a, vector<vector<vector<type>>>(b, vector<vector<type>>(c, vector<type>(__VA_ARGS__))))
+#define INT(...)                                                                                                                                               \
+    int __VA_ARGS__;                                                                                                                                           \
+    IN(__VA_ARGS__)
+#define LL(...)                                                                                                                                                \
+    ll __VA_ARGS__;                                                                                                                                            \
+    IN(__VA_ARGS__)
+#define STR(...)                                                                                                                                               \
+    string __VA_ARGS__;                                                                                                                                        \
+    IN(__VA_ARGS__)
+#define CHR(...)                                                                                                                                               \
+    char __VA_ARGS__;                                                                                                                                          \
+    IN(__VA_ARGS__)
+#define DBL(...)                                                                                                                                               \
+    double __VA_ARGS__;                                                                                                                                        \
+    IN(__VA_ARGS__)
+int scan() { return getchar(); }
+void scan(int &a) { cin >> a; }
+void scan(long long &a) { cin >> a; }
+void scan(char &a) { cin >> a; }
+void scan(double &a) { cin >> a; }
+void scan(string &a) { cin >> a; }
+template <class T, class S> void scan(pair<T, S> &p) { scan(p.first), scan(p.second); }
+template <class T> void scan(vector<T> &);
+template <class T> void scan(vector<T> &a) {
+    for(auto &i : a) scan(i);
+}
+template <class T> void scan(T &a) { cin >> a; }
+void IN() {}
+template <class Head, class... Tail> void IN(Head &head, Tail &...tail) {
+    scan(head);
+    IN(tail...);
+}
+const string YESNO[2] = {"NO", "YES"};
+const string YesNo[2] = {"No", "Yes"};
+const string yesno[2] = {"no", "yes"};
+void YES(bool t = 1) { cout << YESNO[t] << endl; }
+void NO(bool t = 1) { YES(!t); }
+void Yes(bool t = 1) { cout << YesNo[t] << endl; }
+void No(bool t = 1) { Yes(!t); }
+void yes(bool t = 1) { cout << yesno[t] << endl; }
+void no(bool t = 1) { yes(!t); }
+#ifdef LOCAL
+void debug_out() { cerr << endl; }
+template <typename Head, typename... Tail>
+void debug_out(Head H, Tail... T) {
+    cerr << " " << H;
+    debug_out(T...);
+}
+#define dbg(...) \
+    cerr << __LINE__ << " [" << #__VA_ARGS__ << "]:", debug_out(__VA_ARGS__)
+#define dump(x) cerr << __LINE__ << " " << #x << " = " << (x) << endl
+#else
+#define dbg(...) (void(0))
+#define dump(x) (void(0))
+#endif
+template<typename A, typename T>
+std::enable_if_t<std::is_convertible<T, A>::value> fill(A& array, const T& val)
+{
+    array = val;
+}
+template<typename A, typename T>
+std::enable_if_t<!std::is_convertible<T, A>::value> fill(A& array, const T& val)
+{
+    for (auto& a : array) {
+        fill(a, val);
+    }
+}
+template <typename T, typename S> T ceil(T x, S y) {
+    assert(y);
+    return (y < 0 ? ceil(-x, -y) : (x > 0 ? (x + y - 1) / y : x / y));
+}
+template <typename T, typename S> T floor(T x, S y) {
+    assert(y);
+    return (y < 0 ? floor(-x, -y) : (x > 0 ? x / y : x / y - (x % y == 0 ? 0 : 1)));
+}
+vector<int> iota(int n) {vector<int> a(n);iota(all(a), 0);return a;}
+template <class T> T POW(T x, int n) {T res = 1;for(; n; n >>= 1, x *= x){if(n & 1) res *= x;}return res;}
+ll pow2(int i) { return 1LL << i; }
+int topbit(signed t) { return t == 0 ? -1 : 31 - __builtin_clz(t); }
+int topbit(ll t) { return t == 0 ? -1 : 63 - __builtin_clzll(t); }
+int lowbit(signed a) { return a == 0 ? 32 : __builtin_ctz(a); }
+int lowbit(ll a) { return a == 0 ? 64 : __builtin_ctzll(a); }
+// int allbit(int n) { return (1 << n) - 1; }
+ll allbit(ll n) { return (1LL << n) - 1; }
+int popcount(signed t) { return __builtin_popcount(t); }
+int popcount(ll t) { return __builtin_popcountll(t); }
+bool ispow2(int i) { return i && (i & -i) == i; }
+
+
+template <class S> void fold_in(vector<S> &v) {}
+template <typename Head, typename... Tail, class S> void fold_in(vector<S> &v, Head &&a, Tail &&...tail) {
+    for(auto e : a) v.emplace_back(e);
+    fold_in(v, tail...);
+}
+template <class S> void renumber(vector<S> &v) {}
+template <typename Head, typename... Tail, class S> void renumber(vector<S> &v, Head &&a, Tail &&...tail) {
+    for(auto &&e : a) e = lb(v, e);
+    renumber(v, tail...);
+}
+template <class S, class... Args> void zip(vector<S> &head, Args &&...args) {
+    vector<S> v;
+    fold_in(v, head, args...);
+    sort(all(v)), v.erase(unique(all(v)), v.end());
+    renumber(v, head, args...);
+}
+template<class T> inline bool chmax(T &a, T b){
+    if(a<b){
+        a = b;
+        return true;
+    }
+    return false;
+}
+template<class T> inline bool chmin(T &a, T b){
+    if(a>b){
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+
+struct RH {
+	static int mod[2], mul[2];
+    static vector<int> pm[2];
+    int sz;
+    vector<vector<int> > hs;
+	RH(const string& s) : sz((int)s.size()), hs(2, vector<int>(sz + 1, 0)){
+        for(int i = 0; i < 2; i++){
+            if(pm[i].empty()) pm[i].push_back(1);
+            for(int j = 0; j < sz; j++){
+                hs[i][j+1] = ((long long)hs[i][j] * mul[i] + s[j]) % mod[i];
+            }
+        }
+	}
+    // 文字列 s のインデックス [l,r) の部分文字列のハッシュ値
+	pair<int, int> hash(const int l, const int r){
+		if(l >= r) return make_pair(0, 0);
+        int res[2];
+        for(int i = 0; i < 2; i++){
+            while((int)pm[i].size() <= r){
+                pm[i].push_back((long long)pm[i].back() * mul[i] % mod[i]);
+            }
+            res[i] = (hs[i][r] - (long long)hs[i][l] * pm[i][r-l]) % mod[i] + mod[i];
+            res[i] = (res[i] >= mod[i]) ? (res[i] - mod[i]) : res[i];
+        }
+		return make_pair(res[0], res[1]);
+	}
+    // 文字列 s 中の pattern の含まれる位置を pos に格納
+    void contain(const string& pattern, vector<int>& pos){
+        int length = (int)pattern.size();
+        if(sz < length) return;
+        RH rh(pattern);
+        pair<int, int> _hash = rh.hash(0, length);
+        for(int i = 0; i < sz - length + 1; i++){
+    		if(hash(i, i + length) == _hash){
+    			pos.push_back(i);
+    		}
+    	}
+        return;
+    }
+};
+vector<int> RH::pm[2];
+int RH::mod[2] = {1000000007, 1000000009}, RH::mul[2] = {10009, 10007};
+
+
+int dp[501][501];
+pair<int,int> pre[501][501];
+vector<pair<int,int> > g[501][501];
+bool flag[501][501];
+int main(){
+    STR(s);
+    RH rh(s);
+    fill(dp,inf);
+    queue<pair<int,int> > q;
+    int n = s.size();
+    q.push(MP(0,n));
+    dp[0][n] = 0;
+    while(!q.empty()){
+        auto [L,R] = q.front();
+        dbg(L,R);
+        q.pop();
+        int cost = dp[L][R];
+        for(int x = 0;x<10;x++){
+            for(int y=0;y<10;y++){
+                int nL = L,nR = R;
+                if(x==0){
+                    if(L>=n)continue;
+                    if(s[L]!='0'+y)continue;
+                    nL++;
+                }else{
+                    if(y==0){
+                        
+                    }else{
+                        if(L-x<0)continue;
+                        if(L+y>n)continue;
+                        if(rh.hash(L-x,L-x+y)!=rh.hash(L,L+y))continue;
+                        // [L-x,L-x+y) == [L,L+y)
+                        // L -> L+y
+                        nL += y;
+                    }
+                }
+                if(y==0){
+                    if(R==0)continue;
+                    if(s[R-1]!='0'+x)continue;
+                    nR--;
+                }else{
+                    if(x==0){
+
+                    }else{
+                        if(R-x-y<0)continue;
+                        if(R>n)continue;
+                        if(rh.hash(R-x,R)!=rh.hash(R-x-y,R-y))continue;
+                        // [R-x,R) == [R-x-y,R-y)
+                        // R -> R-x
+                        nR -= x;
+                    }
+                }
+                if(chmin(dp[nL][nR],cost+1)){
+                    g[nL][nR].push_back({L,R});
+                    q.push({nL,nR});
+                    dbg(L,R,nL,nR,x,y);
+                }else if(dp[nL][nR]==cost+1){
+                    g[nL][nR].push_back({L,R});
+                }
+            }
+        }
+    }
+    dbg(dp[n][0]);
+    q.push({n,0});
+    flag[n][0] = true;
+    while(!q.empty()){
+        auto [x,y] = q.front();
+        q.pop();
+        for(auto [nx,ny]:g[x][y]){
+            if(!flag[nx][ny]&&dp[nx][ny] == dp[x][y]-1){
+                flag[nx][ny] = true;
+                q.push(MP(nx,ny));
+            }
+        }
+    }
+    dbg(flag[0][n]);
+    int L = 0;
+    int R = n;
+    vector<pair<int,int> >res;
+    while(L!=n||R!=0){
+        dbg(L,R);
+        bool ok = 0;
+        for(int x = 0;x<10;x++){
+            for(int y=0;y<10;y++){
+                int nL = L,nR = R;
+                if(x==0){
+                    if(L>=n)continue;
+                    if(s[L]!='0'+y)continue;
+                    nL++;
+                }else{
+                    if(y==0){
+                        
+                    }else{
+                        if(L-x<0)continue;
+                        if(L+y>n)continue;
+                        if(rh.hash(L-x,L-x+y)!=rh.hash(L,L+y))continue;
+                        // [L-x,L-x+y) == [L,L+y)
+                        // L -> L+y
+                        nL += y;
+                    }
+                }
+                if(y==0){
+                    if(R==0)continue;
+                    if(s[R-1]!='0'+x)continue;
+                    nR--;
+                }else{
+                    if(x==0){
+
+                    }else{
+                        if(R-x-y<0)continue;
+                        if(R>n)continue;
+                        if(rh.hash(R-x,R)!=rh.hash(R-x-y,R-y))continue;
+                        // [R-x,R) == [R-x-y,R-y)
+                        // R -> R-x
+                        nR -= x;
+                    }
+                }
+                if(dp[nL][nR] == dp[L][R]+1&&flag[nL][nR]){
+                    res.push_back({x,y});
+                    ok = 1;
+                    L = nL;
+                    R = nR;
+                    break;
+                }
+            }
+            if(ok)break;
+        }
+    }
+    for(auto [x,y]:res){
+        cout << x << y;
+    }
+    cout << endl;
+    return 0;
+}

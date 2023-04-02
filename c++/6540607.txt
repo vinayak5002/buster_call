@@ -1,0 +1,103 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// 総数を1000000007（素数）で割った余り
+const long long mod = 1e9 + 7;
+
+using ll = long long;
+using pii  = pair<int, int>;
+using pll = pair<ll, ll>;
+#define ull unsigned long long
+#define ld long double
+#define vi vector<int>
+#define vll vector<ll>
+#define vc vector<char>
+#define vs vector<string>
+#define vpii vector<pii>
+#define vpll vector<pll>
+
+#define rep(i, a, b) for (int i = a; i < b; i++)
+#define rrep(i, a, b) for (int i = a; i >= b; i--)
+#define fore(i, a) for (auto& i : a)
+
+#define sz(x) ((int)(x).size())
+#define all(x) (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+
+#define SORT(v, n) sort(v, v + n);
+#define VSORT(v) sort(v.begin(), v.end());
+#define RSORT(x) sort(rall(x));
+#define pb push_back
+#define mp make_pair
+
+#define INF (1e9)
+#define PI (acos(-1))
+#define EPS (1e-7)
+
+ull gcd(ull a, ull b) { return b ? gcd(b, a % b) : a; }
+ull lcm(ull a, ull b) { return a / gcd(a, b) * b; }
+
+template <typename T>
+struct edge {
+  int src, dst;
+  T cost;
+
+  edge(int dst, T cost) : src(-1), dst(dst), cost(cost) {}
+  edge(int src, int dst, T cost) : src(src), dst(dst), cost(cost) {}
+};
+
+template <typename T>
+using Edges = vector<edge<T>>;
+
+template <typename T>
+using WeightedGraph = vector<Edges<T>>;
+
+template<typename T>
+vector<T> dijkstra(WeightedGraph<T> &g, int start){
+  const auto _INF_ = numeric_limits<T>::max();
+  vector<T> path_cost(g.size(), _INF_);
+
+  using Pi = pair<T, int>;
+  priority_queue<Pi, vector<Pi>, greater<Pi>> search_node; //探索予定ノード
+  path_cost[start] = 0;
+  search_node.emplace(path_cost[start], start); //スタート地点のコストと番号を追加
+  while(!search_node.empty()){
+    T cost;
+    int idx;
+    tie(cost, idx) = search_node.top();
+    search_node.pop();
+    if(path_cost[idx] < cost) continue; //探索予定のコストが現在よりも小さければ無視
+
+    //ノードidxの各隣接ノードについて
+    for(auto &e : g[idx]){
+      auto next_cost = cost + e.cost;
+      if(path_cost[e.dst] <= next_cost) continue; //探索先のコストが現在よりも小さければ無視
+      path_cost[e.dst] = next_cost;
+      search_node.emplace(path_cost[e.dst], e.dst);
+    }
+  }
+  return path_cost;
+}
+
+int main(){
+  // cout << fixed << setprecision(5);
+
+  int V, E, r;
+  std::scanf("%d %d %d", &V, &E, &r);
+  WeightedGraph<int> g(V);
+  rep(i, 0, E) {
+    int s, t, d;
+    std::scanf("%d %d %d", &s, &t, &d);
+    g[s].emplace_back(s, t, d);
+  }
+
+  vector<int> cost_map = dijkstra(g, r);
+  fore(i, cost_map) { 
+    if(1.0e8 < i)
+      printf("INF\n");
+    else
+      printf("%d\n", i);
+  }
+  return 0;
+}
+

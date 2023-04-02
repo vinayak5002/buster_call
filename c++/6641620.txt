@@ -1,0 +1,68 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using P = pair<int, int>;
+#define test cout << "test:"
+const int inf = 1073741824;
+const long long linf = 1152921504606846976;
+// const int mod = 998244353;
+// const int mod = 1000000007;
+const int dx[] = {1, 0, -1, 0}, dy[] = {0, 1, 0, -1};
+
+void _main()
+{
+	int n;
+	cin >> n;
+	vector<int> a(n);
+	for (int i = 0; i < n; i++)
+		cin >> a[i];
+
+	vector<int> ans(n, inf);
+	function<void(int, int)> dfs = [&](int now, int cnt)
+	{
+		if (now >= n - 1)
+		{
+			ans[n - 1] = min(ans[n - 1], cnt);
+			return;
+		}
+
+
+
+		cout << "serach:" << now << '\n';
+
+		if (cnt >= ans[now])
+			return;
+
+		else
+			ans[now] = cnt;
+
+		if (a[now] != 0)
+		{
+			if (a[now + a[now]] != -a[now])
+				dfs(max(0, now + a[now]), cnt);
+		}
+
+		else for (int i = 1; i <= 6; i++)
+		{
+			if (a[now + i] == -i)
+				continue;
+
+			else
+				dfs(now + i, cnt + 1);
+		}
+	};
+	dfs(0, 0);
+
+	
+	// test;
+	cout << ans[n - 1] << '\n';
+	return;
+}
+
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin.tie(0);
+	cout << fixed << setprecision(15);
+	_main();
+}

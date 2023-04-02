@@ -1,0 +1,92 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+const int N = 3;
+const int N2 = 9; 
+static const int dx[4] = {-1, 0, 1, 0};
+static const int dy[4] = {0, -1, 0, 1};
+static const char dir[4] = {'u', 'l', 'd', 'r'};
+
+struct Puzzle{
+	int f[N2];
+	//int visited[N2];
+	int space;
+	string path;
+	
+	bool operator < (const Puzzle &p) const{
+		for(int i = 0; i < N2; i++){
+			if(f[i] != p.f[i]) 
+				return f[i] > p.f[i];             
+		}
+		return false;
+	}
+	
+};
+
+bool isTarget(Puzzle p){
+	for(int i = 0; i < N2-1; i++)
+		if(p.f[i] != (i + 1)) 
+			return false;
+	return true;
+}
+string bfs(Puzzle s){
+	queue<Puzzle> Q;
+	map<Puzzle, bool> Visited;
+	s.path = "";
+
+//	memset(s.visited, 0, sizeof(s.visited));
+//	s.visited[s.space] = 1;	
+	
+	Q.push(s);
+	Visited[s] = true;
+	Puzzle u, v;
+	
+
+	while(!Q.empty()){
+		u = Q.front();
+		Q.pop();
+		if( isTarget(u) ) return u.path;
+		//空格所在位置 
+		int sx = u.space / N;    
+		int sy = u.space % N;
+		
+		for(int r = 0; r < 4; r++){
+			int tx = sx + dx[r];
+			int ty = sy + dy[r];
+			
+			if(tx < 0 || ty < 0 || tx >= N || ty >= N) continue;
+		//	if(!u.visited[tx * N + ty]){
+				v = u;
+				v.space = tx * N + ty;
+				//v.visited[v.space] = 1;
+				
+				swap(v.f[u.space], v.f[v.space]);
+			   if(!Visited[v]){
+			   	   Visited[v] = true;
+				   v.path += dir[r];
+					Q.push(v);
+			   }
+				
+		//	}
+			
+		}
+	}
+	
+	return "unsolvable";
+}
+int main(){
+	Puzzle in;
+	
+	for(int i = 0; i < N2; i++){
+		cin >> in.f[i];
+		if(in.f[i] == 0){
+			//in.f[i] = N2;
+			in.space = i;
+		}
+	}
+	
+	string ans = bfs(in);
+	cout << ans.size() << endl;
+   
+	return 0;
+} 

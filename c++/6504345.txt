@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < n; ++i)
+typedef long long ll;
+using namespace std;
+
+void solve(int N) {
+    vector<vector<pair<int, int>>> P(N + 1);
+    rep(i, N + 1) {
+        int M;
+        cin >> M;
+
+        int mi_x = 1e9, mi_y = 1e9;
+        rep(j, M) {
+            int x, y;
+            cin >> x >> y;
+            mi_x = min(mi_x, x);
+            mi_y = min(mi_y, y);
+            P[i].emplace_back(x, y);
+        }
+
+        rep(j, M) {
+            P[i][j].first -= mi_x;
+            P[i][j].second -= mi_y;
+        }
+    }
+
+    // 回転させておく
+    vector<vector<pair<int, int>>> A(4);
+    A[0] = P[0];
+    int ma_x = -1e9, ma_y = -1e9;
+    rep(i, A[0].size()) {
+        ma_x = max(ma_x, A[0][i].first);
+        ma_y = max(ma_y, A[0][i].second);
+    }
+    rep(i, A[0].size()) {
+        A[1].emplace_back(ma_x - A[0][i].first, ma_y - A[0][i].second);
+    }
+
+    rep(i, A[0].size()) {
+        A[2].emplace_back(A[0][i].second, A[0][i].first);
+        A[2][i].second = ma_x - A[2][i].second;
+
+        A[3].emplace_back(A[0][i].second, A[0][i].first);
+        A[3][i].first = ma_y - A[3][i].first;
+    }
+
+    for (int i = 1; i <= N; ++i) {
+        if (A[0].size() != P[i].size()) continue;
+
+        rep(_, 2) {
+            rep(j, 4) {
+                bool flag = true;
+                rep(k, A[j].size()) {
+                    if (A[j][k] != P[i][k]) {
+                        flag = false;
+                        break;
+                    }
+                }
+                if (flag) {
+                    cout << i << "\n";
+                    break;
+                }
+            }
+            reverse(P[i].begin(), P[i].end());
+        }
+    }
+    cout << "+++++\n";
+}
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+
+    int N;
+    while (cin >> N, N)
+        solve(N);
+
+    return 0;
+}
+

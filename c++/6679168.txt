@@ -1,0 +1,96 @@
+#include<stdio.h>
+
+#define e -1
+#define M_MAX 500000
+
+int num[M_MAX]; //数値を入れる配列
+int left[M_MAX]; //左の"番号"を入れる配列(番号はnumの位置)
+int right[M_MAX]; //右の番号を入れる配列
+int parent[M_MAX]; //親の番号を入れる配列
+
+
+void insert(int n,int i)
+{
+	int j=0;
+	num[i] = n;
+	while(1){
+		if(n < num[j]){ //二分木の左側
+			if(left[j] == e){
+				left[j] = i;
+				break;
+			}else{
+				j = left[j];
+			}
+		}else if(num[j] < n){ //二分木の右側
+			if(right[j] == e){
+				right[j] = i;
+				break;
+			}else{
+				j = right[j];
+			}
+		}else{break;} //例外：初回のみ通る
+	}
+}
+
+void print_mid(int i, int m)
+{
+	if(left[i] != e){ //左の子が存在
+		print_mid(left[i], m);
+	}
+	printf("%d", num[i]);
+	if(i<m) printf(" ");
+	if(right[i] != e){ //右の子が存在
+		print_mid(right[i], m);
+	}
+}
+
+void print_first(int i, int m)
+{
+	printf("%d", num[i]);
+	if(i<m) printf(" ");
+	if(left[i] != e){ //左の子が存在
+		print_first(left[i], m);
+	}
+	if(right[i] != e){ //右の子が存在
+		print_first(right[i], m);
+	}
+}
+
+int main(void)
+{
+	int m; //命令数
+	char com[8]; //命令
+	int n; //入力されたキー値
+	char str[20];
+	
+	int i;
+	
+	fgets(str, sizeof(str)-1, stdin);
+	sscanf(str, "%d", &m);
+	
+	//命令数分の初期化
+	for(i=0; i<m; i++){
+		num[i] = e;
+		left[i] = e;
+		right[i] = e;
+	}
+	
+	for(i=0; i<m; i++){
+		fgets(str, sizeof(str)-1, stdin);
+		sscanf(str, "%s%d", com, &n);
+		if(com[0] == 'i'){ //insert命令
+			insert(n, i);
+		}else{ //print命令
+			//中間順巡回アルゴリズム
+			print_mid(0, m);
+			printf("\n");
+			//先行順巡回アルゴリズム
+			print_first(0, m);
+		}
+	}
+	/*for(i=0; i<m; i++){
+		printf("num[%d]=%d, left=num[%d], right=num[%d]\n", i, num[i], left[i], right[i]);
+	}*/
+	
+	return 0;
+}

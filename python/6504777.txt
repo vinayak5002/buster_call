@@ -1,0 +1,98 @@
+//
+//  main.c
+//  ITP1_11_D:   Dice IV
+//
+//  Created by x20039xx on 2020/08/24.
+//  Copyright © 2020 x20039xx. All rights reserved.
+//
+
+#include <stdio.h>
+
+int judge(int a1, int a2, int a3, int a4, int a5, int a6,
+            int b1, int b2, int b3, int b4, int b5, int b6){
+    int tmp=0, flag=0, count=0, count1=0;
+    //まず上面と底面を揃える
+    while (1) {
+        if (a1==b1 && a6==b6) {
+            break;
+        }
+        tmp=a6;
+        a6=a5;
+        a5=a1;
+        a1=a2;
+        a2=tmp;
+        count++;
+        if (count==4) {
+            flag=1;
+            break;
+            
+        }
+    }
+    while (flag==1) {
+        if (a1==b1 && a6==b6) {
+            flag=0;
+            break;
+        }
+        tmp=a1;
+        a1=a4;
+        a4=a6;
+        a6=a3;
+        a3=tmp;
+        count1++;
+        if (count1==4) {
+            break;
+        }
+    }
+    count=0;
+    while (1) {
+        if (flag==1) {
+            break;
+        }
+        if (a3== b3&& a4==b4) {
+            break;
+        }
+        tmp=a2;
+        a2=a3;
+        a3=a5;
+        a5=a4;
+        a4=tmp;
+        count++;
+        if (count==4) {
+            flag=1;
+            break;
+        }
+    }
+    return  flag;
+}
+
+int main(int argc, const char * argv[]) {
+    // insert code here...
+    int n, a[200][7], i, j, x, y, sum1=0, sum2=0, tmp2;
+    scanf("%d", &n);
+    for (i=0; i<n; i++) {
+        for (j=0; j<6; j++) {
+            scanf("%d", &a[i][j]);
+        }
+    }
+    //n-1は0から始まってるから
+    //j=i+1はi番目+1にして総当たりを行ってる。
+    for (i=0; i<n-1; i++) {
+        for (j=i+1; j<n; j++) {
+            x=i*6;
+            y=j*6;
+            tmp2=judge(a[i][0], a[i][1], a[i][2], a[i][3], a[i][4], a[i][5], a[j][0], a[j][1], a[j][2], a[j][3], a[j][4], a[j][5]);
+            if (tmp2==0) {
+                sum1++;
+            }else{
+                sum2++;
+            }
+        }
+    }
+    //一回でもNoが入ったらダメ
+    if (sum1==0) {
+        printf("Yes\n");
+    }else{
+        printf("No\n");
+    }
+}
+

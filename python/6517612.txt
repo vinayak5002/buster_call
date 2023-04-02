@@ -1,0 +1,58 @@
+require('readline')
+  .createInterface({ input: process.stdin })
+  .on('line', (line) => main(line, process.stdout))
+// .on('close', () => main(stdin, process.stdout))
+
+/**
+ * @param {number} num 
+ * @returns {string}
+ */
+function numToPaddedBits(num) {
+  return ('0'.repeat(32) + num.toString(2)).slice(-32)
+}
+
+/**
+ * @param {number} num 
+ */
+function numToBuf(num) {
+  const buf = new Uint8Array(4)
+  for(let i = 0; num !== 0; i++) {
+    buf[i] = num & 0xFF
+    num >>= 8
+  }
+  return buf
+}
+
+/**
+ * @param {Uint8Array} buf 
+ */
+ function bufToNum(buf) {
+    let num = 0
+    buf.forEach((n, i) => {
+      num += n << (i * 8)
+    })
+  return num
+}
+
+/**
+ * 
+ * @param {string} line 
+ * @param {NodeJS.WriteStream} so 
+ */
+function main(line, so) {
+
+  const [a, b] = line.split(' ').map(s => numToBuf(Number(s)))
+
+  // console.log(a, b)
+  
+  const band = a.map((_, i) => a[i] & b[i])
+  const bor = a.map((_, i) => a[i] | b[i])
+  const bxor = a.map((_, i) => a[i] ^ b[i])
+  
+  // console.log(band, bor, bxor)
+
+  so.write(numToPaddedBits(bufToNum(band)) + '\n');
+  so.write(numToPaddedBits(bufToNum(bor)) + '\n');
+  so.write(numToPaddedBits(bufToNum(bxor)) + '\n');
+}
+

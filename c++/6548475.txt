@@ -1,0 +1,65 @@
+#include <iostream>
+#include <unordered_map>
+#include <unordered_set>
+#include <set>
+#include <vector>
+#include <numeric>
+#include <algorithm>
+#include <queue>
+#include <string>
+#include <random>
+#include <array>
+#include <climits>
+#include <map>
+#include <cassert>
+#include <stack>
+#include <iomanip>
+#include <cfloat>
+#include <bitset>
+#include <fstream>
+#include <chrono>
+
+using namespace std;
+class UnionFind {
+	vector<int> vec;
+public:
+	UnionFind(const int size) : vec(size, -1) {};
+	int find(const int a) {
+		if (vec[a] < 0) return a;
+		return vec[a] = find(vec[a]);
+	}
+	int size_of(const int a) {
+		return -vec[find(a)];
+	}
+	void unite(int a, int b) {
+		a = find(a);
+		b = find(b);
+		if (a == b) return;
+		if (vec[a] > vec[b]) swap(a, b);
+		vec[a] += vec[b];
+		vec[b] = a;
+	}
+};
+bool solve(const int w, const int h, const vector<tuple<int, int, int>> filled) {
+	UnionFind uft(w + h);
+	for (const auto [x, y, _] : filled) {
+		uft.unite(x, y + w);
+	}
+	return uft.size_of(0) == w + h;
+}
+int main() {
+	while (true) {
+		int w, h; cin >> w >> h;
+		if (w == 0 && h == 0) break;
+		vector<tuple<int, int, int>> filled(w + h - 1);
+		for (auto& [x, y, n] : filled) {
+			cin >> x >> y >> n; --x; --y;
+		}
+		if (solve(w, h, filled)) {
+			cout << "YES\n";
+		}
+		else {
+			cout << "NO\n";
+		}
+	}
+}

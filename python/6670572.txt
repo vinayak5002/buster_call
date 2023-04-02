@@ -1,0 +1,47 @@
+// 二次元累積和
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using VI = vector<int>;
+using VVI = vector<vector<int>>;
+
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    int m, n, k;
+    cin >> m >> n;
+    cin >> k;
+
+    VVI j(m + 1, VI(n + 1, 0));
+    VVI o(m + 1, VI(n + 1, 0));
+    VVI i(m + 1, VI(n + 1, 0));
+
+    for (int r = 1; r <= m; ++r) {
+        string s;
+        cin >> s;
+        s = '0' + s;
+        for (int c = 1; c <= n; ++c) {
+            j[r][c] = j[r - 1][c] + j[r][c - 1] - j[r - 1][c - 1];
+            o[r][c] = o[r - 1][c] + o[r][c - 1] - o[r - 1][c - 1];
+            i[r][c] = i[r - 1][c] + i[r][c - 1] - i[r - 1][c - 1];
+            if (s[c] == 'J')
+                ++j[r][c];
+            else if (s[c] == 'O')
+                ++o[r][c];
+            else
+                ++i[r][c];
+        }
+    }
+
+    while (k--) {
+        int a, b, c, d;
+        cin >> a >> b >> c >> d;
+        int j_cnt = j[c][d] - j[a - 1][d] - j[c][b - 1] + j[a - 1][b - 1];
+        int o_cnt = o[c][d] - o[a - 1][d] - o[c][b - 1] + o[a - 1][b - 1];
+        int i_cnt = i[c][d] - i[a - 1][d] - i[c][b - 1] + i[a - 1][b - 1];
+        cout << j_cnt << " " << o_cnt << " " << i_cnt << endl;
+    }
+    return 0;
+}
+

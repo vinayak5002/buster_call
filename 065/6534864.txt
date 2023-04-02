@@ -1,0 +1,122 @@
+#include <iostream>
+using namespace	std;
+
+struct LinkNode {
+	int data;
+	LinkNode* piror;
+	LinkNode* next;
+};
+
+void init(LinkNode*& head) {
+	head = (LinkNode*)malloc(sizeof(LinkNode));
+
+	if (head == NULL) {
+		exit(0);
+	}
+
+	head->piror = head->next = head;
+}
+
+//在头节点后插入一个节点
+void insertX(LinkNode*& head, int x) {
+
+	LinkNode* p = (LinkNode*)malloc(sizeof(LinkNode));
+	
+	if (p == NULL) {
+		exit(0);
+	}
+
+	p->data = x;
+	p->piror = head;
+	p->next = head->next;
+	head->next->piror = p;
+	head->next = p;
+
+}
+
+//删除第一个值为x的节点
+void deleteX(LinkNode*& head, int x) {
+	LinkNode* p = head->next;
+
+	while (p != head) {
+		p = p->next;
+		if (p->data == x) {
+			break;
+		}
+	}
+
+	if (p == head) {
+		return;
+	}
+
+	p->piror->next = p->next;
+	p->next->piror = p->piror;
+	free(p);
+}
+
+//删除首元节点
+void deleteFirst(LinkNode*& head) {
+	LinkNode* p = head->next;
+
+	p->piror->next = p->next;
+	p->next->piror = p->piror;
+	free(p);
+}
+
+//删除表尾节点
+void deleteLast(LinkNode*& head) {
+	LinkNode* p = head->piror;
+
+	p->piror->next = p->next;
+	p->next->piror = p->piror;
+	free(p);
+}
+
+void printLink(LinkNode* head) {
+	LinkNode* p = head->next;
+
+	while (p != head) {
+		if(p == head->next){
+			cout << p->data;
+		}
+		else {
+			cout << " " << p->data;	
+		}
+		p = p->next;
+	}
+
+	cout << endl;
+}
+
+int main() {
+
+	LinkNode* head;
+	init(head);
+
+	string op;
+	int opData = 0, n = 0;
+
+	cin >> n;
+
+	for (int i = 0; i < n; i++) {
+		cin >> op;
+
+		if (op == "insert") {
+			cin >> opData;
+			insertX(head, opData);
+		}
+		else if (op == "delete") {
+			cin >> opData;
+			deleteX(head, opData);
+		}
+		else if (op == "deleteFirst") {
+			deleteFirst(head);
+		}
+		else if (op == "deleteLast") {
+			deleteLast(head);
+		}
+	}
+
+	printLink(head);
+
+}

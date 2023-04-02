@@ -1,0 +1,98 @@
+#include <bits/stdc++.h>
+#pragma GCC optimize("Ofast")
+#define _GLIBCXX_DEBUG
+using namespace std;
+using std::cout;
+using std::cin;
+using std::endl;
+using ll=long long;
+using ld=long double;
+ll ILL=2167167167167167167;
+const int INF=2100000000;
+const ll mod=1e9+7;
+#define rep(i,a) for (ll i=0;i<a;i++)
+#define all(p) p.begin(),p.end()
+template<class T> using _pq = priority_queue<T, vector<T>, greater<T>>;
+template<class T> ll LB(vector<T> &v,T a){return lower_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> ll UB(vector<T> &v,T a){return upper_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> bool chmin(T &a,const T &b){if(a>b){a=b;return 1;}else return 0;}
+template<class T> bool chmax(T &a,const T &b){if(a<b){a=b;return 1;}else return 0;}
+template<class T> void So(vector<T> &v) {sort(v.begin(),v.end());}
+template<class T> void Sore(vector<T> &v) {sort(v.begin(),v.end(),[](T x,T y){return x>y;});}
+void yneos(bool a){if(a) cout<<"Yes\n"; else cout<<"No\n";}
+template<class T> void vec_out(vector<T> &p){for(int i=0;i<(int)(p.size());i++){if(i) cout<<" ";cout<<p[i];}cout<<"\n";}
+
+ll W,H,N;
+
+using matr=vector<vector<ll>>;
+matr zero(int N){
+	vector<vector<ll>> p(N,vector<ll>(N));
+	return p;
+}
+matr make_mat(int N){
+	vector<vector<ll>> ans(N,vector<ll>(N));
+	rep(i,N){
+		for(int j=-1;j<=1;j++){
+			if(0<=i+j&&i+j<N){
+				ans[i][i+j]=1;
+			}
+		}
+	}
+	return ans;
+}
+
+matr mul(matr l,matr r){
+	auto ans=zero(W);
+	rep(i,W) rep(j,W) rep(k,W){
+		ans[i][k]=(ans[i][k]+(l[i][j]*r[j][k])%mod)%mod;
+	}
+	return ans;
+}
+
+matr pow(matr p,ll x){
+	auto ans=zero(W);
+	rep(i,W) ans[i][i]=1;
+	while(x){
+		if(x&1) ans=mul(ans,p);
+		x>>=1;
+		p=mul(p,p);
+	}
+	return ans;
+}
+
+void solve();
+// oddloop
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	int t=0;
+	while(cin>>W>>H>>N,W) t++,cout<<"Case "<<t<<": ",solve();
+}
+
+void solve(){
+	map<ll,vector<int>> m;
+	auto ans=zero(W);
+	rep(i,W) ans[i][i]=1;
+	m[1]={};
+	m[H]={};
+	rep(i,N){
+		ll x,y;
+		cin>>x>>y;
+		x--;
+		m[y].push_back(x);
+	}
+	while((int)(m.size())!=1){
+		auto f=*m.begin();
+		m.erase(f.first);
+		auto l=*m.begin();
+		for(auto x:f.second){
+			rep(i,W) ans[i][x]=0;
+		}
+		ans=mul(ans,pow(make_mat(W),l.first-f.first));
+		for(auto x:l.second){
+			rep(i,W) ans[i][x]=0;
+		}
+	}
+	cout<<ans[0][W-1]<<"\n";
+}
+

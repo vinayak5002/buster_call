@@ -1,0 +1,41 @@
+#include <iostream>
+#include <vector>
+using ll = long long;
+using namespace std;
+using Graph = vector<vector<ll>>;
+ll INF = (1LL<<33);
+ll n, m, start;
+Graph g;
+vector<vector<ll>> dp;
+ll rec(ll S, ll v) {
+	if (S & (1<<v)) {
+		// use memo
+		if (dp[S][v] != -1) return dp[S][v];
+		else dp[S][v] = INF;
+	
+		ll nS = S ^ (1<<v);
+		for (ll nv = 0; nv < n; nv++) {
+			dp[S][v] = min(dp[S][v], rec(nS, nv) + g[v][nv]);
+		}
+		return dp[S][v];
+	} else {
+		if (S == 0 && v == start) return 0;
+		else return INF;
+	}
+}
+int main() {
+	cin >> n >> m;
+	g.resize(n, vector<ll>(n, INF));
+	dp.resize((1<<n), vector<ll>(n, INF));
+	for (ll i = 0; i < m; i++) {
+		ll s, t, d; cin >> s >> t >> d;
+		g[s][t] = d;
+	}
+	ll cost = INF;
+	for (start = 0; start < n; start++) {
+		fill(dp.begin(), dp.end(), vector<ll>(n, -1));
+		cost = min(cost, rec((1<<n)-1, start));
+	}
+	cout << (cost == INF ? -1 : cost) << endl;
+}
+

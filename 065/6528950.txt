@@ -1,0 +1,12 @@
+if __name__ == '__main__':
+	n = int(input())
+	R = [int(input()) for i in range(n)]
+
+	minv = R[0]
+	maxv = R[1] - R[0]
+	for j in range(1, n):
+		if (maxv < R[j] - minv):
+			maxv = R[j] - minv
+		if (R[j] < minv):
+			minv = R[j]
+	print(maxv)

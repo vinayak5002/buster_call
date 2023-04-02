@@ -1,0 +1,77 @@
+#include <stdio.h>
+
+#define N 1000
+#define Q 20000
+
+int main(void) {
+	int n, q, query, t, x, i, j, parent, child, tmp, Lchild, Rchild, BIGchild;
+	int queue[N][Q];
+	int size[N];
+
+	scanf("%d %d", &n, &q);
+
+	for (i = 0; i < n; i++){
+		size[i] = 0;
+	}
+
+	for (i = 0; i < q; i++){
+		scanf("%d %d", &query, &t);
+		if (query == 0){
+			scanf("%d", &x);
+			queue[t][size[t]] = x;
+			child = size[t];
+			size[t]++;
+			while (child > 0) {
+				parent = (child + 1) / 2 - 1;
+				if (queue[t][child] > queue[t][parent]){
+					tmp = queue[t][child];
+					queue[t][child] = queue[t][parent];
+					queue[t][parent] = tmp;
+					child = parent;
+				}
+				else{
+					break;
+				}
+			}
+		}
+
+		else if (query == 1){
+			if (size[t] != 0){
+				printf("%d\n", queue[t][0]);
+			}
+		}
+
+		else if (query == 2){
+			if (size[t] != 0){
+				queue[t][0] = queue[t][size[t] - 1];
+				size[t]--;
+				parent = 0;
+				while (parent * 2 + 1 <= size[t] - 1){
+					Lchild = parent * 2 + 1;
+					if (parent * 2 + 2 <= size[t] - 1){
+						Rchild = parent * 2 + 2;
+						if (queue[t][Lchild] > queue[t][Rchild]){
+							BIGchild = Lchild;
+						}
+						else {
+							BIGchild = Rchild;
+						}
+					}
+					else {
+						BIGchild = Lchild;
+					}
+					if (queue[t][parent] < queue[t][BIGchild]){
+						tmp = queue[t][parent];
+						queue[t][parent] = queue[t][BIGchild];
+						queue[t][BIGchild] = tmp;
+						parent = BIGchild;
+					}
+					else {
+						break;
+					}
+				}
+			}
+		}
+	}
+	return 0;
+}

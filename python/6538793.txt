@@ -1,0 +1,84 @@
+use std::{cmp::Ordering, io::Read};
+
+fn main() {
+    let mut input = String::new();
+    std::io::stdin().read_to_string(&mut input).unwrap();
+    let mut set = MySet::new();
+    input.lines().skip(1).for_each(|e| {
+        let mut itr = e.split_ascii_whitespace();
+        match itr.next().unwrap() {
+            "insert" => {
+                let h = hash(itr.next().unwrap());
+                set.insert(h);
+            },
+            "find" => {
+                let h = hash(itr.next().unwrap());
+                if set.find(h).0 == true {
+                    println!("yes");
+                } else {
+                    println!("no");
+                }
+            },
+            _ => {panic!()},
+        }
+    })
+}
+
+fn hash (dna: &str) -> u32{
+    dna.trim().chars().fold(0u32, |h,e| {
+        h * 5 + match e {
+            'A' => 1,
+            'G' => 2,
+            'C' => 3,
+            'T' => 4,
+            _ => {panic!()},
+        }
+    })
+}
+
+struct MySet <T: PartialOrd + Copy>{
+    v: Vec<T>
+}
+
+impl<T:PartialOrd + Copy> MySet<T> {
+    pub fn new () -> Self {
+        Self {
+            v: Vec::new()
+        }
+    }
+    pub fn insert (&mut self, q:T) {
+        let (found, idx) = self.find(q);
+        if !found {
+            self.v.insert(idx, q);
+        }
+    }
+
+    pub fn find (&self, q:T) -> (bool, usize) {
+        self.find_inner(q, 0, self.v.len())
+    }
+
+    fn find_inner (&self, q:T, start: usize, end:usize) -> (bool, usize) {
+        let len = end - start;
+        if len == 0 {
+            return (false, 0);
+        }
+        let i = len / 2 + start;
+        match q.partial_cmp(&self.v[i]).unwrap() {
+            Ordering::Equal => (true, i),
+            Ordering::Greater => {
+                if len == 1 {
+                    (false, start + 1)
+                } else {
+                    self.find_inner(q, i + 1, end)
+                }
+            },
+            Ordering::Less => {
+                if len == 1 {
+                    (false, start)
+                } else {
+                    self.find_inner(q, start, i-1)
+                }
+            },
+        }
+    }
+}

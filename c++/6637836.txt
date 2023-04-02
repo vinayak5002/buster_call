@@ -1,0 +1,86 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+
+#define L 14
+
+struct Node{
+	int key;
+	struct Node *right;
+	struct Node *left;
+	struct Node *parent;
+};
+typedef struct Node Node;
+
+Node *root, *NIL;
+
+void insert(int k){
+	Node *y;
+	Node *x;
+	Node *z;
+	
+	z = (Node *)malloc(sizeof(Node));
+	z->key = k;
+	z->left = NIL;
+	z->right = NIL;
+	y = NIL;
+	x = root;
+	
+	while ( x != NIL ){
+		y = x;
+		if ( z->key < x->key ) x = x->left;
+		else x = x->right;
+	}
+	
+	//新しい要素の配置場所を決定
+	z->parent = y;
+	if ( y == NIL ) root = z;                 //元々木が存在しなかった場合
+	else if ( z->key < y->key ) y->left = z;
+	else y->right = z;
+}
+
+//中間順巡回
+void inorder(Node *u){
+	if ( u == NIL ) return;
+	inorder(u->left);
+	printf(" %d", u->key);
+	inorder(u->right);
+}
+	
+//先行順巡回
+void preorder(Node *u){
+	if ( u == NIL ) return;
+	printf(" %d", u->key);
+	preorder(u->left);
+	preorder(u->right);
+}
+	
+	
+int main(){
+	int n, i, x;
+	char str[L], com[9];
+	
+	scanf("%d",&n);
+	
+	for ( i = 0; i < n; i++ ){
+		scanf("%d",&com);
+		for ( i = 0; i < n; i++ ) {
+			scanf("%s %s", com, str);  
+			
+			if ( com[0] == 'i' ){
+				scanf("%d", &x);
+				insert(x);
+			} else {
+				inorder(root);
+				printf("\n");
+				preorder(root);
+				printf("\n");
+			}
+		}
+	}
+	
+	return 0;
+}
+	
+	
+	

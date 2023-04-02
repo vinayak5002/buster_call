@@ -1,0 +1,154 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+const int MAXP = 4 + 2;
+const int FX[] = {0, 1, 0, -1, 0};
+const int FY[] = {0, 0, 1, 0, -1};
+int mp[MAXP][MAXP];
+map<vector<int>, int> jl;
+int n;
+struct Num
+{
+	vector<int> zt;
+	int time;
+};
+
+inline void output()
+{
+	const int MAXW = 3;
+	for (int i = 1; i <= 4; ++i)
+	{
+		for (int j = 1; j <= 4; ++j)
+			cout << setw(MAXW) << mp[i][j];
+		cout << endl;
+	}
+	cout << endl;
+}
+
+int main()
+{
+	int x;
+	Num n1;
+	n1.zt.clear();
+	int sr[MAXP][MAXP];
+	for (int i = 1; i <= 4; ++i)
+		for (int j = 1; j <= 4; ++j)
+		{
+			cin >> x;
+			n1.zt.push_back(x);
+		}
+	n1.time = 0;
+	queue<Num> q1;
+	q1.push(n1);
+	queue<Num> q2;
+	Num n2;
+	for (int i = 1; i <= 4; ++i)
+		for (int j = 1; j <= 4; ++j)
+		{
+			if (i == 4 && j == 4) n2.zt.push_back(0);
+				else n2.zt.push_back(4 * (i - 1) + j);
+		}
+	n2.time = 0;
+	q2.push(n2);
+	while (!q1.empty() && !q2.empty())
+	{
+		/*part 1*/
+		Num r1 = q1.front();
+		q1.pop();
+		memset(mp, 0, sizeof(mp));
+		int jx, jy;
+		for (int i = 1; i <= 4; ++i)
+			for (int j = 1; j <= 4; ++j)
+			{
+				mp[i][j] = r1.zt[(i - 1) * 4 + j - 1];
+				if (mp[i][j] == 0)
+				{
+					jx = i;
+					jy = j;
+				}
+			}
+		map<vector<int>, int>::iterator iter1;  
+		iter1 = jl.find(r1.zt);
+    	if (iter1 != jl.end()) continue;
+			else jl.insert(pair<vector<int>, int> (r1.zt, r1.time));
+		if (r1.zt == n2.zt)
+		{
+			cout << r1.time << endl;
+			return 0;
+		}
+		//output();
+		for (int i = 1; i <= 4; ++i)
+		{
+			int nx = jx + FX[i];
+			int ny = jy + FY[i];
+			if (mp[nx][ny] == 0) continue;
+			swap(mp[jx][jy], mp[nx][ny]);
+			Num newn;
+			newn.zt.clear();
+			newn.time = r1.time + 1;
+			for (int i = 1; i <= 4; ++i)
+				for (int j = 1; j <= 4; ++j)
+					newn.zt.push_back(mp[i][j]);
+			q1.push(newn);
+			swap(mp[jx][jy], mp[nx][ny]);
+		}
+		/*part 2*/
+		Num r2 = q2.front();
+		q2.pop();
+		memset(mp, 0, sizeof(mp));
+		int jx2, jy2;
+		for (int i = 1; i <= 4; ++i)
+			for (int j = 1; j <= 4; ++j)
+			{
+				mp[i][j] = r2.zt[(i - 1) * 4 + j - 1];
+				if (mp[i][j] == 0)
+				{
+					jx = i;
+					jy = j;
+				}
+			}
+		map<vector<int>, int>::iterator iter2;  
+		iter2 = jl.find(r2.zt);
+		if (iter2 != jl.end())
+			{
+				cout << (*iter2).second + r2.time << endl;//iter2 -> second
+				return 0;
+			}
+		//output();
+		for (int i = 1; i <= 4; ++i)
+		{
+			int nx = jx + FX[i];
+			int ny = jy + FY[i];
+			if (mp[nx][ny] == 0) continue;
+			swap(mp[jx][jy], mp[nx][ny]);
+			Num newn;
+			newn.zt.clear();
+			newn.time = r2.time + 1;
+			for (int i = 1; i <= 4; ++i)
+				for (int j = 1; j <= 4; ++j)
+					newn.zt.push_back(mp[i][j]);
+			q2.push(newn);
+			swap(mp[jx][jy], mp[nx][ny]);
+		}
+		
+	}
+	return 0;
+}
+/*
+1 2 3 4
+6 7 8 0
+5 10 11 12
+9 13 14 15
+
+8
+*/
+
+/*
+1 2 0 4
+5 10 3 6
+13 9 15 8
+14 12 7 11
+
+18
+*/

@@ -1,0 +1,61 @@
+const { findSourceMap } = require('module');
+
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+    let q = si[0];
+    let set = new Set();
+    let str = "";
+
+    for (let i = 0; i < q; i++) {
+        let pair = si[i + 1].split(" ");
+
+        let leftN = Number(pair[0]);
+        let middleN = Number(pair[1]);
+        let rightN = Number(pair[2]);
+
+        /* so.write("leftN = " + leftN + ", middleN = " + middleN);// forDebug
+        if (rightN) {
+            console.log(", rightN = " + rightN);
+        } else {
+            console.log("");
+        }*/ // forDebug
+
+        switch (leftN) {
+            case 0:
+                set.add(middleN);
+                str += set.size + "\n";
+                break;
+
+            case 1:
+                if (set.has(middleN)) {
+                    str += 1 + "\n";
+                } else {
+                    str += 0 + "\n";
+                }
+                break;
+
+            case 2:
+                set.delete(middleN);
+                break;
+
+            case 3:
+                let arr = Array.from(set);
+                arr.sort((a, b) => a - b);
+                let dump = "";
+                for (let j = 0; j < arr.length; j++) {
+                    if (arr[j] >= middleN && arr[j] <= rightN) {
+                        dump += arr[j] + "\n";
+                    }
+                }
+                //str += ("dump is { ")// forDebug
+                str += dump;
+                //str += (" }")// forDebug
+                break;
+        }
+    }
+    so.write(str);
+}
+

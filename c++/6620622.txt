@@ -1,0 +1,37 @@
+#define PROBLEM "https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_14_B"
+
+#include <bits/stdc++.h>
+using namespace std;
+
+#pragma region str_pi
+
+#ifndef STR_PI_HPP
+#define STR_PI_HPP
+
+namespace str {
+	vector<int> pi(const string &s) {
+		int n = (int)s.length();
+		vector<int> _pi(n);
+		for (int i = 1, j; i < n; i++) {
+			for (j = _pi[i - 1]; j > 0 && s[j] != s[i]; j = _pi[j - 1]);
+			if (s[i] == s[j])
+				j++;
+			_pi[i] = j;
+		}
+		return _pi;
+	}
+}
+
+#endif
+
+#pragma endregion str_pi
+
+int main() {
+	string T, P;
+	cin >> T >> P;
+	string S = P + '#' + T;
+	auto pi = str::pi(S);
+	for (int i = 0; i + 2 * P.size() < S.size(); i++)
+		if (pi[i + 2 * P.size()] == P.size())
+			cout << i << '\n';
+}

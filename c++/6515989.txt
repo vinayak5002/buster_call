@@ -1,0 +1,59 @@
+#include<stdio.h>
+#include<string.h>
+#define L 100000
+
+typedef struct round{  // プロセス名と処理時間を持つ構造体
+	char name[10];     // プロセス名
+	int time;          // 処理時間
+}R;
+
+R Q[L+1];      //tail で指す部分として+1する
+int head, tail;
+
+void enqueue(R x)
+{
+	Q[tail] = x;
+	tail = (tail + 1) % L;
+}
+
+R dequeue() //値を返す関数で，name, time両方を返すのでR型の値を返すと考えることができる．
+{
+	R x;
+	x = Q[head];
+	head = (head + 1) % L;
+	return x;
+}
+	
+int main(void)
+{
+	int n, q, i, c=0;
+	R a;
+	
+	scanf("%d %d", &n, &q);
+	
+	for(i = 0; i < n; i++)     //キューにプロセスを格納
+	{
+		scanf("%s", Q[i].name);
+		scanf("%d", &Q[i].time);
+	}
+	
+	head = 0, tail = n;
+	while(head != tail)
+	{
+		a = dequeue();
+		if(q >= a.time)
+		{
+			c+=a.time;
+			a.time=0; 
+			printf("%s %d\n", a.name, c);
+		}
+		else
+		{
+			c+=q;
+			a.time=a.time-q;
+			enqueue(a);
+		}
+	}
+	
+	return 0;
+}

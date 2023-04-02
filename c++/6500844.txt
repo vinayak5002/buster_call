@@ -1,0 +1,81 @@
+#include <cstdio>
+#include <vector>
+#include <iostream>
+#include <set>
+#include <functional>
+using namespace std;
+
+int main() {
+    string s;
+    while (getline(cin, s)) {
+    string t;
+    for (auto c: s) {
+        if (c != ' ') t.push_back(c);
+    }
+    s = t;
+    if (s[0] == '#') break;
+    // cout << s << "\n";
+    int n = s.size();
+    vector<vector<vector<int>>> f(n + 2, vector<vector<int>> (n + 2));
+    vector<vector<int>> vis(n + 2, vector<int> (n + 2, 0));
+    
+    auto op = [&](int u, int v, char c) {
+        if (c == '+') return u + v;
+        if (c == '-') return u - v;
+        if (c == '*') return u * v;
+        return u / v;
+    };
+    
+    function<void(int, int)> solve = [&](int l, int r) {
+        vis[l][r] = 1;
+        if (l > r) return ;
+        int cc = 0;
+        int find = 0;
+        set<int> res;
+        for (int i = l; i <= r; i++) {
+            auto c = s[i - 1];
+            if (c == '(') {
+                cc++;
+            } else if (c == ')') {
+                cc--;
+            } else if ((c <'0' || c > '9') && cc == 0){
+                find = 1;
+                if (!vis[l][i - 1]) solve(l, i - 1);
+                if (!vis[i + 1][r]) solve(i + 1, r);
+                for (int x: f[l][i - 1]) {
+                    for (int y: f[i + 1][r]) {
+                        if (y != 0 || c != '/') {
+                            int z = op(x, y, c);
+                            res.insert(z);
+                        }
+                    }
+                }
+            }
+        }
+        if (!find) {
+            if (s[l - 1] == '(' && s[r - 1] == ')') {
+                if (!vis[l + 1][r - 1]) solve(l + 1, r - 1);
+                f[l][r] = f[l + 1][r - 1];
+            } else {
+                int cur = 0;
+                for (int i = l; i <= r; i++) {
+                    char c = s[i - 1];
+                    cur = cur * 10 + 1 * (c - '0');
+                }
+                f[l][r] = {cur};
+            }
+        } else {
+            for (int u: res) f[l][r].push_back(u);
+        }
+        /*
+        printf("(%d, %d): ", l, r);
+        for (int u: f[l][r]) printf("%d, ", u);
+        printf("\n");*/
+    };
+
+    solve(1, n);
+    printf("%d\n", (int)f[1][n].size());
+}
+    return 0;
+}
+

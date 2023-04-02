@@ -1,0 +1,129 @@
+#include<bits/stdc++.h>
+using namespace std;
+using pii = pair<int,int>;
+using ll = long long;
+
+template<class t=ll>
+t in(){
+	t res;
+	cin >> res;
+	return res;
+}
+
+using BOperator = function<ll(ll,ll)>;
+using P = pair<string,BOperator>;
+vector<vector<P>> Operators;
+
+string str;
+
+bool readNumber(ll &value,int &p){
+	if(not ('0' <= str[p] and str[p] <= '9'))return false;
+	value = str[p] - '0';
+	++p;
+	while(p < str.size() and '0' <= str[p] and str[p] <= '9'){
+		value = value * 10 + str[p] - '0';
+		++p;
+	}
+	return true;
+}
+
+bool readToken(string token,int &p){
+	if(str.substr(p,token.size()) == token){
+		p += token.size();
+		return true;
+	}
+	return false;
+}
+
+bool expression(int level,ll &value,int &p){
+	if(level == 3){
+		do{
+			int np = p;
+			if(readNumber(value,np)){
+				p = np;
+				return true;
+			}
+		}while(false);
+		do{
+			int np = p;
+			if(not readToken("(",np))break;
+			if(not expression(0,value,np))break;
+			if(not readToken(")",np))break;
+			p = np;
+			return true;
+		}while(false);
+		return false;
+	}
+	int np = p;
+	if(not expression(level+1,value,np)){
+		return false;
+	}
+	p = np;
+	while(true){
+		bool flag = false;
+		for(auto op:Operators[level]){
+			int np = p;
+			ll next;
+			if(not readToken(op.first,np))continue;
+			if(not expression(level+1,next,np))continue;
+			value = op.second(value,next);
+			p = np;
+			flag = true;
+			break;
+		}
+		if(not flag)break;
+	}
+	return true;
+}
+
+
+ll add(ll a,ll b){
+	return a + b;
+}
+
+ll sub(ll a,ll b){
+	return a - b;
+}
+ll mul(ll a,ll b){
+	return a * b;
+}
+ll func(){
+	vector<P> ops;
+	ops.emplace_back("+",add);
+	ops.emplace_back("-",sub);
+	ops.emplace_back("*",mul);
+	ll res;
+	str = in<string>();
+	bool flag = false;
+	auto change = [&](ll next){
+		if(flag){
+			res = max(res,next);
+		}else{
+			res = next;
+			flag = true;
+		}
+	};
+	Operators.assign(3,vector<P>(0));
+	function<void(int)> rec = [&](int p){
+		if(p==3){
+			ll res;
+			int p = 0;
+			expression(0,res,p);
+			change(res);
+			return;
+		}
+		for(int i=0;i<3;++i){
+			Operators[i].emplace_back(ops[p]);
+			rec(p+1);
+			Operators[i].pop_back();
+		}
+	};
+	rec(0);
+	return res;
+}
+
+int main(){
+	cout << func() << endl;
+}
+
+

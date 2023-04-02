@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void solver() {
+  int n, w, h;
+  cin >> n >> w >> h;
+
+  vector< int > xs(w + 1), ys(h + 1);
+  for (int i = 0; i < n; i++) {
+    int x, y, d;
+    cin >> x >> y >> d; 
+
+    {
+      int l = max(0, x - d);
+      int r = min(w, x + d);
+      xs[l]++;
+      xs[r]--;
+    }
+    {
+      int l = max(0, y - d);
+      int r = min(h, y + d);
+      ys[l]++;
+      ys[r]--;
+    }
+  }
+
+  for (int i = 1; i <= w; i++) {
+    xs[i] += xs[i - 1];
+  }
+  for (int i = 1; i <= h; i++) {
+    ys[i] += ys[i - 1];
+  }
+
+  xs.pop_back();
+  ys.pop_back();
+
+  if (*min_element(xs.begin(), xs.end()) == 0 and 
+      *min_element(ys.begin(), ys.end()) == 0) {
+    cout << "No" << endl;
+  } else {
+    cout << "Yes" << endl;
+  }
+}
+
+int main() {
+  solver();
+}
+

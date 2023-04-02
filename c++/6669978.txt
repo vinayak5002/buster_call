@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+
+#define rep(i, x, n) for (int i = (x); i < (n); i++)
+#define reps(i, x, n) for (int i = (x); i <= (n); i++)
+#define lol long long
+#define SUM(n) ((n) + 1) * (n) / 2 // 1〜nまでの総和を求める式
+#define mp make_pair
+#define fi first
+#define se second
+#define pu push_back
+#define SYOU(x) fixed << setprecision(x + 1) //小数点桁数を指定する
+#define abs(x, y) max(x, y) - min(x, y)
+#define all(v) v.begin(), v.end()
+#define UPDigit(a, b) (a + b - 1) / b //小数点切り上げ
+const int INF = 0x3f3f3f3f;
+const long long LINF = 0x3f3f3f3f3f3f3f3fLL;
+const int mod = int(998244353);
+const int MOD = int(1e9 + 7);
+using namespace std;
+using pii = pair<int, int>;
+typedef vector<int> vit;
+//八方向を見るのに使うと便利(楽)
+const int dy[] = {0, 1, 0, -1, -1, 1, 1, -1};
+const int dx[] = {1, 0, -1, 0, 1, 1, -1, -1};
+
+signed main(void)
+{
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    int n, m;
+    while(cin >> n >> m, (n != 0 && m != 0)){
+        vector<int> a(n + 5), w(m + 5);
+        rep(i, 0, n){
+            cin >> a[i];
+        }
+        rep(i, 0, m){
+            cin >> w[i];
+        }
+        queue<lol> que1, que2;
+        que1.emplace(0);
+        rep(i, 0, m){
+            while(!que1.empty()){
+                lol x = que1.front();
+                que1.pop();
+                que2.emplace(x);
+                que2.emplace(x + w[i]);
+                que2.emplace(x - w[i]);
+            }
+            while(!que2.empty()){
+                que1.emplace(que2.front());
+                que2.pop();
+            }
+        }
+        set<lol> st;
+        while(!que1.empty()){
+            st.emplace(que1.front());
+            que1.pop();
+        }
+        int cnt = 0;
+        map<lol, int> ans;
+        rep(i, 0, n){
+            if(st.find(a[i]) == st.end()){
+                ++ cnt;
+                for(auto x : st){
+                    lol sub = x - a[i];
+                    if(ans[abs(sub, (lol)0)] < cnt){
+                        ans[abs(sub, (lol)0)] ++;
+                    }
+                }
+            }
+        }
+        lol ans2 = LINF;
+        for(auto x : ans){
+            if(x.second == cnt){
+                lol tmp = x.first;
+                ans2 = min(ans2, tmp);
+            }
+        }
+        if(cnt == 0){
+            cout << "0\n";
+        } else if(ans2 != LINF){
+            cout << ans2 << '\n';
+        } else {
+            cout << "-1\n";
+        }
+    }
+    return 0;
+}

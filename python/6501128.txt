@@ -1,0 +1,38 @@
+import bisect as bi
+
+rxs = lambda: [*map(int, input().split())]
+N, = rxs()
+Xs, Ys = zip(*(rxs() for _ in range(N)))
+Xs, Ix = zip(*sorted((x, i) for i, x in enumerate(Xs)))
+Ys, Iy = zip(*sorted((y, i) for i, y in enumerate(Ys)))
+Q, = rxs()
+Qs = [rxs() for _ in range(Q)]
+
+#import pdb;pdb.set_trace()
+
+for sx, tx, sy, ty in Qs:
+    sxi = bi.bisect_left(Xs, sx)
+    txi = bi.bisect_right(Xs, tx, lo=sxi)
+    syi = bi.bisect_left(Ys, sy)
+    tyi = bi.bisect_right(Ys, ty, lo=syi)
+    xis = [*sorted(Ix[sxi:txi])]
+    yis = [*sorted(Iy[syi:tyi])]
+    ans = []
+    x, y = 0, 0
+    xl, yl = len(xis), len(yis)
+    while x < xl and y < yl:
+        if xis[x] == yis[y]:
+            ans.append(xis[x])
+            x += 1
+            y += 1
+            continue
+        if xis[x] < yis[y]:
+            x = bi.bisect_left(xis, yis[y], lo=x)
+        else:
+            y = bi.bisect_left(yis, xis[x], lo=y)
+    if ans:
+        print("\n".join(map(str, ans)) + "\n")
+    else:
+        print()
+
+

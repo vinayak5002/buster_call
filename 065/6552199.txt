@@ -1,0 +1,235 @@
+#include<bits/stdc++.h>
+#define ll long long
+#define rep(i,a,n) for (int i=(a);i<=(n);i++)
+#define per(i,a,n) for (int i=(n);i>=(a);i--)
+#define inf 0x3f3f3f3f
+#define infll 0x3f3f3f3f3f3f3f3f
+#define pb push_back
+#define mp make_pair
+#define pii pair<int,int>
+#define fi first
+#define se second
+#define lowbit(i) ((i)&(-i))
+#define all(x) x.begin(),x.end()
+#define SZ(x) ((int)x.size())
+using namespace std;
+const int N = 100015, mod = 1e9 + 7;
+
+int n, c[N], e[N], deg[N], step[N], dest[N], dep[N];
+vector<int> rt, g[N];
+vector<pair<ll, int>> qry[N];
+ll dis[N], x0, a[N], b[N], d[N];
+
+struct op {
+	ll v; // x - s_u or a_u - s_u
+	int u, id; // u
+	bool typ;
+};
+
+struct Rule {
+	bool operator()(const op &u, const op &v) const {
+		if (u.u != v.u) return u.u < v.u;
+
+		return u.id < v.id;
+	}
+};
+
+struct cyc {
+	vector<int> p;
+	vector<ll> s;
+	int m; ll L; bool fl;
+	ll I(ll x) { return L == 0 ? x : (x % L + L) % L; }
+
+	void build(vector<int> v) {
+		m = SZ(v); p.resize(m + m); s.resize(m + m, 0);
+		rep(i, 0, m + m - 1) p[i] = v[i % m];
+		rep(i, 1, m + m - 1) s[i] = s[i - 1] + d[p[i - 1]];
+		L = s[m];
+
+		if (L < 0) {
+			fl = 1; L = -L;
+			rep(i, 0, m + m - 1) s[i] = -s[i];
+			rep(i, 0, m - 1) a[p[i]] = -a[p[i]];
+		}
+	}
+
+	vector<vector<op>> hyh;
+	vector<op> all;
+
+	void add(int u, vector<pair<ll, int>> vec) {
+
+		rep(i, 0, m - 1) if (p[i] == u) {
+			u = i; break;
+		}
+
+		if (fl) for (auto &[x, y] : vec) x = -x;
+
+		for (auto [x, id] : vec) all.pb((op) {x - s[u], u, id, 0});
+	}
+
+	void solve() {
+		rep(i, 0, m + m - 1) all.pb((op) {a[p[i]] - s[i], i, -1, 1});
+
+		vector<ll> num;
+
+		for (op o : all) num.pb(I(o.v));
+
+		sort(all(num)); num.erase(unique(all(num)), num.end());
+
+		int q = SZ(num); hyh.resize(q);
+
+		for (op o : all) {
+			int u = lower_bound(all(num), I(o.v)) - num.begin();
+
+			hyh[u].pb(o);
+		}
+
+		rep(_, 0, q - 1) {
+			sort(all(hyh[_]), [](op u, op v) {
+				if (u.v != v.v) return u.v < v.v;
+
+				if (u.typ != v.typ) return u.typ < v.typ;
+
+				return u.u < v.u;
+			});
+
+			set<op, Rule> S;
+
+			for (op o : hyh[_]) {
+				if (o.typ == 0) S.insert(o);
+				else {
+					int j = o.u;
+
+					for (auto it = S.begin(); it != S.end() && it -> u <= j; it = S.erase(it)) {
+						(step[it -> id] += ((ll)(L > 0 ? (o.v - it -> v) / L : 0) % mod * m % mod + j - it -> u) % mod) %= mod;
+						dest[it -> id] = p[j];
+					}
+				}
+			}
+
+			for (auto o : S) dest[o.id] = o.id;
+		}
+	}
+} C[N];
+
+int tot, bel[N];
+
+void dfs0(int u) {
+	for (int v : g[u]) {
+		dis[v] = dis[u] + d[v];
+		dep[v] = dep[u] + 1;
+		dfs0(v);
+	}
+}
+
+void merge(set<pair<ll, int>> &f, set<pair<ll, int>> &g) {
+	if (SZ(f) < SZ(g)) swap(f, g);
+
+	for (auto o : g) f.insert(o);
+}
+
+set<pair<ll, int>> dfs1(int u) {
+	set<pair<ll, int>> f, nf;
+
+	for (int v : g[u]) nf = dfs1(v), merge(f, nf);
+
+	for (auto [x, id] : qry[u]) f.emplace(x + dis[u], id);
+
+	for (auto it = f.lower_bound({a[u] + dis[u], 0}); it != f.end() && it -> fi == a[u] + dis[u]; it = f.erase(it)) {
+		int v = it -> se > 0 ? c[it -> se] : 1;
+		step[it -> se] = dep[v] - dep[u];
+		dest[it -> se] = u;
+	}
+
+	return f;
+}
+
+void build() {
+	queue<int> q;
+	static bool oncyc[N];
+	fill(oncyc + 1, oncyc + n + 1, 1);
+
+	rep(i, 1, n) if (deg[i] == 0) q.push(i);
+
+	while (!q.empty()) {
+		int u = q.front(); q.pop();
+		oncyc[u] = 0;
+		int v = e[u];
+
+		if (--deg[v] == 0) q.push(v);
+	}
+
+	rep(i, 1, n) if (!oncyc[i]) g[e[i]].pb(i);
+
+	rep(i, 1, n) {
+		if (!oncyc[i]) continue;
+
+		vector<int> vec; int x = i;
+
+		while (oncyc[x]) {
+			oncyc[x] = 0;
+			vec.pb(x);
+			x = e[x];
+		}
+
+		C[++tot].build(vec);
+
+		for (int x : vec) bel[x] = tot, rt.pb(x);
+	}
+
+	rt.pb(n + 1);
+
+	for (int u : rt) dfs0(u);
+}
+
+int main() {
+#ifdef Asuka
+	freopen("data.in", "r", stdin);
+	freopen("data.out", "w", stdout);
+#endif
+	scanf("%d%lld", &n, &x0);
+
+	rep(i, 1, n) scanf("%lld%lld%d%lld%d", &a[i], &b[i], &c[i], &d[i], &e[i]), deg[e[i]]++;
+
+	build();
+
+	rep(i, 1, n) qry[c[i]].emplace_back(a[i] + b[i], i);
+
+	qry[1].emplace_back(x0, 0);
+
+	for (int u : rt) {
+		auto o = dfs1(u); vector<pair<ll, int>> vec;
+
+		for (auto _ : o) vec.pb(_);
+
+		for (auto [x, id] : vec) step[id] = dep[id > 0 ? c[id] : 1] - dep[n + 1], dest[id] = n + 1;
+
+		if (u == n + 1) continue;
+
+		C[bel[u]].add(u, vec);
+	}
+
+	rep(i, 1, tot) C[i].solve();
+
+	static bool vis[N];
+
+	int x = 0, ans = 0;
+
+	while (!vis[x]) {
+		vis[x] = 1;
+
+		if (x == n + 1) break;
+
+		(ans += step[x] + (x > 0)) %= mod;
+		x = dest[x];
+	}
+
+	if (x == n + 1) {
+		printf("%d\n", ans);
+
+	} else {
+		printf("-1\n");
+	}
+
+	return 0;
+}

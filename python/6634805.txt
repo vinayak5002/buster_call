@@ -1,0 +1,77 @@
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+
+		String[] na = sc.nextLine().split(" ");
+		int n = Integer.parseInt(na[0]);
+		int a = Integer.parseInt(na[1])-1;
+
+		String[] s = sc.nextLine().split("");
+
+		// aより右、左で配列を分割
+		List<String> left = Arrays.asList(Arrays.copyOfRange(s, 0, a));
+		List<String> right = Arrays.asList(Arrays.copyOfRange(s, a+1, n));
+
+		// 左を反転
+		Collections.reverse(left);
+
+		// 右側計算
+		int rightEnd = 0;		// 右端保存用
+		int rightNum = 0;		// 右側にある#の個数
+		int rightTotal = 0;	// スタート地点から#までの往復時間の合計
+		for (int i = 0; i < right.size(); i++) {
+			if (right.get(i).equals("#")) {
+				rightEnd = i+1;
+				rightNum++;
+				rightTotal += (i+1)*2;
+			}
+		}
+
+		// 左側計算
+		int leftEnd = 0;
+		int leftNum = 0;
+		int leftTotal = 0;
+		for (int i = 0; i < left.size(); i++) {
+			if (left.get(i).equals("#")) {
+				leftEnd = i+1;
+				leftNum++;
+				leftTotal += (i+1)*2;
+			}
+		}
+
+		// 一旦合計
+		int total = rightTotal + leftTotal;
+
+		// 最後のXはスタート地点まで帰る必要はない
+		// ⇒帰る分を合計から差し引く
+		//
+		// 右側のXが左側のXより1つ多いとき、右側で終わる
+		// 右と左のXが同じ数のとき、左側で終わる
+		// ⇒左≧右のとき左で終わる
+		if (leftNum >= rightNum) {
+			total -= leftEnd;
+		} else {
+			total -= rightEnd;
+		}
+
+		// 右側のXが左側のXより2つ多いとき、その分左側の距離分を往復しなければならない
+		// 左側のXが右側のXより1つ多いとき、同様
+		int diff = rightNum - leftNum;
+		if (diff >= 2) {
+			total += (left.size()+1) * 2 * (diff-1);
+		} else if (diff <= -1) {
+			total += (right.size()+1) * 2 * diff * (-1);
+		}
+
+		System.out.println(total);
+
+		sc.close();
+	}
+
+}
+

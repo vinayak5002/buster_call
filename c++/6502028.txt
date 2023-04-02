@@ -1,0 +1,133 @@
+#include <iostream>
+#include <stack>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <cassert>
+
+struct Pond
+{
+    int area;                              //池の面積
+    int down_position;                     //対応するバックスラッシュ(下り)位置
+    bool operator==(const Pond &rhv) const //中身が変わらないですよ～のconst
+    {
+        return this->area == rhv.area && this->down_position == rhv.down_position;
+    }
+};
+
+std::vector<int> stackPondToVectorArea(std::stack<Pond> ponds)
+{
+    int count = ponds.size();
+    std::vector<int> areas(count);
+    for (int i = count - 1; i >= 0; i--) // stack→vectorにする時に順番が逆にならないようにする
+    {
+        areas[i] = ponds.top().area;
+        ponds.pop();
+    }
+    return areas;
+}
+
+std::stack<Pond> compositionPond(Pond new_pond, std::stack<Pond> old_pond)
+{
+    // (1)new_pond.down_positionが今回の登りに対応する下り位置
+    // (2)old_pond.top().down_positionが前回の沼の下り位置
+    // 2つを比較して1＞2なら合成しない、1<2なら合成する
+
+    //「合成しないパターンになる」または「全ての沼が合成される(old_pond.size()==0)」まで繰り返す必要がある
+    // 2回目以降で合成しない場合、なにもせずにreturnしていい
+    // 沼のpop()は初回は1回pop()→push()、2回目以降は2回pop()→push()になる必要がある
+    // old_pond.size()==0の時は「合成が必要ない場合(初回など)」と「合成が全て終わった場合」になる
+    // 2回目以降比較するのは(1)tmpと(2)old_pond.top() ※old_pond.pop()を1回実施済
+
+    std::stack<Pond> return_pond = old_pond;
+    return_pond.push(new_pond);
+    while (1)
+    {
+        if (old_pond.size() != 0 && new_pond.down_position < old_pond.top().down_position)
+        {
+            //合成する　※ここも関数にするかどうか※
+            Pond tmp;
+
+            tmp.area = new_pond.area + old_pond.top().area; // tmp.areaにnew_pond.areaとold_pond.top().areaを足す
+            tmp.down_position = new_pond.down_position;     // tmp.down_positionはnew_pond.down_position
+            old_pond.pop(); // old_pond.top()を消す → 次回以降の合成の時にtop()が(2)になるため
+            return_pond.pop();
+            return_pond.pop();
+            new_pond = tmp;               //次回以降に(1)になるのはtmp
+            return_pond.push(tmp);        // 足したやつtmpをreturn_pondにpushする
+        }
+        else
+        {
+            //合成しない
+            break;
+        }
+    }
+
+    return return_pond;
+}
+
+std::stack<Pond> calculationPond(std::string input) //入力は"\\//"とか
+{
+    std::stack<int> down_positions;
+    std::stack<Pond> individual_pond;
+
+    for (size_t i = 0; i < input.size(); i++)
+    {
+        if (input[i] == '\\')
+        {
+            down_positions.push(i);
+        }
+        else if (input[i] == '/' && down_positions.size() != 0)
+        {
+            Pond tmp;
+            tmp.area = i - down_positions.top();
+            tmp.down_position = down_positions.top();
+            down_positions.pop();                                    // down_positionsの末尾を消す
+            individual_pond = compositionPond(tmp, individual_pond); // tmpとindividual_pondを渡したら合成していい感じのstackを返してくれる関数
+        }
+        else if (input[i] == '_' && i != 0)
+        {
+            /*何もしない*/
+        }
+    }
+    return individual_pond;
+}
+
+int totalArea(std::vector<int> input)
+{
+    int count = input.size();
+    int all_ponds_area = 0;
+    for (int i = 0; i < count; i++)
+    {
+        all_ponds_area += input[i];
+    }
+    return all_ponds_area;
+}
+
+int main()
+{
+    assert(compositionPond(Pond({1, 0}), std::stack<Pond>()) == std::stack<Pond>({{1, 0}}));
+    assert(compositionPond(Pond({2, 2}), std::stack<Pond>({{1, 0}})) == std::stack<Pond>({{1, 0}, {2, 2}}));
+    assert(compositionPond(Pond({3, 0}), std::stack<Pond>({{1, 1}})) == std::stack<Pond>({{4, 0}}));
+    assert(calculationPond("\\/") == std::stack<Pond>({{1, 0}}));
+    assert(calculationPond("\\/\\_/") == std::stack<Pond>({{1, 0}, {2, 2}}));
+    assert(calculationPond("\\\\//") == std::stack<Pond>({{4, 0}}));
+    assert(stackPondToVectorArea(std::stack<Pond>({{1, 0}})) == std::vector<int>({1}));
+
+    assert(compositionPond(Pond({5, 0}), std::stack<Pond>({{1, 1}, {1, 3}})) == std::stack<Pond>({{7, 0}}));
+    assert(calculationPond("\\\\/\\//") == std::stack<Pond>({{7, 0}}));
+
+    std::string input_pond;
+    std::cin >> input_pond;
+
+    std::vector<int> pond_areas = stackPondToVectorArea(calculationPond(input_pond)); //※f(g(h(a)))のようにするのはどうなのか※
+
+    std::cout << totalArea(pond_areas) << std::endl;
+    std::cout << pond_areas.size();
+    for (size_t j = 0; j < pond_areas.size(); j++)
+    {
+        std::cout << " " << pond_areas[j];
+    }
+    std::cout << std::endl;
+    return 0;
+}

@@ -1,0 +1,76 @@
+# 2022/04/29
+# Yutaka Watanobe
+from heapq import heappop, heappush
+
+LIMIT = 45
+N = 3                                                          # N * N pieces
+
+adj = [{1, 3}, {0, 2, 4}, {1, 5},                   # N * N pieces are represented by 0, 1, ..., (N*N-1)
+      {0, 4, 6}, {1, 3, 5, 7}, {2, 4, 8},     # adj[i]: an adj list for piece i
+      {3, 7}, {4, 6, 8}, {5, 7}] # ** this is for only N = 3
+
+pieces = [[[0] for j in range(N)] for i in range(N)]           # contents for simulation
+
+MD = [[abs(i//N-j//N)+abs(i%N-j%N) for j in range(N*N) ] for i in range(N*N)]    # manhattan dist between piece i and j
+PW = [16**i for i in range(N*N)]                               # 16^i
+SW = [[i*PW[j] for j in range(N*N) ] for i in range(N*N)]      # i * 16^j
+
+initial_v, initial_h, initial_b = 0, 0, -1
+target = 0
+
+p = 0
+for i in range(N):
+    row = list(map(int, input().split()))
+    for j in range(N):
+        pieces[i][j] = row[j]
+        if row[j] == 0:
+            initial_b = i*N + j                                # set the place of the blank 0の位置
+        else:            
+            initial_v += row[j]*PW[p]                          # initial hash value of the puzzle 開始盤面のハッシュ値
+            initial_h += MD[p][row[j]-1]                       # initial estimation cost f(x)=h(x)
+        if (p+1) <= 8: target += (p+1)*PW[p]
+        p += 1
+
+ans = -1
+parent = {}                                                    # parent of BFS tree to simulate 中括弧は辞書かセット
+
+def aster():
+    global ans, parent
+    queue = [(initial_h, 0, initial_h, initial_v, initial_b, -1, -1)]       #()はタプルを表す。このqueueがopenList。開始盤面の前の盤面と前の盤面で動かしたピースは存在しないので-1と表す。
+    visited = set()                         #visitedはハッシュ値のclosedList
+    parent[initial_v] = [-1, -1]
+    
+    while len(queue) > 0:
+        estimated, cost, heuristic, val, blank, pre_v, pre = heappop(queue)
+        parent[val] = [pre_v, pre]                              #今の盤面の、親ノード(前の盤面)と前の盤面で動かしたピースの記録
+        if val in visited: continue                         #無くても解けたが、必要な行なのか？
+        if val == target:
+            ans = estimated
+            return True
+        visited.add(val)
+        for next_b in adj[blank]:                               #子ノード展開
+            num = (val >> (4*next_b)) & 15                    #16進数および2進数で盤面を表せることを利用したビット演算
+            next_v = val - SW[num][next_b] + SW[num][blank]           #前のハッシュ値の0と0と隣接するピースに対応する値を交換
+            if next_v in visited: continue
+            next_h = heuristic + MD[blank][num-1] - MD[next_b][num-1]             #(前のヒューリスティック)-(前のヒューリスティックのnum成分)+(次のヒューリスティックのnum成分)とし、次のヒューリスティックを直接計算せずコストを抑えている。
+            if cost + 1 > LIMIT: continue                                    #深さの制限
+            heappush(queue, (cost + 1 + next_h, cost + 1, next_h, next_v, next_b, val, num))     #もともとは1つ目にnext_hが無いので、g(x)でソートをしてしまっている。next_hを足すことで、f(x)=g(x)+h(x)でソートされ、A*アルゴリズムが実行できる。
+			#f(x)が同じなら、次にg(x)を比較して小さいほうを取り出すというような、タプルのインデックスがレベルになっている木構造の優先度付きキューがヒープである。
+    return False
+
+def simulate(v):
+    if v == -1: return        #ベースケースの指定(再帰を切るための条件)
+    simulate(parent[v][0])     #盤面が-1,つまり開始盤面に行くまで戻り、再帰をreturnで切る。
+    if parent[v][1] != -1:     #前の盤面から動かしたピースの確認、表示。開始盤面のみ、ここは表示せず、盤面のみ表示する。
+        print('\n', 'Move', parent[v][1], '\n')
+    for i in range(N*N):       #各盤面の表示
+        if i%3 == 0: print('[', end='')
+        print(v >> (4*i) & 15, end='')
+        if (i+1)%3 == 0: print(']')
+        else: print(', ', end='')
+
+if aster():
+    print('ans')
+    #simulate(target)
+else:
+    print("unsolvable")

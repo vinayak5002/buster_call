@@ -1,0 +1,57 @@
+#include<iostream>
+#include<cstdio>
+#include<algorithm>
+#include<cmath>
+#include<vector>
+
+using namespace std;
+
+long long cnt;
+vector<int> G;
+
+void insertionSort(int array[], int size,int g){
+    for(int i=g;i<size;i++){
+        int v = array[i];
+        int j = i - g;
+        while(j>=0 && array[j]>v){
+            array[j+g] = array[j];
+            j -= g;
+            cnt++;
+        }
+        array[j+g] = v;
+    }
+}
+
+void shellSort(int array[], int size){
+    for(int h=1; ; ){
+        if(h>size) break;
+        G.push_back(h);
+        h = 3*h + 1;
+    }
+
+    for(int i=G.size()-1; i>=0; i--){
+        insertionSort(array,size,G[i]);
+    }
+}
+
+int main(void){
+    int size;
+    int array[1000000];
+
+    cin >> size;
+    for(int i=0;i<size;i++) cin >> array[i];
+    cnt = 0;
+
+    shellSort(array,size);
+
+    cout << G.size() << endl;
+    for(int i=G.size()-1; i>=0; i--){
+        cout << G[i];
+        if(i) cout << " ";
+    }
+    cout << endl;
+    cout << cnt << endl;
+    for(int i=0;i<size;i++) cout << array[i] << endl;
+
+    return 0;
+}

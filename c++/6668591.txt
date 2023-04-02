@@ -1,0 +1,75 @@
+#include <iostream>
+#include <math.h>
+#include <algorithm>
+#include <limits>
+#include <stdio.h>
+#define MAX 2000001
+
+using namespace std;
+
+int H, A[MAX];
+
+void maxHeapify(int i) {
+
+	int left, right, largest;
+	left = 2 * i;
+	right = 2 * i + 1;
+
+	if (left <= H && A[left] > A[right]) largest = left;
+	else largest = i;
+	if (right <= H && A[right] > A[largest]) largest = right;
+
+	if (largest != i) {
+		swap(A[i], A[largest]);
+		maxHeapify(largest);
+	}
+}
+
+void heapIncreaseKey(int A[], int i, int key) {
+
+	if (key < A[i]) return;
+	A[i] = key;
+	while (i > 1 && A[i / 2] < A[i]) {
+		swap(A[i], A[i / 2]);
+		i = i / 2;
+	}
+}
+
+int heapExtractMax(int A[]) {
+
+	if (H < 1) return;
+	int max = A[1];
+	A[1] = A[H];
+	H--;
+	maxHeapify(1);
+
+	return max;
+
+}
+
+void insert(int key) {
+
+	H++;
+	A[H] = -numeric_limits<int>::infinity();
+	heapIncreaseKey(A, H, key);
+}
+
+int main() {
+
+	int key;
+	char f[MAX];
+
+	while (1) {
+		scanf("%s", f);
+		if (f[0] == 'e' && f[1] == 'n') break;
+		if (f[0] == 'i') {
+			cin >> key;
+			insert(key);
+		}
+		else {
+			printf("%d", heapExtractMax(A));
+		}
+	}
+
+	return 0;
+}

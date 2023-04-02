@@ -1,0 +1,75 @@
+class MyList():
+    def __init__(self):
+        self.size = 0
+        self.head = list_item(0)
+        self.end = list_item(0)
+        self.head.next = self.end
+        self.end.prev = self.head
+    def insert(self,n):
+        new_item = list_item(n)
+        new_item.next = self.head.next
+        new_item.next.prev = new_item
+        self.head.next = new_item
+        new_item.prev = self.head
+        self.size += 1
+    def delete(self,n):
+        self.removeItem(self.find(n))
+    def deleteFirst(self):
+        self.removeItem(self.head.next)
+    def deleteLast(self):
+        self.removeItem(self.end.prev)
+    def removeItem(self,item):
+        if(self.size != 0 and item != None):
+            item.prev.next = item.next
+            item.next.prev = item.prev
+            self.size -= 1
+            del item
+    def find(self,n):
+        p1 = self.head.next
+        while(p1 != self.end):
+            if(p1.n == n): return p1
+            p1 = p1.next
+        return None
+    def __iter__(self):
+        self.p = self.head.next
+        return self
+    def __next__(self):
+        if self.p != self.end:
+            p = self.p
+            self.p = self.p.next
+            return p
+        else:
+            raise StopIteration
+
+    def __str__(self):
+        txt = ""
+        i = 0
+        for item in self:
+            txt += str(item.n)
+            i += 1
+            if(i <= self.size - 1):
+                txt += " "
+        return txt
+
+class list_item():
+    def __init__(self,n,prev=None,next=None):
+        self.n = n
+        self.prev = prev
+        self.next = next
+
+n = int(input())
+mylist = MyList()
+for i in range(n):
+    inp = input().split()
+    command = inp[0]
+    if(command == "insert"):
+            mylist.insert(int(inp[1]))
+    elif(command == "delete"):
+            mylist.delete(int(inp[1]))
+    elif(command ==  "deleteFirst"):
+            mylist.deleteFirst()
+    elif(command == "deleteLast"):
+            mylist.deleteLast()
+
+print(mylist)
+

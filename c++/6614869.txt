@@ -1,0 +1,46 @@
+#include <iostream>
+
+using namespace std;
+
+// Matrix-Chain Multiplication problem
+// (D[0],D[1])行列,..,(D[i-1],D[i])行列, (D[i],D[i+1])行列,..,(D[n-1],D[i])行列
+// i 番目で区切ったときの積の総数を再帰的に求め、その最小値を返す。
+long mcm(int D[], int n)
+{
+    long m = 0;
+    if (n == 1)
+	return 0;
+    if (n == 2)
+	return D[0] * D[1] * D[2];
+    if (n == 3) 
+	return min(D[0] * D[1] * D[2] + D[0] * D[2] * D[3],
+		   D[0] * D[1] * D[3] + D[1] * D[2] * D[3]);
+    
+    m = mcm(D, 1) + mcm(D + 1, n - 1) + D[0] * D[1] * D[n];
+    for (int i = 2; i < n; i++)  
+	m = min(m, mcm(D, i) + mcm(D + i, n - i) + D[0] * D[i] * D[n]);
+    return m;
+}
+ 
+int main()
+{
+    int n;
+    cin >> n;
+    int D[n+1];
+    for (int i = 0; i < n; i++) 
+	cin >> D[i] >> D[i+1];
+
+#ifdef CLOCK    
+    clock_t start_clock = clock();
+#endif
+    
+    cout << mcm(D, n) << endl;
+    
+#ifdef CLOCK
+    clock_t end_clock = clock();    
+    cout << 1000 * (end_clock - start_clock) / CLOCKS_PER_SEC << " ms"
+	 << endl;
+#endif
+    return 0;
+}
+

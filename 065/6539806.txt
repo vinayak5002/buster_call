@@ -1,0 +1,49 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <stack>
+#include <pair>
+
+constexpr int dx[] = {1, 0, -1, 0};
+constexpr int dy[] = {0, 1, 0, -1};
+
+int main() {
+    while (true){
+        int W, H;
+        std::cin >> W >> H;
+        if (W == 0 && H == 0) {
+            break;
+        }
+        std::vector<std::string> board(H);
+        for (auto &&s : board) {
+            std::cin >> s;
+        }
+        int sx, sy;
+        for (int i = 0; i < H; ++i) {
+            for (int j = 0; j < W; ++j) {
+                if (board[i][j] == '@'){
+                    sx = i;
+                    sy = j;
+                }
+            }
+        }
+        std::stack<std::pair<int, int>> S;
+        std::vector<std::vector<bool>> used(H, std::vector(W));
+        S.emplace(sx, sy);
+        used[sx][sy] = true;
+        int ans = 1;
+        while (!S.empty()) {
+            const int &[tx, ty] = S.top(); S.pop();
+            for (int k = 0; k < 4; ++k) {
+                int nx = tx + dx[k], ny = ty + dy[k];
+                if (nx >= 0 && nx < W && ny >= 0 && ny < H && board[nx][ny] == '.') {
+                    if (used[nx][ny]) continue;
+                    used[nx][ny] = true;
+                    S.emplac(nx, ny);
+                    ++ans;
+                }
+            }
+        }
+        std::cout << ans << std::endl;
+    }
+}

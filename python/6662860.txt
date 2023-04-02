@@ -1,0 +1,93 @@
+import sys
+import heapq
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def max_heapify(src_list, i):
+    size = len(src_list)
+    max_idx = i
+    max_val = src_list[i]
+
+    l_idx = 2 * i + 1
+    if l_idx < size and max_val < src_list[l_idx]:
+        max_idx = l_idx
+        max_val = src_list[l_idx]
+    r_idx = 2 * i + 2
+    if r_idx < size and max_val < src_list[r_idx]:
+        max_idx = r_idx
+
+    if max_idx != i:
+        src_list[i], src_list[max_idx] = src_list[max_idx], src_list[i]
+        max_heapify(src_list, max_idx)
+
+    return
+
+
+def build_max_heap(src_list):
+    size = len(src_list)
+    s_idx = (size - 1) // 2
+
+    for i in range(s_idx, -1, -1):
+        max_heapify(src_list, i)
+
+    return
+
+
+def insert(max_heap, key):
+    if len(max_heap) > 0:
+        max_heap.append(key)
+        c_idx = len(max_heap) - 1
+        while True:
+            p_idx = (c_idx - 1) // 2
+            if max_heap[p_idx] < max_heap[c_idx]:
+                max_heap[p_idx], max_heap[c_idx] = max_heap[c_idx], max_heap[p_idx]
+                c_idx = p_idx
+                if c_idx == 0:
+                    break
+            else:
+                break
+    else:
+        max_heap.append(key)
+    return
+
+
+def extract(max_heap):
+    result = max_heap[0]
+    max_heap[0] = max_heap[-1]
+    max_heap.pop()
+    if len(max_heap) > 0:
+        max_heapify(max_heap, 0)
+    return result
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+    max_heap = []
+
+    while True:
+        query_list = list(f.readline().split())
+        if query_list[0] == 'insert':
+            key = int(query_list[1])
+            # insert(max_heap, key)
+            heapq.heappush(max_heap, - key)
+        elif query_list[0] == 'extract':
+            if len(max_heap) > 0:
+                # key = extract(max_heap)
+                key = -heapq.heappop(max_heap)
+                print(key)
+        elif query_list[0] == 'end':
+            break
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

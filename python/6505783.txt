@@ -1,0 +1,49 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+
+	const n = parseInt(si[0].split("\n"));
+	const array = si[1].split(" ");
+	for (let i = 0; i < array.length; i++) {
+		array[i] = parseInt(array[i]);
+	}
+	
+	const q = parseInt(si[2].split("\n"));
+	
+	let bs = new Binary_Search(array);
+	let ans ='';
+	
+	for (let i = 3; i < q + 3; i++) {
+		let order = parseInt(si[i].split("\n"));
+		let check = bs.searchNum(order);
+		ans += check + '\n'
+	}
+	
+	so.write(ans);
+}
+
+class Binary_Search {
+	constructor (array) {
+		this.array = array;
+	}
+	
+	searchNum(num, min, max) {
+		min = min || 0;
+		max = max || this.array.length - 1;
+		if (max < min) {
+			return 0;
+		} else {
+			let mid = min + Math.floor((max - min) / 2);
+			
+			if (this.array[mid] > num) {
+				return this.searchNum(num, min, mid - 1);
+			} else if (this.array[mid] < num) {
+				return this.searchNum(num, mid + 1, max);
+			} else {
+				return 1;
+			}
+		}
+	}
+}

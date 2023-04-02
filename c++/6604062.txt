@@ -1,0 +1,242 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+#define MAX		101
+
+#define WHITE		0
+#define	BLACK		1
+#define	GRAY		2
+#define	INFTY		(1 << 21)
+
+typedef struct QUE{
+	int value;
+	QUE* next;
+	QUE* prev;
+}Q;
+
+Q* head = NULL;
+Q* tail = NULL;
+
+int G[MAX][MAX];
+int color[MAX];
+int d[MAX],f[MAX];
+int STACK[MAX];
+int next_v[MAX];
+int sp;
+int tt;
+
+int N;
+
+void init_graph();
+void input_graph(int);
+void output_graph(int);
+void push_s(int);
+int top_s();
+int pop_s();
+int next(int);
+void dfs();
+void dfs_visit(int);
+void bfs(int);
+
+void enqueue(int);
+int dequeue();
+
+int main(){
+
+	init_graph();
+
+
+
+	if(scanf("%d",&N)){
+	}
+
+	input_graph(N);
+	//dfs();
+	bfs(0);
+	//output_graph(N);
+}
+
+int dequeue(){
+
+	int ret;
+
+	if(head == NULL){
+		ret = -1;
+	}
+	else if(head != tail){
+		ret = head->value;
+		head = head->prev;
+		free(head->next);
+		head->next = NULL;
+	}
+	else{
+		tail = NULL;
+		ret = head->value;
+		free(head);
+		head = NULL;
+	}
+	return ret;
+}
+
+void enqueue(int x){
+	Q* p = (Q*)malloc(sizeof(Q));
+
+	p->value = x;
+	if(head == NULL){
+		p->next = NULL;
+		p->prev = NULL;
+		head = p;
+		tail = p;
+	}
+	else{
+		tail->prev = p;
+		p->next = tail;
+		p->prev = NULL;
+		tail = p;
+	}
+}
+
+void bfs(int s){
+
+	int u;
+
+	for(int i = 0;i < N;i++){
+		color[i] = WHITE;
+		d[i] = INFTY;
+	}
+	color[s] = GRAY;
+	d[s] = 0;
+	enqueue(s);
+
+	while(head != NULL){
+		u = dequeue();
+
+		for(int v = 0;v < N;v++){
+			if(G[u][v] && (color[v] == WHITE)){
+				color[v] = GRAY;
+				d[v] = d[u] + 1;
+				enqueue(v);
+			}
+		}
+		color[u] = BLACK;
+	}
+
+	for(int i = 0;i < N;i++){
+		if(d[i] >= INFTY){
+			printf("%d -1\n",i + 1);
+		}else{
+			printf("%d %d\n",i + 1,d[i]);
+		}
+
+	}
+}
+
+void dfs(){
+
+	for(int u = 0;u < N;u++){
+		if(color[u] == WHITE)dfs_visit(u);
+	}
+
+	for(int i = 0;i < N;i++){
+		printf("%d %d %d\n",i + 1,d[i],f[i]);
+	}
+}
+
+void dfs_visit(int r){
+	for(int i = 0;i < N;i++)next_v[i] = 0;
+
+	push_s(r);
+	color[r] = GRAY;
+	d[r] = ++tt;
+
+	while(sp >= 1){
+		int u = top_s();
+		int v = next(u);
+
+		if(v != -1){
+			if(color[v] == WHITE){
+				color[v] = GRAY;
+				d[v] = ++tt;
+				push_s(v);
+			}
+		}
+		else{
+			pop_s();
+			color[u] = BLACK;
+			f[u] = ++tt;
+		}
+	}
+}
+
+int next(int u){
+	for(int v = next_v[u];v < N;v++){
+		next_v[u] = v + 1;
+		if(G[u][v]) return v;
+	}
+	return -1;
+}
+
+int top_s(){
+	int top = sp - 1;
+	return STACK[top];
+}
+
+int pop_s(){
+	int ret;
+	sp--;
+	ret = STACK[sp];
+	return ret;
+}
+
+void push_s(int x){
+	STACK[sp] = x;
+	sp++;
+}
+
+void input_graph(int n){
+	int ver1,num,ver2;
+
+	for(int i = 0;i < n;i++){
+		if(scanf("%d",&ver1)){
+		}
+		if(scanf("%d",&num)){
+		}
+
+		if(num != 0){
+			for(int j = 0;j < num;j++){
+				if(scanf("%d",&ver2)){
+				}
+				G[ver1 - 1][ver2 - 1] = 1;
+				//G[ver2 - 1][ver1 - 1] = 1;
+			}
+		}else{
+
+		}
+	}
+}
+
+void output_graph(int n){
+	for(int i = 0;i < n;i++){
+		for(int j = 0;j < n;j++){
+			printf("%d",G[i][j]);
+			if(j < n-1){
+				printf(" ");
+			}
+		}
+		printf("\n");
+	}
+}
+
+void init_graph(){
+
+	for(int i = 0;i < MAX;i++){
+		color[i] = WHITE;
+		next_v[i] = 0;
+		for(int j = 0;j < MAX;j++){
+			G[i][j] = 0;
+		}
+	}
+	sp = 0;
+	tt = 0;
+}
+

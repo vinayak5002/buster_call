@@ -1,0 +1,192 @@
+#include <bits/stdc++.h>
+
+
+#include <iostream>
+
+#include <algorithm>
+#include <cassert>
+#include <vector>
+
+namespace rklib {
+
+template <class T>
+bool chmax(T &a, const T &b) {
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template <class T>
+bool chmin(T &a, const T &b) {
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template <class T>
+bool chmin_non_negative(T &a, const T &b) {
+    if (a < 0 || a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template <class T>
+T div_floor(T a, T b) {
+    if (b < 0) a *= -1, b *= -1;
+    return a >= 0 ? a / b : (a + 1) / b - 1;
+}
+
+template <class T>
+T div_ceil(T a, T b) {
+    if (b < 0) a *= -1, b *= -1;
+    return a > 0 ? (a - 1) / b + 1 : a / b;
+}
+
+}  // namespace rklib
+
+#include <string>
+#include <type_traits>
+#include <vector>
+
+namespace rklib {
+
+struct BigInt {
+   public:
+    BigInt() : BigInt(0) {}
+    template <typename T, std::enable_if_t<std::is_integral<T>::value,
+                                           std::nullptr_t> = nullptr>
+    BigInt(T x) : BigInt(std::to_string(x)) {}
+    BigInt(std::string s) : sgn(1) {
+        if (s[0] == '-') {
+            s.erase(s.begin());
+            sgn = -1;
+        }
+        if (s == "0") {
+            sgn = 0;
+            v = {0};
+            return;
+        }
+        for (int r = int(s.size()), l = std::max(0, r - log10_base); r > 0;
+             r = l, l = std::max(0, r - log10_base)) {
+            int tmp = 0;
+            for (int i = l; i < r; ++i) {
+                tmp = tmp * 10 + (s[i] - '0');
+            }
+            v.push_back(tmp);
+        }
+    }
+
+    BigInt& operator+=(const BigInt& rhs) {
+        if (v.size() < rhs.v.size()) v.resize(rhs.v.size(), 0);
+        int r_sgn = rhs.sgn;
+        for (size_t i = 0; i < rhs.v.size(); i++) {
+            if (sgn == r_sgn)
+                v[i] += rhs.v[i];
+            else
+                v[i] -= rhs.v[i];
+        }
+        normalize();
+        return *this;
+    }
+    BigInt& operator-=(const BigInt& rhs) {
+        if (v.size() < rhs.v.size()) v.resize(rhs.v.size(), 0);
+        int r_sgn = rhs.sgn;
+        for (size_t i = 0; i < rhs.v.size(); i++) {
+            if (sgn != r_sgn)
+                v[i] += rhs.v[i];
+            else
+                v[i] -= rhs.v[i];
+        }
+        normalize();
+        return *this;
+    }
+
+    friend BigInt operator+(const BigInt& lhs, const BigInt& rhs) {
+        return BigInt(lhs) += rhs;
+    }
+    friend BigInt operator-(const BigInt& lhs, const BigInt& rhs) {
+        return BigInt(lhs) -= rhs;
+    }
+
+    BigInt operator+() const { return *this; }
+    BigInt operator-() const { return {-sgn, v}; }
+
+    friend std::istream& operator>>(std::istream& is, BigInt& rhs) {
+        std::string s;
+        is >> s;
+        rhs = BigInt(s);
+        return is;
+    }
+    friend std::ostream& operator<<(std::ostream& os, const BigInt& rhs) {
+        if (rhs.sgn < 0) os << "-";
+        for (int i = int(rhs.v.size()) - 1; i >= 0; i--) {
+            if (i == int(rhs.v.size()) - 1) {
+                os << rhs.v[i];
+            } else {
+                os << std::to_string(rhs.v[i] + base).substr(1, log10_base);
+            }
+        }
+        return os;
+    }
+
+   private:
+    static constexpr int base = 10000, log10_base = 4;
+    int sgn;
+    std::vector<int> v;
+
+    BigInt(int sgn, std::vector<int> v) : sgn(sgn), v(v) {}
+
+    void normalize() {
+        if (v.back() < 0) {
+            sgn = -sgn;
+            std::transform(v.begin(), v.end(), v.begin(),
+                           [](int x) { return -x; });
+        }
+        int carry = 0;
+        for (size_t i = 0; i < v.size(); i++) {
+            v[i] += carry;
+            if (0 <= v[i] && v[i] < base) {
+                carry = 0;
+                continue;
+            }
+            carry = div_floor(v[i], base);
+            v[i] -= carry * base;
+        }
+        if (carry != 0) v.push_back(carry);
+
+        while (v.size() >= 2 && v.back() == 0) v.pop_back();
+        if (v.size() == 1 && v[0] == 0) sgn = 0;
+    }
+};
+
+}  // namespace rklib
+
+
+#include "testlib.h"
+
+#define For(i, a, b) for (int i = (int)(a); (i) < (int)(b); ++(i))
+#define rFor(i, a, b) for (int i = (int)(a)-1; (i) >= (int)(b); --(i))
+#define rep(i, n) For(i, 0, n)
+#define rrep(i, n) rFor(i, n, 0)
+#define fi first
+#define se second
+
+using namespace std;
+using namespace rklib;
+
+using lint = long long;
+using pii = pair<int, int>;
+using pll = pair<lint, lint>;
+
+int main() {
+    BigInt a, b;
+    cin >> a >> b;
+    cout << a + b << "\n";
+}
+

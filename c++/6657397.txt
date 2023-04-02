@@ -1,0 +1,72 @@
+#include <iostream>
+#include <stdio.h>
+
+#define MAX 100051
+#define NIL -1
+
+using namespace std;
+
+struct Node {
+	int parent, left, right;
+};
+
+Node T[MAX];
+
+void preParse(int u) {
+
+	if (u == NIL) return;
+	printf("%d", u);
+	preParse(T[u].left);
+	preParse(T[u].right);
+}
+
+void inParse(int u) {
+	if (u == NIL) return;
+	inParse(T[u].left);
+	printf("%d", u);
+	inParse(T[u].right);
+	
+}
+
+void postParse(int u) {
+	if (u == NIL) return;
+	postParse(T[u].left);
+	postParse(T[u].right);
+	printf("%d", u);
+
+}
+
+int main() {
+
+	int n;
+	int u, l, r, root = 0;
+	scanf("%d", &n);
+
+	for (int i = 0; i < n; i++) {
+		T[i].parent = NIL;
+	}
+
+	for (int i = 0; i < n; i++) {
+		cin >> u >> l >> r;
+		T[u].left = l;
+		T[u].right = r;
+		if (l != NIL) T[l].parent = u;
+		if (r != NIL) T[r].parent = u;
+	}
+
+	for (int i = 0; i < n; i++) {
+		if (T[i].parent == NIL) root = i;
+	}
+
+	printf("Preorder\n");
+	preParse(root);
+	printf("\n");
+	printf("Inorder\n");
+	inParse(root);
+	printf("\n");
+	printf("Postorder\n");
+	postParse(root);
+	printf("\n");
+
+	return 0;
+}

@@ -1,0 +1,125 @@
+import java.util.*;
+
+public class Main{
+    public static void main(String[] args){
+        try(Scanner stdIn = new Scanner(System.in)){
+            for(int p = 0; p < 1000; p ++){
+                int[] a;
+                a = new int[8];
+                for(int i = 0; i < 8; i++){
+                    a[i] = stdIn.nextInt();
+                }
+                Solve solve = new Solve(a);
+                solve.solve();
+                solve = null;
+            }
+        }
+        return;
+    }
+}
+
+class Solve{
+    private int[][] route = {{1, 4}, {0, 2, 5}, {1, 3, 6}, {2, 7}, {0, 5}, {1, 4, 6}, {2, 5, 7}, {3, 6}};
+    private int[] a = new int[8];
+    private int[] t = new int[8];
+    private Deque<Node> queue = new ArrayDeque<>();
+    private Node[] node = new Node[30000];
+
+    Solve(int[] a){
+        this.a = a;
+    }
+
+    void solve(){
+        int counter = 0;
+        int mother = -1;
+        if(check(a)){
+            System.out.println(0);
+        }else{
+            Node n = new Node(a, -1);
+            queue.add(n);
+            node[0] = n;
+            while(queue.size() > 0){
+                a = queue.poll().getPattern();
+                mother ++;
+                int point = point(a);
+                for(int i = 0; i < route[point].length; i++){
+                    t = Arrays.copyOf(a, 8);
+                    int p = route[point][i];
+                    change(t, p, point);
+
+                    if(check(t)){
+                        counter ++;
+                        System.out.println(times(mother));
+                        return;
+                    }else{
+                        boolean x = true;
+                        for(int j = 0; j < counter; j++){
+                            int[] s = node[j].getPattern();
+                            if(Arrays.equals(t, s)){
+                                x = false;
+                            }
+                        }
+                        if(x){
+                            counter ++;
+                            Node tmp = new Node(t, mother);
+                            queue.add(tmp);
+                            node[counter] = tmp;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    int point(int[] a){
+        for(int i = 0; i < 8; i ++){
+            if(a[i] == 0){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    void change(int[] temporary, int x, int y){
+        int tmp = temporary[x];
+        temporary[x] = temporary[y];
+        temporary[y] = tmp;
+        return;
+    }
+
+    boolean check(int[] a){
+        for(int i = 0; i < 8; i++){
+            if(a[i] != i){return false;}
+        }
+        return true;
+    }
+
+    int times(int mother){
+        int sum = 0;
+
+        while(mother != -1){
+            sum ++;
+            mother = node[mother].getMother();
+        }
+
+        return sum;
+    }
+}
+
+class Node{
+    private int[] pattern;
+    private int mother = 0;
+
+    Node(int[] pattern, int mother){
+        this.pattern = pattern;
+        this.mother = mother;
+    }
+
+    public int getMother() {
+        return mother;
+    }
+
+    public int[] getPattern() {
+        return pattern;
+    }
+}

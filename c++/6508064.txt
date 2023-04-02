@@ -1,0 +1,143 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define null    0
+
+
+struct _node {
+    int id;
+
+    int layer;
+    struct _node* parent;
+    struct _node* child;
+    struct _node* sibling;    
+};
+
+struct _node* create_node( int id ){
+    struct _node* node;
+    node = (struct _node*)malloc(sizeof(struct _node));
+
+    node->id = id;
+    node->layer = 0;
+    node->parent = null;
+    node->child = null;
+    node->sibling = null;
+
+    return node;
+}
+
+void delete_node( struct _node* node ){
+
+    if( node == null ) return;
+
+    delete_node(node->child);
+    delete_node(node->sibling);
+
+    free(node);
+ 
+    return;
+}
+
+struct _node* find_node( struct _node* node, int id ){
+
+    struct _node* tmp;
+
+    if( node == null ) return null;
+
+    // printf( " find: node=%d, param=%d\n", node->id, id );
+
+    if( node->id == id) return node;
+
+    tmp = find_node( node->child, id );
+    if(tmp != null ) return tmp;
+
+    tmp = find_node( node->sibling, id );
+    if(tmp != null ) return tmp;
+
+    return null;
+
+}
+
+
+
+int main(){
+
+    int n, id, k, last=-1;
+    struct _node *root=null;
+    struct _node *current, *tmp;
+    
+    scanf("%d", &n);
+
+    for( int i=0; i<n; i++){
+        scanf( "%d %d", &id,  &k );
+
+        if( last < id) last=id;
+
+        //printf( " seek: %d\n", id);
+        tmp = find_node( root, id );
+        if( tmp == null ){
+            root = create_node( id );
+            current = root;
+        }else{
+            current = tmp;
+        }
+
+        for( int j=0; j<k; j++ ){
+            scanf("%d", &id );
+
+            tmp = create_node( id );
+            if( j == 0 ){
+                //printf( " adding child %d->%d\n", current->id, tmp->id);
+                tmp->parent = current;
+                tmp->layer = current->layer+1;
+                current->child = tmp;
+            } else {
+                //printf( " adding sib %d->%d\n", current->id, tmp->id);
+                tmp->parent = current->parent;
+                tmp->layer = current->layer;
+                current->sibling = tmp;
+            }
+            current = tmp;
+        }
+
+    }
+
+    // printf( "last=%d \n", last);
+
+    //node 0: parent = -1, depth = 0, root, [1, 4, 10]
+    for( int i=0; i<=last; i++){
+        tmp = find_node( root, i );
+        
+        printf( "node %d: ", tmp->id);
+
+        if( tmp->parent == null ){
+            printf( "parent = -1, ");
+            printf( "depth = %d, ", tmp->layer);
+            printf( "root, ");
+        } else if( tmp->child == null ) {
+            printf( "parent = %d, ", tmp->parent->id );
+            printf( "depth = %d, ", tmp->layer);
+            printf( "leaf, " );
+        } else {
+            printf( "parent = %d, ", tmp->parent->id );
+            printf( "depth = %d, ", tmp->layer);
+            printf( "internal node, " );
+        } 
+
+        printf( "[" );
+        if( (tmp = tmp->child) != null ){
+            do{
+                printf( "%d", tmp->id);
+                if( tmp->sibling != null ) printf( ", " );
+            } while( (tmp = tmp->sibling) != null );
+        }
+        printf( "]" );
+        printf( "\n" );
+    }
+
+    delete_node(root);
+
+    return 0;
+}
+

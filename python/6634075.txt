@@ -1,0 +1,119 @@
+/// 入力を取得するマクロ
+/// https://qiita.com/tanakh/items/0ba42c7ca36cd29d0ac8
+macro_rules! input {
+    (source = $s:expr, $($r:tt)*) => {
+        let mut iter = $s.split_whitespace();
+        input_inner!{iter, $($r)*}
+    };
+    ($($r:tt)*) => {
+        let s = stdin!();
+        let mut iter = s.split_whitespace();
+        input_inner!{iter, $($r)*}
+    };
+}
+
+macro_rules! input_inner {
+    ($iter:expr) => {};
+    ($iter:expr, ) => {};
+
+    ($iter:expr, $var:ident : $t:tt $($r:tt)*) => {
+        let $var = read_value!($iter, $t);
+        input_inner!{$iter $($r)*}
+};
+}
+
+macro_rules! read_value {
+    ($iter:expr, ( $($t:tt),* )) => {
+        ( $(read_value!($iter, $t)),* )
+    };
+
+    ($iter:expr, [ $t:tt ; $len:expr ]) => {
+        (0..$len).map(|_| read_value!($iter, $t)).collect::<Vec<_>>()
+    };
+
+    ($iter:expr, chars) => {
+        read_value!($iter, String).chars().collect::<Vec<char>>()
+    };
+
+    ($iter:expr, usize1) => {
+        read_value!($iter, usize) - 1
+    };
+
+    ($iter:expr, $t:ty) => {
+        $iter.next().unwrap().parse::<$t>().expect("Parse error")
+    };
+}
+
+macro_rules! stdin {
+    () => {{
+        use std::io::Read;
+        let mut s = String::new();
+        std::io::stdin().read_to_string(&mut s).unwrap();
+        s
+    }};
+}
+
+macro_rules! stdout {
+    ($out:expr) => {{
+        use std::io::Write;
+        let out = std::io::stdout();
+        let mut out = std::io::BufWriter::new(out.lock());
+        writeln!(out, "{}", $out).unwrap();
+    }};
+}
+
+macro_rules! join {
+    ($input:expr) => {
+        join!($input, " ")
+    };
+
+    ($input:expr, $separator:expr) => {
+        $input
+            .iter()
+            .map(|a| a.to_string())
+            .collect::<Vec<String>>()
+            .join($separator)
+    };
+}
+#[allow(dead_code)]
+fn main() {
+    stdout!(solve(&stdin!()))
+}
+
+fn solve(src: &str) -> String {
+    input! {
+        source = src,
+        n: usize,
+        q: i64,
+        input: [(String, i64); n]
+    }
+    let mut progress: i64 = 0;
+    let mut queue = input;
+    let mut result: Vec<(String, i64)> = Vec::with_capacity(n);
+    loop {
+        if queue.is_empty() {
+            break
+        }
+        let (task, take_time) = queue.remove(0);
+        let rest = take_time - q;
+
+        progress += take_time.min(q);
+
+        if rest <= 0 {
+            result.push((task, progress));
+        } else {
+            queue.push((task, rest));
+        }
+    }
+
+    result
+        .into_iter()
+        .map(|(task, time)| {
+            format!("{} {}", task, time)
+        })
+        .collect::<Vec<String>>()
+        .join("\n")
+}
+
+
+

@@ -1,0 +1,30 @@
+#include <bits/stdc++.h>
+#define MAXN 20
+#define MAXS 50000
+#define oo 100000000
+using namespace std;
+
+int memo[MAXN + 1][MAXS + 1];
+int D[MAXN];
+// complejidad: O(n * s)
+
+int f(int n, int s) {
+  if (n == 0) {
+    if (s == 0) return 0;
+    return oo;
+  }
+  int &ret = memo[n][s];
+  if (ret != -1) return ret;
+  ret = f(n - 1, s);
+  if (s >= D[n - 1]) ret = min(ret, 1 + f(n, s - D[n - 1]));
+  return ret;
+}
+
+int main() {
+  int n, m;
+  cin >> n >> m;
+  for (int i = 0; i < m; ++i) cin >> D[i];
+  memset(memo, -1, sizeof(memo));
+  cout << f(m, n) << "\n";
+}
+

@@ -1,0 +1,1141 @@
+#include <bits/stdc++.h>
+using i32 = int;
+using u32 = unsigned int;
+using i64 = long long;
+using u64 = unsigned long long;
+using i128 = __int128_t;
+using u128 = __uint128_t;
+using f64 = double;
+using f80 = long double;
+using f128 = __float128;
+constexpr i32 operator"" _i32(u64 v)
+{
+    return v;
+}
+constexpr i32 operator"" _u32(u64 v)
+{
+    return v;
+}
+constexpr i64 operator"" _i64(u64 v)
+{
+    return v;
+}
+constexpr u64 operator"" _u64(u64 v)
+{
+    return v;
+}
+constexpr f64 operator"" _f64(f80 v)
+{
+    return v;
+}
+constexpr f80 operator"" _f80(f80 v)
+{
+    return v;
+}
+using Istream = std::istream;
+using Ostream = std::ostream;
+using Str = std::string;
+template<typename T>
+using Lt = std::less<T>;
+template<typename T>
+using Gt = std::greater<T>;
+template<typename T>
+using IList = std::initializer_list<T>;
+template<int n>
+using BSet = std::bitset<n>;
+template<typename T1, typename T2>
+using Pair = std::pair<T1, T2>;
+template<typename... Ts>
+using Tup = std::tuple<Ts...>;
+template<typename T, int N>
+using Arr = std::array<T, N>;
+template<typename... Ts>
+using Deq = std::deque<Ts...>;
+template<typename... Ts>
+using Set = std::set<Ts...>;
+template<typename... Ts>
+using MSet = std::multiset<Ts...>;
+template<typename... Ts>
+using USet = std::unordered_set<Ts...>;
+template<typename... Ts>
+using UMSet = std::unordered_multiset<Ts...>;
+template<typename... Ts>
+using Map = std::map<Ts...>;
+template<typename... Ts>
+using MMap = std::multimap<Ts...>;
+template<typename... Ts>
+using UMap = std::unordered_map<Ts...>;
+template<typename... Ts>
+using UMMap = std::unordered_multimap<Ts...>;
+template<typename... Ts>
+using Vec = std::vector<Ts...>;
+template<typename... Ts>
+using Stack = std::stack<Ts...>;
+template<typename... Ts>
+using Queue = std::queue<Ts...>;
+template<typename T>
+using MaxHeap = std::priority_queue<T>;
+template<typename T>
+using MinHeap = std::priority_queue<T, Vec<T>, Gt<T>>;
+using NSec = std::chrono::nanoseconds;
+using USec = std::chrono::microseconds;
+using MSec = std::chrono::milliseconds;
+using Sec = std::chrono::seconds;
+template<typename T>
+constexpr T LIMMIN = std::numeric_limits<T>::min();
+template<typename T>
+constexpr T LIMMAX = std::numeric_limits<T>::max();
+template<typename T>
+constexpr T INF = (LIMMAX<T> - 1) / 2;
+template<typename T>
+constexpr T PI = T{3.141592653589793238462643383279502884};
+template<typename T = u64>
+constexpr T TEN(const int n)
+{
+    return n == 0 ? T{1} : TEN<T>(n - 1) * T{10};
+}
+Ostream& operator<<(Ostream& os, i128 v)
+{
+    bool minus = false;
+    if (v < 0) { minus = true, v = -v; }
+    Str ans;
+    if (v == 0) { ans = "0"; }
+    while (v) {
+        ans.push_back('0' + v % 10), v /= 10;
+    }
+    std::reverse(ans.begin(), ans.end());
+    return os << (minus ? "-" : "") << ans;
+}
+Ostream& operator<<(Ostream& os, u128 v)
+{
+    Str ans;
+    if (v == 0) { ans = "0"; }
+    while (v) {
+        ans.push_back('0' + v % 10), v /= 10;
+    }
+    std::reverse(ans.begin(), ans.end());
+    return os << ans;
+}
+template<typename T>
+bool chmin(T& a, const T& b)
+{
+    if (a > b) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+template<typename T>
+bool chmax(T& a, const T& b)
+{
+    if (a < b) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+template<typename T>
+constexpr T floorDiv(T x, T y)
+{
+    if (y < T{}) { x = -x, y = -y; }
+    return x >= T{} ? x / y : (x - y + 1) / y;
+}
+template<typename T>
+constexpr T ceilDiv(T x, T y)
+{
+    if (y < T{}) { x = -x, y = -y; }
+    return x >= T{} ? (x + y - 1) / y : x / y;
+}
+template<typename T, typename I>
+constexpr T modPower(T v, I n, T mod)
+{
+    T ans = 1 % mod;
+    for (; n > 0; n >>= 1, (v *= v) %= mod) {
+        if (n % 2 == 1) { (ans *= v) %= mod; }
+    }
+    return ans;
+}
+template<typename T, typename I>
+constexpr T power(T v, I n)
+{
+    T ans = 1;
+    for (; n > 0; n >>= 1, v *= v) {
+        if (n % 2 == 1) { ans *= v; }
+    }
+    return ans;
+}
+template<typename T, typename I>
+constexpr T power(T v, I n, const T& e)
+{
+    T ans = e;
+    for (; n > 0; n >>= 1, v *= v) {
+        if (n % 2 == 1) { ans *= v; }
+    }
+    return ans;
+}
+template<typename T>
+Vec<T>& operator+=(Vec<T>& vs1, const Vec<T>& vs2)
+{
+    vs1.insert(vs1.end(), vs2.begin(), vs2.end());
+    return vs1;
+}
+template<typename T>
+Vec<T> operator+(const Vec<T>& vs1, const Vec<T>& vs2)
+{
+    auto vs = vs1;
+    vs += vs2;
+    return vs;
+}
+template<typename Vs, typename V>
+void fillAll(Vs& arr, const V& v)
+{
+    if constexpr (std::is_convertible<V, Vs>::value) {
+        arr = v;
+    } else {
+        for (auto& subarr : arr) {
+            fillAll(subarr, v);
+        }
+    }
+}
+template<typename Vs>
+void sortAll(Vs& vs)
+{
+    std::sort(std::begin(vs), std::end(vs));
+}
+template<typename Vs, typename C>
+void sortAll(Vs& vs, C comp)
+{
+    std::sort(std::begin(vs), std::end(vs), comp);
+}
+template<typename Vs>
+void reverseAll(Vs& vs)
+{
+    std::reverse(std::begin(vs), std::end(vs));
+}
+template<typename V, typename Vs>
+V sumAll(const Vs& vs)
+{
+    if constexpr (std::is_convertible<Vs, V>::value) {
+        return static_cast<V>(vs);
+    } else {
+        V ans = 0;
+        for (const auto& v : vs) {
+            ans += sumAll<V>(v);
+        }
+        return ans;
+    }
+}
+template<typename Vs>
+int minInd(const Vs& vs)
+{
+    return std::min_element(std::begin(vs), std::end(vs)) - std::begin(vs);
+}
+template<typename Vs>
+int maxInd(const Vs& vs)
+{
+    return std::max_element(std::begin(vs), std::end(vs)) - std::begin(vs);
+}
+template<typename Vs, typename V>
+int lbInd(const Vs& vs, const V& v)
+{
+    return std::lower_bound(std::begin(vs), std::end(vs), v) - std::begin(vs);
+}
+template<typename Vs, typename V>
+int ubInd(const Vs& vs, const V& v)
+{
+    return std::upper_bound(std::begin(vs), std::end(vs), v) - std::begin(vs);
+}
+template<typename Vs, typename V>
+bool contains(const Vs& vs, const V& v)
+{
+    const int li = lbInd(vs, v);
+    return (li < std::size(vs) and vs[li] == v);
+}
+template<typename Vs, typename V>
+void plusAll(Vs& vs, const V& v)
+{
+    for (auto& v_ : vs) {
+        v_ += v;
+    }
+}
+template<typename T, typename F>
+Vec<T> genVec(int n, F gen)
+{
+    Vec<T> ans;
+    std::generate_n(std::back_insert_iterator(ans), n, gen);
+    return ans;
+}
+template<typename T = int>
+Vec<T> iotaVec(int n, T offset = 0)
+{
+    Vec<T> ans(n);
+    std::iota(ans.begin(), ans.end(), offset);
+    return ans;
+}
+constexpr int popcount(const u64 v)
+{
+    return v ? __builtin_popcountll(v) : 0;
+}
+constexpr int log2p1(const u64 v)
+{
+    return v ? 64 - __builtin_clzll(v) : 0;
+}
+constexpr int lsbp1(const u64 v)
+{
+    return __builtin_ffsll(v);
+}
+constexpr int clog(const u64 v)
+{
+    return v ? log2p1(v - 1) : 0;
+}
+constexpr u64 ceil2(const u64 v)
+{
+    const int l = clog(v);
+    return (l == 64) ? 0_u64 : (1_u64 << l);
+}
+constexpr u64 floor2(const u64 v)
+{
+    return v ? (1_u64 << (log2p1(v) - 1)) : 0_u64;
+}
+constexpr bool ispow2(const u64 v)
+{
+    return (v > 0) and ((v & (v - 1)) == 0);
+}
+constexpr bool btest(const u64 mask, const int ind)
+{
+    return (mask >> ind) & 1_u64;
+}
+template<typename F>
+struct Fix : F
+{
+    Fix(F&& f) : F{std::forward<F>(f)} {}
+    template<typename... Args>
+    auto operator()(Args&&... args) const
+    {
+        return F::operator()(*this, std::forward<Args>(args)...);
+    }
+};
+class irange
+{
+private:
+    struct itr
+    {
+        itr(i64 start = 0, i64 step = 1) : m_cnt{start}, m_step{step} {}
+        bool operator!=(const itr& it) const
+        {
+            return m_cnt != it.m_cnt;
+        }
+        int operator*()
+        {
+            return m_cnt;
+        }
+        itr& operator++()
+        {
+            m_cnt += m_step;
+            return *this;
+        }
+        i64 m_cnt, m_step;
+    };
+    i64 m_start, m_end, m_step;
+public:
+    irange(i64 start, i64 end, i64 step = 1)
+    {
+        assert(step != 0);
+        const i64 d = std::abs(step);
+        const i64 l = (step > 0 ? start : end);
+        const i64 r = (step > 0 ? end : start);
+        int n = (r - l) / d + ((r - l) % d ? 1 : 0);
+        if (l >= r) { n = 0; }
+        m_start = start;
+        m_end = start + step * n;
+        m_step = step;
+    }
+    itr begin() const
+    {
+        return itr{m_start, m_step};
+    }
+    itr end() const
+    {
+        return itr{m_end, m_step};
+    }
+};
+irange rep(i64 end)
+{
+    return irange(0, end, 1);
+}
+irange per(i64 rend)
+{
+    return irange(rend - 1, -1, -1);
+}
+/**
+ * @ref https://prng.di.unimi.it
+ */
+namespace xoshiro_impl {
+u64 x;
+u64 next()
+{
+    uint64_t z = (x += 0x9e3779b97f4a7c15);
+    z = (z ^ (z >> 30)) * 0xbf58476d1ce4e5b9;
+    z = (z ^ (z >> 27)) * 0x94d049bb133111eb;
+    return z ^ (z >> 31);
+}
+} // namespace xoshiro_impl
+class Xoshiro32
+{
+public:
+    using result_type = u32;
+    using T = result_type;
+    Xoshiro32(T seed = 0)
+    {
+        xoshiro_impl::x = seed;
+        s[0] = xoshiro_impl::next();
+        s[1] = xoshiro_impl::next();
+        s[2] = xoshiro_impl::next();
+        s[3] = xoshiro_impl::next();
+    }
+    static constexpr T min()
+    {
+        return LIMMIN<T>;
+    }
+    static constexpr T max()
+    {
+        return LIMMAX<T>;
+    }
+    T operator()()
+    {
+        return next();
+    }
+private:
+    static constexpr T rotl(const T x, int k)
+    {
+        return (x << k) | (x >> (32 - k));
+    }
+    T next()
+    {
+        const T ans = rotl(s[1] * 5, 7) * 9;
+        const T t = s[1] << 9;
+        s[2] ^= s[0];
+        s[3] ^= s[1];
+        s[1] ^= s[2];
+        s[0] ^= s[3];
+        s[2] ^= t;
+        s[3] = rotl(s[3], 11);
+        return ans;
+    }
+    T s[4];
+};
+class Xoshiro64
+{
+public:
+    using result_type = u64;
+    using T = result_type;
+    Xoshiro64(T seed = 0)
+    {
+        xoshiro_impl::x = seed;
+        s[0] = xoshiro_impl::next();
+        s[1] = xoshiro_impl::next();
+        s[2] = xoshiro_impl::next();
+        s[3] = xoshiro_impl::next();
+    }
+    static constexpr T min()
+    {
+        return LIMMIN<T>;
+    }
+    static constexpr T max()
+    {
+        return LIMMAX<T>;
+    }
+    T operator()()
+    {
+        return next();
+    }
+private:
+    static constexpr T rotl(const T x, int k)
+    {
+        return (x << k) | (x >> (64 - k));
+    }
+    T next()
+    {
+        const T ans = rotl(s[1] * 5, 7) * 9;
+        const T t = s[1] << 17;
+        s[2] ^= s[0];
+        s[3] ^= s[1];
+        s[1] ^= s[2];
+        s[0] ^= s[3];
+        s[2] ^= t;
+        s[3] = rotl(s[3], 45);
+        return ans;
+    }
+    T s[4];
+};
+template<typename Rng>
+class RNG
+{
+public:
+    using result_type = typename Rng::result_type;
+    using T = result_type;
+    static constexpr T min()
+    {
+        return Rng::min();
+    }
+    static constexpr T max()
+    {
+        return Rng::max();
+    }
+    RNG() : RNG(std::random_device{}()) {}
+    RNG(T seed) : m_rng(seed) {}
+    T operator()()
+    {
+        return m_rng();
+    }
+    template<typename T>
+    T val(T min, T max)
+    {
+        return std::uniform_int_distribution<T>(min, max)(m_rng);
+    }
+    template<typename T>
+    Pair<T, T> pair(T min, T max)
+    {
+        return std::minmax({val<T>(min, max), val<T>(min, max)});
+    }
+    template<typename T>
+    Vec<T> vec(int n, T min, T max)
+    {
+        return genVec<T>(n, [&]() { return val<T>(min, max); });
+    }
+    template<typename T>
+    Vec<Vec<T>> vvec(int n, int m, T min, T max)
+    {
+        return genVec<Vec<T>>(n, [&]() { return vec(m, min, max); });
+    }
+private:
+    Rng m_rng;
+};
+RNG<std::mt19937> rng;
+RNG<std::mt19937_64> rng64;
+RNG<Xoshiro32> rng_xo;
+RNG<Xoshiro64> rng_xo64;
+class Scanner
+{
+public:
+    Scanner(Istream& is = std::cin) : m_is{is}
+    {
+        m_is.tie(nullptr)->sync_with_stdio(false);
+    }
+    template<typename T>
+    T val()
+    {
+        T v;
+        return m_is >> v, v;
+    }
+    template<typename T>
+    T val(T offset)
+    {
+        return val<T>() - offset;
+    }
+    template<typename T>
+    Vec<T> vec(int n)
+    {
+        return genVec<T>(n, [&]() { return val<T>(); });
+    }
+    template<typename T>
+    Vec<T> vec(int n, T offset)
+    {
+        return genVec<T>(n, [&]() { return val<T>(offset); });
+    }
+    template<typename T>
+    Vec<Vec<T>> vvec(int n, int m)
+    {
+        return genVec<Vec<T>>(n, [&]() { return vec<T>(m); });
+    }
+    template<typename T>
+    Vec<Vec<T>> vvec(int n, int m, const T offset)
+    {
+        return genVec<Vec<T>>(n, [&]() { return vec<T>(m, offset); });
+    }
+    template<typename... Args>
+    auto tup()
+    {
+        return Tup<Args...>{val<Args>()...};
+    }
+    template<typename... Args>
+    auto tup(const Args&... offsets)
+    {
+        return Tup<Args...>{val<Args>(offsets)...};
+    }
+private:
+    Istream& m_is;
+};
+Scanner in;
+class Printer
+{
+public:
+    Printer(Ostream& os = std::cout) : m_os{os}
+    {
+        m_os << std::fixed << std::setprecision(15);
+    }
+    template<typename... Args>
+    int operator()(const Args&... args)
+    {
+        dump(args...);
+        return 0;
+    }
+    template<typename... Args>
+    int ln(const Args&... args)
+    {
+        dump(args...), m_os << '\n';
+        return 0;
+    }
+    template<typename... Args>
+    int el(const Args&... args)
+    {
+        dump(args...), m_os << std::endl;
+        return 0;
+    }
+private:
+    template<typename T>
+    void dump(const T& v)
+    {
+        m_os << v;
+    }
+    template<typename T>
+    void dump(const Vec<T>& vs)
+    {
+        for (const int i : rep(vs.size())) {
+            m_os << (i ? " " : ""), dump(vs[i]);
+        }
+    }
+    template<typename T>
+    void dump(const Vec<Vec<T>>& vss)
+    {
+        for (const int i : rep(vss.size())) {
+            m_os << (i ? "\n" : ""), dump(vss[i]);
+        }
+    }
+    template<typename T, typename... Ts>
+    int dump(const T& v, const Ts&... args)
+    {
+        dump(v), m_os << ' ', dump(args...);
+        return 0;
+    }
+    Ostream& m_os;
+};
+Printer out;
+template<typename T, int n, int i = 0>
+auto ndVec(int const (&szs)[n], const T x = T{})
+{
+    if constexpr (i == n) {
+        return x;
+    } else {
+        return std::vector(szs[i], ndVec<T, n, i + 1>(szs, x));
+    }
+}
+template<u32 mod_, u32 root_, u32 max2p_>
+class modint
+{
+    template<typename U = u32&>
+    static U modRef()
+    {
+        static u32 s_mod = 0;
+        return s_mod;
+    }
+    template<typename U = u32&>
+    static U rootRef()
+    {
+        static u32 s_root = 0;
+        return s_root;
+    }
+    template<typename U = u32&>
+    static U max2pRef()
+    {
+        static u32 s_max2p = 0;
+        return s_max2p;
+    }
+public:
+    static constexpr bool isDynamic()
+    {
+        return (mod_ == 0);
+    }
+    template<typename U = const u32>
+    static constexpr std::enable_if_t<mod_ != 0, U> mod()
+    {
+        return mod_;
+    }
+    template<typename U = const u32>
+    static std::enable_if_t<mod_ == 0, U> mod()
+    {
+        return modRef();
+    }
+    template<typename U = const u32>
+    static constexpr std::enable_if_t<mod_ != 0, U> root()
+    {
+        return root_;
+    }
+    template<typename U = const u32>
+    static std::enable_if_t<mod_ == 0, U> root()
+    {
+        return rootRef();
+    }
+    template<typename U = const u32>
+    static constexpr std::enable_if_t<mod_ != 0, U> max2p()
+    {
+        return max2p_;
+    }
+    template<typename U = const u32>
+    static std::enable_if_t<mod_ == 0, U> max2p()
+    {
+        return max2pRef();
+    }
+    template<typename U = u32>
+    static void setMod(std::enable_if_t<mod_ == 0, U> m)
+    {
+        modRef() = m;
+    }
+    template<typename U = u32>
+    static void setRoot(std::enable_if_t<mod_ == 0, U> r)
+    {
+        rootRef() = r;
+    }
+    template<typename U = u32>
+    static void setMax2p(std::enable_if_t<mod_ == 0, U> m)
+    {
+        max2pRef() = m;
+    }
+    constexpr modint() : m_val{0} {}
+    constexpr modint(i64 v) : m_val{normll(v)} {}
+    constexpr void setRaw(u32 v)
+    {
+        m_val = v;
+    }
+    constexpr modint operator-() const
+    {
+        return modint{0} - (*this);
+    }
+    constexpr modint& operator+=(const modint& m)
+    {
+        m_val = norm(m_val + m.val());
+        return *this;
+    }
+    constexpr modint& operator-=(const modint& m)
+    {
+        m_val = norm(m_val + mod() - m.val());
+        return *this;
+    }
+    constexpr modint& operator*=(const modint& m)
+    {
+        m_val = normll((i64)m_val * (i64)m.val() % (i64)mod());
+        return *this;
+    }
+    constexpr modint& operator/=(const modint& m)
+    {
+        return *this *= m.inv();
+    }
+    constexpr modint operator+(const modint& m) const
+    {
+        auto v = *this;
+        return v += m;
+    }
+    constexpr modint operator-(const modint& m) const
+    {
+        auto v = *this;
+        return v -= m;
+    }
+    constexpr modint operator*(const modint& m) const
+    {
+        auto v = *this;
+        return v *= m;
+    }
+    constexpr modint operator/(const modint& m) const
+    {
+        auto v = *this;
+        return v /= m;
+    }
+    constexpr bool operator==(const modint& m) const
+    {
+        return m_val == m.val();
+    }
+    constexpr bool operator!=(const modint& m) const
+    {
+        return not(*this == m);
+    }
+    friend Istream& operator>>(Istream& is, modint& m)
+    {
+        i64 v;
+        return is >> v, m = v, is;
+    }
+    friend Ostream& operator<<(Ostream& os, const modint& m)
+    {
+        return os << m.val();
+    }
+    constexpr u32 val() const
+    {
+        return m_val;
+    }
+    template<typename I>
+    constexpr modint pow(I n) const
+    {
+        return power(*this, n);
+    }
+    constexpr modint inv() const
+    {
+        return pow(mod() - 2);
+    }
+    static modint sinv(u32 n)
+    {
+        static Vec<modint> is{1, 1};
+        for (u32 i = (u32)is.size(); i <= n; i++) {
+            is.push_back(-is[mod() % i] * (mod() / i));
+        }
+        return is[n];
+    }
+    static modint fact(u32 n)
+    {
+        static Vec<modint> fs{1, 1};
+        for (u32 i = (u32)fs.size(); i <= n; i++) {
+            fs.push_back(fs.back() * i);
+        }
+        return fs[n];
+    }
+    static modint ifact(u32 n)
+    {
+        static Vec<modint> ifs{1, 1};
+        for (u32 i = (u32)ifs.size(); i <= n; i++) {
+            ifs.push_back(ifs.back() * sinv(i));
+        }
+        return ifs[n];
+    }
+    static modint comb(int n, int k)
+    {
+        return k > n or k < 0 ? modint{0} : fact(n) * ifact(n - k) * ifact(k);
+    }
+private:
+    static constexpr u32 norm(u32 x)
+    {
+        return x < mod() ? x : x - mod();
+    }
+    static constexpr u32 normll(i64 x)
+    {
+        return norm(u32(x % (i64)mod() + (i64)mod()));
+    }
+    u32 m_val;
+};
+using modint_1000000007 = modint<1000000007, 5, 1>;
+using modint_998244353 = modint<998244353, 3, 23>;
+template<int id>
+using modint_dynamic = modint<0, 0, id>;
+template<typename mint>
+class NTT
+{
+    // DynamicModint 非対応
+    static_assert(not mint::isDynamic(),
+                  "class NTT: Not support dynamic modint.");
+private:
+    static constexpr u32 MOD = mint::mod();
+    static constexpr u32 ROOT = mint::root();
+    static constexpr u32 L_MAX = mint::max2p();
+    static constexpr u32 N_MAX = (1 << L_MAX);
+public:
+    static Vec<mint> convolute(Vec<mint> as, Vec<mint> bs)
+    {
+        const int AN = as.size();
+        const int BN = bs.size();
+        const int CN = AN + BN - 1;
+        const int L = clog(CN);
+        const int N = (1 << L);
+        as.resize(N, 0), bs.resize(N, 0);
+        transform(as, L, false), transform(bs, L, false);
+        for (int i : rep(N)) {
+            as[i] *= bs[i];
+        }
+        transform(as, L, true);
+        as.resize(CN);
+        return as;
+    }
+    static void transform(Vec<mint>& as, int L, bool rev)
+    {
+        const int N = as.size();
+        assert(N <= N_MAX);
+        assert((1 << L) == N);
+        if (N == 1) { return; }
+        const auto l_range = (rev ? irange(1, L + 1, 1) : irange(L, 0, -1));
+        for (int l : l_range) {
+            const int H = 1 << l;
+            const int B = N / H;
+            for (int b : rep(B)) {
+                const mint W = zeta(l, rev);
+                mint W_h = 1;
+                for (int h : rep(H / 2)) {
+                    const int y1 = H * b + h;
+                    const int y2 = y1 + H / 2;
+                    const mint a1 = as[y1];
+                    const mint a2 = as[y2];
+                    const mint na1 = (rev ? a1 + a2 * W_h : a1 + a2);
+                    const mint na2 = (rev ? a1 - a2 * W_h : (a1 - a2) * W_h);
+                    as[y1] = na1;
+                    as[y2] = na2;
+                    W_h *= W;
+                }
+            }
+        }
+        if (rev) {
+            const mint iN = mint::sinv(N);
+            for (auto& a : as) {
+                a *= iN;
+            }
+        }
+    }
+private:
+    static mint zeta(int i, bool rev)
+    {
+        static Vec<mint> zs; // zs[i] = 1の2^i乗根
+        static Vec<mint> izs; // izs[i] = zs[i]の逆元
+        if (zs.empty()) {
+            zs.resize(L_MAX + 1, 1);
+            izs.resize(L_MAX + 1, 1);
+            zs[L_MAX] = mint(ROOT).pow((MOD - 1) / (1 << L_MAX));
+            izs[L_MAX] = zs[L_MAX].inv();
+            for (int l : per(L_MAX)) {
+                zs[l] = zs[l + 1] * zs[l + 1];
+                izs[l] = izs[l + 1] * izs[l + 1];
+            }
+        }
+        return (rev ? izs[i] : zs[i]);
+    }
+};
+class Garner
+{
+public:
+    template<typename mint, typename mint1, typename mint2>
+    static mint restore_mod(const mint1& x1, const mint2& x2)
+    {
+        constexpr auto m1 = mint1::mod();
+        const auto [y0, y1] = coeff(x1, x2);
+        return mint(y0.val()) + mint(y1.val()) * m1;
+    }
+    template<typename mint, typename mint1, typename mint2, typename mint3>
+    static mint restore_mod(const mint1& x1, const mint2& x2, const mint3& x3)
+    {
+        constexpr auto m1 = mint1::mod();
+        constexpr auto m2 = mint2::mod();
+        const auto [y0, y1, y2] = coeff(x1, x2, x3);
+        return mint(y0.val()) + mint(y1.val()) * m1 + mint(y2.val()) * m1 * m2;
+    }
+    template<typename mint1, typename mint2>
+    static i64 restore_i64(const mint1& x1, const mint2& x2)
+    {
+        constexpr u32 m1 = mint1::mod();
+        constexpr u32 m2 = mint2::mod();
+        const auto [y0, y1] = coeff(x1, x2);
+        constexpr u64 MAX = 1_u64 << 63;
+        const i128 M = (i128)m1 * m2;
+        i128 S = i128(y0.val()) + i128(y1.val()) * m1;
+        if (S >= MAX) { S -= M; }
+        return (i64)S;
+    }
+    template<typename mint1, typename mint2, typename mint3>
+    static i64 restore_i64(const mint1& x1, const mint2& x2, const mint3& x3)
+    {
+        constexpr u32 m1 = mint1::mod();
+        constexpr u32 m2 = mint2::mod();
+        constexpr u32 m3 = mint3::mod();
+        const auto [y0, y1, y2] = coeff(x1, x2, x3);
+        constexpr u64 MAX = 1_u64 << 63;
+        const i128 M = (i128)m1 * m2 * m3;
+        i128 S
+            = i128(y0.val()) + i128(y1.val()) * m1 + i128(y2.val()) * m1 * m2;
+        if (S >= MAX) { S -= M; }
+        return (i64)S;
+    }
+private:
+    template<typename mint1, typename mint2>
+    static Pair<mint1, mint2> coeff(const mint1& x1, const mint2& x2)
+    {
+        constexpr auto m1 = mint1::mod();
+        constexpr mint2 m1_inv = mint2(m1).inv();
+        const mint1 y0 = x1;
+        const mint2 y1 = (x2 - mint2(y0.val())) * m1_inv;
+        return {y0, y1};
+    }
+    template<typename mint1, typename mint2, typename mint3>
+    static Tup<mint1, mint2, mint3>
+        coeff(const mint1& x1, const mint2& x2, const mint3& x3)
+    {
+        constexpr auto m1 = mint1::mod();
+        constexpr auto m2 = mint2::mod();
+        constexpr mint2 m1_inv = mint2(m1).inv();
+        constexpr mint3 m1m2_inv = (mint3(m1) * mint3(m2)).inv();
+        const mint1 y0 = x1;
+        const mint2 y1 = (x2 - mint2(y0.val())) * m1_inv;
+        const mint3 y2
+            = (x3 - mint3(y0.val()) - mint3(y1.val()) * m1) * m1m2_inv;
+        return {y0, y1, y2};
+    }
+};
+template<typename mint>
+Vec<mint> convolute_mod(const Vec<mint>& as, const Vec<mint>& bs)
+{
+    constexpr u32 L_MAX = mint::max2p();
+    constexpr u32 N_MAX = (1 << L_MAX);
+    const int AN = as.size();
+    const int BN = bs.size();
+    const int N = AN + BN - 1;
+    if (N <= 10) {
+        Vec<mint> cs(N, 0);
+        for (int i : rep(AN)) {
+            for (int j : rep(BN)) {
+                cs[i + j] += as[i] * bs[j];
+            }
+        }
+        return cs;
+    }
+    if (N <= N_MAX) {
+        // mintはNTT Friendlyなのでそのまま畳み込み
+        return NTT<mint>::convolute(as, bs);
+    } else {
+        assert(N <= (1 << 24));
+        using submint1 = modint<469762049, 3, 26>;
+        using submint2 = modint<167772161, 3, 25>;
+        using submint3 = modint<754974721, 11, 24>;
+        // mod 3つでGarner復元
+        Vec<submint1> as1(AN), bs1(BN);
+        Vec<submint2> as2(AN), bs2(BN);
+        Vec<submint3> as3(AN), bs3(BN);
+        for (int i : rep(AN)) {
+            as1[i] = as[i].val(), as2[i] = as[i].val(), as3[i] = as[i].val();
+        }
+        for (int i : rep(BN)) {
+            bs1[i] = bs[i].val(), bs2[i] = bs[i].val(), bs3[i] = bs[i].val();
+        }
+        const auto cs1 = NTT<submint1>::convolute(as1, bs1);
+        const auto cs2 = NTT<submint2>::convolute(as2, bs2);
+        const auto cs3 = NTT<submint3>::convolute(as3, bs3);
+        Vec<mint> cs(N);
+        for (int i : rep(N)) {
+            cs[i] = Garner::restore_mod<mint>(cs1[i], cs2[i], cs3[i]);
+        }
+        return cs;
+    }
+}
+template<typename I>
+Vec<i64> convolute_i64(const Vec<I>& as, const Vec<I>& bs)
+{
+    const int AN = as.size();
+    const int BN = bs.size();
+    const int N = AN + BN - 1;
+    assert(N <= (1 << 24));
+    if (N <= 10) {
+        Vec<i64> cs(N, 0);
+        for (int i : rep(AN)) {
+            for (int j : rep(BN)) {
+                cs[i + j] += (i64)as[i] * bs[j];
+            }
+        }
+        return cs;
+    }
+    using submint1 = modint<469762049, 3, 26>;
+    using submint2 = modint<167772161, 3, 25>;
+    using submint3 = modint<754974721, 11, 24>;
+    // mod 3つでGarner復元
+    Vec<submint1> as1(AN), bs1(BN);
+    Vec<submint2> as2(AN), bs2(BN);
+    Vec<submint3> as3(AN), bs3(BN);
+    for (int i : rep(AN)) {
+        as1[i] = as[i], as2[i] = as[i], as3[i] = as[i];
+    }
+    for (int i : rep(BN)) {
+        bs1[i] = bs[i], bs2[i] = bs[i], bs3[i] = bs[i];
+    }
+    const auto cs1 = NTT<submint1>::convolute(as1, bs1);
+    const auto cs2 = NTT<submint2>::convolute(as2, bs2);
+    const auto cs3 = NTT<submint3>::convolute(as3, bs3);
+    Vec<i64> cs(N);
+    for (int i : rep(N)) {
+        cs[i] = Garner::restore_i64(cs1[i], cs2[i], cs3[i]);
+    }
+    return cs;
+}
+using mint = modint_dynamic<0>;
+struct C
+{
+    mint r = 0;
+    mint i = 0;
+    C() {}
+    C(mint r) : r{r} {}
+    C(mint r, mint i) : r{r}, i{i} {}
+    friend C operator+(const C& c1, const C& c2)
+    {
+        return C{c1.r + c2.r, c1.i + c2.i};
+    }
+    friend C operator-(const C& c1, const C& c2)
+    {
+        return C{c1.r - c2.r, c1.i - c2.i};
+    }
+    friend C operator*(const C& c1, const C& c2)
+    {
+        return C{c1.r * c2.r - c1.i * c2.i, c1.r * c2.i + c1.i * c2.r};
+    }
+    friend C& operator*=(C& c1, const C& c2)
+    {
+        c1 = c1 * c2;
+        return c1;
+    }
+    C pow(i64 n) const
+    {
+        return power(*this, n, {1, 0});
+    }
+};
+int main()
+{
+    const auto [P, N] = in.tup<u32, i64>(0, -1);
+    mint::setMod(P);
+    const i64 M = N / P;
+    const i64 K = N % P;
+    Vec<mint> Fs(P + 1, 1);
+    for (int i : irange(1, P + 1)) {
+        Fs[i] = Fs[i - 1] * i;
+    }
+    C PP = C{Fs[P - 1], 0}.pow(P) * (C{Fs[P - 1], 0} * C{0, 1}.pow(P - 1));
+    PP *= (C{1, 0} - C{0, 1}.pow(P - 1)).pow(P - 1);
+    C PK = {1, 0};
+    if (K > 0) {
+        PK = C{Fs[K - 1], 0}.pow(P) * (C{Fs[P - 1], 0} * C{0, 1}.pow(P - 1));
+        PK *= (C{1, 0} - C{0, 1}.pow(P - 1)).pow(K - 1);
+    }
+    C KP = {1, 0};
+    if (K > 0) {
+        KP = C{Fs[P - 1], 0} * (C{Fs[K - 1], 0} * C{0, 1}.pow(K - 1)).pow(P);
+        KP *= (C{1, 0} - C{0, -1}.pow(P - 1)).pow(K - 1);
+    }
+    C KK = {1, 0};
+    if (K > 0) {
+        KK = C{Fs[K - 1], 0} * (C{Fs[K - 1], 0} * C{0, 1}.pow(K - 1));
+        for (int i : irange(1, K)) {
+            KK *= C{i, i};
+        }
+        Vec<i64> dp(P, 0);
+        for (int i : irange(1, K)) {
+            dp[(mint(i) * i).val()] += 1;
+        }
+        dp = convolute_i64(dp, dp);
+        for (int i : irange(P, dp.size())) {
+            dp[i % P] += dp[i];
+        }
+        dp.resize(P);
+        for (int i : irange(1, K)) {
+            dp[(mint(i) * i * 2).val()] -= 1;
+        }
+        for (int i : rep(P)) {
+            dp[i] /= 2;
+        }
+        for (int i : rep(P)) {
+            if (dp[i] == 0) { continue; }
+            KK *= C{0, mint(i)}.pow(dp[i]);
+        }
+    }
+    C ans = PP.pow(M).pow(M) * KP.pow(M) * PK.pow(M) * KK;
+    out.ln(ans.r, ans.i);
+    return 0;
+}
+

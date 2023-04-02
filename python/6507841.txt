@@ -1,0 +1,35 @@
+rxs = lambda: map(int, input().split())
+N, Q = rxs()
+rN = int(N**(1/2))
+As = [(1<<31)-1]*N
+Bs = [None]*((N+rN-1)//rN)
+
+for q in [tuple(rxs()) for _ in range(Q)]:
+    #import ipdb; ipdb.set_trace()
+    if q[0] == 0:
+        _, s, t, x = q
+        t += 1
+        sb, sf = s//rN, s%rN
+        tb, tf = t//rN, t%rN
+        if sb == tb:
+            for i in range(sb*rN, (sb+1)*rN):
+                As[i] = x if s <= i < t else Bs[sb]
+            Bs[sb] = None
+            continue
+        if sf != 0:
+            for i in range(sb*rN, (sb+1)*rN):
+                As[i] = x if s <= i else Bs[sb]
+            Bs[sb] = None
+            sb += 1
+        if tf != 0:
+            for i in range(tb*rN, min(Q, (tb+1)*rN)):
+                As[i] = x if i < t else Bs[tb]
+            Bs[sb] = None
+        for i in range(sb, tb):
+            Bs[i] = x
+    else:
+        _, i = q
+        print(As[i] if Bs[i//rN] == None else Bs[i//rN])
+
+
+

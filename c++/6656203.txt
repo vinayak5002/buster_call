@@ -1,0 +1,147 @@
+#include <stdio.h>
+#include <string.h>
+
+#define NIL -1
+#define N_MAX 25
+
+struct node{
+    int data;
+    int left;
+    int right;
+};
+
+
+int parent[N_MAX];
+int sibling[N_MAX];
+int degree[N_MAX];
+int Depth[N_MAX];
+int Height[N_MAX];
+char type[N_MAX][14];
+
+struct node ND[N_MAX];
+
+void post_order(struct node p){
+    if(p.left!=NIL){
+        post_order(ND[p.left]);
+    }
+    if(p.right!=NIL){
+        post_order(ND[p.right]);
+    }
+    printf("%d ",p.data);
+}
+
+void in_order(struct node p){
+    if(p.left!=NIL){
+        in_order(ND[p.left]);
+    }
+    printf("%d ",p.data);
+    if(p.right!=NIL){
+        in_order(ND[p.right]);
+    }
+}
+
+void pre_order(struct node p){
+    printf("%d ",p.data);
+    if(p.left!=NIL){
+        pre_order(ND[p.left]);
+    }
+    if(p.right!=NIL){
+        pre_order(ND[p.right]);
+    }
+}
+
+int compute_height(struct node p){
+    int lh=0,rh=0,MAX;
+    if(p.left==NIL&&p.right==NIL){
+        return 0;
+    }
+
+    if(p.left!=NIL){
+        lh=compute_height(ND[p.left]);
+    }
+    if(p.right!=NIL){
+        rh=compute_height(ND[p.right]);
+    }
+
+    if(lh>rh){
+        return MAX = lh+1;
+    }else{
+        return MAX = rh+1;
+    }
+}
+
+int compute_depth(int i){
+    int DEP=0;
+    if(parent[i]==NIL){
+        return DEP;
+    }
+
+    DEP = compute_depth(parent[i]);
+
+    return DEP+1;
+}
+
+void decide_type(int i){
+    if(parent[i]==NIL){
+        strcpy(type[i],"root");
+    }else if(degree[i]==0){
+        strcpy(type[i],"leaf");
+    }else{
+        strcpy(type[i],"internal node");
+    }
+}
+
+int main(void){
+    for(int i=0;i<N_MAX;i++){
+        ND[i].data = i;
+        ND[i].left=NIL;
+        ND[i].right=NIL;
+        sibling[i]=NIL;
+        parent[i]=NIL;
+        degree[i]=0;
+    }
+
+    int n,id;
+    scanf("%d",&n);
+    for(int i=0;i<n;i++){
+        scanf("%d",&id);
+        scanf("%d %d",&ND[id].left,&ND[id].right);
+
+        if(ND[id].left!=NIL&&ND[id].right!=NIL){ //子と親、兄弟がいる場合の紐付け,子の数の代入
+            degree[id]=2;
+            parent[ND[id].left] = id;
+            parent[ND[id].right] = id;
+            sibling[ND[id].left] = ND[id].right;
+            sibling[ND[id].right] = ND[id].left;
+        }else if(ND[id].left!=NIL){
+            degree[id]=1;
+            parent[ND[id].left] = id;
+        }else if(ND[id].right!=NIL){
+            degree[id]=1;
+            parent[ND[id].right] = id;
+        }
+    }
+
+    for(int i=0;i<n;i++){
+        Height[i] = compute_height(ND[i]);
+        Depth[i] = compute_depth(i);
+        decide_type(i);
+    }
+
+
+    int i;
+    for(i=0;i<n;i++){
+        if(strcmp(type[i],"root")==0){
+            break;
+        }
+    }
+
+    //出力
+    printf("Preorder\n");
+    pre_order(ND[i]);
+    printf("\nInorder\n");
+    in_order(ND[i]);
+    printf("\nPostorder\n");
+    post_order(ND[i]);
+    printf("\n");
+}

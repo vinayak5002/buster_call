@@ -1,0 +1,78 @@
+   #include <bits/stdc++.h>
+    using namespace std;
+    #include <math.h>
+    #include <iomanip>
+    #include <cstdint>
+    #include <string>
+    #include <sstream>
+    
+    template<class T> inline bool chmax(T& a, T b) { if (a < b) { a = b; return 1; } return 0; }
+    template<class T> inline bool chmin(T& a, T b) { if (a > b) { a = b; return 1; } return 0; }
+    #define rep(i,n) for (int i = 0; i < (n); ++i)
+
+    typedef long long ll;
+    typedef unsigned long long ull;
+    using P=pair<ll,ll>;
+    using tp=tuple<ll,ll,ll>;
+    const int INF=1001001001;
+    const ll INFL=1e18;
+    const int mod=1e9+7;
+    
+    const int MAX_N=30;
+    vector<int>G[MAX_N];
+    int d[MAX_N],p[MAX_N],h[MAX_N],sib[MAX_N];
+    
+    int dfs(int i,int depth){
+        d[i]=depth;
+        if(G[i].size()){
+            sib[G[i][0]]=G[i][1];
+            sib[G[i][1]]=G[i][0];
+        }
+        for(int u:G[i]){
+            int x=dfs(u,depth+1);
+            chmax(h[i],x);
+        }
+        return h[i]+1;
+    }
+
+    void solve(){
+        int n;
+        cin>>n;
+        memset(p,-1,sizeof(p));
+        memset(sib,-1,sizeof(sib));
+        rep(i,n){
+            int j,l,r;
+            cin>>j>>l>>r;
+            if(l!=-1){
+                G[j].push_back(l);
+                p[l]=j;
+            }
+            if(r!=-1){
+                G[j].push_back(r);
+                p[r]=j;
+            }
+        }
+        rep(i,n){
+            if(p[i]==-1){
+                dfs(i,0);
+            }
+        }
+        
+        rep(i,n){
+            string t="root";
+            if(p[i]!=-1){
+                if(G[i].size()==0){t="leaf";}
+                else{t="internal node";}
+            }
+            cout<<"node "<<i<<": parent = "<<p[i]<<", sibling = "<<sib[i]<<", degree = "<<G[i].size()<<", depth = "<<d[i]<<", height = "<<h[i]<<", "<<t<<endl;
+        }
+    }
+
+    int main(){
+        ios_base::sync_with_stdio(false);
+        cin.tie(NULL);
+        
+        solve();
+        
+        return 0;
+    }

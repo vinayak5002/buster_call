@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main(){
+    stack<int> data;
+    string str, s;
+    vector<string> str_vec;
+    int a, b;
+
+    getline(cin, str);
+    stringstream ss{str};
+
+    while ( getline(ss, s, ' ')){
+        str_vec.push_back(s);
+    }
+
+    for(const string& str_data : str_vec){
+        if( str_data == "+" ){
+            a = data.top(); data.pop();
+            b = data.top(); data.pop();
+            data.push(b + a);
+        }else if( str_data == "-" ){
+            a = data.top(); data.pop();
+            b = data.top(); data.pop();
+            data.push(b - a);
+        }else if( str_data == "*" ){
+            a = data.top(); data.pop();
+            b = data.top(); data.pop();
+            data.push(b * a);
+        }else{
+            data.push(stoi(str_data));
+        }
+    }
+
+    cout << data.top() << endl;
+
+    return 0;
+}

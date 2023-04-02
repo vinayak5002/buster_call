@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+
+#define rep(i, to) for (int i=0; i<to; i++)
+#define repr(i, from, to) for (int i=from; i<to; i++)
+
+using namespace std;
+using ll = long long;
+using P = pair<int, int>;
+
+#ifdef DEBUG
+#include "debug.hpp"
+#else
+template<class T> void print(T v) { cout << v << endl; }
+void _main(); int main() { _main(); }
+#endif
+
+// ================================================================================ //
+
+const auto INF = 50001;
+
+void _main() {
+    int N, M; cin >> N >> M;
+    vector<int> C(M); rep(i, M) cin >> C[i];
+    
+    /*
+     dp[i][m] = i枚目までのコインを使ってm円を作るときに最低何枚必要か
+     
+     dp[0][x] = INF
+     dp[0][0] = 0
+     
+     dp[x][0] = 0
+     
+     dp[i+1][m] min= dp[i][m] (使わない)
+     dp[i+1][m] min= dp[i][m - C[i]] + 1 (1枚使う)
+     dp[i+1][m] min= dp[i+1][m - C[i]] + 1 (n+1枚使う)
+     */
+    
+    auto dp = vector(M+1, vector(N+1, INF));
+    dp[0][0] = 0; rep(i, M+1) dp[i][0] = 0;
+    
+    
+    rep(i, M) {
+        rep(n, N+1) {
+            dp[i+1][n] = min(dp[i+1][n], dp[i][n]);
+            if (n-C[i] >= 0) {
+                dp[i+1][n] = min(dp[i+1][n], dp[i][n-C[i]] + 1);
+                dp[i+1][n] = min(dp[i+1][n], dp[i+1][n-C[i]] + 1);
+            }
+        }
+    }
+    
+    print(dp[M][N]);
+}
+

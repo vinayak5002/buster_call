@@ -1,0 +1,106 @@
+#include <stdio.h>
+
+#define MAX 100000
+#define NIL -1
+
+struct Node
+{
+	int parent;
+	int left;
+	int right;
+};
+
+struct Node T[MAX];
+int D[MAX];
+
+/* 再帰的に深さを求める */
+void setDepth(int u, int d)
+{
+	D[u] = d;
+	if(T[u].right != NIL){ setDepth(T[u].right, d);}
+	if(T[u].left != NIL) { setDepth(T[u].left, d + 1); }
+}
+
+
+void print_Ndata(int u)
+{
+	printf("node %d: ", u);
+	printf("parent = %d, ", T[u].parent);
+	printf("depth = %d, ", D[u]);
+}
+
+void print_Ntype(int u)
+{
+	if(T[u].parent == NIL){ printf("root, "); }
+	else if(T[u].left == NIL){ printf("leaf, "); }
+	else { printf("internal node, "); }
+}
+
+void print_Nchild(int u)
+{
+	int i;
+	int c = T[u].left;
+	
+	printf("[");
+	for (i = 0; c != NIL; i++)
+	{
+		if (i) // i ≠ 0 なら真
+		{
+			printf(", ");
+		}
+		printf("%d", c);
+		c = T[c].right;
+	}
+	printf("]\n");
+}
+
+int main (void)
+{
+	int n; //節点の個数
+	scanf("%d", &n);
+	
+	int i, j, node, child_num, n_child, left, root;
+	/* 根付き木 T の初期化 */
+	for(i = 0; i < n; i++)
+	{
+		T[i].parent = NIL;
+		T[i].left = NIL;
+		T[i].right = NIL;
+	}
+	
+	
+	/* 根付き木 T にデータを格納 */
+	for(i = 0 ; i < n; i++)
+	{
+		scanf("%d %d", &node, &child_num); // 節点の番号と子の数
+		/* 子のデータを格納 */
+		for(j = 0; j < child_num; j++) //child_num[node]にすると変になる。child_num[n]ではエラーが出る
+		{
+			scanf("%d", &n_child);
+			if(j == 0){ T[node].left = n_child; }
+			else { T[left].right = n_child; }
+			left = n_child;
+			T[n_child].parent = node; // 親のデータを格納
+		}
+	}
+	
+	/* rootノードを見つける */
+	for(i = 0; i < n; i++)
+	{
+		if(T[i].parent == NIL){ root = i; }
+	}
+	
+	/* 深さD[]に格納する */
+	setDepth(root, 0);
+	
+	/* 表示 */
+	for(i = 0; i < n; i++)
+	{
+		print_Ndata(i);
+		print_Ntype(i);
+		print_Nchild(i);
+	}
+	
+	return 0;
+}
+

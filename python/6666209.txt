@@ -1,0 +1,56 @@
+import           Control.Monad ( forM_ )
+import           Control.Monad.ST ( runST )
+import qualified Data.ByteString.Char8 as B
+import           Data.Maybe (fromJust)
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as VM
+
+main :: IO ()
+main = do
+  n <- readLn
+  let f (i:_:cs) = (i, cs)
+      f _ = error "not come here"
+  xss <- fmap (fmap (f . fmap (fst . fromJust . B.readInt) . B.words) . B.lines) B.getContents
+  let pv = parents n xss
+  let cv = childrens n xss
+  forM_ [0 .. n-1] $ \i -> do
+    let parent = pv V.! i
+    let children = cv V.! i
+    putStr $ "node " ++ show i ++ ": "
+    putStr $ "parent = " ++ show parent ++ ", "
+    putStr $ "depth = " ++ show (depth i pv) ++ ", "
+    let ntype = case () of
+                  _ | parent == -1  -> "root"
+                    | null children -> "leaf"
+                    | otherwise     -> "internal node"
+    putStr $ ntype ++ ", "
+    printList children
+    putStrLn ""
+
+printList :: [Int] -> IO ()
+printList [] = putStr "[]"
+printList (x:xs) = putStr ("[" ++ show x) >> go xs >> putStr "]" where
+  go []     = return ()
+  go (y:ys) = putStr (", " ++ show y) >> go ys
+
+depth :: Int -> V.Vector Int -> Int
+depth n parents = go 0 n where
+  go d m
+    | p == -1 = d
+    | otherwise = go (d+1) p
+    where p = parents V.! m
+
+parents :: Int -> [(Int, [Int])] -> V.Vector Int
+parents n xss = runST $ do
+  pmv <- V.thaw (V.replicate n (-1))
+  forM_ xss $ \(i, cs) -> do
+    forM_ cs $ \c -> do
+      VM.write pmv c i
+  V.freeze pmv
+
+childrens :: Int -> [(Int,[Int])] -> V.Vector [Int]
+childrens n xss = runST $ do
+  cmv <- V.thaw (V.replicate n [])
+  forM_ xss $ uncurry (VM.write cmv)
+  V.freeze cmv
+

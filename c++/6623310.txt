@@ -1,0 +1,74 @@
+#include<iostream>
+#include<string>
+#include<queue>
+#include<vector>
+#include<cstring>
+using namespace std;
+typedef pair<int, int> PA;
+const int INF = (1<<20);
+int w, h;
+int dx[] = {1, -1, 0, 0};
+int dy[] = {0, 0, 1, -1};
+int step[22][22];
+string masu[22];
+int min_cost[22][22];
+vector<PA> vec;
+queue<PA> que;
+void bfs(PA mazu, int id){
+    for(int i=0;i<22;i++){
+        for(int j=0;j<22;j++) step[i][j] = INF;
+    }
+    step[mazu.second][mazu.first] = 0;
+    que.push(mazu);
+    while(!que.empty()){
+        PA p = que.front();
+        que.pop();
+        for(int i=0;i<4;i++){
+            int x = p.first + dx[i];
+            int y = p.second + dy[i];
+            int cost = step[p.second][p.first] + 1;
+            if(x<0 || x>=w || y<0 || y>=h || masu[y][x]=='x' || step[y][x]<=cost) continue;
+            step[y][x] = cost;
+            que.push(PA(x, y));
+        }
+    }
+    for(int i=0;i<vec.size();i++){
+        int cost = step[vec[i].second][vec[i].first];
+        min_cost[id][i] = cost;
+    }
+}
+int memo[13][(1<<13)];
+int dfs(int now, int bit){
+    if(bit == (1<<vec.size())-1) return 0;
+    if(memo[now][bit] != -1) return memo[now][bit];
+    int res = INF;
+    for(int i=0;i<vec.size();i++){
+        if( (bit & 1<<i) != 0) continue;
+        res = min(res, dfs(i, (bit | 1<<i)) + min_cost[now][i]);
+    }
+    return memo[now][bit] = res;
+}
+int main(){
+    int sx, sy;
+    while(cin >> w >> h, w!=0){
+        vec.clear();
+        for(int i=0;i<h;i++){
+            cin >> masu[i];
+            for(int j=0;j<w;j++){
+                if(masu[i][j] == 'o'){
+                    sx = j;
+                    sy = i;
+                } else if(masu[i][j] == '*'){
+                    vec.push_back(PA(j, i));
+                }
+            }
+        }
+        for(int i=0;i<vec.size();i++) bfs(vec[i], i);
+        bfs(PA(sx, sy), vec.size());
+        memset(memo, -1, sizeof(memo));
+        int ans = dfs(vec.size(), 0);
+        if(ans >= INF) cout << -1 << endl;
+        else cout << ans << endl;
+    }
+    return(0);
+}

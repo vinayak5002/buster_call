@@ -1,0 +1,86 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+typedef struct{
+	int parent;
+	int left;
+	int right;
+}NODE_t;
+
+NODE_t node[25];
+
+void preorder(int id)
+{
+	printf(" %d",id);
+	if(node[id].left != -1){
+		preorder(node[id].left);
+	}
+	if(node[id].right != -1){
+		preorder(node[id].right);
+	}
+}
+
+void inorder(int id)
+{
+	if(node[id].left != -1){
+		inorder(node[id].left);
+	}
+	printf(" %d",id);
+	if(node[id].right != -1){
+		inorder(node[id].right);
+	}
+}
+
+void postorder(int id)
+{
+	if(node[id].left != -1){
+		postorder(node[id].left);
+	}
+	if(node[id].right != -1){
+		postorder(node[id].right);
+	}
+	printf(" %d",id);
+}
+
+int main(void)
+{
+	int n,id,root,i;
+	
+	scanf("%d",&n);
+	
+	for(i=0;i<n;i++){
+		node[i].parent=-1;
+		node[i].right=-1;
+		node[i].left=-1;
+	}
+	for(i=0;i<n;i++){
+		scanf("%d",&id);
+		scanf("%d",&node[id].left);
+		scanf("%d",&node[id].right);
+		
+		if(node[id].left != -1){
+			node[node[id].left].parent = id;
+		}
+		if(node[id].right != -1){
+			node[node[id].right].parent = id;
+		}
+	}
+	
+	for(root=0;node[root].parent != -1;root++);
+	
+	printf("Preorder\n");
+	preorder(root);
+	printf("\n");
+	
+	printf("Inorder\n");
+	inorder(root);
+	printf("\n");
+	
+	printf("Postorder\n");
+	postorder(root);
+	printf("\n");
+	
+	return 0;
+}
+
+

@@ -1,0 +1,110 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <string>
+#include <sstream>
+using namespace std;
+
+class Deque {
+private:
+	static const int max_num_elements_ = 400001;
+	int* data_;
+	int f_idx_;
+	int l_idx_;
+
+public:
+	Deque() : data_(nullptr), f_idx_(0), l_idx_(0) {
+		data_ = new int(max_num_elements_);
+		return;
+	}
+
+	~Deque() {
+		delete[] data_;
+		return;
+	}
+
+	void push_back(int x) {
+		data_[l_idx_] = x;
+		l_idx_ = (l_idx_ + 1) % max_num_elements_;
+		return;
+	}
+
+	void push_front(int x) {
+		f_idx_--;
+		if (f_idx_ < 0) {
+			f_idx_ = max_num_elements_ - 1;
+		}
+		data_[f_idx_] = x;
+		return;
+	}
+
+	int random_access(int p) const {
+		return data_[(f_idx_ + p) % max_num_elements_];
+	}
+
+	void pop_back() {
+		l_idx_--;
+		if (l_idx_ < 0) {
+			l_idx_ = max_num_elements_ - 1;
+		}
+		return;
+	}
+
+	void pop_front() {
+		f_idx_ = (f_idx_ + 1) % max_num_elements_;
+		return;
+	}
+};
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	string buf;
+	int q = -1;
+	Deque deq;
+
+	cin >> q;
+	getline(cin, buf);
+	for (int i = 0; i < q; i++) {
+		getline(cin, buf);
+		if (buf[0] == '0') {
+			istringstream stream(buf);
+			int tmp, d, x;
+
+			stream >> tmp >> d >> x;
+			if (d == 0) {
+				deq.push_front(x);
+			}
+			else {
+				deq.push_back(x);
+			}
+		}
+		else if (buf[0] == '1') {
+			istringstream stream(buf);
+			int tmp, p;
+
+			stream >> tmp >> p;
+			cout << deq.random_access(p) << endl;
+		}
+		else {
+			istringstream stream(buf);
+			int tmp, d;
+
+			stream >> tmp >> d;
+			if (d == 0) {
+				deq.pop_front();
+			}
+			else {
+				deq.pop_back();
+			}
+		}
+	}
+	return 0;
+}

@@ -1,0 +1,39 @@
+#include<iostream>
+#include<vector>
+#define rep(i,a,b) for(int i = (a); i <= (b); i++)
+#define per(i,b,a) for(int i = (b); i >= (a); i--)
+#define N 1010
+#define M 260000
+using namespace std;
+
+int a[N], dp[M], sum[N], n;
+vector<int> p[N];
+
+int main(){
+    ios::sync_with_stdio(false);
+    while(cin>>n && n){
+        rep(i,1,n){
+            cin>>a[i];
+            int tmp = a[i];
+            while(tmp%2 == 0) tmp /= 2;
+            p[tmp].push_back(a[i]/tmp), sum[tmp] += a[i]/tmp;
+        }
+
+        int ans = 0;
+        rep(o,1,500) if(p[o].size()){
+            int m = p[o].size();
+            rep(i,0,sum[o]) dp[i] = -1;
+            dp[0] = 0;
+            rep(i,1,m){
+                int k = p[o][i-1];
+                for(int j = sum[o]/k*k; j >= 0; j -= k) if(~dp[j])
+                    dp[j+k] = max(dp[j+k], dp[j]+1);
+            }
+            rep(k,0,17) if((1<<k) <= sum[o]) ans = max(ans, dp[1<<k]);
+        }
+        cout<<ans<<endl;
+
+        rep(i,0,500) p[i].clear(), sum[i] = 0;
+    }
+    return 0;
+}

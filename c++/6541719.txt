@@ -1,0 +1,114 @@
+#include <cctype>
+#include <cstddef>
+#include <cstring>
+#include <functional>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <string>
+#include <utility>
+#include <vector>
+int n, l, tot, to[501];
+std::string s[51], f[21][501];
+bool ed[501], vis[501];
+char rev[501];
+std::vector<std::pair<int, int> > g[501];
+std::map<char, int> mp;
+int Id(char c) {
+  if (!mp.count(c)) rev[mp[c] = ++tot] = c;
+  return mp[c];
+}
+void Dijkstra(int layer) {
+  std::priority_queue<std::pair<std::string, int>,
+                      std::vector<std::pair<std::string, int> >,
+                      std::greater<std::pair<std::string, int> > >
+      q;
+  std::memset(vis, 0, tot + 1);
+  for (int i = 0; i <= tot; i++)
+    if (f[layer][i] != "~") q.push(std::make_pair(f[layer][i], i));
+  while (!q.empty()) {
+    std::pair<std::string, int> tmp = q.top();
+    q.pop();
+    int u = tmp.second;
+    if (vis[u]) continue;
+    vis[u] = true;
+    if (layer == 0) ed[u] = true;
+    for (int v = 0; v <= tot; v++)
+      if (!vis[v]) {
+        for (std::vector<std::pair<int, int> >::iterator it = g[v].begin();
+             it != g[v].end(); ++it) {
+          int x = it->first, y = it->second;
+          if (x == u || y == u) {
+            if (x == u && ed[y]) f[layer][v] = tmp.first;
+            if (y == u && ed[x]) f[layer][v] = tmp.first;
+            if (f[layer][v] == tmp.first)
+              q.push(std::make_pair(f[layer][v], v));
+          }
+        }
+      }
+  }
+}
+int main(int argc, char const *argv[]) {
+  std::ios_base::sync_with_stdio(false);
+  std::cin.tie(NULL);
+  while (std::cin >> n >> l && (n || l)) {
+    for (int i = 1; i <= n; i++) std::cin >> s[i];
+    mp.clear(), tot = 0;
+    std::memset(ed, 0, sizeof(ed));
+    std::memset(to, 0, sizeof(to));
+    std::memset(rev, 0, sizeof(rev));
+    ed[0] = true;
+    for (int i = 1; i <= n; i++) {
+      std::string a = s[i].substr(2);
+      int L = Id(s[i][0]), m = a.size();
+      if (m == 0) {
+        ed[L] = true;
+      } else if (m == 1) {
+        if (std::islower(a[0])) {
+          int x = Id(a[0]);
+          if (!to[L] || a[0] < rev[to[L]]) to[L] = x;
+        } else {
+          g[L].push_back(std::make_pair(Id(a[0]), 0));
+        }
+      } else {
+        for (int i = 0; i < m - 2; i++) {
+          int X = ++tot;
+          g[L].push_back(std::make_pair(Id(a[i]), X));
+          L = X;
+        }
+        g[L].push_back(std::make_pair(Id(a[m - 2]), Id(a[m - 1])));
+      }
+    }
+    for (int i = 0; i <= l; i++)
+      for (int j = 0; j <= tot; j++) f[i][j] = "~";
+    for (int i = 0; i <= tot; i++)
+      if (ed[i]) f[0][i] = "";
+    Dijkstra(0);
+    for (int i = 0; i <= tot; i++) {
+      if (to[i]) f[1][i] = rev[to[i]];
+      if (std::islower(rev[i])) f[1][i] = rev[i];
+    }
+    Dijkstra(1);
+    for (int i = 2; i <= l; i++) {
+      for (int j = 1; j < i; j++) {
+        for (int u = 0; u <= tot; u++) {
+          for (std::vector<std::pair<int, int> >::iterator it = g[u].begin();
+               it != g[u].end(); ++it) {
+            int x = it->first, y = it->second;
+            if (f[j][x] != "~" && f[i - j][y] != "~") {
+              std::string tmp = f[j][x] + f[i - j][y];
+              if (tmp < f[i][u]) f[i][u] = tmp;
+            }
+          }
+        }
+      }
+      Dijkstra(i);
+    }
+    if (!mp.count('S') || f[l][Id('S')] == "~")
+      std::cout << "-\n";
+    else
+      std::cout << f[l][Id('S')] << '\n';
+    for (int i = 0; i <= tot; i++) g[i].clear();
+  }
+  return 0;
+}

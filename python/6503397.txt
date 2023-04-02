@@ -1,0 +1,73 @@
+import java.util.Scanner
+
+case class Card (id:String) {
+  val suit: String = id(0).toString()
+  val numb: Int =  id(1).toString().toInt
+  override def toString():String = { suit + numb.toString() }
+}
+
+object Main extends App { 
+  val sc = new Scanner(System.in)
+  val N  = sc.nextInt()
+  val bar = (for (i <- 0 until N) yield Card(sc.next())).toArray
+  val sar = bar.clone()
+  
+  def isStable(ar:Array[Card], br:Array[Card]):String = {
+    def iter(i:Int):String = {
+      if (i >= N) "stable"
+      else {
+        if (ar(i) != br(i)) "not stable" 
+        else iter(i+1) 
+      }
+    }
+    iter(0)    
+  }
+
+  def swap[T](i:Int, j:Int, ar:Array[T]):Unit = {
+    val t = ar(i)
+    ar(i) = ar(j)
+    ar(j) = t
+  }
+
+  def bubblesort(i:Int):Unit = {
+    def sink(j:Int):Unit = {
+      if (i != j) {
+        if (bar(j-1).numb > bar(j).numb) {
+          swap(j-1, j, bar)
+          sink(j-1)
+        } else sink(j-1)
+      }
+    }
+
+    if (i < N) {
+      sink(N-1)
+      bubblesort(i+1)
+    }
+  }
+
+  def selsort(i:Int):Unit = {
+    def seek(i:Int, j:Int):Int = {
+      if (i >= N) j else {
+        if (sar(i).numb < sar(j).numb) seek(i+1, i) else seek(i+1, j)
+      }
+    }
+
+    if (i < N) {
+      val j = seek(i, i)
+      if (i == j) selsort(i+1)
+      else {
+        swap(i, j, sar)
+        selsort(i+1)
+      }     
+    }
+  }
+
+  bubblesort(0)
+  println(bar.mkString(" "))
+  println("stable")
+
+  selsort(0)
+  println(sar.mkString(" "))
+  println(isStable(bar, sar))
+}
+

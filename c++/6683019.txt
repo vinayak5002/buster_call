@@ -1,0 +1,110 @@
+#include<bits/stdc++.h>
+#define ll long long
+#define ri register
+#define all(x) x.begin(),x.end()
+using namespace std;
+//#define double long double
+const char rd[]="%lf";
+namespace jh{
+	const double EPS=1e-9,PI=acos(-1),inf=1e5;
+	inline bool equ(double x,double y){return fabs(x-y)<=EPS;}
+	struct P{
+		double x,y;
+		inline double operator^(const P&b)const{return x*b.x+y*b.y;}
+		inline double operator*(const P&b)const{return x*b.y-b.x*y;}
+		inline P operator+(const P&b)const{return{x+b.x,y+b.y};}
+		inline P operator-(const P&b)const{return{x-b.x,y-b.y};}
+		inline P operator*(const double&b)const{return{x*b,y*b};}
+		inline P operator/(const double&b)const{return{x/b,y/b};}
+		inline bool operator<(const P&b)const{return x==b.x?y<b.y:x<b.x;}
+		inline bool operator>(const P&b)const{return b<*this;} 
+		inline double len()const{return sqrt(x*x+y*y);}
+		inline double sqr()const{return x*x+y*y;}
+		inline double ang()const{return atan2(y,x);}
+		inline void read(){scanf(rd,&x),scanf(rd,&y);}
+	};
+	inline double ang(const P&x,const P&y){return (x^y)/x.len()/y.len();}
+	inline P rotate(P p,double a){
+		return{p.x*cos(a)-p.y*sin(a),p.x*sin(a)+p.y*cos(a)};
+	}
+	struct L{
+		P a,b;
+		inline double mxx()const{return max(a.x,b.x);}
+		inline double mxy()const{return max(a.y,b.y);}
+		inline double mix()const{return min(a.x,b.x);}
+		inline double miy()const{return min(a.y,b.y);}
+		inline void read(){a.read(),b.read();}
+	};
+	inline L midL(P x,P a,P b){
+		if(a.sqr()<b.sqr())swap(a,b);
+		b=b/b.len()*a.len();
+		return{x,x+(a+b)*inf};
+	}
+	inline bool Lcross(const L&l1,const L&l2){
+		if((l1.mxx()<l2.mix())||(l1.mxy()<l2.miy())||
+		   (l2.mxx()<l1.mix())||(l2.mxy()<l1.miy()))
+		   return 0;
+		if(((l1.a-l2.a)*(l2.b-l2.a))*((l1.b-l2.a)*(l2.b-l2.a))<=0&&
+		   ((l2.a-l1.a)*(l1.b-l1.a))*((l2.b-l1.a)*(l1.b-l1.a))<=0)
+			return 1;
+		return 0;
+	}
+	inline P focus(const L&l1,const L&l2){
+		P a=l2.b-l2.a,b=l1.b-l1.a;
+		double x=fabs((l1.a-l2.a)*a),y=fabs((l1.b-l2.a)*a);
+		P z=b*x/(x+y);
+		return l1.a+z;
+	} 
+	struct O{
+		P a;double r;
+		inline void read(){a.read(),scanf(rd,&r);}
+	};
+	inline int Orela(const O&o1,const O&o2){
+		double d=(o1.a-o2.a).len();
+		if(equ(d,0)&&equ(o1.r,o2.r))return INT_MAX;
+		if(o1.r>d+o2.r||o2.r>d+o1.r)return 0;
+		if(equ(o1.r+o2.r,d))return 3;
+		if(equ(fabs(o1.r-o2.r),d))return 1;
+		if(o1.r+o2.r<d)return 4;
+		if(o1.r+o2.r>d)return 2;
+		return -1;
+	}
+	inline O OinT(const P&p1,const P&p2,const P&p3){
+		P a=p2-p1,b=p3-p1,c=p3-p2,d=p1-p2;
+		double s=a*b,r=abs(s)/(a.len()+b.len()+c.len());
+		L x=midL(p1,a,b),y=midL(p2,c,d);
+		return{focus(x,y),r};
+	}
+	inline O OoutT(const P&p1,const P&p2,const P&p3){
+		P a=p2-p1,b=p3-p1,ma=(p1+p2)/2,mb=(p1+p3)/2;
+		a=rotate(a,PI/2)*inf,b=rotate(b,PI/2)*inf;
+		P c=focus({ma-a,ma+a},{mb-b,mb+b});
+		return{c,(c-p1).len()};
+	}
+	inline L OcrossL(const L&l,const O&o){
+		P p1=l.b-l.a,p2=l.a-o.a;
+		double d=p1*p2/p1.len();d=fabs(d);
+//		printf("d=%.10f\n",d);
+		if(d>o.r)return{{0,0},{0,0}};
+		P p=rotate(p1,PI/2),x=focus({l.a-p1*inf,l.b+p1*inf},{o.a,o.a+p});
+//		printf("%.10f %.10f\n",x.x,x.y);
+		if(equ(d,o.r))return{x,x};
+		double s=(o.r*o.r)-(x-o.a).sqr();s=sqrt(s);
+		return{x+p1/p1.len()*s,x-p1/p1.len()*s};
+	}
+}
+using namespace jh;
+L l,_;
+O a;
+int n;
+int main(){
+	a.read();
+	scanf("%d",&n);
+	while(n--){
+		l.read();
+		_=OcrossL(l,a);
+		if(_.a>_.b)swap(_.a,_.b);
+		printf("%.10f %.10f %.10f %.10f\n",_.a.x,_.a.y,_.b.x,_.b.y);
+	}
+	return 0;
+}

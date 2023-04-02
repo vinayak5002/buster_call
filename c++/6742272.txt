@@ -1,0 +1,64 @@
+#include <stdio.h>
+#define N 20000000
+int H=1,A[N];
+
+void swap(int *x,int *y){
+      int temp;
+      temp = *x;
+      *x = *y;
+      *y = temp;
+}
+
+void maxHeapify(int i){
+      int max = i;
+      int left = 2*i;
+      int right = 2*i + 1;
+      if(left > H) return;
+      
+      if(A[left] > A[max]) max = left;
+      if(A[right] > A[max]) max = right;
+      
+      if(max == i) return;
+      
+      swap(&A[max],&A[i]);
+      
+      maxHeapify(max);
+}
+
+int extract(){
+      int max;
+      max = A[1];
+      A[1] = A[H--];
+      maxHeapify(1);
+      return max;
+}
+
+void heapIncreaseKey(int i,int key){
+      if(key < A[i]) return;
+      A[i] = key;
+      while(i>1 && A[i/2] < A[i]){
+            swap(&A[i],&A[i/2]);
+            i /= 2;
+      }
+}
+
+void insert(int key){
+      A[H++] = -N;
+      heapIncreaseKey(H,key);
+}
+
+int main(){
+      int key;
+      char com[10];
+      
+      while(1){
+            scanf("%s",com);
+            if(com[2] == 'd') break;
+            else if(com[0] == 'i'){
+                  scanf("%d",&key);
+                  insert(key);
+            }
+            else printf("%d\n",extract());
+      }
+      return 0;
+}

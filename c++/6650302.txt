@@ -1,0 +1,63 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX 1000
+ 
+int main(void){
+	int field_row,field_column;
+	int pattern_row,pattern_column;
+	int i,j,k,count;
+    int Ck[MAX];
+    int Cn[MAX];
+    char charField[MAX][MAX];
+    char pattern[MAX][MAX];
+
+    scanf("%d%d",&field_row,&field_column);
+    
+    for(i=0;i<field_row;i++)
+    	scanf("%s",&charField[i]);
+    	
+    scanf("%d%d",&pattern_row,&pattern_column);
+    
+    for(i=0;i<pattern_row;i++)
+    	scanf("%s",&pattern[i]);
+
+	for(i=0;i<pattern_row;i++){
+		k = 0;
+		Cn[i]=0;
+
+        for(j=0;j<pattern_column;j++){
+            if(pattern[i][j]==pattern[i][0]){
+            	k++; 
+                Cn[i]=k-1;
+            }
+            else
+                break;
+        }
+        Ck[i]=pattern_column-k+1;
+    }
+
+    for(i=0;i<=field_row-pattern_row;i++){
+        for(j=0;j<=field_column-pattern_column;j++){
+            for(count=0;count<pattern_row;count++)
+                if(memcmp(&charField[i+count][j],&pattern[count][0],pattern_column)!=0)
+                	break;
+            
+            if(count==pattern_row){
+                printf("%d %d\n",i,j);
+                j++;
+                if(j<=field_column-pattern_column){
+                    for(count=0;count<pattern_row;count++){
+                        if(memcmp(&charField[i+count][j+Cn[count]],&pattern[count][Cn[count]],Ck[count])!=0)
+                        	break;
+                    }
+                }
+                else
+                    break;
+            }
+        }
+    }
+    
+    return 0;
+}
+

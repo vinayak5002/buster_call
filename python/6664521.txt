@@ -1,0 +1,157 @@
+// #define _GLIBCXX_DEBUG
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+using namespace std;
+//using namespace atcoder;
+
+#define int long long
+#define all(x) (x).begin(), (x).end()
+#define rall(x) (x).rbegin(), (x).rend()
+#define rep(i, n) for (int i = 0; i < n; ++i)
+#define REP(i, n) for (int i = 0; i < n; ++i)
+#define range(i,a,b) ((a)<=(i) && (i)<(b))
+#define debug(x) cout << #x << " = " << (x) << endl;
+#define fs first
+#define sc second
+#define pb push_back
+#define eb emplace_back
+#define SP << " " <<
+
+typedef long long ll;
+typedef pair<int, int> P;
+typedef tuple<int, int, int> T;
+typedef vector<int> vec;
+typedef vector<P> pvec;
+typedef vector<vector<int>> vvec;
+typedef vector<vector<P>> pvvec;
+typedef priority_queue<int> PQI;
+typedef priority_queue<P> PQP;
+typedef priority_queue<int,vector<int>,greater<int>> PQIG;
+typedef priority_queue<P,vector<P>,greater<P>> PQPG;
+
+const vector<int> DX = {0, -1, 0, 1, 1, 1, -1, -1};
+const vector<int> DY = {1, 0, -1, 0, 1, -1, 1, -1};
+constexpr int MOD = (1000000007);
+// const int MOD = (998244353);
+// const int INF = (1 << 30); // 1073741824
+const ll INF = (1LL << 60); // 1152921504606846976
+const double PI = (3.141592653589794);
+const double EPS = (0.0000000001); // 10^(-10)
+
+template<class T> inline bool chmin(T& a, T b) {if (a > b) {a = b; return 1;} return 0;}
+template<class T> inline bool chmax(T& a, T b) {if (a < b) {a = b; return 1;} return 0;}
+template<class T> inline T ceil(T a, T b) {return T((a + b - 1) / b);}
+template<class T> inline T round(T a, T b) {return T(a / b);}
+template< typename T1, typename T2 > istream &operator>>(istream &is, pair< T1, T2 > &p) { is >> p.first >> p.second; return is; }
+template <class T> inline void out(T &a) { bool flag=true; for(auto&x:a){if(flag) {flag=false;} else{ cout << ' '; } cout<<x; } cout << endl; }
+
+
+
+//----------------------------------------------------------------
+int nmax=200000; // 2*(10^5)
+vvec G(nmax);
+
+int gcd(int x, int y) { return y ? gcd(y, x%y) : x; }
+int lcm(int x, int y) { return x/gcd(x, y)*y; }
+int mod_pow(int x, int y) { int res = 1; while (y > 0) { if (y & 1) { res = res * x % MOD; } x = x * x % MOD; y >>= 1; } return res; }
+int cmb(int n,int k){ if(n<k){ return 0;} int res=1,nn=n,kk=1;k=min(k,n-k); for(int i=0;i<k;i++){ res*=nn-i;res/=kk+i;} return res; }
+ll comb(ll n,ll k){ ll res=1; for(int i=0;i<k;i++){ (res*=(n-i)%MOD)%=MOD; } for(int i=1;i<=k;i++){ (res*=mod_pow(i,MOD-2))%=MOD; } return res; }
+int to_int(string s) { int n = s.size(); int ans = 0; for (int i = 0; i < n; i++) { ans = ((ans * 10) + (s[i] - '0')) % MOD; } return ans; }
+int DigitSum(int x){ int ret=0; while(x){ ret++;x/=10;} return ret; }
+bool is_prime(int n) { for(int i = 2; i*i <= n; i++) { if (n % i == 0) return false; } return n != 1; }
+int extgcd(int a, int b, int& x, int& y) { // ax+by = gcd(a,b) >> gcd(a,b)
+  int d = a;
+  if(d != 0) { d = extgcd(b, a%b, y, x); y -= (a/b)*x; }
+  else { x = 1, y = 0; }
+  return 0;
+}
+
+
+int n;
+vector<double> x(24);
+vector<double> y(24);
+vector<double> r(24);
+vector<int> c(24);
+
+vector<vector<int>> graph(24);
+vector<int> bitg(24);
+
+void solve4ts()
+{
+  cin>>n;
+  if(n==0) exit(0);
+  rep(i,n){
+    cin>>x[i]>>y[i]>>r[i]>>c[i];
+  }
+
+  rep(i,n){
+    for(int j=i+1;j<n;j++){
+      double rr = r[i]+r[j]; // 半径の距離
+      double dd = sqrt((x[i]-x[j])*(x[i]-x[j]) + (y[i]-y[j])*(y[i]-y[j])); // 点と点の距離
+      if(dd < rr){ // 重なっているか判定する iが上
+        graph[j].pb(i);
+      }
+    }
+  }
+
+  rep(i,24){
+    for(auto x: graph[i]){
+      bitg[i]+=pow(2,x);
+    }
+    // cout<<bitg[i]<<endl; あってる 0,1,0,7
+  }
+
+  
+  vector<int> state((1<<n), 0); // 2*10^6 = 2^24
+  state[pow(2,n)-1]=2;
+
+  int ans=0;
+  rep(count,13){
+    rep(i,(1<<n)){
+      if(state[i]==2){
+        state[i]=3;
+        // ここから遷移する
+        rep(j,n){
+          if(((i>>j)&1) == 0) continue;
+          for(int k=j+1;k<n;k++){
+            if(((i>>k)&1) == 0) continue;
+            // まだ2つとも残っている、同じ色、上に乗ってない
+            if(c[j]==c[k]){
+              if(!(i&bitg[j])){
+                if(!(i&bitg[k])){
+                  state[i-(1<<j)-(1<<k)]=1;
+                  chmax(ans, (count+1)*2);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    rep(i,(1<<n)){
+      if(state[i]==1){
+        state[i]=2;
+      }
+    }
+  }
+
+  cout<<ans<<endl;
+
+}
+//-----------------------------------------------------------------
+
+signed main(){ ios::sync_with_stdio(false); cin.tie(0); cout << fixed << setprecision(15);
+  int repeat = 1;
+  // cin >> repeat;
+  while(repeat--) solve4ts();
+}
+
+/*
+
+g++ -std=c++1z code.cpp
+
+./a.out
+
+python3 expander.py code.cpp
+
+*/

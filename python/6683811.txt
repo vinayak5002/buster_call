@@ -1,0 +1,173 @@
+import java.util.HashMap;
+import java.util.Scanner;
+import java.util.Set;
+import java.util.TreeSet;
+
+public class Main {
+
+	/**
+	 * メイン関数
+	 * 別の人が別の場所でこのプログラムのクラスを使っても
+	 * うまく機能するように意識して記述
+	 * @param args
+	 */
+	
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		
+		int n = sc.nextInt();
+		Deck dc = new Deck();
+		Mark mark = Mark.S;
+		/**
+		 * treeSetをhashMapに格納
+		 */
+		
+		dc.setSet();
+		
+		
+		for(int i=0;i<n;i++) {
+			mark = Mark.valueOf(sc.next());
+			dc.removeCard(mark,sc.nextInt());
+		}
+		
+		dc.setSet();
+		
+		print(dc);
+	}
+	
+	/**
+	 * 最終的にhashMapに残ったカードをprintするメソッド
+	 * @param dc　Deckクラスを引数とする
+	 */
+	
+	static void print(Deck dc) {
+		
+		for(Mark mark : Mark.values()) {
+			for(int i=1;i<=13;i++) {
+				Card card = new Card(i,mark);
+				if(dc.getSet(mark).contains(card)) {
+					System.out.println(mark.toString() + " " + i);
+				}
+			}
+		}
+	}
+}
+
+/**
+ * すべてのカード情報を格納してあるデッキクラス
+ * @author C2117
+ *
+ */
+
+class Deck{
+	Set<Card> treeS = new TreeSet<>();
+	Set<Card> treeH = new TreeSet<>();
+	Set<Card> treeC = new TreeSet<>();
+	Set<Card> treeD = new TreeSet<>();
+	HashMap<Mark,Set<Card>> hm = new HashMap<>();
+	/**
+	 * コンストラクタ
+	 * すべてのカードセットを作成する
+	 */
+	
+	Deck(){
+		
+		setSet();
+		for(int i=1;i<=13;i++) {
+			Card card = new Card(i,Mark.S);
+			hm.get(Mark.S).add(card);
+			card = new Card(i,Mark.H);
+			hm.get(Mark.H).add(card);
+			card = new Card(i,Mark.C);
+			hm.get(Mark.C).add(card);
+			card = new Card(i,Mark.D);
+			hm.get(Mark.D).add(card);
+		}
+	}
+	
+	/**
+	 * 入力されたカードをカードをこのデッキから引き抜く
+	 * 
+	 * @param mark カードの絵柄
+	 * @param num　カードの数字
+	 */
+	
+	void removeCard(Mark mark,int num) {
+		Card card = new Card(num,mark);
+		hm.get(mark).remove(card);
+	}
+	
+	/**
+	 * setを取得する
+	 * @param mark　カードの絵柄
+	 * @return　カードの絵柄に沿ったsetを返す
+	 */
+	
+	Set<Card> getSet(Mark mark) {
+		return hm.get(mark);
+	}
+	
+	/**
+	 * 現在のツリーセット(カード情報）をHashMap（すべてのカードセット）に格納する
+	 * @param mark　カードの絵柄
+	 * @return 
+	 */
+	
+	void setSet() {
+		hm.put(Mark.S,treeS);
+		hm.put(Mark.H,treeH);
+		hm.put(Mark.C,treeC);
+		hm.put(Mark.D,treeD);
+	}
+}
+
+/**
+ * カードの絵柄のenum
+ * @author C2117
+ *
+ */
+
+enum Mark{
+	S,
+	H,
+	C,
+	D;
+}
+/**
+ * カード一つ一つの情報を持つカードクラス
+ * @author C2117
+ *
+ */
+
+class Card implements Comparable<Card>{
+	int num;
+	Mark mark;;
+	
+	/**
+	 * コンストラクタ
+	 * カードの数字と絵柄を格納する
+	 * @param num カードの数字
+	 * @param mark　カードの絵柄
+	 */
+	
+	Card(int num,Mark mark){
+		this.num = num;
+		this.mark = mark;
+	}
+	/**
+	 * TreeSetの順番を指定するCompareTo
+	 */
+
+	@Override
+	public int compareTo(Card o) {
+		if(this.num > o.num) {
+			return 1;
+		}
+		if(this.num < o.num) {
+			return -1;
+		}
+		return 0;
+	}
+	
+}
+

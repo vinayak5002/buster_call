@@ -1,0 +1,154 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+/*
+2022 NTHU PME Programming Practice #1
+B - Aizu PR
+*/
+/*version:1.1
+*/
+
+#define			STRING_MAX_SIZE		(1000+1)
+#define			STRING_PATTERN0		"Hoshino"
+#define			STRING_PATTERN1		"Hoshina"
+#define			STRING_PATTERN_LEN	7
+//#define			WORD_SPLIT_TOKEN	" \t\n_,;:!.?0123456789+-*/%&|<>=^~[](){}@#$`"
+//#define			WORD_SPLIT_TOKEN	" \t\n,;!.?+-*/%&|<>=^~[](){}@#$`"
+#define			WORD_SPLIT_TOKEN	" \t\n."
+
+//#define IF_DEBUGGING_ON
+
+int		search0				(	unsigned char		*string	
+						) ;
+int		check_space			(	unsigned char		character
+						) ;
+
+int main(void)
+{
+	unsigned int	n						;
+	long		loop_i						;
+	unsigned char	string	[STRING_MAX_SIZE]			;
+	unsigned char	running						;
+	unsigned char	temp_char					;
+	unsigned char	endofline					;
+
+					running			=	1		;
+	while(running==1) {
+		if(scanf("%d\n", &n)==EOF) 
+					running			=	0		;
+		if(running==1) {
+					loop_i			=	0		;
+					endofline		=	0		;
+		  while(endofline==0) {
+	  	    if(			scanf("%c",&temp_char)==EOF			) {
+		    				temp_char		=	'\n'		;
+		    				running			=	0		;
+	  	    }
+		    				string	[loop_i]	=	temp_char	;
+		    				loop_i++					;
+
+	  	    if(			loop_i>1					&&
+		    			temp_char=='\n'					) {
+		    				string	[loop_i]	=	'\0'		;
+		    				loop_i			=	0		;
+		    				endofline		=	1		;
+	  	    }
+		  }
+#ifdef	IF_DEBUGGING_ON
+					printf("pre:%s",string)				;
+#endif
+					search0(string)					;
+#ifdef	IF_DEBUGGING_ON
+					printf("pos:%s",string)				;
+#endif
+					printf("%s",string)				;
+
+		}
+			
+	}
+
+    	return 0;
+}
+
+
+int		search0					(	unsigned char		*string	
+							) {
+		int		result=0		;
+		unsigned char	pattern0	[STRING_PATTERN_LEN+1]	=	STRING_PATTERN0	;
+		unsigned char	pattern1	[STRING_PATTERN_LEN+1]	=	STRING_PATTERN1	;	
+		int 		loop_i			;
+		int 		loop_j			;
+		unsigned int	length			;
+		int 		bgnidx			;
+		int 		endidx			;
+		int 		preidx			;
+		int 		posidx			;
+		unsigned char	found			;
+
+					length			=	strlen(string)			;
+	for(loop_i=0;loop_i<length;loop_i++) {
+					bgnidx			=	loop_i				;
+					endidx			=	loop_i+STRING_PATTERN_LEN-1	;
+	  if(			endidx<length						&&
+				string[bgnidx]==pattern0[0]				&&
+				string[endidx]==pattern0[STRING_PATTERN_LEN-1]		) {
+					preidx			=	bgnidx-1			;
+					posidx			=	endidx+1			;
+					found			=	1				;
+		if(			preidx>=0					&&
+					check_space(string[preidx])==0			||
+					posidx<length					&&
+					check_space(string[posidx])==0			)
+					found			=	0				;
+		else {
+		  for(loop_j=0;loop_j<STRING_PATTERN_LEN;loop_j++) {
+			if(		string[loop_j+bgnidx]!=pattern0[loop_j]		) {
+					found			=	0				;
+					break;
+			}
+		  }
+		}
+
+		if(			found==1					) {
+		  for(loop_j=0;loop_j<STRING_PATTERN_LEN;loop_j++) {
+					string[loop_j+bgnidx]	=	pattern1[loop_j]		;
+		  }
+//					printf("%s",string+bgnidx)					;
+					result++							;
+		}
+	  }
+	}
+
+		return	result		;
+}
+
+int		check_space				(	unsigned char		character
+							) {
+		unsigned char	pattern0	[256]		=	WORD_SPLIT_TOKEN		;
+
+		int		result			;
+		int 		loop_i			;
+
+					result			=	0				;
+		for(loop_i=0;loop_i<strlen(pattern0);loop_i++) {
+		  if(			character==pattern0[loop_i]			) {
+					result			=	1				;
+					break;
+		  }
+		}
+
+/*
+		if(			character>='A'					&&
+					character<='Z'					||
+					character>='a'					&&
+					character<='z'					||
+					character>='0'					&&
+					character<='9'					||
+					character=='_'					)
+					result			=	0				;
+		else			result			=	1				;
+*/
+		return	result		;
+}
+

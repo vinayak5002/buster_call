@@ -1,0 +1,25 @@
+def push(x):
+	global stack
+
+	stack.append(x)
+
+def pop():
+	global stack
+
+	ret = stack.pop()
+	return ret
+
+ope = {"+": lambda a, b: b + a,
+	   "-": lambda a, b: b - a,
+	   "*": lambda a, b: b * a}
+
+if __name__ == '__main__':
+	stack = []
+
+	for c in input().split():
+		if c in ope:
+			push(ope[c](pop(), pop()))
+		else:
+			push(int(c))
+
+	print(" ".join(map(str, stack)))

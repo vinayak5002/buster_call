@@ -1,0 +1,181 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+
+string str;
+
+ll Add(ll a,ll b){return a + b;}
+ll Sub(ll a,ll b){return a - b;}
+ll Mul(ll a,ll b){return a * b;}
+ll BitOR(ll a,ll b){return a | b;}
+ll BitXOR(ll a,ll b){return a ^ b;}
+ll BitAND(ll a,ll b){return a & b;}
+
+using OP = pair<string,function<ll(ll,ll)>>;
+vector<vector<OP>> ops;
+
+int readToken(int p,string token,bool &success){
+	success = false;
+	if(str.substr(p,token.size()) == token){
+		success = true;
+		return p + token.size();
+	}
+	return 0;
+}
+
+bool isDigit(char c){
+	return '0' <= c and c <= '9';
+}
+bool isPlusDigit(char c){
+	return '1' <= c and c <= '9';
+}
+
+int readNumber(int p,ll &value,bool &success){
+	ll res = 0;
+	success = false;
+	if(p >= str.size() or not isPlusDigit(str[p]))return 0;
+	res = str[p] - '0';
+	++p;
+	while(p < str.size() and isDigit(str[p])){
+		res = res * 10 + str[p] - '0';
+		++p;
+	}
+	success = true;
+	value = res;
+	return p;
+}
+
+int expression(int p,int level,ll &value,bool &success){
+	if(level == ops.size()){
+		do{
+			int np = p;
+			bool s;
+			np = readToken(np,"(",s);
+			if(not s)break;
+			np = expression(np,0,value,s);
+			if(not s)break;
+			np = readToken(np,")",s);
+			if(not s)break;
+			success = true;
+			return np;
+		}while(false);
+		do{
+			bool s;
+			int np = p;
+			np = readNumber(np,value,s);
+			if(not s)break;
+			success = true;
+			return np;
+		}while(false);
+		success = false;
+		return 0;
+	}
+	ll v1;
+	bool s;
+	p = expression(p,level+1,v1,s);
+	if(not s){
+		success = false;
+		return 0;
+	}
+	value = v1;
+	while(true){
+		bool flag = false;
+		for(auto op:ops[level]){
+			int next = p;
+			next = readToken(next,op.first,s);
+			if(not s)continue;
+			ll v2;
+			next = expression(next,level+1,v2,s);
+			if(not s)continue;
+			flag = true;
+			value = op.second(value,v2);
+			p = next;
+			break;
+		}
+		if(not flag)break;
+	}
+	success = true;
+	return p;
+}
+
+bool isValid(string lstr){
+	str = lstr;
+	bool s;
+	ll v;
+	int p = expression(0,0,v,s);
+	return p == str.size() and s;
+}
+
+ll value(string lstr){
+	str = lstr;
+	bool s;
+	ll v;
+	expression(0,0,v,s);
+	return v;
+}
+
+vector<string> add1s(string str){
+	vector<string> res;
+	for(int i=0;i<str.size()+1;++i){
+		for(auto c:"()*+-&^|0123456789"){
+			string ns = str.substr(0,i);
+			ns += c;
+			ns += str.substr(i);
+			if(isValid(ns)){
+				res.emplace_back(ns);
+			}
+		}
+	}
+	return res;
+}
+
+vector<string> remove1s(string str){
+	vector<string> res;
+	for(int i=0;i<str.size();++i){
+		string ns = str.substr(0,i) + str.substr(i+1);
+		if(isValid(ns)){
+			res.emplace_back(ns);
+		}
+	}
+	return res;
+}
+
+vector<string> moves(string str){
+	vector<string> res;
+	vector<string> res1 = add1s(str);
+	vector<string> res2 = remove1s(str);
+	res.insert(res.end(),res1.begin(),res1.end());
+	res.insert(res.end(),res2.begin(),res2.end());
+	return res;
+}
+
+ll func(int n,string str){
+	ll res = -1e18;
+	if(n & 1){
+		for(auto i:moves(str)){
+			res = max(res,value(i));
+		}
+	}else if(n % 2 == 0){
+		res = value(str);
+	}
+	return res;
+}
+
+
+int main(){
+	ops.emplace_back(vector<OP>({{"|",BitOR}}));
+	ops.emplace_back(vector<OP>({{"^",BitXOR}}));
+	ops.emplace_back(vector<OP>({{"&",BitAND}}));
+	ops.emplace_back(vector<OP>({{"+",Add},{"-",Sub}}));
+	ops.emplace_back(vector<OP>({{"*",Mul}}));
+	while(true){
+		int n;
+		cin >> n;
+		string str;
+		cin >> str;
+		if(n == 0)break;
+		cout << func(n,str) << endl;
+	}
+}
+

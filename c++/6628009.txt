@@ -1,0 +1,130 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define NIL NULL
+
+struct node
+{
+    int key;
+    struct node *left, *right, *parent;
+};
+typedef struct node Node;
+Node *T;
+
+void insert(int key)
+{
+    Node *now = T;
+    Node *parent = NIL;
+
+    Node *new = (Node *)malloc(sizeof(Node));
+    new->key = key;
+    new->left = NIL;
+    new->right = NIL;
+
+    while (now != NIL)
+    {
+        parent = now;
+        if (new->key < now->key)
+        {
+            now = now->left;
+        }
+        else
+        {
+            now = now->right;
+        }
+    }
+
+    if (parent == NIL)
+    {
+        T = new;
+    }
+    else if (new->key < parent->key)
+    {
+        new->parent = parent;
+        parent->left = new;
+    }
+    else
+    {
+        new->parent = parent;
+        parent->right = new;
+    }
+}
+
+void print_in(Node *tree)
+{
+    if (tree == NIL)
+    {
+        return;
+    }
+    print_in(tree->left);
+    printf(" %d", tree->key);
+    print_in(tree->right);
+}
+void print_pre(Node *tree)
+{
+    if (tree == NIL)
+    {
+        return;
+    }
+
+    printf(" %d", tree->key);
+    print_pre(tree->left);
+    print_pre(tree->right);
+}
+int find(Node *tree, int key)
+{
+    if (tree == NIL)
+    {
+        return 0;
+    }
+
+    if (key == tree->key)
+    {
+        return 1;
+    }
+    else if (key < tree->key)
+    {
+        return find(tree->left, key);
+    }
+    else
+    {
+        return find(tree->right, key);
+    }
+}
+
+int main(void)
+{
+    char command[10];
+    int n, key;
+    scanf("%d", &n);
+
+    for (int i = 0; i < n; i++)
+    {
+        scanf("%s %d", command, &key);
+        if (command[0] == 'i')
+        {
+            insert(key);
+        }
+        else if (command[0] == 'p')
+        {
+            print_in(T);
+            printf("\n");
+            print_pre(T);
+            printf("\n");
+        }
+        else if (command[0] == 'f')
+        {
+            if (find(T, key))
+            {
+                printf("yes\n");
+            }
+            else
+            {
+                printf("no\n");
+            }
+        }
+    }
+
+    return 0;
+}
+

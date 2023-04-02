@@ -1,0 +1,75 @@
+import bisect
+
+
+n,q = map(int,input().split())
+ini = 2**31-1
+
+data = [ini]*(n+1)
+
+if (len(data)**0.5)//1 == len(data)**0.5:
+    bucket_size = int(len(data)**0.5)
+else:
+    bucket_size = int(len(data)**0.5)//1+1
+
+bucket_sum = [ini]*bucket_size
+
+start = []
+end = []
+
+for i in range(len(bucket_sum)):
+    start.append(i*bucket_size)
+    end.append((i+1)*bucket_size-1)
+
+def SQRTtree(x,y):
+
+    ans = 10**10
+    for i,v in enumerate(start):
+        if end[i]<x:
+            continue
+
+        if x <= start[i]:
+            if end[i] <= y:
+                ans = min(ans,bucket_sum[i])
+            else:
+                for j in range(start[i],y+1):
+                    ans = min(ans,data[j])
+                return ans
+
+        elif start[i]<=x:
+
+            if y<=end[i]:
+                for j in range(x,y+1):
+                    ans = min(ans,data[j])
+                return ans
+            else:
+                for j in range(x,end[i]+1):
+                    ans = min(ans,data[j])
+
+        elif x < start[i]:
+            
+            if y<=end[i]:
+                for j in range(start[i],y+1):
+                    ans = min(ans,data[j])
+                return ans
+            else:
+                ans = min(ans,bucket_sum[i])
+
+    return ans
+
+def SQRT_renew(a,b):
+    data[a] = b
+
+    tmp2 = bisect.bisect_left(end,a)
+    bucket_sum[tmp2] = min(bucket_sum[tmp2],b)
+
+    return
+
+for i in range(q):
+    c,x,y = map(int,input().split())
+
+    if c == 0:
+        SQRT_renew(x,y)
+    else:
+        ans2 = SQRTtree(x,y)
+        print(ans2)
+

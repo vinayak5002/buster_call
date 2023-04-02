@@ -1,0 +1,66 @@
+#!/usr/bin/env PyPy3
+
+from collections import Counter, defaultdict, deque
+import itertools
+import re
+import math
+from functools import reduce
+import operator
+import bisect
+from heapq import *
+import functools
+
+mod=998244353
+
+import sys
+class Dice:
+    def __init__(self,dice):
+        self.d = dice[:]
+    def move(self,s):
+        self.n = len(s)
+        for i in range(self.n):
+            if s[i] == 'S':
+                self.d[0],self.d[1],self.d[2],self.d[3],self.d[4],self.d[5] = self.d[4],self.d[0],self.d[2],self.d[3],self.d[5],self.d[1]
+            elif s[i] == 'N':
+                self.d[0],self.d[1],self.d[2],self.d[3],self.d[4],self.d[5] = self.d[1],self.d[5],self.d[2],self.d[3],self.d[0],self.d[4]
+            elif s[i] == 'W':
+                self.d[0],self.d[1],self.d[2],self.d[3],self.d[4],self.d[5] = self.d[2],self.d[1],self.d[5],self.d[0],self.d[4],self.d[3]
+            elif s[i] == 'E':
+                self.d[0],self.d[1],self.d[2],self.d[3],self.d[4],self.d[5] = self.d[3],self.d[1],self.d[0],self.d[5],self.d[4],self.d[2]
+        return self.d
+    def calc_right(self,n,m,up,flont):
+        self.li = []
+        if flont == 2 or flont == 3:
+            self.move('W')
+            self.li.append('E')
+        while self.d[1] != m:
+            self.move('S')
+            self.li.append('N')
+        while self.d[0] != n:
+            self.move('W')
+            self.li.append('E')
+        ans = self.d[2]
+        for s in self.li[::-1]:
+            self.move(s)
+        return ans
+d1 = list(map(int,input().split()))
+d2 = list(map(int,input().split()))
+c = 0
+for j in range(3):
+    d2 = [d2[1],d2[2],d2[0],d2[5],d2[3],d2[4]]
+    flg1 = 0
+    flg2 = 0
+    for i in range(3):
+        if (d1[i],d1[5-i]) != (d2[i],d2[5-i]) and (d1[i],d1[5-i]) != (d2[5-i],d2[i]):
+            flg1 = 1
+            break
+        elif (d1[i],d1[5-i]) == (d2[i],d2[5-i]) and (d1[i],d1[5-i]) == (d2[5-i],d2[i]):
+            flg2 = 1
+        elif (d1[i],d1[5-i]) != (d2[i],d2[5-i]):
+            c += 1
+    if flg1:
+        continue
+    if flg2 or c % 2 == 0:
+        print('Yes')
+        exit()
+print('No')

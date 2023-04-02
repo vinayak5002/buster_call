@@ -1,0 +1,107 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+// Q021 反転数 https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_5_D&lang=jp
+class Program
+{
+    static string InputPattern = "InputX";
+
+    static List<string> GetInputList()
+    {
+        var WillReturn = new List<string>();
+
+        if (InputPattern == "Input1") {
+            WillReturn.Add("5");
+            WillReturn.Add("3 5 2 1 4");
+            //6
+        }
+        else if (InputPattern == "Input2") {
+            WillReturn.Add("3");
+            WillReturn.Add("3 1 2");
+            //2
+        }
+        else {
+            string wkStr;
+            while ((wkStr = Console.ReadLine()) != null) WillReturn.Add(wkStr);
+        }
+        return WillReturn;
+    }
+
+    static void Main()
+    {
+        List<string> InputList = GetInputList();
+        int[] AArr = InputList[1].Split(' ').Select(X => int.Parse(X)).ToArray();
+
+        // 座圧後の値[座圧前の値]
+        var ZaatuDict = new Dictionary<int, int>();
+        var ASet = new HashSet<int>(AArr);
+        int No = 0;
+        foreach (int EachVal in ASet.OrderBy(pX => pX)) {
+            ZaatuDict[EachVal] = No;
+            No++;
+        }
+
+        long TentouCnt = 0;
+
+        var Ins_Fenwick_Tree = new Fenwick_Tree(ZaatuDict.Count);
+        int UB = ZaatuDict.Count - 1;
+        foreach (int EachA in AArr) {
+            int ZaatuVal = ZaatuDict[EachA];
+            TentouCnt += Ins_Fenwick_Tree.GetSum(ZaatuVal, UB, true);
+            Ins_Fenwick_Tree.Add(ZaatuVal, 1, true);
+        }
+        Console.WriteLine(TentouCnt);
+    }
+}
+
+#region Fenwick_Tree
+// フェニック木
+internal class Fenwick_Tree
+{
+    private int[] mBitArr;
+    private int mN;
+
+    // コンストラクタ
+    internal Fenwick_Tree(int pItemCnt)
+    {
+        mN = pItemCnt;
+        mBitArr = new int[pItemCnt + 1];
+    }
+
+    // [pSta,pEnd] のSumを返す
+    internal int GetSum(int pSta, int pEnd, bool pIsZeroOrigin)
+    {
+        return GetSum(pEnd, pIsZeroOrigin) - GetSum(pSta - 1, pIsZeroOrigin);
+    }
+
+    // [0,pEnd] のSumを返す
+    internal int GetSum(int pEnd, bool pIsZeroOrigin)
+    {
+        if (pIsZeroOrigin) {
+            pEnd++; // 1オリジンに変更
+        }
+
+        int Sum = 0;
+        while (pEnd >= 1) {
+            Sum += mBitArr[pEnd];
+            pEnd -= pEnd & -pEnd;
+        }
+        return Sum;
+    }
+
+    // [I] に Xを加算
+    internal void Add(int pI, int pX, bool pIsZeroOrigin)
+    {
+        if (pIsZeroOrigin) {
+            pI++; // 1オリジンに変更
+        }
+
+        while (pI <= mN) {
+            mBitArr[pI] += pX;
+            pI += pI & -pI;
+        }
+    }
+}
+#endregion
+

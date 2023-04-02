@@ -1,0 +1,198 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX 100005
+
+struct node{
+  struct node *right;
+  struct node *left;
+  struct node *parent;
+  int key;
+};
+typedef struct node * Node;
+Node root;
+
+int checkFind;
+Node record;
+
+void insert(int i){
+  Node y = NULL;
+  Node x = root;
+  Node z;
+
+  z = malloc(sizeof(struct node));
+  z->key = i;
+  z->left = NULL;
+  z->right = NULL;
+
+  while(x != NULL){
+      y = x;
+      if(z->key < x->key){
+          x = x->left;
+      }
+      else{
+          x = x->right;
+      }
+  }
+  
+  z->parent = y;
+  if(y==NULL){
+      root = z;
+  }
+  else{
+      if(z->key < y->key){
+          y->left = z;
+      }
+      else{
+          y->right = z;
+      }
+  }
+}
+
+void preorder(Node i){
+    if(i==NULL){
+        return;
+    }
+    printf(" %d", i->key);
+    preorder(i->left);
+    preorder(i->right);
+}
+
+void inorder(Node i){
+    if(i==NULL){
+        return;
+    }
+    inorder(i->left);
+    printf(" %d", i->key);
+    inorder(i->right);
+}
+
+void find(int n, Node i){
+
+    if(i==NULL){
+        //printf("no\n");
+        checkFind=0;
+        return;
+    }
+    if(i->key==n){
+        //printf("yes\n");
+        checkFind=1;
+        record=i;
+        return;
+    }
+    else if(i->key<n){
+        find(n, i->right);
+    }
+    else if(i->key>n){
+        find(n, i->left);
+    }
+
+    
+}
+
+Node findSmallest(Node i){
+    Node finder;
+    if(i->left!=NULL){
+        findSmallest(i->left);
+    }
+    else{
+        finder=i;
+        return finder;
+    }
+
+    return 0;
+
+
+    
+}
+
+void delete(int n, Node i){
+    Node parentTemp, kidTemp;
+    int checker;
+    find(n,i);
+    if(i==NULL||checkFind==0){
+        return;
+    }
+    if(checkFind==1){
+        if(record->right==NULL&&record->left==NULL){ //no kids
+            parentTemp=record->parent;
+            if(record->key<parentTemp->key){
+                parentTemp->left=NULL;
+            }
+            else{
+                parentTemp->right=NULL;
+            }
+        }
+        else if (record->right!=NULL&&record->left==NULL){ //only right kid
+            parentTemp=record->parent;
+            kidTemp=record->right;
+            kidTemp->parent=parentTemp;
+            parentTemp->right=kidTemp;
+            
+        }
+        else if (record->right==NULL&&record->left!=NULL){ //only left kid
+            parentTemp=record->parent;
+            kidTemp=record->left;
+            kidTemp->parent=parentTemp;
+            parentTemp->left=kidTemp;
+                
+        }
+        else{//both kids
+            if(record->key>record->parent->key){
+                checker=1;
+            }
+            else{
+                checker=0;
+            }
+            parentTemp=record->parent;
+            kidTemp=record->right;
+            kidTemp=findSmallest(kidTemp);
+            kidTemp->parent=parentTemp;
+            if(checker==0){
+                parentTemp->left=kidTemp;
+            }
+            else{
+                parentTemp->right=kidTemp;
+            }
+            
+            
+        }
+        free(record);
+    }
+}
+
+
+
+int main(void){
+    int i, total, self, left, right, num;
+    char com[10];
+    scanf("%d", &total);
+
+    for(i=0; i<total; i++){
+       scanf("%s", com);
+       if ( com[0] == 'i' ){
+           scanf("%d", &num);
+	        insert(num);
+	   }
+       else if(com[0] == 'f'){
+           scanf("%d", &num);
+           find(num, root);
+           if(checkFind==0){
+               printf("no\n");
+           }
+           else if(checkFind==1){
+               printf("yes\n");
+           }
+       }
+       else if(com[0]=='d'){
+           scanf("%d", &num);
+           delete(num, root);
+       }
+       else {
+           inorder(root);
+           printf("\n");
+           preorder(root);
+           printf("\n");
+       }
+    }
+}

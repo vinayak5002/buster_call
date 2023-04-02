@@ -1,0 +1,53 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+long long int Area(long long int x1,long long int y1,long long int x2,long long int y2,long long int x3,long long int y3){
+  long long int X2 = x2-x1;
+  long long int Y2 = y2-y1;
+  long long int X3 = x3-x1;
+  long long int Y3 = y3-y1;
+  long long int Ans = abs(X2*Y3-Y2*X3)*4;
+  return Ans;
+}
+
+int main(){
+  int N;
+  cin >> N;
+  vector<long long int> X(N),Y(N);
+  for(int i=0;i<N;i++) cin >> X[i] >> Y[i];
+  long long int S = 0;
+  for(int i=1;i<N-1;i++) S += Area(X[0],Y[0],X[i],Y[i],X[i+1],Y[i+1]);
+  long long int a = S/2;
+  int l = 1;
+  long long int Sl = 0;
+  long long int Sr = Area(X[0],Y[0],X[1],Y[1],X[2],Y[2]);
+  long long int ans = 2000000000000000000;
+  ans = min(ans,abs(S-Sl));
+  ans = min(ans,abs(S-Sr));
+  for(int i=0;i<N;i++){
+    for(;;){
+      if(Sl-a <= 0 && Sr-a >= 0){
+        if(Sl != 0) ans = min(ans,abs(Sl-a));
+        if(Sr != 0) ans = min(ans,abs(Sr-a));
+        break;
+      }
+      if(Sl-a >= 0 && Sr-a <= 0){
+        if(Sl != 0) ans = min(ans,abs(Sl-S));
+        if(Sr != 0) ans = min(ans,abs(Sr-S));
+        break;
+      }
+      int nl = l+1;
+      if(nl >= N) nl -= N;
+      Sl += Area(X[i],Y[i],X[l],Y[l],X[nl],Y[nl]);
+      Sr += Area(X[i],Y[i],X[nl],Y[nl],X[(nl+1)%N],Y[(nl+1)%N]);
+      l = nl;
+    }
+    Sl -= Area(X[i],Y[i],X[(i+1)%N],Y[(i+1)%N],X[l],Y[l]);
+    Sr -= Area(X[i],Y[i],X[(i+1)%N],Y[(i+1)%N],X[(l+1)%N],Y[(l+1)%N]);
+  }
+  cout << ans/4;
+  if(ans%4 == 0) cout << endl;
+  else if(ans%4 == 1) cout << ".25" << endl;
+  else if(ans%4 == 2) cout << ".5" << endl;
+  else cout << ".75" << endl;
+}

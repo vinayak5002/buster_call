@@ -1,0 +1,72 @@
+// id: ALDS1_9_D
+// Time: 00:32 s, Memory: 6268 KB
+#include <algorithm>
+#include <cstdio>
+#include <vector>
+
+using std::vector;
+using std::sort;
+
+struct heap_node
+{
+    int key;
+    int src_id;
+    bool alloc;
+
+    heap_node(): alloc(false) { }
+};
+
+int main()
+{
+    int n;
+    int cur, parent;
+
+    scanf("%d", &n);
+    vector<int> seq(n);
+    vector<heap_node> hp(n + 1);
+
+    for (int i = 0; i < n; ++i)
+        scanf("%d", &seq[i]);
+    sort(seq.begin(), seq.end());
+
+    hp[1].key = seq[n - 1];
+    hp[1].alloc = true;
+    hp[n].key = seq[0];
+    hp[n].alloc = true;
+
+    for (int i = n - 1; i >= 2; --i) {
+        cur = i;
+        parent = cur / 2;
+
+        if (parent > 1) {
+            cur = parent;
+            parent = cur / 2;
+        }
+        while (!hp[cur].alloc && parent > 1) {
+            cur = parent;
+            parent = cur / 2;
+        }
+
+        while (hp[cur].alloc)
+            cur = hp[cur].src_id;
+
+        hp[cur].key = seq[i - 1];
+        hp[cur].alloc = true;
+
+        cur = i;
+        parent = cur / 2;
+        while (parent > 1) {
+            hp[parent].src_id = cur;
+            cur = parent;
+            parent = cur / 2;
+        }
+    }
+
+    printf("%d", hp[1].key);
+    for (int i = 2; i <= n; ++i)
+        printf(" %d", hp[i].key);
+    printf("\n");
+
+    return 0;
+}
+

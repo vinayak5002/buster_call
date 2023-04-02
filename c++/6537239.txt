@@ -1,0 +1,135 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <deque>
+#include <queue>
+#include <string>
+#include <iomanip>
+#include <set>
+#include <unordered_set>
+#include <map>
+#include <unordered_map>
+#include <utility>
+#include <stdio.h>
+#include <math.h>
+#include <assert.h>
+#if __has_include(<atcoder/all>)
+#include <atcoder/all>
+using namespace atcoder;
+#endif
+using namespace std;
+using ll = long long;
+#define read(x) cin>>(x);
+#define readll(x) ll (x);cin>>(x);
+#define readS(x) string (x);cin>>(x);
+#define readvll(x,N) vector<ll> (x)((N));for(int i=0;i<(N);i++){cin>>(x)[i];}
+/*
+void dfs(ll v,string X,vector<ll>& Y){
+  //cerr<<X<<endl;
+  string L,R;
+  ll xsize=X.size()-1;
+  int left=0,right=0;
+  ll u=0;
+  for(ll i=1;i<xsize;i++){
+	if(X[i]=='('){
+	  left++;
+	  L.push_back(X[i]);
+	}else if(X[i]==')'){
+	  right++;
+	  L.push_back(X[i]);
+	}else if(X[i]!='[' || right!=left){
+	  L.push_back(X[i]);
+	}else{
+	  for(ll j=i+1;j<xsize;j++){
+		if(X[j]!=']'){
+		  u*=10;
+		  u+=X[j]-'0';
+		}else{
+		  for(ll k=j+1;k<xsize;k++){
+			R.push_back(X[k]);
+		  }
+		  break;
+		}
+	  }
+	  break;
+	}
+  }
+  Y[v]=u;
+  if(L!="()" && L!="(()"){
+	dfs(2*v+1,L,Y);
+  }
+  if(R!="()" && R!="()))"){
+	dfs(2*v+2,R,Y);
+  }
+  return;
+}
+string dfs2(ll v,vector<ll>& Z){
+  if(Z[v]==-1){
+	return "()";
+  }else{
+	return "("+dfs2(2*v+1,Z)+"["+to_string(Z[v])+"]"+dfs2(2*v+2,Z)+")";
+  }
+}
+*/
+
+ll solve(string& X, string& L, string& R) {
+	ll xsize = X.size() - 1;
+	int left = 0, right = 0;
+	ll u = 0;
+	for (ll i = 1; i < xsize; i++) {
+		if (X[i] == '(') {
+			left++;
+			L.push_back(X[i]);
+		}
+		else if (X[i] == ')') {
+			right++;
+			L.push_back(X[i]);
+		}
+		else if (X[i] != '[' || right != left) {
+			L.push_back(X[i]);
+		}
+		else {
+			for (ll j = i + 1; j < xsize; j++) {
+				if (X[j] != ']') {
+					u *= 10;
+					u += X[j] - '0';
+				}
+				else {
+					for (ll k = j + 1; k < xsize; k++) {
+						R.push_back(X[k]);
+					}
+					break;
+				}
+			}
+			break;
+		}
+	}
+	return u;
+}
+
+string dfs(string X,string Y) {
+	//cerr<<X<<endl;
+	string XL, XR,YL,YR;
+	ll ux = solve(X, XL, XR);
+	ll uy = solve(Y, YL, YR);
+	string ans;
+	if (XL != "()" && XL != "(()"&&YL!="()"&&YL!="(()") {
+		ans+="("+dfs(XL, YL)+")";
+	}
+	else ans += "()";
+	ans += "["+to_string(ux + uy)+"]";
+	if (XR != "()" && XR != "())"&&YR != "()" && YR != "())") {
+		ans+="("+dfs(XR, YR)+")";
+	}
+	else ans += "()";
+	return ans;
+}
+//const ll size=10000000;
+int main() {
+	string A, B;
+	cin >> A >> B;
+	A = "(" + A + ")";
+	B = "(" + B + ")";
+	cout << dfs(A, B)<<endl;
+	return 0;
+}

@@ -1,0 +1,78 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < n; ++i)
+typedef long long ll;
+using namespace std;
+
+typedef string::const_iterator State;
+int parse_hash(State &begin);
+int parse_letter(State &begin);
+void consume(State &begin, char expected);
+
+vector<int> num(4);
+
+int parse_hash(State &begin) {
+    int res = 0;
+    if (*begin == '[') {
+        consume(begin, '[');
+        if (*begin == '+') {
+            begin++;
+            res = parse_hash(begin) | parse_hash(begin);
+        } else if (*begin == '*') {
+            begin++;
+            res = parse_hash(begin) & parse_hash(begin);
+        } else if (*begin == '^') {
+            begin++;
+            res = parse_hash(begin) ^ parse_hash(begin);
+        }
+        consume(begin, ']');
+    } else
+        return parse_letter(begin);
+
+    return res;
+}
+
+int parse_letter(State &begin) {
+    int res = num[*begin - 'a'];
+    begin++;
+    return res;
+}
+
+void consume(State &begin, char expected) {
+    if (*begin == expected) {
+        begin++;
+    } else {
+        cerr << "Expected '" << expected << "' but got '" << *begin << "'" << endl;
+        exit(1);
+    }
+}
+
+void solve(string S) {
+    string T;
+    cin >> T;
+    rep(i, 4) num[i] = T[i] - '0';
+
+    State begin = S.begin();
+    int ans = parse_hash(begin);
+    cout << ans << " ";
+
+    int cnt = 0;
+    rep(i, 10) rep(j, 10) rep(k, 10) rep(l, 10) {
+        num = {i, j, k, l};
+
+        State begin = S.begin();
+        int res = parse_hash(begin);
+        if (res == ans) cnt++;
+    }
+    cout << cnt << "\n";
+}
+
+int main() {
+    string S;
+    while (cin >> S) {
+        if (S == ".") break;
+        solve(S);
+    }
+
+    return 0;
+}
+

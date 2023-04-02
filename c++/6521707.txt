@@ -1,0 +1,60 @@
+#include<iostream>
+#include<vector>
+#include<queue>
+#define inf 0x3f3f3f3f
+using namespace std;
+struct city {
+	int to,len,val;
+};
+vector<city>ve[10005];
+int min_cost[10005],min_dis[10005];
+int main() {
+	int n,m;
+	while(cin>>n>>m,n||m) {
+		for(int i=1; i<=n; i++) {
+			ve[i].clear();
+			min_cost[i]=0;
+			min_dis[i]=inf;
+		}
+		min_dis[1]=0;
+		for(int i=0; i<m; i++) {
+			int a,b,c,d;
+			cin>>a>>b>>c>>d;
+			city begin;
+			begin.to=b;
+			begin.len=c;
+			begin.val=d;
+			ve[a].push_back(begin);
+			begin.to=a;
+			ve[b].push_back(begin);
+		}
+		priority_queue<pair<int, int>, vector<pair<int, int> >, greater<pair<int, int> > > qq;
+		qq.push(make_pair(0,1));
+		while(!qq.empty()) {
+			pair<int,int> p=qq.top();
+			qq.pop();
+			if(min_dis[p.second]<p.first)continue;
+			for(int i=0; i<ve[p.second].size(); i++) {
+				city temp=ve[p.second][i];
+				if(min_dis[temp.to]>=temp.len+min_dis[p.second]) {
+					if(min_dis[temp.to]==temp.len+min_dis[p.second]&&min_cost[temp.to]>temp.val) {
+						min_cost[temp.to]=temp.val;
+						qq.push(make_pair(min_dis[temp.to],temp.to));
+					} else if(min_dis[temp.to]>temp.len+min_dis[p.second]) {
+						min_dis[temp.to]=temp.len+min_dis[p.second];
+						min_cost[temp.to]=temp.val;
+						qq.push(make_pair(min_dis[temp.to],temp.to));
+					}
+					//qq.push(make_pair(min_dis[temp.to],temp.to));
+				}
+			}
+		}
+		int ans=0;
+		for(int i=1; i<=n; i++) {
+			ans+=min_cost[i];
+		}
+		cout<<ans<<endl;
+	}
+	return 0;
+}
+

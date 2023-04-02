@@ -1,0 +1,52 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <string>
+#include <stack>
+using namespace std;
+
+int calc(int operand0, int operand1, std::string op) {
+	if (op == "+") {
+		return operand0 + operand1;
+	}
+	else if (op == "-") {
+		return operand0 - operand1;
+	}
+	else {
+		return operand0 * operand1;
+	}
+}
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	stack<int> stack;
+	string str;
+
+	while (cin >> str) {
+		if (str == "+" || str == "-" || str == "*") {
+			int operand0 = 0;
+			int operand1 = 0;
+
+			operand1 = stack.top();
+			stack.pop();
+			operand0 = stack.top();
+			stack.pop();
+			stack.push(calc(operand0, operand1, str));
+		}
+		else {
+			stack.push(stoi(str));
+		}
+	}
+
+	cout << stack.top() << endl;
+	return 0;
+}
+
+

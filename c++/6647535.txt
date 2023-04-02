@@ -1,0 +1,113 @@
+#include<string>
+#include<iostream>
+#include<map>
+#include<vector>
+
+void strSearch(const std::string& target, const std::string& str) {
+	// ブルートフォース
+	for (int i = 0; i < target.size(); i++) {
+		// 比較
+		for (int j = 0; j < str.size(); j++) {
+			if (target[i + j] != str[j]) break;
+			if (j == str.size() - 1) {
+				std::cout << i << std::endl;
+			}
+		}
+	}
+}
+
+std::map<char, int> makeLUT(const std::string& str) {
+	const int size = str.size();
+	std::map<char, int> lut; //look up table
+	for (int i = 0; i < str.size() - 1; i++) {
+		lut[str[i]] = size - i - 1;
+	}
+	return lut;
+}
+
+void strSearchBM(const std::string& target, const std::string& str) {
+	std::map<char, int> lut = makeLUT(str);
+	if (target.size() < str.size()) return;
+	const int size = str.size();
+	for (int i = 0; i < target.size() - str.size() + 1;) {
+		// 比較
+		for (int j = size - 1; j >= 0; j--) {
+			if (target[i + j] != str[j]) {
+				const auto& itr = lut.find(target[i + j]);
+				if (itr == lut.end()) {
+					i += j + 1;
+				}
+				else {
+					const int slide = itr->second - size + j + 1;
+					i += slide > 0 ? slide : 2;
+				}
+				break;
+			}
+			if (j == 0) {
+				std::cout << i << std::endl;
+				i++;
+			}
+		}
+	}
+}
+
+std::vector<int> makeKMPTable(const std::string& str) {
+	std::vector<int> ret(str.size(), 0);
+	int tarIdx = 1;
+	int strIdx = 0;
+	while (tarIdx < str.size() - 1) {
+		if (str[tarIdx] == str[strIdx]) {
+			tarIdx++;
+			strIdx++;
+			ret[tarIdx] = strIdx;
+		}
+		else {
+			if (strIdx == 0) {
+				tarIdx++;
+			}
+			else {
+				strIdx = ret[strIdx];
+			}
+		}
+	}
+	return ret;
+}
+
+void strSearchKMP(const std::string& target, const std::string& str) {
+	std::vector<int> KMPtable = makeKMPTable(str);
+
+	uint64_t tarIdx = 0;
+	int strIdx = 0;
+	while (tarIdx < target.size()) {
+		if (target[tarIdx] == str[strIdx]) {
+			if (strIdx == str.size() - 1) {
+				// 完全一致
+				std::cout << tarIdx - str.size() + 1 << std::endl;
+				tarIdx++;
+				strIdx = KMPtable[strIdx];
+			}
+			else {
+				tarIdx++;
+				strIdx++;
+			}
+		}
+		else {
+			if (strIdx == 0) {
+				tarIdx++;
+			}
+			else {
+				strIdx = KMPtable[strIdx];
+			}
+		}
+	}
+}
+
+int main() {
+	// read
+	std::string target;
+	std::string str;
+	std::cin >> target;
+	std::cin >> str;
+
+	strSearchKMP(target, str);
+}

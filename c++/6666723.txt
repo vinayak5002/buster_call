@@ -1,0 +1,42 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const double oo=1e15;
+struct D{
+	double x,y;
+}a[1020000],p[1020000];
+int n;
+double dis(D x,D y){return (x.x-y.x)*(x.x-y.x)+(x.y-y.y)*(x.y-y.y);}
+void mg(int x,int y){
+	int mid=x+y>>1,lp=x,rp=mid+1,t=0;
+	while(lp<=mid&&rp<=y)
+		if(a[lp].y<a[rp].y)p[++t]=a[lp++];
+		else p[++t]=a[rp++];
+	while(lp<=mid)p[++t]=a[lp++];
+	while(rp<=mid)p[++t]=a[lp++];
+	for(int i=1;i<=t;++i)
+		a[x+i-1]=p[i];
+}
+double solve(int l,int r){
+	if(l==r)return oo;
+	int mid=l+r>>1;
+	double l1=solve(l,mid),l2=solve(mid+1,r);
+	double z=min(l1,l2);
+	int hd=mid+1,tl=mid;
+	double p=sqrt(z);
+	for(int i=l;i<=mid;++i){
+		while(a[hd].y<a[i].y-p&&hd<=r&&hd<=tl)hd++;
+		while(a[tl+1].y<=a[i].y+p&&tl<r)tl++;
+		for(int j=hd;j<=tl;++j)
+		if(dis(a[i],a[j])<z)z=dis(a[i],a[j]),p=sqrt(z);
+	}
+	mg(l,r);
+	return z;
+}
+bool cmp(D x,D y){return x.x<y.x;}
+int main(){
+	cin>>n;
+	for(int i=1;i<=n;++i){scanf("%lf%lf",&a[i].x,&a[i].y);}
+	sort(a+1,a+n+1,cmp);
+	printf("%.10lf",sqrt(solve(1,n)));
+}

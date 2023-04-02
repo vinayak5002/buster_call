@@ -1,0 +1,100 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>    // std::copy
+#include <iterator>     // std::back_inserter 
+using namespace std;
+#ifdef DBG
+void printVec(vector<int> V)
+{
+    for (auto i = V.begin(); i != V.end(); i ++) 
+	cout << " " << *i;
+    cout << endl;
+}
+#endif
+	
+// 頂点 s の近傍を拡張し、新たに取り込んだ頂点の数を返す
+int extend(int s, vector<int> nbd[])
+{
+    vector<int> &S = nbd[s];
+    vector<int> S1;               // 新たに取り込む頂点たち
+
+    for (auto i = S.begin(); i != S.end(); i++) {
+	int u = *i;                                // u は s の近傍の要素	
+	if (u == s || u == -1)
+	    continue;
+	vector<int> &U = nbd[u];
+	for (auto j = U.begin(); j != U.end(); j++) {
+	    int v = *j;                             // v は u の近傍の要素
+	    if (v == s || v == u || v == -1)
+		continue;
+	    if (find(S.begin(), S.end(), v) == S.end()) { // vはSの近傍内にない
+		S1.push_back(v);
+	    }
+	}
+    }
+    for (auto i = S1.begin(); i != S1.end(); i++)
+	S.push_back(*i);
+    return S1.size();
+}
+
+// 頂点 s を自身の成分すべてにつなぐ
+void connect(int s, vector<int> nbd[])
+{
+    vector<int> &S = nbd[s];
+    while (true) 
+	if (extend(s, nbd) == 0)       // 新しい連結成分は発見されなかった
+	    break;
+
+    S.push_back(-1);                   // S の成分はこれ以上ないことを記す
+}
+
+// s と 連結な頂点に s の成分情報を伝える。 s の成分がすべてわかってることが前提。
+void complete(int s, vector<int> nbd[])
+{
+    vector<int> &S = nbd[s];
+    for (auto i = S.begin(); i != S.end(); i++) {
+	int u = *i;
+	if (u == s || u == -1)
+	    continue;
+	vector<int> &U = nbd[u];
+	copy(S.begin(), S.end(), back_inserter(U));
+    }
+}
+
+int main()
+{
+    int n;                        // 頂点の数
+    cin >> n;
+    vector<int> nbd[n];           //  nbd[v] :  頂点 v の近傍
+    for (int i = 0; i < n; i++) 
+	nbd[i].push_back(i);     // 自分の成分として、まず自身を登録
+    
+    int m;    //  辺の数
+    cin >> m;
+    for (int i = 0; i < m; i++) {
+	int s, t;
+	cin >> s >> t;
+	nbd[s].push_back(t);
+	nbd[t].push_back(s);
+    }
+
+    int q;    // 質問の数
+    cin >> q;
+    for (int i = 0; i < q; i++) {
+	int s, t;
+	cin >> s >> t;
+	vector<int> &S = nbd[s];
+	if (S.back() != -1) {   // まだ s の成分のすべては見つかってはない
+	    connect(s, nbd);
+//	    complete(s, nbd);
+	}
+	if (find(S.begin(), S.end(), t) != S.end())
+	    cout << "yes" << endl;
+	else
+	    cout << "no" << endl;
+    }
+
+    return 0;
+}
+
+

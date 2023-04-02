@@ -1,0 +1,39 @@
+# https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DPL_2_A&lang=ja
+V, E = map(int, input().split())
+ALL = 1 << V
+D = []
+for _ in range(V):
+    D.append([-1] * V)
+
+S = set()
+T = set()
+for _ in range(E):
+    s, t, d = map(int, input().split())
+    S.add(s)
+    T.add(t)
+    D[s][t] = d
+S = list(S)
+T = list(T)
+
+dp = []
+INF = 10**18
+for _ in range(ALL):
+    dp.append([INF] * V)
+
+# 初期値
+dp[0][0] = 0
+
+for i in range(ALL):
+    for s in S:
+        for t in T:
+            if D[s][t] == -1 or i & (1 << t) > 0:
+                continue
+            dp[i | 1 << t][t] = min(dp[i][s] + D[s][t], dp[i | 1 << t][t])
+
+# result = min(dp[ALL - 1])
+result = dp[ALL - 1][0]
+if result == INF:
+    print(-1)
+else:
+    print(result)
+

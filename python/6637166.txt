@@ -1,0 +1,62 @@
+from platform import node
+
+
+class Node:
+  def __init__(self):
+    self.parent = -1
+    self.children = None
+    self.sib = -1
+    self.deg = 0
+    self.depth = 0
+    self.height = 0
+    self.kind = 0
+
+def searchSibling(id):
+  if nodes[id].parent == -1:
+    return -1
+  elif nodes[nodes[id].parent].children[0] == id:
+    return nodes[nodes[id].parent].children[1]
+  elif nodes[nodes[id].parent].children[1] == id:
+    return nodes[nodes[id].parent].children[0]
+
+def searchDepth_Height(id, depth):
+  nodes[id].depth = depth
+  height = 0
+  for ch in nodes[id].children:
+    if ch != -1:
+      height = max(height, searchDepth_Height(ch, depth+1) + 1)
+  nodes[id].height = height
+  return height
+
+def searchKind(id):
+  if nodes[id].parent == -1:
+    return "root"
+  else:
+    if nodes[id].children and nodes[id].children[0] != -1:
+      return "internal node"
+    return "leaf"
+
+n = int(input())
+nodes = [Node() for _ in range(n)]
+for _ in range(n):
+  id, *children = map(int, input().split())
+  nodes[id].children = children#子ども代入
+  if children[0] != -1:
+    for c in children:
+      nodes[c].parent = id#親代入
+  if nodes[id].children.count(-1) == 2:
+    nodes[id].deg = 0
+  else:
+    nodes[id].deg = 2
+print("-----------------------------------")
+
+for id in range(n):#高さと深さ調べる
+  if nodes[id].parent == -1:
+    searchDepth_Height(id, 0)
+    break
+
+for id in range(n):#兄弟ノードを調べるのと、表示を担う
+  nodes[id].sib = searchSibling(id)
+  nodes[id].kind = searchKind(id)
+  print(f"node {id}: parent = {nodes[id].parent}, sibling = {nodes[id].sib}, degree = {nodes[id].deg}, depth = {nodes[id].depth}, height = {nodes[id].height}", nodes[id].kind)
+

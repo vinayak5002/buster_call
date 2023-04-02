@@ -1,0 +1,245 @@
+#include<iostream>
+#include<vector>
+#include<queue>
+#include<algorithm>
+
+enum Move {
+	UP,
+	DOWN,
+	LEFT,
+	RIGHT,
+	NUM_MOVE
+};
+
+struct Element {
+	Move m;
+	Move m_pre; // 前回のMove
+	uint64_t enc;
+	int depth;
+	int dist;
+	bool operator<(const Element& other) const {
+		if (dist == other.dist) return depth < other.depth;
+		return dist < other.dist;
+	}
+	bool operator>(const Element& other) const {
+		if (dist == other.dist) return depth > other.depth;
+		return dist > other.dist;
+	}
+};
+
+class Puzzle {
+public:
+	Puzzle(std::vector<int> b) : board_(b) {
+		visited_.push_back(encode(b));
+		goal_ = encode(std::vector<int>{1, 2, 3, 4, 5, 6, 7, 8, 9,10, 11, 12, 13, 14, 15, 0});
+	};
+
+	void solve() {
+		std::priority_queue<Element, std::vector<Element>, std::greater<Element>> cand; // 移動候補
+		int depth = 0;
+		pushCand(cand, 1, NUM_MOVE);
+		while (encode(board_) != goal_) {
+			// 幅優先探索
+			Element el = cand.top();
+			cand.pop();
+			changeBoard(el);
+			if (std::find(visited_.begin(), visited_.end(), encode(board_)) != visited_.end()) {
+				// 探索済みの場合は元に戻す
+				continue;
+			}
+			visited_.push_back(encode(board_));
+			depth = el.depth;
+			pushCand(cand, el.depth + 1, el.m);
+		}
+		std::cout << depth << std::endl;
+	}
+
+private:
+	uint64_t encode(const std::vector<int>& b) const {
+		uint64_t s = 0;
+		for (int i = 0; i < 16; i++) {
+			s = s * 16 + b[i];
+		}
+		return s;
+	}
+	std::vector<int> decode(const uint64_t src) const {
+		uint64_t enc = src;
+		std::vector<int> dec(16);
+		for (int i = 0; i < 16; i++) {
+			dec[15 - i] = enc % 16;
+			enc /= 16;
+		}
+		return dec;
+	}
+	void pushCand(std::priority_queue<Element, std::vector<Element>, std::greater<Element>>& cand, const int depth, const Move m_pre) {
+		// 0の位置を探す
+		int idx = 0;
+		for (int i = 0; i < 16; i++) {
+			if (board_[i] == 0) {
+				idx = i;
+				break;
+			}
+		}
+		uint64_t enc = encode(board_);
+		const int dist = calcDist(enc, depth);
+		switch (idx) {
+		case 0:
+			if (m_pre != RIGHT) {
+				cand.push(Element{ LEFT, m_pre, enc, depth, dist });
+			}
+			if (m_pre != DOWN) {
+				cand.push(Element{ UP, m_pre, enc, depth, dist });
+			}
+			break;
+		case 1:
+		case 2:
+			if (m_pre != LEFT) {
+				cand.push(Element{ RIGHT, m_pre, enc, depth, dist });
+			}
+			if (m_pre != RIGHT) {
+				cand.push(Element{ LEFT, m_pre, enc, depth, dist });
+			}
+			if (m_pre != DOWN) {
+				cand.push(Element{ UP, m_pre, enc, depth, dist });
+			}
+			break;
+		case 3:
+			if (m_pre != LEFT) {
+				cand.push(Element{ RIGHT, m_pre, enc, depth, dist });
+			}
+			if (m_pre != DOWN) {
+				cand.push(Element{ UP, m_pre, enc, depth, dist });
+			}
+			break;
+		case 4:
+		case 8:
+			if (m_pre != UP) {
+				cand.push(Element{ DOWN, m_pre, enc, depth, dist });
+			}
+			if (m_pre != RIGHT) {
+				cand.push(Element{ LEFT, m_pre, enc, depth, dist });
+			}
+			if (m_pre != DOWN) {
+				cand.push(Element{ UP, m_pre, enc, depth, dist });
+			}
+			break;
+		case 5:
+		case 6:
+		case 9:
+		case 10:
+			if (m_pre != UP) {
+				cand.push(Element{ DOWN, m_pre, enc, depth, dist });
+			}
+			if (m_pre != LEFT) {
+				cand.push(Element{ RIGHT, m_pre, enc, depth, dist });
+			}
+			if (m_pre != RIGHT) {
+				cand.push(Element{ LEFT, m_pre, enc, depth, dist });
+			}
+			if (m_pre != DOWN) {
+				cand.push(Element{ UP, m_pre, enc, depth, dist });
+			}
+			break;
+		case 7:
+		case 11:
+			if (m_pre != UP) {
+				cand.push(Element{ DOWN, m_pre, enc, depth, dist });
+			}
+			if (m_pre != LEFT) {
+				cand.push(Element{ RIGHT, m_pre, enc, depth, dist });
+			}
+			if (m_pre != DOWN) {
+				cand.push(Element{ UP, m_pre, enc, depth, dist });
+			}
+			break;
+		case 12:
+			if (m_pre != UP) {
+				cand.push(Element{ DOWN, m_pre, enc, depth, dist });
+			}
+			if (m_pre != RIGHT) {
+				cand.push(Element{ LEFT, m_pre, enc, depth, dist });
+			}
+			break;
+		case 13:
+		case 14:
+			if (m_pre != UP) {
+				cand.push(Element{ DOWN, m_pre, enc, depth, dist });
+			}
+			if (m_pre != LEFT) {
+				cand.push(Element{ RIGHT, m_pre, enc, depth, dist });
+			}
+			if (m_pre != RIGHT) {
+				cand.push(Element{ LEFT, m_pre, enc, depth, dist });
+			}
+			break;
+		case 15:
+			if (m_pre != UP) {
+				cand.push(Element{ DOWN, m_pre, enc, depth, dist });
+			}
+			if (m_pre != LEFT) {
+				cand.push(Element{ RIGHT, m_pre, enc, depth, dist });
+			}
+			break;
+		}
+	}
+	void changeBoard(const Element& el) {
+		// 0の位置を探す
+		int idx = 0;
+		board_ = decode(el.enc);
+		for (int i = 0; i < 16; i++) {
+			if (board_[i] == 0) {
+				idx = i;
+				break;
+			}
+		}
+		switch (el.m) {
+		case UP:
+			board_[idx] = board_[idx + 4];
+			board_[idx + 4] = 0;
+			break;
+		case DOWN:
+			board_[idx] = board_[idx - 4];
+			board_[idx - 4] = 0;
+			break;
+		case RIGHT:
+			board_[idx] = board_[idx - 1];
+			board_[idx - 1] = 0;
+			break;
+		case LEFT:
+			board_[idx] = board_[idx + 1];
+			board_[idx + 1] = 0;
+			break;
+		}
+	}
+
+	int calcDist(const uint64_t enc, const int depth) const {
+		const std::vector<int> state = decode(enc);
+		int cost = depth;
+		for (int i = 0; i < 16; i++) {
+			if (state[i] == 0) continue;
+			// 正しい位置になければコスト
+			const int ans = (i + 1) % 16;
+			const int cur = state[i];
+			if (cur != ans) {
+				cost++;
+				const int x = std::abs((cur - 1) % 4 - i % 4);
+				const int y = std::abs((cur - 1) / 4 - i / 4);
+				cost = cost + x + y;
+			}
+		}
+		return cost - 1;
+	}
+	std::vector<int> board_; // パズルの配置　左上からパネルの番号を入れる　0が空白
+	std::vector<uint64_t> visited_; // 探索済みのstate(encoded)
+	uint64_t goal_;
+};
+
+int main() {
+	std::vector<int> board(16);
+	for (int i = 0; i < 16; i++) {
+		std::cin >> board[i];
+	}
+	Puzzle puzzle(board);
+	puzzle.solve();
+}
+

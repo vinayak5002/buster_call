@@ -1,0 +1,223 @@
+import java.io.*
+import java.util.*
+import kotlin.math.*
+
+fun main() {
+    
+    // val T = nextInt()
+    // repeat(T) {solve()}
+    // pw.flush()
+    
+    solve()
+    pw.flush()
+    
+}
+
+fun solve() {
+    
+    val a = nextInt()
+    val b = nextInt()
+    val N = nextInt()
+    val pairs = Array<Pair<Int, Int>>(N) { Pair(nextInt(), nextInt()) }
+    
+    for( p in pairs ) {
+        if( a >= p.second || b <= p.first ) continue
+        else { pw.println(1); return }
+    }
+    
+    pw.println(0)
+    
+}
+
+fun subtask(N: Int, M: Int, D: Int, idx: Int, tx: List<Triple<Int, Int, Int>>): Boolean {
+    
+    var cnt = 0
+    var dist = 0
+    for( i in idx+1 until N ) {
+        val k = tx[i].first-tx[i-1].first
+        if( tx[i].second < tx[idx].second || dist+k < D ) {
+            cnt++
+            dist += k
+        }else {
+            dist = 0
+        }
+    }
+    
+    dist = 0
+    for( i in idx-1 downTo 0 ) {
+        val k = tx[i+1].first-tx[i].first
+        if( tx[i].second < tx[idx].second || dist+k < D ) {
+            cnt++
+            dist += k
+        }else {
+            dist = 0
+        }
+    }
+    
+    return cnt <= N-M
+    
+}
+
+fun upperBound(list: MutableList<Int>, x: Int): Int {
+    
+    var high = list.size-1
+    var low = 0
+    var mid: Int
+    
+    while( low < high ) {
+        mid = (high+low)/2
+        if( list[mid] <= x ) low = mid+1
+        else high = mid
+    }
+    
+    return low
+    
+}
+
+/* struct begin */
+
+data class Line(val a: Long, val b: Long, val c: Long, val d: Long)
+data class Cell(val r: Int, val c: Int)
+data class Point(val x: Long, val y: Long)
+data class Pii(val fi: Int, val se: Int)
+data class Edge(val from: Int, val to: Int, val w: Long)
+
+class BinaryIndexedTree(n: Int) {
+    
+    val N = n
+    var a = Array<Long>(N+1) {0L}
+    
+    fun sum(i: Int): Long {
+        
+        var idx = i+1
+        var res = 0L
+        while( idx > 0 ) {
+            res += a[idx]
+            idx -= idx and (-idx)
+        }
+        
+        return res
+        
+    }
+    
+    fun add(i: Int, x: Long) {
+        
+        var idx = i+1
+        while( idx <= N ) {
+            a[idx] += x
+            idx += idx and (-idx)
+        }
+        
+    }
+    
+}
+
+class UnionFind(N: Int) {
+    
+    var parent = Array<Int>(N) {it}
+    var rank = Array<Int>(N) {1}
+    var size = Array<Int>(N) {1}
+    
+    fun root(x: Int): Int {
+        
+        if( parent[x] == x ) {
+            return x
+        }else {
+            parent[x] = root(parent[x])
+            return parent[x]
+        }
+        
+    }
+    
+    fun unite(x: Int, y: Int) {
+        
+        val rx = root(x)
+        val ry = root(y)
+        if( rx == ry ) return
+        
+        if( rank[rx] > rank[ry] ) {
+            parent[ry] = rx
+            size[rx] += size[ry]
+        }else {
+            parent[rx] = ry
+            size[ry] += size[rx]
+            if( rank[rx] == rank[ry] ) rank[ry]++
+        }
+        
+    }
+    
+    fun same(x: Int, y: Int): Boolean = (root(x) == root(y))
+    fun getSize(x: Int): Int = size[root(x)]
+    
+}
+
+/* struct end */
+
+/* math begin */
+
+fun intceil(x: Double) = ceil(x).toInt()
+fun intfloor(x: Double) = floor(x).toInt()
+fun gcd(x: Long, y: Long): Long {
+    
+    var a = max(abs(x), abs(y))
+    var b = min(abs(x), abs(y))
+    var r: Long
+    
+    do {
+        r = a%b
+        a = b
+        b = r
+    }while( r > 0 )
+    
+    return a
+    
+}
+
+fun modpow(X: Long, T: Long, P: Long = 9223372036854775807L): Long {
+    
+    var x = X
+    var t = T
+    
+    if( t == 0L ) {
+        return 1L
+    }else {
+        var res = 1L
+        while( t > 0 ) {
+            if( t%2L == 1L ) {
+                res *= x
+                res %= P
+                t -= 1L
+            }
+            x *= x
+            x %= P
+            t /= 2
+        }
+        return res%P
+    }
+    
+}
+
+/* math end */
+
+/* I/O begin */
+
+var st = StringTokenizer("")
+val br = System.`in`.bufferedReader()
+val pw = PrintWriter(System.out, false)
+
+fun nextInt() = next().toInt()
+fun nextLong() = next().toLong()
+fun nextLine() = br.readLine()!!
+fun nextDouble() = next().toDouble()
+fun nextIntarr(n: Int) = Array<Int>(n) {nextInt()}
+fun nextStrarr(n: Int) = Array<String>(n) {next()}
+fun nextLongarr(n: Int) = Array<Long>(n) {nextLong()}
+
+fun next(): String {
+    
+    if( !st.hasMoreTokens() ) st = StringTokenizer(br.readLine()!!)
+    return st.nextToken()
+    
+}
+
+/* I/O end */

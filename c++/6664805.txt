@@ -1,0 +1,46 @@
+#include <iostream>
+#include <vector>
+#include <unordered_map>
+using namespace std;
+
+int N;
+vector<int> T;
+
+void Add(int n) {
+    while (n <= N) {
+        T[n] += 1;
+        n += (n & -n);
+    }
+}
+
+int Sum(int n) {
+    int S = 0;
+    while (n) {
+        S += T[n];
+        n -= (n & -n);
+    }
+    return S;
+}
+
+int main(int argc, const char * argv[]) {
+    cin >> N;
+    T.resize(N + 1);
+    vector<int> A(N);
+    for (int n = 0; n < N; ++n) cin >> A[n];
+    
+    vector<int> B = A;
+    sort(B.begin(), B.end());
+    B.erase(unique(B.begin(), B.end()), B.end());
+    unordered_map<int, int> M;
+    for (int m = 0; m < B.size(); ++m) M[B[m]] = m + 1;
+
+    long long Ans = 0;
+    for (int n = 0; n < N; ++n) {
+        Ans += n - Sum(M[A[n]]);
+        Add(M[A[n]]);
+    }
+    cout << Ans << endl;
+    
+    return 0;
+}
+

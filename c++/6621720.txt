@@ -1,0 +1,95 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define REP(i,n) for(int i=0;i<int(n);i++)
+typedef long long ll;
+typedef pair<ll,ll> P;
+
+ll N,M,K,S,X,Y;
+const ll INF=1e18;
+vector<P> G[100010];
+vector<ll> g[100010];
+ll d[100010],c[100010],e[2][200010];
+
+void dfs(ll x,ll e){
+	if(c[x]!=1) c[x]=-1;
+	if(e==S) return;
+
+	for(ll i=0;i<(ll)g[x].size();i++) if(c[g[x][i]]!=-1) dfs(g[x][i],e+1);
+}
+
+void djk(){
+
+    priority_queue<P,vector<P>,greater<P> > q;
+
+    for(ll i=0;i<=N;i++) d[i]=INF;
+    d[1]=0;
+    q.push(P(0,1));
+
+    while(!q.empty()){
+        P p=q.top();  q.pop();
+        ll v=p.second;
+
+        if(c[v]==1) continue;
+        if(d[v]<p.first) continue;
+
+        for(ll i=0;i<(ll)G[v].size();i++){
+        	P x=G[v][i];
+        	if(c[x.second]==1) continue;
+            if(d[x.second]>d[v]+x.first){
+               d[x.second]=d[v]+x.first;
+               q.push(P(d[x.second],x.second));
+            }
+        }
+    }
+
+}
+
+
+int main(void){
+	ll i,j,k;
+ 
+	cin.tie(0);  ios_base::sync_with_stdio(false);
+
+	cin >> N >> M >> K >> S >> X >> Y;
+
+	for(i=1;i<=K;i++){
+		ll t;
+		cin >> t;
+		c[t]=1;
+	}
+
+	for(i=1;i<=M;i++){
+		ll a,b;
+		cin >> a >> b;
+
+		g[a].push_back(b);
+		g[b].push_back(a);
+		e[0][i]=a;
+		e[1][i]=b;
+	}
+
+	for(i=1;i<=N;i++) if(c[i]==1) dfs(i,0);
+
+	for(i=1;i<=M;i++){
+		ll x=e[0][i],y=e[1][i];
+		if(y==N){
+			G[x].push_back(P(0,y));
+			continue;
+		}
+
+		if(c[y]==-1) G[x].push_back(P(Y,y));
+		if(c[y]==0) G[x].push_back(P(X,y));
+		if(c[x]==-1) G[y].push_back(P(Y,x));
+		if(c[x]==0) G[y].push_back(P(X,x));
+	}
+
+	djk();
+
+	cout << d[N] << endl;
+
+
+	return 0;
+}
+

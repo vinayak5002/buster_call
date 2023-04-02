@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include <stdbool.h>
+
+void swap(int *pa, int *pb)
+{
+	int tmp;
+
+	tmp = *pa;
+	*pa = *pb;
+	*pb = tmp;
+}
+
+void reverse(size_t first, size_t last, int a[])
+{
+	while (first != last && first != --last) {
+		swap(&a[first], &a[last]);
+		first++;
+	}
+}
+
+bool next_permutation(size_t first, size_t last, int a[])
+{
+	size_t i, j, k;
+
+	if (first == last) {
+		return false;
+	}
+
+	if (first + 1 == last) {
+		return false;
+	}
+
+	i = last - 1;
+
+	while (true) {
+		j = i--;
+
+		if (a[i] < a[j]) {
+			k = last;
+
+			while (!(a[i] < a[--k])) {
+			}
+
+			swap(&a[i], &a[k]);
+			reverse(j, last, a);
+			return true;
+		}
+
+		if (i == first) {
+			reverse(first, last, a);
+			return false;
+		}
+	}
+}
+int a[10];
+int main(void)
+{
+	size_t n, i;
+	scanf("%d", &n);
+	for (i = 0; i < n; i++){
+		a[i] = i + 1;
+	}
+	do{
+		for (i = 0; i < n; i++){
+			if (i == 0){
+				printf("%d", a[i]);
+			}
+			else{
+				printf(" %d", a[i]);
+			}
+		}
+		printf("\n");
+	} while (next_permutation(0, n, a));
+	return 0;
+}

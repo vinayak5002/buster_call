@@ -1,0 +1,53 @@
+#include <bits/stdc++.h>
+#define LEN 100005
+using namespace std;
+
+// 输入数据的结构体
+typedef struct misson {
+    char name[100];
+    int t;
+} M;
+
+M Q[LEN];
+int head, tail, n, q;
+
+void enqueue(M x) {
+    Q[tail] = x;
+    tail = (tail + 1) % LEN;
+}
+
+M dequeue() {
+    M v = Q[head];
+    head = (head + 1) % LEN;
+    return v;
+}
+
+int main()
+{
+    int st = 0;
+    M m;
+
+    scanf("%d %d", &n, &q);
+
+    for (int i = 1; i <= n; ++i) {
+        scanf("%s", Q[i].name);
+        scanf("%d", &Q[i].t);
+    }
+    
+    head = 1; tail = n + 1;  // head指向首元素,tail指向尾元素的下一元素
+
+    while (head != tail) {
+        m = dequeue();
+        int s = m.t;
+        if (s < q) {
+            st += s;
+            printf("%s %d\n", m.name, m.t);
+        } else {
+            st += q;
+            m.t -= q;
+            enqueue(m);
+        }
+    }
+
+    return 0;
+}

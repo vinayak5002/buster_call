@@ -1,0 +1,54 @@
+class Dice:
+    def __init__(self, surface):
+        self.surface = [0] * 6
+        for i in range(6):
+            self.surface[i] = surface[i]
+
+    def move_n(self):
+        self.surface[0], self.surface[5], self.surface[4], self.surface[1] \
+            = self.surface[1], self.surface[4], self.surface[0], self.surface[5]
+
+    def move_e(self):
+        self.surface[0], self.surface[5], self.surface[2], self.surface[3] \
+            = self.surface[3], self.surface[2], self.surface[0], self.surface[5]
+
+    def move_s(self):
+        self.surface[0], self.surface[5], self.surface[4], self.surface[1] \
+            = self.surface[4], self.surface[1], self.surface[5], self.surface[0]
+
+    def move_w(self):
+        self.surface[0], self.surface[5], self.surface[2], self.surface[3] \
+            = self.surface[2], self.surface[3], self.surface[5], self.surface[5]
+
+    def same_judge(self, dice):
+        move_command = 'NNNNWNNNWNNNENNNENNNWNNN'
+        flag = False
+        for i in move_command:
+            if i == "N":
+                self.move_n()
+            elif i == "E":
+                self.move_e()
+            elif i == "S":
+                self.move_s()
+            else:
+                self.move_w()
+
+            tmp_flag = True
+            for j in range(6):
+                if self.surface[j] != dice.surface[j]:
+                    tmp_flag = False
+                    break
+
+            if tmp_flag:
+                return True
+
+        return flag
+
+
+dice_1 = Dice(list(map(int, input().split())))
+dice_2 = Dice(list(map(int, input().split())))
+if dice_1.same_judge(dice_2):
+    print("Yes")
+else:
+    print("No")
+

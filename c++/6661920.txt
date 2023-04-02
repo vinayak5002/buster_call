@@ -1,0 +1,122 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+#ifdef DBG
+void printVec(vector<int> V)
+{
+    for (auto i = V.begin(); i != V.end(); i ++) 
+	cout << " " << *i;
+    cout << endl;
+}
+#endif
+
+int cmp[100000];
+	
+// 頂点 s の近傍を拡張し、新たに取り込んだ頂点の数を返す
+int extend(int s, vector<int> nbd[])
+{
+    if (cmp[s] >= 0)
+	return 0;
+    vector<int> &S = nbd[s];
+    vector<int> S1;               // 新たに取り込む頂点たち
+
+    for (auto i = S.begin(); i != S.end(); i++) {
+	int u = *i;                                // u は s の近傍の要素	
+	if (u == s)
+	    continue;
+	vector<int> &U = nbd[u];
+	for (auto j = U.begin(); j != U.end(); j++) {
+	    int v = *j;                             // v は u の近傍の要素
+	    if (v == s || v == u)
+		continue;
+	    if (find(S.begin(), S.end(), v) == S.end()) { // vはSの近傍内にない
+		S1.push_back(v);
+	    }
+	}
+    }
+    for (auto i = S1.begin(); i != S1.end(); i++)
+	S.push_back(*i);
+    return S1.size();
+}
+
+// s と連結な頂点が s の成分であることを記す。 s の成分がすべてわかってることが前提。
+void complete(int s, vector<int> nbd[])
+{
+    vector<int> &S = nbd[s];
+    for (auto i = S.begin(); i != S.end(); i++) {
+	int u = *i;
+	if (cmp[u] == -1)
+	    cmp[u] = cmp[s];
+    }
+}
+
+// 頂点 s を自身の成分すべてにつなぐ
+void connect(int s, vector<int> nbd[])
+{
+    if (cmp[s] >= 0)
+	return;
+    while (true) 
+	if (extend(s, nbd) == 0)       // 新しい連結成分は発見されなかった
+	    break;
+    cmp[s] = s;                   // S の成分が確定
+    complete(s, nbd);
+}
+
+// 頂点 s を自身の成分すべてにつなぐ
+void connect(int s, int t, vector<int> nbd[])
+{
+    if (cmp[s] >= 0 || cmp[t] >= 0)
+	return;
+    while (true) {
+	if (extend(s, nbd) == 0) {      // 新しい連結成分は発見されなかった
+	    cmp[s] = s;
+	    complete(s, nbd);
+	    break;
+	}
+	if (extend(t, nbd) == 0) {      // 新しい連結成分は発見されなかった
+	    cmp[t] = t;
+	    complete(t, nbd);
+	    break;
+	}
+    }
+}
+
+int main()
+{
+    int n;                        // 頂点の数
+    cin >> n;
+    vector<int> nbd[n];           //  nbd[v] :  頂点 v の近傍
+    for (int i = 0; i < n; i++) 
+	nbd[i].push_back(i);     // 自分の成分として、まず自身を登録
+
+    for (int i = 0; i < n; i++)
+	cmp[i] = -1;
+    
+    int m;    //  辺の数
+    cin >> m;
+    for (int i = 0; i < m; i++) {
+	int s, t;
+	cin >> s >> t;
+	nbd[s].push_back(t);
+	nbd[t].push_back(s);
+    }
+
+    int q;    // 質問の数
+    cin >> q;
+    for (int i = 0; i < q; i++) {
+	int s, t;
+	cin >> s >> t;
+	if (cmp[s] == -1 && cmp[t] == -1) {   // s も t もの成分が確定していない
+	    connect(s, t, nbd);
+	}
+	if (cmp[s] == cmp[t]) 
+	    cout << "yes\n";
+	else
+	    cout << "no\n";
+    }
+    return 0;
+}
+

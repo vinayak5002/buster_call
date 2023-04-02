@@ -1,0 +1,105 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+
+struct edge {
+    int from, to, id;
+};
+
+vector<vector<edge>> G;
+vector<edge> edges;
+vector<int> is_spanning;
+vector<int> depth;
+vector<int> visited;
+vector<int> is_bridge;
+vector<int> dp;
+
+int N, M;
+
+void dfs(int idx, int par) {
+    depth[idx] = ((par==-1)?0:(depth[par]+1));
+    visited[idx] = 1;
+    for (auto e : G[idx]) {
+        if (e.to == par) continue;
+        if (visited[e.to]) continue;
+        is_spanning[e.id] = 1;
+        dfs(e.to, idx);
+    }
+}
+
+void dfs2(int idx, int par) {
+    int dp_sum = 0;
+    for (auto e : G[idx]) {
+        if (e.to == par) continue;
+        if (is_spanning[e.id] == 0) continue;
+
+        dfs2(e.to, idx);
+        if (dp[e.to] == 0) {
+            is_bridge[e.id] = 1;
+        }
+
+        dp_sum += dp[e.to];
+    }
+
+    for (auto e : G[idx]) {
+        if (is_spanning[e.id] == 0) {
+            if (depth[e.from] < depth[e.to]) {
+                dp_sum--;
+            } else if (depth[e.from] > depth[e.to]) {
+                dp_sum++;
+            }
+        }
+    }
+    dp[idx] = dp_sum;
+}
+
+int main() {
+    ios::sync_with_stdio(0);
+    cin.tie(0);
+    cin >> N >> M;
+
+    if (M == 0) {
+        return 0;
+    }
+
+    G = vector<vector<edge>>(N, vector<edge>());
+    edges = vector<edge>();
+    for (int i=0;i<M;i++) {
+        int u, v;
+        cin >> u >> v;
+        if (u > v) swap(u, v);
+
+        edges.push_back(edge{u, v, i});
+        G[u].push_back(edge{u, v, i});
+        G[v].push_back(edge{v, u, i});
+    }
+
+    is_spanning = vector<int>(M, 0);
+    depth = vector<int>(N, 0);
+    visited = vector<int>(N, 0);
+    dfs(0, -1);
+
+    is_bridge = vector<int>(M, 0);
+    dp = vector<int>(M, 0);
+
+    dfs2(0, -1);
+
+    // cout << "is_spanning: ";
+    // for (auto ele : is_spanning) {
+    //     cout << ele << " ";
+    // }
+    // cout << "\n";
+
+    vector<pair<int, int>> ans;
+    for (int i=0;i<M;i++) {
+        if (is_bridge[i] == 1) {
+            ans.push_back(make_pair(edges[i].from, edges[i].to));
+        }
+    }
+    sort(ans.begin(), ans.end());
+    for (auto pp : ans) {
+        cout << pp.first << " " << pp.second << "\n";
+    }
+
+    return 0;
+}

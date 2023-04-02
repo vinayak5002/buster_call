@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define N 100000
+
+typedef struct{
+  char name[100];
+  int time;
+} process_t;
+
+void initialize( void );
+bool isEmpty( void );
+bool isFull( void );
+void enque( process_t);
+process_t deque( void );
+
+int head, tail;
+process_t Q[N];
+
+int main( void )
+{
+  process_t temp, current_process;
+  int q, n, t=0;
+
+  scanf("%d %d", &n, &q);
+
+  initialize();
+
+  for (int i = 1; i <= n; i++) {
+    scanf("%s", Q[i].name);
+    scanf("%d", &Q[i].time);
+  }
+  head = 1;
+  tail = n+1;
+
+  while( isEmpty() == false )
+  {
+    while(q > 0)
+    {
+      current_process = deque();
+      if( q >= current_process.time )
+      {
+        q -= current_process.time;
+        t += current_process.time;
+        printf("%s %s\n", current_process.name, t);
+      }
+      else
+      {
+        current_process.time -= q;
+        enque(current_process);
+      }
+    }
+  }
+
+  return 0;
+}
+
+void initialize( void )
+{
+  head = 0;
+  tail = 0;
+}
+
+bool isEmpty( void )
+{
+  if( head == tail ) return true;
+  else return false;
+}
+
+bool isFull( void )
+{
+  if( (tail+1) % N == head ) return true;
+  else return false;
+}
+
+void enque( process_t x )
+{
+  if( isFull() ) exit(1);
+  else
+  {
+    Q[tail] = x;
+    tail++;
+    if( tail == N-1 ) tail = 0;
+  }
+}
+
+process_t deque( void )
+{
+  process_t x;
+  if( isEmpty() ) exit(1);
+  else
+  {
+    x = Q[head];
+    head++;
+    if( head == N ) head = 0;
+  }
+  return x;
+}
+

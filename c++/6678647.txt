@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define test cout << "test:"
+using P = pair<int, int>;
+using T = tuple<int, int, int>;
+
+const int inf = 1073741823;
+const long long linf = 1152921504606846975;
+// const long long mod = 998244353;
+// const long long mod = 1000000007;
+const int dx[] = {1, 0, -1, 0}, dy[] = {0, 1, 0, -1};
+
+template <typename T>
+struct SegTree
+{
+    int n = 1;
+    vector<T> node;
+    function<T(T, T)> op;
+    T IE;
+
+    SegTree(int _n, T IEs, function<T(T, T)> ops)
+    {
+        IE = IEs;
+        op = ops;
+        while (n < _n)
+            n *= 2;
+        for (int i = 0; i < 2 * n - 1; i++)
+            node.push_back(IE);
+    }
+
+    void update(int i, T x)
+    {
+        i += n - 1;
+        node[i] = x;
+        while (i > 0)
+        {
+            i = (i - 1) / 2;
+            node[i] = op(node[2 * i + 1], node[2 * i + 2]);
+        }
+    }
+
+    T query(int a, int b, int i, int l, int r)
+    {
+        if (r <= a or b <= l)
+            return IE;
+        else if (a <= l and r <= b)
+            return node[i];
+        else
+        {
+            T vl = query(a, b, 2 * i + 1, l, (l + r) / 2);
+            T vr = query(a, b, 2 * i + 2, (l + r) / 2, r);
+            return op(vl, vr);
+        }
+    }
+
+    T get(int a, int b)
+    {
+        return query(a, b, 0, 0, n);
+    };
+};
+
+void _main()
+{
+    int n, q;
+    cin >> n >> q;
+    function<int(int, int)> op = [](int x, int y)
+    {
+        return min(x, y);
+    };
+    SegTree<int> s(n, INT_MAX, op);
+
+    while (q--)
+    {
+        int c, x, y;
+        cin >> c >> x >> y;
+
+        if (c == 0)
+            s.update(x, y);
+
+        else    
+            cout << s.get(x, y) << '\n';
+    }
+    return;
+}
+
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout << fixed << setprecision(15);
+    _main();
+}

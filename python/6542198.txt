@@ -1,0 +1,149 @@
+
+import java.util.*;
+
+public class Main {
+
+    static int MaxDis = 10000000;
+    static class Edge
+    {
+        int weight;
+        int v;
+        public Edge(int v ,int weight)
+        {
+            this.v = v;
+            this.weight = weight;
+        }
+
+    }
+
+    static class Node
+    {
+        ArrayList<Edge> NodeArray = new ArrayList<>();
+    }
+
+    static class disNode implements Comparable<disNode>
+    {
+        int dis;
+        int v;
+
+        public disNode(int v , int dis)
+        {
+            this.v = v;
+            this.dis =dis;
+        }
+
+        public disNode()
+        {
+            super();
+        }
+
+
+        @Override
+        public int compareTo(disNode o) {
+            return this.dis- o.dis;
+       //     return o.dis-this.dis;
+        }
+    }
+
+
+    public static void main(String[] args) {
+        Main main = new Main();
+        Scanner scan = new Scanner(System.in);
+        int v = scan.nextInt();
+        int e = scan.nextInt();
+        int r = scan.nextInt();
+
+   //     ArrayList<Edge>[] Lgraph = new ArrayList[v];
+
+        Node[] Lgraph = new Node[v];
+
+        for(int i = 0 ; i < v ; i++)
+        {
+            Lgraph[i] = new Node();
+        }
+
+
+
+        for(int i = 0 ; i<e ;i ++)
+        {
+            int s = scan.nextInt();
+            int t = scan.nextInt();
+            int d = scan.nextInt();
+
+            Edge temp = new Edge(t,d);
+            Lgraph[s].NodeArray.add(temp);
+        }
+
+        scan.close();
+        //-----------------------------------------------
+        //Dijistra
+        int[] dis = new int[v];
+        boolean[] collected = new boolean[v];
+
+        Queue<disNode> minheap = new PriorityQueue<>();
+        for(int i = 0 ; i < v ; i++)
+        {
+            collected[i] = false;
+
+            if(r == i) {
+                minheap.add(new disNode(i, 0));
+                dis[i] = 0;
+            }else {
+                minheap.add(new disNode(i, MaxDis));
+                dis[i] = MaxDis;
+            }
+        }
+      //  disNode rebuild = new disNode(-1,MaxDis+1);
+       // minheap.add(rebuild);
+
+
+
+        while(true)
+        {
+            if(minheap.size() == 0 )
+                break;
+
+         //   minheap.remove(rebuild);
+            minheap.add(minheap.remove());
+
+            disNode pollqueue = minheap.poll();
+            int vertex = pollqueue.v;
+            collected[vertex] = true;
+
+
+            for(int i = 0 ; i< Lgraph[vertex].NodeArray.size();i++)
+            {
+                int w = Lgraph[vertex].NodeArray.get(i).v;
+                int weightofw = Lgraph[vertex].NodeArray.get(i).weight;
+
+
+
+
+                if(pollqueue.dis+ weightofw < dis[w] && !collected[w])
+                {
+                    dis[w] = dis[vertex] + weightofw;
+                    Iterator<disNode> iterator = minheap.iterator();
+                    while(iterator.hasNext())
+                    {
+                        disNode temp = iterator.next();
+                        if(temp.v==w) {
+                            temp.dis = dis[w];
+                            break;
+                        }
+                    }
+
+                }
+
+
+            }
+        }
+        for (int i = 0; i < v; i++) {
+            if (dis[i] != MaxDis)
+                System.out.println(dis[i]);
+            else
+                System.out.println("INF");
+        }
+    }
+
+}
+

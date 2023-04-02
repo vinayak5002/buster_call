@@ -1,0 +1,41 @@
+# 演習2-2 Tax Rate Changed
+import math
+
+# 税込み価格を返す関数
+def getTaxedPrice(price, taxRate):
+  return  math.floor(price * (100 + taxRate) / 100)
+
+# 税変更後の合計価格の最大値を返す関数
+def taxRateChanged(lines):
+  for line in lines:
+    taxRateBefore,taxRateAfter,data = map(int, line.split())
+
+    max = 0
+
+    # 対象となる税込み価格の組み合わせの探索
+    for i in range(1, data + 1):
+      iBefore = getTaxedPrice(i, taxRateBefore)
+      for j in range(1, data + 1):
+        jBefore = getTaxedPrice(j, taxRateBefore)
+
+        if (data == iBefore + jBefore):
+          iAfter = getTaxedPrice(i, taxRateAfter)
+          jAfter = getTaxedPrice(j, taxRateAfter)
+
+          # 税変更後の最大値の更新
+          if (max < iAfter + jAfter):
+            max = iAfter + jAfter
+      
+    print(max)
+
+# データセットの受け取り
+lines = []
+while (True):
+  data = input()
+  if '0 0 0' != data:
+    lines.append(data)
+  else:
+    break
+
+print()
+taxRateChanged(lines)

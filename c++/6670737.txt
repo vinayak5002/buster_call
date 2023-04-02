@@ -1,0 +1,173 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+using T = double;
+using Vec = std::complex<T>;
+
+const T PI = std::acos(-1);
+
+constexpr T eps = 1e-12;
+inline bool eq(T a, T b) { return std::abs(a - b) <= eps; }
+inline bool eq(Vec a, Vec b) { return std::abs(a - b) <= eps; }
+inline bool lt(T a, T b) { return a < b - eps; }
+inline bool leq(T a, T b) { return a <= b + eps; }
+
+std::istream& operator>>(std::istream& is, Vec& p) {
+    T x, y;
+    is >> x >> y;
+    p = {x, y};
+    return is;
+}
+
+struct Line {
+    Vec p1, p2;
+    Line() = default;
+    Line(const Vec& p1, const Vec& p2) : p1(p1), p2(p2) {}
+    Vec dir() const { return p2 - p1; }
+};
+
+struct Segment {
+    Vec p1, p2;
+    Segment() = default;
+    Segment(const Vec& p1, const Vec& p2) : p1(p1), p2(p2) {}
+    Vec dir() const { return p2 - p1; }
+};
+
+struct Circle {
+    Vec c;
+    T r;
+    Circle() = default;
+    Circle(const Vec& c, T r) : c(c), r(r) {}
+};
+
+using Polygon = std::vector<Vec>;
+
+T dot(const Vec& a, const Vec& b) {
+    return (std::conj(a) * b).real();
+}
+
+T cross(const Vec& a, const Vec& b) {
+    return (std::conj(a) * b).imag();
+}
+
+Vec rot(const Vec& a, T ang) {
+    return a * Vec(std::cos(ang), std::sin(ang));
+}
+
+Vec perp(const Vec& a) {
+    return Vec(-a.imag(), a.real());
+}
+
+Vec projection(const Line& l, const Vec& p) {
+    return l.p1 + dot(p - l.p1, l.dir()) * l.dir() / std::norm(l.dir());
+}
+
+Vec reflection(const Line& l, const Vec& p) {
+    return T(2) * projection(l, p) - p;
+}
+
+// 0: collinear
+// 1: counter-clockwise
+// 2: clockwise
+int ccw(const Vec& a, const Vec& b, const Vec& c) {
+    if (eq(cross(b - a, c - a), 0)) return 0;
+    if (lt(cross(b - a, c - a), 0)) return -1;
+    return 1;
+}
+
+void sort_by_arg(std::vector<Vec>& pts) {
+    std::sort(pts.begin(), pts.end(), [&](auto& p, auto& q) {
+        if ((p.imag() < 0) != (q.imag() < 0)) return (p.imag() < 0);
+        if (cross(p, q) == 0) {
+            if (p == Vec(0, 0)) return !(q.imag() < 0 || (q.imag() == 0 && q.real() > 0));
+            if (q == Vec(0, 0)) return  (p.imag() < 0 || (p.imag() == 0 && p.real() > 0));
+            return (p.real() > q.real());
+        }
+        return (cross(p, q) > 0);
+    });
+}
+
+T dist(const Line& l, const Vec& p) {
+    return std::abs(cross(p - l.p1, l.dir())) / std::abs(l.dir());
+}
+
+// 0: inside
+// 1: inscribe
+// 2: intersect
+// 3: circumscribe
+// 4: outside
+int intersect(const Circle& c1, const Circle& c2) {
+    T d = std::abs(c1.c - c2.c);
+    if (lt(d, std::abs(c2.r - c1.r))) return 0;
+    if (eq(d, std::abs(c2.r - c1.r))) return 1;
+    if (eq(c1.r + c2.r, d)) return 3;
+    if (lt(c1.r + c2.r, d)) return 4;
+    return 2;
+}
+
+Vec incenter(const Vec& A, const Vec& B, const Vec& C) {
+    assert(ccw(A, B, C) != 0);
+    T a = std::abs(B - C);
+    T b = std::abs(C - A);
+    T c = std::abs(A - B);
+    return (a*A + b*B + c*C) / (a + b + c);
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    while (true) {
+        Vec a, b, c;
+        cin >> a >> b >> c;
+        if (eq(abs(a)+abs(b)+abs(c), 0)) break;
+        Line ab(a, b), bc(b, c), ca(c, a);
+        auto i = incenter(a, b, c);
+
+        auto calc = [&](Vec& b, Vec& i, Line& bc, Circle& c1) {
+            double lb = 0, ub = 1;
+            rep(_,0,100) {
+                double m = (lb + ub) / 2;
+                auto x2 = b + (i - b) * m;
+                double r2 = dist(bc, x2);
+
+                Circle c2(x2, r2);
+
+                if (intersect(c2, c1) == 4) lb = m;  // outside
+                else ub = m;
+            }
+            auto x2 = b + (i - b) * ub;
+            double r2 = dist(bc, x2);
+            return Circle(x2, r2);
+        };
+
+        double lb = 0, ub = 1;
+        rep(_,0,100) {
+            double m = (lb + ub) / 2;
+            auto x1 = a + (i - a) * m;
+            double r1 = dist(ab, x1);
+            Circle c1(x1, r1);
+
+            auto c2 = calc(b, i, bc, c1);
+            auto c3 = calc(c, i, bc, c1);
+            if (intersect(c2, c3) == 4) ub = m;
+            else lb = m;
+        }
+
+        auto x1 = a + (i - a) * ub;
+        double r1 = dist(ab, x1);
+        Circle c1(x1, r1);
+
+        auto c2 = calc(b, i, bc, c1);
+        auto c3 = calc(c, i, bc, c1);
+
+        cout << c1.r << " " << c2.r << " " << c3.r << endl;
+    }
+}

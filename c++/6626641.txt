@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define endl '\n'
+typedef long long ll;
+#define int long long
+
+#pragma GCC diagnostic ignored "-Wunused-result"
+void setIO(string name = "") {
+    ios_base::sync_with_stdio(0); cin.tie(0);
+    cout << fixed << setprecision(15);
+    if (name.size()) {
+    	freopen((name+".in").c_str(), "r", stdin);
+        freopen((name+".out").c_str(), "w", stdout);
+    }
+}
+
+const int M = 2e5+5, MOD = 1e6+7;
+int dt[M], vis[M], t;
+vector<int> node[M];
+set<int> ans;
+int dfs(int s, int p) {
+    vis[s] = 1;
+    dt[s] = t++;
+
+    int mn = dt[s], cnt = 0;
+    for (int i:node[s]) {
+        if (!vis[i]) {
+            int x = dfs(i, s);
+            cnt++;
+
+            if (x >= dt[s] && s != 1) ans.insert(s);
+            mn = min(mn, x);
+        } else {
+            if (i != p) mn = min(mn, dt[i]);
+        }
+    }
+
+    if (s==1 && cnt > 1) ans.insert(s);
+    return mn;
+}
+
+signed main() {
+    ios_base::sync_with_stdio(0);cin.tie(0);cout.tie(0);
+    srand(time(0));
+    // setIO("citystate");
+
+    int n, m;
+    cin >> n >> m;
+
+    for (int i = 0; i < m; i++) {
+        int a, b;
+        cin >> a >> b;
+
+        node[a].push_back(b);
+        node[b].push_back(a);
+    }
+
+    dfs(1, 1);
+    for (int i:ans) cout << i << endl;
+
+    return 0;
+}

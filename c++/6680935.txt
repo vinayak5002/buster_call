@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+struct Edge {
+    int w = INT_MAX, to = -1;
+};
+
+int N, coords[100000][2];
+bool visited[100000];
+Edge minCost[100000];
+
+long solve() {
+    long totalCost = 0;
+
+    minCost[0].w = 0;
+    for (int i = 0; i < N; i++) {
+        int v = -1;
+        for (int j = 0; j < N; j++) {
+            if (!visited[j] && (v == -1 || minCost[j].w < minCost[v].w))
+                v = j;
+        }
+
+        visited[v] = true;
+        totalCost += minCost[v].w;
+
+        for (int to = 0; to < N; to++) {
+            int cost = max(abs(coords[v][0] - coords[to][0]), abs(coords[v][1] - coords[to][1]));
+            if (cost < minCost[to].w) {
+                minCost[to] = { cost, v };
+            }
+        }
+    }
+
+    return totalCost;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+
+    cin >> N;
+    for (int i = 0; i < N; i++)
+        cin >> coords[i][0] >> coords[i][1];
+    cout << solve() << endl;
+
+    return 0;
+}
+

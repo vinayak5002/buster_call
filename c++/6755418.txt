@@ -1,0 +1,353 @@
+#include <algorithm>
+#include <bitset>
+#include <cassert>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <iterator>
+#include <list>
+#include <map>
+#include <memory>
+#include <numeric>
+#include <optional>
+#include <queue>
+#include <random>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <string>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+using namespace __gnu_pbds;
+using namespace std;
+
+#pragma GCC optimize("O3")
+
+
+
+using str = string;
+using ll = long long;
+using ld = long double;
+using ull = unsigned long long;
+using ui = unsigned int;
+using puu = pair<ui, ui>;
+using P = pair<int, int>;
+using vi = vector<int>;
+using vll = vector<long long>;
+
+// rep-------------------------------------------------------------------
+#define overload4(_1, _2, _3, _4, name, ...) name
+#define overload3(_1, _2, _3, name, ...) name
+#define rep1(i, n) for (ll i = 0; i < n; ++i)
+#define rep2(i, a, b) for (ll i = a; i < b; ++i)
+#define rep3(i, a, b, c) for (ll i = a, _bb = b; (c > 0 && i < _bb) || (c < 0 && i > _bb); i += c)
+#define rep(...) overload4(__VA_ARGS__, rep3, rep2, rep1)(__VA_ARGS__)
+#define each1(i, a) for (auto &&i : a)
+#define each2(x, y, a) for (auto &&[x, y] : a)
+#define each3(x, y, z, a) for (auto &&[x, y, z] : a)
+#define each(...) overload4(__VA_ARGS__, each3, each2, each1)(__VA_ARGS__)
+// ----------------------------------------------------------------------
+
+// 入出力-----------------------------------------------------------------
+struct Ioinitializer {
+    Ioinitializer() noexcept {
+        cin.tie(nullptr);
+        ios::sync_with_stdio(false);
+        cout << setprecision(20) << setiosflags(ios::fixed);
+    }
+} Ioinitializer;
+
+struct input {
+    input(){};
+    operator int() {
+        int value;
+        cin >> value;
+        return value;
+    }
+    operator long long() {
+        long long value;
+        cin >> value;
+        return value;
+    }
+    operator unsigned long long() {
+        unsigned long long value;
+        cin >> value;
+        return value;
+    }
+    operator unsigned() {
+        unsigned value;
+        cin >> value;
+        return value;
+    }
+    operator float() {
+        float value;
+        cin >> value;
+        return value;
+    }
+    operator double() {
+        double value;
+        cin >> value;
+        return value;
+    }
+    operator long double() {
+        long double value;
+        cin >> value;
+        return value;
+    }
+    operator char() {
+        char value;
+        do {
+            value = getchar();
+        } while (value == ' ' || value == '\n');
+        return value;
+    }
+    operator string() {
+        string value;
+        cin >> value;
+        return value;
+    }
+};
+void scan(int &a) {
+    cin >> a;
+}
+void scan(unsigned &a) {
+    cin >> a;
+}
+void scan(long &a) {
+    cin >> a;
+}
+void scan(long long &a) {
+    cin >> a;
+}
+void scan(unsigned long long &a) {
+    cin >> a;
+}
+void scan(char &a) {
+    do {
+        a = getchar();
+    } while (a == ' ' || a == '\n');
+}
+void scan(float &a) {
+    cin >> a;
+}
+void scan(double &a) {
+    cin >> a;
+}
+void scan(long double &a) {
+    cin >> a;
+}
+void scan(vector<bool> &a) {
+    for (unsigned i = 0; i < a.size(); i++) {
+        int b;
+        scan(b);
+        a[i] = b;
+    }
+}
+void scan(char a[]) {
+    cin >> a;
+}
+void scan(string &a) {
+    cin >> a;
+}
+template <class T> void scan(vector<T> &);
+template <class T, size_t size> void scan(array<T, size> &);
+template <class T, class L> void scan(pair<T, L> &);
+template <class T, size_t size> void scan(T (&)[size]);
+template <class T> void scan(vector<T> &a) {
+    for (auto &&i : a)
+        scan(i);
+}
+template <class T> void scan(deque<T> &a) {
+    for (auto &&i : a)
+        scan(i);
+}
+template <class T, size_t size> void scan(array<T, size> &a) {
+    for (auto &&i : a)
+        scan(i);
+}
+template <class T, class L> void scan(pair<T, L> &p) {
+    scan(p.first);
+    scan(p.second);
+}
+template <class T, size_t size> void scan(T (&a)[size]) {
+    for (auto &&i : a)
+        scan(i);
+}
+template <class T> void scan(set<T> &a, int n) {
+    for (int i = 0; i < n; i++)
+        a.insert(input());
+}
+
+template <class T> void scan(T &a) {
+    cin >> a;
+}
+template <class A, class B> ostream &operator<<(ostream &ost, const pair<A, B> &p) {
+    ost << "{" << p.first << ", " << p.second << "}";
+    return ost;
+}
+template <class T> ostream &operator<<(ostream &ost, const vector<T> &v) {
+    ost << "[";
+    for (int i = 0; i < v.size(); i++) {
+        if (i)
+            ost << ", ";
+        ost << v[i];
+    }
+    ost << "]";
+    return ost;
+}
+template <class A, class B> ostream &operator<<(ostream &ost, const map<A, B> &v) {
+    bool k = false;
+    ost << "{";
+    for (auto p : v) {
+        if (k) {
+            ost << ", ";
+        }
+        ost << "(" << p.first << ", " << p.second << ")";
+        k = true;
+    }
+    ost << "}";
+    return ost;
+}
+template <class T> ostream &operator<<(ostream &ost, const set<T> &v) {
+    bool k = false;
+    ost << "{";
+    for (auto p : v) {
+        if (k) {
+            ost << ", ";
+            k = true;
+        }
+        ost << p;
+        k = true;
+    }
+    ost << "}";
+    return ost;
+}
+template <class T> ostream &operator<<(ostream &ost, const multiset<T> &v) {
+    bool k = false;
+    ost << "[";
+    for (auto p : v) {
+        if (k) {
+            ost << ", ";
+            k = true;
+        }
+        ost << p;
+        k = true;
+    }
+    ost << "]";
+    return ost;
+}
+template <class T> inline void print(const T &a) {
+    cout << a << "\n";
+}
+template <class T, class... Ts> inline void print(const T &a, const Ts &...ts) {
+    cout << a << " ";
+    print(ts...);
+}
+template <class T> inline void print_vec(const vector<T> &a, bool debug = false) {
+    for (unsigned i = 0; i < a.size(); ++i) {
+        if (debug)
+            cout << "[";
+        if (i) {
+            if (debug)
+                cout << ", ";
+            else
+                cout << " ";
+        }
+        cout << a[i];
+    }
+    if (debug)
+        cout << "]\n";
+    else
+        cout << "\n";
+}
+template <class T> inline void print_vec(const vector<vector<T>> &a, bool debug = false) {
+    int n = a.size();
+    if (n == 0) {
+        if (debug)
+            print("[[]]");
+        else
+            print("");
+        return;
+    }
+    for (int i = 0; i < n; ++i) {
+        if (debug)
+            cout << "[";
+        for (unsigned j = 0; j < a[i].size(); ++j) {
+            if (j) {
+                if (debug)
+                    cout << ", ";
+                else
+                    cout << " ";
+            }
+            cout << a[i][j];
+        }
+        if (debug)
+            cout << "]\n";
+        else
+            cout << "\n";
+    }
+}
+// -----------------------------------------------------------------------
+
+int solve(string &form, int &k);
+
+int neg(string &form, int &k) {
+    if (form[k] == '(') {
+        return 2 - solve(form, ++k);
+    }
+    if (form[k] == '-') {
+        return 2 - neg(form, ++k);
+    } else {
+        return 2 - (form[k++] - '0');
+    }
+}
+
+int solve(string &form, int &k) {
+    int x;
+    for (; k < (int)form.size();) {
+        if (form[k] == '(') {
+            x = solve(form, ++k);
+        } else if (form[k] == '-') {
+            x = neg(form, ++k);
+        } else if (form[k] == '*') {
+            return min(x, solve(form, ++k));
+        } else if (form[k] == '+') {
+            return max(x, solve(form, ++k));
+        } else if (form[k] == ')') {
+            k++;
+            return x;
+        } else {
+            x = form[k] - '0';
+            k++;
+        }
+    }
+    return x;
+}
+
+int main() {
+    while (true) {
+        string s = input();
+        if (s == ".")
+            break;
+        int ans = 0;
+        rep(i, 3) rep(j, 3) rep(k, 3) {
+            string form = s;
+            for (char &c : form) {
+                if (c == 'P')
+                    c = '0' + i;
+                if (c == 'Q')
+                    c = '0' + j;
+                if (c == 'R')
+                    c = '0' + k;
+            }
+            int x = 0;
+            // print(form);
+            // print(solve(form, x));
+            ans += solve(form, x) == 2;
+        }
+        print(ans);
+    }
+}
+

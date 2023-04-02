@@ -1,0 +1,95 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <tuple>
+#include <map>
+#include <set>
+#include <cmath>
+#include <bitset>
+#include <queue>
+
+using namespace std;
+
+const long long INF = 1LL << 60;
+const int INT_INF = 2e9;
+
+
+template<class T> inline bool chmin(T& a, T b) {
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+template<class T> inline bool chmax(T& a, T b) {
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+
+int main(){
+    int w, h;
+    vector<int> ans_vc;
+
+    while(1){
+        cin >> w >> h;
+        if(w==0 && h==0) break;
+
+        vector<vector<int>> maze(2*h-1, vector<int>(2*w-1, 2));
+        for(int ii1=0; ii1<2*h-1; ii1++){
+            for(int ii2=0; ii2<2*w-1; ii2++){
+                if(ii1%2==0){
+                    if(ii2%2==1){
+                        cin >> maze[ii1][ii2];
+                    }
+                }else{
+                    if(ii2%2==0){
+                        cin >> maze[ii1][ii2];
+                    }
+                }
+            }
+        }
+
+        vector<vector<int>> dist(2*h-1, vector<int>(2*w-1, -1));
+        vector<pair<int, int>> queue;
+
+        queue.push_back(make_pair(0, 0));
+        dist[0][0] = 0;
+
+        int dy[4] = {0, -2, 0, 2};
+        int dx[4] = {2, 0, -2, 0};
+
+        int w_dy[4] = {0, 1, 0, -1};
+        int w_dx[4] = {-1, 0, 1, 0};
+
+        while(!queue.empty()){
+            pair<int, int> p = queue.front();
+            queue.erase(queue.begin());
+
+            for(int ii1=0; ii1<4; ii1++){
+                int ny = p.first + dy[ii1];
+                int nx = p.second + dx[ii1];
+
+                if(ny < 0 || ny >= 2*h-1 || nx < 0 || nx >= 2*w-1) continue;
+                if(maze[ny+w_dy[ii1]][nx+w_dx[ii1]] == 1) continue;
+                if(dist[ny][nx] != -1) continue;
+                if(maze[ny][nx] != 2) continue;
+
+                dist[ny][nx] = dist[p.first][p.second]+1;
+                queue.push_back(make_pair(ny, nx));
+            }
+        }
+
+        ans_vc.push_back(dist[2*h-2][2*w-2]+1);
+    }
+
+    for(int ii1=0; ii1<ans_vc.size(); ii1++){
+        cout << ans_vc[ii1] << endl;
+    }
+
+    return 0;
+}

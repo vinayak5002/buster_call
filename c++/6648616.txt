@@ -1,0 +1,76 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+const int H = 1402, W = 1402;
+int a[H][W], b[H][W];
+int h, w;
+struct Rec {
+  int pos;
+  int height;
+  Rec() { pos = height = 0; }
+  Rec(int a, int b) : pos(a), height(b) {}
+};
+int cal(int n) {
+  stack<Rec> s;
+  int ans = 0;
+  for (int i = 1; i <= w; i++) {
+    Rec r;
+    r.height = b[n][i];
+    r.pos = i;
+
+    if (s.empty()) {
+      if (r.height)
+        s.push(r);
+      else
+        continue;
+    } else if (s.top().height < r.height) {
+      s.push(r);
+    } else if (s.top().height == r.height) {
+      continue;
+    } else if (s.top().height > r.height) {
+      while (!s.empty() && s.top().height >= r.height) {
+        ans = max(ans, (r.pos - s.top().pos) * s.top().height);
+        s.pop();
+      }
+      if (r.pos <= w && r.height)
+        s.push(r);
+    }
+  }
+  return ans;
+}
+void getLargest() {
+  for (int j = 1; j <= w; j++) {
+    for (int i = 1; i <= h; i++) {
+      if (a[i][j]) {
+        b[i][j] = 0;
+      } else {
+        b[i][j] = b[i - 1][j] + 1;
+      }
+    }
+  }
+  for (int i = 0; i <= h; i++) {
+    b[i][w + 1] = 0;
+  }
+
+  int maxv = 0;
+  for (int i = 1; i <= h; i++) {
+    maxv = max(maxv, cal(i));
+  }
+  printf("%d\n", maxv);
+}
+int main() {
+  ios::sync_with_stdio(0);
+  cin.tie(0);
+  cin >> h >> w;
+
+  for (int i = 0; i <= h; i++) {
+    for (int j = 0; j <= w; j++)
+      a[i][j] = 0;
+  }
+  for (int i = 1; i <= h; i++) {
+    for (int j = 1; j <= w; j++)
+      cin >> a[i][j];
+  }
+  getLargest();
+  return 0;
+}

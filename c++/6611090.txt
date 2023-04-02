@@ -1,0 +1,42 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <numeric>
+using namespace std;
+using ll = long long;
+using Graph = vector<vector<pair<ll, ll>>>;
+int main() {
+	ll n; cin >> n;
+	Graph g(n);
+	for (ll i = 0; i < n; i++) {
+		for (ll j = 0; j < n; j++) {
+			ll x; cin >> x;
+			if (x != -1) g[i].emplace_back(x, j);
+		}
+	}
+	ll INF = (1LL<<53);
+	using P = pair<ll, ll>;
+	vector<ll> cost(n, INF);
+	vector<ll> used(n, 0);
+	vector<ll> prev(n, -1);
+	priority_queue<P, vector<P>, greater<P>> pq;
+	
+	ll start = 0;
+	cost[start] = 0;
+	pq.emplace(cost[start], start);
+	
+	while (!pq.empty()) {
+		auto [d, v] = pq.top(); pq.pop();
+		if (cost[v] < d || used[v]) continue;
+		used[v] = true;
+		for (auto [c, nv] : g[v]) {
+			if (cost[nv] <= c || used[nv]) continue;
+			cost[nv] = c;
+			prev[nv] = v;
+			pq.emplace(cost[nv], nv);
+		}
+	}
+	
+	cout << accumulate(cost.begin(), cost.end(), 0LL) << endl;
+}
+

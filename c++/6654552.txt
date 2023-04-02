@@ -1,0 +1,70 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct{
+    int value;
+    int weight;
+    double value_par_weight;
+}item;
+
+void swap(item *a,item *b){
+    item temp;
+    
+    temp=*a;
+    *a=*b;
+    *b=temp;
+}
+
+void quicksort(int first,int last,item *A){
+    int i,j;
+    double pivot;
+    
+    if(first<last){
+        pivot=A[(first+last)/2].value_par_weight;
+        i=first;
+        j=last;
+        while(i<=j){
+            while(A[i].value_par_weight<pivot)
+            	i++;
+            while(A[j].value_par_weight>pivot)
+            	j--;
+            if(i<=j)
+            	swap(&A[i++],&A[j--]);
+        }
+        quicksort(first,j,A);
+        quicksort(i,last,A);
+    }
+}
+
+int main(void){
+    int number,max_weight;
+    int i;
+    double v,w,result=0;
+    
+    scanf("%d%d",&number,&max_weight);
+    
+    item *A=malloc(sizeof(item)*number);
+    
+    for(i=0;i<number;i++){
+        scanf("%lf%lf",&v,&w);
+        A[i].value=v;
+        A[i].weight=w;
+        A[i].value_par_weight=v/w;
+    }
+    quicksort(0,number-1,A);
+    for(i=number-1;0<=i;i--){
+        
+        if(A[i].weight<max_weight){
+            result=result+ (A[i].weight*A[i].value_par_weight);
+            max_weight=max_weight-A[i].weight;
+        }
+        else{
+            result=result+(A[i].value_par_weight*max_weight);
+            break;
+        }
+    }
+    printf("%lf\n",result);
+    
+    return 0;
+}
+

@@ -1,0 +1,116 @@
+// https://qiita.com/DaikiSuyama/items/9dba963ba74396b9b7fd
+// https://luling.hatenablog.com/entry/2018/12/01/212805
+// https://zenn.dev/antyuntyun/articles/atcoder-cpp-template
+//
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+
+// rep macro
+#define reps(i, a, n) for (ll i = (a); i < (ll)(n); ++i)
+#define rreps(i, a, n) for (ll i = (a); i > (ll)(n); --i)
+#define rep(i, n) reps(i, 0, n)
+#define rrep(i, n) reps(i, 1, n + 1)
+#define repd(i,n) for(ll i=n-1;i>=0;i--)
+#define rrepd(i,n) for(ll i=n;i>=1;i--)
+
+#define optimize_cin() cin.tie(0); ios::sync_with_stdio(false)
+
+#define pb push_back
+#define mp make_pair
+#define all(obj) (obj).begin(), (obj).end()
+#define YESNO(bool) if(bool){cout<<"YES"<<endl;}else{cout<<"NO"<<endl;}
+#define yesno(bool) if(bool){cout<<"yes"<<endl;}else{cout<<"no"<<endl;}
+#define YesNo(bool) if(bool){cout<<"Yes"<<endl;}else{cout<<"No"<<endl;}
+
+//定数
+#define INF32 2147483647           // 2.147483647 x 10^{9}:32bit整数のinf
+#define INF64 9223372036854775807  // 9.22337203685477580 x 10^{18}:64bit整数のinf
+#define MOD 1000000007             //問題による
+#define PI 3.14159265359           // 円周率
+
+//略記
+#define F first
+#define S second
+
+//出力(空白区切りで昇順に)
+#define dump(x)                                                 \
+  for (auto i = x.begin(); i != --x.end(); i++) cout << *i << " "; \
+  cout << *--x.end() << endl;
+#define echo(x) cout << (x) << endl;
+
+// aをbで割る時の繰上げ,繰り下げ
+ll _ceil(ll a, ll b) { return (a + (b - 1)) / b; }
+ll _floor(ll a, ll b) { return a / b; }
+
+// 大きい方、小さい方を残す
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return 1; } return 0; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return 1; } return 0; }
+
+int partition(vector<pair<string, int>> &as, int p, int r) {
+  auto x = as[r];
+  int i = p - 1;
+  reps(j, p, r) {
+    if (as[j].second <= x.second) {
+      i++;
+      swap(as[i], as[j]);
+    }
+  }
+  swap(as[i + 1], as[r]);
+  return i + 1;  // pivot index
+}
+
+void quickSort(vector<pair<string, int>> &as, int p, int r) {
+  if (p < r) {
+    int q = partition(as, p, r);
+    quickSort(as, p, q-1);
+    quickSort(as, q+1, r);
+  }
+}
+
+bool checkStable(vector<pair<string, int>> &sorted, vector<pair<string, int>> &original) {
+  map<int, vector<string>> hash1; // ソート済み用
+  map<int, vector<string>> hash2; // オリジナル用
+  rep(i, sorted.size()) {
+    auto elem1 = sorted[i];
+    hash1[elem1.S].push_back(elem1.F);
+    auto elem2 = original[i];
+    hash2[elem2.S].push_back(elem2.F);
+  }
+  bool isStable = true;
+  auto iter = hash1.begin();
+  while (iter != hash1.end()) {
+    int key = iter->first;
+    vector<string> value1 = iter->second;
+    vector<string> value2 = hash2[key];
+    rep(i, value1.size()) {
+      if (value1[i] != value2[i]) {
+        isStable = false;
+        break;
+      }
+    }
+    if (!isStable) {
+      break;
+    }
+    ++iter;
+  }
+  return isStable;
+}
+
+signed main() {
+  int n;
+  cin >> n;
+  vector<pair<string, int>> xs(n);
+  rep(i, n) {
+    string card; int value;
+    cin >> card; cin >> value;
+    xs[i] = mp(card, value);
+  }
+  //
+  vector<pair<string, int>> original(all(xs));
+  quickSort(xs, 0, xs.size() - 1);
+  bool isStable = checkStable(xs, original);
+  echo(isStable ? "Stable" : "Not stable");
+  rep(i, n) cout << xs[i].first << " " << xs[i].second << endl;
+}
+

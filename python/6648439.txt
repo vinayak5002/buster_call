@@ -1,0 +1,75 @@
+package main
+
+import (
+	"bufio"
+	"container/list"
+	"fmt"
+	"os"
+	"strconv"
+)
+
+func main() {
+	sc := bufio.NewScanner(os.Stdin)
+	sc.Split(bufio.ScanWords)
+
+	sc.Scan()
+	n, _ := strconv.Atoi(sc.Text())
+
+	v := make([][]int, n)
+	for i := 0; i < n; i++ {
+		sc.Scan()
+		u, _ := strconv.Atoi(sc.Text())
+
+		sc.Scan()
+		k, _ := strconv.Atoi(sc.Text())
+
+		var vi []int
+		for i := 0; i < k; i++ {
+			sc.Scan()
+			t, _ := strconv.Atoi(sc.Text())
+
+			vi = append(vi, t)
+		}
+		v[u-1] = vi
+	}
+
+	visited := make([]bool, n)
+	d := make([]int, n)
+
+	bfs(v, 1, visited, d)
+
+	for i := 0; i < n; i++ {
+		fmt.Printf("%d %d\n", i+1, d[i])
+	}
+}
+
+func bfs(v [][]int, s int, visited []bool, d []int) {
+
+	if visited[s-1] {
+		return
+	}
+	visited[s-1] = true
+
+	if len(v[s-1]) == 0 {
+		return
+	}
+
+	que := list.New()
+	que.PushBack(s)
+
+	for que.Len() != 0 {
+		qv := que.Front().Value.(int)
+
+		for _, value := range v[qv-1] {
+			if visited[value-1] {
+				continue
+			}
+			visited[value-1] = true
+			que.PushBack(value)
+
+			d[value-1] = d[qv-1] + 1
+		}
+		que.Remove(que.Front())
+	}
+}
+

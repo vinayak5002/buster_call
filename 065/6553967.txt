@@ -1,0 +1,64 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int dy[4] = {0, 1, 0, -1};
+int dx[4] = {1, 0, -1, 0};
+
+int n = 12;
+int solve(vector<vector<int>> s){
+  int ans = 0;
+  
+  queue<int> que;
+  vector<vector<int>> seen(n, vector<int>(n));
+  
+  for(int i = 0; i < 12; i++){
+    for(int j = 0; j < 12; j++){
+      if(s[i][j] == 0) continue;
+      if(seen[i][j] == 1) continue;
+      
+      ans++;
+      seen[i][j] = 1;
+      que.push(i * n + j);
+      while(!que.empty()){
+        int cur = que.front();
+        que.pop();
+        int y = cur/n;
+        int x = cur%n;
+        for(int k = 0; k < 4; k++){
+          int ny = y + dy[k];
+          int nx = x + dx[k];
+          if(ny < 0 || n <= ny || nx < 0 || n <= nx) continue;
+          if(s[ny][nx] == 0) continue;
+          if(seen[ny][nx] == 1) continue;
+          que.push(ny * n + nx);
+          seen[ny][nx] = 1;
+        }
+      }
+    }
+  }
+  
+  return ans;
+}
+
+int main(){
+  string str;
+  int cnt = 0;
+  vector<string> vec;
+  while(cin >> str){
+    vec.emplace_back(str);
+  }
+  int sizeV = vec.size();
+  
+  for(int i = 0; i < sizeV/n; i++){
+    vector<vector<int>> s(n, vector<int>(n));
+    for(int j = 0; j < n; j++){
+      for(int k = 0; k < n; k++){
+        s[j][k] = vec[i * n + j][k] - '0';
+      }
+    }
+    cout << solve(s) << endl;
+  }
+  
+  
+  return 0;
+}

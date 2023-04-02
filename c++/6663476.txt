@@ -1,0 +1,72 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+typedef long long int ll;
+
+struct BIT{
+    int n; // the number of nodes(the length of num sequence)
+    vector<long long int> table; // to use vector as if 1-indexed. also convenient in calculating sum of [a_i ... a_j](i<=j)
+    BIT(int n_){
+        n = n_;
+        table.assign(n+1,0);
+    }
+
+    void add(int i,long long int x)
+    {
+        while(i<=n){
+        table[i]+=x;
+        i+=(i&-i); //  LSB
+        }
+    }
+
+    long long int sum(int i)
+    {
+        long long int s = 0;
+        while(i>0){
+            s+=table[i];
+            i-=(i&-i);
+        }
+        return s;
+    }
+};
+
+// 区間加算対応BIT
+struct exBIT{
+    int n;
+    BIT T0,T1;
+    exBIT(int n_): n(n_),T0(n_),T1(n_){}
+
+    void range_add(int l,int r, ll x) // add x to a[l],...,a[r].
+    {
+      T0.add(l,-x*(l-1));
+      T1.add(l,x);
+      T0.add(r+1,x*r);
+      T1.add(r+1,-x); 
+    }
+
+    ll sum(int i)
+    {
+     return T0.sum(i) + i*T1.sum(i);
+    }
+};
+
+
+int main()
+{
+ int n,q; cin >> n >> q;
+ exBIT T(n);
+ for(int i=0;i<q;i++){
+     int com;cin >> com;
+     if(com==0){
+         int l,r;
+         long long int x;
+         cin >> l >> r >> x;
+         T.range_add(l,r,x);
+     }
+     else{
+         int l,r; cin >> l >> r;
+         cout << T.sum(r)-T.sum(l-1) << endl;
+     }
+ }
+ return 0;
+}

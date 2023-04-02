@@ -1,0 +1,88 @@
+#include<cstdio>
+#include<algorithm>
+#include<cstring>
+using namespace std;
+
+const int maxn=2000+50;
+
+int w,h,n,x1[maxn],x2[maxn],y1[maxn],y2[maxn];
+
+int sx[maxn],nx;
+int sy[maxn],ny;
+
+int vis[maxn][maxn],vnx,vny;
+
+
+void process_vis()
+{
+    for(int i=0;i<n;i++)
+    {
+        int ix1=lower_bound(sx,sx+nx,x1[i])-sx;
+        int ix2=lower_bound(sx,sx+nx,x2[i])-sx;
+        int iy1=lower_bound(sy,sy+ny,y1[i])-sy;
+        int iy2=lower_bound(sy,sy+ny,y2[i])-sy;
+
+        for(int j=ix1;j<ix2;j++)
+            for(int k=iy1;k<iy2;k++)
+            vis[j][k]=1;
+    }
+}
+
+int dx[]={0,0,-1,1};
+int dy[]={1,-1,0,0};
+void dfs(int x,int y)
+{
+    vis[x][y]=1;
+    for(int i=0;i<4;i++)
+    {
+        int newx=x+dx[i];
+        int newy=y+dy[i];
+
+        if(newx>=0&&newx<vnx&&newy>=0&&newy<vny&&!vis[newx][newy])
+            dfs(newx,newy);
+    }
+}
+
+void solve()
+{
+    memset(vis,0,sizeof(vis));
+
+    scanf("%d",&n);
+
+    for(int i=0;i<n;i++)
+    {
+        scanf("%d%d%d%d",&x1[i],&y1[i],&x2[i],&y2[i]);
+        sx[2*i]=x1[i];sx[2*i+1]=x2[i];
+        sy[2*i]=y1[i];sy[2*i+1]=y2[i];
+    }
+    sx[2*n]=0;sx[2*n+1]=w;
+    sy[2*n]=0;sy[2*n+1]=h;
+
+    sort(sx,sx+2*n+2);
+    sort(sy,sy+2*n+2);
+
+    nx=unique(sx,sx+2*n+2)-sx;
+    ny=unique(sy,sy+2*n+2)-sy;
+
+    vnx=nx-1;vny=ny-1;
+
+    process_vis();
+
+    int ans=0;
+    for(int x=0;x<vnx;x++)
+        for(int y=0;y<vny;y++)
+            if(!vis[x][y])
+            {
+                dfs(x,y);
+                ans++;
+            }
+
+    printf("%d\n",ans);
+}
+
+int main()
+{
+    while(scanf("%d%d",&w,&h)&&w)
+        solve();
+}
+

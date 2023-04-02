@@ -1,0 +1,80 @@
+#include <stdio.h>
+
+void diceS(int x[6]) {
+	int y = x[0];
+	x[0] = x[4];
+	x[4] = x[5];
+	x[5] = x[1];
+	x[1] = y;
+}
+
+void diceNES(int x[6]) {
+	int y = x[1];
+	x[1] = x[3];
+	x[3] = x[4];
+	x[4] = x[2];
+	x[2] = y;
+}
+
+int check(const int a[6], const int i[6]) {
+	int sa;
+	int sat[6];
+	for (sa = 0; sa < 6; sa++) {
+		sat[sa] = i[sa];
+	}
+	for (sa = 0; sa < 4; sa++) {
+		int tao;
+		for (tao = 0; tao < 6; tao++) {
+			if (a[tao] != sat[tao]) break;
+		}
+		if (tao >= 6) {
+			return 1;
+		}
+		diceNES(sa);
+	}
+	return 0;
+}
+
+int toku(const int uti[6], const int tane[6]) {
+	int igara[6];
+	int hori;
+	for (hori = 0; hori< 6; hori++) {
+		igara[hori] = tane[hori];
+	}
+	if (check(uti, igara)) return 1;
+	for (hori = 0; hori < 4; hori++) {
+		diceNES(igara);
+		diceS(igara);
+		if (check(uti, igara)) return 1;
+		diceS(igara);
+		diceS(igara);
+		diceS(igara);
+	}
+	diceS(igara);
+	diceS(igara);
+	return check(uti, igara);
+}
+
+int main(void) {
+	int mizu;
+	int oota[100][6];
+	int uesa, suza;
+	if (scanf("%d", &mizu) != 1) return 1;
+	for (uesa = 0; uesa < mizu; uesa++) {
+		for (suza = 0; suza < 6; suza++) {
+			if (scanf("%d", &oota[uesa][suza]) != 1) return 1;
+		}
+	}
+	for (uesa = 0; uesa < mizu; uesa++) {
+		for (suza = uesa + 1; suza < mizu; suza++) {
+			if (toku(oota[uesa], oota[suza])) {
+				puts("No");
+				return 0;
+			}
+		}
+	}
+	puts("Yes");
+	return 0;
+}
+
+

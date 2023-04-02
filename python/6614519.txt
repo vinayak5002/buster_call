@@ -1,0 +1,149 @@
+class node():
+    def __init__(self, id, childidlist):
+        self.id = id
+        self.childidlist = childidlist
+        self.depth = -1
+
+    def set_parent(self, p):
+        self.parent = p
+    
+    def set_depth(self, d):
+        self.depth = d
+
+
+class ordered_tree():
+    def __init__(self):
+        self.nodelist = []
+
+    def sort_by_ID(self):
+        self.nodelist = sorted(self.nodelist, key=lambda x: x.id)
+
+    def add_node(self, node):
+        self.nodelist.append(node)
+
+    def search_parent(self, node):
+        is_root = True
+        for p_cand in self.nodelist:
+            if node.id in p_cand.childidlist:
+                node.set_parent(p_cand)
+                is_root = False
+                break
+        
+        if is_root:
+            node.set_parent(node)
+
+    def search_all_parent(self):
+        for n in self.nodelist:
+            self.search_parent(n)
+
+
+    def search_all_parent_by_IDtoNode(self, IDtoNode, node):
+            cur_node = node
+            if node == self.root:
+                node.set_parent(node)
+
+            if cur_node.childidlist == []:
+                pass
+            else:
+                for cid in cur_node.childidlist:
+                    IDtoNode[cid].parent = cur_node
+                    self.search_all_parent_by_IDtoNode(IDtoNode, IDtoNode[cid])
+
+
+    def is_root(self, node):
+        if node.parent == node:
+            self.root = node
+            return True
+        else:
+            return False
+ 
+    def is_leaf(self, node):
+        if node.childidlist == []:
+            return True
+        else:
+            return False
+
+    """def calc_depth(self, node):
+        dpth_cnt = 0
+        cur_node = node
+        while not self.is_root(cur_node):
+            dpth_cnt += 1
+            cur_node = cur_node.parent
+        return dpth_cnt"""
+        
+    def calc_depth(self, node):
+        if node.depth >= 0:
+            return node.depth
+
+        dpth_cnt = 0
+        cur_node = node
+        Anc_list = [node]
+        while not self.is_root(cur_node):
+            dpth_cnt += 1
+            cur_node = cur_node.parent
+            Anc_list.append(cur_node)
+ 
+        for a in Anc_list:
+            a.set_depth(dpth_cnt)
+            dpth_cnt -= 1        
+        
+        return node.depth
+
+
+
+#input
+OT = ordered_tree()
+
+n = int(input())
+
+IDtoNode=[""]*100000
+IDset = set()
+Childrenset = set()
+
+for i in range(n):
+    A = list(map(int, input().split()))
+    ID = A[0]
+    num_ch = A[1]
+    chid_list = []
+    for j in range(num_ch):
+        chid_list.append(A[j+2])
+
+    new_node = node(ID, chid_list)
+    OT.add_node(new_node)
+    
+    IDtoNode[new_node.id] = new_node
+
+    IDset.add(ID)
+    for cid in chid_list:
+        Childrenset.add(cid)
+
+
+
+#set_parent_data
+#OT.search_all_parent()
+Rootset = IDset - Childrenset
+RootID = Rootset.pop()
+OT.root = IDtoNode[RootID]
+OT.search_all_parent_by_IDtoNode(IDtoNode, OT.root)
+
+#sort
+OT.sort_by_ID()
+
+#print
+for node in OT.nodelist:
+    ID = node.id
+    parent = node.parent.id if node.parent.id != node.id else -1
+    depth = OT.calc_depth(node)
+    type = "internal node"
+    if OT.is_root(node):
+        type = "root"
+    elif OT.is_leaf(node):
+        type = "leaf"
+    chid_list = "["
+    for c in node.childidlist:
+        chid_list += str(c) + ", "
+    chid_list = chid_list[:-2] + "]" if len(chid_list) > 1 else chid_list + "]"
+
+    sentence = "node "+str(ID)+": parent = "+str(parent)+", depth = "+str(depth)+", "+type+", "+chid_list
+    print(sentence)
+

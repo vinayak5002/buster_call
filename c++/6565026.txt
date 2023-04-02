@@ -1,0 +1,61 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <cmath>
+#include <map>
+#include <set>
+#include <deque>
+#include <queue>
+#define TEST cout << "TEST" << endl
+#define IINF 2147483647
+#define LLINF 9223372036854775807
+#define AMARI 1000000007
+using namespace std;
+
+//gはg[a] = {b,c}aからb,cに対して矢印が向いているを意味する配列
+//この関数において、順序が自由である部分は辞書順に入るようになっている
+//(priority_queの基準を変えればこれは変えることができる)
+//gがトポロジカルソート不可能であった場合、サイズ1の-1が要素の配列{-1}を返す
+vector<int> ococo_topological_sort(vector<vector<int>> g) {
+    int n = g.size();
+    vector<int> nyuuzisuu(n, 0);
+    vector<int> ans(0);
+    for (int i = 0; i < n; i++)for (int j = 0; j < g[i].size(); j++)nyuuzisuu[g[i][j]]++;
+    //que:矢印が自分に来ていない（⇔nyuuzisuu[i]==0である）ノードを辞書順に入れる
+    priority_queue<int, vector<int>,greater<int>> que;
+    for (int i = 0; i < n; i++)if (nyuuzisuu[i] == 0)que.push(i);
+    
+    while (!que.empty()) {
+        int kari = que.top();
+        que.pop();
+        ans.push_back(kari);
+        for (int i = 0; i < g[kari].size(); i++) {
+            nyuuzisuu[g[kari][i]]--;
+            if (nyuuzisuu[g[kari][i]] == 0)que.push(g[kari][i]);
+        }
+    }
+    for (int i = 0; i < n; i++)if (nyuuzisuu[i] != 0) {
+        return { -1 };
+    }
+    return ans;
+}
+
+int main(void) {
+    int n, m,a,b;
+    cin >> n >> m;
+    vector<vector<int>> g(n, vector<int>(0));
+
+    while (m--) {
+        cin >> a >> b;
+        g[a].push_back(b);
+    }
+    vector<int> ans;
+    ans = ococo_topological_sort(g);
+    if (ans.size() == 1 && ans[0] == -1)cout << -1 << endl;
+    else{
+        for (int i = 0; i < n; i++)cout << ans[i] << endl;
+    }
+
+    return 0;
+}

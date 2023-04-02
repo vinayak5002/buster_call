@@ -1,0 +1,163 @@
+#include<stdio.h>
+
+unsigned long long beki(int num1,int num2);
+int main(void){
+	int i,j,n,c,q,count;
+	int k[10];
+	int mask[10][64]={0};
+	int flag[64]={0};
+	unsigned long long result;
+	
+	scanf("%d",&n);
+	for(i=0;i<n;i++){
+		scanf("%d",&k[i]);
+		for(j=0;j<k[i];j++){
+			scanf("%d",&c);
+			mask[i][c]=1;
+		}
+	}
+	scanf("%d",&q);
+	int query[q];
+	int m[q];
+	for(i=0;i<q;i++){
+		scanf("%d",&query[i]);
+		scanf("%d",&m[i]);
+	}
+	for(i=0;i<q;i++){
+		switch(query[i]){
+			case 0:
+				if(flag[m[i]]>0){
+					printf("1\n");
+				}
+				else{
+					printf("0\n");
+				}
+				break;
+			case 1:
+				for(j=0;j<64;j++){
+					if(mask[m[i]][j]>0){
+						flag[j]=1;
+					}
+				}
+				break;
+			case 2:
+				for(j=0;j<64;j++){
+					if(mask[m[i]][j]>0){
+						flag[j]=0;
+					}
+				}
+				break;
+			case 3:
+				for(j=0;j<64;j++){
+					if(mask[m[i]][j]>0){
+						if(flag[j]>0){
+							flag[j]=0;
+						}
+						else{
+							flag[j]=1;
+						}
+					}
+				}
+				break;
+			case 4:
+				count=0;
+				for(j=0;j<64;j++){
+					if(mask[m[i]][j]>0){
+						if(flag[j]>0){
+							count++;
+						}
+						else{
+							break;
+						}
+					}
+				}
+				if(count==k[m[i]]){
+					printf("1\n");
+				}
+				else{
+					printf("0\n");
+				}
+				break;
+			case 5:
+				count=0;
+				for(j=0;j<64;j++){
+					if(mask[m[i]][j]>0){
+						if(flag[j]>0){
+							count++;
+							break;
+						}
+					}
+				}
+				if(count>0){
+					printf("1\n");
+				}
+				else{
+					printf("0\n");
+				}
+				break;
+			case 6:
+				count=0;
+				for(j=0;j<64;j++){
+					if(mask[m[i]][j]>0){
+						if(flag[j]==0){
+							count++;
+						}
+						else{
+							break;
+						}
+					}
+				}
+				if(count==k[m[i]]){
+					printf("1\n");
+				}
+				else{
+					printf("0\n");
+				}
+				break;
+			case 7:
+				count=0;
+				for(j=0;j<64;j++){
+					if(mask[m[i]][j]>0){
+						if(flag[j]>0){
+							count++;
+						}
+					}
+				}
+				printf("%d\n",count);
+				break;
+			case 8:
+				result=0;
+				for(j=0;j<64;j++){
+					result+=beki(2,j)*mask[m[i]][j];
+				}
+				printf("%llu\n",result);
+				break;
+			default:
+				return 0;
+		}
+		printf("\n");
+	}
+	
+	return 0;
+}
+
+unsigned long long beki(int num1,int num2){
+	unsigned long long num3;
+	int i;
+	num3=2;
+	
+	if(num2==0){
+		num3=1;
+	}
+	else if(num2==1){
+		num3=2;
+	}
+	else{
+		for(i=0;i<num2-1;i++){
+			num3=num1*num3;
+		}
+	}
+	
+	return num3;
+}
+

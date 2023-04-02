@@ -1,0 +1,59 @@
+#include <stdio.h>
+#include <string.h>
+
+int head, tail, n;
+
+typedef struct{
+	char name[100];
+	int t;
+} p;
+
+p Q[200000];
+
+void enqueue(p x){
+	Q[tail] = x;
+	tail++;
+}
+
+p dequeue(){
+	p x = Q[head];
+	head++;
+	return x;
+}
+
+int main(void){
+	int i, q, c;
+	int sum = 0;
+	p u;
+	
+	scanf("%d %d", &n, &q);
+	
+	for(i = 1; i <= n; i++){
+		scanf("%s", Q[i].name);
+		scanf("%d", &Q[i].t);
+	}
+	
+	head = 1; 
+	tail = n + 1;
+	
+	while(head != tail){
+		u = dequeue();
+		if(q <= u.t){
+			c = q;
+		}else{
+			c = u.t;	
+		}
+		
+		u.t -= c;
+		sum += c;
+		
+		if(u.t != 0){
+			enqueue(u);	
+		}else{
+			printf("%s %d\n", u.name, sum);	
+		}
+	}
+	
+	return 0;
+	
+}

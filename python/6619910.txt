@@ -1,0 +1,109 @@
+//テンプレート
+//include
+#include <iostream>
+#include <algorithm>
+#include <string>
+#include <cmath>
+#include <vector>
+#include <iomanip>
+#include <random>
+#include <climits>
+#include <set>
+#include <map>
+#include <stack>
+#include <queue>
+#include <thread>
+#include <chrono>
+#include <ctime>
+#include <deque>
+#include <sstream>
+#include <bitset>
+#include <list>
+#include <unordered_map>
+#include <unordered_set>
+
+//名前空間、型名
+using namespace std;
+using ll = long long;
+template<class T1, class T2> using umap = unordered_map<T1, T2>;
+template<class T> using uset = unordered_set<T>;
+using Graph = vector<vector<int>>;//Graph(n) n:頂点数
+
+struct Edge {
+	int to;
+	int weight;
+	Edge(int t, int w) :to(t), weight(w) {}
+};
+using WGraph = vector<vector<Edge>>;
+
+//関数
+
+template<class T> bool chmin(T& a, T b) {
+	if (a > b) {
+		a = b;
+		return true;
+	}
+	else return false;
+}
+template<class T> bool chmax(T& a, T b) {
+	if (a < b) {
+		a = b;
+		return true;
+	}
+	else return false;
+}
+
+void vprint(vector<int> a) {
+	for (auto& A : a) {
+		printf("%3d", A);
+	}
+	cout << endl;
+}
+
+/*
+メモ
+
+*/
+
+
+int main() {
+
+	int V, e, r;
+	cin >> V >> e >> r;
+	WGraph g(V);
+	for (int i = 0; i < e; ++i) {
+		int s, t, d;
+		cin >> s >> t >> d;
+		g[s].push_back(Edge(t, d));
+	}
+
+	constexpr int INF = 2000000000;
+	vector<int> dist(V, INF);
+	dist[r] = 0;
+	//要素型、内部コンテナ、昇順
+	priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> que;
+	//距離、頂点の順に入れる
+	que.push({ dist[r],r });
+
+	while (!que.empty()) {
+		auto [d, v] = que.top();
+		que.pop();
+		
+		if (d > dist[v])continue;
+
+		for (auto& s : g[v]) {
+			if (chmin(dist[s.to], dist[v] + s.weight)) {
+				que.push({ dist[s.to],s.to });
+			}
+		}
+	}
+
+	for (int& res : dist) {
+		if (res == INF) {
+			cout << "INF" << endl;
+		}
+		else cout << res << endl;
+	}
+
+	return 0;
+}

@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+using ll = long long;
+const int IINF = 0x3f3f3f3f;  // 2倍しても負にならない
+const long long LINF = 0x3f3f3f3f3f3f3f3fLL;
+long long MOD = 1000000007;
+using plint = pair<ll, ll>;
+using pint = pair<int, int>;
+#define all(obj) (obj).begin(), (obj).end()
+struct Edge {
+  ll from, to, cost;
+  Edge(ll f, ll t, ll c) : from(f), to(t), cost(c) {}
+};
+using Graph = vector<vector<Edge>>;
+
+// 変数宣言------------------
+
+// 関数定義------------------
+
+// 最小値を更新
+template <class T>
+inline bool chmin(T& a, T b) {
+  if (a > b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+// ダイクストラ
+void dks(Graph& g, ll start, vector<ll>& d) {
+  // 最短確定エリアの隣接頂点
+  priority_queue<plint, vector<plint>, greater<plint>> que;
+
+  // 初期化
+  d[start] = 0;
+  que.push({d[start], start});
+
+  while (!que.empty()) {
+    auto [d_min, cur] = que.top();
+    que.pop();
+
+    if (d[cur] < d_min) {
+      continue;
+    }
+
+    for (auto e : g[cur]) {
+      if (chmin(d[e.to], d[e.from] + e.cost)) {
+        que.push({d[e.to], e.to});
+      }
+    }
+  }
+}
+
+// メイン------------------
+int main() {
+  // デバッグ用
+  ifstream in("input.txt");
+  if (in.is_open()) {
+    cin.rdbuf(in.rdbuf());
+  }
+
+  ll n, m, start;
+  cin >> n >> m >> start;
+
+  Graph g(n);
+
+  // 入力
+  for (int i = 0; i < m; i++) {
+    ll u, v, d;
+    cin >> u >> v >> d;
+    g[u].push_back({u, v, d});
+  }
+
+  // ダイクストラ
+  vector<ll> d(n, LINF);
+  dks(g, start, d);
+
+  // 出力
+  for (int i = 0; i < n; i++) {
+    if (d[i] == LINF) {
+      cout << "INF" << endl;
+    } else {
+      cout << d[i] << endl;
+    }
+  }
+}

@@ -1,0 +1,41 @@
+import sys
+sys.setrecursionlimit(10 ** 6)
+
+n = int(input())
+edges = [[] for _ in range(n)]
+for _ in range(n - 1):
+    u, v, c = map(int, input().split())
+    edges[u].append((v, c))
+    edges[v].append((u, c))
+
+dp = [0] * n
+def dfs(pos, bpos):
+    for npos, c in edges[pos]:
+        if npos == bpos:
+            continue
+        dfs(npos, pos)
+        dp[pos] = max(dp[pos], dp[npos] + c)
+dfs(0, -1)
+
+ans = [0] * n
+def dfs2(pos, bpos):
+    for npos, c in edges[pos]:
+        ans[pos] = max(ans[pos], dp[npos] + c)
+    le = len(edges[pos])
+    L = [0] * le
+    R = [0] * le
+    for i in range(le - 1):
+        npos, c = edges[pos][i]
+        L[i + 1] = max(L[i], dp[npos] + c)
+    for i in range(le - 1, 0, -1):
+        npos, c = edges[pos][i]
+        R[i - 1] = max(R[i], dp[npos] + c)
+
+    for i, (npos, c) in enumerate(edges[pos]):
+        if npos == bpos:
+            continue
+        dp[pos] = max(L[i], R[i])
+        dfs2(npos, pos)
+
+dfs2(0, -1)
+print(*ans, sep="\n")

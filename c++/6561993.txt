@@ -1,0 +1,144 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+#include <unordered_set>
+using namespace std;
+
+class BinInfo {
+public:
+	int count;
+	int min_x;
+	int max_x;
+	int min_y;
+	int max_y;
+
+public:
+	BinInfo(int count, int min_x, int max_x, int min_y, int max_y) : count(count), min_x(min_x), max_x(max_x), min_y(min_y), max_y(max_y) {
+		return;
+	}
+
+	~BinInfo() {
+		return;
+	}
+};
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test1.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int h = -1;
+	int w = -1;
+	int s = -1;
+	int buf = -1;
+	const int max_h = 1000;
+	const int max_w = 1000;
+	unsigned char image[max_h][max_w];
+
+	cin >> h >> w >> s;
+	for (int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++) {
+			cin >> buf;
+			image[y][x] = buf - 1;
+		}
+	}
+
+	if (s >= h * w) {
+		cout << 0 << endl;
+	}
+	else {
+		int num_pixel_values = 256;
+		unordered_set<unsigned char> pixel_value_set;
+		vector<BinInfo> pixel_hist(num_pixel_values, BinInfo(0, w - 1, 0, h - 1, 0));
+		vector<const BinInfo*> candidate_bin_vec;
+
+
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
+				const unsigned char& pixel_value = image[y][x];
+				BinInfo& c_bin = pixel_hist[pixel_value];
+
+				c_bin.count++;
+				c_bin.min_x = min(c_bin.min_x, x);
+				c_bin.max_x = max(c_bin.max_x, x);
+				c_bin.min_y = min(c_bin.min_y, y);
+				c_bin.max_y = max(c_bin.max_y, y);
+				pixel_value_set.insert(pixel_value);
+			}
+		}
+
+		num_pixel_values = (int)pixel_value_set.size();
+
+		for (const BinInfo& c_bin : pixel_hist) {
+			if (0 < c_bin.count && c_bin.count <= s && c_bin.max_x - c_bin.min_x <= s && c_bin.max_y - c_bin.min_y <= s) {
+				candidate_bin_vec.emplace_back(&c_bin);
+			}
+		}
+
+		if (candidate_bin_vec.empty()) {
+			cout << num_pixel_values << endl;
+		}
+		else {
+			int min_x = w - 1;
+			int max_x = 0;
+			int min_y = h - 1;
+			int max_y = 0;
+			int max_hh = max(2, min(h + 1, s + 1));
+			int min_hh = min(max(1, s / w), max_hh - 1);
+			int max_ww = min(w, s);
+			int max_num_removed_pixel_values = 0;
+
+			for (const BinInfo* c_bin : candidate_bin_vec) {
+				min_x = min(min_x, c_bin->min_x);
+				max_x = max(max_x, c_bin->max_x);
+				min_y = min(min_y, c_bin->min_y);
+				max_y = max(max_y, c_bin->max_y);
+			}
+			
+			for (int hh = min_hh; hh < max_hh; hh++) {
+				if (max_num_removed_pixel_values == num_pixel_values - 1) { break; }
+				int c_max_y = max(min_y + 1, max_y - hh + 1);
+				
+				for (int ww = max_ww; ww > 0; ww--) {
+					if (ww * hh > s) { continue; }
+					if (max_num_removed_pixel_values == num_pixel_values - 1) { break; }
+					int c_max_x = max(min_x + 1, max_x - ww + 1);
+					vector<const BinInfo*> c_candidate_bin_vec;
+
+					for (const BinInfo* c_bin : candidate_bin_vec) {
+						if (c_bin->max_x - c_bin->min_x <= ww && c_bin->max_y - c_bin->min_y <= hh) {
+							c_candidate_bin_vec.emplace_back(c_bin);
+						}
+					}
+
+					for (int by = min_y; by < c_max_y; by++) {
+						if (max_num_removed_pixel_values == num_pixel_values - 1) { break; }
+						int ey = by + hh - 1;
+						
+						for (int bx = min_x; bx < c_max_x; bx++) {
+							int ex = bx + ww - 1;
+							int num_removed_pixel_values = 0;
+							
+							for (const BinInfo* c_bin : c_candidate_bin_vec) {
+								if (bx <= c_bin->min_x && c_bin->max_x <= ex && by <= c_bin->min_y && c_bin->max_y <= ey) {
+									num_removed_pixel_values++;
+								}
+							}
+							max_num_removed_pixel_values = max(max_num_removed_pixel_values, num_removed_pixel_values);
+						}
+					}
+					break;
+				}
+			}
+			cout << num_pixel_values - max_num_removed_pixel_values << endl;
+		}
+	}
+
+	return 0;
+}

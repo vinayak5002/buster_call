@@ -1,0 +1,46 @@
+#include <bits/stdc++.h>
+ 
+using namespace std;
+ 
+#define REP(i,n) for(int i=0;i<int(n);i++)
+typedef long long ll;
+typedef pair<int,int> P;
+
+int N,E;
+int d[20][20],dp[1<<16][20];
+
+int main(void){
+	ll i,j,k;
+ 
+	cin.tie(0);  ios_base::sync_with_stdio(false);
+
+	REP(i,20) REP(j,20) d[i][j]=-1;
+	REP(i,1<<16) REP(j,20) dp[i][j]=1e9;
+	dp[0][0]=0;
+
+	cin >> N >> E;
+	REP(i,E){
+		int x,y,z;
+		cin >> x >> y >> z;
+		d[x][y]=z;
+	}
+
+	REP(s,1<<N){
+		REP(j,N){
+			if(!(s & 1<<j) && s!=0) continue;
+			REP(k,N){
+				if(s & 1<<k) continue;
+				if(d[j][k]!=-1) dp[s+(1<<k)][k]=min(dp[s+(1<<k)][k],dp[s][j]+d[j][k]);
+			}
+		}
+	}
+
+
+
+	if(dp[(1<<N)-1][0]==1e9) cout << -1 << endl;
+	else cout << dp[(1<<N)-1][0] << endl;
+
+
+	return 0;
+}
+

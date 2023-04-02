@@ -1,0 +1,99 @@
+// id: ALDS1_9_C
+// Time: 00:06 s, Memory: 3344 KB
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+#include <string.h>
+
+#define MAX_DATA (INT_MAX)
+#define MAX_ELE (2000000)
+
+struct HeapStruct
+{
+    int size;
+    int *contents;
+};
+typedef struct HeapStruct *PriorityQueue;
+
+PriorityQueue initialize(int maxElements);
+void destroy(PriorityQueue h);
+void insert(PriorityQueue h, int x);
+void delete_max(PriorityQueue h);
+int find_max(PriorityQueue h);
+
+int main(void)
+{
+    PriorityQueue pq = initialize(MAX_ELE);
+    char cmd[8];
+
+    scanf("%s", cmd);
+    while (strcmp(cmd, "end") != 0) {
+        if (strcmp(cmd, "insert") == 0) {
+            int key;
+            scanf("%d", &key);
+            insert(pq, key);
+        }
+        else {
+            printf("%d\n", find_max(pq));
+            delete_max(pq);
+        }
+        scanf("%s", cmd);
+    }
+
+    destroy(pq);
+
+    return 0;
+}
+
+PriorityQueue initialize(int maxElements)
+{
+    PriorityQueue h;
+
+    h = (PriorityQueue) malloc(sizeof(struct HeapStruct));
+    h->contents = (int *) malloc(sizeof(int) * (maxElements + 1));
+
+    h->size = 0;
+    h->contents[0] = MAX_DATA;
+
+    return h;
+}
+
+void destroy(PriorityQueue h)
+{
+    free(h->contents);
+    free(h);
+}
+
+void insert(PriorityQueue h, int x)
+{
+    int i;
+
+    for (i = ++h->size; h->contents[i / 2] < x; i /= 2)
+        h->contents[i] = h->contents[i / 2];
+    h->contents[i] = x;
+}
+
+void delete_max(PriorityQueue h)
+{
+    int i, child;
+    int lastElement = h->contents[h->size--];
+
+    for (i = 1; i * 2 <= h->size; i = child) {
+        child = i * 2;
+        if (child != h->size && h->contents[child + 1] > h->contents[child])
+            ++child;
+
+        if (h->contents[child] > lastElement)
+            h->contents[i] = h->contents[child];
+        else
+            break;
+    }
+    h->contents[i] = lastElement;
+}
+
+int find_max(PriorityQueue h)
+{
+    return h->contents[1];
+}
+

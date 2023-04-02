@@ -1,0 +1,123 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Dice {
+  public:
+    Dice(int number[]);
+    void print_status();
+    int get_status(int number);
+    void toss(char direction);
+    bool is_same(Dice d);
+    bool is_same_dice(Dice d);
+    void right_rotation();
+
+  private:
+    int dice[6];
+};
+
+Dice::Dice(int n[]) {
+    for(int i = 0; i < 6; i++) {
+        dice[i] = n[i];
+    }
+}
+
+void Dice::print_status() {
+    for(int i = 0; i < 6; i++) {
+        cout << dice[i] << " ";
+    }
+    cout << endl;
+}
+
+int Dice::get_status(int number) { return dice[number]; }
+
+void Dice::toss(char direction) {
+    int tmp;
+    switch(direction) {
+    case 'N':
+        tmp = dice[0];
+        dice[0] = dice[1];
+        dice[1] = dice[5];
+        dice[5] = dice[4];
+        dice[4] = tmp;
+        break;
+    case 'S':
+        tmp = dice[0];
+        dice[0] = dice[4];
+        dice[4] = dice[5];
+        dice[5] = dice[1];
+        dice[1] = tmp;
+        break;
+    case 'E':
+        tmp = dice[0];
+        dice[0] = dice[3];
+        dice[3] = dice[5];
+        dice[5] = dice[2];
+        dice[2] = tmp;
+        break;
+    case 'W':
+        tmp = dice[0];
+        dice[0] = dice[2];
+        dice[2] = dice[5];
+        dice[5] = dice[3];
+        dice[3] = tmp;
+        break;
+    }
+}
+
+bool Dice::is_same(Dice d) {
+    for(int i = 0; i < 6; i++) {
+        if(dice[i] != d.get_status(i)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool Dice::is_same_dice(Dice d) {
+    for(int i = 0; i < 6; i++) {
+        if(i < 4) {
+            toss('S');
+        } else if(i == 4) {
+            toss('E');
+        } else {
+            toss('W');
+            toss('W');
+        }
+
+        for(int j = 0; j < 4; j++) {
+            right_rotation();
+            if(is_same(d)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void Dice::right_rotation() {
+    int tmp = dice[1];
+    dice[1] = dice[2];
+    dice[2] = dice[4];
+    dice[4] = dice[3];
+    dice[3] = tmp;
+}
+
+int main() {
+    int dice_table[2][6];
+
+    for(int i = 0; i < 2; i++) {
+        for(int j = 0; j < 6; j++) {
+            cin >> dice_table[i][j];
+        }
+    }
+
+    Dice d1(dice_table[0]), d2(dice_table[1]);
+
+    if(d1.is_same_dice(d2)) {
+        cout << "Yes" << endl;
+    } else {
+        cout << "No" << endl;
+    }
+    return 0;
+}
+

@@ -1,0 +1,63 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+
+	const n = parseInt(si[0].split(" "));
+
+	let goods = [];
+
+	for (i = 1; i < n + 1; i++) {
+		let order = si[i].split(" ");
+		let value = parseInt(order[0]);
+		let weight = parseInt(order[1]);
+		let type = order[2];
+		let date = parseInt(order[3]);
+		let name = order[4];
+
+		goods.push({ 'value': value, 'weight': weight, 'type': type, 'date': date, 'name': name });
+	}
+
+	goods.sort(function(a, b) {	//aとbの価値を比較
+		if (a.value > b.value) {	//aのほうが価値が高いため後に来るようにする
+			return 1;
+		} else if (a.value < b.value) {	//aのほうが価値が低いため先に来るようにする
+			return -1;
+		} else {	//aとbの価値が同じ->重さを比較
+			if (a.weight > b.weight) {	//aのほうが重いため後にする
+				return 1;
+			} else if (a.weight < b.weight) {	//aのほうが軽いため先にする
+				return -1;
+			} else {	//重さも同じ->型を比較
+				if (a.type > b.type) {	//aのほうが型がアルファベット順で大きいため後にする
+					return 1;
+				} else if (a.type < b.type) {	//aのほうが型が小さいため先にする
+					return -1;
+				} else {	//型も同じ→日時を比較
+					if (a.date > b.date) {	//aのほうが日時が遅いため後にする
+						return 1;
+					} else if (a.date < b.date) {	//aのほうが日時が早いため先にする
+						return -1;
+					} else {	//日時も同じ->名前を比較
+						if (a.name > b.name) {	//aのほうが名前が辞書順で大きいため後にする
+							return 1;
+						} else if(a.name < b.name) {	//aのほうが名前が小さいため先にする
+							return -1;
+						} else {	//名前も同じ->aとbはたがいに変更せずほかのすべての要素に対してソート
+							return 0;
+						}
+					}
+				}
+			}
+		}
+	});
+
+	let ans = '';
+
+	for (let i = 0; i < goods.length; i++) {
+		ans += goods[i].value + ' ' + goods[i].weight + ' ' 
+		+ goods[i].type + ' ' + goods[i].date + ' ' + goods[i].name + '\n';
+	}
+	so.write(ans);
+}

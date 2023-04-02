@@ -1,0 +1,33 @@
+from collections import deque
+
+n,m,s = map(int,input().split())
+
+edge = [[] for _ in range(n)]
+for _ in range(m):
+    s_i, t_i, d_i = map(int,input().split())
+    edge[s_i].append([t_i,d_i])
+
+INF = float("inf")
+cost = [INF]*n
+cost[s] = 0
+
+q = deque()
+q.append(s)
+cnt = [0]*n
+flag = False
+while q:
+    x = q.popleft()
+    if cnt[x] >= n:
+        flag = True
+        break
+    for i,c in edge[x]:
+        if cost[i] > cost[x] + c:
+            cost[i] = cost[x] + c
+            q.append(i)
+            cnt[i] += 1
+
+if flag:
+    print("NEGATIVE CYCLE")
+else:
+    for i in cost:
+        print("INF" if i == INF else i)

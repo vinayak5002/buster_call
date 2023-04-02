@@ -1,0 +1,90 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def is_ok(m, n, d_list, i):
+    stack = [i]
+    is_visited_set = {i}
+
+    while len(stack) > 0:
+        i = stack.pop()
+
+        for j in range(1, m):
+            ni = i + j
+            if ni >= n:
+                return True
+
+            ni += d_list[ni]
+            if ni >= n:
+                return True
+            ni = max(0, ni)
+
+            if ni not in is_visited_set:
+                is_visited_set.add(ni)
+                stack.append(ni)
+
+    return False
+
+
+def is_ng(m, n, d_list):
+    stack = [0]
+    is_visited_set = {0}
+    _is_ng = True
+
+    while len(stack) > 0:
+        i = stack.pop()
+
+        for j in range(1, m):
+            ni = i + j
+            if ni >= n:
+                break
+
+            ni += d_list[ni]
+            if ni >= n:
+                continue
+            ni = max(0, ni)
+
+            if ni not in is_visited_set:
+                is_visited_set.add(ni)
+                _is_ng = False
+                if not is_ok(m, n, d_list, ni):
+                    return True
+                stack.append(ni)
+
+    return _is_ng
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test1.txt', 'r')
+    else:
+        f = sys.stdin
+
+    while True:
+        m = int(f.readline())
+        if m == 0:
+            break
+
+        n = int(f.readline())
+        d_list = [0]
+        min_d = 0
+        for _ in range(n):
+            d = int(f.readline())
+            d_list.append(d)
+            min_d = min(min_d, d)
+        d_list.append(0)
+        n += 1
+
+        m += 1
+        print('NG' if is_ng(m, n, d_list) else 'OK')
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

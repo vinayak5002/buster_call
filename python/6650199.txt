@@ -1,0 +1,61 @@
+class Dice:
+
+    def __init__(self):# さいころ定義
+        self.number=[i for i in range(6)]
+
+    def setNumber(self,n0,n1,n2,n3,n4,n5):# さいころの番号変更
+        self.number[0]=n0
+        self.number[1]=n1
+        self.number[2]=n2
+        self.number[3]=n3
+        self.number[4]=n4
+        self.number[5]=n5
+
+    def roll(self,loc):#さいころをある方向に転がす処理
+        if loc == 'E':
+            self.setNumber(self.number[3],self.number[1],self.number[0],self.number[5],self.number[4],self.number[2])
+        elif loc == 'N':
+            self.setNumber(self.number[1],self.number[5],self.number[2],self.number[3],self.number[0],self.number[4])
+        elif loc == 'S':
+            self.setNumber(self.number[4],self.number[0],self.number[2],self.number[3],self.number[5],self.number[1])
+        elif loc == 'W':
+            self.setNumber(self.number[2],self.number[1],self.number[5],self.number[0],self.number[4],self.number[3])
+
+    def get_top(self):#上面の番号返す
+        return self.number[0]
+    def get_front(self):#手前面の番号返す
+        return self.number[1]
+    def get_third(self):#右側面の番号返す
+        return self.number[2]
+    def get_four(self):#左側面の番号返す
+        return self.number[3]
+    def get_five(self):#奥面の番号返す
+        return self.number[4]
+    def get_six(self):#下面の番号返す
+        return self.number[5]
+
+dice1=Dice()
+table = list(map(int,input().split()))
+dice1.setNumber(table[0],table[1],table[2],table[3],table[4],table[5])
+dice2=Dice()
+table = list(map(int,input().split()))
+dice2.setNumber(table[0],table[1],table[2],table[3],table[4],table[5])
+
+for i in range(4):
+    if dice1.get_front()==dice2.get_front():
+        break
+    dice2.roll('N')#さいころ2を奥に回す
+    if dice1.get_front()!=dice2.get_front():
+        dice2.roll('E')#さいころ2を右に回す
+        for i in range(4):
+            if dice1.get_front()==dice2.get_front():
+                break
+            dice2.roll('N')#さいころを奥に回す
+#さいころの前面が指定した面を向いたので横方向にさいころを回して上面を指定した数に合わせる
+for i in range(4):
+    if dice1.get_top()==dice2.get_top() and dice1.get_third()==dice2.get_third() and dice1.get_four()==dice2.get_four() and dice1.get_five()==dice2.get_five() and dice1.get_six()==dice2.get_six():
+        print("Yes")
+        break
+    elif dice1.get_top()==dice2.get_top() and dice1.get_third()==dice2.get_third():
+        print("No")
+    dice2.roll('E')#さいころを右に回す

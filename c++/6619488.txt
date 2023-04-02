@@ -1,0 +1,84 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+template<class T>
+void print_vec(vector<T> &vec){
+    rep(i, 0, SZ(vec)){
+        if(i) cout <<" ";
+        cout << vec[i];
+    }
+    cout << endl;
+    return;
+}
+
+ll cnt = 0;
+
+void insertion_sort(vector<ll> &A, ll g){
+    ll n = A.size();
+    for(ll i = g; i < n; i++){
+        ll v = A[i];
+        ll j = i - g;
+        while(j >= 0 && A[j] > v){
+            A[j + g] = A[j];
+            j = j - g;
+            cnt++;
+        }
+        A[j + g] = v;
+    }
+}
+
+void shell_sort(vector<ll> &A, vector<ll> G){
+    cnt = 0;
+    ll m = G.size();
+    for(ll i = 0; i < m; i++){
+        insertion_sort(A, G[i]);
+    }
+}
+
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll n;
+  cin >> n;
+  vector<ll> a(n);
+  rep(i, 0, n) cin >> a[i];
+
+  vector<ll> G;
+  G.push_back(1);
+  while(1){
+      ll h = G.back() * 3 + 1;
+      if(h > n) break;
+      G.push_back(h);
+  }
+  
+  reverse(ALL(G));
+  ll m = G.size();
+
+  shell_sort(a, G);
+  cout << m << endl;
+  print_vec(G);
+  cout << cnt << endl;
+  rep(i, 0, n) cout << a[i] << endl;
+
+
+
+  return 0;
+}

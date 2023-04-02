@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <string.h>
+
+#define MAX 2000000
+
+int heep_size=1;
+int A[MAX];
+
+void swap(int *a,int *b){
+  	int temp;
+  	
+  	temp = *a;
+  	*a = *b;
+  	*b = temp;
+}
+
+void insert(int key){
+  	int p,pos;
+	
+	heep_size++;
+  	A[heep_size]=key;
+  	q=heep_size;
+  	p=q/2;
+
+  	while(q>1&&A[q]>A[p]){
+    	swap(&A[p],&A[q]);
+    	q=p;
+    	p/=2;
+  }
+}
+
+void maxHeapify(int i){
+  	int left,right;
+	int largest;
+  	
+	left=i*2;
+  	right=i*2+1;
+  	if(left<=heep_size&&A[left]>A[i])
+    	largest=left;
+  	else
+	  	largest=i;
+  
+  	if(right<=heep_size&&A[right]>A[largest])
+    	largest=right;
+  
+  	if(largest!=i){
+    	swap(&A[i],&A[largest]);
+    	maxHeapify(largest);
+  	}
+}
+
+int extractMax(void){
+  	int top,value;
+  	
+	top=1;
+  	value=A[top];
+  	A[top]=A[heep_size];
+  	heep_size--;
+  	maxHeapify(top);
+
+  	return value;
+}
+
+int main(void){
+  	char command[10];
+  	int value;
+
+  	while(1){
+    	scanf("%s",command);
+    
+    	if(strcmp(command,"insert")==0){
+      		scanf("%d",&value);
+      		insert(value);
+    	}
+    
+    	else if(strcmp(command,"extract")==0){
+      		int ma;
+      		ma = extractMax();
+      		printf("%d\n",ma);
+    	}
+    
+    	else if(strcmp(command,"end")==0)
+      		break; 
+  	}
+  	return 0;
+}
+

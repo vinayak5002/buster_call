@@ -1,0 +1,94 @@
+// e3c8f1a924 2022年05月30日 星期一 14时51分21秒
+#include<cstdio>
+#include<cmath>
+#include<array>
+using T = double;
+const T eps = 1e-9;
+int lt(T x, T y) { return x < y - eps; }
+int leq(T x, T y) { return x <= y + eps; }
+int eq(T x, T y) { return leq(x, y) && leq(y, x); }
+int gt(T x, T y) { return !leq(y, x); }
+int geq(T x, T y) { return !lt(y, x); }
+namespace Geo2d {
+	struct Transfer {
+		T a[2][2];
+		T* operator [] (int x) { return a[x]; }
+		Transfer(int x, int y, int z, int l) {
+			a[0][0] = x, a[0][1] = y, a[1][0] = z, a[1][1] = l;
+		}
+		Transfer(const Transfer& x) {
+			for (int i = 0; i < 2; i++) {
+				for (int j = 0; j < 2; j++) a[i][j] = x.a[i][j];
+			}
+		}
+		Transfer& operator = (Transfer x) {
+			for (int i = 0; i < 2; i++) {
+				for (int j = 0; j < 2; j++) a[i][j] = x[i][j];
+			}
+			return *this;
+		}
+	};
+	struct Coord {
+		T x, y;
+		Coord(T a, T b) { x = a, y = b; }
+		Coord() { x = y = 0; }
+		void apply(Transfer t) {
+			T A = x, B = y;
+			x = A * t[0][0] + B * t[0][1];
+			y = A * t[1][0] + B * t[1][1];
+		}
+	};
+	struct Point : Coord {
+		using Coord::Coord;
+	};
+	struct Vector : Coord {
+		using Coord::Coord;
+		Vector operator - () { return Vector(-x, -y); }
+		T norm() { return sqrt(x * x + y * y); }
+	};
+	Point operator + (Point x, Vector y) {
+		return Point(x.x + y.x, x.y + y.y);
+	}
+	Point operator - (Point x, Vector y) { return x + (-y); }
+	Point& operator += (Point& x, Vector v) {
+		x.x += v.x, x.y += v.y;
+		return x;
+	}
+	Point& operator -= (Point& x, Vector v) {
+		x.x -= v.x, x.y -= v.y;
+		return x;
+	}
+
+	Vector operator - (Point x, Point y) { return Vector(x.x - y.x, x.y - y.y); }
+	Vector operator + (Vector x, Vector y) {
+		return Vector(x.x + y.x, x.y + y.y);
+	}
+	Vector operator - (Vector x, Vector y) {
+		return Vector(x.x - y.x, x.y - y.y);
+	}
+	Vector& operator += (Vector& x, Vector y) { return x = x + y; }
+	Vector& operator -= (Vector& x, Vector y) { return x = x - y; }
+	Vector operator * (Vector x, T y) { return Vector(x.x * y, x.y * y); }
+	Vector operator * (T y, Vector x) { return Vector(x.x * y, x.y * y); }
+	Vector operator / (Vector x, T y) { return Vector(x.x / y, x.y / y); }
+	Vector& operator *= (Vector& x, T y) { return x = x * y; }
+	Vector& operator /= (Vector& x, T y) { return x = x / y; }
+
+	T operator * (Vector x, Vector y) { return x.x * y.x + x.y * y.y; }
+	T operator ^ (Vector x, Vector y) { return x.x * y.y - x.y * y.x; }
+}
+using namespace Geo2d;
+Point p1, p2; Vector p; int q;
+int main() {
+	scanf("%lf%lf%lf%lf", &p1.x, &p1.y, &p2.x, &p2.y), p = p2 - p1;
+	int q; scanf("%d", &q);
+	while (q--) {
+		Point x;
+		scanf("%lf%lf", &x.x, &x.y);
+		Vector v = x - p1;
+		Point t = p1 + p * ((p * v) / p.norm() / p.norm());
+		Point ans = t + (t - x);
+		printf("%.9lf %.9lf\n", ans.x, ans.y);
+	}
+}
+

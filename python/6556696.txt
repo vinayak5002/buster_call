@@ -1,0 +1,111 @@
+void main()
+{
+	int v, e, r; scanf("%d %d %d", &v, &e, &r);
+	auto G = new PII[][](v, 0);
+	foreach(i; 0..e)
+	{
+		int s, t, d; scanf("%d %d %d", &s, &t, &d);
+		G[s] ~= PII(d, t);
+	}
+	auto graph = WeightedGraph!int(v, G);
+	foreach(x; graph.dijk(r).map!(x =>  x > (1 << 29) ? "INF" : x.to!string))
+		writeln(x);
+}
+
+struct Graph(T)
+{
+	bool chmin(T)(ref T a, in T b)
+	{
+		if(b < a) { a = b; return true; } else { return false; }
+	}
+	int N;
+	auto G = new T[][](0, 0);
+	this(int n, T[][] g) { N = n; G = g; }
+	T[] bfs(T s, T t = -1)
+	{
+		import std.container : DList;
+		auto dis = new T[](N); dis[] = T.max;
+		auto vis = new bool[](N); dis[] = false;
+		dis[s] = 0;
+		vis[s] = true;
+		auto q = DList!T(s);
+		while(!q.empty)
+		{
+			T cur = q.front; q.removeFront;
+			if(vis[cur])continue;
+			else vis[cur] = true;
+			foreach(e; G[cur])
+				if(chmin(dis[e], dis[cur] + 1))
+					q.insertFront(e);
+		}
+		if(t == -1)return dis;
+		else return T[](dis[t]);
+	}
+}
+
+struct WeightedGraph(T)
+{
+	import std.typecons;
+	alias PTT = Tuple!(T, T);
+	int N;
+	auto G = new PTT[][](0, 0);
+	bool chmin(T)(ref T a, in T b)
+	{
+		if(b < a) { a = b; return true; } else { return false; }
+	}
+	this(int n, PTT[][] g) { N = n; G = g; }
+	T[] bfs(T s, T t = -1)
+	{
+		import std.container : DList;
+		auto dis = new T[](N); dis[] = T.max;
+		dis[s] = 0;
+		auto q = DList!PTT([PTT(0, s)]);
+		while(!q.empty)
+		{
+			auto cur = q.front; q.removeFront;
+			if(cur[0] > dis[cur[1]])continue;
+			foreach(e; G[cur[1]])
+				if(chmin(dis[e[1]], dis[cur[1]] + e[0]))
+					q.insertFront(PTT(dis[e[1]], e[1]));
+		}
+		if(t == -1)return dis;
+		else return [dis[t]];
+	}
+	T[] dijk(T s, T t = -1)
+	{
+		import std.container : heapify;
+		auto dis = new T[](N); dis[] = T.max;
+		dis[s] = 0;
+		auto pq = heapify!"a > b"([PTT(0, s)]);
+		while(!pq.empty)
+		{
+			auto cur = pq.front; pq.removeFront;
+			if(cur[0] > dis[cur[1]])continue;
+			foreach(e; G[cur[1]])
+				if(chmin(dis[e[1]], dis[cur[1]] + e[0]))
+					pq.insert(PTT(dis[e[1]], e[1]));
+		}
+		if(t == -1)return dis;
+		else return [dis[t]];
+	}
+}
+
+import std.conv, std.functional, std.range, std.stdio, std.string;
+	import std.algorithm, std.array, std.bigint, std.bitmanip, std.complex,
+std.container, std.math, std.mathspecial, std.numeric, std.regex, std.typecons;
+import core.bitop, core.stdc.stdlib;
+alias PII = Tuple!(int, int);
+alias PLL = Tuple!(long, long);
+bool chmin(T)(ref T t, in T f) { if(t > f) { t = f; return true; } else { return false; } }
+bool chmax(T)(ref T t, in T f) { if(t < f) { t = f; return true; } else { return false; } }
+int binarySearch(alias pred, T)(in T[] as)
+{
+	int l = -1, h = cast(int)(as.length);
+	while(h - l > 1) { const mid = (l + h) / 2; (unaryFun!pred(as[mid]) ? h : l) = mid; }
+	return h;
+}
+int lowerBound(T)(in T[] as, T val) { return as.binarySearch!(a => (a >= val)); }
+int upperBound(T)(in T[] as, T val) { return as.binarySearch!(a => (a > val)); }
+const INF = 0x1fffffffffffffff;
+const MOD = 1000_000_007;
+const MOD2 = 998_244_353;

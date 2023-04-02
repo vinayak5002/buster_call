@@ -1,0 +1,456 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+
+#define fastio ios_base::sync_with_stdio(false);cin.tie(NULL)
+#define testcase int T; cin >> T; for (int tc = 1; tc <= T; tc++)
+#define MAX 1000000007
+#define Limit 1000000000
+#define modulo 998244353
+#define INF 4000000000000000005
+#define vi vector<int>
+#define vl vector<long long>
+#define pi pair<int,int>
+#define pl pair<long long,long long>
+#define PI 2*acos(0.0)
+#define pb push_back
+#define mkp make_pair
+
+const double threshold = (1.0/1000000.0);
+const int nmax = 2e5+5;
+
+void ha()
+{
+    cout<<"Yes"<<endl;
+}
+void na()
+{
+    cout<<"No"<<endl;
+}
+
+ll power(ll a,ll b)
+{
+    ll c,d;
+
+    if(b==0)
+    {
+        return 1%MAX;
+    }
+    else if(b==1)
+    {
+        return a%MAX;
+    }
+    else if(b%2==0)
+    {
+        c=power(a,b/2);
+        return (c*c)%MAX;
+    }
+    else
+    {
+        c=power(a,b/2);
+        d=(c*c)%MAX;
+        d=(d*a)%MAX;
+        return d;
+    }
+}
+
+ll plainPower(ll a,ll b)
+{
+    ll sum=1,i;
+    for(i=1; i<=b; i++)
+    {
+        sum*=a;
+    }
+    return sum;
+}
+
+int absolute(int a)
+{
+    if(a>=0)
+    {
+        return a;
+    }
+    else
+    {
+        return (a*(-1));
+    }
+}
+ll absolute(ll a)
+{
+    if(a>=0)
+    {
+        return a;
+    }
+    else
+    {
+        return (a*(-1));
+    }
+}
+
+bool isPrime(int a)
+{
+    for(int i=2; i*i<=a; i++)
+    {
+        if(a%i==0)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool isTriangle(ll x1,ll y1,ll x2,ll y2,ll x3,ll y3)
+{
+    ll area = (x1*(y2-y3)) + (x2*(y3-y1)) + (x3*(y1-y2));
+    if(area)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+ll findRangeSum(ll hi,ll lo)
+{
+    ll j = (hi*(hi+1))/2;
+    ll k= (lo*(lo+1))/2;
+    return j-k;
+}
+
+bool present(vi &a,int n,int target)
+{
+    int lo=0,hi=n-1,mid;
+    while(lo<=hi)
+    {
+        mid=lo+((hi-lo)/2);
+        if(a[mid]==target)
+        {
+            return true;
+        }
+        else if(a[mid]>target)
+        {
+            hi=mid-1;
+        }
+        else
+        {
+            lo=mid+1;
+        }
+    }
+    return false;
+}
+
+int Left_bound(vi &a,int n,int target)
+{
+    int lo=0,hi=n-1,mid,ans=-1;
+
+    while(lo<=hi)
+    {
+        mid=lo+((hi-lo)/2);
+
+        if(a[mid]<=target)
+        {
+            ans=mid;
+            lo=mid+1;
+        }
+        else
+        {
+            hi=mid-1;
+        }
+    }
+    return ans;
+}
+int Right_bound(vi &a,int n,int target)
+{
+    int lo=0,hi=n-1,mid,ans=-1;
+
+    while(lo<=hi)
+    {
+        mid=lo+((hi-lo)/2);
+
+        if(a[mid]>=target)
+        {
+            ans=mid;
+            hi=mid-1;
+        }
+        else
+        {
+            lo=mid+1;
+        }
+    }
+    return ans;
+}
+void printArray(vi &a)
+{
+    for(int i=0; i<a.size(); i++)
+    {
+        cout<<a[i]<<" ";
+    }
+    cout<<endl;
+}
+void printArray(vl &a)
+{
+    ll i;
+    for(i=0; i<a.size(); i++)
+    {
+        cout<<a[i]<<" ";
+    }
+    cout<<endl;
+}
+int Right_bound(vector<pi>&a,int n,int target)
+{
+    int lo=0,hi=n-1,mid,ans=0;
+    while(lo<=hi)
+    {
+        mid=lo+((hi-lo)/2);
+        if(a[mid].first>=target)
+        {
+            ans=a[mid].second;
+            lo=mid+1;
+        }
+        else
+        {
+            hi=mid-1;
+        }
+    }
+    return ans;
+}
+vector <int> calculateSpan(int price[], int n)
+{
+    vector<int>spans(n,1);
+    stack<int>st;
+
+    int i,j,k;
+
+    for(i=0; i<n; i++)
+    {
+        while(!st.empty())
+        {
+            k = st.top();
+
+            if(price[k] <= price[i])
+            {
+                st.pop();
+                spans[i]+=spans[k];
+            }
+            else
+            {
+                break;
+            }
+        }
+        st.push(i);
+    }
+    return spans;
+}
+bool subset_sum(vi &a,int target)
+{
+    int dp[2][target+1];
+
+    int i,j,n=a.size();
+    for(i=0; i<=target; i++)
+    {
+        dp[0][i] = false;
+    }
+    for(i=0; i<2; i++)
+    {
+        dp[i][0] = true;
+    }
+
+    for(i=1; i<=n; i++)
+    {
+        for(j=1; j<=target; j++)
+        {
+            if(a[i-1] > j)
+            {
+                dp[i%2][j] = dp[(i-1)%2][j];
+            }
+            else
+            {
+                dp[i%2][j] = (dp[(i-1)%2][j]|dp[(i-1)%2][j-a[i-1]]);
+            }
+        }
+    }
+
+    return dp[n%2][target];
+}
+
+bool isPalindrome(string &a)
+{
+    string b = a;
+    reverse(b.begin(),b.end());
+
+    if(b==a)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+
+void prime_factor_count()
+{
+    //purpse
+    //120 = 2 X 2 X 2 X 3 X 5
+    //so, prime_factor[120] = 5
+
+
+    const int limit = 100000; //make this global
+    int prime_factor[limit+1]; //make this global
+    int smallest_factor[limit+1];//make this global
+
+    int i,j;
+    for(i=2; i*i<=limit; i++)
+    {
+        if(smallest_factor[i]==0)
+        {
+            smallest_factor[i]=i;
+            prime_factor[i]++;
+
+            for(j=i*i; j<=limit; j+=i)
+            {
+                if(smallest_factor[j]==0)
+                {
+                    smallest_factor[j]=i;
+                    prime_factor[j]++;
+                }
+            }
+        }
+    }
+
+    for(; i<=limit; i++)
+    {
+        if(smallest_factor[i]==0)
+        {
+            prime_factor[i]++;
+            smallest_factor[i]=i;
+        }
+    }
+
+
+    for(i=2; i<=limit; i++)
+    {
+        if(smallest_factor[i]<i)
+        {
+            prime_factor[i]+=prime_factor[i/smallest_factor[i]];
+        }
+    }
+
+
+}
+
+ll kadane(vl &a)
+{
+    ll local_max=-INF,global_max=-INF;
+
+    ll i;
+
+    for(i=0; i<a.size(); i++)
+    {
+
+        if(a[i] >= local_max+a[i])
+        {
+            local_max=a[i];
+        }
+        else
+        {
+            local_max+=a[i];
+        }
+        global_max=max(global_max,local_max);
+        //cout<<global_max<<" ";
+    }
+
+    return global_max;
+}
+
+bool isSquare(ll a)
+{
+    double p = ((double)a);
+    p = sqrt(p);
+
+    if(p == ceil(p))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+double triangleArea(double a,double b,double c)
+{
+    double s = (a+b+c)/2.0;  //s = semi perimeter
+
+    double area = sqrt(s*(s-a)*(s-b)*(s-c));
+
+    return area;
+}
+double absolute(double a)
+{
+    if(a>0.0)
+    {
+        return a;
+    }
+    else
+    {
+        return a*(-1.0);
+    }
+}
+
+int adj[102][102];
+
+int main()
+{
+    fastio;
+
+    int i,j,k,l,ii;
+
+    int n;cin>>n;
+
+
+
+    for(i=0;i<n;i++)
+    {
+        cin>>j>>k;
+
+        for(ii=0;ii<k;ii++)
+        {
+            cin>>l;
+            adj[j][l] = 1;
+        }
+    }
+
+    for(i=1;i<=n;i++)
+    {
+        for(j=1;j<=n;j++)
+        {
+            cout<<adj[i][j];
+
+            if(j==n)
+            {
+                break;
+            }
+            else
+            {
+                cout<<" ";
+            }
+        }
+        if(i==n)
+        {
+            break;
+        }
+        else
+        {
+            cout<<endl;
+        }
+    }
+
+    return 0;
+}
+

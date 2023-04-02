@@ -1,0 +1,151 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+class rolling_hash2D{
+  using ull = unsigned long long;
+  using pll = pair<ll, ll>;
+  private:
+    vector<ull> mods = {999999797, 999999883, 999999893, 999999929,
+                        999999937, 1000000007, 1000000009, 1000000021, 
+                        1000000033, 1000000087};
+    vector<ull> bases = {99999931, 99999941, 99999959, 99999971,
+                         99999989, 100000007, 100000037, 100000039,
+                         100000049, 100000073};
+    ull base1, base2, cons, mod1, mod2;
+    
+    // 文字cを数字に変換
+    ull transc(char c){
+      return ((ull)c + cons);
+    }
+    // 最大公約数を求める
+    ull gcd(ull a, ull b){
+      if(a % b == 0) return b;
+      else return gcd(b, b % a);
+    }
+  public:
+    rolling_hash2D(){
+      base1 = bases[rand() % bases.size()];
+      base2 = rand() % (ull)1e7 + (ull)1e3;
+       
+      cons = (rand() % 10) + 10;
+      for(ll i = 0; i < 100; i++){
+        ll a = rand() % mods.size(), b = rand() % mods.size();
+        swap(mods[a], mods[b]);
+      }
+      mod1 = mods[0], mod2 = mods[1];
+    }
+
+    // r行c列のハッシュ値を返す pair(mod1のハッシュ値, mod2のハッシュ値)
+    vector<vector<pll>> calchash2D(vector<string> str, ll r, ll c){
+      ll h = str.size(), w = str[0].size();
+      if(h < r || w < c) return {};
+      vector<vector<pll>> res(h - r + 1, vector<pll>(w - c + 1));
+      vector<vector<ll>> tmp1(h, vector<ll>(w));
+      vector<vector<ll>> tmp2(h, vector<ll>(w));
+
+      ull t11 = 1, t12 = 1, t21 = 1, t22 = 1;
+      // baseのr乗,c乗を計算
+      for(ll i = 0; i < c; i++){
+        t11 = (t11 * base1) % mod1;
+        t12 = (t12 * base1) % mod2;
+      }
+      for(ll i = 0; i < r; i++){
+        t21 = (t21 * base2) % mod1;
+        t22 = (t22 * base2) % mod2;
+      }
+
+      for(ll i = 0; i < h; i++){
+        ull num1 = 0, num2 = 0;
+        for(ll j = 0; j < c; j++){
+          num1 = (num1 * base1 % mod1 + transc(str[i][j])) % mod1;
+          num2 = (num2 * base1 % mod2 + transc(str[i][j])) % mod2;
+        }
+
+        for(ll j = 0; j + c <= w; j++){
+          tmp1[i][j] = num1, tmp2[i][j] = num2;
+          if(j + c < w){
+            num1 = (num1 * base1 % mod1 - (t11 * transc(str[i][j]) % mod1) + transc(str[i][j + c]) + mod1) % mod1;
+            num2 = (num2 * base1 % mod2 - (t12 * transc(str[i][j]) % mod2) + transc(str[i][j + c]) + mod2) % mod2;
+          }
+        }
+      }
+
+      for(ll j = 0; j + c <= w; j++){
+        ull num1 = 0, num2 = 0;
+        for(ll i = 0; i < r; i++){
+          num1 = (num1 * base2 % mod1 + tmp1[i][j]) % mod1;
+          num2 = (num2 * base2 % mod2 + tmp2[i][j]) % mod2;
+        }
+
+        for(ll i = 0; i + r <= h; i++){
+          res[i][j] = {num1, num2};
+          if(i + r < h){
+            num1 = (num1 * base2 % mod1 - (t21 * tmp1[i][j] % mod1) + mod1 + tmp1[i + r][j]) % mod1;
+            num2 = (num2 * base2 % mod2 - (t22 * tmp2[i][j] % mod2) + mod2 + tmp2[i + r][j]) % mod2;
+          }
+        }
+      }
+      return res;
+    }
+    // 画像aにbは含まれているのか(いるなら一致するところの左上の座標の配列を返す)
+    vector<pll> contain_vec(vector<string> &a, vector<string> &b){
+      ll h = a.size(), w = a[0].size(), r = b.size(), c = b[0].size();
+      vector<pll> res;
+      if(h < r || w < c) return res;
+      auto ahash = calchash2D(a, r, c);
+      auto bhash = calchash2D(b, r, c);
+
+      for(ll i = 0; i < h - r + 1; i++){
+        for(ll j = 0; j < w - c + 1; j++){
+          if(bhash[0][0] == ahash[i][j]) res.push_back({i, j});
+        }
+      }
+      return res;
+    }
+
+    // aにbは含まれているか(bool型)
+    bool is_contain(vector<string> &a, vector<string> &b){
+      return (!contain_vec(a, b).empty());
+    }
+};
+
+
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll h, w, r, c;
+  cin >> h >> w;
+  vector<string> str1(h);
+  rep(i, 0, h) cin >> str1[i];
+  cin >> r >> c;
+  vector<string> str2(r);
+  rep(i, 0, r) cin >> str2[i]; 
+
+  rolling_hash2D roliha;
+
+  auto ans = roliha.contain_vec(str1, str2);
+
+  rep(i, 0, SZ(ans)){
+    cout << ans[i].first << " " << ans[i].second << endl;
+  }
+
+  return 0;
+}

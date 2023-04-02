@@ -1,0 +1,30 @@
+#ヒストグラムの最大面積を求める問題？
+from collections import deque
+def rectangle(n, hs):
+    stack = deque() # stack = (j, h)
+    ans = 0
+    for i , h in enumerate(hs):
+        j = -1
+        while stack and stack[-1][1] > h:
+            j, h2 = stack.pop()
+            ans = max(ans, (i-j) * h2)
+        
+        if not stack or stack[-1][1] < h:
+            stack.append((i if j == -1 else j, h))
+    ans = max(ans, max((n-j) *h2 for j, h2 in stack))
+
+    return ans
+
+H,W = map(int, input().split())
+
+hist = [0] * W
+
+
+result = 0
+
+for i in range(H):
+    ht = list(map(int, input().split()))
+    hist = list(map(lambda x, y: (x+1) * abs(y-1), hist, ht)) #ヒストグラムの作成
+    result = max(result, rectangle(W, hist))
+
+print(result)

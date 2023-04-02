@@ -1,0 +1,227 @@
+import java.util.Scanner;
+
+class Main {
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+
+		int totalNum = sc.nextInt();
+
+		Dice[] list = new Dice[totalNum];
+		for (int i = 0; i < totalNum; i++)
+			list[i] = new Dice(sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt(),
+					sc.nextInt());
+		
+		Dice dice1=list[0];
+		Dice dice2=list[0];
+		
+		boolean isYes=false;
+		
+		for (int i = 0; i < totalNum; i++) {
+			for (int j = i + 1; j < totalNum; j++) {
+				dice1= list[i];
+				dice2 = list[j];
+			}
+			isYes = dice1.differentDice(dice2.top(), dice2.front(), dice2.right(), dice2.left(), dice2.back(), dice2.bottom());
+		}
+		if (isYes == true) {
+			System.out.println("No");
+		} else 
+			System.out.println("Yes");
+	}
+}
+
+
+class Dice {
+	int[] base = new int[6];
+
+	Dice(int a, int b, int c, int d, int e, int f) {
+		base[0] = a;// top
+		base[1] = b;// front
+		base[2] = c;// right
+		base[3] = d;// left
+		base[4] = e;// back
+		base[5] = f;// bottom
+	}
+
+	// サイコロの挙動
+	public void turnN() {
+		int a = base[0];
+		base[0] = base[1];
+		base[1] = base[5];
+		base[5] = base[4];
+		base[4] = a;
+	}
+
+	public void turnS() {
+		int a = base[0];
+		base[0] = base[4];
+		base[4] = base[5];
+		base[5] = base[1];
+		base[1] = a;
+	}
+
+	public void turnE() {
+		int a = base[0];
+		base[0] = base[3];
+		base[3] = base[5];
+		base[5] = base[2];
+		base[2] = a;
+	}
+
+	public void turnW() {
+		int a = base[0];
+		base[0] = base[2];
+		base[2] = base[5];
+		base[5] = base[3];
+		base[3] = a;
+	}
+
+	public void turnClockwise() {
+		int a = base[1];
+		base[1] = base[2];
+		base[2] = base[4];
+		base[4] = base[3];
+		base[3] = a;
+	}
+
+	// return
+	public int top() {
+		return base[0];
+	}
+
+	public int front() {
+		return base[1];
+	}
+
+	public int right() {
+		return base[2];
+	}
+
+	public int left() {
+		return base[3];
+	}
+
+	public int back() {
+		return base[4];
+	}
+
+	public int bottom() {
+		return base[5];
+	}
+
+	// topとfrontを見る
+	public void setTopAndFront(int top, int front) {
+		for (int j = 0; j < 4; j++) {// 縦回転
+
+			if (top() == top)
+				break;
+			turnN();
+
+			if (j == 3) {// 横回転
+				if (right() == top) {
+					turnW();
+
+				} else if (left() == top) {
+					turnE();
+				}
+			}
+		}
+	
+		for (int k = 0; k < 4; k++) {
+			if (front() == front) {
+				break;
+			}
+			turnClockwise();// 上下抑えたまま時計回り
+		}
+	}
+
+	public boolean compareDice(int top, int front, int right, int left, int back, int bottom) {
+		boolean isYes = true;
+
+		for (int j = 0; j < 4; j++) {// 縦回転
+			// System.out.println(String.format("top %d, front %d", base[0], base[1]));
+
+			if (top() == top && bottom() == bottom) {
+				break;
+			}
+			turnN();
+
+			if (j == 3) {// 横回転
+				if (right() == top) {
+					turnW();
+					// System.out.println("w");
+
+				} else if (left() == top) {
+					turnE();
+					// System.out.println("e");
+				} else {
+					isYes = false;
+					// System.out.println("!");
+					break;
+				}
+			}
+		}
+		for (int k = 0; k < 4; k++) {
+			if (front() == front) {
+				// System.out.println("?");
+				break;
+			}
+			turnClockwise();// 上下抑えたまま時計回り
+			if (k == 3) {
+				isYes = false;
+				break;
+			}
+		}
+
+		if (right() == right && left() == left && back() == back) {// 上下左右あっているか
+			isYes = true;
+		} else {
+			isYes = false;
+		}
+		return isYes;
+	}
+
+	public boolean differentDice(int top, int front, int right, int left, int back, int bottom) {
+
+		for (int j = 0; j < 4; j++) {// 縦回転
+			// System.out.println(String.format("top %d, front %d", base[0], base[1]));
+
+			if (top() == top && bottom() == bottom) {
+				return true;
+			}
+			turnN();
+
+			if (j == 3) {// 横回転
+				if (right() == top) {
+					turnW();
+					
+
+				} else if (left() == top) {
+					turnE();
+				
+				} else {
+					
+					return false;
+				}
+			}
+		}
+		for (int k = 0; k < 4; k++) {
+			if (front() == front) {
+				System.out.println("?");
+				break;
+			}
+			turnClockwise();// 上下抑えたまま時計回り
+			if (k == 3) {
+				return false;
+				
+			}
+		}
+
+		if (right() == right && left() == left && back() == back) {// 上下左右あっているか
+			return true;
+		}
+		return false;
+	}
+}
+
+

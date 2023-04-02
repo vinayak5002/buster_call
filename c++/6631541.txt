@@ -1,0 +1,86 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+
+const ll nmax = 100 + 10;
+ll n;
+ll G[nmax][nmax];
+ll mst[nmax];
+ll par[nmax];
+ll d[nmax];
+
+ll prim(){
+    ll res = 0;
+    d[0] = 0;
+
+    while(1){
+        ll to;
+        ll mincost = INF;
+        rep(i, 0, n){
+            if(mst[i] == 0 && d[i] < mincost){
+                mincost = d[i];
+                to = i;
+            }
+        }
+        if(mincost == INF) break;
+
+        mst[to] = 1;
+        rep(i, 0, n){
+            if(mst[i] == 0 && G[to][i] != -1){
+                if(G[to][i] < d[i]){
+                    d[i] = G[to][i];
+                    par[i] = to;
+                }
+            }
+        }
+    }
+
+    rep(i, 0, n){
+        if(par[i] != -1){
+            res += G[i][par[i]];
+        }
+    }
+
+    return res;
+}
+
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  cin >> n;
+  rep(i, 0, n){
+      par[i] = -1;
+      d[i] = INF;
+      mst[i] = 0;
+
+      rep(j, 0, n){
+          cin >> G[i][j];
+      }
+  }
+
+  ll ans = prim();
+
+  cout << ans << endl;
+
+
+
+  return 0;
+}

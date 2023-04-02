@@ -1,0 +1,97 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <deque>
+#include <queue>
+#include <string>
+#include <iomanip>
+#include <set>
+#include <unordered_set>
+#include <map>
+#include <unordered_map>
+#include <utility>
+#include <stdio.h>
+#include <math.h>
+#include <assert.h>
+#if __has_include(<atcoder/all>)
+#include <atcoder/all>
+using namespace atcoder;
+#endif
+using namespace std;
+using ll=long long;
+#define read(x) cin>>(x);
+#define readll(x) ll (x);cin>>(x);
+#define readS(x) string (x);cin>>(x);
+#define readvll(x,N) vector<ll> (x)((N));for(int i=0;i<(N);i++){cin>>(x)[i];}
+
+
+void dfs(ll v,string X,vector<ll>& Y){
+  //cerr<<X<<endl;
+  string L,R;
+  ll xsize=X.size()-1;
+  int left=0,right=0;
+  ll u=0;
+  for(ll i=1;i<xsize;i++){
+    if(X[i]=='('){
+      left++;
+      L.push_back(X[i]);
+    }else if(X[i]==')'){
+      right++;
+      L.push_back(X[i]);
+    }else if(X[i]!='[' || right!=left){
+      L.push_back(X[i]);
+    }else{
+      for(ll j=i+1;j<xsize;j++){
+        if(X[j]!=']'){
+          u*=10;
+          u+=X[j]-'0';
+        }else{
+          for(ll k=j+1;k<xsize;k++){
+            R.push_back(X[k]);
+          }
+          break;
+        }
+      }
+      break;
+    }
+  }
+  Y[v]=u;
+  if(L!="()" && L!="(()"){
+    dfs(2*v+1,L,Y);
+  }
+  if(R!="()" && R!="()))"){
+    dfs(2*v+2,R,Y);
+  }
+  return;
+}
+
+string dfs2(ll v,vector<ll>& Z){
+  if(Z[v]==-1){
+    return "()";
+  }else{
+    return "("+dfs2(2*v+1,Z)+"["+to_string(Z[v])+"]"+dfs2(2*v+2,Z)+")";
+  }
+}
+
+int main(){
+  vector<ll> VA(3000,-1),VB(3000,-1),VC(3000,-1);
+  string A,B;
+  cin>>A>>B;
+  A="("+A+")";
+  B="("+B+")";
+  dfs(0,A,VA);
+  dfs(0,B,VB);
+  for(ll i=0;i<3000;i++){
+    if(VA[i]!=-1 && VB[i]!=-1){
+      VC[i]=VA[i]+VB[i];
+    }
+  }
+  string ans=dfs2(0,VC);
+  for(ll i=1;i<(ll)ans.size()-1;i++){
+    cout<<ans[i];
+  }
+  cout<<endl;
+  return 0;
+}
+
+

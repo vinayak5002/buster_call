@@ -1,0 +1,103 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+vector<int> m, mi;
+
+void createPrimesList(int n, vector<int> &primes) {
+    vector<bool> isPrimes(n + 1, true);
+
+    isPrimes.at(0) = false;
+    isPrimes.at(1) = false;
+    for (int i = 2; i <= n; i++) {
+        if (isPrimes.at(i) == true) {
+            for (int j = 2; i * j <= n; j++) {
+                isPrimes.at(i * j) = false;
+            }
+        }
+    }
+
+    int c = -1;
+    for (int i = 2; i <= n; i++) {
+        if (isPrimes.at(i) == true) {
+            primes.push_back(i);
+            c++;
+
+            for (int j = 0; j < mi.size() - 1; j++) {
+                if (mi.at(j) == -1) {
+                    if (m.at(j) % 2 == 0) {
+                        if (primes.at(c) > m.at(j) / 2) mi.at(j) = c - 1;
+                    } else {
+                        if (primes.at(c) > m.at(j) / 3) mi.at(j) = c - 1;
+                    }
+                }
+            }
+        }
+
+        if (i == n) {
+            for (int j = 0; j < mi.size() - 1; j++) {
+                if (mi.at(j) == -1) mi.at(j) = c;
+            }
+        }
+    }
+}
+
+double ratioNum(int a, int b) {
+    if (a > b)
+        return (double)b / (double)a;
+    else
+        return (double)a / (double)b;
+}
+
+int main() {
+    vector<int> a, b;
+    vector<int> p, q;
+    int k = 0, max = 0;
+
+    while (1) {
+        m.push_back(0);
+        mi.push_back(-1);
+
+        a.push_back(0);
+        b.push_back(0);
+
+        cin >> m.at(k) >> a.at(k) >> b.at(k);
+        if (max < m.at(k)) max = m.at(k);
+        if (m.at(k) == 0 && a.at(k) == 0 && b.at(k) == 0) break;
+
+        k++;
+    }
+
+    vector<int> primes;
+    createPrimesList(max / 2, primes);
+
+    k = 0;
+
+    for (int n = 0; n < m.size() - 1; n++) {
+        p.push_back(1);
+        q.push_back(1);
+
+        for (int i = mi.at(n); i >= 0; i--) {
+            for (int j = i; j >= 0; j--) {
+                if (ratioNum(a.at(n), b.at(n)) >
+                    ratioNum(primes.at(i), primes.at(j)))
+                    break;
+
+                if (p.at(k) * q.at(k) <= primes.at(i) * primes.at(j) &&
+                    primes.at(i) * primes.at(j) <= m.at(n)) {
+                    q.at(k) = primes.at(i);
+                    p.at(k) = primes.at(j);
+                    break;
+                }
+            }
+        }
+
+        k++;
+    }
+
+    for (int i = 0; i < p.size(); i++) {
+        cout << p.at(i) << " " << q.at(i) << endl;
+    }
+
+    return 0;
+}
+

@@ -1,0 +1,60 @@
+//https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_5_A&lang=jp
+
+import java.util.Scanner;
+
+public class Main{
+
+    //要素の配列Aと個数nはグローバル変数
+    public static int [] A;
+    
+    
+    public static int n;
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        n = sc.nextInt();
+
+        //空白で区切られたn個の要素を持つ配列を読み込む
+        A = new int[n];
+        for(int i = 0; i < A.length; ++i) {
+            A[i] = sc.nextInt();
+        }
+
+        //作る目的の配列Mとその個数q
+        int q = sc.nextInt();
+
+        //空白で区切られたq個の要素を持つ配列を読み込む
+        int[] M = new int[q];
+        for(int i = 0; i < M.length; ++i) {
+            M[i] = sc.nextInt();
+        }
+
+        //配列M各要素に対して探索をq回繰り返す
+        for(int i=0;i<q;i++){
+            if(solve(0,M[i])==1){
+                System.out.println("yes");
+            }else{
+                System.out.println("no");
+            }
+        }
+        sc.close();
+    }
+
+    /*solve(i, m)を「i 番目以降の要素を使って m を作れる場合 true を返す」という関数とすると、solve(i, m) はより小さい部分問題である solve(i+1, m) と solve(i+1, m - A[i]) に分割することができる。
+    ここで、A[i] を引いていることが、「i 番目の要素を使う」に対応している。これらを再帰的に調べることで元の問題である solve(0, m) を判定することができる。*/
+    public static int solve(int i,int m){
+        //solve(i, m) において、与えられた整数を作ることができたとき、m が 0 となります。また m が 0 より大きくかつ i が n 以上になったときに与えられた整数は作れなかったことになります
+        if(m==0){
+            return 1;
+        }else if(i>=n){
+            return 0;
+        }
+
+        //solve(i+1,m)かsolve(i+1,m-A[i])のいずれかがtrueのとき、元の問題solve(i, m)がtrue
+        if((solve(i+1,m)==1)||(solve(i+1,m-A[i])==1)){
+            return 1;
+        }else{
+            return 0;
+        }
+    }
+}

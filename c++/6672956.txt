@@ -1,0 +1,51 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+using ll = long long;
+struct BIT {
+	ll n;
+	vector<ll> bit[2];
+	BIT(ll n): n(n) {
+		bit[0].resize(n+1, 0);
+		bit[1].resize(n+1, 0);
+	}
+	void add_sub(ll p, ll idx, ll x) {
+		for (ll i = idx; i <= n; i += (i & -i)) {
+			bit[p][i] += x;
+		}
+	}
+	void add_range(ll l, ll r, ll x) {
+		add_sub(0, l, -x*(l-1));
+		add_sub(0, r+1, x*r);
+		add_sub(1, l, x);
+		add_sub(1, r+1, -x);
+	}
+	ll sum_sub(ll p, ll idx) {
+		ll s = 0;
+		for (ll i = idx; i >= 1; i -= (i & -i)) {
+			s += bit[p][i];
+		}
+		return s;
+	}
+	ll sum(ll idx) {
+		return sum_sub(0, idx) + idx * sum_sub(1, idx);
+	}
+	ll sum(ll i, ll j) { return sum(j) - sum(i-1); }
+};
+int main() {
+	ll n, q; cin >> n >> q;
+	vector<ll> ans;
+	BIT b(n);
+	for (ll i = 0; i < q; i++) {
+		ll c; cin >> c;
+		if (c == 0) {
+			ll s, t, x; cin >> s >> t >> x;
+			b.add_range(s, t, x);
+		} else if (c == 1) {	
+			ll i; cin >> i;
+			ans.push_back(b.sum(i, i));
+		}
+	}
+	for (auto x: ans) cout << x << endl;
+}
+

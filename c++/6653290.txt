@@ -1,0 +1,86 @@
+#include "bits/stdc++.h"
+
+#define REP(i,num) for(ll i=0;i<(num);++i)
+#define FOR(i,c,num) for(ll (i)=(c);(i)<(num);++(i))
+#define LOOP(i) while(i--)
+#define ALL(c) c.begin(),c.end()
+#define PRINTALL(c) for(auto pitr=c.begin();pitr!=c.end();++pitr){cout<<*pitr;if(next(pitr,1)!=c.end())cout<<' ';}cout<<endl;
+#define PAIRCOMP(c,comp) [](const pair<ll,ll>& lhs,const pair<ll,ll>& rhs){return lhs.c comp rhs.c;}
+
+using namespace std;
+using ll = long long;
+using ull = unsigned long long;
+using vll = vector<ll>;
+using vvll = vector<vector<ll>>;
+
+constexpr ll atcoder_mod = 1e9+7;
+
+template<typename T=ll>
+T in(){ T x; cin >> x; return (x); }
+template<typename T=ll,typename C=vector<T>>
+C vecin(int N){ C x(N);REP(i,N){ x[i]=in<T>(); }return x; }
+template<typename T=ll,size_t N>
+array<T,N> arrin(){array<T,N> x;REP(i,N){ x[i]=in<T>(); }return x;}
+
+void vout(){ cout << endl; }
+template<typename Head,typename... Tail>
+void vout(Head&& h,Tail&&... t){ cout << ' ' << h;vout(forward<Tail>(t)...); }
+void out(){ cout << endl; }
+template<typename Head,typename... Tail>
+void out(Head&& h,Tail&&... t){ cout << h;vout(forward<Tail>(t)...); }
+
+template<typename T>
+bool chmax(T& a,T b){ if(a<b){ a=b;return true; }return false; }
+template<typename T>
+bool chmin(T& a,T b){ if(a>b){ a=b;return true; }return false; }
+
+ll gcd(ll a,ll b){
+	if(a<b){
+		swap(a,b);
+	}
+
+	while(ll r=(a%b)){
+		a = b;
+		b = r;
+	}
+	return b;
+}
+
+int main(){
+	cin.tie(0);
+	//ios::sync_with_stdio(false);
+	cout<<fixed<<setprecision(10);
+
+	string S=in<string>();
+	if(S.find('(')==S.npos){
+		ll dot = S.find('.');
+		string A=S.substr(0,dot),B=S.substr(dot+1);
+		ll C=stoll(A),D=stoll(B),E=S.size()-dot-1;
+		ll V=1;
+		REP(i,E) V*=10;
+
+		ll X=V*C+D;
+		ll Z=gcd(X,V);
+		printf("%d/%d\n",X/Z,V/Z);
+	}
+	else{
+		ll dot = S.find('.');
+		ll bar = S.find('('),barc = S.find(')');
+		string A=S.substr(0,dot),B=S.substr(bar+1,barc-bar-1);
+		string K=S.substr(dot+1,bar-dot-1);
+		ll C=stoll(A),D=stoll(K.empty()?"0":K),E=stoll(B);
+		ll V=1;
+		REP(i,bar-dot-1) V*=10;
+
+		ll X=V*C+D;
+
+		ll U=1;
+		REP(i,B.size()) U*=10;
+		ll Y=X*(U-1)+E;
+		U=(U-1)*V;
+		ll Z=gcd(Y,U);
+		printf("%d/%d\n",Y/Z,U/Z);
+	}
+	return 0;
+}
+

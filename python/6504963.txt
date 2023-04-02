@@ -1,0 +1,120 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+
+	const n = si[0].split(" ");
+	let num = [];
+	for (let i = 0; i < n.length; i++) {
+		num[i] = parseInt(n[i]);
+	}
+
+	var array = new Array(num[0]);
+
+	for (let i = 0; i < num[0]; i++) {
+		array[i] = new Array(num[1]);
+	}
+	
+	let head = new Array(num[0]);
+	let tail = new Array(num[0]);
+	let mid = new Array(num[0]);
+	let length = new Array(num[0])
+
+	for (let i = 0; i < num[0]; i++) {
+		head[i] = Math.floor(num[1] / 2);
+		tail[i] = Math.floor(num[1] / 2);
+		mid[i] = Math.floor(num[1] / 2);
+		length[i] = 0;
+	}
+
+	for (let i = 1; i <= num[1]; i++) {
+		let order = si[i].split(" ");
+		let t = order[1];
+
+		switch (order[0]) {
+			case '0':
+				let insert = parseInt(order[2]);
+				if (length[t] === 0) {
+					array[t][mid[t]] = insert;
+					head[t]--;
+					tail[t]++;
+					length[t]++;
+				} else {
+					if (insert > array[t][mid[t]]) {
+						array[t][head[t]] = insert;
+						for (let j = head[t]; j < mid[t]; j++) {
+							if (array[t][j] < array[t][j + 1]) {
+								array[t][j] = array[t][j + 1];
+								array[t][j + 1] = insert;
+							} else {
+								break;
+							}
+						}
+						head[t]--;
+						length[t]++;
+					}else {
+						array[t][tail[t]] = insert;
+						for (let j = tail[t]; j > mid[t]; j--) {
+							if (array[t][j] > array[t][j - 1]) {
+								array[t][j] = array[t][j - 1];
+								array[t][j - 1] = insert;
+							} else {
+								break;
+							}
+						}
+						tail[t]++;
+						length[t]++;
+					}
+				}
+				break;
+
+			case '1':
+				if (length[t] > 0) {
+					so.write(array[t][head[t] + 1] + '\n');
+				}
+				break;
+
+			case '2':
+				if (length[t] > 0) {
+					head[t]++;
+					length[t]--;
+					if (length[t] === 0) {
+						head[t] = Math.floor(array[t].length / 2);
+						tail[t] = Math.floor(array[t].length / 2);
+						mid[t] = Math.floor(array[t].length / 2);
+					}
+					array[t][head[t]] = [];
+				}
+				break;
+		}
+		
+		if (length[t] > 0) {
+			mid[t] = Math.floor((tail[t] - head[t]) / 2) + head[t];
+		}
+		
+		if (head[t] < 0 || tail[t] >= array[t].length) {
+			let data = new Array(length[t]);
+			let c = 0
+			for (let j = head[t] + 1; j < tail[t]; j++) {
+				data[c] = (array[t][j]);
+				c++;
+			}
+			
+			array[t] = new Array(array[t].length * 2);
+			array[t] = new Array(length[t] * 2);
+			head[t] = Math.floor(array[t].length / 2);
+			tail[t] = Math.floor(array[t].length / 2) + 1;
+			mid[t] = Math.floor(array[t].length / 2);
+			for (let j = Math.floor(data.length / 2); j >= 0; j--) {
+				array[t][head[t]] = data[j];
+				head[t]--;
+			}
+			for (let j = Math.floor(data.length / 2) + 1; j < data.length; j++) {
+				array[t][tail[t]] = data[j];
+				tail[t]++;
+			}
+		}
+		//so.write(order[0] + ':'+ 'array['+t+']{' +array[t] + '} length : '+length[t]+" : mid : "+array[t][mid[t]]+'\n');
+	}
+}

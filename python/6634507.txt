@@ -1,0 +1,68 @@
+using System;
+
+namespace C {
+    class Program {
+        static void Main(string[] args) {
+            //入力
+            int N = int.Parse(Console.ReadLine());
+            string[] Cb = Console.ReadLine().Trim().Split(' ');
+            string[] Cs = new string[N];
+            for (int i = 0; i <= N - 1; i++) Cs[i] = Cb[i];
+            string Temp = "0";
+
+            //バブルソート
+            for (int i = 0; i <= N - 1; i++) {
+                for (int j = N - 1; j >= i + 1; j--) {
+                    if (int.Parse(Cb[j].Substring(1)) < int.Parse(Cb[j - 1].Substring(1))) {
+                        Temp = Cb[j];
+                        Cb[j] = Cb[j - 1];
+                        Cb[j - 1] = Temp;
+                    }
+                }
+            }
+
+            //選択ソート
+            int minj = 0;
+            for (int i = 0; i <= N - 1; i++) {
+                minj = i;
+                for (int j = i; j <= N - 1; j++) {
+                    if (int.Parse(Cs[j].Substring(1)) < int.Parse(Cs[minj].Substring(1))) {
+                        minj = j;
+                    }
+                }
+                Temp = Cs[i];
+                Cs[i] = Cs[minj];
+                Cs[minj] = Temp;
+            }
+
+            //出力
+            for (int i = 0; i < N; i++) {
+                if (i == N - 1) Console.WriteLine(Cb[i]);
+                else Console.Write("{0} ", Cb[i]);
+            }
+            Console.WriteLine("Stable");
+
+            for (int i = 0; i < N; i++) {
+                if (i == N - 1) Console.WriteLine(Cs[i]);
+                else Console.Write("{0} ", Cs[i]);
+            }
+
+            int flag = 0;
+            for (int i = 0; i < N; i++) {
+                for (int j = i + 1; j <= N - 1; j++) {
+                    for (int a = 0; a <= N - 1; a++) {
+                        for (int b = a + 1; b <= N - 1; b++) {
+                            if (int.Parse(Cb[i].Substring(1, 1)) == int.Parse(Cb[j].Substring(1, 1)) && Cb[i] == Cs[b] && Cb[j] == Cs[a]) { flag = 1; }
+                        }
+                    }
+                }
+            }
+            if (flag == 0) {
+                Console.WriteLine("Stable");
+            } else {
+                Console.WriteLine("Not stable");
+            }
+        }
+    }
+}
+

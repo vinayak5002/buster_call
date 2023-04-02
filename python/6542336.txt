@@ -1,0 +1,331 @@
+import java.io.*;
+import java.util.*;
+import java.math.BigDecimal;
+import java.lang.Object;
+import java.util.function.*;
+
+
+/*
+6
+15 26
+19 24
+20 16
+60 20
+73 11
+89 38
+4
+16 15
+50 9
+80 2
+99 8
+5
+5 2300
+30 1000
+70 1200
+85 3000
+90 3500
+
+17.644444444444446
+17.170731707317074
+3.3846153846153846
+33.50561797752809
+39.666666666666664
+*/
+
+public class Main {
+  public static void main(String[] args){
+      int n,m,w,h,s=0,t,ans=0,mx,mn,sum,cnt,now;
+      int[] a=new int[100000],b=new int[8];
+      int[][] c = new int[200][200];
+      int D,N,M,L;
+      int[] B=new int[200],H=new int[200],F=new int[200],A=new int[200],P=new int[200],T=new int[200];
+      double[] W=new double[200];
+      boolean flag;
+      String str;
+      Scanner scanner =new Scanner(System.in);
+      //ArrayList<Integer>vec=new ArrayList<Integer>();
+      D=Integer.parseInt(scanner.next());
+      for(int Dataset=0;Dataset<D;Dataset++){
+        sum=0;
+        N=Integer.parseInt(scanner.next());
+        B[0]=0; H[0]=50;
+        HashMap<Integer,Integer>hs=new HashMap<Integer,Integer>();
+        HashMap<Integer,Integer>get_node=new  HashMap<Integer,Integer>();
+        cnt=0;
+        hs.put(0,cnt);
+        get_node.put(50, 0);
+        cnt++;
+        mx=0;
+        for(int i=0;i<N;i++){
+          B[i+1]=Integer.parseInt(scanner.next());
+          H[i+1]=Integer.parseInt(scanner.next());
+          mx=Math.max(mx,H[i+1]);
+          hs.put(i+1,cnt);
+          cnt++;
+          hs.put(-(i+1),cnt);
+          get_node.put(H[i+1], cnt);
+          cnt++;
+          W[i]=0;
+        }
+        B[N+1]=100; H[N+1]=50;
+        N+=1;
+        Node[] nd=new Node[100];
+        cnt=0;
+        nd[0]=new Node(H[1],B[1]);
+        cnt++;
+        for(int i=1;i<N;i++){
+          nd[cnt]=new Node(Math.min(H[i],H[i+1]),B[i+1]-B[i]);
+          cnt++;
+          int l=i,r=i;
+          while(H[l]<=H[i]){
+            l--;
+          }
+          mn=H[l];
+          while(H[r]<=H[i]){
+            r++;
+          }
+          mn=Math.min(mn,H[r]);
+          nd[cnt]=new Node(mn-H[i],B[r]-B[l]);
+          cnt++;
+        }
+        /*for(int i=0;i<=N*2-2;i++){
+          System.out.println("nd["+i+"]:"+nd[i].H+" "+nd[i].W);
+        }*/
+        M=Integer.parseInt(scanner.next());
+        int[][] road= new int[100][100];
+        PriorityQueue<Integer> pq=new PriorityQueue<Integer>();
+        for(int i=0;i<M;i++){
+          F[i]=Integer.parseInt(scanner.next());
+          A[i]=Integer.parseInt(scanner.next());
+          for(int j=0;j<N;j++){
+            if(B[j]<=F[i]&&F[i]<=B[j+1]){
+              F[i]=j;
+              break;
+            }
+          } 
+          int num=0,l=F[i],r=F[i]+1;
+          //[l,r)
+          road[i][0]=hs.get(F[i]);
+          num++;
+          pq.add(H[0]);
+          pq.add(H[F[i]]);
+          while(num<=N*2-2){
+            int height=pq.poll();
+            int node=get_node.get(height);
+            if(height<H[l]&&height<H[r]){ 
+              road[i][num]=node;
+              num++;
+            }
+            else if(H[l]<=H[r]){
+              l--;
+              road[i][num]=hs.get(l);
+              pq.add(height);
+              pq.add(H[l]);
+              num++;
+            }
+            else{
+              road[i][num]=hs.get(r);
+              pq.add(height);
+              pq.add(H[r]);
+              r++;
+              num++;
+            }  
+          }
+          /*for(int j=0;j<=N*2-2;j++){
+            System.out.println("road["+i+"]["+j+"]:"+road[i][j]);
+          }*/
+          sum+=A[i];
+        }
+        L=Integer.parseInt(scanner.next());
+        ArrayList<Query> Q = new ArrayList<Query>();
+        for(int i=0;i<L;i++){
+          P[i]=Integer.parseInt(scanner.next());
+          T[i]=Integer.parseInt(scanner.next());
+          Q.add(new Query(P[i],T[i],i));
+        }
+        Compare<Query> Qcomp = (Query x,Query y)->{
+          if(x.T<y.T)return true;
+          return false;
+        };
+        Q=sort(Q, Qcomp,0,Q.size());
+        now=0;
+        for(int tl=0;tl<L;tl++){
+          Query q=Q.get(tl);
+          if(sum*q.T>=100*50*30){
+            q.ans=50;
+            continue;
+          }
+          for(int i=0;i<M;i++){
+            double Water=(double)A[i]*(q.T-now);
+            int j=0;
+            while(Water>(double)0.0000000000001){
+              if((double)nd[road[i][j]].H-nd[road[i][j]].Wt<(double)0.0000000000001){
+                j++;
+                continue;
+              }
+              if(((double)nd[road[i][j]].H-nd[road[i][j]].Wt)*nd[road[i][j]].W*30>Water){
+                nd[road[i][j]].Wt+=Water/(double)(nd[road[i][j]].W*30);
+                Water=0.0;
+                continue;
+              }
+              else{
+                Water-=((double)nd[road[i][j]].H-nd[road[i][j]].Wt)*(double)(nd[road[i][j]].W*30);
+                nd[road[i][j]].Wt=(double)nd[road[i][j]].H;
+                continue;
+              }
+            }
+          }
+          for(int i=0;i<N;i++){
+            if(B[i]<=q.P&&q.P<=B[i+1]){
+              q.P=i;
+              break;
+            }
+          }
+          int l=q.P,r=q.P+1;
+          if((double)nd[hs.get(l)].H-nd[hs.get(l)].Wt<(double)0.0000000000001){
+            q.ans=(double)nd[hs.get(l)].H;
+            mn=Math.min(H[l],H[r]);
+            while(true){
+              if(H[l]<H[r]){
+                if(H[l]<mn){
+                  l--;
+                  continue;
+                }
+                mn=Math.max(mn,Math.min(H[l-1],H[r]));
+                if((double)nd[hs.get(-l)].H-nd[hs.get(-l)].Wt<(double)0.0000000000001){
+                  q.ans+=(double)nd[hs.get(-l)].H;
+                  //System.out.println(hs.get(-l));
+                  l--;
+                }
+                else{
+                  q.ans+=nd[hs.get(-l)].Wt;
+                  //System.out.println(hs.get(-l));
+                  break;
+                }
+              }
+              else {
+                if(H[r]<mn){
+                  r++;
+                  continue;
+                }
+                mn=Math.max(mn,Math.min(H[l],H[r+1]));
+                if((double)nd[hs.get(-r)].H-nd[hs.get(-r)].Wt<(double)0.0000000000001){
+                  q.ans+=(double)nd[hs.get(-r)].H;
+                  //System.out.println(hs.get(-r));
+                  r++;
+                }
+                else{
+                  q.ans+=nd[hs.get(-r)].Wt;
+                  //ystem.out.println(hs.get(-r));
+                  break;
+                }
+              }
+            }
+          }
+          else{
+            q.ans=nd[hs.get(l)].Wt;
+          } 
+          //Q.set(tl, new Query(q.P,q.T,q.id,q.ans));
+          /*System.out.println(tl);
+          for(int i=0;i<=N*2-2;i++){
+            System.out.println("nd["+i+"]: "+nd[i].Wt);
+          }*/
+          now=q.T;
+        }
+        Compare<Query> Idcomp = (Query x,Query y)->{
+          if(x.id<y.id)return true;
+          return false;
+        };
+        Q=sort(Q, Idcomp,0,Q.size());
+        for(int i=0;i<L;i++){
+          System.out.println(Q.get(i).ans);
+        }
+      }
+    }
+  public interface Compare<T>{
+	  public boolean func(T x,T y);
+  }
+  static String swap(String str, int i, int j){
+      char ch[] = str.toCharArray();
+      char tempo = ch[i];
+      ch[i] = ch[j];
+      ch[j] = tempo;
+      return new String(ch);
+  }
+static class Pair<T,E>{
+    T first;
+    E second;
+    public Pair(T a,E b){
+      first=a;
+      second=b;
+    }
+    public Pair(Pair<T,E>x){
+      first=x.first;
+      second=x.second;
+    }
+    public Pair(){}
+    void print(){
+      System.out.println("first:"+first+" second:"+second);
+    }
+  }
+  public static <T> ArrayList<T> sort(ArrayList<T> x, Compare<T> comp,int l,int r){
+    //[l,r)
+    ArrayList<T>ret=new ArrayList<T>();
+    if(l-r==2){
+      if(comp.func(x.get(l),x.get(l+1))==false){
+        ret.add(x.get(l+1));
+        ret.add(x.get(l));
+        return ret;
+      }
+      ret.add(x.get(l));
+      ret.add(x.get(l+1));
+      return ret;
+    }
+    if(r-l==1){
+      ret.add(x.get(l));
+      return ret;
+    }
+    ArrayList<T> A=sort(x,comp,l,(l+r)/2);
+    ArrayList<T> B=sort(x,comp,(l+r)/2,r);
+    int a=0,b=0;
+    while(a<A.size()&&b<B.size()){
+      if(comp.func(A.get(a),B.get(b))==true){
+        ret.add(A.get(a));
+        a++;
+      }
+      else{
+        ret.add(B.get(b));
+        b++;
+      }
+    }
+    while(a<A.size()){
+        ret.add(A.get(a));
+        a++;
+    }
+     while(b<B.size()){
+        ret.add(B.get(b));
+        b++;
+    }
+    return ret;
+  }
+static class Query{
+    int P,T,id;
+    double ans=0.0;
+    public Query(){}
+    public Query(int x,int y,int z){
+      P=x;T=y;id=z;
+    }
+    public Query(int x,int y,int z,double w){
+      P=x;T=y;id=z;ans=w;
+    }
+ }
+ static class Node{
+  int H,W;
+  double Wt=0.0;
+  public Node(){}
+  public Node(int x,int y){
+    H=x;W=y;
+  }
+ }
+}
+

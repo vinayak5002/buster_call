@@ -1,0 +1,64 @@
+#include<cstdio>
+#include<algorithm>
+#include<queue>
+#include<vector>
+#include<map>
+#include<iostream>
+using namespace std;
+struct UnionFind {
+    vector<int> par; // 親ノード
+    vector<int> rank; // ランク
+
+    UnionFind(int n = 1) {
+        init(n);
+    }
+
+    void init(int n = 1) {
+        par.resize(n); rank.resize(n);
+        for (int i = 0; i < n; ++i) par[i] = i, rank[i] = 0;
+    }
+
+    int root(int x) {
+        if (par[x] == x) {
+            return x;
+        }
+        else {
+            int r = root(par[x]);
+            return par[x] = r;
+        }
+    }
+
+    bool issame(int x, int y) {
+        return root(x) == root(y);
+    }
+
+    bool merge(int x, int y) {
+        x = root(x); y = root(y);
+        if (x == y) return false;
+        if (rank[x] < rank[y]) swap(x, y);
+        if (rank[x] == rank[y]) ++rank[x];
+        par[y] = x;
+        return true;
+    }
+};
+int main() {
+    int N;
+    cin>>N;
+    int Q;
+    cin>>Q;
+    UnionFind uf(N);
+    for(int i=1;i<=Q;i++){
+        int T;
+        cin>>T;
+        if(T==0){
+            int X,Y,Z;
+            cin>>X>>Y>>Z;
+            uf.merge(X, Y, Z);
+        }
+        else {
+            int X,Y;
+            cin>>X>>Y;
+            cout<<diff(X, Y)<<endl;
+        }
+    }
+}

@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+
+#define rep(i, x, n) for (int i = (x); i < (n); i++)
+#define reps(i, x, n) for (int i = (x); i <= (n); i++)
+#define lol long long
+#define SUM(n) ((n) + 1) * (n) / 2 // 1〜nまでの総和を求める式
+#define mp make_pair
+#define fi first
+#define se second
+#define pu push_back
+#define SYOU(x) fixed << setprecision(x + 1) //小数点桁数を指定する
+#define abs(x, y) max(x, y) - min(x, y)
+#define all(v) v.begin(), v.end()
+#define UPDigit(a, b) (a + b - 1) / b //小数点切り上げ
+const int INF = 0x3f3f3f3f;
+const long long LINF = 0x3f3f3f3f3f3f3f3fLL;
+const int mod = int(998244353);
+const int MOD = int(1e9 + 7);
+using namespace std;
+using pii = pair<int, int>;
+typedef vector<int> vit;
+//八方向を見るのに使うと便利(楽)
+const int dy[] = {0, 1, 0, -1, -1, 1, 1, -1};
+const int dx[] = {1, 0, -1, 0, 1, 1, -1, -1};
+
+signed main(void)
+{
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    string s1, s2;
+    while(cin >> s1, s1 != "."){
+        cin >> s2;
+        int cnt = 0, i1, i2, ans = 0;
+        // "の位置をメモ
+        queue<int> p1, p2;
+        rep(i, 0, s1.size()){
+            if(s1[i] == '"'){
+                p1.emplace(i);
+            }
+        }
+        rep(i, 0, s2.size()){
+            if(s2[i] == '"'){
+                p2.emplace(i);
+            }
+        }
+        string memo1, memo2;
+        i1 = i2 = 0;
+        while(!p1.empty() && !p2.empty()){
+            int n1 = p1.front(), n2 = p2.front();
+            p1.pop(); p2.pop();
+            // s1[i1]~s1[n1] == s2[i2]~s2[n2] か確認
+            memo1 = memo2 = "";
+            for( ; i1 < n1;++ i1){
+                memo1 += s1[i1];
+            }
+            for( ; i2 < n2; ++ i2){
+                memo2 += s2[i2];
+            }
+            //cout << memo1 << '\n' << memo2 << '\n';
+            if(memo1 != memo2){
+                //cout << cnt << '\n';
+                if(cnt % 2 == 0) ans = 2; // 命令部分が違う
+                else ++ ans; // 文字列リテラルが違う
+            }
+            cnt ++;
+            i1 = n1; i2 = n2;
+        }
+        if(!p1.empty() || !p2.empty()){
+            ans = 2;
+        }
+        memo1 = memo2 = "";
+        for( ; i1 < s1.size();++ i1){
+            memo1 += s1[i1];
+        }
+        for( ; i2 < s2.size(); ++ i2){
+            memo2 += s2[i2];
+        }
+        if(memo1 != memo2) ans = 2;
+        // 回答
+        if(ans == 0 && s1 == s2){
+            cout << "IDENTICAL\n";
+        } else if(ans == 1){
+            cout << "CLOSE\n";
+        } else {
+            cout << "DIFFERENT\n";
+        }
+    }
+    return 0;
+}

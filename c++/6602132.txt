@@ -1,0 +1,90 @@
+#include <stdio.h>
+
+typedef struct Node_
+{
+    int id;
+    int parent;
+    int right;
+    int left;
+} Node;
+
+Node nodes[100000];
+
+void preorder(Node root)
+{
+    printf(" %d", root.id);
+    if (root.left != -1)
+    {
+        preorder(nodes[root.left]);
+    }
+    if (root.right != -1)
+    {
+        preorder(nodes[root.right]);
+    }
+}
+
+void inorder(Node root)
+{
+    if (root.left != -1)
+    {
+        inorder(nodes[root.left]);
+    }
+    printf(" %d", root.id);
+    if (root.right != -1)
+    {
+        inorder(nodes[root.right]);
+    }
+}
+
+void postorder(Node root)
+{
+    if (root.left != -1)
+    {
+        postorder(nodes[root.left]);
+    }
+    if (root.right != -1)
+    {
+        postorder(nodes[root.right]);
+    }
+    printf(" %d", root.id);
+}
+
+int findRoot(Node node)
+{
+    if (node.parent == -1)
+    {
+        return node.id;
+    }
+
+    return findRoot(nodes[node.parent]);
+}
+
+int main()
+{
+    int id, n, left, right, degree, id_root;
+    scanf("%d", &n);
+    for (int i = 0; i < n; i++)
+    {
+        nodes[i].parent = -1;
+    }
+    for (int i = 0; i < n; i++)
+    {
+        scanf("%d %d %d", &id, &left, &right);
+        nodes[id].id = id;
+        nodes[id].left = left;
+        nodes[id].right = right;
+        nodes[left].parent = id;
+        nodes[right].parent = id;
+    }
+    id_root = findRoot(nodes[0]);
+    printf("Preorder\n");
+    preorder(nodes[id_root]);
+    printf("\n");
+    printf("Inorder\n");
+    inorder(nodes[id_root]);
+    printf("\n");
+    printf("Postorder\n");
+    postorder(nodes[id_root]);
+    printf("\n");
+    return 0;
+}

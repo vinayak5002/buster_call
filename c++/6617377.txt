@@ -1,0 +1,66 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef long double ld;
+typedef pair<ll, ll> pll;
+#define rep(i, n) for(ll i = (ll)0; i < (ll)n; i++)
+#define ALL(a)  (a).begin(),(a).end()
+ll dx[8] = {-1, 1, 0, 0, -1, -1, 1, 1};
+ll dy[8] = {0, 0, -1, 1, -1, 1, -1, 1};
+
+
+/*
+ * aとbのうち小さいものをaに代入
+ */
+template<class T> inline bool chmin(T& a, T b) {
+  if (a > b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+
+/*
+ * aとbのうち大きいものをaに代入
+ */
+template<class T> inline bool chmax(T& a, T b) {
+  if (a < b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+
+/*
+ * メイン関数
+ */
+int main() {
+  ll N; cin >> N;
+  vector<ll> A(N);
+  rep(i, N) cin >> A[i];
+  vector<ll> all_enumeration;
+  
+  // bit全探索で作れる整数を全列挙する
+  rep(bit, (1LL << N)) {
+    ll temp_sum = 0;
+    rep(i, N) {
+      if(bit&(1LL<<i)) temp_sum += A[i];
+    }
+    all_enumeration.push_back(temp_sum);
+  }
+  
+  // 二分探索するためにソートする
+  sort(ALL(all_enumeration));
+  
+  // 各Mについて二分探索を行い、存在するかを調べる
+  ll Q; cin >> Q;
+  rep(i, Q) {
+    ll M; cin >> M;
+    if(binary_search(ALL(all_enumeration), M)) cout << "yes" << endl;
+    else cout << "no" << endl;
+  }
+  
+  return 0;
+}

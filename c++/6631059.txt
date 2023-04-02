@@ -1,0 +1,112 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+using namespace std;
+
+typedef struct s_node{
+	int key;
+	struct s_node *prev;
+	struct s_node *next;
+} t_node;
+
+t_node head = {-1, NULL, NULL};
+t_node tail = {-1, &head, NULL};
+
+
+t_node *search_key(int x)
+{
+	t_node *node = head.next;
+	while(node->key != -1)
+	{
+		if(node->key == x)
+			return node;
+		node = node->next;
+	}
+	return NULL;
+}
+
+
+void insert_key(int x)
+{
+	t_node *node = (t_node *)malloc(sizeof(t_node));
+	node->key = x;
+	node->next = head.next;
+	head.next->prev = node;
+	head.next = node;
+	node->prev = &head;
+}
+
+
+void delete_key(int x)
+{
+	t_node *node = search_key(x);
+	if(node != NULL)
+	{
+		node->prev->next = node->next;
+		node->next->prev = node->prev;
+		free(node);
+	}
+}
+
+
+void delete_first()
+{
+	if(head.next != &tail)
+	{
+		t_node *tmp = head.next;
+		head.next = tmp->next;
+		tmp->next->prev = &head;
+		free(tmp);
+	}
+}
+
+
+void delete_last()
+{
+	if(tail.prev != &head)
+	{
+		t_node *tmp = tail.prev;
+		tail.prev = tmp->prev;
+		tmp->prev->next = &tail;
+		free(tmp);
+	}
+}
+
+
+int main()
+{
+	head.next = &tail;
+	tail.prev = &head;
+	int n, x;
+	string s;
+
+	cin >> n;
+	for(int i = 0; i < n; i++)
+	{
+		cin >> s;
+		if(s == "insert" || s == "delete")
+		{
+			cin >> x;
+			if(s == "insert")
+				insert_key(x);
+			else if(s == "delete")
+				delete_key(x);
+		}
+		else if(s == "deleteFirst")
+		{
+			delete_first();
+		}
+		else if(s == "deleteLast")
+		{
+			delete_last();
+		}
+	}
+	t_node *node = head.next;
+	while(node->next != &tail)
+	{
+		cout << node->key << " ";
+		node = node->next;
+	}
+	cout << node->key << endl;
+}

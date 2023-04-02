@@ -1,0 +1,42 @@
+#include <bits/stdc++.h>
+using namespace std;
+struct query{
+    string name;
+    int process;
+    int pdq;
+};
+void fpdq(int k, int q, int &ans){
+    if(k % q == 0) ans = k / q;
+    else ans = k / q + 1;
+}
+int fr(int a){
+    if(a % 100 == 0) return 100;
+    else return a % 100;
+}
+int main(){
+    int n, q;
+    cin >> n >> q;
+    vector<query> p(n);
+    for(int i = 0;i < n;i++){
+        string s;
+        int k;
+        cin >> s >> k;
+        p.at(i).name = s;
+        p.at(i).process = k;
+        fpdq(k, q, p.at(i).pdq);
+    }
+    int cnt = n, t = 0, j = 0;
+    vector<pair<int, int>> ans;
+    while(cnt > 0){
+        p.at(j).pdq --;
+        if(p.at(j).pdq == 0){
+			cnt --;
+          	t += fr(p.at(j).process);
+          	ans.push_back(make_pair(j, t));
+        } else if(p.at(j).pdq > 0) t += 100;
+        j += 1;
+      	j %= n;
+    }
+    for(int i = 0;i < n;i++) cout << p.at(ans.at(i).first).name << " " << ans.at(i).second << endl;
+    return 0;
+}

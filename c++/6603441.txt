@@ -1,0 +1,114 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int n;
+    char seq[260][260];
+    int ans=0, cnt=0;
+    while(scanf("%d", &n)!=EOF)
+    {
+        if(n==0) break;
+        for(int i=0; i<n; i++)
+        {
+            for(int j=0; j<=n; j++)             /* %c will input the "\n", so we need to set j<=n */
+            {
+                scanf("%c", &seq[i][j]);
+            }
+        }
+        for(int i=0; i<n; i++)                                          /* Row */
+        {
+            for(int j=0; j<=n; j++)
+            {
+                if(seq[i][j] == '1' && seq[i][j] == seq[i][j+1])
+                {
+                    cnt++;
+                }
+                else if(seq[i][j] == '1' && seq[i][j] == seq[i][j-1])
+                {
+                    cnt++;
+                }
+                else if(seq[i][j] == '1')
+                {
+                    cnt = 1;
+                }
+            }
+            if(cnt > ans)
+            {
+                ans = cnt;
+            }
+            cnt = 0;
+        }
+        for(int i=0; i<=n; i++)                                           /* Straight Line */
+        {
+            for(int j=0; j<n; j++)
+            {
+                if(seq[j][i] == '1' && seq[j][i] == seq[j+1][i])
+                {
+                    cnt++;
+                }
+                else if(seq[j][i] == '1' && seq[j][i] == seq[j-1][i])
+                {
+                    cnt++;
+                }
+                else if(seq[j][i] == '1')
+                {
+                    cnt = 1;
+                }
+            }
+            if(cnt > ans)
+            {
+                ans = cnt;
+            }
+            cnt = 0;
+        }
+        for(int i=0; i<n; i++)
+        {
+            for(int j=0; j<=n; j++)
+            {
+                if(seq[i][j] == '1')
+                {
+                    cnt++;
+                    for(int k=i+1, sum=i+j, j=j-1; k<=sum-i; k++, j--)
+                    {
+                        if(seq[k][j] == '1')
+                        {
+                            cnt++;
+                        }
+                    }
+                }
+            }
+            if(cnt > ans)
+            {
+                ans = cnt;
+            }
+            cnt = 0;
+        }
+        for(int i=0; i<n; i++)
+        {
+            for(int j=0; j<=n; j++)
+            {
+                if(seq[i][j] == '1')
+                {
+                    cnt++;
+                    for(int k=i+1, sub=abs(i-j), j=j+1; k<=(n-sub); k++, j++)
+                    {
+                        if(seq[k][j] == '1')
+                        {
+                            cnt++;
+                        }
+                    }
+                }
+            }
+            if(cnt > ans)
+            {
+                ans = cnt;
+            }
+            cnt = 0;
+        }
+        printf("%d\n", ans);
+        ans = 0;
+    }
+    return 0;
+}
+

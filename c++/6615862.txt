@@ -1,0 +1,98 @@
+#include <stdio.h>
+#include <stdio.h>
+
+int main() {
+    int len = 1;
+    char c;
+    while(1) {
+        int max = 0;
+        scanf("%d",&len);
+        if(len==0) break;
+        getchar(); // to remove \n
+        int arr[len][len];
+        for (int i=0; i<len; i++) {
+            for (int j=0; j<len; j++) {
+                c = getchar();
+                switch(c){
+                case '0':
+                    arr[i][j] = 0;
+                    break;
+                case '1':
+                    arr[i][j] = 1;
+                    break;
+                default:
+                    break;
+                }
+            }
+            getchar(); // to remove \n
+        }
+
+        for (int i=0; i<len; i++) {
+            //check Horizontal
+            int ct = 0;
+            for (int j=0; j<len; j++) {
+                if(arr[i][j] == 1) {
+                    ct++;
+                    max = ct>max? ct : max;
+                } else {
+                    ct = 0;
+                }
+            }
+            //check Vertical
+            ct = 0;
+            for (int j=0; j<len; j++) {
+                if(arr[j][i] == 1) {
+                    ct++;
+                    max = ct>max? ct : max;
+                } else {
+                    ct = 0;
+                }
+            }
+            //check diagonal downright
+            ct = 0; int L = len-1-i;
+            for (int j=0; j<=i; j++, L++) {
+                if(max > i) break; //optimization
+                if(arr[L][j] == 1) {
+                    ct++;
+                    max = ct>max? ct : max;
+                } else {
+                    ct = 0;
+                }
+            }
+            ct = 0; L = len-1-i;
+            for (int j=0; j<=i; j++, L++) {
+                if(max > i) break; //optimization
+                if(arr[j][L] == 1) {
+                    ct++;
+                    max = ct>max? ct : max;
+                } else {
+                    ct = 0;
+                }
+            }
+            //check diagonal downleft
+            ct = 0; L = i;
+            for (int j=0; j<=i; j++, L--) {
+                if(max > i) break; //optimization
+                if(arr[j][L] == 1) {
+                    ct++;
+                    max = ct>max? ct : max;
+                } else {
+                    ct = 0;
+                }
+            }
+            ct = 0; L = i;
+            for (int j=len-1; j>=len-1-i; j--, L++) {
+                if(max > i) break; //optimization
+                if(arr[L][j] == 1) {
+                    ct++;
+                    max = ct>max? ct : max;
+                } else {
+                    ct = 0;
+                }
+            }
+            printf("up: %d\n", max); //for debugging [DEL THIS]
+        }
+        printf("max: %d\n", max);
+    }
+    return 0;
+}

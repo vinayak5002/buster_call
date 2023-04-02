@@ -1,0 +1,60 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void solve() {
+  int n, m, k;
+  cin >> n >> m >> k;
+
+  vector< int > ds(m);
+  vector< int > rev_ds(n, -1);
+  for (auto &d: ds) {
+    cin >> d;
+    d--;
+  }
+  for (int i = 0; i < m; i++) {
+    rev_ds[ds[i]] = 1 << i;
+  }
+
+  vector< vector< int > > vss(n, vector<int>(k));
+  for (auto &vs: vss) {
+    for (auto &v: vs) {
+      cin >> v;
+      v--;
+    }
+  }
+
+  constexpr int inf = 1001001001;
+  vector< int > dists(1 << m, inf);
+  queue< int > que;
+
+  dists[(1 << m) - 1] = 0;
+  que.emplace((1 << m) - 1);
+
+  while (not que.empty()) {
+    int bit = que.front();
+    que.pop();
+
+    for (int i = 0; i < k; i++) {
+      int nbit = 0;
+      for (int v = 0; v < m; v++) {
+        if (not ((1 << v) & bit)) continue;
+        int u = vss[v][i];
+        if (rev_ds[u] == -1) continue;
+        nbit |= rev_ds[u];
+      }
+
+      if (dists[nbit] > dists[bit] + 1) {
+        dists[nbit] = dists[bit] + 1;
+        que.emplace(nbit);
+      }
+    }
+  }
+
+  cout << dists[0] << endl;
+}
+
+int main() {
+  solve();
+}
+
+

@@ -1,0 +1,117 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <list>
+#include <algorithm>
+#include <ctype.h>
+#include <unordered_map>
+#include <queue>
+#include <iomanip>
+#include <set>
+#include <map>
+using namespace std;
+typedef long long ll;
+#define Out(x) cout << x << endl
+#define Yes cout << "Yes" << endl
+#define No cout << "No" << endl
+#define Ans cout << ans << endl
+#define rep(i,s,e) for(ll i = s; i < e; i++)
+
+
+void printa(vector<pair<int,char>> a) {
+	cout << a[0].second << a[0].first;
+	for (unsigned int i = 1; i < a.size(); i++) {
+		cout << " " << a[i].second << a[i].first;
+	}
+	cout << endl;
+}
+
+
+
+
+int  selectionSort(vector<pair<int,char>> &a) {
+
+	int counter = 0;
+	for (unsigned int i = 0; i < a.size(); i++) {
+		int mina = i;
+		for (unsigned  int j = i; j < a.size(); j++) {
+			if (a[j].first < a[mina].first) {
+				mina = j;
+			}
+		}
+		if (i != mina) {
+			auto tmp = a[mina];
+			a[mina] = a[i];
+			a[i] = tmp;
+			counter++;
+		}
+	}
+	return counter;
+}
+
+
+int bubbleSort(vector<pair<int,char>>& a) {
+
+	bool flag = true;
+	int counter = 0;
+	int i = 0;
+	while (flag) {
+		flag = false;
+		for (int j = a.size() - 1; j > i; j--) {
+			if (a[j].first < a[j - 1].first) {
+				auto tmp = a[j - 1];
+				a[j - 1] = a[j];
+				a[j] = tmp;
+				flag = true;
+				counter++;
+			}
+		}
+		i++;
+	}
+	return counter;
+}
+
+string isStable(vector<pair<int, char>> in, vector<pair<int, char>> out) {
+	int n = in.size();
+	for (int i = 0; i < n; i++) {
+		for (int j = i + 1; j < n; j++) {
+			for (int a = 0; a < n; a++) {
+				for (int b = a + 1; b < n; b++) {
+					if (in[i].first == in[j].first && in[i] == out[b] && (in[j] == out[a])) {
+					return "Not stable";
+					}
+				}
+			}
+		}
+	}
+	return "Stable";
+}
+
+
+
+int main() {
+
+	int n;
+	cin >> n;
+	vector<pair<int,char>> a(n);
+	for (int i = 0; i < n; i++) {
+		string s;
+		cin >> s;
+		a[i].first = s[1] - '0';
+		a[i].second = s[0];
+	}
+
+	auto aBubble = a;
+	int counter = bubbleSort(aBubble);
+	printa(aBubble);
+	cout << isStable(a, aBubble) << endl;
+
+	auto aSelect = a;
+	counter = selectionSort(aSelect);
+	printa(aSelect);
+	cout << isStable(a, aSelect) << endl;
+
+	return 0;
+
+}
+

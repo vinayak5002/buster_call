@@ -1,0 +1,74 @@
+#include<bits/stdc++.h>
+
+#define INF 1e9
+#define rep(i,n)for(int i=0;(i)<(int)(n);i++)
+#define REP(i,a,b)for(int i=(int)(a);(i)<=(int)(b);i++)
+#define ALL(a)  (a).begin(),(a).end()
+#define chmax(a, b) a = max(a, b)
+#define chmin(a, b) a = min(a, b)
+#define pb push_back
+#define fi first
+#define se second
+#define sz(x) ((int)x.size())
+
+using namespace std;
+using ld = long double;
+using ll = long long;
+using P = pair<ll, ll>;
+using Graph = vector<vector<int>>;
+
+const ll ZER = 0;
+const ll MOD = 998244353;
+
+int main() {
+    int n;
+    while(cin >> n){
+        if(n == 0)break;
+        vector<string> s;
+        rep(i, n){
+            string ss;
+            cin >> ss;
+            string ps = "";
+            ps.pb(ss[0]);
+            REP(i, 0, sz(ss)-1){
+                char c = ss[i];
+                if(c == 'a' || c == 'i' || c == 'u' || c == 'e' || c == 'o'){
+                    if(i+1 < sz(ss))ps.pb(ss[i+1]);
+                }
+            }
+            s.pb(ps);
+        }
+        // for(auto si : s)cout << si << ", ";cout << endl;
+        // kを求める
+        int k = 1;
+        bool f = true;
+        int maxsz = -1;
+        rep(i, n)chmax(maxsz, sz(s[i]));
+        // cout << "maxsz = " << maxsz << endl;
+        while(f && k <= maxsz){
+            f = false;
+            rep(i, n){
+                REP(j, i+1, n-1){
+                    string si, sj;
+                    if(sz(s[i]) >= k)si = s[i].substr(0, k);
+                    else si = s[i];
+                    if(sz(s[j]) >= k)sj = s[j].substr(0, k);
+                    else sj = s[j];
+
+                    if(si == sj)f = true;
+                    // cout << si << " " << sj << endl;
+                }
+            }
+            // 同じものがあった
+            if(f){
+                k++;
+            }
+            else {
+                break;
+            }
+        }
+        if(maxsz <= k)k = -1;
+        cout << k << endl;
+    }
+}
+

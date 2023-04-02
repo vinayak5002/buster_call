@@ -1,0 +1,32 @@
+#include <iostream>
+#include <vector>
+#include <map>
+
+using namespace std;
+using Int = int_fast64_t;
+
+int main()
+{
+	int N, M; cin >> N >> M;
+	vector<int> A(N); for (auto& a : A) cin >> a;
+	map<int, int> L = {{N + 1, N + 1}}, C = {{N, 1}};
+	for (int j = 0, Lj, Rj; j < M; ++j) {
+		cin >> Lj >> Rj;
+		if (L.count(Rj) == 0 || L[Rj] > Lj - 2) L[Rj] = Lj - 2;
+	}
+	for (auto [Rj, Lj] : L) ++C[Lj];
+	vector<Int> S(N, 0);
+	S[0] = A[0];
+	for (int i = 1; i < N; ++i) {
+		for (; !L.empty() && L.begin()->first <= i; L.erase(L.begin())) {
+			if (--C[L.begin()->second] <= 0) C.erase(L.begin()->second);
+		}
+		auto [Li, n] = *C.begin();
+		S[i] = (Int) A[i];
+		if (Li >= 0) S[i] += S[min(i - 1, Li)];
+		if (S[i] < S[i - 1]) S[i] = S[i - 1];
+	}
+	cout << S.back() << endl;
+	return 0;
+}
+

@@ -1,0 +1,231 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <deque>
+#include <queue>
+#include <string>
+#include <iomanip>
+#include <set>
+#include <unordered_set>
+#include <map>
+#include <unordered_map>
+#include <utility>
+#include <stack>
+#include <random>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+#include <assert.h>
+#if __has_include(<atcoder/all>)
+#include <atcoder/all>
+using namespace atcoder;
+#endif
+using namespace std;
+using ll=long long;
+#define read(x) cin>>(x);
+#define readll(x) ll (x);cin>>(x);
+#define readS(x) string (x);cin>>(x);
+#define readvll(x,N) vector<ll> (x)((N));for(int i=0;i<(N);i++){cin>>(x)[i];}
+#define rep(i,N) for(ll (i)=0;(i)<(N);(i)++)
+#define rep2d(i,j,H,W) for(ll (i)=0;(i)<(H);(i)++)for(ll (j)=0;(j)<(W);j++)
+#define yn {cout<<"Yes"<<endl;}else{cout<<"No"<<endl;}
+
+#define is_in(x,y) (0<=(x) && (x)<2 && 0<=(y) && (y)<2)
+
+long long powll(long long x,long long n){
+  long long res=1;
+  while(n>0){
+    if(n&1){
+      res*=x;
+    }
+    x*=x;
+    n>>=1;
+  }
+  return res;
+}
+
+inline bool is_in3d(const vector<vector<vector<ll>>>& b,ll dx,ll dy){
+  for(ll i=0;i<2;i++){
+    for(ll x=0;x<2;x++){
+      for(ll y=0;y<2;y++){
+        if(b[i][x][y]==1 && !is_in(x+dx,y+dy)){
+          return false;
+        }
+      }
+    }
+  }
+  return true;
+}
+
+inline vector<vector<vector<ll>>> moved(const vector<vector<vector<ll>>>& b,ll dx,ll dy){
+  vector<vector<vector<ll>>> res(2,vector<vector<ll>>(2,vector<ll>(2)));
+  for(ll i=0;i<2;i++){
+    for(ll x=0;x<2;x++){
+      for(ll y=0;y<2;y++){
+        if(b[i][x][y]==1){
+          res[i][x+dx][y+dy]=1;
+        }
+      }
+    }
+  }
+  return res;
+}
+
+void solve(ll H,ll N){
+  //cerr<<H<<" "<<N<<endl;
+  ll S=H+2*N+2;
+  //cerr<<"S: "<<S<<endl;
+  vector<vector<vector<ll>>> d(S,vector<vector<ll>>(2,vector<ll>(2)));
+  for(ll x=0;x<2;x++){
+    for(ll y=0;y<2;y++){
+      d[0][x][y]=1;
+    }
+  }
+  const vector<pair<ll,ll>> ar={{0,0},{0,1},{0,-1},{1,0},{-1,0},{1,1},{-1,1},{1,-1},{-1,-1}};
+  for(ll i=1;i<H+1;i++){
+    for(ll x=0;x<2;x++){
+      string c;
+      cin>>c;
+      for(ll y=0;y<2;y++){
+        if(c[y]=='#'){
+          d[i][x][y]=1;
+        }
+      }
+    }
+  }
+  // for(ll i=S-1;i>=0;i--){
+  //   for(ll x=0;x<2;x++){
+  //     for(ll y=0;y<2;y++){
+  //       cerr<<d[i][x][y]<<" ";
+  //     }
+  //   }
+  //   cerr<<endl;
+  // }
+  // cerr<<endl;
+  //cerr<<"c input"<<endl;
+  ll ans=0;
+  vector<vector<vector<vector<ll>>>> inputs(N,vector<vector<vector<ll>>>(2,vector<vector<ll>>(2,vector<ll>(2))));
+  for(ll i=0;i<N;i++){
+    for(ll j=0;j<2;j++){
+      for(ll x=0;x<2;x++){
+        string b;
+        cin>>b;
+        for(ll y=0;y<2;y++){
+          if(b[y]=='#'){
+            inputs[i][j][x][y]=1;
+          }
+        }
+      }
+    }
+  }
+  ll u=ar.size();
+  //cerr<<"input end"<<endl;
+  ll M=powll(u,N);
+  for(ll i=0;i<M;i++){
+    ll cnt=0;
+    ll direct=i;
+    ll flag=1;
+    vector<vector<vector<ll>>> D=d;
+    for(ll j=0;j<N;j++){
+      ll dx=ar[direct%u].first,dy=ar[direct%u].second;
+      //cerr<<"j: "<<j<<" ,direct: "<<direct<<" ,dx: "<<dx<<" ,dy: "<<dy<<endl;
+      if(!is_in3d(inputs[j],dx,dy)){
+        flag=0;
+        //cerr<<"break"<<endl;
+        break;
+      }
+      vector<vector<vector<ll>>> changed=moved(inputs[j],dx,dy);
+      // for(ll l=1;l>=0;l--){
+      //   for(ll x=0;x<2;x++){
+      //     for(ll y=0;y<2;y++){
+      //       cerr<<changed[l][x][y]<<" ";
+      //     }
+      //   }
+      //   cerr<<endl;
+      // }
+      ll index=0;
+      for(ll k=S-2;k>=0;k--){
+        ll f2=1;
+        for(ll l=0;l<2;l++){
+          for(ll x=0;x<2;x++){
+            for(ll y=0;y<2;y++){
+              if(D[k+l][x][y]==1 && changed[l][x][y]==1){
+                f2=0;
+                //cerr<<"goto!"<<endl;
+                goto point1;
+              }
+            }
+          }
+        }
+        point1:;
+        if(f2==0){
+          //cerr<<"break: k: "<<k<<endl;
+          index=k+1;
+          break;
+        }
+      }
+      //cerr<<"j:"<<j<<" ,dx: "<<dx<<" ,dy:"<<dy<<endl;
+      //cerr<<"index: "<<index<<endl;
+      for(ll l=0;l<2;l++){
+        for(ll x=0;x<2;x++){
+          for(ll y=0;y<2;y++){
+            D[index+l][x][y]+=changed[l][x][y];
+            assert(D[index+l][x][y]<=1);
+          }
+        }
+      }
+      for(ll l=0;l<2;l++){
+        for(ll k=1;k<S;k++){
+          ll f3=1;
+          for(ll x=0;x<2;x++){
+            for(ll y=0;y<2;y++){
+              if(D[k][x][y]==0){
+                f3=0;
+                goto point2;
+              }
+            }
+          }
+          point2:;
+          if(f3==0){
+            continue;
+          }
+          cnt++;
+          for(ll m=k+1;m<S;m++){
+            for(ll x=0;x<2;x++){
+              for(ll y=0;y<2;y++){
+                D[m-1][x][y]=D[m][x][y];
+              }
+            }
+          }
+          for(ll x=0;x<2;x++){
+            for(ll y=0;y<2;y++){
+              D[S-1][x][y]=0;
+            }
+          }
+          break;
+        }
+      }
+      direct/=u;
+    }
+    if(flag==1){
+      //cerr<<"cnt: "<<cnt<<endl;
+      ans=max(ans,cnt);
+    }
+  }
+  cout<<ans<<endl;
+  return;
+}
+
+int main(){
+  ll H,N;
+  while(1){
+    cin>>H>>N;
+    if(H==0){
+      break;
+    }
+    solve(H,N);
+  }
+  return 0;
+}
+

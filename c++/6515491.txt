@@ -1,0 +1,37 @@
+#include <bits/stdc++.h>
+
+#define rep(i, to) for (int i=0; i<to; i++)
+#define repr(i, from, to) for (int i=from; i<to; i++)
+
+using namespace std;
+using ll = long long;
+using P = pair<int, int>;
+
+#ifdef DEBUG
+#include "debug.hpp"
+#else
+template<class T> void print(T v) { cout << v << endl; }
+void _main(); int main() { _main(); }
+#endif
+
+// ================================================================================ //
+
+void _main() {
+    int N, W; cin >> N >> W;
+    vector<int> v(N), w(N); rep(i, N) cin >> v[i] >> w[i];
+    
+    /*
+     dp[i][w] = iつ目まで選んだ時に重さがwとなる中で最大の価値
+     */
+    auto dp = vector(N+1, vector(W+1, 0));
+    
+    rep(i, N) {
+        rep(j, W+1) {
+            dp[i+1][j] = max(dp[i+1][j], dp[i][j]);
+            if (j+w[i] <= W) dp[i+1][j+w[i]] = max(dp[i+1][j+w[i]], dp[i][j] + v[i]);
+        }
+    }
+    
+    print(dp[N][W]);
+}
+

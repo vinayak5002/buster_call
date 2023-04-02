@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long int ll;
+#define chmin(x,y) x = min(x,y)
+#define chmax(x,y) x = max(x,y)
+#define fill1(arr,num) fill(arr,arr+sizeof(arr)/sizeof(*arr),num);
+#define fill2(arr,num) fill(*arr,*arr+sizeof(arr)/sizeof(**arr),num);
+#define fill3(arr,num) fill(**arr,**arr+sizeof(arr)/sizeof(***arr),num);
+#define rep(i,n) for(int i=0;i<n;i++)
+#define BIG_NUM 2000000000
+#define HUGE_NUM 4000000000000000000
+#define MOD 1000000007
+
+
+
+int main(){
+    int n,m;cin>>n>>m;
+    int st[16][16];
+    int dp[16][1<<16];
+    fill2(dp,BIG_NUM);
+    fill2(st,BIG_NUM);
+    rep(i,m){
+        int s,t,d;
+        cin>>s>>t>>d;
+        st[s][t]=d;
+    }
+
+    dp[0][1]=0;
+    for(int i=0;i<(1<<n);i++){
+        for(int j=0;j<n;j++){
+            if(dp[j][i]==BIG_NUM) continue;
+            for(int k=0;k<n;k++){
+                if(st[k][j]==BIG_NUM||i&(1<<k))continue;
+                int pos=i|(1<<k);
+                chmin(dp[k][pos],st[k][j]+dp[j][i]);
+            }
+        }
+    }
+    int ans=BIG_NUM;
+    for(int i=0;i<n;i++){
+        if(dp[i][(1<<n)-1]!=BIG_NUM||st[0][i]!=BIG_NUM){
+            chmin(ans,st[0][i]+dp[i][(1<<n)-1]);
+        }
+    }
+    if(ans==BIG_NUM) cout<<-1<<endl;
+    else cout<<ans<<endl;
+}

@@ -1,0 +1,145 @@
+class node():
+    def __init__(self, id):
+        self.id = id
+        self.leftid = -1
+        self.rightid = -1
+        self.parentid = -1
+
+    def set_parentid(self, p):
+        self.parentid = p
+    
+
+class Binary_Tree():
+    def __init__(self):
+        self.nodelist = []
+        self.root = -1
+
+    def add_node(self, node):
+        self.nodelist.append(node)
+
+
+    def preorder_tree_walk(self, PL, IDtoNode, node):
+        PL.append(node.id)
+        if node.leftid >= 0:
+            self.preorder_tree_walk(PL, IDtoNode, IDtoNode[node.leftid])
+        if node.rightid >= 0:
+            self.preorder_tree_walk(PL, IDtoNode, IDtoNode[node.rightid])
+
+    def inorder_tree_walk(self, IL, IDtoNode, node):
+        if node.leftid >= 0:
+            self.inorder_tree_walk(IL, IDtoNode, IDtoNode[node.leftid])
+        IL.append(node.id)
+        if node.rightid >= 0:
+            self.inorder_tree_walk(IL, IDtoNode, IDtoNode[node.rightid])
+
+    def postorder_tree_walk(self, PL, IDtoNode, node):
+        if node.leftid >= 0:
+            self.postorder_tree_walk(PL, IDtoNode, IDtoNode[node.leftid])
+        if node.rightid >= 0:
+            self.postorder_tree_walk(PL, IDtoNode, IDtoNode[node.rightid])
+        PL.append(node.id)
+
+
+
+
+
+def Reconstruct_Tree(BT, PL, IL, IDtoNode, node):
+    if node.id == PL[0]:
+        node.parentid = node.id
+        BT.root = node
+
+    Anclist = []
+    LRlist = []
+
+
+    cur_node = node
+    while cur_node != BT.root:
+        parent_node = IDtoNode[cur_node.parentid]
+        Anclist.append(parent_node)
+        if parent_node.leftid == cur_node.id:
+            LRlist.append("L")
+        else:
+            LRlist.append("R")
+        cur_node = parent_node
+
+    In_left_edge = -1
+    In_right_edge = len(PL)
+
+    for i in range(len(Anclist)):
+        if LRlist[i] == "L" and MapIDtoInorder[Anclist[i].id] < In_right_edge:
+            In_right_edge = MapIDtoInorder[Anclist[i].id]
+        elif LRlist[i] == "R" and In_left_edge < MapIDtoInorder[Anclist[i].id]:
+           In_left_edge = MapIDtoInorder[Anclist[i].id]
+
+    left_find = False
+    right_find = False
+    for j in range(MapIDtoPreorder[node.id]+1, len(PL)):
+        if (not left_find) and (In_left_edge < MapIDtoInorder[PL[j]]) and (MapIDtoInorder[PL[j]] < MapIDtoInorder[node.id]):
+            left_find = True
+            node.leftid = PL[j]
+            IDtoNode[PL[j]].parentid = node.id
+            Reconstruct_Tree(BT, PL, IL, IDtoNode, IDtoNode[PL[j]])
+
+        if (not right_find) and (MapIDtoInorder[node.id] < MapIDtoInorder[PL[j]]) and (MapIDtoInorder[PL[j]] < In_right_edge) :
+            right_find = True
+            node.rightid = PL[j]
+            IDtoNode[PL[j]].parentid = node.id
+            Reconstruct_Tree(BT, PL, IL, IDtoNode, IDtoNode[PL[j]])
+
+
+    
+
+
+
+#input
+BT = Binary_Tree()
+
+n = int(input())
+
+IDtoNode=[""]*101
+IDset = set()
+Childrenset = set()
+
+PL = list(map(int, input().split()))
+IL = list(map(int, input().split()))
+
+
+MapIDtoPreorder = [""]*(len(PL)+1)
+for i in range(len(PL)):
+    new_node = node(PL[i])
+    IDtoNode[PL[i]] = new_node
+    MapIDtoPreorder[PL[i]] = i
+MapIDtoInorder = [""]*(len(IL)+1)
+for i in range(len(IL)):
+    MapIDtoInorder[IL[i]] = i
+
+    
+
+
+
+
+
+
+Reconstruct_Tree(BT, PL, IL, IDtoNode, IDtoNode[PL[0]])
+
+
+
+
+
+
+
+
+
+
+Postorderlist = []
+BT.postorder_tree_walk(Postorderlist, IDtoNode,  BT.root)
+#print("Postorder")
+Str = ""
+for i in Postorderlist:
+    Str += " " + str(i)
+
+print(Str[1:])
+
+
+
+

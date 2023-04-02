@@ -1,0 +1,52 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+struct Edge {
+    int to, cap, rev;
+    Edge(int _to, int _cap, int _rev) : to(_to), cap(_cap), rev(_rev) {}
+};
+
+vector<vector<Edge>> G;
+vector<int> U;
+
+int DFS(int v, int t, int f = 1 << 30) {
+    U[v] = 1;
+    if (v == t) return f;
+    for (auto& z : G[v]) {
+        if (U[z.to]) continue;
+        if (z.cap == 0) continue;
+        U[z.to] = 1;
+        int nf = DFS(z.to, t, min(z.cap, f));
+        if (nf > 0) {
+            z.cap -= nf;
+            G[z.to][z.rev].cap += nf;
+            return nf;
+        }
+    }
+    return 0;
+}
+
+int main(int argc, const char * argv[]) {
+    int N, M;
+    cin >> N >> M;
+    G.resize(N);
+    for (int m = 0; m < M; ++m) {
+        int U, V, C;
+        cin >> U >> V >> C;
+        G[U].emplace_back(V, C, G[V].size());
+        G[V].emplace_back(U, 0, G[U].size() - 1);
+    }
+    
+    int Ans = 0;
+    while (1) {
+        U.assign(N, 0);
+        int F = DFS(0, N - 1);
+        if (F == 0) break;
+        Ans += F;
+    }
+    cout << Ans << endl;
+    
+    return 0;
+}
+

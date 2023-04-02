@@ -1,0 +1,114 @@
+import java.util.Scanner;
+
+public class Main {
+
+	static long[] dictionary;
+	static int B;
+	static int maxK = 0;
+
+	public static void main(String[] args) {
+
+		Scanner sc = new Scanner(System.in);
+
+		int n = sc.nextInt();
+		sc.nextLine();
+		String[] order = new String[n];
+		String str;
+		B = n + 37;
+		dictionary = new long[B];
+
+		int space;
+
+		for(int i=0; i<B; i++) {
+			dictionary[i] = -1;
+		}
+
+		for(int i=0; i<n; i++) {
+
+			order[i] = sc.nextLine();
+			space = order[i].indexOf(" ");
+			str = order[i].substring(space+1, order[i].length());
+
+			long strKey = changeInt(str);
+
+			if(order[i].charAt(0)=='i')
+				insert(strKey);
+			else
+				System.out.println(find(strKey));
+		}
+
+		sc.close();
+	}
+
+	//数値に変換したstrを二重ハッシュで格納
+	static void insert(long key) {
+
+		int k = 0;
+		int d = -1;
+
+		while(true) {
+
+			d = (int)(h1(key) + k * h2(key)) % B;
+
+			if(dictionary[d] == -1) {
+				dictionary[d] = key;
+				if(maxK < k)
+					maxK = k;
+
+				break;
+			}
+
+			k++;
+		}
+	}
+
+	//strがdictionaryに格納されているか
+	static String find(long key) {
+
+		int k = 0;
+		int d = -1;
+
+		while(true) {
+			d = (int)(h1(key) + k * h2(key)) % B;
+
+			if(dictionary[d] == key)
+				return "yes";
+
+			else if(dictionary[d] == -1 || k == maxK)
+				return "no";
+
+			k++;
+		}
+	}
+
+	//str(ACGT)を数値に変換
+	static long changeInt(String str) {
+
+		long key = 0;
+
+		for(int i=0; i<str.length(); i++) {
+
+			if(str.charAt(i) == 'A')
+				key = key * 10 + 1;
+			else if(str.charAt(i) == 'C')
+				key = key * 10 + 2;
+			else if(str.charAt(i) == 'G')
+				key = key * 10 + 3;
+			else if(str.charAt(i) == 'T')
+				key = key * 10 + 4;
+		}
+
+		return key;
+	}
+
+	//各ハッシュの関数
+	static long h1(long k) {
+		return (int)(k % B);
+	}
+
+	static long h2(long k) {
+		return (int)(1 + (k % (B-2)));
+	}
+
+}
+

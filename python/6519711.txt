@@ -1,0 +1,134 @@
+const iface = require('readline').createInterface({ input: process.stdin })
+iface.on('line', (line) => main(line, process.stdout))
+
+class BitFlag64 extends Uint8Array {
+  constructor() {
+    super(8)
+  }
+
+  /**
+  * i番目のフラグの状態がONの場合1、OFFの場合0を出力する
+  */
+  test(i) {
+    return ((this[Math.floor(i/8)] >> (i % 8)) & 1) == 1 ? 1 : 0
+  }
+  
+  /**
+   * i番目のフラグをONにする
+   */
+  set(i) {
+    this[Math.floor(i/8)] |= 1 << (i % 8)
+  }
+
+  /**
+  * i番目のフラグをOFFにする
+  */
+  clear(i) {
+    this[Math.floor(i/8)] &= ~(1 << (i % 8))
+  }
+
+  /**
+  * i番目のフラグを反転する
+  */
+  flip(i) {
+    this[Math.floor(i/8)] ^= 1 << (i % 8)
+  }
+
+  /**
+  * 全てのフラグがONになっている場合1、なっていない場合0を出力する
+  */
+  all() {
+    return this.every(v => v === 0xFF) ? 1 : 0
+  }
+
+  /**
+  * 何れかのフラグがONになっている場合1、なっていない場合0を出力する
+  */
+  any() {
+    return this.some(v => v > 0) ? 1 : 0
+  }
+
+  /**
+  * 全てのフラグがOFFになっている場合1、なっていない場合0を出力する
+  */
+  none() {
+    return this.every(v => v === 0x00) ? 1 : 0
+  }
+
+  /**
+  * ONになっているフラグの数を出力する
+  */
+  count() {
+    let num = 0
+    this.forEach((n) => {
+      while(n!==0) {
+        num += 1 & n
+        n >>= 1
+      }
+    })
+    return num
+  }
+
+  /**
+  * 状態の整数値を出力する
+  */
+  val() {
+    let num = 0
+    this.forEach((n, i) => {
+      num += n * Math.pow(2, i * 8)
+    })
+    return num  
+  }
+
+  toString() {
+    return [...bitFlag].map(n => ('00000000' + n.toString(2)).slice(-8)).join('')
+  }
+}
+
+const bitFlag = new BitFlag64()
+let f = true
+
+/**
+ * 
+ * @param {string} line 
+ * @param {NodeJS.WriteStream} so 
+ */
+function main(line, so) {
+  if(f) {
+    f = false
+    return
+  }
+
+  const query = line.split(' ')
+
+  switch(query[0]) {
+    case '0':
+      so.write(bitFlag.test(Number(query[1])) + '\n')
+      break;
+    case '1':
+      bitFlag.set(Number(query[1]))
+      break;
+    case '2':
+      bitFlag.clear(Number(query[1]))
+      break;
+    case '3':
+      bitFlag.flip(Number(query[1]))
+      break;
+    case '4':
+      so.write(bitFlag.all() + '\n')
+      break;
+    case '5':
+      so.write(bitFlag.any() + '\n')
+      break;
+    case '6':
+      so.write(bitFlag.none() + '\n')
+      break;
+    case '7':
+      so.write(bitFlag.count() + '\n')
+      break;
+    case '8':
+      so.write(bitFlag.val() + '\n')
+      break;
+  }
+}
+

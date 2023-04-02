@@ -1,0 +1,63 @@
+import java.util.*;
+
+public class Main{
+    public static void main(String[] args) {
+		Scanner sc=new Scanner(System.in);
+		int[][] tile=new int[3][9];
+		int[] num=new int[9];
+		char[] color=new char[9];
+		boolean flag;
+		int n=sc.nextInt();
+		for(int i=0;i<n;i++){
+			flag=true;
+			for(int j=0;j<3;j++){
+				for(int k=0;k<9;k++){
+					tile[j][k]=0;
+				}
+			}
+			for(int j=0;j<9;j++){
+				num[j]=sc.nextInt();
+			}
+			for(int j=0;j<9;j++){
+				color[j]=sc.next().charAt(0);
+				if(color[j]=='R'){
+					tile[0][num[j]-1]++;
+				}else if(color[j]=='G'){
+					tile[1][num[j]-1]++;
+				}else{
+					tile[2][num[j]-1]++;
+				}
+			}
+			for(int j=0;j<3;j++){
+				if(!flag){
+					break;
+				}
+				for(int k=0;k<9;k++){
+					if(tile[j][k]!=0){
+						if(tile[j][k]>=3){
+							tile[j][k]-=3;
+						}else if(k<7){
+							if((tile[j][k+1]>=tile[j][k]) && (tile[j][k+2]>=tile[j][k])){
+								tile[j][k+1]-=tile[j][k];
+								tile[j][k+2]-=tile[j][k];
+								tile[j][k]=0;
+							}else{
+								flag=false;
+								break;
+							}
+						}else{
+							flag=false;
+							break;
+						}
+					}
+				}
+			}
+			if(flag){
+				System.out.printf("1\n");
+			}else{
+				System.out.printf("0\n");
+			}
+		}
+		sc.close();
+    }
+}

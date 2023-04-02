@@ -1,0 +1,63 @@
+use std::io;
+use std::cmp;
+
+fn read_i32() -> i32 {
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).ok();
+    input.trim().parse::<i32>().unwrap()
+}
+
+fn read_i32vec() -> Vec<i32> {
+    let mut input : String = String::new();
+    io::stdin().read_line(&mut input).ok();
+    input.trim().split(' ').map(|s| s.parse().unwrap()).collect()
+}
+
+fn print_i32vec(v : &Vec<i32>) {
+    println!("{}", v.iter().map(|&x| x.to_string()).collect::<Vec<String>>().join(" "))
+}
+
+fn insertion(mut xs : Vec<i32>, g : i32) -> (Vec<i32>, i32) {
+    let mut cnt = 0;
+    for i in (g as usize)..xs.len() {
+        let v = xs[i];
+        let mut j = i as i32 - g;
+        while j >= 0 && xs[j as usize] > v {
+            xs[(j + g) as usize] = xs[j as usize];
+            j = j - g;
+            cnt += 1;
+        }
+        xs[(j + g) as usize] = v;
+    }
+    (xs, cnt)
+}
+
+fn main() {
+    let n = read_i32();
+    let mut xs = Vec::new();
+    for _ in 0..n {
+        xs.push(read_i32());
+    }
+    let mut ms  = Vec::new();
+    for k in 0..n {
+        let m = if k == 0 { 1 } else { (1 << (k * 2)) + 3 * (1 << (k - 1)) + 1 };
+        if m >= n {
+            break;
+        }
+        ms.push(m);
+    }
+    ms.reverse();
+
+    let mut cnt = 0;
+    for m in &ms {
+        (xs, cnt) = insertion(xs, m);
+    }
+
+    println!("{}", ms.len());
+    print_i32vec(&ms);
+    println!("{}", cnt);
+    for x in xs {
+        println!("{}", x);
+    }
+}
+

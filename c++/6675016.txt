@@ -1,0 +1,60 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <list>
+#include <string>
+#include <sstream>
+using namespace std;
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	string buf;
+	int q = -1;
+	list<int> list;
+	std::list<int>::iterator it = list.end();
+
+	getline(cin, buf);
+	q = stoi(buf);
+	for (int i = 0; i < q; i++) {
+		getline(cin, buf);
+		if (buf[0] == '0') {
+			istringstream stream(buf);
+			int tmp, x;
+
+			stream >> tmp >> x;
+			it = list.insert(it, x);
+		}
+		else if (buf[0] == '1') {
+			istringstream stream(buf);
+			int tmp, d;
+
+			stream >> tmp >> d;
+
+			if (d > 0) {
+				for (int i = 0; i < d; i++) {
+					it++;
+				}
+			}
+			else {
+				for (int i = 0; i < -d; i++) {
+					it--;
+				}
+			}
+		}
+		else {
+			it = list.erase(it);
+		}
+	}
+	for (it = list.begin(); it != list.end(); it++) {
+		cout << *it << endl;
+	}
+	return 0;
+}

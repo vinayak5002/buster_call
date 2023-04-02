@@ -1,0 +1,98 @@
+#include<stdio.h>
+#define N 10000000
+#define SENTINEL 100000000
+
+struct Card{
+  char x[1];
+  int y;
+};
+
+struct Card A[N],B[N];
+struct Card L[N],R[N];
+
+int partition(int a,int b){
+  int i,j;
+  struct Card temp;
+  i = a - 1;
+  for(j=a ;j<b ;j++){
+    if(A[j].y <= A[b].y){
+      i++;
+      temp = A[j];
+      A[j] = A[i];
+      A[i] = temp;
+    }
+  }
+    temp = A[b];
+    A[b] = A[i+1];
+    A[i+1] = temp;
+
+    return i+1;
+}
+
+void quicksort(int p,int r){
+  int q;
+  if(p < r){
+    q = partition(p,r);
+    quicksort(p,q-1);
+    quicksort(q+1,r);
+  }
+}
+
+void merge(int left,int middle,int right){
+  int i,j,k;
+  int n1 = middle - left;
+  int n2 = right - middle;
+  for(i=0 ;i<n1 ;i++) L[i] = B[left + i];
+  for(i=0 ;i<n2 ;i++) R[i] = B[middle + i];
+  L[n1].y = R[n2].y = SENTINEL;
+  i = j = 0;
+  for(k=left ;k<right ;k++){
+    if(L[i].y <= R[j].y) B[k] = L[i++]; 
+    else B[k] = R[j++];
+  }
+}
+
+void mergesort(int left,int right){
+  if(right > left + 1){
+    int middle=(left + right) / 2;
+    mergesort(left,middle);
+    mergesort(middle,right);
+    merge(left,middle,right);
+  }
+}
+
+int main(){
+
+  int i,n,t,count = 0;
+  
+  scanf("%d",&n);
+    
+  for(i=0 ;i<n ;i++){
+    scanf("%s%d",A[i].x,&A[i].y);
+  }
+
+  for(i=0 ;i<n ;i++) B[i] = A[i];
+
+
+  quicksort(0,n-1);
+
+  mergesort(0,n);
+
+  for(i=0 ;i<n ;i++)
+    if(A[i].x != B[i].x) count++; 
+
+  if(count) printf("Not stable\n");
+  else printf("Stable\n");
+  
+  for(i=0 ;i<n ;i++)
+    printf("%s %d\n",A[i].x,A[i].y);
+
+  //printf("aaaa\n");
+
+  //for(i=0 ;i<n ;i++)
+  // printf("%s %d\n",B[i].x,B[i].y);
+	 
+	 
+}
+
+

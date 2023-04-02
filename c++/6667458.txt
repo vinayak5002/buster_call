@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+using std::cin;
+using std::getline;
+using std::cout;
+using std::endl;
+using std::string;
+using std::bitset;
+using std::vector;
+using std::array;
+using std::stack;
+using std::queue;
+using std::priority_queue;
+using std::set;
+using std::map;
+using std::pair;
+using llong = long long;
+template<typename T> using nLimits = std::numeric_limits<T>;
+#define ALL(a) (a).begin(), (a).end()
+#define REP(i, n) for (int i = 0; i < static_cast<int>(n); ++i)
+#define RREP(i, n) for (int i = static_cast<int>(n) - 1; i >= 0; --i)
+#define FOR(i, a, b) for (int i = static_cast<int>(a); i < static_cast<int>(b); ++i)
+#define RFOR(i, a, b) for (int i = static_cast<int>(a) - 1; i >= static_cast<int>(b); --i)
+constexpr int INF = 1001001001;
+constexpr llong LINF = 1001001001001001001ll;
+
+template<typename T> inline bool chMin(T &a, T b) { return ((a > b) ? (a = b, true) : (false)); }
+template<typename T> inline bool chMax(T &a, T b) { return ((a < b) ? (a = b, true) : (false)); }
+template<typename T> void printArray(T a, int n = 0);
+
+
+class QueensProblem {
+public:
+    QueensProblem() {
+        table.resize(N, vector<bool>(N, false));
+        row.resize(N, -1);
+        col.resize(N, -1);
+        dpos.resize(2 * N - 1, -1);
+        dneg.resize(2 * N - 1, -1);
+    }
+
+    void printTable() {
+        REP(i, N) REP(j, N) if (table[i][j] && row[i] != j) return;
+
+        REP(i, N) {
+            REP(j, N) cout << ((row[i] == j) ? "Q" : ".");
+            cout << endl;
+        }
+    }
+
+    void solve(llong r) {
+        if (r == N) {
+            printTable();
+            return;
+        }
+
+        REP(c, N) {
+            if (col[c] == 1 || dpos[r + c] == 1 || dneg[r - c + N - 1] == 1) continue;  // not free
+
+            row[r] = c;
+            col[c] = dpos[r + c] = dneg[r - c + N - 1] = 1;
+            solve(r + 1);
+            row[r] = col[c] = dpos[r + c] = dneg[r - c + N - 1] = -1;
+        }
+    }
+
+    const int N = 8;
+    vector<vector<bool>> table;
+    vector<int> row, col, dpos, dneg;
+};
+
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout << std::fixed << std::setprecision(20);
+
+    int k;
+    cin >> k;
+    
+    QueensProblem qp;
+    
+    REP(i, k) {
+        int y, x;
+        cin >> y >> x;
+        qp.table[y][x] = true;
+    }
+
+
+    qp.solve(0);
+}
+
+
+template<typename T> 
+void printArray(T a, int n) {
+    string s = std::to_string(a[0]);
+    FOR(i, 1, n > 0 ? n : a.size()) s += " " + std::to_string(a[i]);
+    cout << s + "\n";
+}
+

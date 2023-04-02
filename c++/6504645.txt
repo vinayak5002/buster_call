@@ -1,0 +1,100 @@
+#include <iostream>
+using namespace std;
+
+#include <stdlib.h>  // malloc
+
+struct Node { 
+    int key = -1;
+    Node *prev = NULL;
+    Node *next = NULL;
+};
+
+// head --> node_1 --> node_2 --> ... -> node_n --> tail
+Node head;
+Node tail;
+
+
+void insertNode(int x)
+{
+    Node *p0 = (Node *) malloc(sizeof(Node));   // 新しい先頭ノードを作成
+    p0->key = x;
+    
+    Node *p1 = head.next;
+    head.next = p0;
+    p0->prev = &head;
+    p0->next = p1;
+    p1->prev = p0;
+}
+
+void deleteFirst(void)
+{
+    Node *first = head.next;
+    head.next = first->next;
+    (first->next)->prev = &head;
+    free(first);
+}
+
+void deleteLast(void)
+{
+    Node *last = tail.prev;
+    tail.prev = last->prev;
+    (last->prev)->next = &tail;
+    free(last);
+}
+
+void deleteNode(int x)
+{
+    for (Node *p = head.next; p != &tail; p = p->next) {
+	if (p->key != x)
+	    continue;
+	// p->key == x
+	(p->prev)->next = p->next;
+	(p->next)->prev = p->prev;
+	free(p);
+	return;
+    }
+}
+
+void printList(void)
+{
+    for (Node *p = head.next; p != &tail; p = p->next) {
+	cout << p->key;
+	if (p->next != &tail)
+	    cout << " ";
+    }
+    cout << endl;
+}
+
+int main()
+{
+    
+    // head --> tail
+    head.next = &tail;
+    tail.prev = &head;
+
+    int n;
+    cin >> n;
+
+    for (int i = 0; i < n; ++i) {
+	string cmd;
+	cin >> cmd;
+	if (cmd == "deleteFirst") 
+	    deleteFirst();
+	else if (cmd == "deleteLast") 
+	    deleteLast();
+
+	if (cmd != "delete" && cmd != "insert")  // リストにないコマンドは無視
+	    continue;
+    
+	int x;
+	cin >> x;	    
+	if (cmd == "delete") 
+	    deleteNode(x);
+	else if (cmd == "insert") 
+	    insertNode(x);
+    }
+    printList();
+	    
+    return 0;
+}
+

@@ -1,0 +1,48 @@
+#include<cstdio>
+#include<cstring>
+#include<algorithm>
+using namespace std;
+
+int r,c,trix[10][10000],f[10];
+
+int count()
+{
+    int ans=0;
+    for(int i=0;i<c;i++)
+    {
+        int sum=0;
+        for(int j=0;j<r;j++)
+            if((f[j]+trix[j][i])%2==1)sum++;
+
+        ans+=max(sum,r-sum);
+    }
+    return ans;
+}
+
+void solve()
+{
+    for(int i=0;i<r;i++)
+        for(int j=0;j<c;j++)
+        scanf("%d",&trix[i][j]);
+
+    int res=0;
+    for(int s=0;s<1<<r;s++)
+    {
+        memset(f,0,sizeof(f));
+
+        for(int j=0,k=s;j<r;j++)
+        {
+            if(k&1)f[j]=1;
+            k=k/2;
+        }
+
+        res=max(res,count());
+    }
+    printf("%d\n",res);
+}
+int main()
+{
+    while(scanf("%d%d",&r,&c)&&r)
+        solve();
+}
+

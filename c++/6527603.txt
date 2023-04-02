@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+import sys
+
+# 2べきでなくてもいい
+class SegTree:
+    def __init__(self, monoid, N, func):
+        self.monoid = monoid
+        self.func = func
+        self.bottomLen = N
+        self.offset = self.bottomLen        # セグ木の最下層の最初のインデックスに合わせるためのオフセット
+        self.segLen = self.bottomLen * 2 + 1
+        self.tree = [monoid] * self.segLen
+
+    def build(self, seq):
+        # 最下段の初期化
+        for i, x in enumerate(seq, self.offset):
+            self.tree[i] = x
+        # ビルド
+        for i in range(self.offset - 1, 0, -1):
+            self.tree[i] = self.func(self.tree[i << 1], self.tree[i << 1 | 1])
+            print(self.tree)
+
+    """
+    一点加算
+    O(log(self.bottomLen))
+    """
+    def pointAdd(self, i: int, val: int):
+        i += self.offset
+        self.tree[i] += val
+        while i > 1:
+            i >>= 1 # 2で割って頂点に達するまで下層から遡上
+            self.tree[i] = self.func(self.tree[i << 1], self.tree[i << 1 | 1]) # 必ず末尾0と1がペアになるのでor演算子
+
+    """
+    一点更新
+    O(log(self.bottomLen))
+    """
+    def pointUpdate(self, i: int, val: int):
+        i += self.offset
+        self.tree[i] = val
+        while i > 1:
+            i >>= 1 # 2で割って頂点に達するまで下層から遡上
+            self.tree[i] = self.func(self.tree[i << 1], self.tree[i << 1 | 1]) # 必ず末尾0と1がペアになるのでor演算子
+
+    """ 区間取得
+    """
+    def rangeQuery(self, L: int, R: int):
+        L += self.offset
+        R += self.offset
+        vL = self.monoid
+        vR = self.monoid
+        while L < R:
+            if L & 1:
+                vL = self.func(vL, self.tree[L])
+                L += 1
+            if R & 1:
+                R -= 1
+                vR = self.func(self.tree[R], vR)
+            L >>= 1
+            R >>= 1
+        return self.func(vL, vR)
+
+def main():
+    N, Q = map(int, input().split())
+    monoid = 0
+    def add(A, B):
+        return A + B
+    seg = SegTree(monoid, N + 1, add)
+    for _ in range(Q):
+        com, x, y = map(int, input().split())
+        if com == 0:
+            seg.pointAdd(x, y)
+        else:
+            print(seg.rangeQuery(x, y + 1))
+    return
+
+if __name__ == '__main__':
+    main()

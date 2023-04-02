@@ -1,0 +1,130 @@
+#include <iostream>
+#include <queue>
+#include <random>
+#include <regex>
+using namespace std;
+using P = pair<int, int>;
+
+struct expr {
+    vector<char> ops;
+    vector<long> nums;
+    long res;
+};
+ostream& operator<<(ostream& os, const expr& e) {
+    for (size_t i = 0; i < e.ops.size(); ++i) {
+        os << e.nums.at(i) << e.ops.at(i);
+    }
+    os << e.nums.back() << '=' << e.res;
+    return os;
+}
+
+long calc(int n, expr &expr) {
+    auto mul = [&n](long a, long b) {
+        return a * b > n ? n + 1 : a * b;
+    };
+    vector<long> nums;
+    long tmp = 1;
+    for (int i = 0; i < expr.ops.size(); ++i) {
+        if (expr.ops[i] == '+') {
+            nums.push_back(mul(tmp, expr.nums[i]));
+            tmp = 1;
+        } else {
+            tmp = mul(tmp, expr.nums[i]);
+        }
+    }
+    nums.push_back(mul(tmp, expr.nums.back()));
+    // cerr << "[debug] nums=[";
+    // for (auto x : nums) cerr << x << ',';
+    // cerr << ']' << endl;
+    return (expr.res = min(n + 1L, accumulate(nums.begin(), nums.end(), 0L)));
+}
+
+long parse(const int n, int &cur, const string &s, vector<expr> &ret) {
+    expr tmp;
+    for (; cur < s.length(); ++cur) {
+        // cerr << "[debug] cur=" << cur << endl;
+        char c = s[cur];
+        if ('0' <= c && c <= '9') {
+            tmp.nums.push_back(c - '0');
+        } else if (c == '+' || c == '*') {
+            tmp.ops.push_back(c);
+        } else if (c == '(') {
+            tmp.nums.push_back(parse(n, ++cur, s, ret));
+        } else {
+            // ++cur;
+            long retval = calc(n, tmp);
+            ret.push_back(tmp);
+            // cerr << "[debug] retval=" << retval << endl;
+            return retval;
+        }
+    }
+    long retval = calc(n, tmp);
+    ret.push_back(tmp);
+    // cerr << "[debug] retval=" << retval << endl;
+    return retval;
+}
+
+long op(int n, char op, long l, long r) {
+    return min(n + 1L, (op == '+' ? l + r : l * r));
+}
+
+long shakutori(int n, const expr& e) {
+    long ret = 0;
+    if (e.res < n) return 0;
+    int l = 0, r = 0;
+    deque<long> nums = {e.nums[0]};
+    deque<int> ones = {e.nums[0] == 1};
+    long res = nums.back();
+    for (; l < e.nums.size(); ++l) {
+        // cerr << "[debug] l=" << l << " r=" << r << " res=" << res << endl;
+        if (res == n) ret += nums.back() > 1 ? 1 : ones.back();
+        while (r < e.ops.size() && res <= n) {
+            if (e.ops[r] == '+') {
+                nums.push_back(e.nums[r + 1]);
+                ones.push_back(e.nums[r + 1] == 1);
+                res += nums.back();
+            } else {
+                res += (e.nums[r + 1] - 1) * nums.back();
+                nums.back() *= e.nums[r + 1];
+                ones.back() = nums.back() == 1 ? ones.back() + 1 : 0;
+            }
+            ++r;
+            if (res == n) ++ret;
+            // if (res == n) ret += nums.back() > 1 ? 1 : ones.back();
+            // cerr << "[debug] l=" << l << " r=" << r << " res=" << res << endl;            
+        }
+        if (e.ops.size() > l) {
+            if (e.ops[l] == '+') {
+                res -= nums.front();
+                nums.pop_front();
+                ones.pop_front();
+            } else {
+                long tmp = nums.front() / e.nums[l];
+                res -= nums.front() - tmp;
+                nums.front() = tmp;
+                ones.front() = max(0, ones.front() - 1);
+            }
+        }
+    }
+    return ret;
+}
+
+int main(void) {
+    int n;
+    while (true) {
+        cin >> n;
+        if (n == 0) break;
+        string s;
+        cin >> s;
+        int cur = 0;
+        vector<expr> exprs;
+        parse(n, cur, s, exprs);
+        long ans = 0;
+        for (auto &e : exprs) {
+            // cerr << "[debug] " << e << endl;
+            ans += shakutori(n, e);
+        }
+        cout << ans << endl;
+    }
+    return 0;
+}

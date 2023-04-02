@@ -1,0 +1,68 @@
+#include <iostream>
+#include <iomanip>
+#include <vector>
+#include <cmath>
+#include <tuple>
+using namespace std;
+
+struct Point {
+    double x, y, z;
+    double Dist(const Point& P)
+    {
+        double dx = x - P.x;
+        double dy = y - P.y;
+        double dz = z - P.z;
+        return sqrt(dx * dx + dy * dy + dz * dz);
+    }
+};
+
+int main(int argc, const char * argv[]) {
+    while (1) {
+        int N;
+        cin >> N;
+        if (N == 0) break;
+        
+        vector<Point> V(N);
+        vector<double> R(N);
+        for (int n = 0; n < N; ++n) {
+            cin >> V[n].x >> V[n].y >> V[n].z >> R[n];
+        }
+        
+        vector<tuple<double, int, int>> E;
+        for (int n = 0; n < N; ++n) {
+            for (int m = n + 1; m < N; ++m) {
+                double d = V[n].Dist(V[m]) - R[n] - R[m];
+                d = max(d, 0.0);
+                E.emplace_back(d, n, m);
+            }
+        }
+        sort(E.begin(), E.end());
+        
+        struct UnionFind {
+            UnionFind(int N) : P(N, -1) {}
+            int Root(int v) {
+                if (P[v] == -1) return v;
+                return P[v] = Root(P[v]);
+            }
+            bool Same(int v, int u) {
+                return Root(v) == Root(u);
+            }
+            bool Union(int v, int u) {
+                if (Same(v, u)) return false;;
+                P[Root(v)] = Root(u);
+                return true;
+            }
+            vector<int> P;
+        } UF(N);
+        
+        double Ans = 0.0;
+        for (auto z : E) {
+            if (UF.Union(get<1>(z), get<2>(z))) {
+                Ans += get<0>(z);
+            }
+        }
+        cout << setprecision(15) << Ans << endl;
+    }
+    return 0;
+}
+

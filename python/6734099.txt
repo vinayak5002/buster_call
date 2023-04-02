@@ -1,0 +1,121 @@
+
+fn main() {
+    let (n, m, q) : (usize,usize,usize) = input_t3();
+
+    let mut event = vec![];
+    for _ in 0..m {
+        let (d, a, b) : (usize,i64,i64) = input_t3();
+        event.push((d, true, 0, a, b));
+    }
+
+    for i in 0..q {
+        let (e, s, t) : (usize, i64, i64) = input_t3();
+        event.push((e, false, i, s.min(t), s.max(t)));
+    }
+
+    event.sort();
+
+    // for &e in event.iter() {
+    //     eprintln!("{:?}", e);
+    // }
+
+    let mut rset = RangeSet::new(false);
+    let mut ans = vec!["_"; q];
+    for (_, f, i, a, b) in event {
+        if f { rset.insert_range(a..=b); }
+        else {
+            ans[i] = if rset.contains_range(a..=b){"Yes"} else {"No"};
+        }
+    }
+
+    println!("{}", ans.join("\n"));
+}
+
+#[allow(dead_code)] fn input<T: std::str::FromStr>() -> T { let mut s = String::new(); std::io::stdin().read_line(&mut s).ok(); s.trim().parse().ok().unwrap() } #[allow(dead_code)] fn input_t<T: std::str::FromStr, U: std::str::FromStr>() -> (T, U) { let mut s = String::new(); std::io::stdin().read_line(&mut s).ok(); let s = s.trim().split_whitespace().collect::<Vec<&str>>(); (s[0].parse().ok().unwrap(), s[1].parse().ok().unwrap()) } #[allow(dead_code)] fn input_t3<T1: std::str::FromStr, T2: std::str::FromStr, T3: std::str::FromStr>() -> (T1, T2, T3) { let mut s = String::new(); std::io::stdin().read_line(&mut s).ok(); let s = s.trim().split_whitespace().collect::<Vec<&str>>(); (s[0].parse().ok().unwrap(), s[1].parse().ok().unwrap(), s[2].parse().ok().unwrap()) } #[allow(dead_code)] fn input_t4<T1: std::str::FromStr, T2: std::str::FromStr, T3: std::str::FromStr, T4: std::str::FromStr>() -> (T1, T2, T3, T4) { let mut s = String::new(); std::io::stdin().read_line(&mut s).ok(); let s = s.trim().split_whitespace().collect::<Vec<&str>>(); (s[0].parse().ok().unwrap(), s[1].parse().ok().unwrap(), s[2].parse().ok().unwrap(), s[3].parse().ok().unwrap()) } #[allow(dead_code)] fn input_t5<T1: std::str::FromStr, T2: std::str::FromStr, T3: std::str::FromStr, T4: std::str::FromStr, T5: std::str::FromStr>() -> (T1, T2, T3, T4, T5) { let mut s = String::new(); std::io::stdin().read_line(&mut s).ok(); let s = s.trim().split_whitespace().collect::<Vec<&str>>(); (s[0].parse().ok().unwrap(), s[1].parse().ok().unwrap(), s[2].parse().ok().unwrap(), s[3].parse().ok().unwrap(), s[4].parse().ok().unwrap()) } #[allow(dead_code)] fn input_vec<T: std::str::FromStr>() -> Vec<T> { let mut s = String::new(); std::io::stdin().read_line(&mut s).ok(); s.trim().split_whitespace().map(|s| s.parse().ok().unwrap()).collect() }
+
+struct RangeSet {
+    ranges: std::collections::BTreeSet<(i64, i64)>,
+    merge_adjacent_range_flag: bool
+}
+
+#[allow(dead_code)]
+impl RangeSet {
+    fn new(merge_adjacent_range_flag: bool) -> Self {
+        Self { ranges: std::collections::BTreeSet::new() , merge_adjacent_range_flag }
+    }
+
+    fn contains(&self, x:i64) -> bool {
+        self.contains_range(x..=x)
+    }
+
+    fn contains_range<R:std::ops::RangeBounds<i64>>(&self, range:R) -> bool {
+        // eprintln!("contains_range");
+        let left = match range.start_bound() {
+            std::ops::Bound::Unbounded => unreachable!(),
+            std::ops::Bound::Included(&l) => l,
+            _ => unreachable!()
+        };
+        let right = match range.end_bound() {
+            std::ops::Bound::Unbounded => unreachable!(),
+            std::ops::Bound::Included(&x) => x + 1,
+            std::ops::Bound::Excluded(&x) => x,
+        };
+
+
+        if let Some(&(l2, r2)) = self.ranges.range((left,left)..).next() {
+            // eprintln!("{:?} {:?}", (left,left), (l2, r2));
+            if l2 <= left && right <= r2 { return true; }
+        }
+
+        if let Some(&(l2, r2)) = self.ranges.range(..(left,left)).next_back() {
+            // eprintln!("{:?} {:?}", (left,left), (l2, r2));
+            if l2 <= left && right <= r2 { return true; }
+        }
+
+        false
+    }
+
+    fn insert(&mut self, x:i64) -> (i64, i64) {
+        self.insert_range(x..=x)
+    }
+
+    fn insert_range<R:std::ops::RangeBounds<i64>>(&mut self, range:R) -> (i64, i64) {
+        let mut left = match range.start_bound() {
+            std::ops::Bound::Unbounded => unreachable!(),
+            std::ops::Bound::Included(&l) => l,
+            _ => unreachable!()
+        };
+        let mut right = match range.end_bound() {
+            std::ops::Bound::Unbounded => unreachable!(),
+            std::ops::Bound::Included(&x) => x + 1,
+            std::ops::Bound::Excluded(&x) => x,
+        };
+
+        let mut erase = vec![];
+        for &(l, r) in self.ranges.range((left,left)..=(right,right)) {
+            left = left.min(l);
+            right = right.max(r);
+            erase.push((l, r));
+        }
+
+        if let Some(&prev) = self.ranges.range(..(left,std::i64::MIN)).next_back() {
+            if left < prev.1 + if self.merge_adjacent_range_flag {1} else {0} { left = left.min(prev.0); right = right.max(prev.1); erase.push(prev); }
+        }
+
+        if let Some(&next) = self.ranges.range((right, std::i64::MIN)..).next() {
+            if right > next.0 - if self.merge_adjacent_range_flag {1} else {0} { left = left.min(next.0); right = right.max(next.1); erase.push(next); }
+        }
+
+        for e in erase { self.ranges.remove(&e); }
+        self.ranges.insert((left, right));
+        (left, right)
+    }
+
+    fn len(&self) -> usize {
+        self.ranges.len()
+    }
+    
+    fn iter(&self) -> std::collections::btree_set::Iter<'_, (i64, i64)> {
+        self.ranges.iter()
+    }
+}

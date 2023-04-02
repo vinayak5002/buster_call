@@ -1,0 +1,96 @@
+class node():
+    def __init__(self, id, childidlist):
+        self.id = id
+        self.childidlist = childidlist
+
+    def set_parent(self, p):
+        self.parent = p
+
+
+class ordered_tree():
+    def __init__(self):
+        self.nodelist = []
+
+    def sort_by_ID(self):
+        self.nodelist = sorted(self.nodelist, key=lambda x: x.id)
+
+    def add_node(self, node):
+        self.nodelist.append(node)
+
+    def search_parent(self, node):
+        is_root = True
+        for p_cand in self.nodelist:
+            if node.id in p_cand.childidlist:
+                node.set_parent(p_cand)
+                is_root = False
+                break
+        
+        if is_root:
+            node.set_parent(node)
+
+    def search_all_parent(self):
+        for n in self.nodelist:
+            self.search_parent(n)
+
+    def is_root(self, node):
+        if node.parent == node:
+            return True
+        else:
+            return False
+
+    def is_leaf(self, node):
+        if node.childidlist == []:
+            return True
+        else:
+            return False
+
+    def calc_depth(self, node):
+        dpth_cnt = 0
+        cur_node = node
+        while not self.is_root(cur_node):
+            dpth_cnt += 1
+            cur_node = cur_node.parent
+        return dpth_cnt
+
+
+
+#input
+OT = ordered_tree()
+
+n = int(input())
+
+for i in range(n):
+    A = list(map(int, input().split()))
+    ID = A[0]
+    num_ch = A[1]
+    chid_list = []
+    for j in range(num_ch):
+        chid_list.append(A[j+2])
+
+    new_node = node(ID, chid_list)
+    OT.add_node(new_node)
+
+#set_parent_data
+OT.search_all_parent()
+
+#sort
+OT.sort_by_ID()
+
+#print
+for node in OT.nodelist:
+    ID = node.id
+    parent = node.parent.id if node.parent.id != node.id else -1
+    depth = OT.calc_depth(node)
+    type = "internal node"
+    if OT.is_root(node):
+        type = "root"
+    elif OT.is_leaf(node):
+        type = "leaf"
+    chid_list = "["
+    for c in node.childidlist:
+        chid_list += str(c) + ", "
+    chid_list = chid_list[:-2] + "]" if len(chid_list) > 1 else chid_list + "]"
+
+    sentence = "node "+str(ID)+": parent = "+str(parent)+", depth = "+str(depth)+", "+type+", "+chid_list
+    print(sentence)
+

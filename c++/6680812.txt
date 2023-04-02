@@ -1,0 +1,97 @@
+#include<bits/stdc++.h>
+#include<complex>
+using namespace std;
+#define int long long
+const double eps=1e-10;
+inline int EPS(double x)
+{
+	if(fabs(x)<eps)return 0;
+	return x<0?-1:1;
+}
+struct Vec{
+	double x,y;
+	Vec(double X=0,double Y=0){x=X;y=Y;}
+	double len(){return sqrt(x*x+y*y);}
+	Vec operator+(Vec a){return Vec(x+a.x,y+a.y);}
+	Vec operator-(Vec a){return Vec(x-a.x,y-a.y);}
+	Vec operator*(double a){return Vec(x*a,y*a);}
+	Vec operator/(double a){return Vec(x/a,y/a);}
+	double operator*(Vec a){return x*a.x+y*a.y;}
+	double operator%(Vec a){return x*a.y-y*a.x;}
+	friend istream &operator>>(istream &cin,Vec &a){return cin>>a.x>>a.y;}
+	friend ostream &operator<<(ostream &cout,Vec a){return cout<<fixed<<setprecision(10)<<a.x<<' '<<setprecision(10)<<a.y;}
+}p1,p2,p3,p0;
+namespace Point_and_Segment{
+	#define point Vec
+	bool Intersect(point a,point b,point c,point d)//线段相交
+	{
+		if(max(a.x,b.x)<min(c.x,d.x)||max(c.x,d.x)<min(a.x,b.x)||max(a.y,b.y)<min(c.y,d.y)||max(c.y,d.y)<min(a.y,b.y))return false;
+		return EPS(((a-d)%(c-d))*((b-d)%(c-d)))<=0&&EPS(((d-b)%(a-b))*((c-b)%(a-b)))<=0;
+	}
+	point Intersection(point a,point b,point c,point d)
+	{
+		Vec ac=a-c,ab=b-a,cd=d-c,bc=b-c;
+		double d1=fabs(ac%cd/cd.len());
+		double d2=fabs(bc%cd/cd.len());
+		double x=(d1*ab.len())/(d1+d2);
+		Vec res=ab*x/ab.len(); 
+		return res+a;
+	}
+	double Dis_point_to_segment(point a,point b,point c)
+	{
+		Vec ab=b-a,ac=c-a,bc=c-b;
+		double x=(ab*ac)*(ab*bc);
+		if(EPS(x)>0)return min(ac.len(),bc.len());
+		else return fabs((ab%ac)/ab.len());
+	}
+	double Dis_segment_to_segment(point a,point b,point c,point d)
+	{
+		if(Intersect(a,b,c,d))return 0;
+		return min({Dis_point_to_segment(a,b,c),Dis_point_to_segment(a,b,d),Dis_point_to_segment(c,d,a),Dis_point_to_segment(c,d,b)});
+	}
+	#undef point
+}using namespace Point_and_Segment;
+
+class Polygon: public vector<Vec>
+{
+	#define Point (*this)
+	using point=Vec;
+	public:
+	double Area()
+	{
+		double res=0;point p=Point[0];
+		for(int i=1;i<Point.size()-1;i++)
+		{
+			Vec a=Point[i]-p,b=Point[i+1]-p;
+			res+=a%b;
+		}
+		return res/2;
+	}
+	// Polygon Convex_Hull()
+	// {
+	// 	sort(Point.begin(),Point.end(),[](const Vec &x,const Vec &y){if(x.y==y.y)return x.x<y.x;return x.y<y.y;});
+	// 	Polygon res;res.emplace_back(Point[0]);
+	// 	for(int i=1;i<Point.size();i++)
+	// 	{
+	// 		Vec a=Point[i]-Point[i-1],b=Point[i+1]-Point[i];
+	// 		double x=a%b;
+	// 		// if(EPS())
+	// 	}
+	// }
+	#undef Point
+};
+signed main()
+{
+	ios::sync_with_stdio(0);
+	cin.tie(0),cout.tie(0);
+	int q;cin>>q;
+	while(q--)
+	{
+		cin>>p0>>p1>>p2>>p3;
+		if(Intersect(p0,p1,p2,p3))
+			cout<<1<<'\n';
+		else cout<<0<<'\n';
+	}
+	return 0;
+}
+

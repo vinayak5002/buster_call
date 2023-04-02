@@ -1,0 +1,393 @@
+package ut_rummy;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
+public class  UT_Rummy {
+
+	/** ペアのカウント */
+	public static int pairCount;
+
+	public static void main(String[] args)  throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+        /** 入力されるデータセット数 */
+        int setDataNum;
+        /** 入力された数字データを格納する */
+        int[][] saveNumDatas;
+        /** 入力された色データを格納する */
+        String[][] saveCollarDatas;
+
+        // 正誤判定用の配列
+        int [] outputDatas;
+
+        /*
+         * 入力するデータ数をインプット
+         */
+        String inputDataNum = br.readLine();
+        // 入力されたデータ数をint型に変換
+        setDataNum = Integer.parseInt(inputDataNum);
+
+        // 入力された値をもとに配列を初期化
+        saveNumDatas = new int[setDataNum][9];
+        saveCollarDatas = new String[setDataNum][9];
+
+        // 正誤判定用の配列を初期化
+        outputDatas = new int [setDataNum];
+
+        /*
+         * 入力されたデータの格納
+         */
+        for (int i = 0; i < setDataNum; i++){
+        	 /*
+        	  * 数字と色データをインプット
+        	  */
+        	 String nums = br.readLine();
+             String collars = br.readLine();
+
+             // 配列に格納
+             saveNumDatas = arrayNumStorage(nums, saveNumDatas, i);
+             saveCollarDatas =  arrayCollarStorage(collars, saveCollarDatas, i);
+        }
+
+        /*
+         * ペアの判定とその結果の出力
+         */
+        for (int i = 0; i < setDataNum; i++) {
+        	// ペアの初期化
+            pairCount = 0;
+        	// 配列のコピー
+            int[] copyNumData_A = saveNumDatas[i].clone();
+
+            // 最小の添え字を求める
+            int[] minIndexArray = minIndex(copyNumData_A);
+
+            /*
+             * ペア判定
+             */
+
+            // 同じ数から検索する
+            copyNumData_A = sameNumCheck(saveNumDatas[i], copyNumData_A, saveCollarDatas[i], minIndexArray);
+            // 連番を検索する
+            copyNumData_A = serialNumCheck(saveNumDatas[i], copyNumData_A, saveCollarDatas[i], minIndexArray);
+
+
+            // ペアが３未満なら順番を変えて実行
+            if (pairCount < 3) {
+            	//ペア数の初期化
+            	pairCount = 0;
+            	// 配列のコピー
+                int[] copyNumData_B = saveNumDatas[i].clone();
+
+            	//連番を検索する
+                copyNumData_B = serialNumCheck(saveNumDatas[i], copyNumData_B, saveCollarDatas[i], minIndexArray);
+                //同じ数から検索する とりま配列の一番目のみ
+                copyNumData_B = sameNumCheck(saveNumDatas[i], copyNumData_B, saveCollarDatas[i], minIndexArray);
+            }
+
+            // 結果の出力と保存
+            if (pairCount == 3) {
+            	System.out.println(1);
+            	outputDatas[i] = 1;
+            }
+            else {
+            	System.out.println(0);
+            	outputDatas[i] = 0;
+            }
+
+        }
+
+        // 正誤判定 (50件のデータのみ)
+        misjudgment(outputDatas, saveNumDatas, saveCollarDatas,setDataNum);
+	}
+
+	/**
+	 * 配列の中身を確認するデバッグ用
+	 *
+	 * @param saveNumDatas 数字の配列
+	 * @param saveCollarDatas 色の配列
+	 */
+	public static void show(int[][] saveNumDatas, String[][] saveCollarDatas){
+		 for (int i[] : saveNumDatas) {
+	        	for (int j : i) {
+	        		System.out.print(j + " ");
+	        	}
+	        	System.out.println();
+	        }
+
+	     for (String i[] : saveCollarDatas) {
+	        	for (String j : i) {
+	        		System.out.print(j + " ");
+	        	}
+	        	System.out.println();
+	        }
+	}
+
+	/**
+	 * 数字文字列から配列へ中身を格納する
+	 *
+	 * @param inputCollarData 色の配列
+	 * @param saveNumDatas 数字と半角がある文字列
+	 * @param index saveNumDatasの[ここ][]の添え字
+	 * @return 数字だけにした配列を返す
+	 */
+	public static int[][] arrayNumStorage(String inputCollarData, int[][] saveNumDatas, int index) {
+		//配列を格納
+		// " "は配列に格納しないようにする
+		String[] cut = inputCollarData.split(" ");
+		int count = 0;
+        for (String data : cut) {
+            saveNumDatas[index][count] = Integer.parseInt(data);
+            count++;
+        }
+		return saveNumDatas;
+	}
+
+	/**
+	 * 色文字列から配列へ中身を格納する
+	 * @param inputCollarData 色と半角がある文字列
+	 * @param saveCollarDatas 色と半角がある文字列
+	 * @param index saveCollarDatasの[ここ][]の添え字
+	 * @return
+	 */
+	public static String[][] arrayCollarStorage(String inputCollarData, String[][] saveCollarDatas, int index) {
+		//配列を格納
+		// " "は配列に格納しないようにする
+		String[] cut = inputCollarData.split(" ");
+		int count = 0;
+        for (String data : cut) {
+            saveCollarDatas[index][count] = data;
+            count++;
+        }
+		return saveCollarDatas;
+	}
+
+	/**
+	 * 同じ数字があるかを調べる処理
+	 *
+	 * @param saveNumDatas 数字の配列(配列の長さ検出用)
+	 * @param copyNumData 数字の配列のコピー
+	 * @param collarDatas 色データの配列
+	 * @param min 昇順に並んだ数値データの添え字の配列
+	 * @return 処理途中のcopyNumDataを返す
+	 */
+	public static int[] sameNumCheck(int[] saveNumDatas, int[] copyNumData, String[] collarDatas, int[] min) {
+
+		//連番から検索する とりま配列の一番目のみ
+        for (int i = 0; i < saveNumDatas.length; i++) {
+            // ペアになるかどうかのカウント
+            int sameNumCount = 1;
+            // 同じ数字の添え字
+            int sameNumIndex = -1;
+
+            //使用済みならば比べないで次へ
+            if (copyNumData[min[i]] == 99) {
+            	continue;
+            }
+
+        	// 同じ数字があるか調査
+        	for (int j = 0; j < saveNumDatas.length; j++) {
+        		/**
+        		 *  比べる数字が同じ、使用済み、同じ色ではない
+        		 *  なら比べないで次へ行く
+        		 *  ※99はペアで使用済み
+        		 */
+        		if (min[i] == min[j] || copyNumData[min[j]] == 99 || !collarDatas[min[i]].equals(collarDatas[min[j]]) || min[j] == sameNumIndex) {
+        			continue;
+        		}
+
+        		// 比べてる数字が同じ数値か？ ※99はペア済みなので除外する。
+        		if (copyNumData[min[j]] != 99 && copyNumData[min[i]] == copyNumData[min[j]] ) {
+        			// 同じ数字のカウント
+        			sameNumCount++;
+        			// ペアが３つ揃ったか？
+        			if (sameNumCount == 3) {
+        			//	System.out.println("ペア：" + copyNumData[min[i]] + " " +copyNumData[sameNumIndex] + " "+ copyNumData[min[j]]);
+        				// ペアの数をカウント
+        				pairCount++;
+        				// 現在の添え字の数字を使用済みに
+        				copyNumData[min[j]] = 99;
+        				// 比べている数字の添え字の数字を使用済みに
+        				copyNumData[min[i]] = 99;
+        				// 保存した添え字の数字を使用済みに
+        				copyNumData[sameNumIndex] = 99;
+        				break;
+        			}
+
+        			// 添え字を保存
+        			if (sameNumIndex == -1) {
+        				sameNumIndex = min[j];
+        			}
+        			// 一番初めから調べなおす
+        			j = 0;
+        		}
+        	}
+        }
+		// 処理中の配列を返す
+		return copyNumData;
+
+	}
+
+	/**
+	 * 数字の連番があるか調べる処理
+	 *
+	 * @param saveNumDatas 数字の配列
+	 * @param copyNumData 数字の配列のコピー
+	 * @param collarDatas 色データの配列
+	 * @param min 昇順に並んだ数値データの添え字の配列
+	 * @return 処理途中のcopyNumDataを返す
+	 */
+	public static int[] serialNumCheck(int[] saveNumDatas, int[] copyNumData, String[] collarDatas, int[] min) {
+
+
+		//連番の検索する
+        for (int i = 0; i < saveNumDatas.length; i++) {
+            // ペアになるかどうか調べるためのカウント
+            int sameNumCount = 1;
+            // 同じ数字の添え字格納用
+            int sameNumIndex = -1;
+
+            //使用済み、もしくは8以上ならば比べないで次へ
+            if(copyNumData[min[i]] == 99 || copyNumData[min[i]] == 8) {
+            	continue;
+            }
+
+        	// 同じ数字があるか調査
+        	for (int j = 0; j < saveNumDatas.length; j++) {
+        		/*
+        		 *  比べる数字が同じ、使用済み、同じ色ではない
+        		 *  なら比べないで次へ行く
+        		 *  ※99はペアで使用済み
+        		 */
+        		if (min[i] == min[j] || copyNumData[min[j]] == 99 || !collarDatas[min[i]].equals(collarDatas[min[j]]) || min[j] == sameNumIndex) {
+        			continue;
+        		}
+        		// 比べてる数字の連番か？ ※99はペア済みなので除外する。
+        		if (copyNumData[min[j]] != 99  && (copyNumData[min[i]] + sameNumCount) == copyNumData[min[j]]) {
+        		//	System.out.println("i" + i +"  = " + j);
+        			// 同じ数字のカウント
+        			sameNumCount++;
+        			// ペアが３つ揃ったか？
+        			if (sameNumCount == 3) {
+        				//System.out.println("ペア：" + copyNumData[min[i]] + " " +copyNumData[sameNumIndex] + " "+ copyNumData[min[j]]);
+        				// ペアの数をカウント
+        				pairCount++;
+          				// 現在の添え字の数字を使用済みに
+        				copyNumData[min[j]] = 99;
+        				// 比べている数字の添え字の数字を使用済みに
+        				copyNumData[min[i]] = 99;
+        				// 保存した添え字の数字を使用済みに
+        				copyNumData[sameNumIndex] = 99;
+        				break;
+        			}
+        			// 添え字を保存
+        			if (sameNumIndex == -1) {
+        				sameNumIndex = min[j];
+        			}
+        			// 一番初めから調べなおす
+        			j = 0;
+        		}
+        	}
+
+        }
+		// 処理中の配列を返す
+		return copyNumData;
+	}
+
+	/**
+	 * 正誤判定用のメソッド(50個あったテストデータ用)
+	 *
+	 * @param outputDatas outputされた結果
+	 * @param saveNumDatas 保存された数字データ
+	 * @param saveCollarDatas 保存された色データ
+	 * @param setDataNum 入力されたデータ数
+	 */
+	public static void misjudgment(int[] outputDatas, int[][] saveNumDatas, String[][] saveCollarDatas, int setDataNum ) {
+
+		// 50以外なら抜ける
+		if (setDataNum != 50) {
+			return;
+		}
+
+		// 答え
+		int[] answers = {1,0,0,0,1,1,1,0,0,0,
+						 0,0,1,1,1,1,1,1,1,1,
+						 1,1,1,1,1,1,1,1,1,1,
+						 1,0,0,0,0,0,0,0,0,0,
+						 0,0,0,0,0,0,0,0,0,0};
+
+		// 間違えている部分の添え字を格納
+		boolean[] error = new boolean[setDataNum];
+		// 間違えた数を数える
+		int count = 0;
+
+		//正誤判定
+		for (int i = 0; i < answers.length; i++) {
+			/*
+			 *  outputしたデータと正解を比較
+			 *  間違えたらその添え字を保存及びカウント
+			 */
+			if (outputDatas[i] != answers[i]) {
+				error[i] = true;
+				count ++;
+			}
+		}
+
+		System.out.println("\n\n\n間違えている場所を下記に表示");
+
+		// 正誤判定した結果を表示
+		for (int i = 0; i < error.length; i++) {
+			// 間違えた場所を表示
+			if (error[i]) {
+				for (int j : saveNumDatas[i]) {
+					System.out.print(j + " ");
+				}
+				System.out.println();
+				for (String j : saveCollarDatas[i]) {
+					System.out.print(j + " ");
+				}
+				System.out.println();
+			}
+		}
+
+		System.out.println("間違えた数は" + count + "個です。");
+	}
+
+	/**
+	 * 昇順に並べた数字の添え字の順番を返すメソッド
+	 * @param numData 数字データ
+	 * @return 昇順の添え字データ
+	 */
+	public static int[] minIndex(int[] numData) {
+
+		int[] indexArray = new int[9];
+		int[] copyNumData = numData.clone();
+
+		// 初期値に0-9までの数字を順番に入れる
+		for (int i = 0; i < indexArray.length; i++) {
+			indexArray[i] = i;
+		}
+
+		/**
+		 * 昇順に並び替える
+		 * その時に昇順時の添え字を保存する
+		 */
+		 for (int i = 0; i < copyNumData.length - 1; i++) {
+			for (int j = i; j < copyNumData.length; j++) {
+				if (copyNumData[i] >= copyNumData[j]) {
+					int swap = copyNumData[i];
+					int index = indexArray[i];
+					copyNumData[i] = copyNumData[j];
+					indexArray[i] = indexArray[j];
+					copyNumData[j] = swap;
+					indexArray[j] = index;
+				}
+			}
+		}
+		// 昇順の時の添え字を返す
+		return indexArray;
+	}
+}
+
+

@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using pll = pair<ll, ll>;
+#define drep(i, cc, n) for (ll i = (cc); i <= (n); ++i)
+#define rep(i, n) drep(i, 0, n - 1)
+#define all(a) (a).begin(), (a).end()
+#define pb push_back
+#define fi first
+#define se second
+
+const ll MOD = 1000000007;
+const ll MOD2 = 998244353;
+const ll INF = 1LL << 60;
+const ll N_MAX = 2e5;
+
+struct SegmentTree{
+    ll n;
+    vector<ll> data;
+    vector<ll> lazy;
+
+    SegmentTree(ll n_){
+        n = 1;
+        while(n < n_) n*=2;
+        data.resize(2*n, 0);
+        lazy.resize(2*n, 0);
+    }
+
+    void update(ll a, ll b, ll x){update_sub(a, b, x, 0, 0, n);}
+
+    void update_sub(ll a, ll b, ll x, ll k, ll l, ll r){
+        if(a <= l && r <= b){
+            data[k] += x;
+        }else if(!(b <= l || r <= a)){
+            lazy[k] += (min(b, r)-max(a, l))*x;
+            update_sub(a, b, x, 2*k+1, l, (l+r)/2);
+            update_sub(a, b, x, 2*k+2, (l+r)/2, r);
+        }
+    }
+
+    // the minimun element of [a, b)
+    ll query(ll a, ll b){return query_sub(a, b, 0, 0, n);}
+
+    ll query_sub(ll a, ll b, ll k, ll l, ll r){
+        if(r <= a || b <= l){
+            return 0;
+        }else if(a <= l && r <= b){
+            return data[k]*(r-l)+lazy[k];
+        }else{
+            ll res = (min(b, r)-max(a, l))*data[k];
+            res += query_sub(a, b, 2*k+1, l, (l+r)/2);
+            res += query_sub(a, b, 2*k+2, (l+r)/2, r);
+            return res;
+        }
+    }
+};
+
+int main(){
+    ll n, q;
+    cin >> n >> q;
+
+    SegmentTree ST(n);
+    vector<ll> ans;
+    rep(i, q){
+        ll t;
+        cin >> t;
+
+        if(t == 0){
+            ll s, t, x;
+            cin >> s >> t >> x;
+            s--; t--;
+            ST.update(s, t+1, x);
+        }else{
+            ll s, t;
+            cin >> s >> t;
+            s--; t--;
+            ans.pb(ST.query(s, t+1));
+        }
+    }
+
+    rep(i, (ll)ans.size()) cout << ans[i] << endl;
+}

@@ -1,0 +1,73 @@
+class Node:
+    prev = None
+    next = None
+    key = None
+
+class LinkedList:
+    def __init__(self) -> None:
+        # Create centinel
+        # NOTE: Centinel stays at the front all the time.
+        sentinel = Node()
+        sentinel.prev = sentinel
+        sentinel.next = sentinel
+        self.sentinel = sentinel
+        self._elements = {sentinel}
+
+    def insert(self, key):
+        """Insert an element with the key at the front of the linked list"""
+        x = Node()
+        x.key = key
+        x.next = self.sentinel.next  # x --> element on the right
+        self.sentinel.next.prev = x  # x <-- element on the right
+        self.sentinel.next = x  # sentinel --> x
+        x.prev = self.sentinel  # sentinel <-- x
+        self._elements.add(x)
+
+    def delete(self, node):
+        if node == self.sentinel:
+            return
+        node.prev.next = node.next
+        node.next.prev = node.prev
+        self._elements.remove(node)
+
+    def delete_first(self):
+        self.delete(self.sentinel.next)
+
+    def delete_last(self):
+        self.delete(self.sentinel.prev)
+
+    def delete_key(self, key):
+        node = self.search(key)
+        self.delete(node)
+
+    def search(self, key):
+        # Start searching from sentinel
+        cur = self.sentinel.next
+        while cur != self.sentinel and cur.key != key:
+            cur = cur.next
+        return cur
+
+
+n = int(input())
+linked_list = LinkedList()
+for _ in range(n):
+    op, key = [e for e in input().split()]
+    if op == 'insert':
+        linked_list.insert(key)
+    elif op == 'delete':
+        linked_list.delete_key(key)
+    elif op == 'deleteFirst':
+        linked_list.delete_first()
+    elif op == 'deleteLast':
+        linked_list.delete_last()
+    else:
+        raise RuntimeError('something is wrong...')
+
+out = []
+cur = linked_list.sentinel.next
+while cur != linked_list.sentinel:
+    out.append(cur.key)
+    cur = cur.next
+
+print(' '.join(out))
+

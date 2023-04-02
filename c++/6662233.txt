@@ -1,0 +1,63 @@
+#include "bits/stdc++.h"
+using namespace std;
+
+
+//AOJ DSL_1_A Minimum Spanning Tree
+//https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=ALDS1_12_A&lang=jp
+
+//コンパイル時にはエラーが出なかったが実行しようとするとsegmentation faultが出ました。原因がわからないまま
+//提出時間になってしまったので現時点でのコードをとりあえず提出します。
+
+
+
+int P[2010];//頂点iの親をP[i]で表現
+void init(int N){//初期化
+    for(int i=0; i<N; i++) P[i] = i;
+}
+
+int root(int a){
+    if (P[a] == a) return a;//aがrootの場合
+    else return (P[a] = root(P[a]));
+}
+
+bool is_same_set(int a, int b){
+    return root(a) == root(b);
+}
+void unite(int a, int b){
+    P[root(a)] = root(b);
+}
+
+int main(){
+    int N;//頂点数
+    cin >> N;
+    pair<int,pair<int,int>> a[4000010];//重み、始点、終点のペア
+    int counter = 0;
+    for(int i=1; i<=N; i++){
+        for(int j=1; j<=N; j++){
+            cin >> a[counter].first;
+            a[counter].second.first = i;
+            a[counter].second.second = j;
+            counter =+1;
+        }
+    }
+
+    sort(a, a+counter);
+
+    init(N);
+
+    int sum = 0;
+
+    for(int i=0; i<counter; i++){
+        if (a[i].first != -1){
+            if (is_same_set(a[i].second.first, a[i].second.second) == false){
+                unite(a[i].second.first, a[i].second.second);
+                sum += a[i].first;
+            }
+
+        }
+
+    }
+
+    cout << sum << endl;
+
+}

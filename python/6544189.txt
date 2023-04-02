@@ -1,0 +1,52 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+    let inp = si[0].split(" ");
+    const dec_a = Number(inp[0]);
+    const dec_b = Number(inp[1]);
+
+    //console.log(fillZero(dec_a.toString(2), 32));
+    //console.log(fillZero(dec_b.toString(2), 32) + "\n");
+
+    let str = fillZero((dec_a & dec_b).toString(2), 32) + "\n";
+    str += disjunction(dec_a, dec_b) + "\n";
+    str += ex_disjunction(dec_a, dec_b) + "\n";
+    so.write(str)
+
+}
+const fillZero = (string, length) => ("0".repeat(length) + string).slice(-length);
+// 0で埋めてlength桁にする.
+
+const disjunction = (dec_a, dec_b) => {
+    // 論理和の演算結果を返す.
+    const bin_a = fillZero(dec_a.toString(2), 32);
+    const bin_b = fillZero(dec_b.toString(2), 32);
+    let disj = "";
+    for (let i = 0; i < 32; i++) {
+        if (bin_a.charAt(i) === "1" || bin_b.charAt(i) === "1") {
+            disj += "1";
+        } else {
+            disj += "0";
+        }
+    }
+    return disj;
+}
+
+const ex_disjunction = (dec_a, dec_b) => {
+    // 排他的論理和の演算結果を返す.
+    const bin_a = fillZero(dec_a.toString(2), 32);
+    const bin_b = fillZero(dec_b.toString(2), 32);
+    let disj = "";
+    for (let i = 0; i < 32; i++) {
+        if (bin_a.charAt(i) === "0" && bin_b.charAt(i) === "1") {
+            disj += "1";
+        } else if (bin_a.charAt(i) === "1" && bin_b.charAt(i) === "0") {
+            disj += "1";
+        } else {
+            disj += "0";
+        }
+    }
+    return disj;
+}

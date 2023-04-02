@@ -1,0 +1,103 @@
+#include <bits/stdc++.h>
+#pragma GCC optimize("Ofast")
+#define _GLIBCXX_DEBUG
+using namespace std;
+using std::cout;
+using std::cin;
+using std::endl;
+using ll=long long;
+using ld=long double;
+ll ILL=1167167167167167167;
+const int INF=1050000000;
+const ll mod=998244353;
+#define rep(i,a) for (ll i=0;i<a;i++)
+#define all(p) p.begin(),p.end()
+template<class T> using _pq = priority_queue<T, vector<T>, greater<T>>;
+template<class T> ll LB(vector<T> &v,T a){return lower_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> ll UB(vector<T> &v,T a){return upper_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> bool chmin(T &a,const T &b){if(a>b){a=b;return 1;}else return 0;}
+template<class T> bool chmax(T &a,const T &b){if(a<b){a=b;return 1;}else return 0;}
+template<class T> void So(vector<T> &v) {sort(v.begin(),v.end());}
+template<class T> void Sore(vector<T> &v) {sort(v.begin(),v.end(),[](T x,T y){return x>y;});}
+void yneos(bool a){if(a) cout<<"Yes\n"; else cout<<"No\n";}
+template<class T> void vec_out(vector<T> &p){for(int i=0;i<(int)(p.size());i++){if(i) cout<<" ";cout<<p[i];}cout<<"\n";}
+
+int N,M,H,K;
+
+void solve();
+// oddloop
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	
+	while(cin>>N>>M>>H>>K,N) solve();
+}
+
+void solve(){
+	vector<vector<tuple<int,int,int,int>>> G(N);
+	rep(i,M){
+		int a,b,c,h,r;
+		cin>>a>>b>>c>>h>>r;
+		a--,b--,r--;
+		G[a].push_back({b,c,h,r});
+		G[b].push_back({a,c,h,r});
+	}
+	int S,T;
+	cin>>S>>T;S--,T--;
+	int dp[N][1+H][(1<<K)];
+	rep(i,N) rep(j,1+H) rep(k,(1<<K)) dp[i][j][k]=INF;
+	_pq<tuple<int,int,int,int>> pq;
+	rep(k,(1<<K)) dp[S][0][k]=0,pq.push({0,S,0,k});
+	while(!pq.empty()){
+		int cost,ind,time,g;
+		tie(cost,ind,time,g)=pq.top();
+		pq.pop();
+		if(dp[ind][time][g]<cost) continue;
+		for(auto x:G[ind]){
+			int nex,c,h,r;
+			tie(nex,c,h,r)=x;
+			h+=time;
+			if(h>H) continue;
+			if(g&(1<<r)) c=cost;
+			else c+=cost;
+			if(chmin(dp[nex][h][g],c)){
+				pq.push({c,nex,h,g});
+			}
+		}
+	}
+	int ans=INF;
+	int P;
+	cin>>P;
+	vector<int> add_cost(1<<K,INF);
+	add_cost[0]=0;
+	rep(i,P){
+		int l,d;
+		cin>>l>>d;
+		int Q=0;
+		rep(i,l){
+			int a;
+			cin>>a;
+			Q|=(1<<(a-1));
+		}
+		add_cost[Q]=d;
+	}
+	rep(i,(1<<K)) rep(j,(1<<K)){
+		chmin(add_cost[i|j],add_cost[i]+add_cost[j]);
+	}
+	rep(time,H+1) rep(k,1<<K){
+		chmin(ans,dp[T][time][k]+add_cost[k]);
+		//if(dp[T][time][k]!=INF) cout<<time<<" "<<k<<" "<<dp[T][time][k]<<" "<<add_cost[k]<<"\n";
+		/*if(H==20){
+			if(time%5==0&&k<8){
+				cout<<time<<" "<<k<<"\n";
+				rep(i,5){
+					cout<<dp[i][time][k]<<" ";
+				}
+				cout<<"\n";
+			}
+		}*/
+	}
+	if(ans==INF) cout<<"-1\n";
+	else cout<<ans<<"\n";
+}
+

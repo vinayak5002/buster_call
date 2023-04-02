@@ -1,0 +1,79 @@
+#include<stdio.h>
+#include<math.h>
+#define MAX 200000
+
+int N,heapSize;
+int A[MAX];
+
+void swap(int *a,int *b){
+    int temp;
+    
+    temp=*a;
+	*a=*b;
+	*b=temp; 
+}
+
+void maxHeapify(int i){
+    int left=2*i;
+	int right=2*i+1;
+	int largest;
+    
+    if(left<=heapSize&&A[left]>A[i])
+		largest=left;
+    else
+		largest=i;
+    if(right<=heapSize&&A[largest]<A[right])
+		largest=right;
+
+    if(largest!=i){
+        swap(&A[i],&A[largest]);
+        maxHeapify(largest);
+    }
+}
+
+void buildMaxHeap(){
+	int i;
+	
+    heapSize=N;
+    for (i=N/2;0<i;i--)
+        maxHeapify(i);
+    
+}
+
+void heapSort(){
+    buildMaxHeap();
+    heapSize=N;
+    while(heapSize>=2){
+        swap(&A[1],&A[heapSize--]);
+        maxHeapify(1);
+    }
+}
+
+int main(void){
+	int current,para;
+    int i;
+    
+	scanf("%d",&N);
+
+    for(i=1;i<=N;i++)
+		scanf("%d",&A[i]);
+			
+	heapSort();
+	
+	for(i=1;i<N;i++){
+		current=i;
+		para=current/2;
+		while(current!=1){
+			swap(&A[current],&A[para]);
+			current=para;
+			para=current/2;
+		}
+	swap(&A[1],&A[i+1]);
+	}
+    for(i=1;i<N;i++)
+    	printf("%d ",A[i]);
+    printf("%d\n",A[N]);
+    
+    return 0;
+}
+

@@ -1,0 +1,57 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <queue>
+#include <stack>
+#include <map>
+#include <set>
+#include <bitset>
+using namespace std;
+using ll = long long;
+
+struct UnionFind {
+    vector<int> par, siz;
+    UnionFind(int n): par(n, -1), siz(n, 1) {}
+    int root(int x) {
+        if (par[x] == -1) return x;
+        else return par[x] = root(par[x]);
+    }
+    bool unite(int x, int y) {
+        x = root(x); y = root(y);
+        if (x == y) return false;
+        if (siz[x] < siz[y]) swap(x, y);
+        par[y] = x;
+        siz[x] += siz[y];
+        return true;
+    }
+    bool issame(int x, int y) {
+        return root(x) == root(y);
+    }
+};
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+    vector<tuple<int, int, int>> es;
+    for (int i = 0; i < m; i++) {
+        int s, t, w;
+        cin >> s >> t >> w;
+        es.push_back(make_tuple(w, s, t));
+    }
+    sort(es.begin(), es.end());
+
+    UnionFind uf(n);
+    long ans = 0;
+    for (auto e : es) {
+        int w = get<0>(e);
+        int u = get<1>(e);
+        int v = get<2>(e);
+
+        if (uf.issame(u, v)) continue;
+        uf.unite(u, v);
+        ans += w;
+    }
+    cout << ans << endl;
+    return 0;
+}
+

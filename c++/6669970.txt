@@ -1,0 +1,32 @@
+# https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DPL_2_A&lang=ja
+V, E = map(int, input().split())
+ALL = 1 << V
+S = []
+for _ in range(V):
+    S.append([0] * V)
+
+for _ in range(E):
+    s, t, d = map(int, input().split())
+    S[s][t] = d
+
+dp = []
+INF = 10**18
+for _ in range(ALL):
+    dp.append([INF] * V)
+
+
+dp[0][0] = 0
+
+for i in range(ALL):
+    for j in range(V):
+        for k in range(V):
+            if j == k or S[j][k] == 0 or i & (1 << k) > 0:
+                continue
+            dp[i | 1 << k][k] = min(dp[i][j] + S[j][k], dp[i | 1 << k][k])
+
+result = min(dp[ALL - 1])
+if result == INF:
+    print(-1)
+else:
+    print(result)
+

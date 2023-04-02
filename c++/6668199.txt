@@ -1,0 +1,56 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+void connect(int s, int t, vector<int> *cmp[])
+{
+    if (cmp[s] == cmp[t])
+	return;
+    if (cmp[s]->size() < cmp[t]->size())
+	swap(s, t);
+    vector<int> *T = cmp[t];   // 下の処理が終わったらこの領域は解放する
+    vector<int>::iterator it;
+    for (it = T->begin(); it != T->end(); it++) {
+	cmp[s]->push_back(*it);
+	cmp[*it] = cmp[s];
+    }
+    delete T;
+}
+
+int main()
+{
+    int n;           // 頂点の数
+    cin >> n;
+    vector<int> *cmp[n];
+
+    for (int s = 0; s < n; s++) {
+	cmp[s] = new vector<int>;
+	cmp[s]->push_back(s);
+    }
+
+    int m;    //  辺の数
+    cin >> m;  
+    for (int i = 0; i < m; i++) {
+	int s, t;
+	cin >> s >> t;
+	connect(s, t, cmp);
+    }
+    
+    int q;    // 質問の数
+    cin >> q;
+    for (int i = 0; i < q; i++) {
+	int s, t;
+	cin >> s >> t;
+	if (cmp[s] == cmp[t])
+	    cout << "yes" << endl;
+	else
+	    cout << "no" << endl;
+    }
+
+    return 0;
+}
+
+
+

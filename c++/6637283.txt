@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll n, W;
+  cin >> n >> W;
+  vector<ll> v(n), w(n);
+  rep(i, 0, n) cin >> v[i] >> w[i];
+
+  ll m = n / 2;
+  vector<pair<ll, ll>> dp;
+
+  for(ll bi = 0; bi < (1 << m); bi++){
+      bitset<32> bits(bi);
+      ll sumv = 0;
+      ll sumw = 0;
+      rep(i, 0, m){
+          if(bits[i]){
+              sumv += v[i];
+              sumw += w[i];
+          } 
+      }
+      dp.push_back({sumw, sumv});
+  }
+
+  sort(ALL(dp));
+  rep(i, 1, SZ(dp)){
+      dp[i].second = max(dp[i - 1].second, dp[i].second);
+  }
+
+  ll ans = 0;
+
+  for(ll bi = 0; bi < (1 << (n - m)); bi++){
+      bitset<32> bits(bi);
+      ll sumv = 0;
+      ll sumw = 0;
+      for(ll i = 0; i < n - m; i++){
+          if(bits[i]){
+              sumw += w[m + i];
+              sumv += v[m + i];
+          }
+      }
+      if(W - sumw < 0) continue;
+      auto p = make_pair(W - sumw, INF);
+      ll tmp = upper_bound(ALL(dp), p) - dp.begin();
+      ans = max(ans, sumv + dp[tmp - 1].second);
+  }
+  cout << ans << endl;
+
+
+
+  return 0;
+}

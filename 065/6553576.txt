@@ -1,0 +1,63 @@
+import math
+
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        
+
+def koch(n, p1, p2):
+    if n == 0:
+        return
+        
+    s = Point(0, 0)
+    t = Point(0, 0)                
+    u = Point(0, 0)       
+    
+    # p1 と p2 の差の1/3を求める
+    # p1*2 + p2 を 1/3(平均)することで、差を三等分する         
+    s.x = (2 * p1.x + p2.x) / 3.0
+    s.y = (2 * p1.y + p2.y) / 3.0
+
+    # p1 と p2 の差の2/3を求める
+    # p1 + p2*2 を 1/3(平均)することで、差を2/3ずつ分けあうことになる         
+    t.x = (p1.x + 2 * p2.x) / 3.0
+    t.y = (p1.y + 2 * p2.y) / 3.0
+    
+    ang = math.radians(60)
+    
+    # 回転行列で 点u を求める
+    u.x = (t.x - s.x) * math.cos(ang) - (t.y - s.y) * math.sin(ang) + s.x
+    u.y = (t.x - s.x) * math.sin(ang) + (t.y - s.y) * math.cos(ang) + s.y
+    
+    # p1 ~ s    
+    koch(n - 1, p1, s)
+    # s点
+    print(f'{s.x:.08f} {s.y:.08f}')
+    
+    # s ~ u    
+    koch(n - 1, s, u)
+    # u点
+    print(f'{u.x:.08f} {u.y:.08f}')
+
+    # u ~ t    
+    koch(n - 1, u, t)
+    # t点
+    print(f'{t.x:.08f} {t.y:.08f}')
+
+    # t ~ p2    
+    koch(n - 1, t, p2)
+
+p1 = Point(0, 0)
+p2 = Point(100, 0)
+
+n = int(input())
+
+# p1点
+print(f'{p1.x:.08f} {p1.y:.08f}')
+
+koch(n ,p1, p2)
+
+# p2点
+print(f'{p2.x:.08f} {p2.y:.08f}')
+

@@ -1,0 +1,595 @@
+//include
+//------------------------------------------
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <cctype>
+#include <string>
+#include <cstring>
+#include <ctime>
+#include<queue>
+#include<complex>
+using namespace std;
+//conversion
+//------------------------------------------
+inline long long toint(string s) {long long v; istringstream sin(s);sin>>v;return v;}
+template<class T> inline string toString(T x) {ostringstream sout;sout<<x;return sout.str();}
+//math
+//-------------------------------------------
+template<class T> inline T sqr(T x) {return x*x;}
+//typedef
+//------------------------------------------
+typedef long long ll;
+typedef long long LL;
+typedef vector<int > vi;
+typedef vector<long long > VLL;
+typedef vector<long long > vll;
+typedef vector<string > ves;
+typedef vector<char > vech;
+
+typedef pair<long long , long long> pll;
+typedef pair<long long , long long> PLL;
+typedef map<ll , ll >mll;
+typedef map<int , int >mii;
+typedef map<char , int >mci;
+typedef map<char , ll >mcl;
+typedef vector<pair<ll , ll> > vpll;
+
+//container util
+//------------------------------------------
+#define ALL(a)  (a).begin(),(a).end()
+#define RALL(a) (a).rbegin(), (a).rend()
+#define VECMAX(x) *max_element(ALL(x))
+#define VECMIN(x) *min_element(ALL(x))
+#define PB push_back
+#define MP make_pair
+#define SZ(a) int((a).size())
+#define EACH(i,c) for(typeof((c).begin()) i=(c).begin(); i!=(c).end(); ++i)
+#define EXIST(s,e) ((s).find(e)!=(s).end())
+#define SORT(c) sort((c).begin(),(c).end())
+//repetition
+//------------------------------------------
+#define FOR(i,a,b) for(long long i=(a);i<(b);++i)
+#define REP(i,n)  FOR(i,0,n)
+//#define MULTIPLE(i,n,k) for(int i = (k) ; i<(n) ; i+=k+1)//倍数ループ
+//constant
+//------------------------------------------
+const double EPS = 1e-10;
+const double PI  = acos(-1.0);
+//clear memory
+#define CLR(a) memset((a), 0 ,sizeof(a))
+//debug
+#define dump(x)  cerr << #x << " = " << (x) << endl;
+#define debug(x) cerr << #x << " = " << (x) << " (L" << __LINE__ << ")" << " " << __FILE__ << endl;
+#define SIZEOF(x) sizeof(x)/sizeof(x[0])
+
+
+const long long INF = 4e18;
+const long long NINF = 1 - INF;
+
+#define ENDL cout << endl;
+#define CIN(a) REP(i,a.size())cin >> a[i];
+
+//二次元座標の点を表す構造体。xとyをメンバに持つ
+struct POINT{
+    double x;
+    double y;
+
+};
+
+
+
+ll gcd(ll x, ll y) { return y ? gcd(y, x % y) : x; }
+ll lcm(ll a, ll b) { return (a / gcd(a, b)) * b; }
+
+/*
+    nCr , 値が大きいとオーバーフローする
+    n<=kなら1 (0C1や1C5= 1)
+*/
+ll nCr(ll n,  ll r){
+  if ( r * 2 > n ) r = n - r;
+  ll dividend = 1;
+  ll divisor  = 1;
+  for ( unsigned int i = 1; i <= r; ++i ) {
+    dividend *= (n-i+1);
+    divisor  *= i;
+  }
+  return dividend / divisor;
+}
+
+
+
+//firstが最大値（最小値） , second が index
+template<class T>
+pair<T , ll> maxP(vector<T> a , ll size){
+    pair <T , ll> p;
+    ll ind = 0;
+    T mx = NINF;
+    REP(i,size){
+        if(mx<a[i]){
+            mx = a[i];
+            ind = i;
+        }
+    }
+    p.first = mx;
+    p.second = ind;
+    return p;
+}
+
+
+template<class T>
+pair<T , ll> minP(vector<T> a , ll size){
+    pair <T , ll> p;
+    T mn = INF;
+    ll ind = 0;
+    REP(i,size){
+        if(mn > a[i]){
+            mn = a[i];
+            ind = i;
+        }
+    }
+    p.first = mn;
+    p.second = ind;
+    return p;
+}
+
+template<class T>
+T sumL(vector<T> a , ll size){
+    T sum = 0;
+    REP(i,size){
+        sum += a[i];
+
+    }
+    return sum;
+}
+
+
+ //sort済みのvll ; a のleft ~ rightにtがいくつあるか
+ll counT(VLL a ,ll left , ll right ,  ll t ){
+    //sort(a.begin(),a.end());
+    return upper_bound(a.begin() + left , a.begin() + right,t)-lower_bound(a.begin() + left , a.begin() + right, t);
+}
+
+//切り上げ
+ll kiriage(ll a , ll b){
+    return a/b + (a%b!=0);
+}
+
+#define COUNT(a,b) counT((a),0,a.size(),(b))
+
+#define MAX(x) maxP(x,x.size())
+#define MIN(x) minP(x,x.size())
+#define SUM(x) sumL(x,x.size())
+
+
+
+
+//-------要素を見つける-----------
+ll search(vll &a , ll n ){//a内のnのindexを返す
+    std::vector<ll>::iterator iter = std::find(a.begin(), a.end(), n);
+    size_t index = distance(a.begin(), iter);
+    return index;
+}
+
+
+//桁数
+int getdigit(ll n){
+    return log10(n)+1;
+}
+
+
+
+// toBinary[i]は,binaを二進数で表したときの下からi桁目のbitが入ってる
+vll toBinary(ll bina){
+    vll ans;
+    for (ll i = 0; bina>0 ; i++)
+    {
+        ans.push_back(bina%2);
+        bina = bina/2;
+    }
+    return ans;
+}
+
+
+
+//-----------MAIN:困った時メモ------------//
+//    
+//    Sqrは２乗 sqrtはルート , 二次元座標の点は struct POINT でも表せる(メンバはx , y)
+//    小さい順ならpriority_queue<ll, vll, greater<ll> > と書く
+//    ゲーム:grundy数 , グラフ:LCA,eulerTour,　
+//    最大流がScalingMaxFlow , 最小費用流がPrimalDual<flow_t , cost_t>
+//    めぐる式二分探索 , 半分前列挙
+//    bitDP , 最小全域木でコストやグラフを求める , オイラーツアー , 0-1BFS 
+//    オイラーツアーはDFS , 全域木はDFS , 三分探索
+//    区間スケジューリング問題(右端が小さい順にソート)
+//    定数倍(log)を落とすことで通ることもたまにある(setやmapに注意)
+//    度数　＝ ラジアン × 180 ÷ 円周率
+//    競技プログラミングでは「数が少ない方を考えると考察が進む場合がある」という典型テクニックがあります。
+//    std::mapをループするときは、for(pair<type,type> x(要素): MAP)
+//    期待値の線形性, 平均値は期待値の特殊な場合 
+
+//    二次元累積和の計算 : s[i+1][j+1] = s[i][j+1] + s[i+1][j] - s[i][j] + a[i][j];
+//    (a,b) -> (c,d)の二次元累積和 : s[c][d] - s[a][d] - s[b][c] + s[a][b]
+
+//    multisetは便利 , 値の重複、upperbound、追加削除がlogN , *rbeginで最大値,*beginで最小値
+
+#define ENDL cout << endl;
+
+
+ll n , m;
+ll h , w , k; 
+string s;
+vll A ,B;    
+map<ll , ll>p;
+ll v , e;
+
+
+
+
+
+bool isLMS(vector<char> &type , int index){
+    if(index > 0 && index < type.size() && type[index] == 'S' && type[index-1] =='L' ){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+
+/*
+    s：元の文字列
+    type:s[i]のタイプ(LS型) = type[i]
+    LMS_index : sのlmsのindexを並べたもの
+    charnum_max : 使われている文字の種類数
+*/
+template<class String_or_VectorInt>
+vector<int> induced_sort(String_or_VectorInt &s , vector<char> &type , vector<int> &LMS_index , int charnum_max ){
+
+    vector<int> res(s.size() , -1);
+    
+    vector<int> bin(charnum_max,0);//文字コードをindexとして、文字cはsuffixArrayの[ bin[c] , bin[c+1] )の場所に現れる
+    vector<int> bin_cop;//binはcount変数としてよく使うので、使う際はコピーを使う
+
+
+
+
+
+    for(char c : s){
+        //各文字が現れる回数をカウント
+        bin[c]++;
+    }
+
+
+       
+
+    /*
+        suffixの先頭の文字のみをソートした時、文字:cが現れる位置は、[ bin[c] , bin[c+1] ) である(半開区間なのに注意)
+            例えば、bin[$] = 0 , bin[a] = 1 , bin[b] = 1 , bin[c] = 3 , bin[d] = 4の時、
+            先頭の文字だけソートしたら { $ b b c ... } となる
+
+    */ 
+
+
+    int now_ind = 0;
+    for(int i = 0 ; i < bin.size() ;i++){
+        int next_ind = now_ind + bin[i];
+        bin[i] = now_ind;
+        now_ind = next_ind;
+    }
+
+
+
+
+
+
+    //induce sortのステップ１(LMSを、s[LMS]のbinの末尾(上限)の方から埋めていく(SufArrにはindexを入れていく))
+    bin_cop = bin;//カウント用
+    int c_now = 0;
+
+    for(int i = LMS_index.size()-1 ; i >= 0 ; i--){
+        int lms = LMS_index[i];
+        int c = s[lms];
+
+        res[bin_cop[c+1]-1] = lms;
+        bin_cop[c+1]--;
+    }
+    
+
+
+    //ステップ２(SufArrを前から見て、SufArrに接尾辞のindex: i が入っていて、s[i-1]がL型の時、SufArrのbin[s[i-1]]の先頭の位置からi-1を入れていく
+    bin_cop = bin;//カウント用
+    for(int i = 0 ; i < res.size() ; i++){
+        if(res[i] == -1)continue;//何も入っていない
+        if(res[i] == 0)continue;//&なので、0-1はout of index
+        if(type[res[i]-1] == 'S')continue;
+
+        int c = s[res[i]-1];
+
+        res[bin_cop[c]]=res[i]-1;
+        bin_cop[c]++;
+        
+    }
+
+
+    //ステップ３(SufArrを後ろから見て、SufArrに接尾辞のindex: i が入っていて、s[i-1]がS型の時、SufArrのbin[s[i-1]]の末尾(上限)の位置からi-1を入れていく
+    bin_cop = bin;//カウント用
+    for(int i = res.size()-1 ; i >= 0 ; i--){
+        if(res[i] == -1)continue;//何も入っていない
+        if(res[i] == 0)continue;//&なので、0-1はout of index
+        if(type[res[i]-1] == 'L')continue;
+       
+        int c = s[res[i]-1];
+
+        res[bin_cop[c+1]-1]=res[i]-1;
+        bin_cop[c+1]--;
+        
+    }
+
+
+    return res;
+
+}
+
+
+/*
+    接尾辞配列(英小文字のみ)
+
+    計算中はsの末尾に0を加える
+    0を加えるので、sの中身を全て+1する
+    末尾の0はsのどの文字よりも小さい
+
+    charnum_max = sに現れる文字の個数(文字コードの最大値)
+*/
+template<class String_or_VectorInt>
+vector<int> SuffixArray(String_or_VectorInt s , int charnum_max = 1100000){
+    for(int i = 0 ; i < s.size() ; i++){
+        s[i]++;
+    }
+    s.push_back(0);
+    
+    vector<char> type(s.size(),'.');//sのindexの型(L型かS型か)
+    
+    
+    vector<bool> isLMS(s.size(),false);//LMSかどうか
+
+
+    vector<int> res(s.size(),-1);//SuffixArrayを入れるやつ。-1は初期化値(何も入っていないということ)
+
+    int now_ind = 0;//for文の外で変数が必要な時、これ使って
+
+    /*
+        sのindex:iが
+                S型 := sのi文字目以降の接尾辞が、i+1文字目以降の接尾辞よりも辞書順で小さい。
+                L型 := sのi文字目以降の接尾辞が、i+1文字目以降の接尾辞よりも辞書順で大きい。
+    */
+
+    type.back()='S';
+
+    for(int i = (int)s.size()-2 ; i>= 0 ; i--){
+        //i以降の接尾辞と、i+1以降の接尾辞の辞書順を比べる。(後ろから見れば、iとi+1文字目のみ見ればわかる)
+
+        if(s[i] < s[i+1]){
+            //s[i] < s[i+1]ならSタイプ(先頭の文字からの比較で辞書順は決まるから)
+            type[i] = 'S';
+        }else if(s[i]>s[i+1]){
+            //s[i] > s[i+1]ならLタイプ(先頭の文字からの比較で辞書順は決まるから)
+            type[i] = 'L';
+        }else{
+            //s[i]とs[i+1]が等しい時、i以降の接尾辞とi+1以降の接尾辞の先頭1文字を取ればいいので、i+1とi+2の場合と同じタイプ。
+            type[i] = type[i+1];
+        }
+
+    }
+
+
+    vector<int>LMS_index;       
+    REP(i,s.size()-1){
+        if(type[i] == 'L' && type[i+1] == 'S'){
+            //LMSであるようなindexたちを入れる
+            LMS_index.push_back(i+1);
+        }
+    }
+    for(int ind : LMS_index)isLMS[ind]=true;
+
+
+    /*
+        LMS(Left-Most-S)とは、s[i-1]がL型で,s[i]がS型になるような index:i .
+        LMS-substringとは、LMSであるようなindexに挟まれた文字列のこと。
+
+        また、文字cのビンとは、求めるSuffixArrayにおいて、文字cで始まるsuffixが現れる場所の範囲のことである。
+        文字:cが現れる位置は、[ bin[c] , bin[c+1] ) である(半開区間なのに注意)
+            例えば、bin[$] = 0 , bin[a] = 1 , bin[b] = 1 , bin[c] = 3 , bin[d] = 4の時、
+            先頭の文字だけソートしたら { $ b b c ... } となる
+
+    */
+
+
+
+
+
+    //一度目のinducedsort
+    vector<int> SA = induced_sort(s,type,LMS_index,charnum_max);
+
+
+    //一度目のソートの結果から、LMSである部分だけ順番に取り出す。
+    vector<int>NewSA(LMS_index.size());
+
+    for(int x : SA){
+        if(isLMS[x]){
+            NewSA[now_ind] = x;
+            now_ind++;
+        }
+    }
+
+    //NewSAのi番目に割り振る番号
+    vector<int> num_for_LMS(NewSA.size());
+    now_ind = 0;
+    //メモリがもったいないので、SAを再利用。LMSに番号を割り振ります。
+    SA[NewSA[now_ind]]=0;
+    
+    now_ind++;
+
+    
+    
+    for(int i = 1 ; i < NewSA.size() ; i++){
+        //Iは、i-1番目のLMSのindex ,　Jはi番目のLMSのindex
+        int J = NewSA[i-1];
+        int I = NewSA[i];
+        bool is_same_I_and_J = true;
+
+        for(int x = 0 ; x < s.size() ; x++){
+            if(J+x>=s.size())break;
+            if(s[I+x]!=s[J+x] || isLMS[I+x] != isLMS[J+x]){
+                is_same_I_and_J = false;
+                break;
+            }
+            else if(x > 0 && (isLMS[I+x] || isLMS[J+x]))break;
+        }
+
+        if(is_same_I_and_J){
+            num_for_LMS[now_ind] = num_for_LMS[now_ind-1];
+        }else{
+            num_for_LMS[now_ind] = num_for_LMS[now_ind-1] + 1;
+        }
+        SA[NewSA[now_ind]] = num_for_LMS[now_ind];
+        
+        now_ind++;
+    }
+
+    now_ind = 0;
+    
+    
+    int max_num = -1;
+
+    for(int i = 0 ; i < s.size() ; i++){
+        if(isLMS[i]){
+            num_for_LMS[now_ind] = SA[i];
+            
+            now_ind++;
+            max_num = max(SA[i] , max_num);
+        }
+        
+    }
+
+
+    SA.resize(LMS_index.size()+1);
+    
+
+    if(max_num +1 == num_for_LMS.size()){
+        for(int i = 0 ; i < num_for_LMS.size() ; i++){
+            SA[num_for_LMS[i]+1] = i;
+            
+        }
+    }else{
+        SA = SuffixArray(num_for_LMS , max_num+2);
+        
+    } 
+
+
+
+
+
+    vector<int> NewLMS_index(LMS_index.size());
+    SA.erase(SA.begin());
+
+
+    for(int i = 0 ; i < SA.size(); i++){
+        NewLMS_index[i] = LMS_index[SA[i]];
+      
+    }
+
+
+
+    res = induced_sort(s,type,NewLMS_index,charnum_max);
+
+    
+
+
+
+
+        
+
+
+
+    return res;
+
+}
+
+
+
+
+int main(){
+    cin >> s;
+    
+    auto v = SuffixArray(s);
+    v.erase(v.begin());
+    
+    int q ;
+    cin >> q;
+    while(q-->0){
+
+        string t;
+        cin >> t;        
+        int lef = 0 ;
+        int rig = v.size();
+
+        while(rig - lef > 1){
+            int mid = lef + (rig-lef)/2;
+            int m = v[mid];
+
+            ll fl = 0;
+            for(int i = 0 ; i < t.size() ; i++){
+                if(m+i>s.size())break;
+                if(s[i+m]>t[i]){
+                    fl = 1;
+                    break;
+                }else if(s[i+m]<t[i]){
+                    break;
+                }
+            }
+
+            if(!fl){
+                lef = mid;
+            }else{
+                rig = mid;
+            }
+
+
+        }
+        int I = lef;
+
+
+        ll fl = 1;
+        for(int i = I ; i< I+t.size() ; i++){
+
+            if(i>=s.size()){
+                fl = 0;
+                break;
+            }
+            if(s[i]!=t[i-I]){
+                fl = 0;
+                break;
+            }
+        }
+        cout << fl << endl;
+        
+    }
+    
+
+    return 0;   
+}
+

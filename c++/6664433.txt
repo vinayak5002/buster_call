@@ -1,0 +1,236 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+
+enum Face {
+	TOP,
+	SOUTH,
+	EAST,
+	WEST,
+	NORTH,
+	BOTTOM,
+};
+
+class Dice {
+private:
+	vector<int> faces_;
+
+public:
+	Dice(const vector<int>& labels);
+
+	~Dice();
+
+	void roll_north();
+
+	void roll_east();
+
+	void roll_west();
+
+	void roll_south();
+
+	void roll_left();
+
+	void roll_right();
+
+	void roll_to(char d);
+
+	int get_cur_label(char f);
+
+	bool operator == (Dice& r);
+};
+
+Dice::Dice(const vector<int>& labels) : faces_(labels) {
+	return;
+}
+
+Dice::~Dice() {
+	return;
+}
+
+void Dice::roll_north() {
+	int tmp = faces_[TOP];
+	faces_[TOP] = faces_[SOUTH];
+	faces_[SOUTH] = faces_[BOTTOM];
+	faces_[BOTTOM] = faces_[NORTH];
+	faces_[NORTH] = tmp;
+	return;
+}
+
+void Dice::roll_east() {
+	int tmp = faces_[TOP];
+	faces_[TOP] = faces_[WEST];
+	faces_[WEST] = faces_[BOTTOM];
+	faces_[BOTTOM] = faces_[EAST];
+	faces_[EAST] = tmp;
+	return;
+}
+
+void Dice::roll_west() {
+	int tmp = faces_[TOP];
+	faces_[TOP] = faces_[EAST];
+	faces_[EAST] = faces_[BOTTOM];
+	faces_[BOTTOM] = faces_[WEST];
+	faces_[WEST] = tmp;
+	return;
+}
+
+void Dice::roll_south() {
+	int tmp = faces_[TOP];
+	faces_[TOP] = faces_[NORTH];
+	faces_[NORTH] = faces_[BOTTOM];
+	faces_[BOTTOM] = faces_[SOUTH];
+	faces_[SOUTH] = tmp;
+	return;
+}
+
+void Dice::roll_left() {
+	int tmp = faces_[SOUTH];
+	faces_[SOUTH] = faces_[WEST];
+	faces_[WEST] = faces_[NORTH];
+	faces_[NORTH] = faces_[EAST];
+	faces_[EAST] = tmp;
+	return;
+}
+
+void Dice::roll_right() {
+	int tmp = faces_[SOUTH];
+	faces_[SOUTH] = faces_[EAST];
+	faces_[EAST] = faces_[NORTH];
+	faces_[NORTH] = faces_[WEST];
+	faces_[WEST] = tmp;
+	return;
+}
+
+void Dice::roll_to(char d) {
+	switch (d) {
+	case 'N':
+		roll_north();
+		break;
+	case 'E':
+		roll_east();
+		break;
+	case 'W':
+		roll_west();
+		break;
+	case 'S':
+		roll_south();
+		break;
+	case 'R':
+		roll_right();
+		break;
+	case 'L':
+		roll_left();
+		break;
+	default:
+		break;
+	}
+	return;
+}
+
+int Dice::get_cur_label(char f) {
+	return faces_[f];
+}
+
+bool Dice::operator == (Dice& r) {
+	return this->faces_ == r.faces_;
+}
+
+bool is_already_searched(Dice dice, std::vector<Dice>& is_searched) {
+	bool ret = false;
+
+	for (int i = 0; i < is_searched.size(); i++) {
+		if (dice == is_searched[i]) {
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
+bool is_same(Dice dice0, Dice dice1, std::vector<Dice>& is_searched) {
+	bool ret = false;
+	Dice tmp_dice = dice1;
+
+	if (dice0 == dice1) { return true; }
+
+	tmp_dice.roll_north();
+	if (!is_already_searched(tmp_dice, is_searched)) {
+		is_searched.push_back(tmp_dice);
+		ret = is_same(dice0, tmp_dice, is_searched);
+	}
+
+	if (!ret) {
+		tmp_dice = dice1;
+		tmp_dice.roll_east();
+		if (!is_already_searched(tmp_dice, is_searched)) {
+			is_searched.push_back(tmp_dice);
+			ret = is_same(dice0, tmp_dice, is_searched);
+		}
+	}
+
+	if (!ret) {
+		tmp_dice = dice1;
+		tmp_dice.roll_south();
+		if (!is_already_searched(tmp_dice, is_searched)) {
+			is_searched.push_back(tmp_dice);
+			ret = is_same(dice0, tmp_dice, is_searched);
+		}
+	}
+
+	if (!ret) {
+		tmp_dice = dice1;
+		tmp_dice.roll_west();
+		if (!is_already_searched(tmp_dice, is_searched)) {
+			is_searched.push_back(tmp_dice);
+			ret = is_same(dice0, tmp_dice, is_searched);
+		}
+	}
+	return ret;
+}
+int main() {
+	int num_faces = 6;
+	vector<vector<int> > labels_vec;
+	int n = -1;
+
+
+	cin >> n;
+	labels_vec.resize(n);
+
+	for (int j = 0; j < n; j++) {
+		labels_vec[j].resize(num_faces);
+		for (int i = 0; i < num_faces; i++) {
+			cin >> labels_vec[j][i];
+		}
+	}
+
+	vector<Dice> dices;
+	bool is_all_different = true;
+
+	for (int i = 0; i < n; i++) {
+		Dice d(labels_vec[i]);
+		dices.push_back(d);
+	}
+
+	for (int i = 0; i < n; i++) {
+		for (int j = i + 1; j < n; j++) {
+			vector<Dice> is_searched;
+
+			if (is_same(dices[i], dices[j], is_searched)) {
+				is_all_different = false;
+				j = n;
+				break;
+			}
+		}
+	}
+	if (is_all_different) {
+		cout << "Yes";
+	}
+	else {
+		cout << "No";
+	}
+	cout << endl;
+	return 0;
+}
+

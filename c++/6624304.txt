@@ -1,0 +1,115 @@
+#include<stdio.h>
+
+#define MAX 100005
+#define NIL -1
+
+typedef struct { 
+	int id;
+	int p;
+	int l;
+	int r;
+}Node;
+
+Node T[MAX];
+
+
+
+
+//再帰的に深さを求める//
+int rec( Node node )
+{
+	if( node.p == NIL ) 
+	{
+		return 0;
+	}
+	
+	return rec(T[node.p]) + 1; //深さのカウント
+}
+
+void print( int u )
+{
+	int i, c;
+	
+	printf( "node %d: ", u );        //節点の番号//
+	printf( "parent = %d, ", T[u].p );   //親の節点番号//
+	printf( "depth = %d, ", rec(T[u]));     //深さ//
+	
+	if( T[u].p == NIL )
+	{
+		printf( "root" );
+	}
+	else if( T[u].l == NIL )
+	{
+		printf( "leaf" );
+	}
+	else
+	{
+		printf( "internal node, " );
+	}
+	
+	printf( "[" );
+	
+	//子のリストの表示//
+	for( c = T[u].l; c != NIL; c = T[c].r )
+	{
+		if( T[c].r == -1)
+		{
+			printf("%d", c);
+		}
+		else
+		{
+			printf( "%d, ", c );
+		}
+	}
+	
+	printf( "]\n" );
+}
+
+int main( void )
+{
+	int i, n, j, k, id, c, l, r;
+	
+	scanf( "%d", &n );
+	
+	for( i=0; i<n; i++ )
+	{
+		T[i].p  = T[i].l = T[i].r = NIL;
+	}
+	
+	for( i = 0; i < n; i++ )
+	{
+		scanf( "%d %d", &id, &k );
+		
+		for( j = 0; j < k; j++ )
+		{
+			scanf( "%d", &c );
+			
+			if( j == 0 )
+			{
+				T[id].l = c;
+				l = c;
+			}
+			else
+			{
+				T[l].r = c;
+				l = c;
+			}
+			T[c].p = id;
+		}
+	}
+	
+	for( i = 0; i < n; i++ )
+	{
+		if( T[i].p == NIL )
+		{
+			r = i;
+		}
+	}
+	
+	for( i = 0; i < n; i++ )
+	{
+		print(i);
+	}
+	
+	return 0;
+}

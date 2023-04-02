@@ -1,0 +1,24 @@
+import qualified Data.ByteString.Char8 as B
+import Control.Monad ( when, forM_ )
+import Data.Char (isSpace)
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as VM
+import Control.Monad.ST ( runST )
+
+main :: IO ()
+main = do
+  n <- readLn
+  av <- fmap (V.unfoldr (B.readInt . B.dropWhile isSpace)) B.getLine
+  (putStrLn . unwords . V.toList . V.map show) (bsort n av)
+
+bsort :: Int -> V.Vector Int -> V.Vector Int
+bsort n av = runST $ do
+  amv <- V.thaw av
+  forM_ [0..(n-2)] $ \i -> do
+    forM_ [0..(n-i-2)] $ \j -> do
+      aj <- VM.read amv j
+      aj1 <- VM.read amv (j+1)
+      when (aj1 < aj) $ do
+        VM.write amv j aj1
+        VM.write amv (j+1) aj
+  V.freeze amv

@@ -1,0 +1,80 @@
+#include<iostream>
+#include<stdio.h>
+#include<vector>
+using namespace std;
+
+int main(){
+    int n;
+    char ch,pc;
+    ch='A';
+    vector<vector<char> > vct;
+    vector<char> tv;
+    
+    n=int(getchar());
+    while(true){
+        pc=ch;
+        ch=getchar();
+        if (ch==-1){
+            break;
+        }
+        if ((47<ch) and (ch<58)){
+            tv.push_back(pc);
+            tv.push_back(ch);
+            vct.push_back(tv);
+            tv.clear();
+        }
+    }
+    
+    vector<vector<char> > vctcopy;
+    vctcopy=vct;
+    
+    int l, ct;
+    ct=0;
+    
+    for (int i=0; i<n-1; ++i){
+        l=ct;
+        for (int j=n-1; i<j; --j){
+            if (vct[j-1][1]>vct[j][1]){
+                tv=vct[j];
+                vct[j]=vct[j-1];
+                vct[j-1]=tv;
+                ++ct;
+            }
+        }
+        if(l==ct){
+            break;
+        }
+    }
+    for (vector<vector<char> >::iterator i=vct.begin(), m=vct.end(); i!=m; ++i){
+        cout<<(*i)[0];
+        cout<<(*i)[1];
+    }
+    cout<<endl;
+    cout<<"Stable"<<endl;
+    int mn, c;
+    for (int i=0; i<n; ++i){
+        mn=i;
+        c=0;
+        for (int j=i+1; j<n; ++j){
+            if (vctcopy[j][1]<vctcopy[mn][1]){
+                mn=j;
+                c=1;
+            }
+        }
+        if(c){
+            tv=vctcopy[mn];
+            vctcopy[mn]=vctcopy[i];
+            vctcopy[i]=tv;
+        }
+    }
+    
+    if (vct==vctcopy){
+        cout<<"Stable"<<endl;
+    }else{
+        cout<<"Not stable"<<endl;
+    }
+    
+    
+    
+    
+}

@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+constexpr ll inf = (1LL << 62);
+constexpr ll MOD = (998244353);
+template <typename T>
+bool chmax(T& a, const T& b)
+{
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+template <typename T>
+bool chmin(T& a, const T& b)
+{
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+struct edge {
+    ll to, cost;
+};
+void dijkstra(const vector<vector<edge>>& g, int s, vector<ll>& d)
+{
+    using P = pair<ll, ll>;
+    // 隣接リストG, 始点s, 各店までの距離d
+    ll n = g.size();
+    d.resize(n, inf);
+    priority_queue<P, vector<P>, greater<P>> pq;  // (仮の最短距離,頂点)のペア
+    d[s] = 0;
+    pq.push({d[s], s});
+    while (pq.size() > 0) {
+        auto p = pq.top();
+        pq.pop();
+        ll v = p.second;
+        if (d[v] < p.first)
+            continue;
+        for (auto& e : g[v]) {
+            if (d[e.to] > d[v] + e.cost) {
+                d[e.to] = d[v] + e.cost;
+                pq.push({d[e.to], e.to});
+            }
+        }
+    }
+}
+
+int main()
+{
+    ll V, E, r;
+    cin >> V >> E >> r;
+    vector<vector<edge>> G(V);
+    for (ll i = 0; i < E; ++i) {
+        ll s, t, d;
+        cin >> s >> t >> d;
+        G[s].push_back(edge{t, d});
+    }
+    vector<ll> d;
+    dijkstra(G, r, d);
+    for (auto& x : d) {
+        if (x == inf) {
+            cout << "INF" << endl;
+        } else {
+            cout << x << endl;
+        }
+    }
+}

@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+// #include <iostream>
+using namespace std;
+
+struct Edge
+{
+  int w = INT_MAX, to = -1, next = -1, prev = -1;
+};
+
+int N, coords[100000][2];
+Edge edges[100000];
+int start = 0;
+
+long solve()
+{
+  long totalCost = 0;
+
+  edges[0].w = 0;
+  int v = -1;
+  for (int i = 0; i < N; i++)
+  {
+    if (v == -1)
+    {
+      for (int j = start; j < N; j = edges[j].next)
+      {
+        if (v == -1 || edges[j].w < edges[v].w)
+          v = j;
+      }
+    }
+
+    totalCost += edges[v].w;
+
+    if (v == start)
+      start = edges[v].next;
+    else
+    {
+      edges[edges[v].prev].next = edges[v].next;
+      edges[edges[v].next].prev = edges[v].prev;
+    }
+
+    int vv = start;
+    for (int to = start; to < N; to = edges[to].next)
+    {
+      int cost = max(abs(coords[v][0] - coords[to][0]), abs(coords[v][1] - coords[to][1]));
+      if (cost < edges[to].w)
+      {
+        edges[to].w = cost;
+        edges[to].to = v;
+      }
+
+      if (edges[to].w < edges[vv].w)
+        vv = to;
+    }
+
+    v = vv;
+  }
+
+  return totalCost;
+}
+
+int main()
+{
+  ios::sync_with_stdio(false);
+  cin.tie(0);
+
+  cin >> N;
+  for (int i = 0; i < N; i++)
+  {
+    cin >> coords[i][0] >> coords[i][1];
+    edges[i].next = i + 1;
+    edges[i].prev = i - 1;
+  }
+  cout << solve() << endl;
+
+  return 0;
+}
+

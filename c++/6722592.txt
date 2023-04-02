@@ -1,0 +1,84 @@
+#pragma GCC optimize("O3,unroll-loops")
+#pragma GCC target("avx2,bmi,bmi2,lzcnt,popcnt")
+
+#include "bits/stdc++.h"
+using namespace std;
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+using namespace __gnu_pbds;
+template<class key, class cmp = std::less<key>>
+using op_set = tree<key, null_type, cmp, rb_tree_tag, tree_order_statistics_node_update>;
+#ifdef thunder
+#include "bug.h"
+#else
+#define bug(...) 
+#endif
+
+#define ll long long
+#define lld double
+#define all(x) x.begin(), x.end()
+#define iceil(n, x) (((n) + (x) - 1) / (x))
+#define goog(tno) cout << "Case #" << tno <<": "
+
+const ll INF=2e18;
+const ll mod=1000000007;
+const ll maxn=1e6+5;
+
+ll dp[maxn],dp2[maxn];
+
+ll dfs(ll n){
+    if(n==0)    return 0;
+    if(n<0) return INF;
+    ll &ans=dp[n];
+    if(ans!=-1) return ans;
+    ans=INF;
+    for(ll i=1;i<=105;i++){
+        ll x=(i*(i+1)*(i+2))/6;
+        if(n-x>=0){
+            ans=min(ans,dfs(n-x)+1);
+        }
+    }
+    return ans;
+}
+
+ll dfs2(ll n){
+    if(n==0)    return 0;
+    if(n<0) return INF;
+    ll ans=dp2[n];
+    if(ans!=-1) return ans;
+    ans=INF;
+    for(ll i=1;i<=105;i++){
+        ll x=(i*(i+1)*(i+2))/6;
+        if(n-x>=0&&x%2){
+            ans=min(ans,dfs2(n-x)+1);
+        }
+    }
+    return ans;
+}
+
+void solve(){
+    ll n;
+    // bug("hi");
+    memset(dp,-1,sizeof dp);
+    memset(dp2,-1,sizeof dp2);
+    dfs(1000000);
+    // dfs2(100000);
+    while(1){
+        cin>>n;
+        if(n==0) break;
+        cout<<dfs(n)<<' ';
+        cout<<dfs2(n)<<'\n';
+    }
+}
+
+signed main(){
+    ios_base::sync_with_stdio(false), cin.tie(nullptr);
+    //freopen("input.txt","r",stdin);
+    //freopen("output.txt","w",stdout);
+    int t=1;
+    // cin>>t;
+    for(int i=1;i<=t;i++){
+        solve();
+    }
+    return 0;
+}

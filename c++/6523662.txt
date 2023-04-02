@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+bool isPrimes(int n) {
+    if (n == 2) return true;
+    if (n == 1 || n % 2 == 0) return false;
+
+    for (int i = 3; i < n; i += 2) {
+        if (n % i == 0) return false;
+    }
+    return true;
+}
+
+void createPrimeList(int n, vector<int> &v) {
+    for (int i = 1; i < n; i++) {
+        if (isPrimes(i)) v.push_back(i);
+    }
+}
+
+double ratioNum(int a, int b) {
+    if (a < b)
+        return (double)a / (double)b;
+    else
+        return (double)b / (double)a;
+}
+
+int maxNum(vector<int> v) {
+    int max = 0;
+    for (int i = 0; i < v.size(); i++) {
+        if (max < v.at(i)) max = v.at(i);
+    }
+    return max;
+}
+
+bool withinRatio(int a, int b, int pi, int pj) {
+    if (ratioNum(a, b) <= ratioNum(pi, pj) && ratioNum(pi, pj) <= 1.0)
+        return true;
+    else
+        return false;
+}
+
+bool withinRange(int p, int q, int pi, int pj, int m) {
+    if (p * q <= pi * pj && pi * pj <= m)
+        return true;
+    else
+        return false;
+}
+
+int main() {
+    vector<int> m, a, b, primes;
+    vector<int> p, q;
+    int k = 0, l = 0;
+
+    while (1) {
+        m.push_back(0);
+        a.push_back(0);
+        b.push_back(0);
+        cin >> m.at(l) >> a.at(l) >> b.at(l);
+        if (m.at(l) == 0 && a.at(l) == 0 && b.at(l) == 0) break;
+        l++;
+    }
+
+    createPrimeList(maxNum(m), primes);
+
+    for (int n = 0; n < m.size() - 1; n++) {
+        p.push_back(1);
+        q.push_back(1);
+
+        for (int i = 0; i < primes.size() && primes.at(i) < m.at(n); i++) {
+            for (int j = 0; j < primes.size() && primes.at(j) < m.at(n); j++) {
+                if (withinRatio(a.at(n), b.at(n), primes.at(i), primes.at(j)) &&
+                    withinRange(p.at(k), q.at(k), primes.at(i), primes.at(j),
+                                m.at(n))) {
+                    p.at(k) = primes.at(j);
+                    q.at(k) = primes.at(i);
+                }
+            }
+        }
+
+        k++;
+    }
+
+    for (int i = 0; i < k; i++) {
+        cout << p.at(i) << " " << q.at(i) << endl;
+    }
+
+    return 0;
+}
+

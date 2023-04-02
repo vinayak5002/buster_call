@@ -1,0 +1,108 @@
+#include <stdio.h>
+#include <string.h>   // strcmp
+#include <stdlib.h>   // malloc
+
+struct nlist {  // table entry:
+    struct nlist *next;   // next entry in chain
+    char *name;
+};
+
+#define HASHSIZE 1046527
+
+static nlist *hashtab[HASHSIZE];  // pointer table
+
+int c2i(char ch)
+{
+    switch (ch) {
+    case 'A':
+	return 1;
+	break;
+    case 'C':
+	return 2;
+	break;
+    case 'G':
+	return 3;
+	break;
+    case 'T':
+	return 4;
+	break;
+    default:
+	return 0;
+    }
+}
+
+long getKey(char str[])
+{
+    long key = 0;
+    long d = 1;
+    for (int i = 0; i < strlen(str); i++) {
+	key += d * c2i(str[i]);
+	d *= 5;
+    }
+    return key;
+}
+
+int hash1(long key)
+{
+    return  key % HASHSIZE;
+}
+    
+// lookup:  look for s in hashtab
+nlist *lookup(char *s)
+{
+    nlist *p;
+
+    for (p = hashtab[hash1(getKey(s))]; p != NULL; p = p->next)
+	if (strcmp(s, p->name) == 0)
+	    return p;     // found
+    return NULL;          // not found
+}
+
+char *strdum(char *s)   // make a duplicate of s
+{
+    char *p = (char *) malloc(strlen(s) + 1);    // +1 for '\0'
+    if (p != NULL)
+	strcpy(p, s);
+    return p;
+}
+
+// install:  put name in hashtab
+nlist *install(char *name)
+{
+    nlist *p = lookup(name);
+    if (p == NULL) {    // not found
+	p = (nlist *) malloc(sizeof(*p));
+	if (p == NULL || (p->name = strdup(name)) == NULL)
+	    return NULL;
+	int hashval = hash1(getKey(name));
+	p->next = hashtab[hashval];
+	hashtab[hashval] = p;
+    }
+    return p;
+}
+
+int main()
+{
+    int n;
+    scanf("%d", &n);
+    char cmd[7];
+    char name[7];
+    for (int i = 0; i < n; i++) {
+	scanf("%s %s", cmd, name);
+	nlist *np = lookup(name);
+	//	if (strcmp(cmd, "find") == 0) {
+	if (cmd[0] == 'f') {
+	    if(np != NULL)
+		printf("yes\n");
+	    else
+		printf("no\n");
+	    //	} else if (strcmp(cmd, "insert") == 0) {
+	} else if (cmd[0] == 'i') {
+	    if (np == NULL)
+		install(name);
+	}
+    }
+	
+    return 0;
+}
+

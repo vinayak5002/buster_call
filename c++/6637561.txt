@@ -1,0 +1,71 @@
+#include <cmath>
+#include <iostream>
+#include <vector>
+#include <stdio.h>
+using namespace std;
+
+struct Card {
+    char suit;
+    int value;
+};
+
+void bubbleSort(struct Card a[], int N) {
+    for (int i = 0; i < N; i++)
+    {
+        for (int j = N - 1; j > i; j--)
+        {
+            if (a[j - 1].value > a[j].value) swap(a[j - 1], a[j]);
+        }
+    }
+}
+
+void selectionSort(struct Card a[], int N) {
+    for (int i = 0; i < N; i++)
+    {
+        int minj = i;
+        for (int j = i + 1; j < N; j++)
+        {
+            if (a[minj].value > a[j].value) minj = j;
+        }        
+        swap(a[i], a[minj]);
+    }
+}
+
+bool isStable(struct Card a[], struct Card b[], int N) {
+    for (int i = 0; i < N; i++)
+    {
+        if (a[i].suit != b[i].suit) return false;
+    }
+    return true;
+}
+
+void print(struct Card a[], int N) {
+    for (int i = 0; i < N; i++)
+    {
+        if (i == 0) printf("%c%d", a[i].suit, a[i].value);
+        else printf(" %c%d", a[i].suit, a[i].value);
+    }
+    printf("\n");
+}
+
+int main() {
+    int N;
+    cin >> N;
+    Card card1[36], card2[36];
+    for (int i = 0; i < N; i++)
+    {
+        cin >> card1[i].suit >> card1[i].value;
+        card2[i] = card1[i];
+    }
+    
+    bubbleSort(card1, N);
+    print(card1, N);
+    printf("Stable\n");
+
+    selectionSort(card2, N);
+    print(card2, N);
+    if (isStable(card1, card2, N)) printf("Stable\n");
+    else printf("Not stable\n");
+
+    return 0;
+}

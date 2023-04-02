@@ -1,0 +1,57 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < n; ++i)
+typedef long long ll;
+using namespace std;
+const int INF = 1e9;
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+
+    int N, M, K;
+    cin >> N >> M >> K;
+    vector<int> D(M);
+    rep(i, M) cin >> D[i], D[i]--;
+    vector V(N, vector<int>(K));
+    rep(i, N) rep(j, K) cin >> V[i][j], V[i][j]--;
+
+    // 暗い部屋なら何番目
+    // 明るい部屋なら-1
+    vector<int> dark_id(N, -1);
+    rep(i, M) dark_id[D[i]] = i;
+
+    // i番目から 道jを選んだときに行く場所
+    vector G(M, vector<int>(K));
+    rep(j, K) {
+        rep(i, M) G[i][j] = dark_id[V[D[i]][j]];
+    }
+
+    queue<int> que;
+    que.push((1 << M) - 1);
+    vector<int> d(1 << M, INF);
+    d[(1 << M) - 1] = 0;
+    while (!que.empty()) {
+        int state = que.front();
+        que.pop();
+
+        rep(k, K) {
+            int next = 0;
+            rep(i, M) {
+                if (state & (1 << i)) {
+                    // 明るい部屋に行った
+                    if (G[i][k] == -1) continue;
+                    next |= (1 << G[i][k]);
+                }
+            }
+
+            if (d[next] == INF) {
+                que.push(next);
+                d[next] = d[state] + 1;
+            }
+        }
+    }
+    cout << d[0] << "\n";
+
+    return 0;
+}
+

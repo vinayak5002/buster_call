@@ -1,0 +1,125 @@
+#include <stdio.h>
+#define MAX 100001
+#define NIL -1
+
+
+/* 左子右兄弟表現の実装*/
+struct Node
+{
+    int parent;  /* 親のノード */
+    int left;    /* 子のノード */
+    int right;   /* 左の兄弟ノード */
+} ;
+
+struct Node T[MAX];
+int  Depth[MAX];
+
+
+/* 出力用関数 */
+void print_node(int node)
+{
+    int i, child;
+    printf("node %d: ", node);
+    printf("parent = %d, ", T[node].parent);
+    printf("depth = %d, ", Depth[node]);
+
+    if (T[node].parent == NIL){
+        printf("root, ");
+    }
+    else if (T[node].left == NIL){
+        printf("leaf, ");
+    }
+    else{
+        printf("internal node, ");
+    }
+
+    printf("[");
+
+    for (i = 0, child = T[node].left; child!= NIL; i++, child = T[child].right)
+    {
+        if (i!=0)
+        {
+            printf(", ");
+        }
+        printf("%d", child);
+    }
+    printf("]\n");
+}
+
+/* 再帰的に深さを求める */
+void setDepth(int u,int p)
+{
+    Depth[u] =p;
+    if(T[u].right!=NIL){
+        setDepth(T[u].right,p);
+    }
+    if(T[u].left!=NIL){
+        setDepth(T[u].left,p+1);
+    }
+}
+
+int main(void)
+{
+    int i, j, N, x, n, c, l,r;
+    scanf("%d", &N);
+
+    /* tを初期化 */
+    for (i = 0; i < N; i++)
+    {
+        T[i].parent = NIL;
+        T[i].left = NIL;
+        T[i].right= NIL;
+    }
+
+    /* 格納 */
+    for (i = 0; i < N; i++)
+    {
+        /* ノード番号と持つ子の数 */
+        scanf("%d %d", &n, &x);
+
+        /* 子の関係を格納する */
+        for (j = 0; j < x; j++)
+        {
+            scanf("%d", &c);
+
+            /* 
+            最初の子ノードはleftに格納
+            次からは最初の子ノードの兄弟なので、rightに入れる。
+             */
+            if (j == 0)
+                T[n].left = c;
+            else
+                T[l].right = c;
+
+            /* 親ノードの番号を入れる */
+            l = c;
+            T[c].parent = n;
+        }
+    }
+
+    /* rootノードを見つける */
+    for (i = 0; i < N; i++)
+        if (T[i].parent == NIL)
+            r = i;
+
+    /* 深さD[]に格納する */
+    setDepth(root, 0);
+
+    for (i = 0; i < N; i++)
+        print_node(i);
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

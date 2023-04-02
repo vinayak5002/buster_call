@@ -1,0 +1,253 @@
+#include <cstdio>
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class My_List{
+    class l_content{
+        public:
+        unsigned long long int key;
+        l_content *l_before{nullptr}, *l_after{nullptr}, *m_before{nullptr}, 
+        *m_after_1{nullptr}, *m_after_2{nullptr};
+        l_content(unsigned long long num):key{num}{}
+        ~l_content(){
+            l_before=nullptr, l_after=nullptr, m_before=nullptr, 
+            m_after_1=nullptr, m_after_2=nullptr;
+        }
+    };
+    l_content *l_start{nullptr}, *l_last{nullptr}, *m_start{nullptr};
+    void del_i(l_content*& iterator){
+        if(iterator==l_start){
+            l_start=iterator->l_after;
+            l_start->l_before=nullptr;
+        }else if(iterator==l_last){
+            l_last=iterator->l_before;
+            l_last->l_after=nullptr;
+        }else{
+            iterator->l_before->l_after=iterator->l_after;
+            iterator->l_after->l_before=iterator->l_before;
+        }
+        iterator->l_after=nullptr;
+        iterator->l_before=nullptr;
+        if(iterator->m_before==nullptr){
+            relink(iterator, m_start);
+        }else if(iterator==iterator->m_before->m_after_2){
+            relink(iterator, iterator->m_before->m_after_2);
+        }else{
+            relink(iterator, iterator->m_before->m_after_1);
+        }
+        iterator->~l_content();
+    }
+    void relink(l_content*& iterator, l_content*& m_p){
+        if(iterator->m_after_2==nullptr&&iterator->m_after_1==nullptr){
+            m_p=nullptr;
+        }else if(iterator->m_after_2==nullptr){
+            m_p=iterator->m_after_1;
+        }else{
+            if(iterator->m_after_1==nullptr){
+                m_p=iterator->m_after_2;
+            }else{
+                m_start=iterator->m_after_2;
+                if(iterator->m_after_2->m_after_1==nullptr){
+                    m_p->m_after_1=iterator->m_after_1;
+                }else{
+                    l_content* temp=m_p->m_after_1;
+                    m_p->m_after_1=iterator->m_after_1;
+                    l_content* near=iterator->m_after_1->m_after_2;
+                    while(near!=nullptr&&near->m_after_2!=nullptr){
+                        l_content* n=near->m_after_2;
+                        near=n;
+                    }
+                    if(near==nullptr){
+                        iterator->m_after_1->m_after_2=temp;
+                    }else{
+                        near->m_after_2=temp;
+                    }
+                }
+            }
+        }
+    }
+    public:
+    My_List(){};
+    My_List(My_List&)=delete;
+    My_List(My_List&&)=delete;
+    ~My_List(){
+        l_content* iterator=l_start;
+        while(iterator->l_after!=nullptr){
+            iterator=iterator->l_after;
+            iterator->l_before->~l_content();
+        }
+        iterator->~l_content();
+    }
+    l_content* search_near(unsigned long long key) const{
+        l_content* ans = m_start;
+        while(true){
+            if(ans->key>=key){
+                if(ans->m_after_2==nullptr)return ans;
+                ans = ans->m_after_2;
+            }else{
+                if(ans->m_after_1==nullptr)return ans;
+                ans = ans->m_after_1;
+            }
+        }
+    }
+    l_content* search(unsigned long long key) const{
+        l_content* ans = m_start;
+        while(true){
+            if(ans->key==key)return ans;
+            if(ans->key>key){
+                if(ans->m_after_2==nullptr)return nullptr;
+                ans = ans->m_after_2;
+            }else{
+                if(ans->m_after_1==nullptr)return nullptr;
+                ans = ans->m_after_1;
+            }
+        }
+    }
+    void insert(unsigned long long num){
+        l_content* temp= new l_content{num};
+        if(l_start==nullptr){
+            l_start=temp;
+            l_last=temp;
+            m_start=temp;
+        }else{
+            l_start->l_before=temp;
+            temp->l_after=l_start;
+            l_start=temp;
+            l_content* m_f=search_near(num);
+            if(m_f->key<=num){
+                m_f->m_after_2=temp;
+                temp->m_before= m_f;
+            }else{
+                m_f->m_after_1=temp;
+                temp->m_before= m_f;
+            }
+        }
+    }
+    void del(unsigned long long int key){
+        l_content* ans=search(key);
+        if(ans!=nullptr){
+            del_i(ans);
+        }
+    }
+    void del_first(){
+        del_i(l_start);
+    }
+    void del_last(){
+        del_i(l_last);
+    }
+    void print(){
+        l_content* iterator=l_start;
+        while(iterator->l_after!=nullptr){
+            iterator=iterator->l_after;
+            cout<<iterator->l_before->key<<" ";
+        }
+        cout<<iterator->key<<endl;
+    }
+};
+class List{
+    struct content{
+        const unsigned long long int key;
+        content *before, *after;
+        content(unsigned long long int num, content *p): key{num}, 
+        before{nullptr}, after{p}{}
+        ~content(){
+            before=nullptr;
+            after=nullptr;
+        }
+        content(content&)=delete;
+        void link_a(content* p){
+            after=p;
+        }
+        void link_b(content* p){
+            before=p;
+        }
+    };
+    content *start, *last;
+    void del_c(content *p){
+        content *p_bef, *p_aft;
+        p_bef=p->before;
+        p_aft=p->after;
+        if(p==start){
+            start=p_aft;
+            start->before=nullptr;
+        }else if(p==last){
+            last=p_bef;
+            last->after=nullptr;
+        }else{
+            p_bef->after=p_aft;
+            p_aft->before=p_bef;
+        }
+        delete p;
+    }
+    public:
+    List(){}
+    List(List&)=delete;
+    List(List&&)=delete;
+    ~List(){
+        content *ptr=start;
+        while(ptr->after!=nullptr){
+            ptr=ptr->after;
+            ptr->before->~content();
+        }
+        ptr->~content();
+    }
+    content* search(unsigned long long int num){
+        content *p=start;
+        while(p->key!=num){
+            p=p->after;
+            if(p==nullptr)break;
+        }
+        return p;
+    }
+    void insert(unsigned long long num){
+        content* p = new content(num, start);
+        if(start==nullptr){
+            last=p;
+            start=p;
+            return;
+        }
+        start->before=p;
+        start=p;
+    }
+    void del(unsigned long long num){
+        content *p=search(num);
+        if(p!=nullptr){
+            del_c(p);
+        }
+    }
+    void delF(){
+        del_c(start);
+    }
+    void delL(){
+        del_c(last);
+    }
+    void print(){
+        content *p=start;
+        while(p->after!=nullptr){
+            cout<<p->key<<" ";
+            p=p->after;
+        }
+        cout<<p->key<<endl;
+    }
+};
+int main(){
+    unsigned long long int n, temp;
+    cin>>n;
+    List l;
+    string command;
+    for(unsigned long long i=0; i<n; ++i){
+        cin>>command>>temp;
+        if(command=="insert"){
+            l.insert(temp);
+        }else if(command=="delete"){
+            l.del(temp);
+        }else if(command=="deleteFirst"){
+            l.delF();
+        }else if(command=="deleteLast"){
+            l.delL();
+        }
+    }
+    l.print();
+}

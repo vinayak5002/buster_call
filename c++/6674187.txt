@@ -1,0 +1,63 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+int N;
+vector<int> T0, T1;
+
+void Add(vector<int>& T, int k, int v) {
+    while (k <= N) {
+        T[k] += v;
+        k += (k & -k);
+    }
+}
+
+int Sum(vector<int>& T, int k) {
+    int Ret = 0;
+    while (k) {
+        Ret += T[k];
+        k -= (k & -k);
+    }
+    return Ret;
+}
+
+void Add(int s, int t, int v) {
+    Add(T0, s, -(s - 1) * v);
+    Add(T1, s, v);
+    Add(T1, t, -v);
+    Add(T0, t, (t - 1) * v);
+}
+
+int Sum(int n) {
+    return Sum(T0, n) + n * Sum(T1, n);
+}
+
+int Get(int n) {
+    if (n == 0) return Sum(0);
+    return Sum(n) - Sum(n - 1);
+}
+
+
+int main(int argc, const char * argv[]) {
+    int Q;
+    cin >> N >> Q;
+    T0.resize(N + 1);
+    T1.resize(N + 1);
+    
+    for (int q = 0; q < Q; ++q) {
+        int c;
+        cin >> c;
+        if (c == 0) {
+            int s, t, x;
+            cin >> s >> t >> x;
+            Add(s, t + 1, x);
+        } else {
+            int i;
+            cin >> i;
+            cout << Get(i) << '\n';
+        }
+    }
+    
+    return 0;
+}
+

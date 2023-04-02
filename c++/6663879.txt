@@ -1,0 +1,158 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+
+#define ROOT (0)
+#define INTERNAL_NODE (1)
+#define LEAF (2)
+
+
+class Node {
+public:
+	int parent;
+	int left;
+	int right;
+
+	Node() : parent(-1), left(-1), right(-1) {
+		return;
+	}
+
+	~Node() {
+		return;
+	}
+
+	int get_type() {
+		if (parent == -1) {
+			return ROOT;
+		}
+		else if (left != -1 || right != -1) {
+			return INTERNAL_NODE;
+		}
+		else {
+			return LEAF;
+		}
+	}
+
+};
+
+int calc_depth(const vector<Node>& nodes, int i) {
+	int d = 0;
+	int n = nodes[i].parent;
+
+	while (n != -1) {
+		n = nodes[n].parent;
+		d++;
+	}
+	return d;
+}
+
+int calc_height(const vector<Node>& nodes, int i) {
+	int lh = 0;
+	int rh = 0;
+	int lid = nodes[i].left;
+	int rid = nodes[i].right;
+
+	if (lid == -1 && rid == -1) {
+		return 0;
+	}
+	if (lid >= 0) {
+		lh += calc_height(nodes, lid) + 1;
+	}
+	if (rid >= 0) {
+		rh += calc_height(nodes, rid) + 1;
+	}
+
+	return lh > rh ? lh : rh;
+}
+
+int get_siling(const vector<Node>& nodes, int i) {
+	int pid = nodes[i].parent;
+	int lid = -1;
+	int rid = -1;
+
+	if (pid == -1) {
+		return -1;
+	}
+	lid = nodes[pid].left;
+	rid = nodes[pid].right;
+
+	if (lid != i) {
+		return lid;
+	}
+	else {
+		return rid;
+	}
+}
+
+int get_degree(const vector<Node>& nodes, int i) {
+	int d = 0;
+	if (nodes[i].left >= 0) {
+		d++;
+	}
+	if (nodes[i].right >= 0) {
+		d++;
+	}
+	return d;
+}
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n = 0;
+	vector<Node> node_vec;
+	int height = 0;
+
+	cin >> n;
+	node_vec.resize(n);
+
+	for (int i = 0; i < n; i++) {
+		int id = -1;
+		int left = -1;
+		int right = -1;
+
+		cin >> id >> left >> right;
+		node_vec[id].left = left;
+		node_vec[id].right = right;
+
+		if (left >= 0) {
+			node_vec[left].parent = id;
+		}
+		if (right >= 0) {
+			node_vec[right].parent = id;
+		}
+	}
+
+
+	for (int i = 0; i < node_vec.size(); i++) {
+		cout << "node " << i << ": ";
+		cout << "parent = " << node_vec[i].parent << ", ";
+
+		cout << "sibling = " << get_siling(node_vec, i) << ", ";
+		cout << "degree = " << get_degree(node_vec, i) << ", ";
+		cout << "depth = " << calc_depth(node_vec, i) << ", ";
+		cout << "height = " << calc_height(node_vec, i) << ", ";
+
+		if (node_vec[i].get_type() == ROOT) {
+			cout << "root";
+		}
+		else if (node_vec[i].get_type() == INTERNAL_NODE) {
+			cout << "internal node";
+		}
+		else {
+			cout << "leaf";
+		}
+		cout << endl;
+	}
+
+	return 0;
+}

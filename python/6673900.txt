@@ -1,0 +1,89 @@
+
+//include
+//------------------------------------------
+#include <vector>
+#include <list>
+#include <map>
+#include <set>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <bitset>
+#include <algorithm>
+#include <functional>
+#include <numeric>
+#include <utility>
+#include <sstream>
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <cstdio>
+#include <cmath>
+#include <cstdlib>
+#include <string>
+#include <cstring>
+#include <ctime>
+#include <climits>
+#include <limits>
+
+using namespace std;
+
+typedef long long LL;
+//constant
+//--------------------------------------------
+const double EPS = 1e-10;
+const double PI = acos(-1.0);
+const int INF = (int)1000000007;
+const LL MOD = (LL)1000000007;//10^9+7
+const LL INF2 = (LL)100000000000000000;//10^18
+
+
+LL calc(int n, vector<int> w) {
+	//dp[l][r] [l,r)を抜けるか
+	vector < vector <int>> dp(n+1, vector<int>(n+1));
+	
+	for (int d = 1; d < n+1; d++) {
+		for (int l = 0; l <=n; l++) {
+			int r = l + d;if (r>n)continue;
+			//ぶち抜き
+			int x = l + 1; int y = r - 1;
+			if (x <= y) {
+				if (abs(w[l] - w[r - 1]) <= 1) {
+					if (dp[x][y]==(y-x)) {
+						dp[l][r] = r - l;
+					}
+				}
+			}
+
+			//くっつく
+			for (int m = l + 1; m < r; m++) {
+				int v = dp[l][m] + dp[m][r];
+				dp[l][r] = max(dp[l][r], v);
+			}
+		}
+	}
+
+	return dp[0][n];
+}
+
+int main() {
+	
+	while (1) {
+		int n; cin >> n;
+		if (n == 0) {
+			return 0;
+		}
+		vector<int> w(n);
+		for (int i = 0; i < n; i++) {
+			cin >> w[i];
+		}
+		cout << calc(n, w) << endl;
+	}
+	return 0;
+}
+
+/*
+2
+1 2
+0
+*/

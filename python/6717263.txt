@@ -1,0 +1,79 @@
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Scanner; 
+
+
+class Main {
+	
+	private final int V;
+	private final List<List<Integer>> adj;
+
+	public Main(int V)
+	{
+		this.V = V;
+		adj = new ArrayList<>(V);
+		
+		for (int i = 0; i < V; i++)
+			adj.add(new LinkedList<>());
+	}
+	
+	private boolean checkCycleUtil(int i, boolean[] visited, boolean[] recursiveStack){
+		if (recursiveStack[i])
+			return true;
+		if (visited[i])
+			return false;
+			
+		visited[i] = true;
+		recursiveStack[i] = true;
+		List<Integer> children = adj.get(i);
+		
+		for (Integer child: children)
+			if (checkCycleUtil(child, visited, recursiveStack))
+				return true;
+				
+		recursiveStack[i] = false;
+
+		return false;
+	}
+
+	private void addEdge(int node, int dest) {
+		adj.get(node).add(dest);
+	}
+
+	private boolean checkCycle()
+	{
+		boolean[] visited = new boolean[V]; //initializes visited and recursiveStack
+		boolean[] recursiveStack = new boolean[V];
+		
+		for (int i = 0; i < V; i++) //checks if the cycle works
+			if (checkCycleUtil(i, visited, recursiveStack))
+				return true; //if there exists cycle
+
+		return false; //doesn't exist
+	}
+
+	// Driver code
+	public static void main(String[] args){
+        Scanner sc = new Scanner(System.in); //scans 
+
+        int v = sc.nextInt();
+        Main graph = new Main(v);
+        // System.out.println("v: "+v);
+
+        int e = sc.nextInt();
+        // System.out.println("e: "+e);
+
+        for(int i=0; i < e; i++){
+            int node = sc.nextInt();
+            int dest = sc.nextInt();
+            graph.addEdge(node, dest);
+            // System.out.println("node: "+node+" dest:"+dest);
+        }
+        if(graph.checkCycle()){
+            System.out.println("1");
+        }
+        else System.out.println("0");
+	}
+}
+

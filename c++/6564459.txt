@@ -1,0 +1,138 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef unsigned long long int ull;
+#define chmin(x,y) x = min(x,y)
+#define chmax(x,y) x = max(x,y)
+#define BIG_NUM 2000000000
+#define HUGE_NUM 4000000000000000000 //オーバーフローに注意
+#define MOD 1000000007
+#define EPS 0.000000001
+
+
+
+#define SIZE 1005
+
+struct State{
+	State(int arg_row,int arg_col,int arg_sum_dist){
+		row = arg_row;
+		col = arg_col;
+		sum_dist = arg_sum_dist;
+	}
+	State(){
+		row = col = sum_dist = 0;
+	}
+	bool operator<(const struct State& arg) const{
+
+		return sum_dist > arg.sum_dist; //昇順(PQ)
+	}
+	int row,col,sum_dist;
+};
+
+int H,W;
+int min_dist[SIZE][SIZE];
+int d_row[4] = {-1,0,0,1},d_col[4] = {0,-1,1,0};
+char table[SIZE][SIZE];
+
+bool rangeCheck(int row,int col){
+
+	return row >= 0 && row <= H-1 && col >= 0 && col <= W-1;
+}
+
+bool isSpecial(char ch){
+
+	return ch == 'U'|| ch == 'D'|| ch == 'L' || ch == 'R';
+}
+
+int main(){
+
+	scanf("%d %d",&H,&W);
+
+	int s_row,s_col,t_row,t_col;
+
+	for(int row = 0; row < H; row++){
+
+		scanf("%s",table[row]);
+		for(int col = 0; col < W; col++){
+			if(table[row][col] == 'S'){
+				s_row = row;
+				s_col = col;
+			}else if(table[row][col] == 'G'){
+				t_row = row;
+				t_col = col;
+			}
+		}
+	}
+
+	for(int row = 0; row < H; row++){
+		for(int col = 0; col < W; col++){
+
+			min_dist[row][col] = BIG_NUM;
+		}
+	}
+
+	min_dist[s_row][s_col] = 0;
+	priority_queue<State> Q;
+
+	Q.push(State(s_row,s_col,0));
+
+	while(!Q.empty()){
+
+		State state = Q.top();
+		Q.pop();
+
+		if(state.row == t_row && state.col == t_col){
+
+			printf("%d\n",state.sum_dist);
+			return 0;
+		}
+
+		if(isSpecial(table[state.row][state.col])){
+
+			int adj_row = state.row,adj_col = state.col,next_dist = state.sum_dist;
+
+			switch(table[state.row][state.col]){
+			case 'U':
+				adj_row--;
+				break;
+			case 'D':
+				adj_row++;
+				break;
+			case 'L':
+				adj_col--;
+				break;
+			case 'R':
+				adj_col++;
+				break;
+			}
+			if(!rangeCheck(adj_row,adj_col) || table[adj_row][adj_col] == '#')continue;
+
+			if(min_dist[adj_row][adj_col] > next_dist){
+
+				min_dist[adj_row][adj_col] = next_dist;
+				Q.push(State(adj_row,adj_col,next_dist));
+			}
+
+		}else{
+
+			for(int i = 0; i < 4; i++){
+				int adj_row = state.row+d_row[i];
+				int adj_col = state.col+d_col[i];
+				int next_dist = state.sum_dist+1;
+
+				if(!rangeCheck(adj_row,adj_col) || table[adj_row][adj_col] == '#')continue;
+
+				if(min_dist[adj_row][adj_col] > next_dist){
+
+					min_dist[adj_row][adj_col] = next_dist;
+					Q.push(State(adj_row,adj_col,next_dist));
+				}
+			}
+		}
+	}
+
+	printf("-1\n");
+
+	return 0;
+}
+

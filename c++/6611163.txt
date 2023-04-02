@@ -1,0 +1,62 @@
+#include<stdio.h>
+#include<iostream>
+#include<vector>
+using namespace std;
+
+int cnt = 0;
+
+void trace(int n, int A[]){
+    for(int j = 0; j <= n-1; j++){
+            cout << A[j];
+            cout << endl;
+        }
+}
+
+void insectionSort(int n, int A[], int g){
+    for(int i = g; i < n; i++){
+        int v = A[i];
+        int j = i - g;
+        while(j >= 0 && A[j] > v){
+            A[j+g] = A[j];
+            j -= g;
+            cnt++;
+        }
+        A[j+g] = v;
+    }
+}
+
+void shellSort(int n, int A[]){
+    vector<int> G;
+
+    for(int h = 1; ;){
+        if(h > n) break;
+        G.push_back(h);
+        h = 3 * h + 1;
+    }
+
+    for(int i = G.size() - 1; i >= 0; i--){
+        insectionSort(n, A, G[i]);
+    }
+
+    cout << G.size() << endl;
+    for(int j = G.size() - 1; j >= 0; j--){
+        if(j != G.size() - 1) cout << " ";
+        cout << G[j];
+    }
+    cout << endl;
+    cout << cnt << endl;
+    trace(n, A);
+    
+}
+
+int main(){
+    int n;
+    cin >> n;
+    int A[n];
+    for(int i = 0; i < n; i++){
+        cin >> A[i];
+    }
+    shellSort(n, A);
+
+    return 0;
+}

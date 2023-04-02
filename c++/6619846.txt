@@ -1,0 +1,105 @@
+#include<bits/stdc++.h>
+
+#define rep(i,n)for(int i=0;(i)<(int)(n);i++)
+#define REP(i,a,b)for(int i=(int)(a);(i)<=(int)(b);i++)
+#define ALL(a)  (a).begin(),(a).end()
+#define chmax(a, b) a = max(a, b)
+#define chmin(a, b) a = min(a, b)
+#define pb push_back
+#define fi first
+#define se second
+#define sz(x) ((int)x.size())
+
+using namespace std;
+using ld = long double;
+using ll = long long;
+using P = pair<ll, ll>;
+using Graph = vector<vector<int>>;
+
+const ll ZER = 0;
+const ll MOD = 998244353;
+const int INF = 1e9;
+
+int tonum(char c){
+    return (int)(c - '0');
+};
+
+int main(){
+    string s;
+    while(cin >> s){
+        if(s == "#")break;
+        int a, b, c, d;
+        cin >> a >> b >> c >> d;
+        a--;b--;c--;d--;
+        // h, wを求める
+        int h = 1, w = 0;
+        // hは/の数
+        rep(i, sz(s))if(s[i] == '/')h++;
+        // wは1つのセグメントにおけるbの個数と数字の和
+        rep(i, sz(s)){
+            if(s[i] == '/')break;
+            if(s[i] == 'b')w++;
+            else w += tonum(s[i]);
+        }
+        vector<vector<int>> fld(h, vector<int>(w, 0));
+        // 初期化
+        int i = 0, j = 0;
+        for(auto si : s){
+            // '/'で行が下がる
+            if(si == '/'){
+                i++;
+                j = 0;
+                continue;
+            }
+            // ボール
+            if(si == 'b'){
+                fld[i][j] = 1;
+                j++;
+            }
+            else if('0' <= si && si <= '9'){
+                rep(_, tonum(si)){
+                    fld[i][j] = 0;
+                    j++;
+                }
+            }
+            else {
+                assert(0);
+            }
+        }
+        // ちぇっく
+        assert(fld[a][b] == 1);
+        assert(fld[c][d] == 0);
+
+        // 移動
+        fld[a][b] = 0;
+        fld[c][d] = 1;
+
+        // グラフからjfenに戻す
+        string res = "";
+        rep(i, h){
+            rep(j, w){
+                // ボールのとき
+                if(fld[i][j] == 1){
+                    res.pb('b');
+                }
+                else {
+                    // 0が連続何個続くかを数える
+                    int cnt = 0;
+                    cnt++;
+                    while(j+1 < w && fld[i][j+1] == 0){
+                        cnt++;
+                        j++;
+                    }
+                    assert(cnt < 10);
+                    char c = (char)('0' + cnt);
+                    res.pb(c);
+                }
+            }
+            res.pb('/');
+        }
+        res.pop_back();
+        cout << res << endl;
+    }
+}
+
+

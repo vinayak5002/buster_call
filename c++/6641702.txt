@@ -1,0 +1,113 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+class edge{
+public:
+	int from;
+	int to;
+	int cost;
+	int time;
+	int kind;
+	edge(int from,int to,int cost,int time,int kind):from(from),to(to),cost(cost),time(time),kind(kind){}	
+};
+
+class state{
+public:
+	int place;
+	int time;
+	int cost;
+	state(int place,int time,int cost):place(place),time(time),cost(cost){}
+};
+
+bool operator<(state a,state b){
+	return a.cost > b.cost;
+}
+
+int func(int n,int m,int h,int k){
+	vector<vector<edge>> edges(n);
+	for(int i=0;i<m;++i){
+		int a;
+		int b;
+		int c;
+		int h;
+		int r;
+		cin >> a >> b >> c >> h >> r;
+		--a;
+		--b;	
+		--r;
+		edges[a].emplace_back(a,b,c,h,r);
+		edges[b].emplace_back(b,a,c,h,r);
+	}
+	int s;
+	int t;
+	cin >> s >> t;
+	--s;
+	--t;
+	auto calc = [&](int can) -> int{
+		vector<vector<int>> fast(n,vector<int>(h+1,1e9));
+		priority_queue<state> pq;
+		auto add = [&](state s) -> void{
+			if(s.time>h)return;
+			if(fast[s.place][s.time] > s.cost){
+				fast[s.place][s.time] = s.cost;
+				pq.emplace(s);
+			}
+		};
+		add(state(s,0,0));
+		while(pq.size()){
+			state current = pq.top();
+			pq.pop();
+			if(fast[current.place][current.time] != current.cost)continue;
+			for(auto e:edges[current.place]){
+				int cost = ((1 << e.kind) & can) ? 0 : e.cost;
+				add(state(e.to,current.time+e.time,current.cost+cost));
+			}
+		}
+		int res = 1e9;
+		for(auto i:fast[t])res = min(res,i);
+		return res;
+	};
+	int p;
+	cin >> p;
+	using pii = pair<int,int>;
+	vector<pii> line;
+	for(int i=0;i<p;++i){
+		int l;
+		int d;
+		cin >> l >> d;
+		int sum = 0;
+		for(int j=0;j<l;++j){
+			int v;
+			cin >> v;
+			sum |= 1 << (v-1);
+		}
+		line.emplace_back(d,sum);
+	}
+	vector<int> dp(1 << k,1e9);
+	dp[0] = 0;
+	for(int i=0;i<dp.size();++i){
+		for(auto j:line){
+			dp[i|j.second] = min(dp[i]+j.first,dp[i|j.second]);
+		}
+	}
+	int res = 1e9;
+	for(int i=0;i<dp.size();++i){
+		res = min(res,dp[i] + calc(i));
+	}
+	if(res == 1e9)return -1;
+	return res;
+}
+
+int main(){
+	while(true){
+		int n;
+		int m;
+		int h;
+		int k;
+		cin >> n >> m >> h >> k;
+		if(n==0)break;
+		cout << func(n,m,h,k) << endl;
+	}
+	return 0;
+}
+

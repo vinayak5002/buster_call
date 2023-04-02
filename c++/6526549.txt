@@ -1,0 +1,76 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+void func(int l , int r , vector<ll>& v , vector<ll>& w , vector<pair<ll , ll>>& arr)
+{
+    int n=r-l;
+    ll val=0 , wt=0;
+    for(int i=0;i<(1<<n);i++)
+    {
+        ll val=0 , wt=0;
+        for(int j=0;j<n;j++)
+        {
+            if(i&(1<<j))
+            {
+                val+=v[l+j] , wt+=w[l+j];
+            }
+        }
+        arr.push_back({wt , val});
+    }
+        
+}
+void solve(int n , ll total , vector<ll> v , vector<ll> w)
+{
+    vector<pair<ll , ll>> arr1 , arr2;
+    func(0 , n/2 , v , w , arr1);
+    func(n/2 , n , v , w , arr2);
+    sort(arr2.begin() , arr2.end());
+
+    int n1=arr1.size() , n2=arr2.size();
+    vector<ll> maxm(n2);
+    maxm[0]=arr2[0].second;
+    for(int i=1;i<n2;i++)
+        maxm[i]=max(maxm[i-1] , arr2[i].second);
+
+    ll ansval=-1 , answt=0;
+    for(int i=0;i<n1;i++)
+    {
+        ll tempval=arr1[i].second , tempwt=arr1[i].first;
+        int l=-1 , r=n2;
+        while(l+1<r)
+        {
+            int mid=(l+r)/2;
+            if(arr2[mid].first <= total-tempwt)
+                l=mid;
+            else
+                r=mid;
+        }
+        if(l!=-1 && maxm[l] + tempval > ansval)
+            ansval=maxm[l] + tempval;
+    }
+    cout<<ansval<<"\n";
+}
+int main()
+{
+    int n;
+    ll total;
+    cin>>n>>total;
+
+    vector<ll> v(n) , w(n);
+    for(int i=0;i<n;i++)
+    {
+        cin>>v[i]>>w[i];
+    }
+    if(n==1)
+    {
+        if(w[0]<=total)
+            cout<<v[0]<<"\n";
+        else
+            cout<<0<<"\n";
+    }
+    else
+    {
+        solve(n , total , v , w);
+    }
+
+}

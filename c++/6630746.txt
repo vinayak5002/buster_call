@@ -1,0 +1,75 @@
+#include<stdio.h>
+
+#define MAX 10000
+#define INF 1<<20
+
+#define WHITE 0
+#define GRAY  1
+#define BLACK 2
+
+int am[MAX][MAX];
+
+void search(int number){
+    int vertex,min_cost,sum_weight=0;
+    int cost[MAX],colar[MAX];
+    int i;
+    
+    for(i=0;i<number;i++){
+    	cost[i]=INF;
+    	colar[i]=WHITE;
+	}
+	cost[0]=0;
+	colar[0]=GRAY;
+    
+    while(1){
+    	vertex=-1;
+    	min_cost=INF;
+    	
+    	for(i=0;i<number;i++){
+    		if(colar[i]==GRAY&&cost[i]<min_cost){
+    			min_cost=cost[i];
+    			vertex=i;
+			}
+		}
+		if(vertex==-1)
+			break;
+			
+    	colar[vertex]=BLACK;
+    	
+    	for(i=0;i<number;i++){
+    		if(colar[i]!=BLACK&&am[vertex][i]<INF){
+    			colar[i]=GRAY;
+    			if(cost[i]>cost[vertex]+am[vertex][i])
+    				cost[i]=cost[vertex]+am[vertex][i];
+			}
+		}	
+	}
+	for(i=0;i<number;i++)
+		printf("%d %d\n",i,cost[i]);
+}
+ 
+int main(void){
+	int number,vertex,route;
+	int node,weight;
+    int i,j;
+     
+    scanf("%d",&number);
+    
+    for(i=0;i<number;i++)
+    	for(j=0;j<number;j++)
+    		am[i][j]=INF;
+    
+    for(i=0;i<number;i++){
+		scanf("%d%d",&vertex,&route);
+		
+		for(j=0;j<route;j++){
+			scanf("%d%d",&node,&weight);
+			
+			am[vertex][node]=weight;
+		}		
+    }
+    search(number);
+    
+    return 0;
+}
+

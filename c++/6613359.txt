@@ -1,0 +1,75 @@
+#include<stdio.h>
+#define White 0
+#define Gray 1
+#define Black 2
+#define N 100
+#define M 90
+#define INF 1<<21
+
+int Q[M],i,j,k,n,head,tail;
+int m[N][N],d[N],color[N];
+
+
+void enqueue(int x){
+  Q[tail] = x;
+  if(tail == N)
+    tail = 1;
+  else
+    tail++;
+  // tail = (tail + 1) % N;
+}
+
+int dequeue(){
+  int x = Q[head];
+  if(head == N)
+    head = 1;
+  else
+    head++;
+  //head = (head + 1) % N;
+  return x;
+}
+
+void dfs(int t){
+  head = 0;
+  tail = n;
+  enqueue(t);
+  for(i=1 ;i<=n ;i++) d[i] = INF;
+  d[t] = 0;
+  int u,v;
+  while(head != tail){
+    u = dequeue();
+    for(v=1 ;v<=n ;v++){
+      if(m[u][v] == 1 && color[v] == White){
+	color[v] = Gray;
+	d[v] = d[u] + 1;
+	enqueue(v);
+      }
+      color[u] = Black;
+    }
+  }
+
+  for(i=1 ;i<=n ;i++){
+    if(d[i] != INF)printf("%d %d\n",i,d[i]);
+    else printf("%d -1\n",i);
+  }
+}
+
+int main(){
+  int u,v;
+  scanf("%d",&n);
+  for(i=1 ;i<=n ;i++){
+    for(j=1 ;j<=n ;j++) m[i][j] = 0;
+  }
+
+  for(i=0 ;i<n ;i++){
+    scanf("%d%d",&u,&k);
+    for(j=0 ;j<k ;j++){
+      scanf("%d",&v);
+      m[u][v] = 1;
+    }
+  }
+
+    dfs(1);
+    return 0;
+}
+

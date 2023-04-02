@@ -1,0 +1,157 @@
+#include <iostream>
+#include <array>
+#include <cmath>
+#include <vector>
+#include <algorithm>
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////     HEADER    ///////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+constexpr double EPS = 1e-10;
+#define fequal(a, b) (fabs((a) - (b)) < EPS)
+
+struct Point2D
+{
+    double x, y;
+
+    inline Point2D operator+(const Point2D &p) const { return Point2D{x + p.x, y + p.y}; };
+    inline Point2D operator-(const Point2D &p) const { return Point2D{x - p.x, y - p.y}; };
+
+    inline double distance(const Point2D &p) const { return std::sqrt((x - p.x) * (x - p.x) + (y - p.y) * (y - p.y)); };
+};
+
+class Vector2D
+{
+public:
+    Vector2D(double x, double y) : x(x), y(y) {}
+    Vector2D(const Point2D &p_start, const Point2D &p_end) : x(p_end.x - p_start.x), y(p_end.y - p_start.y) {}
+
+    inline double X() const { return x; };
+    inline double Y() const { return y; };
+
+    inline Vector2D operator+(const Vector2D &v) const { return Vector2D(x + v.x, y + v.y); };
+    inline Vector2D operator-(const Vector2D &v) const { return Vector2D(x - v.x, y - v.y); };
+    inline Vector2D operator*(double k) const { return Vector2D(x * k, y * k); };
+    inline Vector2D operator/(double k) const { return Vector2D(x / k, y / k); };
+
+    inline double dot(const Vector2D &v) const { return x * v.x + y * v.y; };
+    inline double cross(const Vector2D &v) const { return x * v.y - y * v.x; };
+    inline double norm() const { return std::sqrt(x * x + y * y); };
+    inline Vector2D unit() const { return (*this) / norm(); };
+
+    inline bool parallel(Vector2D &v) const { return fequal(cross(v), 0); };
+    inline bool orthogonal(Vector2D &v) const { return fequal(dot(v), 0); };
+
+    double subtended_angle(const Vector2D &v) const;
+
+private:
+    double x, y;
+};
+
+double Vector2D::subtended_angle(const Vector2D &v) const
+{
+    double norm_a = dot(*this);
+    double norm_b = v.dot(v);
+    if (norm_a == 0 || norm_b == 0)
+        return 0;
+
+    double value = dot(v) / (norm_a * norm_b);
+    return std::acos(value);
+}
+
+void read_point(Point2D &p)
+{
+    std::cin >> p.x >> p.y;
+}
+//////////////////////////////////////// END OF HEADER ///////////////////////////////////////////
+
+enum ClockWise
+{
+    ON_SEGMENT = 0,
+    CLOCKWISE = -1,
+    COUNTER_CLOCKWISE = 1,
+    ONLINE_FRONT = -2,
+    ONLINE_BACK = 2,
+};
+
+ClockWise counter_clockwise(const Point2D &p0, const Point2D &p1, const Point2D &p2)
+{
+    auto v_p0_p1 = Vector2D(p0, p1);
+    auto v_p0_p2 = Vector2D(p0, p2);
+
+    if (v_p0_p1.cross(v_p0_p2) > 0.0)
+        return COUNTER_CLOCKWISE;
+    if (v_p0_p1.cross(v_p0_p2) < 0.0)
+        return CLOCKWISE;
+    if (v_p0_p1.dot(v_p0_p2) < 0.0)
+        return ONLINE_BACK;
+    if (v_p0_p1.norm() + EPS < v_p0_p2.norm())
+        return ONLINE_FRONT;
+    return ON_SEGMENT;
+};
+
+bool check_intersect(const Point2D &p0, const Point2D &p1, const Point2D &p2, const Point2D &p3)
+{
+    double cross_product_p0 = Vector2D(p0, p1).cross(Vector2D(p0, p2)) * Vector2D(p0, p1).cross(Vector2D(p0, p3));
+    double cross_product_p2 = Vector2D(p2, p3).cross(Vector2D(p2, p0)) * Vector2D(p2, p3).cross(Vector2D(p2, p1));
+
+    if (cross_product_p0 <= 0 &&
+        cross_product_p2 <= 0 &&
+        counter_clockwise(p0, p1, p2) * counter_clockwise(p0, p1, p3) <= 0)
+        return true;
+
+    return false;
+}
+
+Vector2D projection(const Vector2D &a, const Vector2D &b)
+{
+    double x = a.dot(b) / a.dot(a);
+    return a * x;
+}
+
+Point2D vertical_point(const Point2D &p0, const Point2D &p1, const Point2D &p)
+{
+    auto v1 = Vector2D(p0, p1);
+    auto v2 = Vector2D(p0, p);
+    Vector2D proj_vec = projection(v1, v2);
+
+    return Point2D{p0.x + proj_vec.X(), p0.y + proj_vec.Y()};
+}
+
+int main()
+{
+    int q;
+    std::cin >> q;
+
+    for (int i = 0; i < q; i++)
+    {
+        Point2D p0, p1, p2, p3;
+        read_point(p0);
+        read_point(p1);
+        read_point(p2);
+        read_point(p3);
+
+        Vector2D v1(p0, p1);
+        Vector2D v2(p2, p3);
+
+        if (check_intersect(p0, p1, p2, p3))
+            std::cout << 0.0 << std::endl;
+        else if (v1.parallel(v2))
+            std::cout << v1.cross(Vector2D(p0, p2)) << std::endl;
+        else
+        {
+            std::vector<double> candidates(0);
+
+            if (counter_clockwise(p0, p1, vertical_point(p0, p1, p2)) == ClockWise::ON_SEGMENT)
+                candidates.emplace_back(p2.distance(vertical_point(p0, p1, p2)));
+            if (counter_clockwise(p0, p1, vertical_point(p0, p1, p3)) == ClockWise::ON_SEGMENT)
+                candidates.emplace_back(p3.distance(vertical_point(p0, p1, p3)));
+            if (counter_clockwise(p2, p3, vertical_point(p2, p3, p0)) == ClockWise::ON_SEGMENT)
+                candidates.emplace_back(p0.distance(vertical_point(p2, p3, p0)));
+            if (counter_clockwise(p2, p3, vertical_point(p2, p3, p1)) == ClockWise::ON_SEGMENT)
+                candidates.emplace_back(p1.distance(vertical_point(p2, p3, p1)));
+
+            printf("%.10f\n", *std::min_element(candidates.begin(), candidates.end()));
+        }
+    }
+}

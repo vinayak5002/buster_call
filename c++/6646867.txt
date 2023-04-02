@@ -1,0 +1,80 @@
+#include <bits/stdc++.h>
+using std::cin;
+using std::getline;
+using std::cout;
+using std::endl;
+using std::string;
+using std::bitset;
+using std::vector;
+using std::array;
+using std::stack;
+using std::queue;
+using std::set;
+using std::map;
+using std::pair;
+using llong = long long;
+template<typename T> using nLimits = std::numeric_limits<T>;
+#define ALL(a) (a).begin(), (a).end()
+#define REP(i, n) for (int i = 0; i < static_cast<int>(n); ++i)
+#define RREP(i, n) for (int i = static_cast<int>(n) - 1; i >= 0; --i)
+#define FOR(i, a, b) for (int i = static_cast<int>(a); i < static_cast<int>(b); ++i)
+#define RFOR(i, a, b) for (int i = static_cast<int>(a) - 1; i >= static_cast<int>(b); --i)
+constexpr int INF = 1001001001;
+constexpr llong LINF = 1001001001001001001ll;
+
+template<typename T> inline bool chMin(T &a, T b) { return ((a > b) ? (a = b, true) : (false)); }
+template<typename T> inline bool chMax(T &a, T b) { return ((a < b) ? (a = b, true) : (false)); }
+template<typename T> void printArray(const T* a, const size_t n);
+
+int N;
+const int MAX_N = 300;
+vector<int> W;
+const int MAX_W = 1000;
+vector<vector<int>> DP;  // DP[l][r]: the maximum value that can be removed for [l, r)
+const int DP_INIT_VAL = -1;
+
+
+int solve(int l, int r) {
+    if ((r - l) <= 1) return 0;
+    if ((r - l) == 2) {
+        if (std::abs(W[l] - W[l + 1]) <= 1) return 2;
+        else return 0;
+    }
+    if (DP[l][r] != DP_INIT_VAL) return DP[l][r];
+
+    if (std::abs(W[l] - W[r - 1]) <= 1 && solve(l + 1, r - 1) == r - l - 2) {
+        chMax(DP[l][r], r);
+    }
+
+    FOR(i, l + 1, r) {
+        chMax(DP[l][r], solve(l, i) + solve(i, r));
+    }
+    
+    return DP[l][r];
+}
+
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout << std::fixed << std::setprecision(20);
+
+    while (true) {
+        cin >> N;
+        if (N == 0) break;
+        W.resize(N);
+        REP(i, N) cin >> W[i];
+
+        DP.assign(N + 2, vector<int>(N + 2, DP_INIT_VAL));
+        cout << solve(0, N) << endl;
+    }
+}
+
+
+template<typename T> 
+void printArray(const T* a, const size_t n) {
+    string s = std::to_string(a[0]);
+    FOR(i, 1, n) s += " " + std::to_string(a[i]);
+    cout << s + "\n";
+}
+

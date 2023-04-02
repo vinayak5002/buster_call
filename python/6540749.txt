@@ -1,0 +1,106 @@
+import java.util.*;
+
+class Solver{
+    //private
+    private Scanner sc = new Scanner(System.in);
+    private char[] cbarr;
+    private int[] nbarr;
+    private char[] csarr;
+    private int[] nsarr;
+
+    private void printArr(String[] arr){
+        for(int i = 0,n = arr.length; i < n ; i++){
+            System.out.print(arr[i] + (i == n-1? "\n" : " "));
+        }
+    }
+    private void selectionSort(int[] arr,int n){
+        for(int i = 0; i < n; i++ ){
+            int minj = i;
+            for(int j = i+1; j < n; j++){
+                if(arr[j] < arr[minj]){
+                    minj = j;
+                }
+            }
+            swap(arr, i, minj);
+            swap(csarr, i, minj);
+        }
+    }
+    private void bubbleSort(int[] arr,int n){
+        for(int i = 0; i < n; i++){
+            for(int j = n-1; i < j; j--){
+                if(arr[j] < arr[j-1]){
+                    swap(arr, j, j-1);
+                    swap(cbarr, j, j-1);
+                }
+            }
+        }
+    }
+    private void swap(int[] arr,int a,int b){
+        if(a == b)
+            return;
+        int t = arr[a];
+        arr[a] = arr[b];
+        arr[b] = t;
+    }
+    private void swap(char[] arr,int a,int b){
+        if(a == b)
+            return;
+        char t = arr[a];
+        arr[a] = arr[b];
+        arr[b] = t;
+    }
+    private String[] toBubbleArr(){
+        int l = nbarr.length;
+        String[] r = new String[l];
+        for(int i = 0; i < l; i++){
+            r[i] = cbarr[i] + "" + nbarr[i];
+        }
+        return r;
+    }
+    private String[] toSelectionArr(){
+        int l = nsarr.length;
+        String[] r = new String[l];
+        for(int i = 0; i < l; i++){
+            r[i] = csarr[i] + "" + nsarr[i];
+        }
+        return r;
+    }
+    private boolean isStable(String[] buble, String[] selection){
+        int l = nbarr.length;
+        for(int i = 0; i < l; i++){
+            if(!buble[i].equals(selection[i]))
+                return false;
+        }
+        return true;
+    }
+
+    //public
+    public void Solve(){
+        int n = sc.nextInt();
+        cbarr = new char[n];
+        nbarr = new int[n];
+        csarr = new char[n];
+        nsarr = new int[n];
+        for(int i = 0; i < n ; i++){
+            char[] v = sc.next().toCharArray();
+            cbarr[i] = v[0];
+            nbarr[i] = Integer.parseInt(v[1]+"");
+            csarr[i] = v[0];
+            nsarr[i] = Integer.parseInt(v[1]+"");
+        }
+        bubbleSort(nbarr, n);
+        String[] outb = toBubbleArr();
+        printArr(outb);
+        System.out.println("Stable");
+        selectionSort(nsarr, n);
+        String[] outs = toSelectionArr();
+        printArr(outs);
+        System.out.println(isStable(outb, outs)?"Stable":"Not Stable");
+    }
+}
+class Main{
+    public static void main(String[] args_){
+        new Solver().Solve();
+    }
+}
+

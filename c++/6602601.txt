@@ -1,0 +1,103 @@
+#include <bits/stdc++.h>
+
+
+#include <algorithm>
+#include <cassert>
+#include <vector>
+
+namespace rklib {
+
+template <class T>
+bool chmax(T &a, const T &b) {
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template <class T>
+bool chmin(T &a, const T &b) {
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template <class T>
+bool chmin_non_negative(T &a, const T &b) {
+    if (a < 0 || a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template <class T>
+T div_floor(T a, T b) {
+    if (b < 0) a *= -1, b *= -1;
+    return a >= 0 ? a / b : (a + 1) / b - 1;
+}
+
+template <class T>
+T div_ceil(T a, T b) {
+    if (b < 0) a *= -1, b *= -1;
+    return a > 0 ? (a - 1) / b + 1 : a / b;
+}
+
+}  // namespace rklib
+
+
+#define For(i, a, b) for (int i = (int)(a); (i) < (int)(b); ++(i))
+#define rFor(i, a, b) for (int i = (int)(a)-1; (i) >= (int)(b); --(i))
+#define rep(i, n) For(i, 0, n)
+#define rrep(i, n) rFor(i, n, 0)
+#define fi first
+#define se second
+
+using namespace std;
+using namespace rklib;
+
+using lint = long long;
+using pii = pair<int, int>;
+using pll = pair<lint, lint>;
+
+int dx[4] = {0, 1, 0, -1};
+int dy[4] = {1, 0, -1, 0};
+
+lint w, d, h;
+
+int get_h(int x, int y, map<pii, int> &mp) {
+    auto it = mp.find({x, y});
+    return it == mp.end() ? h : it->se;
+}
+
+int main() {
+    int c;
+    scanf("%lld%lld%lld%d", &w, &d, &h, &c);
+
+    lint ans = (w * d + d * h + h * w) * 2;
+    map<pii, int> mp;
+    rep(_, c) {
+        int x, y, z;
+        scanf("%d%d%d", &x, &y, &z);
+        int b = get_h(x, y, mp);
+        rep(i, 4) {
+            int nx = x + dx[i], ny = y + dy[i];
+            if (nx < 0 || nx >= w || ny < 0 || ny >= d) {
+                ans -= z;
+                continue;
+            }
+            int a = get_h(nx, ny, mp);
+            if (a < b) {
+                ans += (z <= b - a ? -z : z - 2 * (b - a));
+            } else {
+                ans += z;
+            }
+        }
+        mp[{x, y}] = b - z;
+    }
+    printf("%lld\n", ans);
+}
+

@@ -1,0 +1,96 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+#define N 3
+#define TRUE 1
+#define FALSE 0
+
+int x[4]={0,-1,0,1};
+int y[4]={1,0,-1,0};
+int puzzle[N][N];
+int count;
+
+void swap(int *x,int *y){
+  	int temp;
+  	
+  	temp=*x;
+  	*x=*y;
+  	*y=temp;
+}
+
+int abc(void){
+  	int i,j,s=0,r;
+  
+  	for(i=0;i<N;i++){
+    	for(j=0;j<N;j++){
+        
+        	if(puzzle[i][j]==0)
+        		continue;
+        
+        	r=puzzle[i][j]-1;
+        		s+=abs(r/N-i)+abs(r%N-j);
+    	}
+  	}
+  	
+  	return s;
+}
+
+int dfs(int d,int p,int sy,int sx){
+  	int i,m;
+  	int tx,ty;
+
+  	m=abc();
+  
+  	if(m==0)
+  		return TRUE;
+  	if(d+m>count)
+  		return FALSE;
+  
+  	for(i=0;i<4;i++){
+    	if(abs(i-p)==2)
+    		continue;
+    
+    	tx=sx+x[i],ty=sy+y[i];
+    
+    	if(tx<0||ty<0||tx>=N||ty>=N)
+    		continue;
+    
+    	swap(&puzzle[ty][tx],&puzzle[sy][sx]);
+    
+    	if(dfs(d+1,i,ty,tx))
+    		return TRUE;
+    
+    	swap(&puzzle[ty][tx],&puzzle[sy][sx]);
+  	}
+  	
+    return FALSE;
+}
+
+void Solved(int b,int a){
+  	for(count=0;;count++){
+    	if(dfs(0,99,b,a)){
+      		printf("%d\n",count);
+      		return ;
+    	}
+  	}
+}
+
+int main(void){
+	int s,t;
+  	int i,j;
+
+  	for(i=0;i<N;i++){
+    	for(j=0;j<N;j++){
+      		scanf("%d", &puzzle[i][j]);
+      		if(puzzle[i][j]==0){
+				t=i;
+				s=j;
+      		}
+    	}  
+  	}
+  	Solved(t,s);
+  
+  	return 0;
+}
+

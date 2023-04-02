@@ -1,0 +1,38 @@
+#include <iostream>
+#include <string>
+#include <set>
+
+using namespace std;
+
+int main()
+{
+	int N, A; cin >> N >> A;
+	string S; cin >> S;
+	set<int> SS;
+	for (int i = 0; i < N; ++i) if (S[i] == '#') SS.insert(i + 1);
+	int t = 0;
+	for (auto p = SS.upper_bound(A);;) {
+		if (p != SS.end()) {
+			t += *p - A;
+			A = *p;
+			p = SS.erase(p);
+			if (SS.empty()) break;
+		} else {
+			t += N + 1 - A;
+			A = N + 1;
+		}
+		if (p != SS.begin()) {
+			--p;
+			t += A - *p;
+			A = *p;
+			p = SS.erase(p);
+			if (SS.empty()) break;
+		} else {
+			t += A;
+			A = 0;
+		}
+	}
+	cout << t << endl;
+	return 0;
+}
+

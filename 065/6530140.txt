@@ -1,0 +1,75 @@
+import java.io.*;
+import java.util.*;
+import java.math.BigDecimal;
+import java.lang.Object;
+import java.util.function.*;
+
+public class Main {
+  public static void main(String[] args){
+      int n,m,w,h,s=0,t,sum,ans=0,mx,mn,cnt;
+      int[] a=new int[9],b=new int[8];
+      int[][] c=new int[100][100];
+      int[] dx={1,0,-1,0,1,1,-1,-1},dy={0,1,0,-1,-1,1,-1,1};
+      String str;
+      Scanner scanner =new Scanner(System.in);
+      ArrayList<Integer>vec=new ArrayList<Integer>();
+      while(true){
+        w=Integer.parseInt(scanner.next());
+        h=Integer.parseInt(scanner.next());
+        if(w==0&&h==0)break;
+        ans=0;
+        boolean[][] flag=new boolean[100][100];
+        for(int i=0;i<h;i++){
+          for(int j=0;j<w;j++){
+            c[i][j]=Integer.parseInt(scanner.next());
+          }
+        }
+        Queue<Pair<Integer,Integer>> q=new LinkedList<Pair<Integer,Integer>>();
+        for(int i=0;i<h;i++)
+        for(int j=0;j<w;j++){
+          if(flag[i][j]==false&&c[i][j]==1){
+            ans++;
+            q.add(new Pair<Integer,Integer>(i,j));
+            while(!q.isEmpty()){
+              Pair<Integer,Integer>pos=q.poll();
+              int x=pos.first,y=pos.second;
+              if(flag[x][y]==true)continue;
+              flag[x][y]=true;
+              for(int k=0;k<8;k++){
+              if(x+dx[k]>=0&&x+dx[k]<h&&y+dy[k]>=0
+              &&y+dy[k]<w&&flag[x+dx[k]][y+dy[k]]==false&&c[x+dx[k]][y+dy[k]]==1)q.add(new Pair<Integer,Integer>(x+dx[k],y+dy[k]));
+              }
+            }
+          }
+        }
+          System.out.println(ans);
+      }
+  }
+  public interface Compare<T>{
+	  public boolean func(T x,T y);
+  }
+  static String swap(String str, int i, int j){
+      char ch[] = str.toCharArray();
+      char tempo = ch[i];
+      ch[i] = ch[j];
+      ch[j] = tempo;
+      return new String(ch);
+  }
+}   
+class Pair<T,E>{
+    T first;
+    E second;
+    public Pair(T a,E b){
+      first=a;
+      second=b;
+    }
+    public Pair(Pair<T,E>x){
+      first=x.first;
+      second=x.second;
+    }
+    public Pair(){}
+    void print(){
+      System.out.println("first:"+first+" second:"+second);
+    }
+  }
+  

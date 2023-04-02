@@ -1,0 +1,53 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def is_ok(x, n, card_list, kth, lth):
+    lt_or_eq_x_counter = 0
+    counter = 0
+    j = 0
+    for i in range(n - kth + 1):
+        while j < n:
+            if card_list[j] <= x:
+                lt_or_eq_x_counter += 1
+            if lt_or_eq_x_counter >= kth:
+                break
+            j += 1
+        counter += n - j
+        if card_list[i] <= x:
+            lt_or_eq_x_counter -= 1
+        lt_or_eq_x_counter -= 1
+
+    return counter >= lth
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, kth, lth = map(int, f.readline().split())
+    card_list = list(map(int, f.readline().split()))
+
+    left = 0
+    right = n
+    while left + 1 < right:
+        mid = (left + right) // 2
+        if is_ok(mid, n, card_list, kth, lth):
+            right = mid
+        else:
+            left = mid
+
+    print(right)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

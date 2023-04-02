@@ -1,0 +1,91 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+using namespace std;
+
+
+class Card {
+public:
+	char suit;
+	int number;
+	int input_order;
+
+public:
+	Card() : suit(-1), number(-1), input_order(-1) {
+		return;
+	}
+
+	~Card() {
+		return;
+	}
+};
+
+int partition(vector<Card>& a_vec, int p, int r) {
+	int x = a_vec[r].number;
+	int i = p - 1;
+
+	for (int j = p; j < r; j++) {
+		if (a_vec[j].number <= x) {
+			i++;
+			swap(a_vec[i], a_vec[j]);
+		}
+	}
+	swap(a_vec[i + 1], a_vec[r]);
+	return i + 1;
+}
+
+void quick_sort(vector<Card>& a_vec, int p, int r) {
+	if (p < r) {
+		int q = partition(a_vec, p, r);
+
+		quick_sort(a_vec, p, q - 1);
+		quick_sort(a_vec, q + 1, r);
+	}
+	return;
+}
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n = 0;
+	vector<Card> a_vec;
+	char suit = 0;
+	int m = 0;
+	bool is_stable = true;
+
+	cin >> n;
+	a_vec.resize(n);
+	for (int i = 0; i < n; i++) {
+		cin >> suit >> m;
+		a_vec[i].suit = suit;
+		a_vec[i].number = m;
+		a_vec[i].input_order = i;
+	}
+
+	quick_sort(a_vec, 0, n - 1);
+	for (int i = 1; i < a_vec.size(); i++) {
+		if (a_vec[i - 1].number == a_vec[i].number && a_vec[i - 1].input_order > a_vec[i].input_order) {
+			is_stable = false;
+			break;
+		}
+	}
+
+	if (is_stable) {
+		cout << "Stable" << endl;
+	}
+	else {
+		cout << "Not stable" << endl;
+	}
+	for (int i = 0; i < a_vec.size(); i++) {
+		cout << a_vec[i].suit << " " << a_vec[i].number << endl;
+	}
+	return 0;
+}

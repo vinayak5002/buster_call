@@ -1,0 +1,38 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+    let n = si[0];
+    let array = [];
+    for (let i = 0; i < n; i++) {
+        let inp = si[i + 1].split(" ");
+        let pairs = new Map();
+        pairs.set('X',Number(inp[0]));
+        pairs.set('y',Number(inp[1]));
+        array[i] = pairs;
+        //console.log(pairs);// forDebug
+    }
+    
+    array.sort((a, b) => {
+        if (a.get('X') < b.get('X')) {
+            return -1;// xが小さい点を先に
+        } else if (a.get('X') > b.get('X')) {
+            return 1;
+        } else if (a.get('y') < b.get('y')) {
+            return -1;
+        } else if (a.get('y') === b.get('y')){
+            return 0;
+        } else {
+            return 1;
+        }
+    });
+    
+
+    let str = "";
+    for (let i = 0; i < n; i++) {
+        str += array[i].get('X') + " " + array[i].get('y') + "\n"
+    }
+    so.write(str)
+}
+

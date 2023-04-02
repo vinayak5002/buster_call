@@ -1,0 +1,32 @@
+N, W = map(int, input().split())
+info = [list(map(int, input().split())) for _ in range(N)]
+
+dp = [[[-1, 0] for _ in range(W + 1)] for _ in range(N + 1)]
+dp[0][0][0] = 0
+
+for i in range(N):
+    
+    for j in range(W + 1):
+        
+        v = info[i][0]
+        w = info[i][1]
+        
+        if dp[i][j][0] != -1:
+            dp[i + 1][j][0] = max(dp[i + 1][j][0], dp[i][j][0])
+    
+            if j + w <= W and dp[i + 1][j + w][0] < dp[i][j][0] + v:
+                dp[i + 1][j + w][0] = dp[i][j][0] + v
+                dp[i + 1][j + w][1] = 1
+            
+        if dp[i + 1][j][0] != -1 and j + w <= W and dp[i + 1][j][1] < info[i][2]:
+            
+            if dp[i + 1][j + w][0] < dp[i + 1][j][0] + v:
+                dp[i + 1][j + w][0] = dp[i + 1][j][0] + v
+                dp[i + 1][j + w][1] = dp[i + 1][j][1] + 1
+
+ans = -1
+for i in range(W + 1):
+    
+    ans = max(ans, dp[N][i][0])
+    
+print(ans)

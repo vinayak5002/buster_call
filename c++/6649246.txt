@@ -1,0 +1,83 @@
+#include<stdio.h>
+#define MAX 100005
+#define NIL -1
+
+
+//構造体で宣言
+//左子右兄弟表現の実装
+typedef struct{
+	int p;
+	int l;
+	int r;
+}Node;
+
+Node T[MAX];
+int n, D[MAX];
+
+
+//節点の番号uを入力すると以下の表を出力する
+void print(int u){
+	int i, c;
+	printf("node %d: ", u);
+	printf("parent = %d, ", T[u].p);
+	printf("depth = %d, ", D[u]);
+	
+	if(T[u].p == NIL) printf("root, ");       //T[u].p、つまり親が空だった場合、"root,"(=根)を出力
+	else if(T[u].l == NIL) printf("leaf, ");  //T[u].l、つまり子が空だった場合、"leaf,"(=葉)を出力
+	else printf("internal node, ");           //根でも葉でもない場合、"internal node, "(=内部ノード)を出力
+	
+	printf("[");
+	
+	for ( i = 0, c = T[u].l; c != NIL; i++, c = T[c].r ){  //例えばu=0のとき  i=0, c=T[0].l=1     //次にi=1, c=T[1].r=4  //次にi=2, c=T[1].r=10
+		if (i){                                            //i=0なのでif文は偽になり飛ばされる    //i=1なので真          //i=2なので真
+			printf(", ");
+		}
+		printf("%d",c);                                    //c=1                                  //c=4                  //c=10
+	}
+	printf( "]\n");
+}                                                         
+
+//再帰的に深さを求める
+int rec(int u, int p){
+	D[u] = p;                              //深さ
+	if ( T[u].r != NIL ) rec(T[u].r, p);   //T[u].r、つまり右の兄弟が存在する場合、深さpは変わらず
+	if ( T[u].l != NIL ) rec(T[u].l, p+1); //T[u].r、つまり左の兄弟が存在する場合、深さを１つ足す
+}
+
+
+int main(void){
+	int i, j, d, v, c, l, r;
+	scanf("%d",&n); //節点の個数n
+	
+	//treeの初期化
+	for ( i = 0; i < n; i++ ){
+		T[i].p = T[i].l =T[i].r = NIL;
+	}
+	
+	//格納
+	for ( i = 0; i < n; i++ ){
+		scanf("%d %d",&v, &d);  //ノードの番号(v)とリンクの数(d)を入力
+		
+		for ( j = 0; j < d; j++ ){
+			scanf("%d",&c);  //子のノード番号(c)を入力
+			if ( j == 0 ) T[v].l = c;  //jが0の場合、つまり一番左側にある節点なのでT[v].lに代入
+			else T[l].r = c;           //jが0でない場合、つまり一番左側以外にある節点なのでT[v].rに代入
+			
+			l = c;
+			T[c].p = v;                
+		}
+	}
+	
+	for ( i = 0; i < n; i++ ){
+		if (T[i].p == NIL ) r = i;
+	}
+	
+	rec(r, 0);
+	
+	for( i = 0; i < n; i++ ) print(i);
+	
+	return 0;
+}
+
+		
+	

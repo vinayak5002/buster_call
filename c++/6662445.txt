@@ -1,0 +1,91 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+int main(){
+    int a[4],b[4];
+    int x1[4][2],x2[4][2],ans1=0,ans2=0,sum=0,m=0;
+
+    for(int i=0;i<4;i++){
+        scanf("%d",&a[i]);
+    }
+    for(int i=0;i<4;i++){
+        scanf("%d",&b[i]);
+    }
+
+    for(int i=0;i<4;i++){
+        if(i==0){
+            x1[i][0]=a[0];
+            x1[i][1]=a[1];
+        }
+        if(i==1){
+            x1[i][0]=x1[0][0]+a[2];
+            x1[i][1]=a[1];
+        }
+        if(i==2){
+            x1[i][0]=a[2]+x1[0][0];
+            x1[i][1]=a[3]+x1[0][1];
+        }
+        if(i==3){
+            x1[i][0]=a[0];
+            x1[i][1]=x1[0][1]+a[3];
+        }
+    }
+
+    for(int i=0;i<4;i++){
+        if(i==0){
+            x2[i][0]=b[0];
+            x2[i][1]=b[1];
+        }
+        if(i==1){
+            x2[i][0]=x2[0][0]+b[2];
+            x2[i][1]=b[1];
+        }
+        if(i==2){
+            x2[i][0]=b[2]+x2[0][0];
+            x2[i][1]=b[3]+x2[0][1];
+        }
+        if(i==3){
+            x2[i][0]=b[0];
+            x2[i][1]=x2[0][1]+b[3];
+        }
+    }
+
+    for(int i=0;i<4;i++){
+        if(x1[i][0]>x2[0][0]&&x1[i][0]<x2[2][0]&&x1[i][1]>x2[0][1]&&x1[i][1]<x2[2][1]){
+            ans1=i;
+        }
+    }
+    for(int i=0;i<4;i++){
+        if(x2[i][0]>x1[0][0]&&x2[i][0]<x1[2][0]&&x2[i][1]>x1[0][1]&&x2[i][1]<x1[2][1]){
+            ans2=i;
+        }
+    }
+
+    if(ans1==0&&ans2==0){
+        sum=a[2]*a[3]+b[2]*b[3];
+    }else if(ans1==0&&ans2!=0){
+        sum=a[2]*a[3]+b[2]*b[3];
+        sum=sum-2*b[2]*b[3];
+    }else if(ans2==0&&ans1!=0){
+        sum=a[2]*a[3]+b[2]*b[3];
+        sum=sum-2*a[2]*a[3];
+    }else{
+        sum=a[2]*a[3]+b[2]*b[3];
+        sum=sum-2*abs(x1[ans1][0]-x2[ans2][0])*abs(x1[ans1][1]-x2[ans2][1]);
+    }
+
+    for(int i=0;i<4;i++){
+        for(int j=0;j<2;j++){
+            if(x1[i][j]==x2[i][j]){
+                m++;
+            }
+        }
+    }
+    if(m>=2){
+        sum=abs(a[2]*a[3]-b[2]*b[3]);
+    }
+    printf("%d\n",sum);
+
+    return 0;
+}
+

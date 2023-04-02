@@ -1,0 +1,84 @@
+#include<stdio.h>
+#define gridsize 255
+
+int main(void){
+	int n;
+	while(scanf("%d", &n)!=0||(n>=2 && n<=255)){
+		int max=0, rowsum, colsum, leftsum, rightsum;
+		int d[gridsize][gridsize]={0};
+		
+
+		for(int i=0; i<n; i++){
+			for (int j=0; j<n; j++){
+				scanf("%d", &d[i][j]);
+			}
+		}
+
+		for(int i=0; i<n; i++){
+			rowsum=0; 
+      		colsum=0;
+			for (int j=0; j<n; j++){
+				if(d[i][j]==1){
+					rowsum++;
+				}
+				else{
+					if(rowsum>max){
+						max=rowsum;
+					}
+					rowsum=0;
+				}
+				if(d[j][i]==1){
+					colsum++;
+				}
+				else{
+					if(colsum>max){
+						max=colsum;
+					}
+					colsum=0;
+				}
+			}
+		}
+
+		for (int i=0; i<n; i++){
+			leftsum=0;
+			for (int j=0; j<n; j++){
+				for (int k=0; k<=j; k++){
+					if(d[i-k][j-k]==0){
+						if(leftsum>max){
+							max=leftsum;
+						}
+						leftsum=0;
+					}
+					else{
+						leftsum++;
+					}
+				}
+			}
+			if(leftsum>max){
+				max=leftsum;
+			}
+		}
+
+		for (int i=0; i<n; i++){
+			rightsum=0;
+			for (int j=0; j<n; j++){
+				for (int k=0; k<n-j; k++){
+					if(d[i+k][i+j]==0){
+						if (rightsum>max){
+							max=rightsum;
+						}
+						rightsum=0;
+					}
+					else{
+						rightsum++;
+					}
+				}
+			}
+			if(rightsum>max){
+				max=rightsum;
+			}
+		}
+		printf("%d\n", max);
+	}
+	return 0;
+}

@@ -1,0 +1,83 @@
+#include <stdio.h>
+
+typedef struct{
+    int x;
+    int ar;
+}pair;
+
+int top_stack1=0,top_stack2=0;
+
+int stack1[20000];
+pair stack2[20000];
+
+void pushStack1(int x){
+    stack1[top_stack1]=x;
+    top_stack1++;
+}
+
+void pushStack2(int j,int a){
+    stack2[top_stack2].x=j;
+    stack2[top_stack2].ar=a;
+    top_stack2++;
+}
+
+int popStack1(void){
+    int r=0;
+    top_stack1--;
+
+    if (top_stack1<0){
+        top_stack1=0;
+        return 0;
+    }
+
+    r=stack1[top_stack1];
+
+    return r;
+}
+
+pair popStack2(void){
+    struct pair s;
+    top_stack2--;
+    if (top_stack2<0){
+
+        top_stack2=0;
+        return 0;
+    }
+    s=stack2[top_stack2];
+
+    return s;
+}
+
+int main(void){
+
+    int i,j,sum=0,a;
+    pair c;
+    char input[20000];
+
+    scanf("%s",input);
+
+    for (i=0;input[i]!='\0';i++){
+        if(input[i]=='\\'){
+            pushStack1(i);
+        }
+		else if((input[i]=='/')&&(top_stack1>0)){
+            j=popStack1();
+            sum+=i-j;
+            a=i-j;
+            while(stack2[top_stack2-1].x>j){
+                a+=stack2[top_stack2-1].ar;
+                c=popStack2();
+            }
+            pushStack2(j,a);
+        }
+    }
+    printf("%d\n",sum);
+    printf("%d",top_stack2);
+
+    for (i=0;i<top_stack2;i++){
+        printf(" %d",stack2[i].ar);
+    }
+    printf("\n");
+    
+    return 0;
+}

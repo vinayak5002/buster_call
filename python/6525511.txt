@@ -1,0 +1,107 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace _20220416_AOJ
+{
+    class ITP2_5C
+    {
+        static int ReadInt() { return int.Parse(Console.ReadLine()); }
+        static double ReadDouble() { return double.Parse(Console.ReadLine()); }
+        static int[] ReadIntArr(char dlm = ' ') { return Console.ReadLine().Split(dlm).Select(x => int.Parse(x)).ToArray(); }
+        static double[] ReadDoubleArr(char dlm = ' ') { return Console.ReadLine().Split(dlm).Select(x => double.Parse(x)).ToArray(); }
+        static string[] ReadStringArr(char dlm = ' ') { return Console.ReadLine().Split(dlm).ToArray(); }
+
+
+        static void Main(string[] args)
+        {
+            string line = Console.ReadLine();
+            int n = int.Parse(line);
+            int[] A = ReadIntArr();
+            int[] prevA = PrevPermutation(A);
+            int[] nextA = NextPermutation(A);
+
+            if (prevA != null)
+            {
+                Console.WriteLine(string.Join(" ", prevA));
+            }
+            Console.WriteLine(string.Join(" ", A));
+            if (nextA != null)
+            {
+                Console.WriteLine(string.Join(" ", nextA));
+            }
+        }
+
+        static int[] PrevPermutation(int[] arr)
+        {
+            bool prevExists = false;
+
+            HashSet<int> vs = new HashSet<int>();
+            int[] tempArr = new int[arr.Length];
+            Array.Copy(arr, tempArr, arr.Length);
+            for (int i = arr.Length - 1; i > 0; i--)
+            {
+                vs.Add(arr[i]);
+                if (tempArr[i - 1] > vs.Min())
+                {
+                    int t = vs.Where(x => x < tempArr[i - 1]).Max();
+                    vs.Remove(t);
+                    vs.Add(tempArr[i - 1]);
+                    tempArr[i - 1] = t;
+                    for (int j = i; j < tempArr.Length; j++)
+                    {
+                        t = vs.Max();
+                        tempArr[j] = t;
+                        vs.Remove(t);
+                    }
+                    prevExists = true;
+                    break;
+                }
+                else
+                {
+                    vs.Add(tempArr[i - 1]);
+                }
+            }
+
+            return (prevExists ? tempArr : null);
+        }
+
+        static int[] NextPermutation(int[] arr)
+        {
+            bool prevExists = false;
+
+            HashSet<int> vs = new HashSet<int>();
+            int[] tempArr = new int[arr.Length];
+            Array.Copy(arr, tempArr, arr.Length);
+            for (int i = arr.Length - 1; i > 0; i--)
+            {
+                vs.Add(arr[i]);
+                if (tempArr[i - 1] < vs.Max())
+                {
+                    int t = vs.Where(x => x > tempArr[i - 1]).Min();
+                    vs.Remove(t);
+                    vs.Add(tempArr[i - 1]);
+                    tempArr[i - 1] = t;
+                    for (int j = i; j < tempArr.Length; j++)
+                    {
+                        t = vs.Min();
+                        tempArr[j] = t;
+                        vs.Remove(t);
+                    }
+                    prevExists = true;
+                    break;
+                }
+                else
+                {
+                    vs.Add(tempArr[i - 1]);
+                }
+            }
+
+            return (prevExists ? tempArr : null);
+        }
+    }
+}
+

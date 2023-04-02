@@ -1,0 +1,78 @@
+#include<iostream>
+#include<cstring>
+#include<algorithm>
+#include<queue>
+using namespace std;
+const int N=1e4+10;
+int ne[N],e[N],h[N],idx,w[N],v[N];
+int dist[N],price[N];
+int n,m;
+bool st[N];
+typedef pair<int ,int> PII;
+void add(int a,int b,int c,int d)
+{
+	ne[idx]=h[a],e[idx]=b,w[idx]=c,v[idx]=d,h[a]=idx++;
+}
+void dijkstra()
+{
+	priority_queue<PII ,vector<PII>,greater<PII> >heap;
+	if(heap.size())
+	heap.pop();
+	memset(dist,0x3f,sizeof dist);
+	memset(price ,0x3f,sizeof price);
+	memset(st,0,sizeof st);
+	dist[1]=0;
+	heap.push({0,1});
+	while(heap.size())
+	{
+		PII t=heap.top();
+		heap.pop();
+		int ver=t.second ,distance=t.first;
+		if(st[ver]) continue;
+		st[ver]=true;
+		for(int i=h[ver];i!=-1;i=ne[i])
+		{
+			int j=e[i];
+			if(dist[j]>distance+w[i])
+			{
+				dist[j]=distance+w[i];
+				price[j]=v[i];
+				heap.push({dist[j],j});
+			}
+			else if(dist[j]==distance+w[i])
+			{
+				price[j]=min(price[j],v[i]);
+			}
+		}
+	}
+}
+int main()
+{
+	while(1)
+	{
+		memset(ne,0,sizeof ne);
+		memset(e,0,sizeof e);
+		memset(w,0,sizeof w);
+		memset(v,0,sizeof v);
+		memset(h,-1,sizeof h);
+		idx=0;
+		cin>>n>>m;
+		if(n==0&&m==0)
+		break;
+		for(int i=0;i<m;i++)
+		{
+			int a,b,c,d;
+			cin>>a>>b>>c>>d;
+			add(a,b,c,d);
+			add(b,a,c,d);
+		}
+		dijkstra();
+		int sum=0;
+		for(int i=2;i<=n;i++)
+		{
+			sum+=price[i];
+		}
+		cout<<sum<<endl;
+	}
+	return 0;
+}

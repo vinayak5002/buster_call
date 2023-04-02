@@ -1,0 +1,68 @@
+/*	author:  Kite_kuma
+	created: 2022.05.03 20:07:50 */
+
+#include "SPJ-Library/template/kuma.hpp"
+
+ll phi(ll n) {
+	const ll n_copy = n;
+	vector<pair<ll, int>> factors;
+	for(ll d = 2; d * d <= n; d++) {
+		if(n % d == 0) {
+			int c = 0;
+			while(n % d == 0) {
+				n /= d;
+				c++;
+			}
+			factors.emplace_back(d, c);
+		}
+	}
+	if(n > 1) factors.emplace_back(n, 1);
+	ll m = n_copy;
+	debug(factors);
+	debug(m);
+	for(auto [a, b] : factors) {
+		m *= a - 1;
+		m /= a;
+	}
+	return m;
+}
+
+ll solve(ll n) {
+	if(n == 2) return 1LL;
+	ll m = phi(n);
+	debug(m);
+	if(gcd(n, m) != 1LL) return -1;
+	ll p = phi(m);
+	ll ans = INF;
+	debug(m, p);
+	auto test = [&](ll beki) {
+		// debug(beki, modpow(n, beki, m));
+		// return 1LL == modpow(n, beki, m);
+		debug(n, beki, m);
+		beki = modpow(n, beki, m);
+		debug(beki);
+		rep(100) {
+			ll a = rand() % (n - 1) + 1;
+			if(modpow(a, beki, n) != a) {
+				debug(a, beki, n);
+				return false;
+			}
+		}
+		return true;
+	};
+	for(ll d = 1LL; d * d <= p; d++) {
+		if(p % d == 0) {
+			if(test(d)) chmin(ans, d);
+			if(test(p / d)) chmin(ans, p / d);
+		}
+	}
+	return ans == INF ? -1LL : ans;
+}
+
+int main() {
+	ll n;
+	cin >> n;
+	cout << solve(n) << '\n';
+	return 0;
+}
+

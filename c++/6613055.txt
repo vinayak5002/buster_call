@@ -1,0 +1,99 @@
+#include<cmath>
+#include<cstdio>
+#include<algorithm>
+using namespace std;
+
+const double EPS=1e-10;
+const double g=9.8;
+const int maxn=55;
+
+double calc(double vy,double t)
+{
+    return vy*t-g*t*t/2;
+}
+
+int N;
+double  V,X,Y;
+double  L[maxn],B[maxn],R[maxn],T[maxn];
+
+bool check(double x,double y)
+{
+    double a=g*g/4,b=g*y-V*V,c=x*x+y*y;
+    double D=b*b-4*a*c;
+
+    if(abs(D)<EPS)D=0;///////////////
+
+    else if(D<0)return false;
+
+    for(int d=-1;d<=1;d+=2)
+    {
+        double t1=(-b+d*sqrt(D))/(2*a);
+        if(t1<EPS)continue;/////////
+
+        double t=sqrt(t1);
+        double vx=x/t,vy=(y+0.5*g*t*t)/t;
+
+        double dy=calc(vy,X/vx);////
+
+        if(dy<Y-EPS)continue;///
+
+        bool ok=true;
+        for(int i=0;i<N;i++)
+        {
+            if(L[i]>=X)continue;
+
+            if(B[i]<=dy&&T[i]>=Y&&L[i]<=X&&R[i]>=X)
+            {
+                ok=false;
+                break;
+            }
+
+            double yh=calc(vy,vy/g),xh=vx*vy/g;
+
+            if(xh>=L[i]&&xh<=min(R[i],X)&&yh>=B[i]&&yh<=T[i])
+            {
+                ok=false;
+                break;
+            }
+
+            if(yh<B[i])continue;
+
+            double yl=calc(vy,L[i]/vx);
+            if(yl>=B[i]&&yl<=T[i])ok=false;
+
+            double yr=calc(vy,min(X,R[i])/vx);
+            if(yr<=T[i])ok=false;
+        }
+        if(ok)return true;
+    }
+
+    return false;
+}
+
+void solve()
+{
+    scanf("%d%lf%lf%lf",&N,&V,&X,&Y);
+
+    for(int i=0;i<N;i++)
+        scanf("%lf%lf%lf%lf",&L[i],&B[i],&R[i],&T[i]);
+
+    if(check(X,Y))
+    {
+        printf("Yes\n");
+        return ;
+    }
+    for(int i=0;i<N;i++)
+    {
+        if(check(L[i],T[i])||check(R[i],T[i]))
+        {
+            printf("Yes\n");
+            return ;
+        }
+    }
+    printf("No\n");
+}
+int main()
+{
+    solve();
+}
+

@@ -1,0 +1,91 @@
+#include <iostream>
+using namespace std;
+
+#define MAXLEN 1000
+int T[MAXLEN][MAXLEN + 1];   // T[a][b]: (X[a],..,X[b-1]) は Y の部分列か
+
+#define YES 1
+#define NO  2
+#define NIL  0  // 不明
+
+//  X 内の Y のインデックス、なければ -1 を返す 
+int strIndex(string s, string t)
+{
+    int i;  // インデックス
+    int j;  // s の添字
+    int k;  // t の添字
+    for (i = 0; i < s.length(); i++) {
+	// (t[0],..) が (j[i],..) の先頭部分に一致するか調べる
+	for (j = i, k = 0; k < t.length() && s[j] == t[k]; j++, k++)
+	    ;
+	if (k == t.length())
+	    return i;
+    }
+    return -1;
+}
+    
+// (Y[i],..,X[i + n - 1]) は X の部分列か
+int isSubseq(string X, string Y, int i, int n)
+{
+
+    if (T[i][n] != NIL)
+	return T[i][n];
+    if (n > X.length())
+	return T[i][n] = NO;
+
+    string Z = Y.substr(i, n);
+    if (strIndex(X, Z) < 0)
+	return T[i][n] = NO;
+    else
+	return T[i][n] = YES;
+}
+
+int lcs(string X, string Y)
+{
+    int lY = Y.length();
+    int i, n;
+    for (i = 0; i < lY; i++)
+	for (n = 1; n <= lY - i; n++) 
+	    isSubseq(X, Y, i, n);
+    for (n = lY; n > 0; n--) 
+	for (i = 0; i <= lY - n; i++) 
+	    if (T[i][n] == YES)
+		return n;
+    return 0;
+}
+
+int main()
+{
+#ifdef CLOCK    
+    clock_t start_clock = clock();
+#endif
+    
+    int q;
+    cin >> q;
+    for (int cnt = 0; cnt < q; cnt++) {
+	string X, Y;
+	cin >> X >> Y;
+	
+	for (int i = 0; i < Y.length(); i++)
+	    for (int n = 1; n <= Y.length();  n++)
+		T[i][n] = NIL;
+	
+	int ans = lcs(X, Y);
+#ifdef DBG
+	for (int i = 0; i < Y.length(); i++) {
+	    for (int n = 1; n <= Y.length(); n++) 
+		cout << " " << T[i][n];
+	    cout << endl;
+	}
+#endif
+	cout << ans << endl;
+    }
+
+#ifdef CLOCK
+    clock_t end_clock = clock();    
+    cout << 1000 * (end_clock - start_clock) / CLOCKS_PER_SEC << " ms"
+	 << endl;
+#endif
+    return 0;
+}
+

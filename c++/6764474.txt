@@ -1,0 +1,418 @@
+#include <bits/stdc++.h>
+#pragma GCC optimize("Ofast")
+#define _GLIBCXX_DEBUG
+using namespace std;
+using std::cout;
+using std::cin;
+using std::endl;
+using ll=long long;
+using ld=long double;
+ll ILL=2167167167167167167;
+const int INF=100000000;
+const ll mod=1e9+7;
+#define rep(i,a) for (ll i=0;i<a;i++)
+#define all(p) p.begin(),p.end()
+template<class T> using _pq = priority_queue<T, vector<T>, greater<T>>;
+template<class T> ll LB(vector<T> &v,T a){return lower_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> ll UB(vector<T> &v,T a){return upper_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> bool chmin(T &a,const T &b){if(a>b){a=b;return 1;}else return 0;}
+template<class T> bool chmax(T &a,const T &b){if(a<b){a=b;return 1;}else return 0;}
+template<class T> void So(vector<T> &v) {sort(v.begin(),v.end());}
+template<class T> void Sore(vector<T> &v) {sort(v.begin(),v.end(),[](T x,T y){return x>y;});}
+void yneos(bool a){if(a) cout<<"Yes\n"; else cout<<"No\n";}
+template<class T> void vec_out(vector<T> &p){for(int i=0;i<(int)(p.size());i++){if(i) cout<<" ";cout<<p[i];}cout<<"\n";}
+
+
+// CUT begin
+// Suffix array algorithms from AtCoder Library
+// Document: <https://atcoder.github.io/ac-library/master/document_ja/string.html>
+namespace internal {
+
+std::vector<int> sa_naive(const std::vector<int>& s) {
+    int n = int(s.size());
+    std::vector<int> sa(n);
+    std::iota(sa.begin(), sa.end(), 0);
+    std::sort(sa.begin(), sa.end(), [&](int l, int r) {
+        if (l == r) return false;
+        while (l < n && r < n) {
+            if (s[l] != s[r]) return s[l] < s[r];
+            l++, r++;
+        }
+        return l == n;
+    });
+    return sa;
+}
+
+std::vector<int> sa_doubling(const std::vector<int>& s) {
+    int n = int(s.size());
+    std::vector<int> sa(n), rnk = s, tmp(n);
+    std::iota(sa.begin(), sa.end(), 0);
+    for (int k = 1; k < n; k *= 2) {
+        auto cmp = [&](int x, int y) {
+            if (rnk[x] != rnk[y]) return rnk[x] < rnk[y];
+            int rx = x + k < n ? rnk[x + k] : -1;
+            int ry = y + k < n ? rnk[y + k] : -1;
+            return rx < ry;
+        };
+        std::sort(sa.begin(), sa.end(), cmp);
+        tmp[sa[0]] = 0;
+        for (int i = 1; i < n; i++) { tmp[sa[i]] = tmp[sa[i - 1]] + (cmp(sa[i - 1], sa[i]) ? 1 : 0); }
+        std::swap(tmp, rnk);
+    }
+    return sa;
+}
+
+// SA-IS, linear-time suffix array construction
+// Reference:
+// G. Nong, S. Zhang, and W. H. Chan,
+// Two Efficient Algorithms for Linear Time Suffix Array Construction
+template <int THRESHOLD_NAIVE = 10, int THRESHOLD_DOUBLING = 40> std::vector<int> sa_is(const std::vector<int>& s, int upper) {
+    int n = int(s.size());
+    if (n == 0) return {};
+    if (n == 1) return {0};
+    if (n == 2) {
+        if (s[0] < s[1]) {
+            return {0, 1};
+        } else {
+            return {1, 0};
+        }
+    }
+    if (n < THRESHOLD_NAIVE) { return sa_naive(s); }
+    if (n < THRESHOLD_DOUBLING) { return sa_doubling(s); }
+
+    std::vector<int> sa(n);
+    std::vector<bool> ls(n);
+    for (int i = n - 2; i >= 0; i--) { ls[i] = (s[i] == s[i + 1]) ? ls[i + 1] : (s[i] < s[i + 1]); }
+    std::vector<int> sum_l(upper + 1), sum_s(upper + 1);
+    for (int i = 0; i < n; i++) {
+        if (!ls[i]) {
+            sum_s[s[i]]++;
+        } else {
+            sum_l[s[i] + 1]++;
+        }
+    }
+    for (int i = 0; i <= upper; i++) {
+        sum_s[i] += sum_l[i];
+        if (i < upper) sum_l[i + 1] += sum_s[i];
+    }
+
+    auto induce = [&](const std::vector<int>& lms) {
+        std::fill(sa.begin(), sa.end(), -1);
+        std::vector<int> buf(upper + 1);
+        std::copy(sum_s.begin(), sum_s.end(), buf.begin());
+        for (auto d : lms) {
+            if (d == n) continue;
+            sa[buf[s[d]]++] = d;
+        }
+        std::copy(sum_l.begin(), sum_l.end(), buf.begin());
+        sa[buf[s[n - 1]]++] = n - 1;
+        for (int i = 0; i < n; i++) {
+            int v = sa[i];
+            if (v >= 1 && !ls[v - 1]) { sa[buf[s[v - 1]]++] = v - 1; }
+        }
+        std::copy(sum_l.begin(), sum_l.end(), buf.begin());
+        for (int i = n - 1; i >= 0; i--) {
+            int v = sa[i];
+            if (v >= 1 && ls[v - 1]) { sa[--buf[s[v - 1] + 1]] = v - 1; }
+        }
+    };
+
+    std::vector<int> lms_map(n + 1, -1);
+    int m = 0;
+    for (int i = 1; i < n; i++) {
+        if (!ls[i - 1] && ls[i]) { lms_map[i] = m++; }
+    }
+    std::vector<int> lms;
+    lms.reserve(m);
+    for (int i = 1; i < n; i++) {
+        if (!ls[i - 1] && ls[i]) { lms.push_back(i); }
+    }
+
+    induce(lms);
+
+    if (m) {
+        std::vector<int> sorted_lms;
+        sorted_lms.reserve(m);
+        for (int v : sa) {
+            if (lms_map[v] != -1) sorted_lms.push_back(v);
+        }
+        std::vector<int> rec_s(m);
+        int rec_upper = 0;
+        rec_s[lms_map[sorted_lms[0]]] = 0;
+        for (int i = 1; i < m; i++) {
+            int l = sorted_lms[i - 1], r = sorted_lms[i];
+            int end_l = (lms_map[l] + 1 < m) ? lms[lms_map[l] + 1] : n;
+            int end_r = (lms_map[r] + 1 < m) ? lms[lms_map[r] + 1] : n;
+            bool same = true;
+            if (end_l - l != end_r - r) {
+                same = false;
+            } else {
+                while (l < end_l) {
+                    if (s[l] != s[r]) { break; }
+                    l++;
+                    r++;
+                }
+                if (l == n || s[l] != s[r]) same = false;
+            }
+            if (!same) rec_upper++;
+            rec_s[lms_map[sorted_lms[i]]] = rec_upper;
+        }
+
+        auto rec_sa = sa_is<THRESHOLD_NAIVE, THRESHOLD_DOUBLING>(rec_s, rec_upper);
+
+        for (int i = 0; i < m; i++) { sorted_lms[i] = lms[rec_sa[i]]; }
+        induce(sorted_lms);
+    }
+    return sa;
+}
+
+} // namespace internal
+
+std::vector<int> suffix_array(const std::vector<int>& s, int upper) {
+    assert(0 <= upper);
+    for (int d : s) { assert(0 <= d && d <= upper); }
+    auto sa = internal::sa_is(s, upper);
+    return sa;
+}
+
+template <class T> std::vector<int> suffix_array(const std::vector<T>& s) {
+    int n = int(s.size());
+    std::vector<int> idx(n);
+    iota(idx.begin(), idx.end(), 0);
+    sort(idx.begin(), idx.end(), [&](int l, int r) { return s[l] < s[r]; });
+    std::vector<int> s2(n);
+    int now = 0;
+    for (int i = 0; i < n; i++) {
+        if (i && s[idx[i - 1]] != s[idx[i]]) now++;
+        s2[idx[i]] = now;
+    }
+    return internal::sa_is(s2, now);
+}
+
+std::vector<int> suffix_array(const std::string& s) {
+    int n = int(s.size());
+    std::vector<int> s2(n);
+    for (int i = 0; i < n; i++) { s2[i] = s[i]; }
+    return internal::sa_is(s2, 255);
+}
+
+// Reference:
+// T. Kasai, G. Lee, H. Arimura, S. Arikawa, and K. Park,
+// Linear-Time Longest-Common-Prefix Computation in Suffix Arrays and Its
+// Applications
+template <class T> std::vector<int> lcp_array(const std::vector<T>& s, const std::vector<int>& sa) {
+    int n = int(s.size());
+    assert(n >= 1);
+    std::vector<int> rnk(n);
+    for (int i = 0; i < n; i++) { rnk[sa[i]] = i; }
+    std::vector<int> lcp(n - 1);
+    int h = 0;
+    for (int i = 0; i < n; i++) {
+        if (h > 0) h--;
+        if (rnk[i] == 0) continue;
+        int j = sa[rnk[i] - 1];
+        for (; j + h < n && i + h < n; h++) {
+            if (s[j + h] != s[i + h]) break;
+        }
+        lcp[rnk[i] - 1] = h;
+    }
+    return lcp;
+}
+
+std::vector<int> lcp_array(const std::string& s, const std::vector<int>& sa) {
+    int n = int(s.size());
+    std::vector<int> s2(n);
+    for (int i = 0; i < n; i++) { s2[i] = s[i]; }
+    return lcp_array(s2, sa);
+}
+
+// Count keyword occurence in str
+// Complexity: O(min(|str|, |keyword|) * lg |str|)
+int count_keyword_occurence(const std::string& str, const std::vector<int>& suffarr, const std::string& keyword) {
+    const int n = str.size(), m = keyword.size();
+    assert(n == suffarr.size());
+    if (n < m) return 0;
+    auto f1 = [&](int h) {
+        for (int j = 0; h + j < n and j < m; j++) {
+            if (str[h + j] < keyword[j]) return true;
+            if (str[h + j] > keyword[j]) return false;
+        }
+        return n - h < m;
+    };
+    auto f2 = [&](int h) {
+        for (int j = 0; h + j < n and j < m; j++) {
+            // if (str[h + j] < keyword[j]) return true;
+            if (str[h + j] > keyword[j]) return false;
+        }
+        return true;
+    };
+    const auto L = std::partition_point(suffarr.begin(), suffarr.end(), f1);
+    const auto R = std::partition_point(L, suffarr.end(), f2);
+    return std::distance(L, R);
+    // return std::vector<int>(L, R); // if you need occurence positions
+}
+// CUT begin
+// Range Minimum Query for static sequence by sparse table
+// Complexity: O(NlogN) for precalculation, O(1) per query
+template <typename T> struct StaticRMQ {
+    inline T func(const T &l, const T &r) const noexcept { return std::min<T>(l, r); }
+    int N, lgN;
+    T defaultT;
+    std::vector<std::vector<T>> data;
+    std::vector<int> lgx_table;
+    StaticRMQ() = default;
+    StaticRMQ(const std::vector<T> &sequence, T defaultT) : N(sequence.size()), defaultT(defaultT) {
+        lgx_table.resize(N + 1);
+        for (int i = 2; i < N + 1; i++) lgx_table[i] = lgx_table[i >> 1] + 1;
+        lgN = lgx_table[N] + 1;
+        data.assign(lgN, std::vector<T>(N, defaultT));
+        data[0] = sequence;
+        for (int d = 1; d < lgN; d++) {
+            for (int i = 0; i + (1 << d) <= N; i++) {
+                data[d][i] = func(data[d - 1][i], data[d - 1][i + (1 << (d - 1))]);
+            }
+        }
+    }
+    T get(int l, int r) const { // [l, r), 0-indexed
+        assert(l >= 0 and r <= N);
+        if (l >= r) return defaultT;
+        int d = lgx_table[r - l];
+        return func(data[d][l], data[d][r - (1 << d)]);
+    }
+};
+struct LongestCommonPrefix {
+    const int N;
+    std::vector<int> sainv; // len = N
+    StaticRMQ<int> rmq;
+    LongestCommonPrefix(const std::string s) : N(s.size()) {
+        auto sa = suffix_array(s);
+        auto lcp = lcp_array(s, sa);
+        sainv.resize(N);
+        for (int i = 0; i < N; i++) sainv[sa[i]] = i;
+        rmq = {lcp, N};
+    }
+    int lcplen(int l1, int l2) const {
+        if (l1 == l2) return N - l1;
+        if (l1 == N or l2 == N) return 0;
+        l1 = sainv[l1], l2 = sainv[l2];
+        if (l1 > l2) std::swap(l1, l2);
+        return rmq.get(l1, l2);
+    }
+};
+
+// CUT begin
+// Lyndon factorization based on Duval's algorithm
+// **NOT VERIFIED YET**
+// Reference:
+// [1] K. T. Chen, R. H. Fox, R. C. Lyndon,
+//     "Free Differential Calculus, IV. The Quotient Groups of the Lower Central Series,"
+//     Annals of Mathematics, 81-95, 1958.
+// [2] J. P. Duval, "Factorizing words over an ordered alphabet,"
+//     Journal of Algorithms, 4(4), 363-381, 1983.
+// - https://cp-algorithms.com/string/lyndon_factorization.html
+// - https://qiita.com/nakashi18/items/66882bd6e0127174267a
+template <typename T> std::vector<std::pair<int, int>> lyndon_factorization(const std::vector<T> &S) {
+    const int N = S.size();
+    std::vector<std::pair<int, int>> ret;
+    for (int l = 0; l < N;) {
+        int i = l, j = i + 1;
+        while (j < N and S[i] <= S[j]) i = (S[i] == S[j] ? i + 1 : l), j++;
+        ret.emplace_back(l, j - i), l += j - i;
+    }
+    return ret;
+}
+
+std::vector<std::pair<int, int>> lyndon_factorization(const std::string &s) {
+    const int N = int(s.size());
+    std::vector<int> v(N);
+    for (int i = 0; i < N; i++) v[i] = s[i];
+    return lyndon_factorization<int>(v);
+}
+
+// Compute the longest Lyndon prefix for each suffix s[i:N]
+// (Our implementation is $O(N \log N)$)
+// Example:
+// - `teletelepathy` -> [1,4,1,2,1,4,1,2,1,4,1,2,1]
+// Reference:
+// [1] H. Bannai et al., "The "Runs" Theorem,"
+// SIAM Journal on Computing, 46.5, 1501-1514, 2017.
+template <typename String>
+std::vector<int> longest_lyndon_prefixes(const String &s, const LongestCommonPrefix &rh) {
+    const int N = s.size();
+    std::vector<std::pair<int, int>> st{{N, N}};
+    std::vector<int> ret(N);
+    for (int i = N - 1, j = i; i >= 0; i--, j = i) {
+        while (st.size() > 1) {
+            int iv = st.back().first, jv = st.back().second;
+            int l = rh.lcplen(i, iv);
+            if (!(iv + l < N and s[i + l] < s[iv + l])) break;
+            j = jv;
+            st.pop_back();
+        }
+        st.emplace_back(i, j);
+        ret[i] = j - i + 1;
+    }
+    return ret;
+}
+
+// Compute all runs in given string
+// Complexity: $O(N \log N)$ in this implementation (Theoretically $O(N)$ achievable)
+// N = 2e5 -> ~800 ms
+// Reference:
+// [1] H. Bannai et al., "The "Runs" Theorem,"
+// SIAM Journal on Computing, 46.5, 1501-1514, 2017.
+std::vector<std::tuple<int, int, int>> run_enumerate(std::string s) {
+    if (s.empty()) return {};
+    LongestCommonPrefix rh(s);
+    std::reverse(s.begin(), s.end());
+    LongestCommonPrefix rrev(s);
+    std::reverse(s.begin(), s.end());
+    auto t = s;
+    auto lo = *std::min_element(s.begin(), s.end()), hi = *std::max_element(s.begin(), s.end());
+    for (auto &c : t) c = hi - (c - lo);
+    auto l1 = longest_lyndon_prefixes(s, rh), l2 = longest_lyndon_prefixes(t, rh);
+    int N = s.size();
+    std::vector<std::tuple<int, int, int>> ret;
+    for (int i = 0; i < N; i++) {
+        int j = i + l1[i], L = i - rrev.lcplen(N - i, N - j), R = j + rh.lcplen(i, j);
+        if (R - L >= (j - i) * 2) ret.emplace_back(j - i, L, R);
+
+        if (l1[i] != l2[i]) {
+            j = i + l2[i], L = i - rrev.lcplen(N - i, N - j), R = j + rh.lcplen(i, j);
+            if (R - L >= (j  - i) * 2) ret.emplace_back(j - i, L, R);
+        }
+    }
+    std::sort(ret.begin(), ret.end());
+    ret.erase(std::unique(ret.begin(), ret.end()), ret.end());
+    return ret;
+}
+
+//https://judge.yosupo.jp/submission/41769
+
+void solve();
+// oddloop
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	
+	int t=1;
+	//cin>>t;
+	rep(i,t) solve();
+}
+
+void solve(){
+	string S;
+	cin>>S;
+	auto ret=run_enumerate(S);
+	ll ans=0;
+	for(auto x:ret){
+		ll t,l,r;
+		tie(t,l,r)=x;
+		//cout<<t<<" "<<l<<" "<<r<<"\n";
+		ll len=r-l,c=1;
+		while(c*t*2<=len) ans+=len+1-c*t*2,c++;
+	}
+	cout<<ans<<"\n";
+}
+
+

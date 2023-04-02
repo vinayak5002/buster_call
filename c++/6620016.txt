@@ -1,0 +1,93 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef long double ld;
+typedef pair<ll, ll> pll;
+#define rep(i, n) for(ll i = (ll)0; i < (ll)n; i++)
+#define ALL(a)  (a).begin(),(a).end()
+ll dx[8] = {-1, 1, 0, 0, -1, -1, 1, 1};
+ll dy[8] = {0, 0, -1, 1, -1, 1, -1, 1};
+
+
+/*
+ * aとbのうち小さいものをaに代入
+ */
+template<class T> inline bool chmin(T& a, T b) {
+  if (a > b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+
+/*
+ * aとbのうち大きいものをaに代入
+ */
+template<class T> inline bool chmax(T& a, T b) {
+  if (a < b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+
+/*
+ * メイン関数
+ */
+int main() {
+  // 入力
+  ll V, E; cin >> V >> E;
+  ll INF = 1e18;
+  vector<vector<ll>> dist(V, vector<ll>(V, INF));
+  rep(i, E) {
+    ll s, t, d; cin >> s >> t >> d;
+    dist[s][t] = d;
+  }
+  rep(i, V) dist[i][i] = 0;
+  
+  // Floyd–Warshall法
+  rep(k, V) {
+    rep(i, V) {
+      rep(j, V) {
+        chmin(dist[i][j], dist[i][k]+dist[k][j]);
+      }
+    }
+  }
+  
+  // 負閉路の検出
+  vector<vector<ll>> dist2 = dist;
+  rep(k, V) {
+    rep(i, V) {
+      rep(j, V) {
+        chmin(dist2[i][j], dist2[i][k]+dist2[k][j]);
+      }
+    }
+  }
+  bool not_negative = true;
+  rep(i, V) {
+    rep(j, V) {
+      if(dist[i][j] != dist2[i][j]) not_negative = false;
+    }
+  }
+  
+  
+  if(!not_negative) cout << "NEGATIVE CYCLE" << endl;
+  else {
+    rep(i, V) {
+      rep(j, V) {
+        if(dist[i][j] >= 1e9) {
+          if(j == 0) cout << "INF";
+          else cout << ' ' << "INF";
+        }else {
+          if(j == 0) cout << dist[i][j];
+          else cout << ' ' << dist[i][j]; 
+        }
+      }
+      cout << endl;
+    }
+  }
+  
+  return 0;
+}

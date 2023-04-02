@@ -1,0 +1,86 @@
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <map>
+#include <algorithm>
+#include <queue>
+#include <iomanip>
+// clang-format off
+#define rep(i,n) for(int i=0, i##_len=(n); i<i##_len; ++i)
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return 1; } return 0; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return 1; } return 0; }
+#define SZ(x) ((int)(x).size())
+using ll = long long;
+// 2^60
+const ll INF = 1LL << 60;
+// lower_bound(ALL(a), 4)
+#define ALL(a)  (a).begin(),(a).end()
+int gcd(int a,int b){return b?gcd(b,a%b):a;}
+int dx[4]={1,0,-1,0};
+int dy[4]={0,1,0,-1};
+using namespace std;
+using Graph = vector<vector<int>>;
+using Dim = pair<int,int>;
+struct El {
+    ll cnt;
+    Dim dim;
+    El(ll cnt, Dim dim): cnt(cnt),dim(dim){}
+};
+bool operator==(const El& lhs, const El& rhs) { return lhs.cnt == rhs.cnt && lhs.dim == rhs.dim;}
+bool operator!=(const El& lhs, const El& rhs) {return !(lhs==rhs);}
+// clang-format on
+
+El NullEl(
+    INF,
+    {});
+
+vector<vector<El>> dp;
+
+// [i,j)
+El calc(int i, int j)
+{
+    if (dp[i][j] != NullEl)
+    {
+        return dp[i][j];
+    }
+    ll cnt = INF;
+    El ret = dp[i][i + 1];
+    for (int split = i + 1; split < j; ++split)
+    {
+        auto l = calc(i, split);
+        auto r = calc(split, j);
+        ll calcCnt = l.dim.first * r.dim.second * l.dim.second + l.cnt + r.cnt;
+        if (calcCnt < cnt)
+        {
+            ret = El(calcCnt, Dim{l.dim.first, r.dim.second});
+            cnt = calcCnt;
+        }
+    }
+    return dp[i][j] = ret;
+}
+
+int main()
+{
+    cout << fixed << setprecision(16);
+    int n;
+    cin >> n;
+    dp.resize(n + 1);
+    rep(i, n + 1)
+    {
+        dp[i].assign(n + 1, NullEl);
+    }
+
+    rep(i, n)
+    {
+        int xx;
+        int yy;
+        cin >> xx;
+        cin >> yy;
+        dp[i][i + 1] = El{
+            0,
+            Dim{xx, yy}};
+    }
+    auto ret = calc(0, n);
+    cout << ret.cnt << endl;
+}
+

@@ -1,0 +1,8 @@
+N = int(input())
+curmin = 10**10
+ans = -10**10
+for i in range(N):
+	x = int(input())
+	ans = max(ans, x - curmin)
+	curmin = min(curmin, x)
+print(ans)

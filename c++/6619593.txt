@@ -1,0 +1,61 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef long double ld;
+typedef pair<ll, ll> pll;
+#define rep(i, n) for(ll i = (ll)0; i < (ll)n; i++)
+#define ALL(a)  (a).begin(),(a).end()
+ll dx[8] = {-1, 1, 0, 0, -1, -1, 1, 1};
+ll dy[8] = {0, 0, -1, 1, -1, 1, -1, 1};
+
+
+/*
+ * aとbのうち小さいものをaに代入
+ */
+template<class T> inline bool chmin(T& a, T b) {
+  if (a > b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+
+/*
+ * aとbのうち大きいものをaに代入
+ */
+template<class T> inline bool chmax(T& a, T b) {
+  if (a < b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+
+/*
+ * メイン関数
+ */
+int main() {
+  // 入力
+  ll N, W; cin >> N >> W;
+  ll INF = 1e16;
+  vector<ll> value(N), weight(N);
+  rep(i, N) cin >> value[i] >> weight[i];
+  
+  // 動的計画法
+  vector<vector<ll>> dp(N+1, vector<ll>(W+1, -INF));
+  dp[0][0] = 0;
+  rep(i, N) {
+    rep(j, W+1) {
+      chmax(dp[i+1][j], dp[i][j]);
+      if(j-weight[i] >= 0) chmax(dp[i+1][j], dp[i][j-weight[i]]+value[i]);
+    }
+  }
+  
+  ll answer = -1;
+  rep(i, W+1) chmax(answer, dp[N][i]); 
+  cout << answer << endl;
+  
+  return 0;
+}

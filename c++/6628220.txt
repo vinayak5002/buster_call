@@ -1,0 +1,135 @@
+#include<stdio.h>
+
+#define SIZE 30//n<=25から
+
+typedef struct
+{
+    int parent;
+    int left;
+    int right;
+}node_t;//nodeの構造体を定義
+
+node_t tree[SIZE];//二分木の実現配列
+int depth[SIZE],height[SIZE];//深さと高さの配列
+
+void set_Depth(int id, int deep)//深さを再帰的に計算しdepth[]に代入する関数
+{
+    if ( id == -1 ){
+        return;
+    }//葉の子であれば、存在しないので、return
+
+    depth[id] = deep;//代入する
+    set_Depth(tree[id].left, deep + 1);
+    set_Depth(tree[id].right, deep + 1);//子であれば深さを１増やす
+}
+
+int set_Height(int id)//高さを再帰的に計算しheight[]に代入する関数。返す値がintでなければ、再帰的な計算ができない  (返す値 + 1)という形
+{
+    int hl = 0;//左側の高さ
+    int hr = 0;//右側の高さ
+    if ( tree[id].left != -1 ){
+        hl = set_Height(tree[id].left) + 1;
+    }//左側の高さは左の子の高さ+1である
+    if ( tree[id].right != -1 ){
+        hr = set_Height(tree[id].right) + 1;
+    }//右側の高さは右の子の高さ+1である
+
+    return height[id] = (hl > hr ? hl : hr);//条件演算子は （式1 ? 式2 : 式3）という形で、式1が真なら式2、偽なら式3。ここは大きい方を取り出す条件式
+}
+
+int get_Sibling(int id)//兄弟の値を計算し返す関数
+{
+    if ( tree[id].parent == -1 ) return -1;//もし根であれば、兄弟ないので-1を返す
+    else if ( tree[tree[id].parent].left == id && tree[tree[id].parent].right != -1 )//もしidは親の左の子で親の右の子も存在したら、親の右の子を返す
+    {
+        return tree[tree[id].parent].right;
+    }
+    else if ( tree[tree[id].parent].right == id && tree[tree[id].parent].left != -1 )//もしidは親の右の子で親の左の子も存在したら、親の左の子を返す
+    {
+        return tree[tree[id].parent].left;
+    }
+    else//兄弟がないなら-1を返す
+    {
+        return -1;
+    }
+}
+
+int get_Degree(int id)//度数(子の数量)を計算する関数
+{
+    int degree = 0;
+    if( tree[id].left != -1 )//左の子があれば、度数＋１
+    {
+        degree++;
+    }
+    if( tree[id].right != -1 )//右の子があれば、度数＋１
+    {
+        degree++;
+    }
+
+    return degree;
+}
+
+void result_Print(int id)//出力するための関数
+{
+    printf("node %d: parent = %d, sibling = %d, degree = %d, depth = %d, height = %d, ", id, tree[id].parent, get_Sibling(id), get_Degree(id), depth[id], height[id]);
+
+    if( tree[id].parent == -1 )//もし親がなければrootを
+    {
+        printf("root\n");
+    }
+    else if( tree[id].left == -1 && tree[id].right == -1 )//もし子がなければleafを
+    {
+        printf("leaf\n");
+    }
+    else//他の場合は中間節点を
+    {
+        printf("internal node\n");
+    }
+}
+
+int main(void)
+{
+    int i;//for loop
+    int n;//nodeの数量
+    int id, left, right, root;//idは処理中のnode、leftは左の子、rightは右の子、rootは根の値
+
+    scanf("%d", &n);//nを読み込む
+
+    for(i = 0; i < n; i++)//二分木の初期化
+    {
+        tree[i].parent = -1;
+        tree[i].right = -1;
+        tree[i].left = -1;//子の初期化は省略してもいい、入力を代入すると同じ結果(next line)
+    }
+
+    for(i = 0; i < n; i++)
+    {
+        scanf("%d %d %d", &id, &left, &right);//データを読み込む
+        tree[id].left = left;
+        tree[id].right = right;//子を代入
+        if(left != -1){//もし左の子があれば、左の子の親はid
+            tree[left].parent = id;
+        }
+        if(right != -1){//もし右の子があれば、右の子の親はid
+            tree[right].parent = id;
+        }
+    }
+
+    for(i = 0; i < n; i++)
+    {
+        if(tree[i].parent == -1)
+        {
+            root = i;//根を探して代入する
+        }
+    }
+
+    set_Depth(root, 0);//深さを計算
+    set_Height(root);//高さを計算
+
+    for(i = 0; i < n; i++)
+    {
+        result_Print(i);//出力
+    }
+
+    return 0;
+}

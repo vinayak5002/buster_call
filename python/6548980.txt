@@ -1,0 +1,23 @@
+import qualified Data.ByteString.Char8 as B
+import Data.Maybe ( fromJust )
+main :: IO()
+main = do
+  n <- fmap (fst . fromJust . B.readInt) B.getLine
+  ss <- fmap (map (fst . fromJust . B.readInt) . B.words) B.getLine
+  let (lst, cnt) = msort n ss
+  putStrLn $ unwords $ map show lst
+  print cnt
+
+msort :: Int -> [Int] -> ([Int],Int)
+msort 1 l = (l,0)
+msort n l = merge (msort ln ll) (msort rn rl) where
+  (ln,rn) = (div n 2, n - ln)
+  (ll,rl) = splitAt ln l
+
+merge :: ([Int],Int) -> ([Int],Int) -> ([Int],Int)
+merge (ll,lc) (rl,rc) = help (lc+rc) [] ll rl where
+  help c ml [] rl = (reverse ml ++ rl, c+length rl)
+  help c ml ll [] = (reverse ml ++ ll, c+length ll)
+  help c ml ll@(l:ls) rl@(r:rs)
+    | l <= r    = c `seq` help (c+1) (l:ml) ls rl
+    | otherwise = c `seq` help (c+1) (r:ml) ll rs

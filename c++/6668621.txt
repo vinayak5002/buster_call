@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void dfs(int h, int w, int c_grid[50][50], bool seen[50][50], 
+        vector<int> dx, vector<int> dy, int x, int y)
+{
+    seen[x][y] = true;
+    for (int i = 0; i < 8; ++i) {
+        int x2 = x + dx[i];
+        int y2 = y + dy[i];
+        if (x2 < 0 || h <= x2 || y2 < 0 || w <= y2)
+            continue;
+        if (c_grid[x2][y2] == 0)
+            continue;
+        if (seen[x2][y2])
+            continue;
+        dfs(h, w, c_grid, seen, dx, dy, x2, y2);
+    }
+}
+
+int main()
+{
+    int c_grid[50][50] = {};
+    bool seen[50][50] = {};
+    int dx[8] = {1, 0, -1, 0, 1, 1, -1, -1};
+    int dy[8] = {0, 1, 0, -1, 1, -1, 1, -1};
+    int h, w;
+    while (cin >> w >> h) {
+        if (h == 0 && w == 0)
+            return 0;
+        for (int i = 0; i < h; ++i) {
+            for (int j = 0; j < w; ++j) {
+                cin >> c_grid[i][j];
+                seen[i][j] = false;
+            }
+        }
+        int cnt = 0;
+        for (int i = 0; i < h; ++i) {
+            for (int j = 0; j < w; ++j) {
+                if (c_grid[i][j] == 0)
+                    continue;
+                if (seen[i][j])
+                    continue;
+                ++cnt;
+                dfs(h, w, c_grid, seen, dx, dy, i, j);
+            }
+        }
+        cout << cnt << endl;
+    }
+}

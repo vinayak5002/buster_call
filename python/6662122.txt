@@ -1,0 +1,52 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def dfs(num_vertexes, adjacency_list, first):
+    is_visited = [False] * num_vertexes
+    stack = [first]
+
+    while stack:
+        v = stack.pop()
+        if is_visited[v]:
+            continue
+
+        for u in adjacency_list[v]:
+            if u == first:
+                return True
+            if is_visited[u]:
+                continue
+            stack.append(u)
+
+    return False
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+    sys.setrecursionlimit(2 ** 16 - 1)
+    num_vertexes, num_edges = map(int, f.readline().split())
+    adjacency_list = [[] for _ in range(num_vertexes)]
+    for _ in range(num_edges):
+        s, t = map(int, f.readline().split())
+        adjacency_list[s].append(t)
+
+    for i in range(num_vertexes):
+        if dfs(num_vertexes, adjacency_list, i):
+            print(1)
+            break
+    else:
+        print(0)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

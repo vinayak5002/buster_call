@@ -1,0 +1,86 @@
+#include <cstdio>
+#include <cstring>
+#include <cmath>
+#include <vector>
+#include<iostream>
+#include <algorithm>
+using namespace std;
+const int maxn = 1e3 + 5;
+
+// -------------------- 通用基本常数 --------------------
+
+const double eps = 1e-8;
+const double pi = acos(-1.0);
+static const int COUNTER_CLOCKWISE = 1;
+static const int CLOCKWISE = -1;
+static const int ONLINE_BACK = 2;
+static const int ONLINE_FRONT = -2;
+static const int ON_SEGMENT = 0;
+
+// -------------------- 二维点（向量）类 --------------------
+
+struct Point {
+    double x, y;
+    Point() {}
+    Point(double x, double y) : x(x), y(y) {}
+    // 输入一个点
+    void input() {
+        scanf("%lf%lf", &x, &y);
+    }
+    double abs() {
+    	return sqrt(x * x + y * y);
+    }
+    friend Point operator + (const Point& a, const Point& b) {
+        return Point(a.x + b.x, a.y + b.y);
+    }
+    friend Point operator - (const Point& a, const Point& b) {
+        return Point(a.x - b.x, a.y - b.y);
+    }
+    friend Point operator * (const Point& a, const double& b) {
+        return Point(a.x * b, a.y * b);
+    }
+    friend Point operator * (const double& a, const Point& b) {
+        return Point(a * b.x, a * b.y);
+    }
+    friend Point operator / (const Point& a, const double& b) {
+        return Point(a.x / b, a.y / b);
+    }
+};
+
+// -------------------- 向量与向量运算 --------------------
+
+// 计算两个向量的叉积
+double det(const Point& a, const Point& b) {
+    return a.x * b.y - a.y * b.x;
+}
+
+// 计算两个向量的点积
+double dot(const Point& a, const Point& b) {
+    return a.x * b.x + a.y * b.y;
+}
+
+
+// -------------------- 线段（直线）类 --------------------
+
+struct Line
+{
+    Point a, b;
+    Line() {};
+    Line(Point _a, Point _b)
+        :a(_a), b(_b) {};
+};
+
+int main() {
+	Point A,B,C;
+	A.input();
+	B.input();
+	C.input();
+
+	Point ab = B-A,ac = C-A,bc = C-B;
+	double a = bc.abs(), b = ac.abs(), c = ab.abs();
+	Point ans = (a * A + b * B + c * C) / (a + b + c);
+	double p = (a + b + c) / 2;
+	double r = sqrt((p-a)*(p-b)*(p-c)/p);
+	printf("%.10lf %.10lf %.10lf\n",ans.x,ans.y,r);
+
+}

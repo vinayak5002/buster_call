@@ -1,0 +1,187 @@
+import java.io.*
+import java.util.*
+import kotlin.math.*
+
+fun main() {
+    
+    // val T = nextInt()
+    // repeat(T) {solve()}
+    // pw.flush()
+    
+    solve()
+    pw.flush()
+    
+}
+
+fun solve() {
+    
+    val N = nextInt()
+    val M = nextInt()
+    val ab = Array<Pair<Long, Long>>(M+2) {
+        when(it) {
+            0 -> Pair(0L, 0L)
+            M+1 -> Pair(N+1L, 0L)
+            else -> Pair(nextLong(), nextLong())
+        }
+    }
+    val a = Array<Long>(M+2) { ab[it].first }
+    val b = Array<Long>(M+2) { ab[it].second }
+    
+    // printArray(a)
+    
+    var crr = 0L
+    var ans = 0L
+    for( i in 0..M ) {
+        val da = a[i+1]-a[i]+1
+        val db = abs(b[i+1]-b[i])+1
+        ans = max(ans, crr+f(b[i], da-1, 1L))
+        if( da >= db ) {
+            crr += maxfund(da, b[i], b[i+1])
+        }else {
+            break
+        }
+    }
+    
+    pw.println(ans)
+    
+}
+
+fun f(a1: Long, n: Long, d: Long): Long = n*(2*a1+d*(n-1))/2
+
+fun maxfund(da: Long, b1: Long, b2: Long): Long {
+    
+    val db = b2-b1
+    val inc = (da+db)/2
+    var dec = (da-db)/2+(da-db)%2
+    
+    return f(b1, inc, 1L)+f(b2, dec, 1L)-b2
+    
+}
+
+fun printArray(a: Array<Long>) {
+    
+    a.forEach{ print("$it ") }
+    println()
+    
+}
+
+/* struct begin */
+
+data class Pii(val fi: Int, val se: Int)
+data class Edge(val from: Int, val to: Int, val w: Long)
+
+class BinaryIndexedTree(n: Int) {
+    
+    val N = n
+    var a = Array<Long>(N+1) {0L}
+    
+    fun sum(i: Int): Long {
+        
+        var idx = i+1
+        var res = 0L
+        while( idx > 0 ) {
+            res += a[idx]
+            idx -= idx and (-idx)
+        }
+        
+        return res
+        
+    }
+    
+    fun add(i: Int, x: Long) {
+        
+        var idx = i+1
+        while( idx <= N ) {
+            a[idx] += x
+            idx += idx and (-idx)
+        }
+        
+    }
+    
+}
+
+class UnionFind(N: Int) {
+    
+    var parent = Array<Int>(N) {it}
+    var rank = Array<Int>(N) {1}
+    var size = Array<Int>(N) {1}
+    
+    fun root(x: Int): Int {
+        
+        if( parent[x] == x ) {
+            return x
+        }else {
+            parent[x] = root(parent[x])
+            return parent[x]
+        }
+        
+    }
+    
+    fun unite(x: Int, y: Int) {
+        
+        val rx = root(x)
+        val ry = root(y)
+        if( rx == ry ) return
+        
+        if( rank[rx] > rank[ry] ) {
+            parent[ry] = rx
+            size[rx] += size[ry]
+        }else {
+            parent[rx] = ry
+            size[ry] += size[rx]
+            if( rank[rx] == rank[ry] ) rank[ry]++
+        }
+        
+    }
+    
+    fun same(x: Int, y: Int): Boolean = (root(x) == root(y))
+    fun getSize(x: Int): Int = size[root(x)]
+    
+}
+
+/* struct end */
+
+/* math begin */
+
+fun intceil(x: Double) = ceil(x).toInt()
+fun intfloor(x: Double) = floor(x).toInt()
+fun gcd(x: Int, y: Int): Int {
+    
+    var a = max(x, y)
+    var b = min(x, y)
+    var r: Int
+    
+    do {
+        r = a%b
+        a = b
+        b = r
+    }while( r > 0 )
+    
+    return a
+    
+}
+
+/* math end */
+
+/* I/O begin */
+
+var st = StringTokenizer("")
+val br = System.`in`.bufferedReader()
+val pw = PrintWriter(System.out, false)
+
+fun nextInt() = next().toInt()
+fun nextLong() = next().toLong()
+fun nextLine() = br.readLine()!!
+fun nextDouble() = next().toDouble()
+fun nextIntarr(n: Int) = Array<Int>(n) {nextInt()}
+fun nextStrarr(n: Int) = Array<String>(n) {next()}
+fun nextLongarr(n: Int) = Array<Long>(n) {nextLong()}
+
+fun next(): String {
+    
+    if( !st.hasMoreTokens() ) st = StringTokenizer(br.readLine()!!)
+    return st.nextToken()
+    
+}
+
+/* I/O end */

@@ -1,0 +1,115 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+#include <climits>
+#include <cmath>
+using namespace std;
+
+typedef long long ll;
+
+
+class RangeAddSumQuery {
+private:
+	int n_;
+	vector<ll> uniform_;
+	vector<ll> partial_;
+
+private:
+	ll get_sum_sub(int s, int t, int k, int left, int right) {
+		if (right <= s || t <= left) {
+			return 0;
+		}
+		if (s <= left && right <= t) {
+			return (right - left) * uniform_[k] + partial_[k];
+		}
+		ll sum = (min(t, right) - max(s, left)) * uniform_[k];
+		int mid = (left + right) / 2;
+		int k2 = 2 * k;
+
+		sum += get_sum_sub(s, t, k2 + 1, left, mid);
+		sum += get_sum_sub(s, t, k2 + 2, mid, right);
+		return sum;
+	}
+
+	void add_sub(int s, int t, int x, int k, int left, int right) {
+		if (right <= s || t <= left) {
+			return;
+		}
+		if (s <= left && right <= t) {
+			uniform_[k] += x;
+			return;
+		}
+		int mid = (left + right) / 2;
+		int k2 = 2 * k;
+
+		partial_[k] += (min(t, right) - max(s, left)) * x;
+		add_sub(s, t, x, k2 + 1, left, mid);
+		add_sub(s, t, x, k2 + 2, mid, right);
+		return;
+	}
+
+public:
+	RangeAddSumQuery(int n, ll init_val) {
+		int n2 = -1;
+
+		n_ = 1;
+		while (n_ < n) {
+			n_ <<= 2;
+		}
+		n2 = 2 * n_ - 1;
+		partial_ = vector<ll>(n2, init_val);
+		uniform_ = vector<ll>(n2, init_val);
+		return;
+	}
+
+	~RangeAddSumQuery() {}
+
+	// [s, t), zero-based
+	ll get_sum(int s, int t) {
+		return get_sum_sub(s, t, 0, 0, n_);
+	}
+
+	// [s, t), zero-based
+	void add(int s, int t, int x) {
+		add_sub(s, t, x, 0, 0, n_);
+		return;
+	}
+};
+
+int main() {
+#if READ_FROM_FILE
+	std::ifstream ifs("test0.txt");
+	std::cin.rdbuf(ifs.rdbuf());
+#endif
+	int n = -1;
+	int q = -1;
+	int init_val = 0;
+	int op = -1;
+	int s = -1;
+	int t = -1;
+	int x = -1;
+	ll val = init_val;
+
+	cin >> n >> q;
+	RangeAddSumQuery rasq(n, init_val);
+
+	for (int i = 0; i < q; i++) {
+		cin >> op;
+		cin >> s >> t;
+		s--;
+		if (op == 0) {
+			cin >> x;
+			rasq.add(s, t, x);
+		}
+		else {
+			val = rasq.get_sum(s, t);
+			cout << val << endl;
+		}
+	}
+	return 0;
+}

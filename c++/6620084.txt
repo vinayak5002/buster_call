@@ -1,0 +1,107 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef long long int ll;
+typedef long double ld;
+typedef pair<ll, ll> pll;
+#define rep(i, n) for(ll i = (ll)0; i < (ll)n; i++)
+#define ALL(a)  (a).begin(),(a).end()
+ll dx[8] = {-1, 1, 0, 0, -1, -1, 1, 1};
+ll dy[8] = {0, 0, -1, 1, -1, 1, -1, 1};
+
+
+/*
+ * aとbのうち小さいものをaに代入
+ */
+template<class T> inline bool chmin(T& a, T b) {
+  if (a > b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+
+/*
+ * aとbのうち大きいものをaに代入
+ */
+template<class T> inline bool chmax(T& a, T b) {
+  if (a < b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+
+/*
+ * Union-Find木
+ */
+struct UnionFind {
+  private:
+    vector<int> parent;
+  
+  public:
+    UnionFind(int n) : parent(n, -1) { }
+    void init(int n) { parent.assign(n, -1); }
+ 
+    int root(int x) {
+      if (parent[x] < 0) return x;
+      else return parent[x] = root(parent[x]);
+    }
+ 
+    bool issame(int x, int y) {
+      return root(x) == root(y);
+    }
+ 
+    void merge(int x, int y) { //親、子
+      x = root(x);
+      y = root(y);
+      if (x == y) return;
+      if (parent[x] > parent[y]) swap(x, y);
+      parent[x] += parent[y]; // sizeを調整
+      parent[y] = x; // 大きい木の根に小さい木をつける, yの親はx
+    }
+ 
+    int size(int x) {
+      return -parent[root(x)];
+    }
+  
+};
+
+
+
+/*
+ * 重みでソート出来るようにする関数
+ */
+bool cmp(pair<pll, ll> a, pair<pll, ll> b) {
+  return a.second < b.second;
+}
+
+
+/*
+ * メイン関数
+ */
+int main() {
+  // 入力
+  ll V, E; cin >> V >> E;
+  vector<pair<pll, ll>> P(E);
+  rep(i, E) {
+    ll s, t, w; cin >> s >> t >> w;
+    P[i] = pair<pll, ll>(pll(s, t), w);
+  }
+  ll answer = 0;
+  
+  // 重みでソートして重みが小さい順に調べられるようにする
+  sort(ALL(P), cmp);
+  
+  // UnionFindでマージされてないものを調べる
+  UnionFind uf(V);
+  rep(i, E) {
+    if(uf.issame(P[i].first.first, P[i].first.second)) continue;
+    uf.merge(P[i].first.first, P[i].first.second);
+    answer += P[i].second;
+  }
+  cout << answer << endl;
+  
+  return 0;
+}

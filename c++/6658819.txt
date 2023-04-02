@@ -1,0 +1,52 @@
+#include <bits/stdc++.h>
+#define rep(i, st, n) for (ll i = (ll)st; i < (ll)st + (ll)n; i++)
+#define repd(i, st, gl, c) for(ll i = ll(st); i <= ll(gl); i += ll(c))
+#define rrep(i, st, n) for (ll i = (ll)st; i > (ll)st - (ll)n; i--)
+#define rrepd(i, st, gl, c) for(ll i = ll(st); i >= ll(gl); i -= ll(c))
+#define fi first
+#define se second
+#define pb push_back
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using pll = pair<ll, ll>;
+ll a, n, cnt, ans;
+const ll inf = 1e18;
+vector<ll> v, t;
+
+// 二分探索
+bool isOK(ll index, ll key, vector<ll> &v) {
+    if (v[index] >= key) return true;
+    else return false;
+}
+ll binary_search(ll key, vector<ll> &v) {//返り値aはv[a] >= keyとなる最小の数
+    ll ng = -1;
+    ll ok = (ll)v.size(); 
+
+    while (abs(ok - ng) > 1) {
+        ll mid = (ok + ng) / 2;
+
+        if (isOK(mid, key, v)) ok = mid;
+        else ng = mid;
+    }
+    return ok;// ngにすると1つ前のindexが返ってくる
+}// vectorをsortしましょう
+
+int main(){
+    cin >> n;
+    v.resize(n);
+    rep(i, 0, n) cin >> v[i];
+    ll q;
+    cin >> q;
+    t.resize(q);
+    rep(i, 0, q) cin >> t[i];
+    sort(t.begin(), t.end());
+    rep(i, 0, q){
+        //cout << v[i] << " " << t[binary_search(v[i], t)] << endl;
+        if(t[i] == v[binary_search(t[i], v)]){
+            ans++;
+        }
+    }
+
+    cout << ans << endl;
+}

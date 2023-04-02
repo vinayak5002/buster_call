@@ -1,0 +1,150 @@
+// https://qiita.com/DaikiSuyama/items/9dba963ba74396b9b7fd
+// https://luling.hatenablog.com/entry/2018/12/01/212805
+// https://zenn.dev/antyuntyun/articles/atcoder-cpp-template
+//
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+
+// rep macro
+#define reps(i, a, n) for (ll i = (a); i < (ll)(n); ++i)
+#define rreps(i, a, n) for (ll i = (a); i > (ll)(n); --i)
+#define rep(i, n) reps(i, 0, n)
+#define rrep(i, n) reps(i, 1, n + 1)
+#define repd(i,n) for(ll i=n-1;i>=0;i--)
+#define rrepd(i,n) for(ll i=n;i>=1;i--)
+
+#define optimize_cin() cin.tie(0); ios::sync_with_stdio(false)
+
+#define pb push_back
+#define mp make_pair
+#define all(obj) (obj).begin(), (obj).end()
+#define YESNO(bool) if(bool){cout<<"YES"<<endl;}else{cout<<"NO"<<endl;}
+#define yesno(bool) if(bool){cout<<"yes"<<endl;}else{cout<<"no"<<endl;}
+#define YesNo(bool) if(bool){cout<<"Yes"<<endl;}else{cout<<"No"<<endl;}
+
+//定数
+#define INF32 2147483647           // 2.147483647 x 10^{9}:32bit整数のinf
+#define INF64 9223372036854775807  // 9.22337203685477580 x 10^{18}:64bit整数のinf
+#define MOD 1000000007             //問題による
+#define PI 3.14159265359           // 円周率
+
+//略記
+#define F first
+#define S second
+
+//出力(空白区切りで昇順に)
+#define dump(x)                                                 \
+  for (auto i = x.begin(); i != --x.end(); i++) cout << *i << " "; \
+  cout << *--x.end() << endl;
+#define echo(x) cout << (x) << endl;
+
+#define dumpMatrix(ms, row, col) \
+for (auto i = 0; i < row; i++) { \
+  for (auto j = 0; j < col; j++) { \
+    if (j != 0) cout << " "; \
+    cout << ms[i][j]; \
+  } \
+  cout << endl; \
+}
+
+// aをbで割る時の繰上げ,繰り下げ
+ll _ceil(ll a, ll b) { return (a + (b - 1)) / b; }
+ll _floor(ll a, ll b) { return a / b; }
+
+// 大きい方、小さい方を残す
+template<class T>bool chmax(T &a, const T &b) { if (a<b) { a=b; return 1; } return 0; }
+template<class T>bool chmin(T &a, const T &b) { if (b<a) { a=b; return 1; } return 0; }
+
+// 参考 : https://judge.u-aizu.ac.jp/onlinejudge/review.jsp?rid=6278933#1
+
+#define N 4
+
+class Puzzle {
+ private:
+  int dy[4] = {-1, 0, 1, 0};
+  int dx[4] = {0, 1, 0, -1};
+  vector<vector<int>> table;
+  int r;  // 手数
+
+  // 座標が範囲内かどうか
+  bool in(int x, int y) { return !(x < 0 || y < 0 || N <= x || N <= y); }
+
+  // 正しい位置とのズレを計算する
+  // 正しい位置だと0になる
+  int calcDiff() {
+    int diff = 0;
+    rep(i, N) {
+      rep(j, N) {
+        int index = table[i][j] - 1;
+        if (index == -1) {
+          continue;
+        }
+        int y = index / N, x = index % N;
+        diff += abs(y - i) + abs(x - j);
+      }
+    }
+    return diff;
+  }
+
+  /**
+   * px     : 1つ前の0の位置(x座標)
+   * py     : 1つ前の0の位置(y座標)
+   * depth  : 1つ前の手数
+   * prev   : 1つ前の操作(dx,dyのindex)
+   */
+  bool dfs(int px, int py, int depth, int prev) {
+    int diff = calcDiff();
+    // 各値の位置が正しい場合に差分が0になるので終了
+    if (diff == 0) return true;
+    // 現在の最大手を越える場合は飛ばす
+    if (depth + diff > r) return false;
+    rep(i, N) {
+      // 逆操作をやらないようにする
+      // ex) dy[0], dy[2]を実行すると元に戻る
+      if ((i + 2) % N == prev) continue;
+      // 次の"0"の位置
+      int ny = py + dy[i];
+      int nx = px + dx[i];
+      if (!in(nx, ny)) continue;
+      swap(table[ny][nx], table[py][px]);
+      if (dfs(nx, ny, depth + 1, i)) return true;
+      // ダメだったら元に戻す
+      swap(table[ny][nx], table[py][px]);
+    }
+    return false;
+  }
+
+ public:
+  Puzzle(vector<vector<int>> &_table) : table(_table) {}
+  void solve(int sx, int sy) {
+    // 問題文より45手以内で解くことができる
+    rep(rr, 46) {
+      r = rr;
+      if (dfs(sx, sy, 0, -1)) {
+        echo(r);
+        break;
+      }
+    }
+  }
+};
+
+signed main() {
+  vector<vector<int>> table(N);
+  int sx, sy;  // 開始位置(0の位置)
+  rep(i, N) {
+    table[i].resize(N);
+    rep(j, N) {
+      int x;
+      cin >> x;
+      table[i][j] = x;
+      if (x == 0) {
+        sx = j;
+        sy = i;
+      }
+    }
+  }
+  Puzzle puzzle(table);
+  puzzle.solve(sx, sy);
+}
+

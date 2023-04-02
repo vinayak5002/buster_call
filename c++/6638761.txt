@@ -1,0 +1,73 @@
+#include<bits/stdc++.h>
+#define all(x) begin(x),end(x)
+#define rep(i,a,b) for (ll i = a; i < b; i++)
+#define trav(a,x) for (auto &a : x)
+#define vi vector<int>
+#define vll vector<long long>
+
+
+using namespace std;
+
+typedef long long ll;
+typedef pair<long long,long long> ii;
+
+struct edge
+{
+    ll u,v,w;
+    bool operator<(edge const& other)
+    {
+        return w < other.w;
+    }
+};
+
+ll n,m,a,b,c,p[10003],ra[10003],ans=0;
+vector<edge> e;
+
+ll find_set(int v)
+{
+    if (p[v]==v)
+        return v;
+    return p[v]=find_set(p[v]);
+}
+
+void union_set(int u, int v)
+{
+    u=find_set(u);
+    v=find_set(v);
+    if (ra[u] > ra[v]) swap(u,v);
+    if (ra[u] == ra[v]) ra[v]++;
+    p[v]=u;
+    return ;
+}
+
+int main()
+{
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+    cin>>n>>m;
+    rep(i,0,m)
+    {
+        cin>>a>>b>>c;
+        e.push_back({a,b,c});
+    }
+    rep(i,0,n)
+    {
+        p[i]=i;
+        ra[i]=0;
+    }
+    sort (all(e));
+    a=n;
+    trav(i,e)
+    {
+        if (find_set(i.u) != find_set(i.v))
+        {
+            ans+=i.w;
+            union_set(i.u , i.v);
+            a--;
+        }
+        if (a==1) break;
+    }
+    cout<<ans;
+    return 0;
+}
+

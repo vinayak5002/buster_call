@@ -1,0 +1,135 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+using ll = long long;
+using ull = unsigned long long;
+
+// ビット全探索用の添え字(0-indexed)を生成する。
+// 初期状態bit_state=0から呼び出すと0,1,..,2^bit_length-1の後、0になる
+// @pre bit長は最大32
+// @ret_val false 全列挙済, true 列挙前
+// ex.
+// ll bit_state = 0;
+// vector<size_t> index_list;
+//
+// while (next_bit_enumeration(2, &bit_state, &index_list)) {
+//   for (auto v : index_list) {
+//   }
+//}
+bool next_bit_enumeration(const size_t bit_length, long long* bit_state, vector<size_t>* index_list) {
+   assert(bit_length <= 32);
+   index_list->clear();
+
+   // 全列挙出来ているか
+   auto mask = (1LL << bit_length) - 1;
+
+   if ((*bit_state & mask) == 0 && *bit_state > 0) {
+      return false;
+   }
+
+   for (size_t i = 0; i < bit_length; i++) {
+      auto bit_check = *bit_state & (1ULL << i);
+
+      if (bit_check != 0) {
+         index_list->push_back(i);
+      }
+   }
+
+   *bit_state += 1;
+   return true;
+}
+
+using Result = pair<ll, ll>;  // w, v
+
+Result calc(const vector<size_t>& index_list, const vector<ll>& vl, const vector<ll>& wl) {
+   ll v = 0, w = 0;
+
+   for (auto i : index_list) {
+      v += vl[i];
+      w += wl[i];
+   }
+
+   return {w, v};
+}
+
+int N, W;
+vector<ll> vl1, vl2, wl1, wl2;
+
+int main() {
+   cin >> N >> W;
+
+   for (int i = 0; i < N; i++) {
+      ll v, w;
+      cin >> v >> w;
+
+      if (i < 20) {
+         vl1.emplace_back(v);
+         wl1.emplace_back(w);
+      } else {
+         vl2.emplace_back(v);
+         wl2.emplace_back(w);
+      }
+   }
+
+   // vl1, wl1を全列挙
+   vector<Result> sub_res;
+   vector<size_t> index_list;
+   ll bit_state = 0;
+
+   while (next_bit_enumeration(vl1.size(), &bit_state, &index_list)) {
+      auto res = calc(index_list, vl1, wl1);
+
+      if (res.first <= W)
+         sub_res.emplace_back(res);
+   }
+   // vl2, wl2を全列挙
+   vector<Result> remain_res;
+   bit_state = 0;
+
+   while (next_bit_enumeration(vl2.size(), &bit_state, &index_list)) {
+      auto res = calc(index_list, vl2, wl2);
+
+      if (res.first <= W)
+         remain_res.emplace_back(res);
+   }
+
+   if (remain_res.empty()) {
+      ll ans = -1;
+
+      for (const auto& v : sub_res) {
+         ans = max(ans, v.second);
+      }
+
+      cout << ans << endl;
+      return 0;
+   }
+
+   sort(remain_res.begin(), remain_res.end());
+
+   for (int i = 1; i < remain_res.size(); i++) {
+      remain_res[i].second = max(remain_res[i - 1].second, remain_res[i].second);
+   }
+
+   ll ans = -1;
+
+   for (const auto& res : sub_res) {
+      const auto [w1, v1] = res;
+      ll w_r = W - w1;
+      Result s(w_r, numeric_limits<ll>::max());
+
+      auto it = upper_bound(remain_res.begin(), remain_res.end(), s);
+      ll v = v1;
+
+      if (it != remain_res.begin()) {
+         --it;
+         v += it->second;
+      }
+
+      ans = max(ans, v);
+   }
+
+   cout << ans << endl;
+
+   return 0;
+}
+

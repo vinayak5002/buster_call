@@ -1,0 +1,242 @@
+/*
+2022 NTHU PME Programming Practice #1
+E - Grid
+*/
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+/*
+version:1
+*/
+
+#define			N_MAX_SIZE		255
+#define			VERT_IDX		0
+#define			HORI_IDX		1
+#define			BLTR_IDX		2		//bottom left top right
+#define			BRTL_IDX		3		//bottom right top left
+#define			MAXC_IDX		4
+
+unsigned int	search2				(	unsigned char		array[][N_MAX_SIZE]	,
+							unsigned int		size			,
+							unsigned int		row_idx			,
+							unsigned int		col_idx			,
+							unsigned char		*direction		
+						) ;
+
+int main(void)
+{
+	unsigned int	size	;
+	char		entry	;
+	int		loop_r	;
+	int		loop_c	;
+	char		string		[N_MAX_SIZE+1]			;
+	unsigned char	grid_matrix	[N_MAX_SIZE][N_MAX_SIZE]	;
+	unsigned char	running	;
+
+	unsigned int	local_max	;
+	unsigned int	global_max	;
+	unsigned char	direction	;
+
+				running				=	1		;
+	while(	running==1			)  {
+	  if(scanf("%d\n",&size)==EOF		)
+				running				=	0		;
+	  else if(size==0)	running				=	0		;
+
+	  if(	running==1			) {
+		for(loop_r=0;loop_r<size;loop_r++) {
+				gets(string);
+		  if(strlen(string)==size) {
+		    for(loop_c=0;loop_c<size;loop_c++) {
+				entry				=	string[loop_c]	-
+									'0'		;
+		      if(	entry==0  ||	entry==1	)
+				grid_matrix[loop_r][loop_c]	=	entry		;
+		      else	running				=	0		;
+		    }	  
+		  }
+		  else		running				=	0		;
+		}
+	  }
+
+	  if(		running==1			) {
+		for(loop_r=0;loop_r<size;loop_r++)
+		  for(loop_c=0;loop_c<size;loop_c++) {
+			//(loop_r,loop_c)
+		    if(	grid_matrix[loop_r][loop_c]==1		) {
+				local_max			=	0		;
+			//
+		    }
+
+	 	  }
+	  }
+/*
+	  if(		running==1			) {
+			printf("%d\n",size)		;
+		for(loop_r=0;loop_r<size;loop_r++) {
+		  for(loop_c=0;loop_c<size;loop_c++) {
+			printf("%d",grid_matrix[loop_r][loop_c])	;
+		  }
+			printf("\n")		;
+		}	
+	  }
+*/
+//				running				=	0		;
+
+//searching	(begin)
+	  if(		size>0				) {
+				global_max			=	0		;
+	   for(loop_r=0;loop_r<size;loop_r++) { 
+	    for(loop_c=0;loop_c<size;loop_c++) {
+		if(	grid_matrix[loop_r][loop_c]!=0		) {
+			local_max	=	search2	(grid_matrix, size, loop_r, loop_c, &direction)	;
+//			printf("(%d,%d)=%d @%d\n",loop_r,loop_c,local_max,direction);
+		  if(	local_max>global_max			)
+				global_max			=	local_max	;
+		}
+	    }
+	   }
+//searching	(end)
+
+//output	(begin)
+			printf("%d\n",global_max);
+//output	(end)
+	  }
+	}
+
+    	return 0;
+}
+
+unsigned int	search2				(	unsigned char		array[][N_MAX_SIZE]	,
+							unsigned int		size			,
+							unsigned int		row_idx			,
+							unsigned int		col_idx			,
+							unsigned char		*direction		
+						) {
+		int		result=0		;
+		int 		row_tmp			;
+		int 		col_tmp			;
+		int		count	[5]		;		//{ver,hor,lurd,ldru,max}
+
+				*direction		=		MAXC_IDX		;
+				count	[MAXC_IDX]	=		0			;
+		//vertical scanning (begin)
+				count	[VERT_IDX]	=		1			;
+		//up (row:-,col:0)
+				row_tmp			=		row_idx-1		;
+				col_tmp			=		col_idx+0		;
+		while (			row_tmp>=0			&&
+//					col_idx>=0			&&
+					array[row_tmp][col_tmp]!=0	) {
+				row_tmp			-=		1			;
+//				col_tmp			-=		1			;
+				count	[VERT_IDX]	+=		1			;
+		}
+		//dn (row:+,col:0)
+				row_tmp			=		row_idx+1		;
+				col_tmp			=		col_idx+0		;
+		while (			row_tmp<size			&&
+//					col_tmp<size			&&
+					array[row_tmp][col_tmp]!=0	) {
+				row_tmp			+=		1			;
+//				col_tmp			+=		1			;
+				count	[VERT_IDX]	+=		1			;
+		}
+		if(			count[VERT_IDX]>count[MAXC_IDX]		) {
+				*direction		=		VERT_IDX		;
+				count	[MAXC_IDX]	=		count	[VERT_IDX]	;
+		}
+		//vertical scanning (end)
+
+		//horizontal scanning (begin)
+				count	[HORI_IDX]	=		1			;
+		//left (row:0,col:-)
+				row_tmp			=		row_idx+0		;
+				col_tmp			=		col_idx-1		;
+		while (	//		row_tmp>=0			&&
+					col_tmp>=0			&&
+					array[row_tmp][col_tmp]!=0	) {
+//				row_tmp			-=		1			;
+				col_tmp			-=		1			;
+				count	[HORI_IDX]	+=		1			;
+		}
+		//right (row:0,col:+)
+				row_tmp			=		row_idx+0		;
+				col_tmp			=		col_idx+1		;
+		while (	//		row_tmp<size			&&
+					col_tmp<size			&&
+					array[row_tmp][col_tmp]!=0	) {
+//				row_tmp			+=		1			;
+				col_tmp			+=		1			;
+				count	[HORI_IDX]	+=		1			;
+		}
+		if(			count[HORI_IDX]>count[MAXC_IDX]		) {
+				*direction		=		HORI_IDX		;
+				count	[MAXC_IDX]	=		count	[HORI_IDX]	;
+		}
+		//horizontal scanning (end)
+
+		//bottom left top right (begin)
+				count	[BLTR_IDX]	=		1			;
+		//bottom left  (row:+,col:-)
+				row_tmp			=		row_idx+1		;
+				col_tmp			=		col_idx-1		;
+		while (			row_tmp<size			&&
+					col_tmp>=0			&&
+					array[row_tmp][col_tmp]!=0	) {
+				row_tmp			+=		1			;
+				col_tmp			-=		1			;
+				count	[BLTR_IDX]	+=		1			;
+		}
+		//top right (row:-,col:+)
+				row_tmp			=		row_idx-1		;
+				col_tmp			=		col_idx+1		;
+		while (			row_tmp>=0			&&
+					col_tmp<size			&&
+					array[row_tmp][col_tmp]!=0	) {
+				row_tmp			-=		1			;
+				col_tmp			+=		1			;
+				count	[BLTR_IDX]	+=		1			;
+		}
+		if(			count[BLTR_IDX]>count[MAXC_IDX]		) {
+				*direction		=		BLTR_IDX		;
+				count	[MAXC_IDX]	=		count	[BLTR_IDX]	;
+		}
+		//bottom left top right (end)
+
+		//bottom right top left (begin)
+				count	[BRTL_IDX]	=		1			;
+		//bottom right (row:+,col:+)
+				row_tmp			=		row_idx+1		;
+				col_tmp			=		col_idx+1		;
+		while (			row_tmp<size			&&
+					col_tmp<size			&&
+					array[row_tmp][col_tmp]!=0	) {
+				row_tmp			+=		1			;
+				col_tmp			+=		1			;
+				count	[BRTL_IDX]	+=		1			;
+		}
+		//top left (row:-,col:-)
+				row_tmp			=		row_idx-1		;
+				col_tmp			=		col_idx-1		;
+		while (			row_tmp>=0			&&
+					col_tmp>=0			&&
+					array[row_tmp][col_tmp]!=0	) {
+				row_tmp			-=		1			;
+				col_tmp			-=		1			;
+				count	[BRTL_IDX]	+=		1			;
+		}
+		if(			count[BRTL_IDX]>count[MAXC_IDX]		) {
+				*direction		=		BRTL_IDX		;
+				count	[MAXC_IDX]	=		count	[BRTL_IDX]	;
+		}
+		//bottom right top left (end)
+
+				result			=		count	[MAXC_IDX]	;
+
+
+		return	result		;
+}
+

@@ -1,0 +1,45 @@
+#include<stdio.h>
+#include<algorithm>
+#include<iomanip>
+#include<iostream>
+using namespace std;
+const int MAX_Capicity = 100000;
+const int MAX_Weight = 1000000000;
+typedef pair<double, double> pii;
+pii snap[MAX_Capicity];
+double Solution(int N,int W) {
+	sort(snap, snap + N);
+	double left = W;
+	double sum = 0, temp;
+	for (int i = N-1; i >=0; i--) {
+		double weight = snap[i].second, value = (snap[i].first)*weight;
+		if (left > 0 && weight > left) {
+			sum = sum + (snap[i].first)*left;
+			left = left - weight;
+		}
+		else if (left > 0 && weight <= left) {
+			sum = sum + value;
+			left = left - weight;
+		}
+		else if (left <= 0)
+			break;
+	}
+	return sum;
+}
+int main() {
+	int N, W, p;
+	double v, w;
+	pii num;
+	double k;
+	cin >> N >> W;
+	for (int i = 0; i < N; i++) {
+		cin >> v >> w;
+		num.first = v / w;
+		num.second = w;
+		snap[i] = num;
+	}
+	k = Solution(N, W);
+	cout << setprecision(8)<<fixed<<k<< endl;
+	return 0;
+
+}

@@ -1,0 +1,71 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+
+public class Main {
+
+	public static void main(String[] args) {
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		try {
+			int n = Integer.parseInt(br.readLine());
+			int[] input = new int[n];
+			input = Arrays.stream(br.readLine().split((" "))).mapToInt(Integer::parseInt).toArray();
+			//最初の状態
+			int[] dial = new int[]{0,1,2,3,4,5,6,7,8,9};
+			int sum = 0;
+			
+			for (int i = 0; i < input.length; i++) {
+				int dialCount = dialCheck(dial, input[i]);
+				sum += dialCount;
+				dial = dialChange(dial, input[i]);				
+			}
+			System.out.println(sum);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	//ダイヤル変更
+	public static int[] dialChange(int[] dial, int rotation) {
+		for (int index = 0; index < dial.length; index++, rotation++) {
+			if (rotation > 9) {
+				rotation = 0;
+			}
+			dial[index] = rotation;
+		}
+		return dial;
+	}
+	//より少ない方ののダイヤル回数を返す
+	public static int dialCheck(int[] dial, int number) {
+		int clockCount = 0;
+		int antiCount = 0;
+		//時計回り
+		for (int i = 0; i < dial.length; i++) {
+			if (dial[i] == number) {
+				break;
+			} else {
+				clockCount++;
+			}
+		}
+		//反計回り
+		for (int i = dial.length; i > 0; i--) {
+			if (i == dial.length) {
+				if (dial[0] == number) {
+					break;
+				} else {
+					antiCount++;
+				}
+			}
+			else if (dial[i] == number) {
+				break;
+			} else {
+				antiCount++;
+			}
+		}
+		if (clockCount < antiCount) {
+			return clockCount;
+		}
+		return antiCount;
+	}
+}

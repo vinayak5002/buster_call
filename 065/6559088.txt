@@ -1,0 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int cmp(const void *a, const void *b){return *(int*)a - *(int*)b;}
+
+int np(int *a, int size){
+    int range, base, nbase, tmp, sort_flag=0;
+    int *buf = (int*)malloc(sizeof(int)*size);
+    for(int i = 1; i < size; i++){
+        base = a[size-1-i];
+        nbase = 10;
+        int cnt = i;
+        while(cnt--){
+            tmp = a[size-1-cnt];
+            if((base < tmp) && (tmp < nbase)){
+                nbase = tmp;
+                sort_flag = 1;
+            }
+        }
+        if(sort_flag){
+            int k = 1;
+            buf[0] = nbase;
+            for(int j = size-1-i; j < size; j++){
+                if(a[j] != nbase)buf[k++] = a[j];
+            }
+            qsort(buf+1, i, sizeof(int), cmp);
+            for(i = size-1-i; i < size; i++)a[i] = *(buf++);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int main(){
+    int n, *list, p;
+    scanf("%d", &n);
+
+    list = (int*)malloc(sizeof(int)*n);
+    for(int i = 0; i < n; i++)scanf("%d", list+i);
+
+    if(n == 1){
+        printf("%d\n", *list);
+        return 0;
+    }
+    
+    for(int i = 0; i < n; i++) list[i] *= (-1);
+    if(p = np(list, n))for(int i = 0; i < n; i++)printf("%d%c", list[i]*(-1), i!=n-1 ? ' ':'\n');
+    for(int i = 0; i < n; i++) list[i] *= (-1);
+    if(p){if(np(list, n))for(int i = 0; i < n; i++)printf("%d%c", list[i], i!=n-1 ? ' ':'\n');}
+    else for(int i = 0; i < n; i++)printf("%d%c", list[i], i!=n-1 ? ' ':'\n');
+    if(np(list, n))for(int i = 0; i < n; i++)printf("%d%c", list[i], i!=n-1 ? ' ':'\n');
+}

@@ -1,0 +1,173 @@
+#include <iostream>
+#include <cstdio>
+#include <string>
+#include <stdio.h>
+#include <bitset>
+#include <cmath>
+#include <cctype>
+#include <iomanip>
+#include <algorithm>
+#include <set>
+using namespace std;
+
+
+class DICE
+{
+public:
+    int top, btm, fwd, bck, rgt, lft;
+    void set_nums()
+    {
+        cin >> top >> bck >> rgt >> lft >> fwd >> btm;
+        cin.ignore();
+    }
+    void roll(char direction)
+    {
+        int tmp;
+        if (direction == 'N')
+        {
+            tmp = top;
+            top = bck;
+            bck = btm;
+            btm = fwd;
+            fwd = tmp;
+        }
+        if (direction == 'S')
+        {
+            tmp = top;
+            top = fwd;
+            fwd = btm;
+            btm = bck;
+            bck = tmp;
+        }
+        if (direction == 'E')
+        {
+            tmp = top;
+            top = lft;
+            lft = btm;
+            btm = rgt;
+            rgt = tmp;
+        }
+        if (direction == 'W')
+        {
+            tmp = top;
+            top = rgt;
+            rgt = btm;
+            btm = lft;
+            lft = tmp;
+        }
+        if (direction == 'H')
+        {
+            //roll left, top and btm are sticked.
+            tmp = bck;
+            bck = lft;
+            lft = fwd;
+            fwd = rgt;
+            rgt = tmp;
+        } 
+    }
+    int check_rgt(int top_target,int fwd_target)
+    {
+        /*目の現れ方全パターンを探索したい*/
+        // roll(N)で探索できる面の集合にtop_tgtが存在するなら、top==top_tgtとなるまで回した後にroll(H)
+        // 存在しないなら、側面にある→roll(E) or roll(W)そのあとroll(H)
+        if (rgt == top_target)
+        {
+            roll('W');
+        }
+        else if (lft == top_target)
+        {
+            roll('E');
+        }
+        else
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                roll('N');
+                if (top != top_target)
+                {
+                    break;
+                }
+            }
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            roll('H');
+            if (fwd != fwd_target)
+            {
+                break;
+            }
+        }
+        return lft; //なぜか右じゃなくて左の面でAC、なんで？？？？？？？？？？？？？？？？
+    }
+    void debug()
+    {
+        printf("top:%d, btm:%d, fwd:%d, bck:%d, rgt:%d, lft:%d\n", top, btm, fwd, bck, rgt, lft);
+    }
+    bool is_same(DICE other)
+    {
+        //"(E)EEE NEEE NEEE NEEE NEEE NNEEE"で全パターン捜査できる。
+        //(E)：初期状態を検証する際は不要
+        string all_patterns = "EEEENEEENEEENEEENEEENNEEE";
+        int checker = 0;
+        for (int i = 0; i < all_patterns.size(); i++)
+        {
+            roll(all_patterns[i]);
+            if (fwd == other.fwd && bck == other.bck && top == other.top && btm == other.btm && rgt == other.rgt && lft == other.lft)
+            {
+                checker++;
+                break;
+            }
+        }
+        if (checker > 0)
+        {
+            return true;
+        }
+        else
+            return false;
+    }
+};
+int main()
+{
+    // // hairetu[n]にDICEを格納、各要素の組についていis_sameを行う
+    // int n;
+    // cin >> n;
+    // DICE cubes[n];
+    // int is_there_sames = 0;
+    // for (int i = 0; i < n; i++)
+    // {
+    //     cubes[i].set_nums();
+    // }
+    // for (int i = 0; i < n-1; i++)
+    // {
+    //     for (int j = i+1; j < n; j++)
+    //     {
+    //         is_there_sames += cubes[i].is_same(cubes[j]);
+    //         cout << cubes[i].is_same(cubes[j]) << endl;
+    //     }
+    // }
+    // if (is_there_sames==0)
+    // {
+    //     cout << "Yes" << endl;
+    // }
+    // else
+    // {
+    //     cout << "No" << endl;
+    // }
+
+    DICE cubes[2];
+    cubes[0].set_nums();
+    cubes[1].set_nums();
+    bool issame = cubes[0].is_same(cubes[1]);
+    if (issame)
+    {
+        cout << "Yes" << endl;
+    }
+    else
+    {
+        cout << "No" << endl;
+    }
+    
+    
+}
+
+

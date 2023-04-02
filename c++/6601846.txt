@@ -1,0 +1,46 @@
+#include<bits/stdc++.h>
+using namespace std;
+const int N=50;
+int pre[N],in[N],flag=1;
+struct node{
+	node *l,*r;
+	int key;
+};
+node *tree(int st,int ed,int root,node *a){
+	if(st>ed)
+		return NULL;
+	a=new node;
+	int k;
+	for(int i=st;i<=ed;i++)
+		if(in[i]==pre[root]){
+			k=i;
+			break;
+		}
+	a->key=in[k];
+	a->l=tree(st,k-1,root+1,a->l);
+	a->r=tree(k+1,ed,root+k-st+1,a->r);
+	return a;
+}
+void post(node *a){
+	if(a==NULL)
+		return ;
+	post(a->l);
+	post(a->r);
+	if(flag)
+		cout<<a->key,flag=0;
+	else
+		cout<<" "<<a->key;
+}
+int main()
+{
+	int n;
+	cin>>n;
+	for(int i=1;i<=n;i++)
+		cin>>pre[i];
+	for(int i=1;i<=n;i++)
+		cin>>in[i];
+	node *root;
+	root=tree(1,n,1,root);
+	post(root);
+	return 0;
+}

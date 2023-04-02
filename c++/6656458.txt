@@ -1,0 +1,120 @@
+#include<stdio.h>
+
+#define MAX 500
+#define N -1
+
+struct Node{
+    int p,lft,rgt;
+};
+
+int H[MAX];
+int D[MAX];
+
+struct Node T[MAX];
+
+int TreeHeight(int root){
+    int hl,hr;
+    hl=0; hr=0;
+
+    if(T[root].rgt != N){//右に子があれば、その子の高さを調べる
+        hr=TreeHeight(T[root].rgt)+1;//親の高さ＝子の高さ＋１
+    }
+
+    if(T[root].lft != N){//左に子があれば、その子の高さを調べる
+        hl=TreeHeight(T[root].lft)+1;
+    }
+    if(hl>hr){//左から数えた高さが右より高いの場合
+        H[root] = hl;
+        return hl;
+    }
+    else{//右の場合
+        H[root] = hr;
+        return hr;
+    }
+}
+
+void TreeDepth(int root, int fd){
+    if(root == N){
+        return;
+    }
+    D[root] = fd;
+    TreeDepth(T[root].lft,fd+1);
+    TreeDepth(T[root].rgt,fd+1);
+
+}
+
+int SerchSib(int root){
+    if(T[root].p==N){//親が無ければ
+        return N;
+    }
+    if(T[T[root].p].lft != root && T[T[root].p].lft != N){//親の左の子が自身でなく、別の子があれば
+        return T[T[root].p].lft;
+    }
+     if(T[T[root].p].rgt != root && T[T[root].p].rgt != N){//親の左の子が自身でなく、別の子があれば
+        return T[T[root].p].rgt;
+    }
+    return N;
+}
+
+
+
+void print_node(int root){
+    int ch=0;
+    if(T[root].lft!=N)ch++;
+    if(T[root].rgt!=N)ch++;
+
+    printf("node %d: parent = %d, sibiling = %d, ",root,T[root].p,SerchSib(root));
+    printf("degree = %d, depth = %d, height = %d, ",ch,D[root],H[root]);
+
+    if(T[root].p==N){
+        printf("root\n");
+    }
+    else if(T[root].lft == N && T[root].rgt == N){
+        printf("leaf\n");
+    }
+    else{
+        printf("internal node\n");
+    }
+}
+
+
+int main(void){
+    int i, n, ri,le,val,root;
+
+    scanf("%d",&n);
+
+    for(i=0;i<n;i++){
+        T[i].p=N;
+        H[i]=0;
+        }
+
+    for(i=0;i<n;i++){
+        scanf("%d %d %d",&val,&le,&ri);
+        T[val].lft=le;
+        T[val].rgt=ri;
+        if(le!=N){
+            T[le].p=val;//左の子の親
+        }
+        if(ri!=N){
+            T[ri].p=val;//右の子の親
+        }
+    }
+
+    root = 0;
+    //根を探索
+    for(;;){
+        if(T[root].p==N){
+            break;
+        }
+        root++;
+    }
+    TreeHeight(root);
+    TreeDepth(root,0);
+    for(i=0;i<n;i++){
+        print_node(i);
+    }
+    
+
+    return 0;
+}
+

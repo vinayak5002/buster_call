@@ -1,0 +1,49 @@
+from bisect import bisect_left, bisect_right
+
+inf = 10 ** 18
+
+while True:
+    N, M, C, S, G = map(int, input().split())
+    if N == M == C == S == G == 0:
+        exit()
+    com_sta = [[] for _ in range(C)]
+    for _ in range(M):
+        x, y, d, c = map(int, input().split())
+        com_sta[c - 1].append((x - 1, y - 1, d))
+        com_sta[c - 1].append((y - 1, x - 1, d))
+    p = list(map(int, input().split()))
+    cdp = [[inf] * N for _ in range(N)]
+    for c in range(C):
+        q = [0] + list(map(int, input().split()))
+        r = list(map(int, input().split()))
+        f = [0]
+        now = 0
+        for i in range(p[c] - 1):
+            now += (q[i + 1] - q[i]) * r[i]
+            f.append(now)
+        dp = [[inf] * N for _ in range(N)]
+        for i in range(N):
+            dp[i][i] = 0
+        for x, y, d in com_sta[c]:
+            dp[x][y] = min(dp[x][y], d)
+            dp[y][x] = min(dp[y][x], d)
+        for k in range(N):
+            for i in range(N):
+                for j in range(N):
+                    dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j])
+        for i in range(N):
+            for j in range(N):
+                if dp[i][j] >= inf:
+                    continue
+                idx = bisect_right(q, dp[i][j]) - 1
+                cdp[i][j] = min(cdp[i][j], f[idx] + (dp[i][j] - q[idx]) * r[idx])
+    for k in range(N):
+        for i in range(N):
+            for j in range(N):
+                cdp[i][j] = min(cdp[i][j], cdp[i][k] + cdp[k][j])
+    ans = cdp[S - 1][G - 1]
+    if ans >= inf:
+        print(-1)
+    else:
+        print(ans)
+

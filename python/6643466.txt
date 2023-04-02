@@ -1,0 +1,62 @@
+import sys
+sys.setrecursionlimit(10**9)
+
+def UG(n,m):
+    G=[[] for i in range(n)]
+    for i in range(m):
+        a,b=rdi()
+        a,b=a-1,b-1
+        G[a].append(b)
+        G[b].append(a)
+    return G
+def DG(n,m):
+    G=[[] for i in range(n)]
+    for i in range(m):
+        a,b=rdi()
+        a,b=a-1,b-1
+        G[a].append(b)
+    return G
+
+ep = lambda s:exit(print(s))
+rdi = lambda:map(int,input().split())
+lrdi = lambda:list(rdi())
+MOD,MOD9 = 7+10**9,998244353
+INF = float("inf")
+ans,Ans = 0,[]
+
+global dx,dy,dx2,dy2,Visited,WH
+dx = [1,0,-1,0]
+dy = [0,1,0,-1]
+dx2 = [1,1,-1,-1]
+dy2 = [-1,1,1,-1]
+
+def dfs(i,j):
+    Visited[i][j]=True
+    # print(i,j)
+    # [print(k) for k in Visited]
+    for k in range(4):
+        if Visited[i+dy[k]][j+dx[k]]==False and WH[i+dy[k]][j+dx[k]]:
+            dfs(i+dy[k],j+dx[k])
+        if Visited[i+dy2[k]][j+dx2[k]]==False and WH[i+dy2[k]][j+dx2[k]]:
+            dfs(i+dy2[k],j+dx2[k])
+
+cnt = 0
+
+while True:
+    w,h = rdi()
+    if h==0 and w==0: exit()
+    cnt = 0
+    WH = [[0]*(w+2)]
+    WH.extend([[0,*lrdi(),0] for i in range(h)])
+    WH.append([0]*(w+2))
+    Visited = [[False]*(w+2) for i in range(h+2)]
+    # [print(i) for i in WH]
+    for i in range(1,h+1):
+        for j in range(1,w+1):
+            if WH[i][j] and Visited[i][j]==False:
+                dfs(i,j)
+                cnt+=1
+    # print(WH)
+    print(cnt)
+
+

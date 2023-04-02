@@ -1,0 +1,74 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Dice{
+    vector<int> f,n;
+
+public:
+
+    void init(int (&x)[6]){
+        f.resize(6);
+        n.resize(6);
+        for(int i = 0; i < 6; ++i)  f[i] = x[i];
+    }
+
+    int get(int x){
+        return f[x];
+    }
+
+    void north(){
+        n[0] = f[1];
+        n[1] = f[5];
+        n[5] = f[4];
+        n[4] = f[0];
+    }
+
+    void south(){
+        n[0] = f[4];
+        n[1] = f[0];
+        n[5] = f[1];
+        n[4] = f[5];
+    }
+
+    void east(){
+        n[0] = f[3];
+        n[3] = f[5];
+        n[5] = f[2];
+        n[2] = f[0];
+    }
+
+    void west(){
+        n[0] = f[2];
+        n[2] = f[5];
+        n[5] = f[3];
+        n[3] = f[0];
+    }
+
+    void rotate(char c){
+        n = f;
+
+        if(c == 'N') north();
+        if(c == 'S') south();
+        if(c == 'E') east();
+        if(c == 'W') west();
+
+        f = n;
+    }
+};
+
+
+int main(){
+    int d[6];
+    for(int i = 0; i < 6; ++i) cin >> d[i];
+    string c;
+    cin >> c;
+
+    Dice dice;
+    dice.init(d);
+    for(int i = 0; i < c.length(); ++i){
+        dice.rotate(c[i]);
+    }
+
+    cout << dice.get(0) << endl;
+}
+

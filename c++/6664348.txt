@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define rep(i, s, t) for (int i = (int)(s); i < (int)(t); ++i)
+#define revrep(i, t, s) for (int i = (int)(t)-1; i >= (int)(s); --i)
+#define all(x) begin(x), end(x)
+template <typename T> bool chmax(T& a, const T& b) { return a < b ? (a = b, 1) : 0; }
+template <typename T> bool chmin(T& a, const T& b) { return a > b ? (a = b, 1) : 0; }
+
+constexpr int X = 1e6+1;
+
+template <typename T>
+ostream& operator<<(ostream& os, const vector<T>& v) {
+    for (int i = 0; i < (int) v.size(); ++i) {
+        os << v[i];
+        if (i < (int) v.size() - 1) os << " ";
+    }
+    return os;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout << fixed << setprecision(15);
+
+    int V, E;
+    cin >> V >> E;
+    vector<vector<int>> G(V);
+    rep(i,0,E) {
+        int a, b;
+        cin >> a >> b;
+        --a, --b;
+        G[a].push_back(b);
+        G[b].push_back(a);
+    }
+    vector<int> color(V, -1);
+    int s = 0;
+    bitset<X> bs;
+    bs |= 1;
+    rep(i,0,V) {
+        if (color[i] != -1) continue;
+        color[i] = 0;
+        stack<int> st;
+        st.push(i);
+        vector<int> cnt(2);
+        while (!st.empty()) {
+            int v = st.top(); st.pop();
+            ++cnt[color[v]];
+            for (int u : G[v]) {
+                if (color[u] == color[v]) {
+                    cout << -1 << endl;
+                    return 0;
+                } else if (color[u] == -1) {
+                    color[u] = color[v] ^ 1;
+                    st.push(u);
+                }
+            }
+        }
+        if (cnt[0] > cnt[1]) swap(cnt[0], cnt[1]);
+        s += cnt[0];
+        bs |= bs<<(cnt[1]-cnt[0]);
+    }
+    ll ans = 0;
+    rep(i,0,X) {
+        if (bs[i]) {
+            chmax(ans, 1LL*(s+i)*(V-s-i)-E);
+        }
+    }
+    cout << ans << endl;
+}

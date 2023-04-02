@@ -1,0 +1,138 @@
+<?php
+
+ini_set('memory_limit', '-1');
+$n = (int)trim(fgets(STDIN));
+$tree = [];
+const KY = 'key';
+const PR = 'priority';
+const LC = 'leftchild';
+const RC = 'rightchild';
+$cnt = 0;
+$root = -1;
+for ($i = 0; $i < $n; ++$i) {
+    $s = explode(' ', trim(fgets(STDIN)));
+    if ($s[0] === 'print') {
+        inparse($root);
+        echo PHP_EOL;
+        preparse($root);
+        echo PHP_EOL;
+    } elseif ($s[0] === 'find') {
+        echo (find((int)$s[1]) >= 0 ? 'yes' : 'no') , PHP_EOL;
+    } elseif ($s[0] === 'delete') {
+        $root = deletenode($root, (int)$s[1]);
+    } else {
+        $root = insert($root, $cnt++, (int)$s[1], (int)$s[2]);
+    }
+}
+
+function insert($t, $cnt, $k, $p)
+{
+    global $tree;
+    if ($t == -1) {
+        $tree[$cnt][KY] = $k;
+        $tree[$cnt][PR] = $p;
+        $tree[$cnt][LC] = -1;
+        $tree[$cnt][RC] = -1;
+        return $cnt;
+    }
+    if ($tree[$t][KY] == $k) {
+        return $cnt;
+    }
+    if ($tree[$t][KY] > $k) {                           // 左の子へ移動
+        $tree[$t][LC] = insert($tree[$t][LC], $cnt, $k, $p);   // 左の子へのポインタを更新
+        if ($tree[$t][PR] < $tree[$tree[$t][LC]][PR]) {          // 左の子の方が優先度が高い場合右回転
+            $t = rightRotate($t);
+        }
+    } else {                                         // 右の子へ移動
+        $tree[$t][RC] = insert($tree[$t][RC], $cnt, $k, $p); // 右の子へのポインタを更新
+        if ($tree[$t][PR] < $tree[$tree[$t][RC]][PR]) {         // 右の子の方が優先度が高い場合左回転
+            $t = leftRotate($t);
+        }
+    }
+    return $t;
+}
+function preparse($x)
+{
+    global $tree;
+    echo ' ' . $tree[$x][KY];
+    $tree[$x][LC] != -1 && preparse($tree[$x][LC]);
+    $tree[$x][RC] != -1 && preparse($tree[$x][RC]);
+}
+
+function inparse($x)
+{
+    global $tree;
+    $tree[$x][LC] != -1 && inparse($tree[$x][LC]);
+    echo ' ' . $tree[$x][KY];
+    $tree[$x][RC] != -1 && inparse($tree[$x][RC]);
+}
+
+function find($k)
+{
+    global $tree,$root;
+    $x = $root;
+    while ($x != -1) {
+        if ($k == $tree[$x][KY]) {
+            break;
+        } elseif ($k < $tree[$x][KY]) {
+            $x = $tree[$x][LC];
+        } else {
+            $x = $tree[$x][RC];
+        }
+    }
+    return $x;
+}
+
+function deletenode($t, $k)
+{
+    global $tree;
+    if ($t == -1) {
+        return -1;
+    }
+    if ($k < $tree[$t][KY]) {                               // 削除対象を検索
+        $tree[$t][LC] = deletenode($tree[$t][LC], $k);
+    } elseif ($k > $tree[$t][KY]) {
+        $tree[$t][RC] = deletenode($tree[$t][RC], $k);
+    } else {
+        return _delete($t, $k);
+    }
+    return $t;
+}
+
+function _delete($t, $k) // 削除対象の節点の場合
+{
+    global $tree;
+    if ($tree[$t][LC] == -1 && $tree[$t][RC] == -1) {         // 葉の場合
+        return -1;
+    } elseif ($tree[$t][LC] == -1) {                    // 右の子のみを持つ場合左回転
+        $t = leftRotate($t);
+    } elseif ($tree[$t][RC] == -1) {                     // 左の子のみを持つ場合右回転
+        $t = rightRotate($t);
+    } elseif // 左の子と右の子を両方持つ場合
+        ($tree[$tree[$t][LC]][PR] > $tree[$tree[$t][RC]][PR]) {    // 優先度が高い方を持ち上げる
+            $t = rightRotate($t);
+    } else {
+        $t = leftRotate($t);
+    }
+    return deletenode($t, $k);
+}
+
+function rightRotate($t)
+{
+    global $tree;
+    $s = $tree[$t][LC];
+    $tree[$t][LC] = $tree[$s][RC];
+    $tree[$s][RC] = $t;
+    return $s; // root of the subtree
+}
+
+function leftRotate($t)
+{
+    global $tree;
+    $s = $tree[$t][RC];
+    $tree[$t][RC] = $tree[$s][LC];
+    $tree[$s][LC] = $t;
+    return $s; // root of the subtree
+}
+
+

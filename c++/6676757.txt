@@ -1,0 +1,75 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct
+{
+    int con;
+    int x;
+    int y;
+} City;
+
+typedef struct
+{
+    int dist;
+    int city;
+} Road;
+
+typedef struct
+{
+    int dist;
+    int city;
+} Temp;
+
+int main()
+{
+    City c[100001];
+    Road r[100000];
+    Temp t[100000];
+    int n, min, pos, ttl=0, i, j, k, a;
+    scanf("%d",&n);
+    for(k=1;k<=n;k++)
+        scanf("%d %d",&c[k].x,&c[k].y);
+    for(i=1;i<n;i++)
+        c[i].con=0;
+    c[1].con=1;
+    for(i=1;i<n;i++)
+    {
+        for(j=1;j<=n;j++)
+        {
+            if(c[j].con==1)
+            {
+                a=0;
+                for(k=1;k<=n;k++)
+                    if(c[k].con!=1)
+                    {
+                        t[a].dist= (abs(c[j].x-c[k].x) > abs(c[j].y-c[k].y)) ? abs(c[j].x-c[k].x) : abs(c[j].y-c[k].y);
+                        t[a].city=k;
+                        a++;
+                    }
+                min=1000000000;
+                for(k=0;k<a;k++)
+                    if(min>t[k].dist)
+                    {
+                        min=t[k].dist;
+                        pos=t[k].city;
+                    }
+            }
+            r[j].dist=min;
+            r[j].city=pos;
+        }
+        min=1000000000;
+        for(j=1;j<=n;j++)
+        {
+            if(min>r[j].dist)
+            {
+                min=r[j].dist;
+                pos=r[j].city;
+            }
+        }
+        ttl+=min;
+        c[pos].con=1;
+    }
+    printf("%d\n",ttl);
+    return 0;
+}
+

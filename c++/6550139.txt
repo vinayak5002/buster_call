@@ -1,0 +1,130 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+struct node{
+	int key;
+	struct node *next;
+	struct node *prev;
+};					//struct node型の構造体
+
+typedef struct node *nodepointer;
+nodepointer nil;
+
+void init(){
+	nil = malloc(sizeof(struct node));
+	nil->next = nil;
+	nil->prev = nil;
+}
+
+void insert(int key){
+	nodepointer x;
+	x = malloc(sizeof(struct node));
+	x->key = key;		//key値を設定
+	x->next = nil->next;		//x->nextにnilを設定
+	nil->next->prev = x;		
+	nil->next = x;
+	x->prev = nil;
+}
+
+nodepointer listSearch(int key){
+	//key値を持つlistを探す
+	nodepointer cur = nil->next;
+	while(cur != NULL && cur->key != key){
+		cur = cur->next;
+	}
+	
+	return cur;
+}
+
+void deleteNode(nodepointer t){
+	if(t == nil){
+	
+	}
+	
+	else{
+		t->next->prev = t->prev;
+		t->prev->next = t->next;
+		free(t);
+	}
+}
+
+void delete(int key){
+	deleteNode(listSearch(key));
+}
+
+void deleteFirst(){
+	nodepointer t = nil->next;
+	if(t == nil){
+	
+	}
+	
+	else{
+		deleteNode(t);
+	}
+}
+
+void deleteLast(){
+	nodepointer t = nil->prev;
+	if(t == NULL){
+		
+	}
+	
+	else{
+		deleteNode(t);
+	}
+}
+
+void printList(){
+	nodepointer cur = nil->next;
+	int isf = 1;
+	while(1){
+		if(cur == nil){
+			break;
+		}
+		
+		if(isf == 0){
+			printf(" ");
+		}
+		printf("%d", cur->key);
+		cur = cur->next;
+		isf = 0;
+	}
+	
+	printf("\n");
+}
+
+int main (void){
+	int key, n, i;
+	char com[20];
+	
+	scanf("%d", &n);
+	init();
+	
+	for(i = 0; i < n; i++){
+		scanf("%s %d", com, &key);
+		if(com[0] == 'i'){
+			insert(key);
+		}
+		
+		else if(com[0] == 'd'){
+			if(strlen(com) <= 6){
+				delete(key);
+			}
+			
+			else if(com[6] == 'F'){
+				deleteFirst(key);
+			}
+			
+			else if(com[6] == 'L'){
+				deleteLast(key);
+			}
+			
+		}
+	}
+	
+	printList();
+	
+	return 0;
+}
+

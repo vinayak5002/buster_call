@@ -1,0 +1,29 @@
+import heapq
+
+V, E, r = map(int, input().split())
+
+graph = [[] for i in range(V)]
+
+for _ in range(E):
+    s, g, d = map(int, input().split())
+    graph[s].append((d, g))
+
+
+def get_minimam_distance(graph, start, goal, V):
+    pq = [(0, start)]
+    distance = [10**6] * V
+    distance[start] = 0
+
+    while len(pq) != 0:
+        now_d, node = heapq.heappop(pq)
+        for graph_d, nd in graph[node]:
+            if (now_d + graph_d) >= distance[nd]:
+                continue
+            distance[nd] = (now_d + graph_d)
+            heapq.heappush(pq, (now_d + graph_d, nd))
+    return "INF" if distance[goal] == 10 ** 6 else distance[goal]
+
+
+for i in range(V):
+    print(get_minimam_distance(graph, r, i, V))
+

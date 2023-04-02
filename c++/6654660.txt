@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+
+import heapq
+
+
+def dijkstra(start_vertex, graph):
+    n = len(graph)
+
+    dist = [0 if i == start_vertex else float("inf") for i in range(n)]
+    que = []
+    heapq.heappush(que, (0, start_vertex))
+
+    while que:
+        cur_distance, cur_vertex = heapq.heappop(que)
+        if dist[cur_vertex] < cur_distance:
+            continue
+
+        for nxt_vertex, cost in graph[cur_vertex]:
+            if dist[cur_vertex] + cost < dist[nxt_vertex]:
+                dist[nxt_vertex] = dist[cur_vertex] + cost
+                heapq.heappush(que, (dist[nxt_vertex], nxt_vertex))
+
+    return dist
+
+
+def main():
+    n = int(input())
+    graph = [[] for _ in range(n)]
+    for _ in range(n):
+        x = [int(x) for x in input().split()]
+        u, k = x[0], x[1]
+        for i in range(k):
+            v, c = x[i * 2 + 2:i * 2 + 4]
+            graph[u].append((v, c))
+
+    dist = dijkstra(0, graph)
+    for k, v in enumerate(dist):
+        print(k, v)
+
+
+main()

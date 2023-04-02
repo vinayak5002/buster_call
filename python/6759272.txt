@@ -1,0 +1,75 @@
+// ACM-ICPC 2010 Japan Online Contest Problem B
+//
+// ファイル名: b1.c
+// コンパイル方法: cc b1.c
+// 実行方法: ./a.out < B0 > B0.result など
+// チェック方法: diff B0.ans B0.result など
+//
+// アルゴリズム概要
+// キューを用いない簡易版の幅優先探索 (n = w * h とすると O(n*n))
+// 壁のデータは文字列のまま配列 wall に格納
+// (x,y)と(x+1,y)の間に壁有 <==> wall[2*y][2*x+1]=='1'
+// (x,y)と(x-1,y)の間に壁有 <==> wall[2*y][2*x-1]=='1'
+// (x,y)と(x,y+1)の間に壁有 <==> wall[2*y+1][2*x] == '1'
+// (x,y)と(x,y-1)の間に壁有 <==> wall[2*y-1][2*x] == '1'
+// (x,y)の隣接位置を(nx,ny)とすると
+// (x,y)と(nx,ny)の間に壁有 <==> wall[y+ny][x+nx] == '1'
+#include <stdio.h>
+#define MAXWH 30 // 幅、高さの最大値
+int map[MAXWH][MAXWH]; // 経路探索用の地図。入口からの最短距離を格納
+char wall[2*MAXWH-1][2*MAXWH+2]; // 壁のデータ
+// 隣接位置のオフセット 右,上,左,下
+int dx[4] = {1, 0, -1, 0};
+int dy[4] = {0, -1, 0, 1};
+int w, h; // 迷路の幅と高さ
+bfs() // 簡易版の幅優先探索 (n=w*h とすると O(n*n))
+{
+ int x,y, len,flag,d;
+ int nx, ny;
+ for(y=0; y<h; y++) // 探索用マップの初期化
+ for(x=0; x<w; x++)
+ map[y][x] = 0; // まだ入口からの最短距離は求まっていない
+ map[0][0] = 1; // 入口は左上
+ 
+ for(len=1; ; len++){
+ flag = 0;
+ for(y=0; y<h; y++){
+ for(x=0; x<w; x++){
+ if(map[y][x] != len) continue; // 最短距離が len 以外(未満)ならスキップ
+ // 入口から(x,y)までの最短距離は len
+ for(d=0; d<4; d++){ // (x,y)に隣接する４方向をチェック(右、上、左、下)
+ nx = x + dx[d]; // nx は隣接場所の x 座標
+ ny = y + dy[d]; // ny は隣接場所の y 座標
+ if(nx<0 || nx >= w || ny<0 || ny>=h) continue; // 迷路の外へはでない
+ if(map[ny][nx] > 0) continue; // 既に最短距離が求まっているのでスキップ
+
+ if(wall[y+ny][x+nx]=='1') continue;// 進行方向は壁なのでスキップ
+ map[ny][nx] = len+1; // 新しい場所に来たので、最短距離(len+1)を格納
+ if(ny==h-1 && nx==w-1){ // 迷路の出口なので
+ printf("%d\n",len+1); // 求まった最短距離をプリント
+ return;
+ }
+ flag = 1; // 新たに最短距離が求まった場所がある。
+ }
+ }
+ }
+ if(flag==0) break; // 新たに最短距離が求まった場所がなければ探索終了
+ }
+ printf("0\n"); // 出口に到達できなかった。
+}
+main()
+{
+ int i;
+ 
+ while(1){
+ scanf("%d %d", &w, &h); // 幅と高さの入力
+ if(w==0 && h==0) break; // 両方共 0 なら終了
+ getchar(); // w と h の行の行末の改行コードを読み飛ばす
+ for(i=0; i< 2*h-1; i++){ // 壁データの読み込み
+ fgets(wall[i],2*MAXWH+1,stdin); // 文字列として読み込む
+ }
+ bfs(); // 幅優先探索により最短距離を求める。
+ }
+}
+  
+

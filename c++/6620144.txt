@@ -1,0 +1,58 @@
+#include <iostream>
+#include <vector>
+#include <utility>
+#include <cmath>
+
+
+using namespace std;
+
+constexpr int N = 3;
+int puzzle[N * N] = {};
+int init_space = 0;
+int ans = 31;
+int next_space_index[4] = {
+	-1 * N,
+	-1,
+	1,
+	N
+};
+
+
+int distance() {
+	int sum = 0;
+	for (int i = 0; i < N*N; i++) {
+		sum += abs(i / N - puzzle[i] / N) + abs(i % N - puzzle[i] % N);
+	}
+	return sum;
+}
+
+void dfs(const int depth, const int pre, const int space) {
+	int d = distance();
+	if (d == 0) {
+		ans = depth;
+		return;
+	}
+	if (depth + d > ans) return;
+	for (auto n : next_space_index) {
+		int next_space = space + n;
+		if (space / N + n / N < 0 || space / N + n / N > N - 1 ||
+			space % N + n % N < 0 || space % N + n % N > N - 1 || pre == next_space) continue;
+		swap(puzzle[space], puzzle[next_space]);
+		dfs(depth + 1, space, next_space);
+		swap(puzzle[space], puzzle[next_space]);
+	}
+}
+
+
+int main() {
+	for (int i = 0; i < N*N; i++) {
+		int v;
+		cin >> v;
+		if (v == 0) {
+			init_space = i;
+			puzzle[i] = N * N - 1;
+		} else puzzle[i] = v - 1;
+	}
+	dfs(0, -1, init_space);
+	cout << ans << endl;
+}

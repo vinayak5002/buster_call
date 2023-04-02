@@ -1,0 +1,82 @@
+#include<bits/stdc++.h>
+//#include<atcoder/dsu>
+using namespace std;
+//using namespace atcoder;
+
+void solve(){
+	while(1){
+        int n, m;
+        cin >> n >> m;
+        if(n == 0) return;
+        vector<string> B(n);
+        for(int i = 0; i < n; i++) cin >> B[i];
+        if(n < m){
+            int ans = 0;
+            for(int bit = 1; bit < (1 << n); bit++){
+                int pc = __builtin_popcount(bit);
+                if(pc <= ans) continue;
+                vector<bool> pari(m, false);
+                for(int i = 0; i < n; i++){
+                    if((bit >> i) & 1){
+                        for(int j = 0; j < m; j++){
+                            if(B[i][j] == '1') pari[j] = pari[j] ^ true;
+                        }
+                    }
+                }
+                bool ok = true;
+                for(int i = 0; i < m; i++){
+                    if(pari[i]){
+                        ok = false;
+                        break;
+                    }
+                }
+                if(ok){
+                    ans = pc;
+                }
+            }
+            cout << ans << "\n";
+
+        }
+        else{
+            vector<int> A(n);
+            int x = 0;
+            for(int i = 0; i < n; i++){
+                int bit = 0;
+                for(int j = 0; j < m; j++){
+                    bit <<= 1;
+                    if(B[i][j] == '1') bit |= 1;
+                }
+                A[i] = bit;
+                x ^= bit;
+            }            
+            vector<int> dist(1 << m, -1);
+            dist[x] = 0;
+            queue<int> st;
+            st.push(x);
+            while(!st.empty()){
+                int pos = st.front();
+                st.pop();
+                for(auto a:A){
+                    int npos = pos ^ a;
+                    if(dist[npos] == -1){
+                        dist[npos] = dist[pos] + 1;
+                        st.push(npos);
+                    }
+                }
+            }
+            cout << n - dist[0] << "\n";
+        }
+
+    }
+}
+
+int main(){	
+	cin.tie(0)->sync_with_stdio(0);
+    int t;
+    t = 1;
+    // cin >> t;
+    while(t--) solve();
+}
+    
+    
+	

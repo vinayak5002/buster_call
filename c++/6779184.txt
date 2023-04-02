@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 2000000002
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 123456
+#define M 1000000007
+typedef long long int ll;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+#define REP(i,n) for(int i=0; i<(int)n; i++)
+
+ll cnt = 0 ;
+//結局困ったときは２分探索
+void merge(vector<int> &A , int l, int r ){
+    vector<int> L ,R ;
+    int mid = (l+r)/2;
+    L.resize(mid-l);
+    R.resize(r-mid);
+    REP(i, mid-l) {L[i] = A[l+i];}
+    REP(i,r-mid) {R[i] = A[mid+i]; }
+
+    int i = 0;
+    int j = 0;
+    int k = l ;
+
+    while ( k < r) {
+        if ( l + i >= mid ) {
+            A[k] = R[j];  j++; 
+        } else if ( mid + j >= r) {
+            A[k] = L[i]; i++;
+        } else if ( L[i] > R[j] ) { 
+            A[k] = R[j];
+            cnt += (mid+j) - k;
+            j++;
+        } else {
+            A[k] = L[i];
+            i++;
+        }
+        k++;
+    }
+    return;
+}
+
+void msort (vector<int> &A, int l, int r) {
+    /*printf("l=%d , r=%d \n",l,r);
+    REP(i, (A).size()) {
+        printf ("%d", (A)[i]);
+        if (i == (A).size()-1) {printf ("\n");} else {printf(" "); }
+    }*/
+    if (r-l >1) {
+        int mid = (l+r)/2;
+        msort( A,l,mid );
+        msort( A, mid, r);
+        merge( A,l,r);
+    }
+    return;
+}
+
+int main() {
+    int n ;
+    vector<int> A;
+    scanf ("%d",&n);
+    REP(i,n){ 
+        int tmp;
+        scanf("%d",&tmp);
+        A.push_back(tmp);
+    }
+    msort(A,0,n);
+    /*    int cur = 0;
+    while (cur < n-1 ) {
+        int i = n-1;
+        while (i>cur) {
+            if (A[i-1] > A[i]) {
+                swap (A[i-1], A[i]) ;
+                cnt++;
+            }
+            i--;
+        }
+        cur++;
+    }*/
+    printf("%d\n",cnt);
+    /*REP(i,n) {
+        printf ("%d",A[i]);
+        if (i <n-1) {printf(" ");} else {printf("\n"); }
+    }*/
+
+
+
+}
+

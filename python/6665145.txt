@@ -1,0 +1,46 @@
+import scala.annotation.tailrec
+import scala.io.StdIn
+
+object Main extends App {
+  @tailrec
+  def solver(slopes: Seq[Char], pos:Int, stack:List[Int], ac:Int, acc: List[Int]): List[Int] =
+    slopes match {
+      case '\\'+:xs =>
+        if (results(pos))
+          solver(xs, pos+1, pos::stack, ac, acc)
+        else
+          solver(xs, pos+1, stack, ac, acc)
+      case '/'+:xs => stack match {
+        case List() => solver(xs, pos+1, List(), 0, acc)
+        case x::List() => solver(xs, pos+1, List(), 0, (ac+pos-x)::acc)
+        case x::ss => solver(xs, pos+1, ss, ac+pos-x, acc)
+      }
+      case '_'+:xs  => solver(xs, pos+1, stack, ac, acc)
+      case _    => acc.reverse
+    }
+  def validate(slopes:Seq[Char]): Array[Boolean] = {
+    val results = Array.fill[Boolean](slopes.length)(false)
+    @tailrec
+    def iterate(slopes:Seq[Char], pos:Int, stack:List[Int]): Unit =     slopes match {
+      case '\\'+:xs => iterate(xs, pos+1, pos::stack)
+      case '/'+:xs => stack match {
+        case List() => iterate(xs, pos+1, List())
+        case x::ss =>
+          results(x) = true
+          iterate(xs, pos+1, ss)
+      }
+      case '_'+:xs  => iterate(xs, pos+1, stack)
+      case _    => ()
+    }
+
+    iterate(slopes, 0, List())
+    results
+  }
+
+  val slopes = StdIn.readLine().toSeq
+  val results = validate(slopes)
+  val lakes = solver(slopes, pos = 0, stack=List(), 0, acc = List())
+  println(lakes.sum)
+  println(s"${lakes.length} ${lakes.mkString(" ")}")
+}
+

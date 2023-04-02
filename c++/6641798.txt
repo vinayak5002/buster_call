@@ -1,0 +1,43 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+const long long sup = 10000000000000;
+
+int calc(int y, int c) {
+	y += c;
+	if (y > 255) y = 255;
+	if (y < 0) y = 0;
+	return y;
+}
+
+long long solve(vector<int>& c, vector<int>& a) {
+	vector<vector<long long>> dp(a.size() + 1, vector<long long>(256, sup));
+	dp[0][128] = 0;
+	for (int i = 0 ; i < a.size() ; i++) {
+		for (int j = 0 ; j < 256 ; j++) {
+			if (dp[i][j] == sup) continue;
+			for (int k = 0 ; k < c.size() ; k++) {
+				int tmp = calc(j, c[k]);
+				long long pow2 = (tmp - a[i]) * (tmp - a[i]);
+				if (dp[i][j] + pow2 < dp[i + 1][tmp]) dp[i + 1][tmp] = dp[i][j] + pow2;
+			}
+		}
+	}
+	long long ans = sup;
+	for (int i = 0 ; i < 256 ; i++) if (ans > dp[a.size()][i]) ans = dp[a.size()][i];
+	return ans;
+}
+
+int main() {
+	while(1) {
+		int n, m; cin >> n >> m;
+		if (n == 0 and m == 0) break;
+		vector<int> c(m), a(n);
+		for (auto& x : c) cin >> x;
+		for (auto& x : a) cin >> x;
+		cout << solve(c, a) << endl;
+	}
+}
+
+

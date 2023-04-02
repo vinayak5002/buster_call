@@ -1,0 +1,97 @@
+import copy
+from distutils.util import check_environ
+
+pos = [[0, 1, 0], [0, 0, -1], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, -1, 0]]
+
+class Dice:
+
+  def __init__(self, a):
+    self.deme = a
+    self.iti = copy.deepcopy(pos)
+
+  def cur_face(self, s):
+    return self.deme[self.iti.index(pos[s])]
+
+  def roll(self, dim):
+    if dim == "E":
+      re, im = 1, 0
+    elif dim == "N":
+      re, im = 1, 2
+    elif dim == "S":
+      re, im = 2, 1
+    elif dim == "W":
+      re, im = 0, 1
+    elif dim == "R":
+      re, im = 0, 2
+    elif dim == "L":
+      re, im = 2, 0
+
+    for i in range(6):
+      c = complex(self.iti[i][re], self.iti[i][im]) * 1j
+      self.iti[i][re] = int(c.real)
+      self.iti[i][im] = int(c.imag)
+
+  def check_right(self, up, front):
+    while(True):
+      self.roll("W")
+      if up == self.cur_face(0):
+        break
+      self.roll("N")
+      if up == self.cur_face(0):
+        break
+    while(True):
+      self.roll("N")
+      self.roll("W")
+      self.roll("S")
+      if front == self.cur_face(1):
+        break
+    return self.cur_face(2)
+
+
+def check_same(d1, d2):
+  flag = False
+  for i in range(6):
+    if d1.cur_face(0) == d2.cur_face(0):
+      for j in range(4):
+        if d1.cur_face(1) == d2.cur_face(1):
+          flag = True
+          for k in range(2, 6):
+            if d1.cur_face(k) != d2.cur_face(k):
+              flag = False
+              break
+
+        if flag:
+          return True
+        d1.roll("R")
+
+    if i % 2 == 0:
+      d1.roll("W")
+    else:
+      d1.roll("N")
+
+  return False
+
+
+n = int(input())
+deme_list = [[0 for i in range(6)] for j in range(n)]
+dice_list = []
+
+for i in range(n):
+  deme_list[i] = list(map(int, input().split()))
+  dice_list.append(Dice(deme_list[i]))
+
+dif = True
+for i in range(n - 1):
+  for j in range(i + 1, n):
+    if check_same(dice_list[i], dice_list[j]):
+      dif = False
+      break
+  else:
+    continue
+  break
+
+if dif:
+  print("Yes")
+else:
+  print("No")
+

@@ -1,0 +1,59 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+//変数型のテンプレート
+using ll = long long;
+using vi = vector<int>;
+using vpii = vector<pair<int, int>>;
+using Graph = vector<vector<int>>;
+
+//数値のテンプレート
+const ll INF = 1000000007; //または998244353
+
+//for文のテンプレート
+#define r(i, k, n) for(int i = k; i < n; i++)
+#define r0(i) for(int i = 0; i < n; i++)
+
+int main(void)
+{
+    int V, E; cin >> V >> E;
+    Graph graph(V);
+    int s, t;
+    vi tg(V);
+    r(i, 0, E)
+        {
+            cin >> s >> t;
+            graph[s].push_back(t);
+            tg[t]++;
+        }
+    
+    vi seen(V);
+    queue<int> que;
+    r(i, 0, V)
+        {
+            if(tg[i] == 0)
+            {
+                seen[i] = true;
+                que.push(i);
+            }
+        }
+
+    while(que.size() != 0)
+        {
+            int v = que.front();
+            cout << v << endl;
+            que.pop();
+            for(auto next : graph[v])
+                {
+                    tg[next]--;
+                    if(tg[next] == 0)
+                    {
+                        seen[next] = true;
+                        que.push(next);
+                    }
+                    
+                }
+        }
+
+    return(0);
+    }

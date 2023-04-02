@@ -1,0 +1,136 @@
+#include <iostream>
+
+struct in {
+    operator char() const noexcept {
+        char c = getchar_unlocked();
+        while (c == ' ' || c == '\n' || c == '\r') c = getchar_unlocked();
+        return c;
+    }
+    template<typename T> operator T() const noexcept {
+        static_assert(std::is_integral_v<T>);
+        static_assert(!std::is_same_v<T, char>);
+        static_assert(!std::is_same_v<T, bool>);
+        char c = operator char();
+        T n = 0;
+        if constexpr (std::is_signed_v<T>) {
+            int sign = 1;
+            if (c == '-') sign = -1, c = getchar_unlocked();
+            while ('0' <= c && c <= '9') {
+                n = n * 10 + (c - '0');
+                c = getchar_unlocked();
+            }
+            n *= sign;
+        } else {
+            while ('0' <= c && c <= '9') {
+                n = n * 10 + (c - '0');
+                c = getchar_unlocked();
+            }
+        }
+        return n;
+    }
+};
+
+template<class Iterator> void read(Iterator first, Iterator last) noexcept {
+    while (first != last) {
+        if constexpr (std::is_same_v<decltype(*first), std::string&>) std::cin >> *(first++);
+        else *(first++) = in();
+    }
+}
+
+void out() noexcept { putchar_unlocked('\n'); }
+
+template<typename Head> void out(Head&& head) noexcept {
+    std::cout << head;
+    putchar_unlocked('\n');
+}
+
+template<typename Head, typename...Tail> void out(Head&& head, Tail&&...tail) noexcept {
+    std::cout << head;
+    putchar_unlocked(' ');
+    out(std::forward<Tail>(tail)...);
+}
+
+template<class Iterator> void dump(Iterator first, Iterator last) noexcept {
+    if (first != last) {
+        std::cout << *(first++);
+        while (first != last) std::cout << ' ' << *(first++);
+    }
+    std::cout << '\n';
+}
+
+#include <vector>
+
+template<typename T, typename U, class G, class H> struct dual_segtree {
+private :
+    using value_type = T;
+    using operator_type = U;
+    const operator_type e;
+    const G g;
+    const H h;
+
+    int n, height = 0;
+    std::vector<value_type> val;
+    std::vector<operator_type> op;
+
+    void pushdown(int i) noexcept {
+        if (op[i] == e) return;
+        if (i < n) {
+            op[i << 1] = g(op[i << 1], op[i]);
+            op[i << 1 | 1] = g(op[i << 1 | 1], op[i]);
+        }
+        op[i] = e;
+    }
+    void operate(int i, const operator_type& x) noexcept { op[i] = g(op[i], x); }
+public :
+    dual_segtree(U e_, G g_, H h_) : e(e_), g(g_), h(h_) { }
+    void fill(int n_, value_type x) noexcept {
+        n = n_;
+        while ((1 << height) < (n << 1)) height++;
+        val.resize(n, x);
+        op.resize(n * 2, e);
+    }
+    template<class Iterator> void build(Iterator first, Iterator last) noexcept {
+        n = last - first;
+        while ((1 << height) < (n << 1)) height++;
+        val = std::vector<value_type>(first, last);
+        op.resize(n * 2, e);
+    }
+    void operate(int l, int r, const operator_type& x) noexcept {
+        int ctz_l = __builtin_ctz(l += n), ctz_r = __builtin_ctz(r += n);
+        for (int i = height - 1; i > ctz_l; i--) pushdown(l >> i);
+        for (int i = height - 1; i > ctz_r; i--) pushdown(r >> i);
+        int L = l, R = r;
+        while (L < R) {
+            if (L & 1) operate(L++, x);
+            if (R & 1) operate(--R, x);
+            L >>= 1; R >>= 1;
+        }
+    }
+    value_type operator[](int i) const noexcept {
+        value_type ret = val[i];
+        i += n;
+        do { ret = h(ret, op[i]); } while (i >>= 1);
+        return ret;
+    }
+};
+
+int main() {
+    int n = in(), q = in();
+
+    auto g = [] (int a, int b) { return a + b; };
+    auto h = [] (int a, int b) { return a + b; };
+    dual_segtree<int, int, decltype(g), decltype(h)> sg(0, g, h);
+    sg.fill(n, 0);
+
+    while (q--) {
+        int query = in();
+        if (query == 0) {
+            int s = in(), t = in(), x = in();
+            sg.operate(s - 1, t, x);
+        } else {
+            int i = in();
+            out(sg[i - 1]);
+        }
+    }
+}
+

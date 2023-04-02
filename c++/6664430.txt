@@ -1,0 +1,88 @@
+#include <bits/stdc++.h>
+#ifdef MY_DEBUG
+  #include "dprint.cpp"
+  # define dprint(a, ...);\
+      do {\
+          printf("line : %d, func : %s\n",\
+                __LINE__, __func__);\
+          dprint(#a,a,##__VA_ARGS__ );\
+      } while (0)
+#else
+  #define dprint(a,...) 
+#endif
+using namespace std;
+struct circle{
+  int x;
+  int y;
+  int r;
+  int c;
+};
+bool check(circle a,circle b){//かぶってたらtrue
+  int dx=(a.x-b.x);
+  int dy=(a.y-b.y);
+  int dr=(a.r+b.r);
+  bool ret=dx*dx+dy*dy<dr*dr;
+  return ret;
+}
+int main() {
+while(true){
+  int n;
+  cin >>n;  
+  if(n==0)break;
+  vector<int>mask(n,0);
+  vector<circle>vec(n);
+  for (int q = 0; q < n; q++){
+    int x,y,r,c;
+    cin >>x>>y>>r>>c;
+    circle t_circle;
+    t_circle.x=x;
+    t_circle.y=y;
+    t_circle.r=r;
+    t_circle.c=c;
+    vec[q]=t_circle;
+    //mask作成
+    for (int i = 0; i < q; i++){
+      if(check(vec[i],vec[q])==true){
+        //かぶりがある→先に除去必要
+        mask[q]|=(1<<i);
+      }
+    }
+  }
+  set<int>st;
+  st.insert((1<<n)-1);//最初はすべておいてある状態
+  int res=0;
+  while (!st.empty()){
+    auto v_itr=st.rbegin();
+    int v=*v_itr;
+    int count_v=0;//ビットの個数（現在の枚数）
+    st.erase(v);
+    vector<vector<int>>able(5);//色番号のなかで除去できるものをまとめる。
+    for (int i = 0; i < n; i++){//i番目のタイルについて。
+       if(((v>>i)&1)==0)continue;//すでに存在しない。
+       count_v++;
+       if(mask[i]&v)continue;//除去できない
+       circle t=vec[i];
+       able[t.c].push_back(i);
+    }
+    for(auto v_able :able){
+      if((int)v_able.size()>1){
+        //2つ以上あるので取り除くことができる。
+        res=max(res,n-count_v+2);
+        for (int x = 0; x < (int)v_able.size(); x++){
+          for (int y = x+1; y < (int)v_able.size(); y++){
+            //取り除く組み合わせ
+            int z=v;
+            z^=1<<v_able[x];
+            z^=1<<v_able[y];
+          st.insert(z);
+          }
+        }
+      }
+    }
+  }
+  
+  cout << res << endl;
+}
+
+return 0;
+}

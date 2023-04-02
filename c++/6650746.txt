@@ -1,0 +1,72 @@
+#include <stdio.h>
+
+// 頂点 v が 集合 S に属する時 S[v] = 1, 属さないとき S[v] = 0
+
+// 頂点 v について、頂点 s と 連結かどうか判定する 
+void connect(int s, int n, int C[][n])
+{
+    for (int i = 2; i < n; i++) {       // n - 2 回くりかえす
+	for (int u = 0; u < n; u++) {
+	    if (C[s][u] != 1)
+		continue;
+	    for (int v = 0; v < n; v++) {
+		int cnt = 0;
+		if (C[u][v] == 1) {
+		    cnt++;
+		    C[s][v] = 1;
+		}
+		if (cnt == 0)          // 新しい連結成分は発見されなかった
+		    return;
+	    }
+	}
+    }
+}
+		       
+int main()
+{
+    int n;      // 頂点の数
+    scanf("%d", &n);
+    //  s と t が同じ成分内なら C[s][t] = 1, そうでないか未知なら 0
+    int C[n][n];    
+    //  C を初期化
+    for (int i = 0; i < n; i++) {
+	C[i][i] = 1;
+	for (int j = 0; j < i; j++)
+	    C[i][j] = C[j][i] = 0;
+    }
+
+    int m;    //  辺の数
+    scanf("%d", &m);
+    for (int i = 0; i < m; i++) {
+	int s, t;
+	scanf("%d %d", &s, &t);
+	C[s][t] = C[t][s] = 1;
+    }
+
+    int q;    // 質問の数
+    scanf("%d", &q);
+    for (int i = 0; i < q; i++) {
+	int s, t;
+	scanf("%d %d", &s, &t);
+	if (C[s][t] == 1)
+	    printf("yes\n");
+	else {
+	    connect(s, n, C);
+#ifdef DBG	
+	    for (int u = 0; u < n; u++) {
+		for (int v = 0; v < n; v++) {
+		    printf(" %2d", C[u][v]);
+		}
+		printf("\n");
+	    }
+#endif
+	    if (C[s][t] == 1)
+		printf("yes\n");
+	    else
+		printf("no\n");
+	}
+    }
+    
+    return 0;
+} 
+

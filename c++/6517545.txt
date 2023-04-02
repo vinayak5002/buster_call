@@ -1,0 +1,56 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+int main(void)
+{
+	int n; //プロセス数
+	int q; //クォンタム
+	int p=0; //処理を行う位置
+	int count=0; //処理が終了したプロセスの数
+	int total=0; //総処理時間
+	char **nArray;
+	int i;
+	char str[20];
+	
+	scanf("%d %d\n", &n, &q);
+	
+	nArray = malloc(sizeof(char *)*n); //nArrayはn個のchar型ポインタ
+	
+	for(i=0; i<n; i++){
+		//nArrayの各ポインタにchar型10個分割り当て
+		nArray[i] = malloc(sizeof(char)*11); 
+	}
+	
+	int *tArray = (int *)malloc(sizeof(int)*n); //プロセス数分動的割り当て
+	
+	for(i=0; i<n; i++){
+		fgets(str, sizeof(str), stdin);
+	    sscanf(str, "%s %d", nArray[i], &tArray[i]);
+	}
+	while(count < n){
+		if(p == n){ //pが一周した場合
+			p=0; //pを0に戻す
+		}
+		while(tArray[p] == 0){
+			p++;
+			if(p == n){
+				p=0;
+			}
+		}
+		if(tArray[p] <= q){ //pが100以下
+			total += tArray[p]; //totalに終了時間まで追加
+			tArray[p] = 0;
+			printf("%s %d",nArray[p], total); //出力
+			count++; //カウント追加
+			if(count<=n){
+				printf("\n");
+			}
+		}else if(tArray[p] > 0){
+			total += q;
+			tArray[p] -= q;
+		}
+		p++; //pを隣にずらす
+	}
+	return 0;
+}
+

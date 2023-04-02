@@ -1,0 +1,210 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define double long double
+const double pi = acos(-1.0), eps = 1e-11;
+const int maxn = 105;
+inline int Dcmp(double x) {
+	return x < -eps ? -1 : x > eps ? 1 : 0;
+}
+inline double Sqr(double x) {
+	return x * x;
+}
+struct Point {
+	double x, y;
+	Point(double x = 0, double y = 0) : x(x), y(y) {}
+	inline bool operator == (const Point &rhs) const {
+		return !Dcmp(x - rhs.x) && !Dcmp(y - rhs.y);
+	}
+	inline Point operator + (const Point &rhs) const {
+		return Point(x + rhs.x, y + rhs.y);
+	}
+	inline Point operator - (const Point &rhs) const {
+		return Point(x - rhs.x, y - rhs.y);
+	}
+	inline double operator * (const Point &rhs) const {
+		return x * rhs.x + y * rhs.y;
+	}
+	inline double operator ^ (const Point &rhs) const {
+		return x * rhs.y - y * rhs.x;
+	}
+	inline Point operator * (const double &k) const {
+		return Point(x * k, y * k);
+	}
+	inline Point operator / (const double &k) const {
+		return Point(x / k, y / k);
+	}
+	inline double len2() {
+		return x * x + y * y;
+	}
+	inline double len() {
+		return sqrt(len2());
+	}
+	inline Point Unit() {
+		double l = len();
+		return Point(x / l, y / l);
+	}
+	inline Point Rotate90() {
+		return Point(-y, x);
+	}
+	inline Point Rotate(const double &rad) {
+		return Point(x * cos(rad) - y * sin(rad), x * sin(rad) + y * cos(rad));
+	}
+}p[maxn];
+struct Line {
+	Point s, t;
+	Line(Point s = Point(), Point t = Point()) : s(s), t(t) {}
+};
+struct Circle {
+	Point c;
+	double r;
+	Circle(Point c = Point(), double r = 0) : c(c), r(r) {}
+};
+inline double Angle(const Point &p) {
+	double t = atan2(p.y, p.x);
+	return t < 0 ? t + 2 * pi : t;
+}
+Circle MakeCircle(Point a, Point b) {
+	Point c = (a + b) / 2;
+	double r = (a - c).len();
+	return Circle(c, r);
+}
+vector<Point> CircleInterCircle(Circle a, Circle b) {
+	if(a.c == b.c || Dcmp((a.c - b.c).len() - a.r - b.r) > 0 || Dcmp((a.c - b.c).len() - abs(a.r - b.r)) < 0)
+		return vector<Point>();
+	Point r = (b.c - a.c).Unit();
+	double d = (a.c - b.c).len();
+	double x = ((Sqr(a.r) - Sqr(b.r)) / d + d) / 2;
+	double h = sqrt(Sqr(a.r) - Sqr(x));
+	if(Dcmp(h) == 0)
+		return {a.c + r * x};
+	return {a.c + r * x + r.Rotate90() * h, a.c + r * x - r.Rotate90() * h};
+}
+vector<Point> Tangent(Point p, Circle b) {
+// cerr << p.x << " " << p.y << " " << b.c.x << " " << b.c.y << " " << b.r << endl;
+	return CircleInterCircle(MakeCircle(p, b.c), b);
+}
+inline void GetExTan(Circle a, Circle b, vector<Line> &res) {
+// cerr << (a.c - b.c).len() - abs(a.r - b.r) << endl;
+	if(Dcmp((a.c - b.c).len() - abs(a.r - b.r)) <= 0)
+		return ;
+// cerr << Dcmp(a.r - b.r) << endl;
+	if(Dcmp(a.r - b.r) == 0) {
+// cerr << "???" << endl;
+		Point dir = b.c - a.c;
+		dir = dir.Unit().Rotate90() * a.r;
+		res.push_back(Line(a.c + dir, b.c + dir));
+		res.push_back(Line(a.c - dir, b.c - dir));
+	}
+	else {
+// cerr << "?!?" << endl;
+		Point p = (b.c * a.r - a.c * b.r) / (a.r - b.r);
+		vector<Point> pp = Tangent(p, a), qq = Tangent(p, b);
+		if(pp.size() == 2u && qq.size() == 2u) {
+// cerr << "!!!" << endl;
+			if(Dcmp(a.r - b.r) < 0)
+				swap(pp[0], pp[1]), swap(qq[0], qq[1]);
+			res.push_back(Line(pp[0], qq[0]));
+			res.push_back(Line(pp[1], qq[1]));
+		}
+	}
+}
+inline void GetInTan(Circle a, Circle b, vector<Line> &res) {
+	if(Dcmp((a.c - b.c).len() - (a.r + b.r)) == 0) {
+		Point mid = a.c + (b.c - a.c).Unit() * a.r;
+		res.push_back(Line(mid, mid + (b.c - a.c).Rotate90()));
+		return;
+	}
+	Point p = (b.c * a.r + a.c * b.r) / (a.r + b.r);
+	vector<Point> pp = Tangent(p, a), qq = Tangent(p, b);
+	if(pp.size() == 2u && qq.size() == 2u) {
+		res.push_back(Line(pp[0], qq[0]));
+		res.push_back(Line(pp[1], qq[1]));
+	}
+}
+inline void GetTan(Circle a, Circle b, vector<Line> &res) {
+	GetExTan(a, b, res), GetInTan(a, b, res);
+}
+int n;
+double mx, mn, ans1, ans2, pt[maxn];
+vector<Line> v;
+vector<double> rd;
+pair<double, int> vec[maxn];
+inline double Calc(double rad) {
+	for(int i = 1; i <= n; ++ i)
+		pt[i] = p[i].Rotate(rad).y;
+	sort(pt + 1, pt + n + 1);
+	double mr = 0, sum = 0;
+	sum = 2.0, mr = pt[1] + 1.0;
+	for(int i = 1; i <= n; ++ i) {
+		if(pt[i] + 1.0 < mr)
+			continue;
+		if(pt[i] - 1.0 < mr)
+			sum += pt[i] + 1.0 - mr;
+		else
+			sum += 2.0;
+		mr = pt[i] + 1.0;
+	}
+	return sum;
+}
+inline double Work(double phi) {
+	for(int i = 1; i <= n; ++ i)
+		vec[i] = make_pair(p[i].Rotate(phi).y, i);
+	sort(vec + 1, vec + n + 1);
+	int pre = 1;
+	double nowx = 0, nowy = 0;
+	for(int i = 2; i <= n + 1; ++ i)
+		if(i == n + 1 || Dcmp(vec[i].first - vec[i - 1].first - 2) > 0)
+			nowx += (p[vec[i - 1].second].x - p[vec[pre].second].x), nowy += (p[vec[i - 1].second].y - p[vec[pre].second].y), pre = i;
+	double ans = Angle({nowy, nowx});
+	if(ans > pi)
+		ans -= pi;
+	return ans;
+}
+int main() {
+	ios :: sync_with_stdio(0);
+	cin.tie(0), cout.tie(0);
+	while(cin >> n && n) {
+		for(int i = 1; i <= n; ++ i) 
+			cin >> p[i].x >> p[i].y;
+		mx = -1e18, mn = 1e18;
+		v.clear();
+		for(int i = 1; i <= n; ++ i)
+			for(int j = i + 1; j <= n; ++ j)
+				GetTan(Circle(p[i], 1.0), Circle(p[j], 1.0), v);
+		rd.clear();
+		for(int i = 0; i < (int)v.size(); ++ i) {
+			double rad = Angle(v[i].t - v[i].s);
+// cerr << "????" << " " << v[i].s.x << " " << v[i].s.y << " " << v[i].t.x << " " << v[i].t.y << " " << rad << endl;
+			if(rad < pi)
+				rad = pi - rad;
+			else
+				rad = 2 * pi - rad;
+			rd.push_back(rad);
+		}
+		rd.push_back(0), rd.push_back(pi), sort(rd.begin(), rd.end());
+// for(auto t : rd)
+// 	cerr << t << " ";
+// cerr << endl;
+		int tot = 0;
+		for(int i = 0; i < (int)rd.size(); ++ i) 
+			if(i == 0 || Dcmp(rd[i] - rd[i - 1]) > 0) 
+				rd[tot ++] = rd[i];
+		rd.erase(rd.begin() + tot, rd.end());
+		for(int i = 0; i < tot; ++ i) {
+			double sum = Calc(rd[i]);
+			if(Dcmp(sum - mx) > 0)
+				mx = sum, ans1 = rd[i];
+			if(Dcmp(sum - mn) < 0)
+				mn = sum, ans2 = rd[i];
+			if(i >= 1) {
+				double phi0 = (rd[i - 1] + rd[i]) / 2, phi1 = Work(phi0), sum = Calc(phi1);
+				if(Dcmp(sum - mx) > 0)
+					mx = sum, ans1 = phi1;
+				if(Dcmp(sum - mn) < 0)
+					mn = sum, ans2 = phi1;
+			}
+		}
+		cout << setprecision(15) << fixed << ans2 << endl << ans1 << endl;
+	}
+}
+

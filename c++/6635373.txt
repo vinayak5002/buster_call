@@ -1,0 +1,114 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+class rolling_hash1D{
+  using ull = unsigned long long;
+  private:
+    vector<ull> mods = {999999797, 999999883, 999999893, 999999929,
+                        999999937, 1000000007, 1000000009, 1000000021, 
+                        1000000033, 1000000087};
+    ull base, cons, mod1, mod2;
+    
+    // 文字cを数字に変換
+    ull transc(char c){
+      return ((ull)c + cons);
+    }
+
+  public:
+    rolling_hash1D(){
+      base = (rand() % (ull)(1e8)) + (ull)(1e8);
+      cons = (rand() % 10) + 10;
+      for(ll i = 0; i < 100; i++){
+        ll a = rand() % mods.size(), b = rand() % mods.size();
+        swap(mods[a], mods[b]);
+      }
+      mod1 = mods[0], mod2 = mods[1];
+    }
+
+    // aにbは含まれているか(a.sunstr(i, b.size()) == bとなるiの配列を返す)
+    vector<ll> contain_vec(string &a, string &b){
+      ll sa = a.size(), sb = b.size();
+      vector<ll> res;
+      if(sa < sb) return res;
+
+      ull t1 = 1, t2 = 1;
+      // baseのb.size()乗を計算
+      for(ll i = 0; i < sb; i++){
+        t1 = (t1 * base) % mod1;
+        t2 = (t2 * base) % mod2;
+      }
+
+      // aとbの先頭b.size()文字のハッシュ値を計算
+      ull ha1 = 0, ha2 = 0, hb1 = 0, hb2 = 0;
+      for(ll i = 0; i < sb; i++){
+        ha1 = (ha1 * base % mod1 + transc(a[i])) % mod1;
+        hb1 = (hb1 * base % mod1 + transc(b[i])) % mod1;
+        ha2 = (ha2 * base % mod2 + transc(a[i])) % mod2;
+        hb2 = (hb2 * base % mod2 + transc(b[i])) % mod2;
+      }
+
+      // aを1文字ずつずらしながらハッシュを計算し一致するかチェック
+      for(ll i = 0; i + sb <= sa; i++){
+        if(ha1 == hb1 && ha2 == hb2) res.push_back(i);
+        if(i + sb < sa){
+          ha1 = ((ha1 * base) % mod1 + transc(a[i + sb]) - (transc(a[i]) * t1 % mod1) + mod1) % mod1;
+          ha2 = ((ha2 * base) % mod2 + transc(a[i + sb]) - (transc(a[i]) * t2 % mod2) + mod2) % mod2;
+        }
+      }
+      return res;
+    }
+
+    // aにbは含まれているか(bool型)
+    bool is_contain(string &a, string &b){
+      return (!contain_vec(a, b).empty());
+    }
+
+    // aの末尾とbの先頭が何文字一致するか
+    ll overlap(string &a, string &b){
+      ll sa = a.size(), sb = b.size();
+      ll res = 0;
+      ull ha1 = 0, ha2 = 0, hb1 = 0, hb2 = 0, t1 = 1, t2 = 1;
+      for(ll i = 1; i <= min(sa, sb); i++){
+        ha1 = (ha1 + transc(a[sa - i]) * t1) % mod1;
+        hb1 = (hb1 * base + transc(b[i - 1])) % mod1;
+        ha2 = (ha2 + transc(a[sa - i]) * t2) % mod2;
+        hb2 = (hb2 * base + transc(b[i - 1])) % mod2;
+        if(ha1 == hb1 && ha2 == hb2) res = i;
+        t1 = t1 * base % mod1; t2 = t2 * base % mod2;
+      }
+      return res;
+    }
+};
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  string s, t;
+  cin >> s >> t;
+
+  rolling_hash1D roliha;
+
+  auto vec = roliha.contain_vec(s, t);
+  rep(i, 0, SZ(vec)) cout << vec[i] << endl;
+
+
+  return 0;
+}
+

@@ -1,0 +1,78 @@
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+#include <iostream>
+#include <vector>
+using namespace std;
+const int maxn=30;
+int n;
+struct tree
+{
+    int parent;
+    int left,right;
+};
+tree node[maxn];
+vector <int> ve[3];
+void init ()
+{
+    memset (node,-1,sizeof(node));
+}
+void Ftraverse(int x)
+{
+    if(x==-1)
+        return;
+    ve[0].push_back(x);
+    Ftraverse (node[x].left);
+    Ftraverse (node[x].right);
+}
+void Mtraverse(int x)
+{
+     if(x==-1)
+        return;
+    Mtraverse (node[x].left);
+    ve[1].push_back(x);
+    Mtraverse (node[x].right);
+}
+void Etraverse(int x)
+{
+     if(x==-1)
+        return;
+    Etraverse (node[x].left);
+    Etraverse (node[x].right);
+    ve[2].push_back(x);
+}
+void print()
+{
+    char s[4][15]={"Preorder","Inorder","Postorder"};
+    for (int i=0;i<3;i++)
+    {
+        printf("%s\n",s[i]);
+        for (int j=0;j<ve[i].size();j++)
+             printf(" %d",ve[i][j]);
+        printf("\n");
+    }
+}
+int main()
+{
+    scanf("%d",&n);
+    init();
+    for (int i=0;i<n;i++)
+    {
+        int x,left,right;
+        scanf("%d%d%d",&x,&left,&right);
+        left==-1? :node[x].left=left,node[left].parent=x;
+        right==-1? :node[x].right=right,node[right].parent=x;
+    }
+    int parent;
+    for (int i=0;i<n;i++)
+        if(node[i].parent==-1)
+        {
+            parent=i;
+            break;
+        }
+    Ftraverse(parent);
+    Mtraverse(parent);
+    Etraverse(parent);
+    print();
+    return 0;
+}

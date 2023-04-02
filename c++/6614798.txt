@@ -1,0 +1,99 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef pair<int, int> pii;
+typedef pair<double, double> pdd;
+typedef pair<long long, long long> pll;
+typedef long long ll;
+
+#define YESNO(bool)            \
+    if (bool) {                \
+        cout << "YES" << endl; \
+    } else {                   \
+        cout << "NO" << endl;  \
+    }
+#define yesno(bool)            \
+    if (bool) {                \
+        cout << "yes" << endl; \
+    } else {                   \
+        cout << "no" << endl;  \
+    }
+#define YesNo(bool)            \
+    if (bool) {                \
+        cout << "Yes" << endl; \
+    } else {                   \
+        cout << "No" << endl;  \
+    }
+#define REP(i, n) for (ll i = 0; i < ll(n); i++)
+#define REPD(i, n) for (ll i = n - 1; i >= 0; i--)
+#define FOR(i, a, b) for (ll i = a; i <= ll(b); i++)
+#define FORD(i, a, b) for (ll i = a; i >= ll(b); i--)
+#define FORA(i, I) for (const auto& i : I)
+
+#define ALL(x) x.begin(), x.end()
+#define SIZE(x) ll(x.size())
+
+#define INF32 2147483647
+#define INF64 9223372036854775807
+#define MOD 1000000007
+#define INF 1000000000
+
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+
+#define OP(m) cout << m << endl;
+ll myceil(ll a, ll b) { return (a + (b - 1)) / b; }
+ll myfloor(ll a, ll b) { return a / b; }
+
+int dx4[4] = {1, 0, -1, 0};
+int dy4[4] = {0, 1, 0, -1};
+int dx8[8] = {-1, -1, 0, 1, 1, 1, 0, -1};
+int dy8[8] = {0, -1, -1, -1, 0, 1, 1, 1};
+// cout<<fixed<<setprecision(10);
+
+const int mxN = 500 + 10;
+int dp[mxN][mxN];
+
+int main() {
+    int V, E;
+    cin >> V >> E;
+    int n = V;
+    for (int i = 0; i < n; ++i)
+        for (int j = 0; j < n; ++j) dp[i][j] = (i == j) ? 0 : INF;
+
+    REP(i, E) {
+        int s, t, d;
+        cin >> s >> t >> d;
+
+        dp[s][t] = d;
+    }
+
+    for (int k = 0; k < n; ++k) {
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (dp[i][k] < INF && dp[k][j] < INF) {
+                    dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j]);
+                }
+            }
+        }
+    }
+
+    REP(i, n) {
+        if (dp[i][i] < 0) {
+            OP("NEGATIVE CYCLE")
+            return 0;
+        }
+    }
+
+    REP(i, n) {
+        REP(j, n) {
+            if (j != 0) cout << " ";
+            if (dp[i][j] == INF)
+                cout << "INF";
+            else
+                cout << dp[i][j];
+        }
+        cout << endl;
+    }
+}

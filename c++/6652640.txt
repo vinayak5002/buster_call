@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+#define all(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+
+
+
+
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    while(1){
+    ll N, M;
+    cin >> N >> M;
+    if(N==0)return 0;
+    ll mod = 100000;
+    vvvll DP(4, vvll(N, vll(M, 0)));//1,2U3,4R;
+    DP[0][1][0] = DP[2][0][1] = 1;
+    rep(i, N)rep(j, M) {
+        if (i + j == 0)continue;
+        if (i != N - 1) {
+            if (i == 1 && j == 0) {
+                cout << "";
+            }
+            DP[0][i + 1][j] += DP[0][i][j] + DP[1][i][j];
+            DP[0][i + 1][j] %= mod;
+            DP[1][i + 1][j] += DP[2][i][j];
+            DP[1][i + 1][j] %= mod;
+        }
+        if (j != M - 1) {
+            DP[2][i][j + 1] += DP[2][i][j] + DP[3][i][j];
+            DP[2][i][j + 1] %= mod;
+            DP[3][i][j + 1] += DP[0][i][j];
+            DP[3][i][j + 1] %= mod;
+        }
+    }
+    ll an = 0;
+    rep(i, 4) {
+        an += DP[i][N - 1][M - 1];
+    }
+    cout << an % mod << endl;}
+}

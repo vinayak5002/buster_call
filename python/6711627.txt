@@ -1,0 +1,141 @@
+import java.io.BufferedReader
+import java.io.PrintWriter
+import kotlin.math.max
+import kotlin.math.sqrt
+
+fun main() {
+    val re = System.`in`.bufferedReader() // こっちのほうが速いっぽい。
+    val pw = PrintWriter(System.out)
+
+    val (N, W) = re.readInts() // N個の品物, 容量W
+    val an = MutableList(N) {
+        val (vi, wi) = re.readInts() // i番目の品物の価値viと重さwi
+        vi to wi
+    }
+
+    val memo = MutableList(N + 1) {
+        MutableList(W + 1) { 0 }
+    } // 0~i までの品物を、容量jを得ないように選んだ時の価値の最大値 memo[i][j]
+    //memo[0] = MutableList(W) { 0 }
+
+    fun knapsack(n: Int, w: Int): Int {
+        println("knapsack n $n, w $w")
+        //if (n <= 0 || w <= 0) return 0
+        // if (memo[n - 1][w - 1] != -1) return memo[n - 1][w - 1]
+
+        (0..(n - 1)).forEach { ni ->
+            (1..(w)).forEach { wi ->
+                // memo[ni+1][wi] を決定する
+                // ni+1を選択しない
+                val notSelect = memo[ni][wi] //  knapsack(n - 1, w)
+                // ni+1番目の品を選んだとき
+                val (vk, wk) = an[ni]
+                // ni番目が wi-wkまでの重さのうちの最大値 + vk
+                val select = memo[ni].getOrElse(wi - wk) { 0 } + vk
+                memo[ni + 1][wi] = max(notSelect, select)
+            }
+        }
+        println("memo $memo")
+        return memo[n][w - 1]
+    }
+
+    pw.println(knapsack(N, W))
+    pw.flush()
+    re.close()
+}
+
+
+fun Int.isEven(): Boolean = this % 2 == 0
+
+fun Int.isOdd(): Boolean = !isEven()
+
+fun Int.factorial() = (1..this).reduce { a, b -> a * b }
+
+fun Int.permutation(k: Int = 1) = (k..this).reduce { a, b -> a * b }
+
+fun <T> List<T>.permutations(): Set<List<T>> {
+    val source = this
+    val permutations = mutableSetOf<List<T>>()
+    fun permutation(source: List<T>, perm: List<T>) {
+        if (source.size <= 1) {
+            permutations += perm + source
+        } else {
+            repeat(source.size) {
+                permutation(source.take(it) + source.drop(it + 1), perm + source[it])
+            }
+        }
+    }
+    permutation(source, emptyList())
+    return permutations
+}
+
+/*fun <T> List<T>.permutations(): List<List<T>> {
+    if (this.isEmpty()) return listOf(emptyList())
+
+    val result: MutableList<List<T>> = mutableListOf()
+    for (i in this.indices) {
+        (this - this[i]).permutations().forEach { item ->
+            result.add(0, item + this[i])
+        }
+    }
+    return result
+}*/
+
+fun Int.combination(k: Int = 1) = permutation(k) / k.factorial()
+
+// digitToIntが1.5からなので自前で定義
+fun Char.digitToInt(): Int {
+    @Suppress("DEPRECATION")
+    return Character.digit(this.toInt(), 10).also {
+        if (it < 0) throw IllegalArgumentException("Char $this is not a decimal digit")
+    }
+}
+
+
+operator fun Regex.contains(text: CharSequence): Boolean = this.matches(text)
+
+fun divisor(value: Long): List<Long> {
+    return (1..(sqrt(value.toDouble()).toLong() + 1)).filter { value % it == 0L }
+        .flatMap {
+            if (value / it == it) listOf(it) else listOf(
+                it,
+                value / it
+            )
+        }//.also { println("value: $value, divisors $it") }
+}
+
+fun primeFactor(value: Long): List<Long> {
+    if (value == 1L) return listOf(1)
+    val max = Math.sqrt(value.toDouble()).toLong()
+    return prime(2, max).filter { value % it == 0L }.also { println("value: $value, primeFactor $it") }
+}
+
+// 範囲内の素数を取得
+// fromだけ指定すると戻り値の個数で素数判定ができる
+fun prime(from: Long, to: Long = from): List<Long> {
+    return (from..to).filter { i ->
+        val max = Math.sqrt(i.toDouble()).toLong()
+        (2..max).all { j -> i % j != 0L }
+    }
+}
+
+
+fun BufferedReader.readInt(): Int = this.readLine()!!.toInt()
+
+//fun readLong(reader: BufferedReader): Long = reader.readLine()!!.toLong()
+
+fun BufferedReader.readLong(): Long = this.readLine()!!.toLong()
+
+fun BufferedReader.readDouble(): Double = this.readLine()!!.toDouble()
+
+fun BufferedReader.readInts(): List<Int> = readLine()!!.split(" ").map { it.toInt() }
+
+// fun readBigInts(): List<BigInteger> = readLine()!!.split(" ").map { it.toBigInteger() }
+
+fun readLongs(reader: BufferedReader): List<Long> = reader.readLine()!!.split(" ").map { it.toLong() }
+
+fun readDoubles(reader: BufferedReader): List<Double> = reader.readLine()!!.split(" ").map { it.toDouble() }
+
+// fun readStrList(): List<String> = readLine()!!.split(" ")
+
+fun Double.decimalFormat(decimalCount: Int): String = String.format("%.${decimalCount}f", this)

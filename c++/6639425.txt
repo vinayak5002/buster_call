@@ -1,0 +1,166 @@
+#include <stdio.h>
+#define MAX 25
+#define NIL -1
+
+typedef struct
+{
+    int parent;
+    int left;
+    int right;
+} Node;
+
+Node Tree[MAX];
+
+int n, Depth[MAX], Height[MAX], Sibling[MAX], Degree[MAX];
+
+void print_node(int u)
+{
+    int i;
+	int child = Tree[u].left;
+	
+    printf("node %d: ", u);
+    printf("parent = %d, ", Tree[u].parent);
+	printf("sibling = %d, ", Sibling[u]);
+	printf("degree = %d, ", Degree[u]);
+    printf("depth = %d, ", Depth[u]);
+	printf("height = %d, ", Height[u]);
+
+    if (Tree[u].parent == NIL)
+	{
+        printf("root\n");
+	}
+    else if (Tree[u].left == NIL && Tree[u].right == NIL )
+	{
+        printf("leaf\n");
+	}
+    else
+	{
+        printf("internal node\n");
+	}
+}
+
+/* 深さを求める */
+void setDepth(int u, int depth)
+{
+    Depth[u] = depth;
+	
+    if (Tree[u].right != NIL)
+	{
+        setDepth(Tree[u].right, depth+1);
+	}
+    if (Tree[u].left != NIL)
+	{
+        setDepth(Tree[u].left, depth + 1);
+	}
+}
+
+/* 高さを求める */
+int setHeight(int u, int height)
+{
+	 int h1 = 0;
+	 int h2 = 0;
+	
+	if (Tree[u].right != NIL)
+	{
+		h1 = setHeight(Tree[u].right, height) + 1;
+	}
+	if (Tree[u].left != NIL)
+	{
+		h2 = setHeight(Tree[u].left, height) + 1;
+	}
+	
+	if(h1 >= h2)
+	{
+		Height[u] = h1;
+	}
+	else if( h1 < h2)
+	{
+		Height[u] = h2;
+	}
+	
+	return Height[u];
+}
+
+/* 節点の兄弟を求める */
+void setSibling(int u, int sibling)
+{
+	Sibling[u] = sibling;
+	
+	if(Tree[u].right != NIL)
+	{
+		setSibling(Tree[u].right, Tree[u].left);
+	}
+	if(Tree[u].left != NIL)
+	{
+		setSibling(Tree[u].left, Tree[u].right);
+	}
+}
+
+/* 節点の数を求める */
+void setDegree(int u)
+{
+	int count = 0;
+	
+	if(Tree[u].left != NIL)
+	{
+		count++;
+	}
+	if(Tree[u].right != NIL)
+	{
+		count++;
+	}
+	
+	Degree[u] = count;
+}
+
+
+int main(void)
+{
+    int n, i, j, node, left_num, right_num, root;
+    scanf("%d", &n);
+
+    for (i = 0; i < n; i++)
+    {
+        Tree[i].parent = NIL;
+        Tree[i].left = NIL;
+        Tree[i].right = NIL;
+    }
+
+    /* 格納 */
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d %d %d", &node, &left_num, &right_num);
+
+        Tree[node].left = left_num;
+    	Tree[node].right = right_num;
+    	Tree[left_num].parent = node;
+    	Tree[right_num].parent = node;
+    }
+
+    /* rootノード */
+    for (i = 0; i < n; i++)
+	{
+        if (Tree[i].parent == NIL)
+		{
+            root = i;
+		}
+	}
+    
+    setDepth(root, 0);
+	setHeight(root, 0);
+	setSibling(root, -1);
+	
+	for(i = 0; i < n; i++)
+	{
+		Height[i] = setHeight(i, 0);
+		setDegree(i);
+	}
+	
+
+    for (i = 0; i < n; i++)
+	{
+        print_node(i);
+	}
+
+    return 0;
+}

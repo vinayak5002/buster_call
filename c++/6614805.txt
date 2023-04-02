@@ -1,0 +1,32 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+#define rep(i,n) for(int i = 0 ; i < n ; i++)
+
+int main(){
+  int N;
+
+  cin >> N;
+  double x[N], y[N];
+  rep(i,N){
+    cin >> x[i]; 
+  }
+  rep(i,N){
+    cin >> y[i];
+  }
+
+  double p1 = 0, p2 = 0, p3 = 0, pINF = 0;
+  rep(i,N){
+    double diff = fabs(x[i]-y[i]);
+    p1 += diff;
+    p2 += pow(diff, 2.);
+    p3 += pow(diff, 3.);
+    pINF = max(pINF, diff);
+  }
+  p2 = sqrt(p2);
+  p3 = pow(p3, 0.33333333333333333333);
+  printf("%.6f\n%.6f\n%.6f\n%.6f\n" ,p1 ,p2 ,p3, pINF);
+
+  return 0;
+}

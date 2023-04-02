@@ -1,0 +1,50 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Scanner;
+import java.util.stream.Collectors;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner s = new Scanner(System.in);
+        int n = s.nextInt();
+        int[] nums = new int[n];
+        for (int i = 0; i < n; i++) {
+            nums[i] = s.nextInt();
+        }
+        int gtmp = 1;
+        List<Integer> gs = new ArrayList<>();
+        while (gtmp < n) {
+            gs.add(gtmp);
+            gtmp = 3 * gtmp + 1;
+        }
+        System.out.println(gs.size());
+        Collections.reverse(gs);
+        System.out.println(gs.stream().map(String::valueOf)
+            .collect(Collectors.joining(" ")));
+        int count = 0;
+        for (int g : gs.stream().mapToInt(Integer::intValue).toArray()) {
+            for (int j = g; j < n; j++) {
+                int v = nums[j];
+                int k = j - g;
+                while (k >= 0 && nums[k] > v) {
+                    nums[k + g] = nums[k];
+                    k -= g;
+                    count += 1;
+                }
+                nums[k + g] = v;
+            }
+        }
+        s.close();
+
+        System.out.println(count);
+        System.out.println(
+            Arrays.stream(nums)
+                .boxed()
+                .map(String::valueOf)
+                .collect(Collectors.joining("\n"))
+        );
+    }
+}
+

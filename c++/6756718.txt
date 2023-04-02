@@ -1,0 +1,97 @@
+#三分木ノードを格納するクラス
+class Node:
+    def __init__(self, data, left=None, mid=None, right=None):
+        self.data = data
+        self.left = left
+        self.mid = mid
+        self.right = right
+ 
+ 
+#二重リンクリストの先頭にツリーノードを挿入します
+def push(node, head):
+ 
+    #は、二重リンクリストの先頭に指定されたノードを挿入します
+    head.left = node
+    node.right = head
+ 
+    #は、左および中央の子ポインタをNoneに更新します
+    node.left = node.mid = None
+ 
+    #を更新し、指定されたノードを指すヘッドポインターを返します
+    head = node
+    return head
+ 
+ 
+#逆ポストオーダートラバーサルを使用して、三分木を二重リンクリストに変換します
+def ternaryTreeToDoublyLinkedList(root, head=None):
+ 
+    #ベースケース：空のツリー
+    if root is None:
+        return head
+ 
+    #は、右、中央、および左の子に対して繰り返されます
+    head = ternaryTreeToDoublyLinkedList(root.right, head)
+    head = ternaryTreeToDoublyLinkedList(root.mid, head)
+    head = ternaryTreeToDoublyLinkedList(root.left, head)
+ 
+    #二重リンクリストのヘッドポインタを初期化します
+    if head is None:
+        head = root
+    else:
+        #は、二重リンクリストの先頭にある現在のノードをプッシュします
+        head = push(root, head)
+ 
+    return head
+ 
+ 
+# 二重リンクリストを印刷する#関数
+def printDoublyLinkedList(node):
+ 
+    while node:
+        print(node.data, end=' —> ')
+        node = node.right
+    print('None')
+ 
+ 
+if __name__ == '__main__':
+ 
+    ''' Construct the following ternary tree
+                  1
+                / | \
+              /   |   \
+            /     |     \
+           2      9      12
+         / | \   / \     |  \
+        3  6  8 10  11  13   16
+        |   \          /  \   |
+        4    7        14  15  17
+         \
+          5
+    '''
+ 
+    root = Node(1)
+ 
+    root.left = Node(2)
+    root.mid = Node(9)
+    root.right = Node(12)
+ 
+    root.left.left = Node(3)
+    root.left.mid = Node(6)
+    root.left.right = Node(8)
+ 
+    root.mid.left = Node(10)
+    root.mid.right = Node(11)
+ 
+    root.right.mid = Node(13)
+    root.right.right = Node(16)
+ 
+    root.left.left.mid = Node(4)
+    root.left.left.mid.right = Node(5)
+    root.left.mid.right = Node(7)
+ 
+    root.right.mid.left = Node(14)
+    root.right.mid.right = Node(15)
+    root.right.right.mid = Node(17)
+ 
+    ternaryTreeToDoublyLinkedList(root)
+    printDoublyLinkedList(root)

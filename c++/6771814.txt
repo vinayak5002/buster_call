@@ -1,0 +1,116 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define N 100
+
+char graph[N+1][N+1];
+int flag[N];
+//
+int time[N][3];
+//現在の探索時刻
+int now=0;
+
+void search(int n,int i)
+{
+	now++;
+	time[i][1] = now;
+	
+	for(int j=0; j<n; j++){
+		//接続辺があり、未探索
+		if(graph[i][j] == '1' && flag[j] == 0){
+			flag[j] = 1;
+			search(n, j);
+		}
+	}
+	now++;
+	time[i][2] = now;
+}
+
+int main(void)
+{
+	char str[512];
+	char tmp[8];
+	int n;
+	int u, k; //uは一番目、kは二番目の入力(毎行)
+	int i; //行数
+	int j; //strの位置
+	int l; //tmpの位置
+	int m; //確認済みの頂点の数
+	int p; //atoi(tmp)
+	
+	fgets(str, sizeof(str), stdin);
+	sscanf(str, "%d", &n);
+	
+	for(i=0; i<n; i++){
+		/*ここから*/
+		//flag[i](未探索かを判定)を0(未探索)で埋める
+		flag[i] = 0;
+		//time[i][0](発見時間と探索終了時間を入れる配列)
+		time[i][0] = i;
+		/*ここまで深さ優先探索用*/
+		
+		//'0'と' 'で埋める
+		for(j=0; j<n; j++){
+			graph[i][j] = '0';
+		}
+		//最後にヌル文字を入れる
+		graph[i][n] = '\0';
+		
+		l = sizeof(tmp);
+		while(0 < l){
+			tmp[l--] = '\0';
+		}
+		
+		u = -1;
+		k = -1;
+		j=0;
+		
+		fgets(str, sizeof(str), stdin);
+		while(1){
+			//printf("str[%d] = %x\n", j, str[j]);
+			if(47 < str[j] && str[j] < 58){
+				tmp[l++] = str[j];
+				//printf("tmp = %s\n", tmp);
+			}else{
+				p = atoi(tmp);
+					//printf("p = %d\n", p);
+				if(u == -1){ //uが入っていない
+					u = p;
+				}else if(k == -1){ //kが入っていない
+					k = p;
+					//printf("u=%d, k=%d\n", u, k);
+					if(k == 0){ //確認する要素が0
+						break;
+					}
+				}else{
+					graph[i][p-1] = '1';
+					//printf("graph[%d][%d] = '1'\n", i, 2*(p-1));
+					m++;
+					if(m >= k){
+						m=0;
+						break;
+					}
+				}
+				while(0 < l){
+					tmp[l--] = '\0';
+				}
+			}
+			j++;
+		}
+	}
+	
+	//深さ優先探索
+	search(n, 0);
+	//全て探索済みでなければそこを探索
+	for(i=1; i<n; i++){
+		if(flag[i] == 0){
+			search(n, i);
+		}
+	}
+	
+	for(i=0; i<n; i++){
+		printf("%d %d %d\n", time[i][0]+1, time[i][1], time[i][2]);
+	}
+	
+	return 0;
+}

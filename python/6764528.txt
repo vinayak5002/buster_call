@@ -1,0 +1,808 @@
+
+#if 1
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <queue>
+#include <stack>
+#include <array>
+#include <deque>
+#include <algorithm>
+#include <utility>
+#include <cstdint>
+#include <functional>
+#include <iomanip>
+#include <numeric>
+#include <assert.h>
+#include <bitset>
+#include <list>
+#include <cmath>
+
+auto& in = std::cin;
+auto& out = std::cout;
+#define all_range(C) std::begin(C), std::end(C)
+const double PI = 3.141592653589793238462643383279502884197169399375105820974944;
+
+std::vector<int> point2index;
+void assyuku() {
+	std::sort(all_range(point2index));
+	point2index.erase(std::unique(all_range(point2index)), point2index.end());
+}
+
+inline constexpr uint32_t get_min2pow(uint32_t value, uint32_t work = 1) {
+	return ((value <= work) ? (work) : (get_min2pow(value, work * 2)));
+}
+
+int32_t W_max, M, Q;
+int32_t X_in[110000];
+
+inline constexpr uint32_t get_min2pow(uint32_t value, uint32_t work = 1) {
+	return ((value <= work) ? (work) : (get_min2pow(value, work * 2)));
+}
+
+inline constexpr uint32_t get_min2pow(uint32_t value, uint32_t work = 1) {
+	return ((value <= work) ? (work) : (get_min2pow(value, work * 2)));
+}
+//class segment_tree
+//{
+//public:
+//	using value_type = int;
+//	static constexpr uint32_t N_MAX = get_min2pow(100000);
+//private:
+//	std::vector< std::pair < std::pair<int, int>, int> > query[N_MAX * 2 - 1];
+//	int value[N_MAX * 2 - 1] = {};
+//	static inline constexpr int32_t getchild(int i) {
+//		return i * 2 + 1;
+//	}
+//	static inline constexpr int32_t getparent(int i) {
+//		return (i - 1) / 2;
+//	}
+//	void Init_impl(int k = 0)
+//	{
+//		if (k < N_MAX - 1) {
+//			//ノード
+//			auto c1 = getchild(k), c2 = c1 + 1;
+//			Init_impl(c1);
+//			Init_impl(c2);
+//			value[k] = merge(value[c1], value[c2]);
+//		}
+//		else {
+//			//葉
+//			value[k] = 0;
+//		}
+//	}
+//	//value_type query_impl(int32_t a, int32_t b, int32_t k = 0, int32_t l = 0, int32_t r = N_MAX)const
+//	//{
+//	//	if (r <= a || b <= l)return default_value;
+//	//	if (a <= l && r <= b)return value[k];
+//	//	int m = (l + r) / 2;
+//	//	return merge(query_impl(a, b, getchild(k), l, m), query_impl(a, b, getchild(k) + 1, m, r));
+//	//}
+//
+//public:
+//	//-----------------------------変更するコードここから-----------------------------//
+//	template<typename T>
+//	void change(int32_t i, T&& v)
+//	{
+//		i += N_MAX - 1;
+//		//葉
+//		ここを書く
+//		value[i] += std::forward<T>(v);
+//		//value[i] = std::forward<T>(v);
+//		i = getparent(i);
+//		//ノード
+//		for (;;) {
+//			auto c1 = getchild(i), c2 = c1 + 1;
+//			value[i] = merge(value[c1], value[c2]);
+//			if (i == 0) { break; }
+//			i = getparent(i);
+//		}
+//	}
+//
+//private:
+//	static inline value_type merge(const value_type& l, const value_type& r)
+//	{
+//		ここを書く;
+//		//RMQ
+//		return std::min(l, r);
+//		//RSQ
+//		return l + r;
+//	}
+//public:
+//	inline segment_tree() { init(); }
+//	inline void init()
+//	{
+//		Init_impl();
+//	}
+//	inline int get_pos(int32_t i)const
+//	{
+//		int32_t k = 0, l = 0, r = N_MAX;
+//
+//		while (l == i && r == i+1) {
+//
+//			auto c1 = getchild(i), c2 = c1 + 1;
+//			if (!query[k].empty()) {
+//				query[c1].insert();
+//			}
+//			int m = (l + r) / 2;
+//			if (i < m) {
+//				k = c1;
+//				l = l;
+//				r = m;
+//			}
+//
+//			merge(query_impl(a, b, getchild(k), l, m), query_impl(a, b, getchild(k) + 1, m, r));
+//
+//		}
+//
+//		i += N_MAX - 1;
+//		//葉
+//		ここを書く
+//		value[i] += std::forward<T>(v);
+//		//value[i] = std::forward<T>(v);
+//		i = getparent(i);
+//		//ノード
+//		for (;;) {
+//			auto c1 = getchild(i), c2 = c1 + 1;
+//			value[i] = merge(value[c1], value[c2]);
+//			if (i == 0) { break; }
+//			i = getparent(i);
+//		}
+//	}
+//};
+
+using namespace std;
+using ll = int64_t;
+class SegmentTree {
+    static constexpr int32_t N = get_min2pow(100000);
+    const ll inf = 1e18;
+    int n, n0;
+    ll max_v[4 * N], smax_v[4 * N], max_c[4 * N];
+    ll min_v[4 * N], smin_v[4 * N], min_c[4 * N];
+    ll sum[4 * N];
+    ll len[4 * N], ladd[4 * N], lval[4 * N];
+
+    void update_node_max(int k, ll x) {
+        sum[k] += (x - max_v[k]) * max_c[k];
+
+        if (max_v[k] == min_v[k]) {
+            max_v[k] = min_v[k] = x;
+        }
+        else if (max_v[k] == smin_v[k]) {
+            max_v[k] = smin_v[k] = x;
+        }
+        else {
+            max_v[k] = x;
+        }
+
+        if (lval[k] != inf && x < lval[k]) {
+            lval[k] = x;
+        }
+    }
+    void update_node_min(int k, ll x) {
+        sum[k] += (x - min_v[k]) * min_c[k];
+
+        if (max_v[k] == min_v[k]) {
+            max_v[k] = min_v[k] = x;
+        }
+        else if (smax_v[k] == min_v[k]) {
+            min_v[k] = smax_v[k] = x;
+        }
+        else {
+            min_v[k] = x;
+        }
+
+        if (lval[k] != inf && lval[k] < x) {
+            lval[k] = x;
+        }
+    }
+
+    void push(int k) {
+
+        if (n0 - 1 <= k) return;
+
+        if (lval[k] != inf) {
+            updateall(2 * k + 1, lval[k]);
+            updateall(2 * k + 2, lval[k]);
+            lval[k] = inf;
+            return;
+        }
+
+        if (ladd[k] != 0) {
+            addall(2 * k + 1, ladd[k]);
+            addall(2 * k + 2, ladd[k]);
+            ladd[k] = 0;
+        }
+
+        if (max_v[k] < max_v[2 * k + 1]) {
+            update_node_max(2 * k + 1, max_v[k]);
+        }
+        if (min_v[2 * k + 1] < min_v[k]) {
+            update_node_min(2 * k + 1, min_v[k]);
+        }
+
+        if (max_v[k] < max_v[2 * k + 2]) {
+            update_node_max(2 * k + 2, max_v[k]);
+        }
+        if (min_v[2 * k + 2] < min_v[k]) {
+            update_node_min(2 * k + 2, min_v[k]);
+        }
+    }
+
+    void update(int k) {
+        sum[k] = sum[2 * k + 1] + sum[2 * k + 2];
+
+        if (max_v[2 * k + 1] < max_v[2 * k + 2]) {
+            max_v[k] = max_v[2 * k + 2];
+            max_c[k] = max_c[2 * k + 2];
+            smax_v[k] = max(max_v[2 * k + 1], smax_v[2 * k + 2]);
+        }
+        else if (max_v[2 * k + 1] > max_v[2 * k + 2]) {
+            max_v[k] = max_v[2 * k + 1];
+            max_c[k] = max_c[2 * k + 1];
+            smax_v[k] = max(smax_v[2 * k + 1], max_v[2 * k + 2]);
+        }
+        else {
+            max_v[k] = max_v[2 * k + 1];
+            max_c[k] = max_c[2 * k + 1] + max_c[2 * k + 2];
+            smax_v[k] = max(smax_v[2 * k + 1], smax_v[2 * k + 2]);
+        }
+
+        if (min_v[2 * k + 1] < min_v[2 * k + 2]) {
+            min_v[k] = min_v[2 * k + 1];
+            min_c[k] = min_c[2 * k + 1];
+            smin_v[k] = min(smin_v[2 * k + 1], min_v[2 * k + 2]);
+        }
+        else if (min_v[2 * k + 1] > min_v[2 * k + 2]) {
+            min_v[k] = min_v[2 * k + 2];
+            min_c[k] = min_c[2 * k + 2];
+            smin_v[k] = min(min_v[2 * k + 1], smin_v[2 * k + 2]);
+        }
+        else {
+            min_v[k] = min_v[2 * k + 1];
+            min_c[k] = min_c[2 * k + 1] + min_c[2 * k + 2];
+            smin_v[k] = min(smin_v[2 * k + 1], smin_v[2 * k + 2]);
+        }
+    }
+
+    void _update_min(ll x, int a, int b, int k, int l, int r) {
+        if (b <= l || r <= a || max_v[k] <= x) {
+            return;
+        }
+        if (a <= l && r <= b && smax_v[k] < x) {
+            update_node_max(k, x);
+            return;
+        }
+
+        push(k);
+        _update_min(x, a, b, 2 * k + 1, l, (l + r) / 2);
+        _update_min(x, a, b, 2 * k + 2, (l + r) / 2, r);
+        update(k);
+    }
+
+    void _update_max(ll x, int a, int b, int k, int l, int r) {
+        if (b <= l || r <= a || x <= min_v[k]) {
+            return;
+        }
+        if (a <= l && r <= b && x < smin_v[k]) {
+            update_node_min(k, x);
+            return;
+        }
+
+        push(k);
+        _update_max(x, a, b, 2 * k + 1, l, (l + r) / 2);
+        _update_max(x, a, b, 2 * k + 2, (l + r) / 2, r);
+        update(k);
+    }
+
+    void addall(int k, ll x) {
+        max_v[k] += x;
+        if (smax_v[k] != -inf) smax_v[k] += x;
+        min_v[k] += x;
+        if (smin_v[k] != inf) smin_v[k] += x;
+
+        sum[k] += len[k] * x;
+        if (lval[k] != inf) {
+            lval[k] += x;
+        }
+        else {
+            ladd[k] += x;
+        }
+    }
+
+    void updateall(int k, ll x) {
+        max_v[k] = x; smax_v[k] = -inf;
+        min_v[k] = x; smin_v[k] = inf;
+        max_c[k] = min_c[k] = len[k];
+
+        sum[k] = x * len[k];
+        lval[k] = x; ladd[k] = 0;
+    }
+
+    void _add_val(ll x, int a, int b, int k, int l, int r) {
+        if (b <= l || r <= a) {
+            return;
+        }
+        if (a <= l && r <= b) {
+            addall(k, x);
+            return;
+        }
+
+        push(k);
+        _add_val(x, a, b, 2 * k + 1, l, (l + r) / 2);
+        _add_val(x, a, b, 2 * k + 2, (l + r) / 2, r);
+        update(k);
+    }
+
+    void _update_val(ll x, int a, int b, int k, int l, int r) {
+        if (b <= l || r <= a) {
+            return;
+        }
+        if (a <= l && r <= b) {
+            updateall(k, x);
+            return;
+        }
+
+        push(k);
+        _update_val(x, a, b, 2 * k + 1, l, (l + r) / 2);
+        _update_val(x, a, b, 2 * k + 2, (l + r) / 2, r);
+        update(k);
+    }
+
+    ll _query_max(int a, int b, int k, int l, int r) {
+        if (b <= l || r <= a) {
+            return -inf;
+        }
+        if (a <= l && r <= b) {
+            return max_v[k];
+        }
+        push(k);
+        ll lv = _query_max(a, b, 2 * k + 1, l, (l + r) / 2);
+        ll rv = _query_max(a, b, 2 * k + 2, (l + r) / 2, r);
+        return max(lv, rv);
+    }
+
+    ll _query_min(int a, int b, int k, int l, int r) {
+        if (b <= l || r <= a) {
+            return inf;
+        }
+        if (a <= l && r <= b) {
+            return min_v[k];
+        }
+        push(k);
+        ll lv = _query_min(a, b, 2 * k + 1, l, (l + r) / 2);
+        ll rv = _query_min(a, b, 2 * k + 2, (l + r) / 2, r);
+        return min(lv, rv);
+    }
+
+    ll _query_sum(int a, int b, int k, int l, int r) {
+        if (b <= l || r <= a) {
+            return 0;
+        }
+        if (a <= l && r <= b) {
+            return sum[k];
+        }
+        push(k);
+        ll lv = _query_sum(a, b, 2 * k + 1, l, (l + r) / 2);
+        ll rv = _query_sum(a, b, 2 * k + 2, (l + r) / 2, r);
+        return lv + rv;
+    }
+
+public:
+    SegmentTree(int n) {
+        SegmentTree(n, nullptr);
+    }
+
+    SegmentTree(int n, ll* a) : n(n) {
+        n0 = 1;
+        while (n0 < n) n0 <<= 1;
+
+        for (int i = 0; i < 2 * n0; ++i) ladd[i] = 0, lval[i] = inf;
+        len[0] = n0;
+        for (int i = 0; i < n0 - 1; ++i) len[2 * i + 1] = len[2 * i + 2] = (len[i] >> 1);
+
+        for (int i = 0; i < n; ++i) {
+            max_v[n0 - 1 + i] = min_v[n0 - 1 + i] = sum[n0 - 1 + i] = (a != nullptr ? a[i] : 0);
+            smax_v[n0 - 1 + i] = -inf;
+            smin_v[n0 - 1 + i] = inf;
+            max_c[n0 - 1 + i] = min_c[n0 - 1 + i] = 1;
+        }
+
+        for (int i = n; i < n0; ++i) {
+            max_v[n0 - 1 + i] = smax_v[n0 - 1 + i] = -inf;
+            min_v[n0 - 1 + i] = smin_v[n0 - 1 + i] = inf;
+            max_c[n0 - 1 + i] = min_c[n0 - 1 + i] = 0;
+        }
+        for (int i = n0 - 2; i >= 0; i--) {
+            update(i);
+        }
+    }
+
+    // range minimize query
+    void update_min(int a, int b, ll x) {
+        _update_min(x, a, b, 0, 0, n0);
+    }
+
+    // range maximize query
+    void update_max(int a, int b, ll x) {
+        _update_max(x, a, b, 0, 0, n0);
+    }
+
+    // range add query
+    void add_val(int a, int b, ll x) {
+        _add_val(x, a, b, 0, 0, n0);
+    }
+
+    // range update query
+    void update_val(int a, int b, ll x) {
+        _update_val(x, a, b, 0, 0, n0);
+    }
+
+    // range minimum query
+    ll query_max(int a, int b) {
+        return _query_max(a, b, 0, 0, n0);
+    }
+
+    // range maximum query
+    ll query_min(int a, int b) {
+        return _query_min(a, b, 0, 0, n0);
+    }
+
+    // range sum query
+    ll query_sum(int a, int b) {
+        return _query_sum(a, b, 0, 0, n0);
+    }
+};
+
+
+
+
+
+// @param n `0 <= n`
+// @return minimum non-negative `x` s.t. `n <= 2**x`
+int ceil_pow2(int n) {
+    int x = 0;
+    while ((1U << x) < (unsigned int)(n)) x++;
+    return x;
+}
+
+// @param n `1 <= n`
+// @return minimum non-negative `x` s.t. `(n & (1 << x)) != 0`
+constexpr int bsf_constexpr(unsigned int n) {
+    int x = 0;
+    while (!(n & (1 << x))) x++;
+    return x;
+}
+
+// @param n `1 <= n`
+// @return minimum non-negative `x` s.t. `(n & (1 << x)) != 0`
+int bsf(unsigned int n) {
+#ifdef _MSC_VER
+    unsigned long index;
+    _BitScanForward(&index, n);
+    return index;
+#else
+    return __builtin_ctz(n);
+#endif
+}
+
+template <class S,
+    S(*op)(S, S),
+    S(*e)(),
+    class F,
+    S(*mapping)(F, S),
+    F(*composition)(F, F),
+    F(*id)()>
+struct lazy_segtree {
+public:
+    lazy_segtree() : lazy_segtree(0) {}
+    explicit lazy_segtree(int n) : lazy_segtree(std::vector<S>(n, e())) {}
+    explicit lazy_segtree(const std::vector<S>& v) : _n(int(v.size())) {
+        log = ceil_pow2(_n);
+        size = 1 << log;
+        d = std::vector<S>(2 * size, e());
+        lz = std::vector<F>(size, id());
+        for (int i = 0; i < _n; i++) d[size + i] = v[i];
+        for (int i = size - 1; i >= 1; i--) {
+            update(i);
+        }
+    }
+
+    void set(int p, S x) {
+        assert(0 <= p && p < _n);
+        p += size;
+        for (int i = log; i >= 1; i--) push(p >> i);
+        d[p] = x;
+        for (int i = 1; i <= log; i++) update(p >> i);
+    }
+
+    S get(int p) {
+        assert(0 <= p && p < _n);
+        p += size;
+        for (int i = log; i >= 1; i--) push(p >> i);
+        return d[p];
+    }
+
+    S prod(int l, int r) {
+        assert(0 <= l && l <= r && r <= _n);
+        if (l == r) return e();
+
+        l += size;
+        r += size;
+
+        for (int i = log; i >= 1; i--) {
+            if (((l >> i) << i) != l) push(l >> i);
+            if (((r >> i) << i) != r) push((r - 1) >> i);
+        }
+
+        S sml = e(), smr = e();
+        while (l < r) {
+            if (l & 1) sml = op(sml, d[l++]);
+            if (r & 1) smr = op(d[--r], smr);
+            l >>= 1;
+            r >>= 1;
+        }
+
+        return op(sml, smr);
+    }
+
+    S all_prod() { return d[1]; }
+
+    void apply(int p, F f) {
+        assert(0 <= p && p < _n);
+        p += size;
+        for (int i = log; i >= 1; i--) push(p >> i);
+        d[p] = mapping(f, d[p]);
+        for (int i = 1; i <= log; i++) update(p >> i);
+    }
+    void apply(int l, int r, F f) {
+        assert(0 <= l && l <= r && r <= _n);
+        if (l == r) return;
+
+        l += size;
+        r += size;
+
+        for (int i = log; i >= 1; i--) {
+            if (((l >> i) << i) != l) push(l >> i);
+            if (((r >> i) << i) != r) push((r - 1) >> i);
+        }
+
+        {
+            int l2 = l, r2 = r;
+            while (l < r) {
+                if (l & 1) all_apply(l++, f);
+                if (r & 1) all_apply(--r, f);
+                l >>= 1;
+                r >>= 1;
+            }
+            l = l2;
+            r = r2;
+        }
+
+        for (int i = 1; i <= log; i++) {
+            if (((l >> i) << i) != l) update(l >> i);
+            if (((r >> i) << i) != r) update((r - 1) >> i);
+        }
+    }
+
+    template <bool (*g)(S)> int max_right(int l) {
+        return max_right(l, [](S x) { return g(x); });
+    }
+    template <class G> int max_right(int l, G g) {
+        assert(0 <= l && l <= _n);
+        assert(g(e()));
+        if (l == _n) return _n;
+        l += size;
+        for (int i = log; i >= 1; i--) push(l >> i);
+        S sm = e();
+        do {
+            while (l % 2 == 0) l >>= 1;
+            if (!g(op(sm, d[l]))) {
+                while (l < size) {
+                    push(l);
+                    l = (2 * l);
+                    if (g(op(sm, d[l]))) {
+                        sm = op(sm, d[l]);
+                        l++;
+                    }
+                }
+                return l - size;
+            }
+            sm = op(sm, d[l]);
+            l++;
+        } while ((l & -l) != l);
+        return _n;
+    }
+
+    template <bool (*g)(S)> int min_left(int r) {
+        return min_left(r, [](S x) { return g(x); });
+    }
+    template <class G> int min_left(int r, G g) {
+        assert(0 <= r && r <= _n);
+        assert(g(e()));
+        if (r == 0) return 0;
+        r += size;
+        for (int i = log; i >= 1; i--) push((r - 1) >> i);
+        S sm = e();
+        do {
+            r--;
+            while (r > 1 && (r % 2)) r >>= 1;
+            if (!g(op(d[r], sm))) {
+                while (r < size) {
+                    push(r);
+                    r = (2 * r + 1);
+                    if (g(op(d[r], sm))) {
+                        sm = op(d[r], sm);
+                        r--;
+                    }
+                }
+                return r + 1 - size;
+            }
+            sm = op(d[r], sm);
+        } while ((r & -r) != r);
+        return 0;
+    }
+
+private:
+    int _n, size, log;
+    std::vector<S> d;
+    std::vector<F> lz;
+
+    void update(int k) { d[k] = op(d[2 * k], d[2 * k + 1]); }
+    void all_apply(int k, F f) {
+        d[k] = mapping(f, d[k]);
+        if (k < size) lz[k] = composition(f, lz[k]);
+    }
+    void push(int k) {
+        all_apply(2 * k, lz[k]);
+        all_apply(2 * k + 1, lz[k]);
+        lz[k] = id();
+    }
+};
+
+
+int op(int a, int b) { return a + b; }
+int e() { return 0; }
+int mapping(bool a, int b) {
+    if (a == 1) return -b;
+    return b;
+}
+bool composition(bool a, bool b) { return a xor b; }
+bool id() { return false; }
+
+
+int32_t Q[110000][3];
+
+SegmentTree postree;
+int main()
+{
+	using std::endl;
+	in.sync_with_stdio(false);
+	out.sync_with_stdio(false);
+	in.tie(nullptr);
+	out.tie(nullptr);
+
+	in >> W_max >> M;
+	for (size_t i = 0; i < M; i++)
+	{
+		in >> X_in[i];
+	}
+	std::sort(X_in, X_in + M);
+    for (size_t i = 0; i < M; i++)
+    {
+        postree.add_val(i, i+1, X_in[i]);
+    }
+
+    std::vector<int> one(M, 1);
+    lazy_segtree<int, op, e, bool, mapping, composition, id> seg(one);
+    // test
+    //printf("%d\n", seg.prod(5, 10)); // [5, 10) sum -> 5
+    //seg.apply(3, 8, true); // [3, 8)反転
+    //printf("%d\n", seg.prod(5, 10)); // [5, 10) sum -> -1 -1 -1 1 1     -> -1
+    //seg.apply(7, 10, true); // [7, 10)反転
+    //printf("%d\n", seg.prod(5, 10)); // [5, 10) sum -> -1 -1 1 -1 -1     -> -3
+
+
+    in >> Q;
+	for (size_t i = 0; i < Q; i++)
+	{
+        int type;
+        in >> type;
+        if (type == 1) {
+            int a, b, c;
+            in >> a >> b >> c;
+
+            using BS_INT = int64_t;
+            BS_INT ok_range = M + 1, ng_range = 0;
+            while (std::abs(ok_range - ng_range) > 1) {
+                BS_INT mid = (ok_range + ng_range) / 2;
+                bool is_ok = false;
+
+                is_ok = a <= postree.query_sum(mid, mid + 1);
+
+                if (is_ok) {
+                    ok_range = mid;
+                }
+                else {
+                    ng_range = mid;
+                }
+            }
+            auto a_index = ok_range;
+
+            ok_range = M + 1, ng_range = 0;
+            while (std::abs(ok_range - ng_range) > 1) {
+                BS_INT mid = (ok_range + ng_range) / 2;
+                bool is_ok = false;
+
+                is_ok = b < postree.query_sum(mid, mid + 1);
+
+                if (is_ok) {
+                    ok_range = mid;
+                }
+                else {
+                    ng_range = mid;
+                }
+            }
+            auto b_index_end = ok_range;
+
+            postree.add_val(a_index, b_index_end, c);
+            postree.update_min(a_index, b_index_end, b);
+            postree.update_max(a_index, b_index_end, a);
+
+            seg.apply(a_index, b_index_end, true);
+        }
+        else {
+            int a, b;
+
+            in >> a >> b;
+
+            using BS_INT = int64_t;
+            BS_INT ok_range = M + 1, ng_range = 0;
+            while (std::abs(ok_range - ng_range) > 1) {
+                BS_INT mid = (ok_range + ng_range) / 2;
+                bool is_ok = false;
+
+                is_ok = a <= postree.query_sum(mid, mid + 1);
+
+                if (is_ok) {
+                    ok_range = mid;
+                }
+                else {
+                    ng_range = mid;
+                }
+            }
+            auto a_index = ok_range;
+
+            ok_range = M + 1, ng_range = 0;
+            while (std::abs(ok_range - ng_range) > 1) {
+                BS_INT mid = (ok_range + ng_range) / 2;
+                bool is_ok = false;
+
+                is_ok = b < postree.query_sum(mid, mid + 1);
+
+                if (is_ok) {
+                    ok_range = mid;
+                }
+                else {
+                    ng_range = mid;
+                }
+            }
+            auto b_index_end = ok_range;
+
+
+            out << seg.prod(a_index, b_index_end) << endl;
+        }
+
+
+	}
+
+
+	return 0;
+}
+#endif
+

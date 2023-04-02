@@ -1,0 +1,85 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+struct node{
+    int state[8];
+    int d;
+};
+
+const int fac[8]={1,1,2,6,24,120,720,5040};
+int vis[40321];
+
+void init()
+{
+    memset(vis,0,sizeof(vis));
+}
+
+bool insert_table(int* str,int n)
+{
+    int res=0;
+    for(int i=0;i<n;i++){
+        int cnt=0;
+        for(int j=i+1;j<n;j++)
+            if(str[j]<str[i])
+            cnt++;
+        res+=fac[n-i-1]*cnt;
+    }
+    if(vis[res])
+        return false;
+
+    vis[res]=1;
+    return true;
+}
+
+node st;
+node goal;
+
+int dr[]={-1,1,0,0};
+int dc[]={0,0,-1,1};
+
+void solve()
+{
+    init();
+    queue<node>que;
+    st.d=0;
+
+    que.push(st);
+
+    while(!que.empty())
+    {
+        node cur=que.front();que.pop();
+
+        if(!memcmp(cur.state,goal.state,sizeof(cur.state))){printf("%d\n",cur.d);return ;}
+
+        int z=0;
+        while(cur.state[z])z++;
+        int r=z/4,c=z%4;
+
+        for(int i=0;i<4;i++)
+        {
+            int newr=r+dr[i],newc=c+dc[i];
+            if(newr<0||newr>1||newc<0||newc>3)continue;
+
+            int newz=newr*4+newc;
+
+            node t;
+            memcpy(t.state,cur.state,sizeof(t.state));
+            t.state[z] =cur.state[newz];t.state[newz]=cur.state[z];
+
+            t.d=cur.d+1;
+
+            if(insert_table(t.state,8))que.push(t);
+        }
+    }
+}
+int main()
+{
+    for(int i=0;i<8;i++)goal.state[i]=i;
+
+    while(~scanf("%d",&st.state[0]))
+    {
+        for(int i=1;i<8;i++)scanf("%d",&st.state[i]);
+        solve();
+    }
+}
+

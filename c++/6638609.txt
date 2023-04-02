@@ -1,0 +1,205 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+// template {{{
+using i32 = int;
+using u32 = unsigned int;
+using i64 = long long;
+using u64 = unsigned long long;
+
+#define  range(i, l, r) for (i64 i = (i64)(l); i < (i64)(r); (i) += 1)
+#define rrange(i, l, r) for (i64 i = (i64)(r) - 1; i >= (i64)(l); (i) -= 1)
+
+#define  whole(f, x, ...) ([&](decltype((x)) container) { return (f)(  begin(container),  end(container), ## __VA_ARGS__); })(x)
+#define rwhole(f, x, ...) ([&](decltype((x)) container) { return (f)( rbegin(container), rend(container), ## __VA_ARGS__); })(x)
+
+#define debug(x) cerr << "(" << __LINE__ << ")" << #x << ": " << (x) << endl
+
+constexpr i32 inf   = 1001001001;
+constexpr i64 infll = 1001001001001001001ll;
+
+constexpr i32 dx[] = {0, -1, 1, 0, -1, 1, -1, 1}; 
+constexpr i32 dy[] = {-1, 0, 0, 1, -1, -1, 1, 1};
+
+struct IoSetup { IoSetup(i32 x = 15){ cin.tie(0); ios::sync_with_stdio(0); cout << fixed << setprecision(x); cerr << fixed << setprecision(x); } } iosetup;
+
+template <typename T = i64> T input() { T x; cin >> x; return x; }
+
+template <typename T> ostream &operator<<(ostream &os, vector<T> &v) { range(i, 0, v.size()) { os << v[i] << (i + 1 != (int)v.size() ? " " : ""); } return os; } 
+template <typename T> istream &operator>>(istream &is, vector<T> &v) { for (T &in : v) is >> in; return is; }
+
+template <typename T1, typename T2> ostream &operator<<(ostream &os, pair<T1, T2> p) { os << "(" << p.first << ", " << p.second << ")"; return os; }
+template <typename T1, typename T2> istream &operator>>(istream &is, pair<T1, T2> &p) { is >> p.first >> p.second; return is; }
+
+template <typename T> vector<T> make_vector(size_t a, T b) { return vector<T>(a, b); }
+template <typename... Ts> auto make_vector(size_t a, Ts... ts) { return vector<decltype(make_vector(ts...))>(a, make_vector(ts...)); }
+
+template <typename T1, typename T2> inline bool chmax(T1 &a, T2 b) { return a < b && (a = b, true); }
+template <typename T1, typename T2> inline bool chmin(T1 &a, T2 b) { return a > b && (a = b, true); }
+// }}}
+
+template< typename T >
+struct Enumeration {
+private:
+  static vector< T > _fact, _finv, _inv;
+
+  inline static void expand(size_t sz) {
+    if(_fact.size() < sz + 1) {
+      int pre_sz = max(1, (int) _fact.size());
+      _fact.resize(sz + 1, T(1));
+      _finv.resize(sz + 1, T(1));
+      _inv.resize(sz + 1, T(1));
+      for(int i = pre_sz; i <= (int) sz; i++) {
+        _fact[i] = _fact[i - 1] * T(i);
+      }
+      _finv[sz] = T(1) / _fact[sz];
+      for(int i = (int) sz - 1; i >= pre_sz; i--) {
+        _finv[i] = _finv[i + 1] * T(i + 1);
+      }
+      for(int i = pre_sz; i <= (int) sz; i++) {
+        _inv[i] = _finv[i] * _fact[i - 1];
+      }
+    }
+  }
+
+public:
+  explicit Enumeration(size_t sz = 0) { expand(sz); }
+
+  static inline T fact(int k) {
+    expand(k);
+    return _fact[k];
+  }
+
+  static inline T finv(int k) {
+    expand(k);
+    return _finv[k];
+  }
+
+  static inline T inv(int k) {
+    expand(k);
+    return _inv[k];
+  }
+
+  static T P(int n, int r) {
+    if(r < 0 || n < r) return 0;
+    return fact(n) * finv(n - r);
+  }
+
+  static T C(int p, int q) {
+    if(q < 0 || p < q) return 0;
+    return fact(p) * finv(q) * finv(p - q);
+  }
+
+  static T H(int n, int r) {
+    if(n < 0 || r < 0) return 0;
+    return r == 0 ? 1 : C(n + r - 1, r);
+  }
+};
+
+template< typename T >
+vector< T > Enumeration< T >::_fact = vector< T >();
+template< typename T >
+vector< T > Enumeration< T >::_finv = vector< T >();
+template< typename T >
+vector< T > Enumeration< T >::_inv = vector< T >();
+
+template< int mod >
+struct ModInt {
+  int x;
+
+  ModInt() : x(0) {}
+
+  ModInt(int64_t y) : x(y >= 0 ? y % mod : (mod - (-y) % mod) % mod) {}
+
+  ModInt &operator+=(const ModInt &p) {
+    if((x += p.x) >= mod) x -= mod;
+    return *this;
+  }
+
+  ModInt &operator-=(const ModInt &p) {
+    if((x += mod - p.x) >= mod) x -= mod;
+    return *this;
+  }
+
+  ModInt &operator*=(const ModInt &p) {
+    x = (int) (1LL * x * p.x % mod);
+    return *this;
+  }
+
+  ModInt &operator/=(const ModInt &p) {
+    *this *= p.inverse();
+    return *this;
+  }
+
+  ModInt operator-() const { return ModInt(-x); }
+
+  ModInt operator+(const ModInt &p) const { return ModInt(*this) += p; }
+
+  ModInt operator-(const ModInt &p) const { return ModInt(*this) -= p; }
+
+  ModInt operator*(const ModInt &p) const { return ModInt(*this) *= p; }
+
+  ModInt operator/(const ModInt &p) const { return ModInt(*this) /= p; }
+
+  bool operator==(const ModInt &p) const { return x == p.x; }
+
+  bool operator!=(const ModInt &p) const { return x != p.x; }
+
+  ModInt inverse() const {
+    int a = x, b = mod, u = 1, v = 0, t;
+    while(b > 0) {
+      t = a / b;
+      swap(a -= t * b, b);
+      swap(u -= t * v, v);
+    }
+    return ModInt(u);
+  }
+
+  ModInt pow(int64_t n) const {
+    ModInt ret(1), mul(x);
+    while(n > 0) {
+      if(n & 1) ret *= mul;
+      mul *= mul;
+      n >>= 1;
+    }
+    return ret;
+  }
+
+  friend ostream &operator<<(ostream &os, const ModInt &p) {
+    return os << p.x;
+  }
+
+  friend istream &operator>>(istream &is, ModInt &a) {
+    int64_t t;
+    is >> t;
+    a = ModInt< mod >(t);
+    return (is);
+  }
+
+  static int get_mod() { return mod; }
+};
+
+constexpr int mod = 1000000007;
+using modint = ModInt< mod >;
+
+void solve() {
+  int n, m, k;
+  cin >> n >> m >> k;
+
+  Enumeration<modint> en(n + m + 2 * k);
+  modint ans = 0;
+  range(t, 0, k + 1) {
+    int u = k - t;
+    modint a = en.C(n + 2 * t, t) - en.C(n + 2 * t, t - 1);
+    modint b = en.C(m + 2 * u, u) - en.C(m + 2 * u, u - 1);
+    modint c = en.C(n + m + 2 * k, n + 2 * t);
+    ans += a * b * c;
+  }
+
+  cout << ans << endl;
+}
+
+signed main() {
+  solve();
+}
+

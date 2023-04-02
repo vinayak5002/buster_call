@@ -1,0 +1,62 @@
+class SegmentTree():
+    def __init__(self, n, mapping, id):
+        self.n = n
+        self.id = id
+        self.log = (n - 1).bit_length()
+        self.size = 1 << self.log
+        self.data = [self.id] * (2 * self.size)
+        self.mapping = mapping
+    
+    def get(self, p):
+        #assert 0 <= p < self.n
+        res = self.id
+        p += self.size
+        for _ in range(self.log+1):
+            res = self.mapping(self.data[p], res)
+            p >>= 1
+        return res
+
+    def set(self, p, x):
+        #assert 0 <= p < self.n
+        p += self.size
+        self.data[p] = x
+
+    def build(self, arr):
+        #assert len(arr) <= self.n
+        for i in range(self.n):
+            self.data[self.size + i] = arr[i]
+
+    def range_apply(self, l, r, x):
+        #assert 0 <= l <= r <= self.n
+        l += self.size
+        r += self.size
+        while l < r:
+            if l & 1:
+                self.data[l] = self.mapping(x, self.data[l])
+                l += 1
+            if r & 1:
+                r -= 1
+                self.data[r] = self.mapping(x, self.data[r])
+            l >>= 1
+            r >>= 1
+
+import sys
+input = sys.stdin.readline
+
+N, Q = map(int, input().split())
+id = (1<<31)-1
+#fが作用素, xが更新する前の値
+def mapping(f, x): return x if f==id else f
+
+st = SegmentTree(N,mapping,id)
+
+ans = []
+for q in range(Q):
+    t,*A = map(int, input().split())
+    if t==0:
+        l,r,x = A
+        st.range_apply(l,r+1,x)
+    else:
+        i, = A
+        ans.append(st.get(i))
+print(*ans, sep='\n')

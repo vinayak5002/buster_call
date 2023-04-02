@@ -1,0 +1,40 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+
+	const n = parseInt(si[0].split(" "));
+	let points = new Object();
+	
+	for (let i = 1; i < n + 1; i++) {
+		let order = si[i].split(" ");
+		let x = parseInt(order[0]);
+		if (!points[x]) {
+			points[x] = new Array();
+		}
+		let y = parseInt(order[1]);
+		points[x].push(y);
+		for (let j = points[x].length - 1; j >= 0; j--) {
+			if (points[x][j] < points[x][j - 1]) {
+				points[x][j] = points[x][j - 1];
+				points[x][j - 1] = y;
+			} else {
+				break;
+			}
+		}
+	}
+	
+	let ans = '';
+	for (let key in points) {
+		if (points[key].length === 1) {
+			ans += key + ' ' + points[key] + '\n';
+		} else {
+			for (let i = 0; i < points[key].length; i++) {
+				ans += key + ' ' + points[key][i] + '\n';
+			}
+		}
+		
+	}
+	so.write(ans);
+}

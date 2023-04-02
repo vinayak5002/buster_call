@@ -1,0 +1,51 @@
+def find(x):
+    if par[x] == x:
+        return x
+    else:
+        par[x] = find(par[x]) #経路圧縮
+        return par[x]
+def same(x,y):
+    return find(x) == find(y)
+def unite(x,y):
+    x = find(x)
+    y = find(y)
+    if x == y:
+        return 0
+    par[x] = y
+while True:
+  N = int(input())
+  if N == 0:
+    break
+  else:
+    List1 = [list(input().split()) for _ in range(N)]
+    for l in List1:
+      for i in range(4):
+        l[i] = float(l[i])
+    edgeL = []
+    for i in range(N):
+      for j in range(i+1,N):
+        L1 = List1[i]
+        L2 = List1[j]
+        std = 0
+        for k in range(3):
+          std += (L2[k]-L1[k])**2
+        std = std**0.5
+        std -= (L1[3]+L2[3])
+        if std < 0:
+          std = 0
+        edgeL.append([i,j,std])
+    edgeL.sort(key = lambda x: x[2])
+    par = [i for i in range(N+1)]
+    ans = 0
+    count = 0
+    for l in edgeL:
+      if not same(l[0],l[1]):
+        unite(l[0],l[1])
+        count += 1
+        ans += l[2]
+      else:
+        pass
+      if count == N-1:
+        break
+    print(ans)
+

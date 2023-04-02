@@ -1,0 +1,62 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <cmath>
+#include <iomanip>
+#include <bitset>
+#include <functional>
+#include <queue>
+#include <utility>
+ 
+static const double pi = acos(-1.0);
+const long long INF = pow(10,18);
+const int mod1 = 1000000007;
+
+using namespace std;
+
+int main(){
+    while (true){
+        int money; cin >> money;
+        if (money == 0) return 0;
+        int coin_data[] = {10, 50, 100, 500}; 
+        vector<int> coin(coin_data, coin_data+4);
+        vector<int> purse(4);
+        for (int i=0; i<4; i++) cin >> purse[i];
+
+        vector<int> able;
+        for (int ten=0; ten<purse[0]+1; ten++)
+            for (int fif=0; fif<purse[1]+1; fif++)
+                for (int hun=0; hun<purse[2]+1; hun++)
+                    for (int fiv=0; fiv<purse[3]+1; fiv++)
+                        able.push_back(ten*10+fif*50+hun*100+fiv*500);
+
+        sort(able.begin(),able.end());
+
+        int pay;
+        queue<int> q;
+        q.push(money);
+        while (true){
+            int now = q.front();
+            for (int i=0; i<4; i++) q.push(now+coin[i]);
+            q.pop();
+            if (binary_search(able.begin(),able.end(),now)) {
+                pay = now;
+                break;
+            }
+        }
+
+        vector<int> ans(4,0);
+        for (int i=0; i<3; i++){
+            ans[i] = purse[i];
+            int adj = (purse[i] % (coin[i+1]/coin[i])) - ((pay % coin[i+1])/coin[i]);
+            if (adj<0) adj += (coin[i+1]/coin[i]);
+            ans[i] -= adj;
+            pay -= ans[i]*coin[i];
+        }
+        ans[3] = pay/coin[3];
+        for (int i=0; i<4; i++) 
+            if (ans[i]>0) cout << coin[i] << " " << ans[i] << endl;
+    
+    }
+}

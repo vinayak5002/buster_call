@@ -1,0 +1,45 @@
+from collections import deque
+strings = input()
+length = len(strings)
+
+height = 0
+num = 0
+area = 0
+
+leftside = deque()
+olds = deque()
+area_list = deque()
+
+
+for i in range(length):
+
+    try:
+        if strings[i] == "\\":
+            leftside.append(i)
+
+        elif (strings[i] == "/"):
+            l = leftside.pop()
+            area = i - l
+
+
+            if len(olds) > 0:
+                old = olds.pop()
+                if l < old:
+                    area_list.append(area + area_list.pop())
+                    olds.append(l)
+                else:
+                    area_list.append(area)
+                    olds.append(old)
+                    olds.append(l)
+            else:
+                area_list.append(area)
+                olds.append(l)
+    except:
+        continue
+        
+
+
+print(sum(area_list))
+
+area_list.appendleft(len(area_list))
+print(" ".join(list(map(str,area_list))))

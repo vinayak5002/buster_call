@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef long double ld ;
+typedef pair<ll,ll> P ;
+typedef tuple<ll,ll,ll> TP ;
+#define rep(i, n) for (int i = 0; i < (int)(n); i++)
+#define rep2(i, s, n) for (int i = (s); i < (int)(n); i++)
+#define endl "\n"
+#define chmin(a,b) a = min(a,b)
+#define chmax(a,b) a = max(a,b)
+#define bit_count(x) __builtin_popcountll(x)
+#define gcd(a,b) __gcd(a,b)
+#define lcm(a,b) a / gcd(a,b) * b
+
+vector<ll> all;
+vector<ll> odd;
+int dpall[200][1010101];
+int dpodd[50][1010101];
+
+
+ll f(ll n){
+  return n * (n+1LL) * (n+2LL) / 6LL;
+}
+
+int main(){
+  ll n = 0;
+  while(true){
+    n++;
+    ll ans = f(n);
+    if(ans > 1e6) break;
+    all.push_back(ans);
+    if(ans % 2 == 1) odd.push_back(ans);
+  }
+
+
+  rep(i, 181) rep(j, 1010101) dpall[i][j] = 10000;
+  rep(i, 50) rep(j, 1010101) dpodd[i][j] = 10000;
+  rep(i, 181) dpall[i][0] = 0;
+  rep(i, 50) dpodd[i][0] = 0;
+  dpall[0][1] = 1;
+  dpodd[0][1] = 1;
+
+
+  rep(j, 1010101){
+    rep(i, 179) {
+      if(j+all[i] > 1e6 || j+all[i+1] > 1e6) continue;
+      chmin(dpall[i+1][j], dpall[i][j]);
+      chmin(dpall[i][j+all[i]], dpall[i][j]+1);
+      chmin(dpall[i+1][j+all[i+1]], dpall[i][j]+1);
+    }
+  }
+
+  rep(j, 1010101){
+    rep(i, 49) {
+      if(j+odd[i] > 1e6 || j+odd[i+1] > 1e6) continue;
+      chmin(dpodd[i+1][j], dpodd[i][j]);
+      chmin(dpodd[i][j+odd[i]], dpodd[i][j]+1);
+      chmin(dpodd[i+1][j+odd[i+1]], dpodd[i][j]+1);
+    }
+  }
+
+  while(true){
+    int in;
+    cin >> in;
+    if(in == 0) break;
+    cout << dpall[179][in] << " " << dpodd[44][in] << endl;
+  }
+}
+

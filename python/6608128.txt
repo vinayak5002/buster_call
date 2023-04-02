@@ -1,0 +1,79 @@
+//#pragma GCC optimize ("O2")
+//#pragma GCC optimize("unroll-loops")
+//#pragma GCC target ("avx2")
+#include<bits/stdc++.h>
+//#include<atcoder/all>
+//using namespace atcoder;
+//using mint = modint998244353;
+
+using namespace std;
+typedef long long ll;
+#define rep(i, n) for(int i = 0; i < (n); i++)
+#define rep1(i, n) for(int i = 1; i <= (n); i++)
+#define co(x) cout << (x) << "\n"
+#define cosp(x) cout << (x) << " "
+#define ce(x) cerr << (x) << "\n"
+#define cesp(x) cerr << (x) << " "
+#define pb push_back
+#define mp make_pair
+#define chmin(x, y) x = min(x, y)
+#define chmax(x, y) x = max(x, y)
+#define Would
+#define you
+#define please
+
+const int maxn = 200001;
+int ord[maxn], low[maxn], topo;
+vector<pair<int, int> > E[maxn];
+vector<int> bri, aps; //briが橋、apsが関節点
+
+void dfs(int p, int prev) {
+	ord[p] = ++topo;
+	low[p] = topo;
+	int apsfl = 0, cnt = 0;
+	for (auto t : E[p]) {
+		int to = t.first;
+		if (ord[to] == 0) {
+			cnt++;
+			dfs(to, p);
+			low[p] = min(low[p], low[to]);
+			if (prev && ord[p] <= low[to]) apsfl = 1;
+			if (ord[p] < low[to]) bri.pb(t.second);
+		}
+		else {
+			if (to == prev) continue;
+			low[p] = min(low[p], ord[to]);
+		}
+	}
+	if (!prev && cnt >= 2) apsfl = 1;
+	if (apsfl) aps.pb(p);
+}
+
+int main() {
+	cin.tie(0);
+	ios::sync_with_stdio(false);
+
+
+	int N, M;
+	cin >> N >> M;
+
+	int A[maxn], B[maxn];
+	rep1(i, M) {
+		int a, b;
+		cin >> a >> b;
+		a++; b++;
+		E[a].pb({ b, i });
+		E[b].pb({ a, i });
+		A[i] = a;
+		B[i] = b;
+	}
+
+	dfs(1, 0);
+	sort(bri.begin(), bri.end());
+	for (auto p : bri) {
+		cosp(A[p] - 1);
+		co(B[p] - 1);
+	}
+
+	Would you please return 0;
+}

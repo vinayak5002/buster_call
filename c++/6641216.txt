@@ -1,0 +1,73 @@
+#include <iostream>
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+const int INF = 1e9;
+
+int prim(vector< vector<int> > &g, int n, vector<int> &mincost, vector<bool> &used){
+    
+    int res = 0; // mstの重みの総和
+    mincost[0] = 0;
+    
+    while ( true ){
+        
+        int v = -1;
+        
+        // 使われていない点の中で頂点vからのコストが最小である点を探す
+        for (int u = 0; u < n; u++){
+            if ( !used[u] && (v == -1 || mincost[u] < mincost[v]) ){
+                v = u;
+            }
+        }
+            
+        // v != -1であればmstは未完成
+        if ( v == -1 ) break;
+            
+        // 確定済みの頂点を決定
+        used[v] = true;
+        res += mincost[v];
+            
+        // 確定済みの頂点から行ける頂点について最小コストを更新する
+            
+        for (int u = 0; u < n; u++){
+                
+            // ちゃんと道があるかどうか
+            if (g[v][u] != -1){
+                mincost[u] = min(mincost[u],g[v][u]);
+            }
+        }
+            
+        
+        
+    }
+    
+    return res;
+    
+}
+
+int main(void){
+    
+    int n;
+    cin >> n;
+    
+    vector<vector<int>> g(n,vector<int>(n));
+    vector<int> mincost(n,INF); // すでに確定した頂点からの最小コスト
+    vector<bool> used(n,false); // すでに確定したかどうか
+
+    
+    for (int i = 0; i < n; i++){
+        for (int j = 0; j < n; j++){
+            cin >> g[i][j];
+            //cout << g[i][j];
+        }
+        //cout << endl;
+    }
+    
+    cout << prim(g,n,mincost,used) << endl;
+    
+    
+}
+

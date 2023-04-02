@@ -1,0 +1,89 @@
+#include<iostream>
+#include<vector>
+using namespace std;
+
+class Node{
+private:
+	vector<int> destination;
+	bool visited;
+public:
+	Node(){
+		visited = false;
+	}
+
+	void addDestination(int dest){
+		destination.push_back(dest);
+	}
+
+	int getNumOfDestination(){
+		return destination.size();
+	}
+
+	int getDestination(int num){
+		if(num>=getNumOfDestination() || num<0) return -1;
+		return destination[num];
+	}
+
+	void setVisited(){
+		visited = true;
+	}
+
+	void setNotVisited(){
+		visited = false;
+	}
+
+	bool isVisited(){
+		return visited;
+	}
+};
+
+class Graph{
+private:
+	vector<Node> graph;	// directed graph
+	bool cycle;	// cycle existence flag
+
+public:
+	Graph(){
+		int v, e;
+		cin >> v >> e;
+		graph.resize(v);
+
+		for(int i=0; i<e; i++){
+			int s, t;
+			cin >> s >> t;
+			graph[s].addDestination(t);
+		}
+
+		num_of_visited = 0;
+		cycle = false;
+	}
+
+	int checkCycle(){
+		// visit all not visited nodes
+		for(int i=0; i<graph.size(); i++){
+			if(graph[i].isVisited()) continue;
+			dfs(i);
+		}
+		return cycle ? 1 : 0;
+	}
+
+	void dfs(int node){
+		graph[node].setVisited();
+		for(int i=0; i<graph[node].getNumOfDestination(); i++){
+			int next_node = graph[node].getDestination(i);
+
+			if(graph[next_node].isVisited()){
+				cycle = true;
+				continue;
+			}
+			dfs(next_node);
+			graph[next_node].setNotVisited();
+		}
+	}
+};
+
+int main(){
+	Graph g = Graph();
+	cout << g.checkCycle() << endl;
+	return 0;
+}

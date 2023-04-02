@@ -1,0 +1,113 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+#define L 4000000
+#define N 16
+
+char dictionary[L][N]; //二次元配列
+
+int str_key(char str[])
+{
+	int key=0;
+	
+	for(int i=0; i<strlen(str);i ++) key += str[i]*i;
+	
+	key += strlen(str);
+	
+	return key;
+}
+
+int h1(int key, int n) { return key%n; }
+int h2(int key, int n) { return 1 + (key%(n-1)); }
+
+int hash(int key, int n, int i)
+{
+	return (h1(key, n) + i*h2(key, n))%L;
+}
+
+void insert(char str[], int n)
+{
+	int end=1; //ループ条件
+	int i=0;
+	int h; //ハッシュ値
+	int tmp_k = str_key(str);
+	
+	while(end){
+		h = hash(tmp_k, n, i);
+		
+		if(dictionary[h][0] == '\0'){
+			end=0;
+			strcpy(dictionary[h], str);
+			
+		}
+		i++;
+	}
+}
+
+void find(char str[], int n)
+{
+	int end=1; //ループ条件
+	int i=0;
+	int h; //ハッシュ値
+	int tmp_k = str_key(str);
+	
+	while(end){
+		h = hash(tmp_k, n, i);
+		
+		if(dictionary[h][0] != '\0'){
+			if(strcmp(dictionary[h], str)==0){
+				end=0;
+				printf("yes\n");
+			}
+			
+		}else if(dictionary[h][0] == '\0'){
+			end=0;
+			printf("no\n");
+		}
+		i++;
+	}
+}
+
+int main(void)
+{
+	char s[32]; //fgetsで入力を受け取り
+	int n; //命令数
+	char com[10]; //insert,findの命令を格納
+	char str[N]; //入力された文字列を格納
+	char *p, *tok_p;
+	int i;
+	
+	fgets(s, sizeof(s)-1, stdin);
+	sscanf(s, "%d", &n);
+	
+	for(i=0; i<2*n; i++) dictionary[i][0] = '\0';
+	
+	for(i=0; i<n; i++){
+		fgets(s, sizeof(s)-1, stdin);
+		//strtokで文字列を分割
+		p=s;
+		tok_p = strtok(p, " ");
+		strcpy(com, tok_p);
+		p = NULL;
+		tok_p = strtok(p, " ");
+		strcpy(str, tok_p);
+		p = str;
+		while(1){
+			if(*p == '\0') break;
+			if(*p == 0x0d || *p == 0x0a){
+				*p = '\0';
+				break;
+			}p++;
+		}
+		
+		if(com[0] == 'i'){
+			insert(str, n);
+		}else{
+			find(str, n);
+		}
+	}
+	
+	return 0;
+}
+

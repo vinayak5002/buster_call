@@ -1,0 +1,37 @@
+import sys
+from itertools import combinations
+from bisect import bisect_left, bisect_right
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, k, left, right = map(int, f.readline().split())
+    a_list = list(map(int, f.readline().split()))
+
+    s0_list = [sorted(sum(c) for c in combinations(a_list[:n // 2], kk)) for kk in range(k + 1)]
+    s1_list = [sorted(sum(c) for c in combinations(a_list[n // 2:], kk)) for kk in range(k + 1)]
+
+    counter = 0
+    for kk in range(k + 1):
+        s0_kk_list = s0_list[kk]
+        s1_k_kk_list = s1_list[k - kk]
+        for s in s0_kk_list:
+            counter += bisect_right(s1_k_kk_list, right - s) - bisect_left(s1_k_kk_list, left - s)
+
+    print(counter)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

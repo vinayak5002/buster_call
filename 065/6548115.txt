@@ -1,0 +1,151 @@
+import java.io.*;
+import java.util.*;
+import java.math.BigDecimal;
+import java.lang.Object;
+import java.util.function.*;
+
+public class Main {
+  public static void main(String[] args){
+      int n,m,w,p,q,h,s=0,t,ans=0,mx,mn,sum,cnt,now;
+      int[] a=new int[100000],b=new int[8];
+      int[][] cost = new int[200][200];
+      int[] dx={0,1,0,-1},dy={1,0,-1,0};
+      boolean flag;
+      String[] str=new String[100];
+      Scanner scanner =new Scanner(System.in);
+      ArrayList<Integer>vec=new ArrayList<Integer>();
+      while(true){ 
+        w=Integer.parseInt(scanner.next());
+        h=Integer.parseInt(scanner.next());
+        scanner.nextLine();
+        for(int i=0;i<h*2-1;i++){
+          str[i]=scanner.nextLine();
+        }
+        Queue<Pair<Integer,Integer>> qu=new LinkedList<Pair<Integer,Integer>>();
+        for(int i=0;i<h;i++)
+        for(int j=0;j<w;j++){
+          cost[i][j]=-1;
+        }
+        //System.out.println(str[h*2-2]);
+        qu.add(new Pair<Integer,Integer>(0,0));
+        cost[0][0]=0;
+        while(!qu.isEmpty()){
+          Pair<Integer,Integer> pos=qu.poll();
+          int x=pos.first,y=pos.second,X,Y;
+          X=x+1;Y=y;
+          if(X>=0&&X<h&&Y>=0&&Y<w&&str[X*2-1].charAt(Y*2)=='0'&&cost[X][Y]==-1){
+            cost[X][Y]=cost[x][y]+1;
+            qu.add(new Pair<Integer,Integer>(X,Y));
+          }
+
+          X=x-1;Y=y;
+          if(X>=0&&X<h&&Y>=0&&Y<w&&str[X*2+1].charAt(Y*2)=='0'&&cost[X][Y]==-1){
+            cost[X][Y]=cost[x][y]+1;
+            qu.add(new Pair<Integer,Integer>(X,Y));
+          }
+
+          X=x;Y=y+1;
+          if(X>=0&&X<h&&Y>=0&&Y<w&&str[X*2].charAt(y*2+1)=='0'&&cost[X][Y]==-1){
+            cost[X][Y]=cost[x][y]+1;
+            qu.add(new Pair<Integer,Integer>(X,Y));
+          }
+
+          X=x;Y=y-1;
+          if(X>=0&&X<h&&Y>=0&&Y<w&&str[X*2].charAt(y*2-1)=='0'&&cost[X][Y]==-1){
+            cost[X][Y]=cost[x][y]+1;
+            qu.add(new Pair<Integer,Integer>(X,Y));
+          }
+
+        }
+        if(cost[h-1][w-1]!=-1)System.out.println(cost[h-1][w-1]+1);
+        else System.out.println(0);
+      }
+    }
+
+  public interface Compare<T>{
+	  public boolean func(T x,T y);
+  }
+  static String swap(String str, int i, int j){
+      char ch[] = str.toCharArray();
+      char tempo = ch[i];
+      ch[i] = ch[j];
+      ch[j] = tempo;
+      return new String(ch);
+  }
+static class Pair<T,E>{
+    T first;
+    E second;
+    public Pair(T a,E b){
+      first=a;
+      second=b;
+    }
+    public Pair(Pair<T,E>x){
+      first=x.first;
+      second=x.second;
+    }
+    public Pair(){}
+    void print(){
+      System.out.println("first:"+first+" second:"+second);
+    }
+  }
+  public static <T> ArrayList<T> sort(ArrayList<T> x, Compare<T> comp,int l,int r){
+    //[l,r)
+    ArrayList<T>ret=new ArrayList<T>();
+    if(l-r==2){
+      if(comp.func(x.get(l),x.get(l+1))==false){
+        ret.add(x.get(l+1));
+        ret.add(x.get(l));
+        return ret;
+      }
+      ret.add(x.get(l));
+      ret.add(x.get(l+1));
+      return ret;
+    }
+    if(r-l==1){
+      ret.add(x.get(l));
+      return ret;
+    }
+    ArrayList<T> A=sort(x,comp,l,(l+r)/2);
+    ArrayList<T> B=sort(x,comp,(l+r)/2,r);
+    int a=0,b=0;
+    while(a<A.size()&&b<B.size()){
+      if(comp.func(A.get(a),B.get(b))==true){
+        ret.add(A.get(a));
+        a++;
+      }
+      else{
+        ret.add(B.get(b));
+        b++;
+      }
+    }
+    while(a<A.size()){
+        ret.add(A.get(a));
+        a++;
+    }
+     while(b<B.size()){
+        ret.add(B.get(b));
+        b++;
+    }
+    return ret;
+  }
+static class Query{
+    int P,T,id;
+    double ans=0.0;
+    public Query(){}
+    public Query(int x,int y,int z){
+      P=x;T=y;id=z;
+    }
+    public Query(int x,int y,int z,double w){
+      P=x;T=y;id=z;ans=w;
+    }
+ }
+ static class Node{
+  int H,W;
+  double Wt=0.0;
+  public Node(){}
+  public Node(int x,int y){
+    H=x;W=y;
+  }
+ }
+}
+

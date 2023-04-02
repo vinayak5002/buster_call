@@ -1,0 +1,71 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+struct Node {
+	int Id;
+	int k;
+	int parent;
+	vector<int> childs;
+};
+
+int depth_is(vector<Node> tree, int id) {
+	if (tree[id].parent == -1) {
+		return 0;
+	}
+	else {
+		return 1 + depth_is(tree, tree[id].parent);
+	}
+}
+
+int main()
+{
+	int n;
+	cin >> n;
+	vector<Node> tree(n);
+	int id;
+	int k;
+	int parent;
+	int child;
+
+	for (int i = 0; i < n; i++) {
+		tree[i].parent = -1;
+	}
+
+	for (int i = 0; i < n; i++) {
+		cin >> id;
+		tree[id].Id = id;
+		cin >> k;
+		tree[id].k = k;
+		
+		for (int j = 0; j < k; j++) {
+			cin >> child;
+			tree[child].parent = id;
+			tree[id].childs.push_back(child);
+		}
+	}
+
+	for (int i = 0; i < n; i++) {
+		cout << "ノード" << tree[i].Id << " : 親= " << tree[i].parent << "、深さ= " << depth_is(tree, i)<<"、";
+		if (tree[i].parent == -1) {
+			cout << "ルート、";
+		}
+		else if (tree[i].k == 0) {
+			cout << "葉、";
+		}
+		else {
+			cout << "内部ノード、";
+		}
+		cout << "[";
+		if (tree[i].k > 0) {
+			for (int j = 0; j < tree[i].k; j++) {
+				if (j)cout << "、";
+				cout << tree[i].childs[j];
+			}
+		}
+		cout << "]";
+		cout << endl;
+	}
+
+	return 0;
+}

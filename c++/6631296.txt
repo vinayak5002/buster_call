@@ -1,0 +1,60 @@
+#include <iostream>
+#include <cmath>
+#include <vector>
+
+using namespace std;
+using vector_ll = vector<long long>;
+using ll = long long;
+
+void max_heapify(vector_ll &A, ll i){
+    if(i==0)return;
+    ll l, r, largest;
+    l=2*i;
+    r=2*i+1;
+    if(l<A.size() && A[l] > A[i])largest = l;
+    else largest = i;
+    if(r<A.size() && A[r] > A[largest])largest = r;
+    if(largest!=i){
+        swap(A[i], A[largest]);
+        max_heapify(A, largest);
+    }
+}
+void build_max_heap(vector<ll> &A){
+    for(ll i=(A.size())/2; i>=1; --i){
+        max_heapify(A, i);
+    }
+}
+void insert(vector_ll &A, ll num){
+    A.push_back(num);
+    max_heapify(A, (A.size()-1)/2);
+}
+ll extract(vector_ll &A){
+    ll ans=A[1];
+    A[1]=A.back();
+    A.pop_back();
+    max_heapify(A, 1);
+    return ans;
+}
+int main(){
+    vector_ll A{-1};
+    while(true){
+        string st;
+        cin>>st;
+        switch(st[2]){
+            case 's':{          //st=="insert"
+                ll num;
+                cin>>num;
+                insert(A, num);
+                break;
+            }
+            case 't':{          //st=="extract"
+                ll ans = extract(A);
+                cout<<ans<<endl;
+                break;
+            }
+            case 'd':{          //st=="end"
+                return 0;
+            }
+        }
+    }
+}

@@ -1,0 +1,95 @@
+#include<stdio.h>
+
+#define N 8
+
+int board[N][N];
+int queen_sum;
+
+void printBoard(){
+	int i,j;
+	
+	for(i=0;i<N;i++){
+		for(j=0;j<N;j++){
+			if(board[i][j]==1)printf("Q");
+			else printf(".");
+		}
+		puts("");
+	}
+	return;	
+}
+
+int check(int y,int x){
+	int i,j;
+	
+	for(i=0;i<N;i++)
+		if(i!=x && board[y][i]==1)
+			return 0;
+	
+	for(i=0;i<N;i++)
+		if(i!=y && board[i][x]==1)
+			return 0;
+	
+	i=y-1; j=x+1;
+	while(i>=0 && j<N)
+		if(board[i--][j++]==1)
+			return 0;
+	
+	i=y-1; j=x-1;
+	while(i>=0 && j>=0)
+		if(board[i--][j--]==1)
+			return 0;
+	
+	i=y+1; j=x-1;
+	while(i<N && j>=0)
+		if(board[i++][j--]==1)
+			return 0;
+	
+	i=y+1; j=x+1;
+	while(i<N && j<N)
+		if(board[i++][j++]==1)
+			return 0;
+	
+	return 1;
+}
+
+int Get_Solution(int raw){
+	int i;
+	
+	for(i=0;i<N;i++)
+		if(board[raw][i]==1)
+			if(!Get_Solution(raw+1))
+				return 0;
+		
+	if(raw==N){
+		printBoard();
+		return 1;
+	}
+	else{
+		for(i=0;i<N;i++){
+			if(board[raw][i]==0&&check(raw,i)){
+				board[raw][i]=1;
+				if(!Get_Solution(raw+1))
+					board[raw][i]=0;
+			}
+		}
+	}
+	return 0;
+}
+
+int main(void){
+	int number;
+	int raw,column;
+	int i,j;
+	
+	
+	scanf("%d",&number);
+	
+	for(i=0;i<number;i++){
+		scanf("%d%d",&raw,&column);
+		board[raw][column]=1;
+	}
+	
+	i=Get_Solution(0);
+
+	return 0;
+}

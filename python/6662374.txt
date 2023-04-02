@@ -1,0 +1,40 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    s = f.readline().rstrip('\n')
+    t = f.readline().rstrip('\n')
+    ls = len(s)
+    lt = len(t)
+
+    dp = [[0] * (lt + 1) for _ in range(ls + 1)]
+    for i in range(ls + 1):
+        dp[i][0] = i
+    for i in range(lt + 1):
+        dp[0][i] = i
+
+    for i in range(1, ls + 1):
+        for j in range(1, lt + 1):
+            l_match = dp[i - 1][j - 1] + (1 if s[i - 1] != t[j - 1] else 0)
+            l_delete = dp[i - 1][j] + 1
+            l_insert = dp[i][j - 1] + 1
+            dp[i][j] = min(l_match, l_delete, l_insert)
+
+    print(dp[ls][lt])
+    
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

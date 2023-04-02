@@ -1,0 +1,30 @@
+import heapq
+ep = lambda s:exit(print(s))
+rdi = lambda:map(int,input().split())
+lrdi = lambda:list(rdi())
+MOD,MOD9 = 7+10**9,998244353
+INF = float("inf")
+cnt,ans,Ans = 0,0,[]
+
+
+v,e,r = rdi()
+G = [[] for i in range(v)]
+V = [INF]*v
+for i in range(e):
+    s,t,d = rdi()
+    G[s].append([t,d])
+
+que = [[0,r]]
+heapq.heapify(que)
+V[r] = 0
+Visited = [False]*v
+while len(que)>0:
+    _,v = heapq.heappop(que)
+    if Visited[v]: continue
+    Visited[v] = True
+    for nv,w in G[v]:
+        if V[nv]>V[v]+w:
+            V[nv] = min(V[nv],V[v]+w)
+            heapq.heappush(que,[V[v]+w,nv])
+[print(i) if i!=INF else print("INF") for i in V]
+

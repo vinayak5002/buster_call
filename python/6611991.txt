@@ -1,0 +1,48 @@
+while True:
+    n,w,d = map(int,input().split())
+    if n == w == d == 0:
+        break
+    #P = list(map(int,input().split()))
+    piece = [(w,d)]
+    def cut(rect,s):
+        w,d = rect
+        if 1 <= s%(2*w+2*d) <= w-1:#上辺
+            d1 = d
+            d2 = d
+            w1 = w - s%(2*w+2*d)
+            w2 = w - w1
+            if w1>w2:
+                w1,w2 = w2,w1
+        elif w+1 <= s%(2*w+2*d) <= w+d-1:#右辺
+            w1 = w
+            w2 = w
+            d1 = w+d - s%(2*w+2*d)
+            d2 = d - d1
+            if d1>d2:
+                d1,d2 = d2,d1
+        elif w+d+1 <= s%(2*w+2*d) <= 2*w+d-1:#下辺
+            d1 = d
+            d2 = d
+            w1 = 2*w+d - s%(2*w+2*d)
+            w2 = w - w1
+            if w1>w2:
+                w1,w2 = w2,w1
+        else:
+            w1 = w
+            w2 = w
+            d1 = 2*w+2*d - s%(2*w+2*d)
+            d2 = d - d1
+            if d1>d2:
+                d1,d2 = d2,d1
+        return (w1,d1),(w2,d2)
+    for _ in range(n):
+        p,s = map(int,input().split())
+        p1,p2 = cut(piece.pop(p-1),s)
+        piece.append(p1)
+        piece.append(p2)
+
+    ans = [0]*(n+1)
+    for i in range(n+1):
+        ans[i] = piece[i][0]*piece[i][1]
+    ans.sort()
+    print(*ans)

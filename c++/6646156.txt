@@ -1,0 +1,151 @@
+#include<stdio.h>
+#include<string.h>
+#include<stdlib.h>
+
+
+struct Node{
+	int key;
+	struct Node *right;
+	struct Node *left;
+	struct Node *parent;
+};
+typedef struct Node Node;
+
+Node *root, *NIL;
+
+Node * treeMinimum(Node *x){
+	while( x->left != NIL ) x = x->left;
+	return x;
+}
+
+Node * find(Node *u, int k){
+	while ( u != NIL && k != u->key ){
+		if ( k < u->key ) u =  u->left;
+		else u = u->right;
+	}
+	return u;
+}
+
+Node * treeSuccessor(Node *x){
+	if ( x->right != NIL ) return treeMinimum(x->right);
+	Node *y = x->parent;
+	while ( y != NIL && x == y->right ){
+		x = y;
+		y = y->parent;
+	}
+	return y;
+}
+
+
+void treeDelete(Node *z){
+	Node *y;  //削除する対象
+	Node *x;  // y の子
+	
+	//削除する節点を決める
+	if ( z->left == NIL || z->right == NIL ) y = z;
+	else y = treeSuccessor(z);
+	
+	// y の子 x を決める
+	if (  y->left != NIL ){
+		x = y->left;
+	} else {
+		x = y->right;
+	}
+	
+	if ( x != NIL ){
+		x->parent = y->parent;
+	}
+	
+	if ( y->parent == NIL ){
+		root = x;
+	} else {
+		if ( y == y->parent->left ){
+			y->parent->left = x;
+		} else {
+			y->parent->right = x;
+		}
+	}
+	
+	if ( y != z ){
+		z->key = y->key;
+	}
+	
+	free(y);
+}
+
+
+void insert(int k){
+	Node *y;
+	Node *x;
+	Node *z;
+	
+	z = (Node *)malloc(sizeof(Node));
+	z->key = k;
+	z->left = NIL;
+	z->right = NIL;
+	y = NIL;
+	x = root;
+	
+	while ( x != NIL ){
+		y = x;
+		if ( z->key < x->key ) x = x->left;
+		else x = x->right;
+	}
+	
+	//新しい要素の配置場所を決定
+	z->parent = y;
+	if ( y == NIL ) root = z;                 //元々木が存在しなかった場合
+	else if ( z->key < y->key ) y->left = z;
+	else y->right = z;
+}
+
+//中間順巡回
+void inorder(Node *u){
+	if ( u == NIL ) return;
+	inorder(u->left);
+	printf(" %d", u->key);
+	inorder(u->right);
+}
+	
+//先行順巡回
+void preorder(Node *u){
+	if ( u == NIL ) return;
+	printf(" %d", u->key);
+	preorder(u->left);
+	preorder(u->right);
+}
+	
+	
+int main(void){
+	int n, i, x;
+	char com[9];
+	
+	scanf("%d",&n);
+	
+	for ( i = 0; i < n; i++ ) {
+		scanf("%s", com);  
+		
+		if ( com[0] == 'f' ){
+			scanf("%d", &x);
+			Node *t = find(root, x);
+			if ( t != NIL ) printf("yes\n");
+			else printf("no\n");
+		} else if ( com[0] == 'i' ){
+			scanf("%d", &x);
+			insert(x);
+		} else if ( com[0] == 'p' ){
+			inorder(root);
+			printf("\n");
+			preorder(root);
+			printf("\n");
+		} else if ( com[0] == 'd' ){
+			scanf("%d", &x); 
+			treeDelete(find(root, x));
+		}
+	}
+	
+	return 0;
+}
+	
+	
+	

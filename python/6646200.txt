@@ -1,0 +1,97 @@
+/*
+*
+*GRL_5_A: A Diameter of a tree
+*
+*2022/05/24
+*
+*/
+
+#include <iostream>
+#include<cstdio>
+#include<queue>
+#include<climits>
+#include<vector>
+
+using namespace std;
+
+#define MAX 100000
+
+class Edge{
+    public:
+    int t,w;
+    Edge(){};
+    Edge(int t, int w): t(t), w(w){}
+};
+
+vector<Edge> G[MAX];
+int n,d[MAX];
+
+bool vis[MAX];
+int cnt;
+
+void bfs(int s){
+    for(int i = 0; i < n; i++) d[i] = INT_MAX;
+    
+    queue<int> Q;
+    Q.push(s);
+    d[s] = 0;
+    
+    int u;
+    while(!Q.empty()){
+        u = Q.front();Q.pop();
+        for(int i = 0; i < (int)G[u].size() ; i++){
+            Edge e = G[u][i];
+            if(d[e.t] == INT_MAX){
+                d[e.t] = d[u] + e.w;
+                Q.push(e.t);
+            }
+        }
+    }
+}
+
+void solve(){
+    // 任意の節点Sから最も遠い節点tを求める
+    bfs(0);
+
+    int maxv = 0;
+    int t = 0;
+    for(int i = 0; i < n; i++){
+
+        if(d[i] == INT_MAX) continue;
+
+        if(maxv < d[i]){
+            maxv = d[i];
+            t = i;
+        }
+    }
+
+    //節点tから最も遠い節点の距離maxvを求める．
+    bfs(t);
+    maxv = 0;
+    for(int i = 0; i < n; i++){
+
+        if( d[i] == INT_MAX) continue;
+
+        maxv = max(maxv,d[i]);
+    }
+
+    printf("%d\n", maxv);
+
+}
+
+int main() {
+    int s,t,w;
+
+    cin >> n;
+
+    for(int i = 0; i < n-1; i++){
+        cin >> s >> t >> w;
+
+        G[s].push_back(Edge(t,w));
+        G[t].push_back(Edge(s,w));
+    }
+
+    solve();
+
+    return 0;
+}

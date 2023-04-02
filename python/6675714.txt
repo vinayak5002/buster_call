@@ -1,0 +1,117 @@
+import java.util.Scanner;
+public class Main {
+
+	public static void main(String[] args) {
+		Scanner sc=new Scanner(System.in);
+		Dice dice=new Dice();
+		for(int i=0;i<6;i++) {
+			int a=sc.nextInt();
+			dice.setNum(a, i);
+		
+		}
+		int q=sc.nextInt();
+		for(int i=0;i<q;i++){
+			int a=sc.nextInt();
+			int b=sc.nextInt();
+			dice.matchTop(a);
+			dice.matchN(b);
+			System.out.println(dice.getNum(2));
+		
+		}
+		
+
+	}
+
+}
+class Dice {
+	Face[] dice=new Face[6];
+	int topindex;
+	int Eindex;
+	int Nindex;
+	
+	public Dice() {
+		for(int i=0;i<6;i++) {
+			dice[i]=new Face();
+		}
+		topindex=0;
+		Eindex=3;
+		Nindex=1;
+	}
+	
+	
+	public void setNum(int a,int index) {
+		dice[index].setNum(a);
+		
+	}
+	public int getNum(int index) {
+		return dice[index].getNum();
+	}
+	public int getTopNum() {
+		return dice[topindex].getNum();
+	}
+	public void move(char direction ) {
+		int tmp=0;
+		if(direction=='N') {
+			tmp=Nindex;
+			Nindex=5-topindex;
+			topindex=tmp;
+		}else if(direction=='E') {
+			tmp=Eindex;
+			Eindex=5-topindex;
+			topindex=tmp;
+		}else if(direction=='W') {
+			tmp=Eindex;
+			Eindex=topindex;
+			topindex=5-tmp;
+		}else {
+			tmp=Nindex;
+			Nindex=topindex;
+			topindex=5-tmp;
+		}
+	}
+	public void matchTop(int a) {
+		if(dice[0].getNum()==a) {
+			return;
+		}
+		int i=1;
+		for(;i<=3;i++) {
+			move('N');
+			if(dice[topindex].getNum==a) {
+				break;
+			}
+			
+		}
+		if(i==4) {
+			if(dice[Eindex].getNum()==a) {
+				move('E');
+			}else {
+				move('W');
+			}
+			
+			
+		}
+		
+	}
+	public void matchN(int a) {
+		if(dice[Nindex].getNum()==a) {
+			return;
+		}
+		int tmp=Nindex;
+		Nindex=5-Eindex;
+		Eindex=tmp;
+		matchN(a);
+	}
+	
+
+}
+class Face {
+	private int no;
+	
+	public void setNum(int a) {
+		this.no=a;
+	}
+	public int getNum() {
+		return no;
+	}
+}
+

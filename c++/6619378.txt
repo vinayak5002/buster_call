@@ -1,0 +1,77 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+typedef struct Node* NodePointer;
+
+typedef struct Node {
+  int key;
+  NodePointer next, pre;
+} Node;
+
+NodePointer head, last;
+
+NodePointer make_node(int key) {
+  NodePointer tmp = malloc(sizeof(Node));
+  tmp->next = tmp->pre = NULL;
+  tmp->key = key;
+  return tmp;
+}
+
+void init() {
+  head = malloc(sizeof(Node));
+  last = malloc(sizeof(Node));
+  head->next = last;
+  last->pre = head;
+}
+
+void insert(NodePointer s, int key) {
+  NodePointer node = make_node(key);
+  NodePointer t = s->next;
+  s->next = node;
+  node->pre = s;
+  node->next = t;
+  t->pre = node;
+}
+
+void delete(NodePointer p) {
+  NodePointer s = p->pre;
+  NodePointer t = p->next;
+  s->next = t;
+  t->pre = s;
+  free(p);
+}
+
+int main() {
+  int N, num;
+  char str[30];
+  NodePointer p;
+  init();
+  scanf(" %d ", &N);
+  while(N--) {
+    scanf(" %s ", str);
+    if(!strcmp(str,"insert")) {
+      scanf(" %d ", &num);
+      insert(head,num);
+    } else if(!strcmp(str,"delete")) {
+      scanf(" %d ", &num);
+      for(p = head->next; p != last; p = p->next) {
+        if(p->key == num) {
+          delete(p);
+          break;
+        }
+      }
+    } else if(!strcmp(str,"deleteFirst")) {
+      delete(head->next);
+    } else if(!strcmp(str,"deleteLast")) {
+      delete(last->pre);
+    }
+  }
+
+  for(p = head->next; p != last; p = p->next) {
+    printf(p == head->next? "%d":" %d", p->key);
+  }
+  printf("\n");
+
+  return 0;
+}

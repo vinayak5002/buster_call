@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+using ld = long double;
+using P = pair<int, int>;
+using Graph = vector<vector<ll>>;
+using vi = vector<int>;
+using vl = vector<long>;
+using vll = vector<long long>;
+using vvi = vector<vi>;
+using vvl = vector<vl>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using vc = vector<char>;
+using vvc = vector<vc>;
+using pll = pair<long long, long long>;
+using vpll = vector<pll>;
+const long double EPS = 1e-18;
+const long long INF = 1e18;
+const long double PI = acos(-1.0L);
+#define reps(i, a, n) for (ll i = (a); i < (ll)(n); i++)
+#define rep(i, n) for (ll i = (0); i < (ll)(n); i++)
+#define rrep(i, n) for (ll i = (1); i < (ll)(n + 1); i++)
+#define repd(i, n) for (ll i = n - 1; i >= 0; i--)
+#define rrepd(i, n) for (ll i = n; i >= 1; i--)
+#define ALL(n) begin(n), end(n)
+#define IN(a, x, b) (a <= x && x < b)
+#define INIT                          \
+    std::ios::sync_with_stdio(false); \
+    std::cin.tie(0);
+template <class T>
+inline T CHMAX(T& a, const T b) {
+    return a = (a < b) ? b : a;
+}
+template <class T>
+inline T CHMIN(T& a, const T b) {
+    return a = (a > b) ? b : a;
+}
+struct edge {
+    ll from, to, cost;
+};
+vll shortest_path(vector<edge> es, ll start, ll V, ll E) {
+    vll d(V);
+    rep(i, V) { d.at(i) = INF; }
+    d.at(start) = 0;
+    while (true) {
+        bool update = false;
+        rep(i, E) {
+            edge e = es.at(i);
+            if (d.at(e.from) != INF && d.at(e.to) > d.at(e.from) + e.cost) {
+                d.at(e.to) = d.at(e.from) + e.cost;
+                update = true;
+            }
+        }
+        if (!update) {
+            break;
+        }
+    }
+    return d;
+}
+bool find_negative_loop(vector<edge> es, ll start, ll V, ll E) {
+    vll d(V, 0);
+    rep(i, V) {
+        rep(j, E) {
+            edge e = es.at(j);
+            if (d.at(e.to) > d.at(e.from) + e.cost) {
+                d.at(e.to) = d.at(e.from) + e.cost;
+                if (i == V - 1) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+int main() {
+    ll V, E, r;
+    cin >> V >> E >> r;
+    vector<edge> es(E);
+    rep(i, E) {
+        ll s, t, d;
+        cin >> s >> t >> d;
+        es.at(i) = {s, t, d};
+    }
+    if (find_negative_loop(es, r, V, E)) {
+        cout << "NEGATIVE CYCLE" << endl;
+    } else {
+        vll d = shortest_path(es, r, V, E);
+        rep(i, V) { cout << d.at(i) << endl; }
+    }
+}

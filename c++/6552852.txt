@@ -1,0 +1,52 @@
+#include<bits/stdc++.h>
+#define M 256
+using namespace std;
+int R(int i, int S, int A, int C){
+  if(i==0){
+    return S;
+  }else{
+    return (A*R(i-1,S,A,C)+C) % M;
+  }
+}
+int main(){
+  int n;
+  
+  
+  while(cin>>n, n){
+    long double ans=0;
+    int ss, aa, cc;
+    bool f = true;
+    vector<int>I(n), O(n);
+    for(int i=0; i<n; i++){
+      cin >> I[i];
+    }
+    
+    for(int s=0; s<16; s++){
+    for(int a=0; a<16; a++){
+    for(int c=0; c<16; c++){
+      
+      vector<int>count(256, 0);
+      for(int i=0; i<n; i++){
+        O[i] = (I[i]+R(i+1,s,a,c))% M;
+        count[O[i]]++;
+      }
+      long double h=0;
+      for(int j=0; j<256; j++){
+        if(count[j]==0)continue;
+        long double d = count[j];
+        h += d*log(d);
+        //cout << h;
+      }
+      if(f==true || ans < h){
+        ss = s;
+        aa = a;
+        cc = c;
+        ans = h;
+        //cout << ans << endl;
+        f = false;
+      }
+    }}}
+    cout << ss << " " << aa << " " << cc << endl;
+  }
+  return 0;
+}

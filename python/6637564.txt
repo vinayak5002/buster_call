@@ -1,0 +1,55 @@
+
+#include <bits/stdc++.h>
+using namespace std;
+ 
+#define V_SUM_MAX 1000
+#define N_MAX 100
+#define W_MAX 10000000
+ 
+
+int dp[V_SUM_MAX + 1][N_MAX];
+bool v[V_SUM_MAX + 1][N_MAX];
+ 
+
+int solveDp(int r, int i, vector<int>& w, vector<int>& val, int n)
+{
+
+    if (r <= 0)
+        return 0;
+    if (i == n)
+        return W_MAX;
+    if (v[r][i])
+        return dp[r][i];
+ 
+
+    v[r][i] = 1;
+ 
+    dp[r][i]
+        = min(solveDp(r, i + 1, w, val, n),
+              w[i] + solveDp(r - val[i],
+                             i + 1, w, val, n));
+    return dp[r][i];
+}
+
+int maxWeight(vector<int>& w, vector<int>& val, int n, int c)
+{
+
+    for (int i = V_SUM_MAX; i >= 0; i--) {
+        if (solveDp(i, 0, w, val, n) <= c) {
+            return i;
+        }
+    }
+    return 0;
+}
+
+int main()
+{
+    vector<int> w = { 3, 4, 5 };
+    vector<int> val = { 30, 50, 60 };
+    int n = (int)w.size();
+    int C = 8;
+ 
+    cout << maxWeight(w, val, n, C);
+ 
+    return 0;
+}

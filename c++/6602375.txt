@@ -1,0 +1,63 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+vector<vector<int>> used;
+
+string Time(int Min){
+  int h = Min/60;
+  int m = Min%60;
+  string H = to_string(h);
+  string M = to_string(m);
+  if(H.size() == 1){
+    H += "0";
+    reverse(H.begin(),H.end());
+  }
+  if(M.size() == 1){
+    M += "0";
+    reverse(M.begin(),M.end());
+  }
+  H += M;
+  return H;
+}
+
+int Power(string S,string T){
+  int res = 0;
+  for(int i=0;i<4;i++){
+    int a = S[i]-'0';
+    int b = T[i]-'0';
+    for(int j=0;j<7;j++){
+      if(used[a][j] == 0 && used[b][j] == 1){
+        res++;
+      }
+    }
+  }
+  return res;
+}
+
+int main(){
+  used = vector<vector<int>>(10,vector<int>(7,0));
+  //    0
+  // 1     2
+  //    3
+  // 4     5
+  //    6
+  used[0][0] = used[0][1] = used[0][2] = used[0][4] = used[0][5] = used[0][6] = 1;
+  used[1][2] = used[1][5] = 1;
+  used[2][0] = used[2][2] = used[2][3] = used[2][4] = used[2][6] = 1;
+  used[3][0] = used[3][2] = used[3][3] = used[3][5] = used[3][6] = 1;
+  used[4][1] = used[4][2] = used[4][3] = used[4][5] = 1;
+  used[5][0] = used[5][1] = used[5][3] = used[5][5] = used[5][6] = 1;
+  used[6][0] = used[6][1] = used[6][3] = used[6][4] = used[6][5] = used[6][6] = 1;
+  used[7][0] = used[7][1] = used[7][2] = used[7][5] = 1;
+  used[8][0] = used[8][1] = used[8][2] = used[8][3] = used[8][4] = used[8][5] = used[8][6] = 1;
+  used[9][0] = used[9][1] = used[9][2] = used[9][3] = used[9][5] = used[9][6] = 1;
+  int h1,m1,h2,m2;
+  cin >> h1 >> m1 >> h2 >> m2;
+  int A = h1*60+m1;
+  int B = h2*60+m2;
+  int ans = 0;
+  for(int i=A+1;i<=B;i++){
+    ans += Power(Time(i-1),Time(i));
+  }
+  cout << ans << endl;
+}

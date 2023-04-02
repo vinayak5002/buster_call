@@ -1,0 +1,33 @@
+import sys
+import heapq
+input = sys.stdin.readline
+
+INF = 1<<60
+v, e, r = map(int, input().split())
+g = [[] for _ in range(v)]
+for i in range(e):
+    s, t, d = map(int, input().split())
+    g[s].append((t, d))
+
+dist = [INF]*v
+dist[r] = 0
+
+que = []
+heapq.heappush(que, (dist[r], r))
+
+while len(que)>0:
+    d_now, now  = heapq.heappop(que)
+
+    if d_now > dist[now]:
+        continue
+
+    for to in g[now]:
+        if dist[to[0]] > dist[now]+ to[1]:
+            dist[to[0]] = dist[now] + to[1]
+            heapq.heappush(que, (dist[to[0]], to[0]))
+
+for i in range(v):
+    if dist[i] < INF:
+        print(dist[i])
+    else:
+        print('INF')

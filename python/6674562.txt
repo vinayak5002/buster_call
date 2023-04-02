@@ -1,0 +1,71 @@
+import scala.annotation.tailrec
+import scala.io.StdIn
+
+case class Node() {
+  val nodes: Array[Option[Node]] = Array.fill[Option[Node]](4)(None)
+  def register(key:String):Unit = {
+    def setNode(n:Node, idx:Int):Unit = {
+      if (n.nodes(idx).isEmpty) n.nodes(idx) = Some(Node())
+    }
+    def iterate(root:Node, key:String):Unit = key.headOption match {
+      case Some('A') =>
+        setNode(root,0)
+        root.nodes(0).foreach(iterate(_, key.tail))
+      case Some('C') =>
+        setNode(root,1)
+        root.nodes(1).foreach(iterate(_, key.tail))
+      case Some('G') =>
+        setNode(root,2)
+        root.nodes(2).foreach(iterate(_, key.tail))
+      case Some('T') =>
+        setNode(root,3)
+        root.nodes(3).foreach(iterate(_, key.tail))
+      case _ => ()
+    }
+    iterate(this, key)
+  }
+  def exist(key:String):Boolean = {
+    @tailrec
+    def iterate(root:Node, key:String):Boolean = key.headOption match {
+      case Some('A') => root.nodes(0) match {
+        case Some(n) => iterate(n, key.tail)
+        case None => false
+      }
+      case Some('C') => root.nodes(1) match {
+        case Some(n) => iterate(n, key.tail)
+        case None => false
+      }
+      case Some('G') => root.nodes(2) match {
+        case Some(n) => iterate(n, key.tail)
+        case None => false
+      }
+      case Some('T') => root.nodes(3) match {
+        case Some(n) => iterate(n, key.tail)
+        case None => false
+      }
+      case _ => true
+    }
+    iterate(this, key)
+  }
+}
+
+object Main extends App {
+  val N  = StdIn.readInt()
+  val S = for (_ <- 0 until N) yield StdIn.readLine().split(" ").toList
+
+  @tailrec
+  def solver(ll:List[List[String]], ac:List[String]):List[String] = {
+    ll match {
+      case List("insert", s)::xs =>
+        tree.register(s)
+        solver(xs, ac)
+      case List("find", s)::xs => if (tree.exist(s)) solver(xs, "yes"::ac) else solver(xs, "no"::ac)
+      case _ => ac.reverse
+    }
+  }
+
+  val tree = Node()
+  val C = solver(S.toList, List())
+  println(s"${C.mkString("\n")}")
+
+}

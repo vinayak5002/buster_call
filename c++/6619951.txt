@@ -1,0 +1,94 @@
+#include<bits/stdc++.h>
+using namespace std;
+struct node
+{
+	int p,d;
+	vector<int>ch;
+}T[100005];
+int n,root;
+string ril(int node)
+{
+	if(T[node].p==-1)
+		return "root";
+	else if(T[node].ch.empty())
+		return "leaf";
+	else
+		return "internal node";
+}
+void chout(int node)
+{
+	int len=T[node].ch.size();
+	if(len==0) 
+		cout<<"[]"<<endl;
+	else if(len==1)
+		cout<<"["<<T[node].ch[0]<<"]"<<endl;
+	else
+		for(int i=0;i<len;i++)
+		{
+			if(i==0)
+			{
+				cout<<'['<<T[node].ch[i];
+			}
+			else if(i==len-1)
+			{
+				cout<<", "<<T[node].ch[i]<<"]"<<endl;
+			}
+			else
+			{
+				cout<<", "<<T[node].ch[i];
+			}
+		}
+}
+void depth(int root,int d)
+{
+	T[root].d=d;
+	if(T[root].ch.empty())
+		return;
+	int len=T[root].ch.size();
+	for(int i=0;i<len;i++)
+	{
+		depth(T[root].ch[i],d+1);
+	}
+}
+void preOrder(int node)
+{
+	if(node==n)
+		return;
+	cout<<"node "<<node<<": parent = "<<T[node].p<<", depth = "<<T[node].d<<", "<<ril(node)<<", ";
+	chout(node);
+	preOrder(node+1);
+}
+int main()
+{
+	int i,val,num,x;
+	cin>>n;
+	for(int i=0;i<n;i++)
+	{
+		T[i].p=-1;
+	}
+	for(i=0;i<n;i++)
+	{
+		cin>>val>>num;
+		if(num>0)
+		{
+			for(int j=0;j<num;j++)
+			{
+				cin>>x;
+				T[val].ch.push_back(x);
+				T[x].p=val; 
+			}
+		}
+	}
+	
+	for(i=0;i<n;i++)
+	{
+		if(T[i].p==-1)
+		{
+			root=i;
+			break;
+		}
+	}
+	depth(root,0);
+	preOrder(0);
+	return 0;
+}

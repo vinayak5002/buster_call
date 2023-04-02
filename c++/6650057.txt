@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct{
+	char s[32];
+	char p[1001];
+} Dic;
+
+int compare_Dic(const void *a, const void *b)
+{
+    return (int)strcmp(((Dic*)a)->s, ((Dic*)b)->s);
+}
+
+
+int main(int argc, char *argv[]){
+	int i,j,n;
+	char b[32], t[10000];
+	Dic d[100],*p;
+	memset(d, 0, sizeof(d));
+	for(i=0;i<100;i++){
+		scanf("%s ",b);
+		scanf("%d ",&n);
+		for(p=d;*p->s && strcmp(p->s, b);p++);
+		strcpy(p->s,b);
+		p->p[n]=1;
+	}
+	qsort(&d, 100, sizeof(Dic), compare_Dic);
+	for(p=d;p<=&d[99];p++){
+		if(!p->s[0]) continue;
+		printf("%s\n", p->s);
+		for(t[0]=0,i=1;i<1001;i++) if(p->p[i]) sprintf(&t[strlen(t)], "%d ", i);
+		t[strlen(t)-1]=0;
+		printf("%s\n", t);
+	}
+    return 0;
+}

@@ -1,0 +1,47 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+    let inp = si[0].split(" ");
+    const dec_a = Number(inp[0]);
+    const dec_b = Number(inp[1]);
+
+    let str = fillZero(dec_a & dec_b) + "\n";
+    str += fillZero(dec_a | dec_b) + "\n";
+    str += fillZero(dec_a ^ dec_b) + "\n";
+    so.write(str)
+
+}
+const fillZero = (string, length) => ("0".repeat(length) + string).slice(-length);
+// 0で埋めて32桁にする.
+
+const swapZero_one = (char) => {
+    // 0を1に, 1を0に変換する. 
+    let swapped = "";
+    char === "0" ?
+        swapped = "1" :
+        swapped = "0";
+    return swapped;
+}
+
+const inversion = (string) => {
+    // 32bit全ての0と1を入れ替える.
+    let inv = "";
+    for (let i = 0; i < string.length; i++) {
+        inv += swapZero_one(string.charAt(i))
+    }
+    return inv;
+}
+
+const shiftL = (string) => {
+    // 左へ1つずらす.
+    const shifted = string.slice(1) + "0";
+    return shifted;
+}
+
+const shiftR = (string) => {
+    // 右へ1つずらす.
+    const shifted = "0" + string.slice(0, string.length - 1);
+    return shifted;
+}

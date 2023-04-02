@@ -1,0 +1,74 @@
+class Node:
+  def __init__(self, key=0):
+    self.key = key
+    self.pa = None
+    self.right = None
+    self.left = None
+
+def preOrder(node):
+  pre_num = ""
+  if node: 
+    pre_num += f" {node.key}"
+    pre_num += preOrder(node.left)
+    pre_num += preOrder(node.right)
+  
+  return pre_num
+
+def inOrder(node):
+  in_num =  ""
+  if node:
+    in_num += inOrder(node.left)
+    in_num += f" {node.key}"
+    in_num += inOrder(node.right)
+  
+  return in_num
+
+
+def insert(key):
+  global root
+  y = None
+  x = root
+  z = Node(key)
+  while x != None:
+    y = x
+    if z.key < x.key:
+      x = x.left
+    else:
+      x = x.right
+  z.pa = y
+  
+  if y == None:
+    root = z
+
+  elif z.key < y.key:
+    y.left = z
+
+  else:
+    y.right = z
+
+def find(key):
+  if key in tree:
+    return "yes"
+  else:
+    return "no"
+
+
+tree = []
+m = int(input())
+root = None
+for _ in range(m):
+  order = input()
+  if order[:6] == "insert":
+    key = int(order[7:])
+    tree.append(key)
+    insert(int(key))
+  
+  elif order[:4] == "find":
+    key = order[5:]
+    print(find(int(key)))
+
+  else:
+    print(inOrder(root), end="")
+    print('')
+    print(preOrder(root))
+

@@ -1,0 +1,59 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+const int a = 3;
+const int b = 457; 
+const int c = 13831;
+
+vector<int> sroll(vector<int> dice) {
+    int tmp = dice[0];
+    dice[0] = dice[4];
+    dice[4] = dice[5];
+    dice[5] = dice[1];
+    dice[1] = tmp;
+    return dice;
+}
+
+vector<int> eroll(vector<int>& dice) {
+    int tmp = dice[0];
+    dice[0] = dice[3];
+    dice[3] = dice[5];
+    dice[5] = dice[2];
+    dice[2] = tmp;
+    return dice;
+}
+
+vector<int> nroll(vector<int>& dice) {
+    int tmp = dice[1];
+    dice[1] = dice[3];
+    dice[3] = dice[4];
+    dice[4] = dice[2];
+    dice[2] = tmp;
+    return dice;
+}
+
+vector<int> roll(vector<int> dice) {
+    for (int i = 0 ; i < 10000 ; i++) {
+        int r = rand() % 3;
+        vector<int> comp = dice;
+        if (r == 0) comp = sroll(comp);
+        if (r == 1) comp = eroll(comp);
+        if (r == 2) comp = nroll(comp);
+        dice = min(dice, comp);
+    }
+
+    return dice;
+}
+
+vector<int> solve() {
+    vector<int> dice(6); for (auto& x : dice) cin >> x;
+    return roll(dice);
+}
+
+
+int main() {
+    srand((unsigned)time(NULL));
+    vector<int> fir = solve(), sec = solve();
+    cout << (fir == sec ? "Yes" : "No") << endl;
+}
+

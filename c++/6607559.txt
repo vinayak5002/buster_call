@@ -1,0 +1,121 @@
+#include "iostream"
+#include "climits"
+#include "list"
+#include "queue"
+#include "stack"
+#include "set"
+#include "functional"
+#include "algorithm"
+#include "string"
+#include "map"
+#include "unordered_map"
+#include "unordered_set"
+#include "iomanip"
+#include "cmath"
+#include "random"
+#include "bitset"
+#include "cstdio"
+#include "numeric"
+#include "cassert"
+#include "ctime"
+
+using namespace std;
+
+//constexpr long long int MOD = 1000000007;
+constexpr long long int MOD = 998244353;
+constexpr double EPS = 1e-8;
+
+//int N, M, K, T, H, W, L, R;
+long long int N, M, K, T, H, W, L, R;
+
+class UnionFind {
+	vector<int>parent;
+	vector<int>rank;
+public:
+	UnionFind(int num) {
+		num++;
+		parent.resize(num);
+		rank.resize(num);
+		for (int i = 0; i < num; i++) {
+			parent[i] = i;
+			rank[i] = 0;
+		}
+	}
+	int Find(int node) {
+		if (parent[node] == node)return node;
+		else return parent[node] = Find(parent[node]);
+	}
+	void Unite(int u, int v) {
+		u = Find(u);
+		v = Find(v);
+		if (u == v)return;
+		if (rank[u] < rank[v])parent[u] = v;
+		else {
+			parent[v] = u;
+			if (rank[u] == rank[v])rank[u]++;
+		}
+	}
+	bool Check_Same(int u, int v) {
+		return Find(u) == Find(v);
+	}
+};
+
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(0);
+
+	while (cin >> N >> M >> K, N) {
+		vector<int>au;
+		vector<int>av;
+		vector<int>aw;
+		vector<int>bu;
+		vector<int>bv;
+		vector<int>bw;
+		for (int i = 0; i < M; i++) {
+			int a, b, c;
+			cin >> a >> b >> c;
+			a--, b--;
+			char ab;
+			cin >> ab;
+			if (ab == 'A') {
+				au.push_back(a);
+				av.push_back(b);
+				aw.push_back(c);
+			}
+			else {
+				bu.push_back(a);
+				bv.push_back(b);
+				bw.push_back(c);
+			}
+		}
+		long long ans = LLONG_MAX;
+		for (int i = -101; i <= 100; i++) {
+			UnionFind uf(N);
+			vector<pair<int, pair<int, int>>>edge;
+			for (int j = 0; j < au.size(); j++) {
+				edge.push_back({ aw[j] + i,{au[j],av[j]} });
+			}
+			for (int j = 0; j < bu.size(); j++) {
+				edge.push_back({ bw[j],{-bu[j],-bv[j]} });
+			}
+			reverse(edge.begin(), edge.end());
+			stable_sort(edge.begin(), edge.end());
+			int num = 0;
+			int score = 0;
+			for (auto j : edge) {
+				if (uf.Check_Same(abs(j.second.second), abs(j.second.first)))continue;
+				uf.Unite(abs(j.second.first), abs(j.second.second));
+				score += j.first;
+				num += j.second.first + j.second.second > 0;
+			}
+		//	cout << i << " " << num << endl;
+			if (num <= K) {
+				if (i == -101 && num < K)break;
+				ans = min(ans, score - i * K);
+				break;
+			}
+		}
+		if (ans == LLONG_MAX)ans = -1;
+		cout << ans << endl;
+	}
+}

@@ -1,0 +1,38 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define ll long long
+#define loop(__x, __start, __end) for(int __x = __start; __x < __end; __x++)
+template <class T> bool chmin(T &a, T b) { if (a > b) { a = b; return true; } return false; }
+
+const int INF = 60000;
+int n, m;
+vector<int> A(20);
+
+vector<vector<int>> dp(50010, vector<int>(30, -1));
+
+int dfs(int amt, int i) {
+  if (amt == 0) return 0;
+  if (i == m) return INF;
+  //if (~dp[amt][i]) return dp[amt][i];
+
+  int ret = INF;
+  chmin(ret, dfs(amt, i + 1));
+  if (amt - A[i] >= 0) {
+    chmin(ret, dfs(amt - A[i], i + 1) + 1);
+    chmin(ret, dfs(amt - A[i], i) + 1);
+  }
+  return ret;
+}
+
+
+int main() {
+  cin >> n >> m;
+  A.resize(m);
+  loop(i,0,m) cin >> A[i];
+  sort(A.begin(), A.end());
+  reverse(A.begin(), A.end());
+  cout << dfs(n, 0) << endl;
+  return 0;
+}
+
+

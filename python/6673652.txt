@@ -1,0 +1,163 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+
+public class Main {
+
+	static int[] parent, left, right, ver;
+	static StringBuilder sb = new StringBuilder();
+
+	public static void main(String[] args) throws IOException{
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		PrintWriter out = new PrintWriter(System.out);
+
+		int n = Integer.parseInt(br.readLine());
+
+		parent = new int[n-1];
+		left = new int[n-1];
+		right = new int[n-1];
+		ver = new int[n-1];
+
+		String[] num;
+		String input, pre, in, find;
+		int x = 0;
+
+		for(int i=0; i<n-1; i++) {
+			parent[i] = -1;
+			left[i] = -1;
+			right[i] = -1;
+			ver[i] = -1;
+		}
+
+		//入力&格納
+		for(int i=0; i<n; i++) {
+
+			input = br.readLine();
+
+			if(input.charAt(0) == 'i') {
+				num = input.split(" ");
+
+				insert(Integer.parseInt(num[1]), i);
+			}
+			else if(input.charAt(0) == 'p'){
+				in = inOrder(x);
+				pre = preOrder(x);
+
+				out.println(in);
+				out.println(pre);
+
+			}
+			else {
+
+				num = input.split(" ");
+				find = findNum(Integer.parseInt(num[1]), 0);
+				out.println(find);
+			}
+
+		}
+
+		out.flush();
+	}
+
+	//二分探索木の生成
+	static void insert(int x, int i) {
+
+		int z = 0;
+		int y = 0;
+
+		while(true) {
+
+			if(ver[z] != -1) {
+
+				//左探索
+				if(ver[z] > x) {
+
+					if(left[z] != -1)
+						z = left[z];
+
+					//ver[z]のインデックス==left[y]として探索できるように
+					else {
+						y = z;
+						z = i;
+						ver[z] = x;
+						left[y] = z;
+						break;
+					}
+
+				}
+
+				else {
+
+					//右探索
+					if(right[z] != -1)
+						z = right[z];
+
+					else {
+						y = z;
+						z = i;
+						ver[z] = x;
+						right[y] = z;
+						break;
+					}
+				}
+			}
+			else {
+				ver[z] = x;
+				break;
+			}
+		}
+	}
+
+	//前順
+	static String preOrder(int x) {
+
+		String s = " " + ver[x];
+		if(left[x] != -1)
+			s += preOrder(left[x]);
+
+		if(right[x] != -1)
+			s += preOrder(right[x]);
+
+		return s;
+	}
+
+	//中順
+	static String inOrder(int x) {
+
+		String s = "";
+
+		if(left[x] != -1)
+			s += inOrder(left[x]);
+
+		s += " " + ver[x];
+
+		if(right[x] != -1)
+			s += inOrder(right[x]);
+
+		return s;
+
+	}
+
+	//要素の探索
+	static String findNum(int k, int z) {
+
+		if(ver[z] == k)
+			return "yes";
+
+		else {
+			if(left[z] != -1) {
+				if(ver[z] > k)
+					return findNum(k, left[z]);
+			}
+
+			if(right[z] != -1) {
+				if(ver[z] < k)
+					return findNum(k, right[z]);
+			}
+		}
+
+		return "no";
+	}
+}

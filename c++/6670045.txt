@@ -1,0 +1,114 @@
+#include <stdio.h>
+#define MAX 100001
+#define max 1000000001
+
+struct card{
+	char suit;
+	int value;
+};
+
+struct card card1[MAX], card2[MAX];
+
+int partition(int p, int r){
+	int j;
+	struct card tmp; ;
+	int x = card1[r].value, i = p - 1;
+	
+	for(j = p; j <= r -1; j++){
+		if(card1[j].value <= x){
+			i += 1;
+			tmp = card1[i];
+			card1[i] = card1[j];
+			card1[j] = tmp;
+		}
+	}
+	
+	tmp = card1[i + 1];
+	card1[i + 1] = card1[r];
+	card1[r] = tmp;
+	
+	return i + 1;
+}
+
+void quicksort(int p, int r){
+	if(p < r){
+		int q;
+		q = partition(p, r);
+		quicksort(p, q - 1);
+		quicksort(q + 1, r);
+	}
+}
+
+void merge(int left, int mid, int right){
+	int i, j, k;
+	int n1 = mid - left;
+	int n2 = right - mid;
+	struct card L[n1 + 1], R[n2 + 1];
+	
+	for(i = 0; i < n1; i++){
+		L[i] = card2[left + i];
+	}
+	
+	for(i = 0; i < n2; i++){
+		R[i] = card2[mid + i];
+	}
+	
+	L[n1].value = max;
+	R[n2].value = max;
+	
+	i = 0, j = 0;
+	for(k = left; k < right; k++){
+		if(L[i].value <= R[j].value){
+			card2[k] = L[i];
+			i++;
+		}
+		
+		else{
+			card2[k] = R[j];
+			j++;
+		}
+	}
+}
+
+void mergeSort(int left, int right){
+	if(left + 1 < right){
+		int mid = (left + right) / 2;
+		mergeSort(left, mid);
+		mergeSort(mid, right);
+		merge(left, mid, right);
+	}
+}
+
+int main (void){
+	int n, i, num;
+	char s[10];
+	scanf("%d", &n);
+	
+	for(i = 0; i < n; i++){
+		scanf("%s", s);
+		card1[i].suit = card2[i].suit = s[0];
+		scanf("%d", &num);
+		card1[i].value = card2[i].value = num;
+	}
+	
+	quicksort(0, n - 1);
+	
+	mergeSort(0, n - 1);
+	
+	for(i = 0; i < n; i++){
+		if(card1[i].suit != card2[i].suit){
+			printf("Not stable\n");
+			break;
+		}
+	}
+	
+	if(i == n){
+		printf("Stable\n");
+	}
+	
+	for(i = 0; i < n; i++){
+		printf("%c %d\n", card1[i].suit, card1[i].value);
+	}
+	
+	return 0;
+}

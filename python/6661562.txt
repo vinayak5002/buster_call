@@ -1,0 +1,27 @@
+n, m = map(int, input().split())
+inf = 1 << 60
+D = [[inf] * n for _ in range(n)]
+for i in range(n):
+    D[i][i] = 0
+for _ in range(m):
+    s, t, d = map(int, input().split())
+    D[s][t] = min(D[s][t], d)
+
+
+for k in range(n):
+    for i in range(n):
+        for j in range(n):
+            D[i][j] = min(D[i][j], D[i][k] + D[k][j])
+
+for k in range(n):
+    for i in range(n):
+        for j in range(n):
+            if D[i][j] > D[i][k] + D[k][j]:
+                print("NEGATIVE CYCLE")
+                exit()
+
+for i in range(n):
+    for j in range(n):
+        if D[i][j] == inf:
+            D[i][j] = "INF"
+    print(*D[i])

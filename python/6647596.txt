@@ -1,0 +1,27 @@
+Mod=998244353
+A,B=gets.split.map(&:to_i)
+ans=0
+(2..B).each do |i|
+  a,aa=A,[]
+  while a>0 do
+    aa.unshift(a%i)
+    a/=i
+  end
+  if aa.size%2==0 then
+    aa.pop
+    aa.size.times {|j| aa[j]=(j%2==0 ? i-1 : 0)}
+  else
+    f=false
+    aa.size.times do |j|
+      if j%2==1 && aa[j]!=0 then
+        aa[j]=0
+        f=true
+      elsif f then
+        aa[j]=i-1
+      end
+    end
+  end
+  ans+=aa.each_with_index.inject(0) {|r,(j,k)| r+(k%2==0 ? j*i**((aa.size-k)/2) : 0) }
+  ans%=Mod
+end
+puts ans%Mod

@@ -1,0 +1,188 @@
+#include <iostream>
+#include <algorithm>
+#include <cmath>
+#include <vector>
+using namespace std;
+
+const double eps = 1e-8;
+
+struct Vector
+{
+    double x, y;
+
+    Vector(double x = 0, double y = 0) : x(x), y(y) {}
+
+    Vector operator+(Vector p) const { return Vector(x + p.x, y + p.y); }
+    Vector operator-(Vector p) const { return Vector(x - p.x, y - p.y); }
+    Vector operator*(double k) const { return Vector(x * k, y * k); }
+    Vector operator/(double k) const { return Vector(x / k, y / k); }
+
+    bool operator==(Vector p) const
+    {
+        return fabs(x - p.x) < eps && fabs(y - p.y) < eps;
+    }
+
+    bool operator<(Vector p) const
+    {
+        if (fabs(x - p.x) > eps)
+            return x < p.x;
+        return y < p.y;
+    }
+
+    double dot(Vector p) const { return x * p.x + y * p.y; }
+    double cross(Vector p) const { return x * p.y - p.x * y; }
+    double norm() const { return sqrt(x * x + y * y); }
+};
+
+struct Seg
+{
+    Vector a, b;
+
+    Seg(Vector a = Vector(), Vector b = Vector()) : a(a), b(b) {}
+
+    Vector project(Vector p)
+    {
+        Vector v = b - a;
+        double t = (p - a).dot(v) / v.dot(v);
+        return a + v * t;
+    }
+};
+
+double getDisLP(Seg s, Vector p)
+{
+    Vector proj = s.project(p);
+    return (proj - p).norm();
+}
+
+struct Circle
+{
+    Vector c;
+    double r;
+
+    Circle(Vector c = Vector(), double r = 0) : c(c), r(r) {}
+
+    Vector getCrossPointCL(Seg x)
+    {
+        Vector pr = x.project(c);
+        Vector e = (x.b - x.a) / (x.b - x.a).norm();
+        Vector a, b;
+        if (fabs(getDisLP(x, c) - r) < eps)
+            a = b = pr;
+        else
+        {
+            double base = sqrt(r * r - (pr - c).dot(pr - c));
+            a = pr + e * base;
+            b = pr - e * base;
+        }
+        if (a == x.a || a == x.b)
+            return b;
+        else
+            return a;
+    }
+    vector<Vector> getCrossPointsCL(Seg x)
+    {
+        vector<Vector> res;
+        Vector pr = x.project(c);
+        Vector e = (x.b - x.a) / (x.b - x.a).norm();
+        Vector a, b;
+        if (fabs(getDisLP(x, c) - r) < eps)
+            res.push_back(a);
+        else
+        {
+            double base = sqrt(r * r - (pr - c).dot(pr - c));
+            a = pr + e * base;
+            b = pr - e * base;
+            res.push_back(b);
+            res.push_back(a);
+        }
+        // sort(res.begin(), res.end());
+        return res;
+    }
+};
+
+double getDisPP(const Vector &p, const Vector &q)
+{
+    return (p - q).norm();
+}
+
+double getDisPL(const Vector &p, const Seg &l)
+{
+    return fabs((l.b - l.a).cross(p - l.a)) / (l.b - l.a).norm();
+}
+
+double getDisSP(const Seg &s, const Vector &p)
+{
+    if ((s.b - s.a).dot(p - s.a) < 0) // 点p在a点那一侧的外面
+        return getDisPP(p, s.a);
+    if ((s.a - s.b).dot(p - s.b) < 0) // 点p在b点那一侧的外面
+        return getDisPP(p, s.b);
+    return getDisPL(p, s); // 可以取p到s的垂线段距离
+}
+
+int main()
+{
+    int n;
+    double r;
+    cin >> n >> r;
+    vector<Vector> v;
+    Circle c;
+    c.r = r;
+
+    double s = 0;
+    Vector x;
+    for (int i = 0; i < n; ++i)
+    {
+        cin >> x.x >> x.y;
+        v.push_back(x);
+    }
+
+    for (int i = 0; i < n; ++i)
+    {
+        Vector p1 = v[i];
+        Vector p2 = v[(i + 1) % n];
+
+        double d1 = p1.norm();
+        double d2 = p2.norm();
+
+        if (fabs(p1.cross(p2)) <= eps)
+            continue;
+
+        if (c.r - d1 >= eps && c.r - d2 >= eps)
+        {
+            // 在圆内，直接加
+            s += p1.cross(p2) / 2;
+        }
+        else if (d1 - c.r >= eps && d2 - c.r >= eps)
+        {
+            // 在圆外
+            double d = getDisSP(Seg(p1, p2), c.c);
+            if (d - r > eps) // 一个扇形
+            {
+                double angle = acos(p1.dot(p2) / (p1.norm() * p2.norm()));
+                s += angle * c.r * c.r / 2;
+            }
+            else // 扇形+2*三角形
+            {
+                vector<Vector> cross = c.getCrossPointsCL(Seg(p1, p2));
+                s += cross[0].cross(cross[1]) / 2;
+                double a1 = acos(p1.dot(cross[0]) / (p1.norm() * cross[0].norm()));
+                s += a1 * c.r * c.r / 2;
+                double a2 = acos(p2.dot(cross[1]) / (p2.norm() * cross[1].norm()));
+                s += a2 * c.r * c.r / 2;
+            }
+        }
+        else // 一个在圆上/内，一个在圆外
+        {
+            Vector p = c.getCrossPointCL(Seg(p1, p2));
+            s += p1.cross(p) / 2;
+            double angle = acos(p.dot(p2) / (p.norm() * p2.norm()));
+            s += angle * c.r * c.r / 2;
+        }
+        // cout << s << endl;
+    }
+    if (fabs(s) <= eps)
+        s = 0;
+    printf("%.8lf\n", s);
+
+    return 0;
+}

@@ -1,0 +1,47 @@
+import java.util.*;
+
+public class Main {
+    private static HashMap<String, Integer> results = new HashMap<>();
+    private static int[] mova = {1, -1, 4, -4};
+
+    private static void bfs() {
+        ArrayDeque<String> queue = new ArrayDeque<>();
+        queue.addLast("01234567");
+        results.put("01234567", 0);
+        while (!queue.isEmpty()) {
+            String current = queue.pop();
+            int p=0;
+            for (int i=0;i<8;i++){
+                if (current.charAt(i) == '0') {
+                    p=i;
+                    break;
+                }
+            }
+            for (int i=0;i<4;i++){
+                int n=p+mova[i];
+                if (0<=n && n<8 && !(p==3 && i==0) && !(p == 4 && i==1)) {
+                    StringBuilder next = new StringBuilder(current);
+                    char temp = next.charAt(p);
+                    next.setCharAt(p, next.charAt(n));
+                    next.setCharAt(n, temp);
+                    if (!results.containsKey(next.toString())) {
+                        results.put(next.toString(), results.get(current)+1);
+                        queue.addLast(next.toString());
+                    }
+                }
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        String line;
+        bfs();
+        while (sc.hasNext()) {
+            line=sc.nextLine();
+            line=line.replace(" ","");
+            System.out.println(results.get(line));
+        }
+        sc.close();
+    }
+}

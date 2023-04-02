@@ -1,0 +1,72 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <stack>
+#include <vector>
+using namespace std;
+const int maxx = 1010;
+const int INF = 1 << 30;
+int n, m[maxx][maxx];
+int u, num, v;
+int flag[maxx];
+
+int prim() {
+    // d陣列是保存V-T中最短距離， p陣列是記錄MST的
+    int d[maxx], p[maxx];
+    for (int i = 0; i < n; i++) {
+        d[i] = INF;
+        p[i] = -1;
+        flag[i] = 0;//flag[i] = 0表示vertex還未加入MST中 
+    }
+
+    d[0] = 0;
+    while (1) {
+        int minv = INF;
+        u = -1;
+        //比較出權值最小的邊
+        for (int i = 0; i < n; i++) {
+            if (minv > d[i] && flag[i] == 0) {
+                u = i;
+                minv = d[i];
+            }
+        }
+
+        if (u == -1)  //在V-T中的vertex，找不到具有最小distance的vertex之編號 
+            break;
+
+        // 標記已經加入MST
+        flag[u] = 1;
+
+        // 更新未訪問的點與已經訪問的點之間的最小的邊（相對於每個點）
+        for (int v = 0; v < n; v++) {  //m[u][v] != INF:表示u和v邊存在
+            if (flag[v] == 0 && m[u][v] != INF && d[v] > m[u][v]) {
+                d[v] = m[u][v];
+                p[v] = u;
+            }
+        }
+    }
+
+
+    int ans = 0;
+    for (int i = 0; i < n; i++)
+        if (p[i] != -1)
+            ans += m[i][p[i]];
+
+    return ans;
+}
+int main()
+{
+    memset(flag, 0, sizeof(flag));
+    scanf("%d", &n);
+
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            scanf("%d", &m[i][j]);
+            if (m[i][j] == -1)
+                m[i][j] = INF;
+        }
+    }
+    printf("%d\n", prim());
+    return 0;
+}
+

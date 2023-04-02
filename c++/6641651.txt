@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+
+template<uint64_t base>
+struct RollingHash {
+
+	const std::string s;
+	const int len;
+	const uint64_t mask30 = (1ull << 30ull) - 1ull;
+	const uint64_t mask31 = (1ull << 31ull) - 1ull;
+	const uint64_t mod = (1ull << 61ull) - 1;
+
+	std::vector<uint64_t> hashed, power;
+
+	RollingHash (const std::string &s): s(s), len(s.size()) {
+		hashed.assign(len + 1, 0);
+		power.assign(len + 1, 1);
+
+		for (int i = 0; i < len; i++) {
+			hashed[i + 1] = calc_mod(mul(hashed[i], base) + s[i]);
+			power[i + 1] = calc_mod(mul(power[i], base));
+		}
+	}
+
+	// hash of s[l, r)
+	uint64_t get_hash(int l, int r) {
+		uint64_t res = hashed[r] + mod - calc_mod(mul(hashed[l], power[r - l]));
+		if (res >= mod) res -= mod;
+		return res;
+	}
+
+	inline uint64_t mul(uint64_t l, uint64_t r) {
+		uint64_t lu = l >> 31;
+		uint64_t ld = l & mask31;
+		uint64_t ru = r >> 31;
+		uint64_t rd = r & mask31;
+		uint64_t mid = ld * ru + lu * rd;
+
+		return ((lu * ru) << 1) + (mid >> 30) + ((mid & mask30) << 31) + ld * rd;
+	}	
+	inline uint64_t calc_mod(uint64_t v) {
+		v = (v & mod) + (v >> 61);
+		if (v >= mod) v -= mod;
+		return v;
+	}
+};
+
+using namespace std;
+using i64 = long long;
+using u64 = unsigned long long;
+
+int main() {
+	cin.sync_with_stdio(false);
+	cin.tie(nullptr);
+
+	i64 n, m;
+	cin >> n >> m;
+	string s;
+	cin >> s;
+	RollingHash<221> rh(s);
+
+	set<u64> st;
+	i64 l = 0;
+	i64 r = 1;
+
+	for (int _ = 0; _ < m; _++) {
+		string q;
+		cin >> q;
+
+		if (q == "L++") {
+			l++;
+		}
+		else if (q == "L--") {
+			l--;
+		}
+		else if (q == "R++") {
+			r++;
+		}
+		else { // R--
+			r--;
+		}
+
+		st.insert(rh.get_hash(l, r));
+	}
+
+	cout << st.size() << endl;
+
+	return 0;
+}
+

@@ -1,0 +1,33 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let target = Number(si[0])
+	const bitNum = 32
+	let ans = new Array(bitNum).fill(0)
+	let i = 1
+	while (target) {
+		let rem = target % 2
+		ans[bitNum - i] = rem
+		target = parseInt(target / 2)
+		i++
+	}
+	let binary = ans.join("")
+	let revBin = []
+	for (val of ans){
+		if (val == 0){
+			revBin.push(1)
+		} else if (val == 1){
+			revBin.push(0)
+		}
+	}
+	let leftShiftBin = ans.slice()
+	leftShiftBin.push(0)
+	leftShiftBin.shift()
+	let rightShiftBin = ans.slice()
+	rightShiftBin.pop()
+	rightShiftBin.unshift(0)
+	so.write(binary + "\n" + revBin.join("") + "\n" + leftShiftBin.join("") + "\n" + rightShiftBin.join("") + "\n")
+}
+

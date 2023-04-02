@@ -1,0 +1,159 @@
+#include<stdio.h>
+#include<math.h>
+int main(){
+    int result = 0;
+    int jx, jy, jw, jh;
+    int kx, ky, kw, kh;
+    int ax, ay, aw, ah;//left down 1, counterclockwise 234
+    int bx, by, bw, bh;
+    scanf("%d %d %d %d", &jx, &jy, &jw, &jh);
+    if(jx < 0 || jx > 1000 || jy < 0 || jy > 1000){
+        return 0;
+    }
+    if(jw < 0 || jw > 1000 || jh < 0 || jh > 1000){
+        return 0;
+    }
+    scanf("%d %d %d %d", &kx, &ky, &kw, &kh);
+    if(kx < 0 || kx > 1000 || ky < 0 || ky > 1000){
+        return 0;
+    }
+    if(kw < 0 || kw > 1000 || kh < 0 || kh > 1000){
+        return 0;
+    }
+
+    if(jw*jh > kw*kh){
+        bx = jx;
+        by = jy;
+        bw = jw;
+        bh = jh;
+        ax = kx;
+        ay = ky;
+        aw = kw;
+        ah = kh;
+    }
+    else{
+        ax = jx;
+        ay = jy;
+        aw = jw;
+        ah = jh;
+        bx = kx;
+        by = ky;
+        bw = kw;
+        bh = kh;
+    }
+
+    /*A.wtf and include completely overlap*/
+    if(ax >= bx && ax <= bx+bw && ax+aw >= bx && ax+aw <= bx+bw && by >= ay && by <= ay+ah && by+bh >= ay && by+bh <= ay+ah){
+        result = (aw*ah+bw*bh)-2*aw*bh;
+        printf("%d\n", abs(result));
+        return 0;
+    }
+    else if(bx >= ax && bx <= ax+aw && bx+bw >= ax && bx+bw <= ax+aw && ay >= by && ay <= by+bh && ay+ah >= by && ay+ah <= by+bh){
+        result = (aw*ah+bw*bh)-2*bw*ah;
+        printf("%d\n", abs(result));
+        return 0;
+    }
+
+    /*B.multiple sides overlap*/
+    else if(ax >= bx && ax <= bx+bw && ax+aw >= bx && ax+aw <= bx+bw || ay >= by && ay <= by+bh && ay+ah >= by && ay+ah <= by+bh){
+        result = bw*bh-aw*ah;
+    }//Amust<=B
+
+    else if(ax == bx && ay == by){//B(1)
+        if(ax+aw > bx && ax+aw < bx+bw){//B(1)-2
+            result = (aw*ah+bw*bh)-2*(aw*bh);
+        }
+        else if(ay+ah > by && ay+ah < by+bh){//B(1)-1
+            result = (aw*ah+bw*bh)-2*(bw*ah);
+        }
+    }
+
+    else if(ax+aw == bx+bw && ay == by){//B(2)
+        if(ax > bx && ax < bx+bw){//B(2)-2
+            result = (aw*ah+bw*bh)-2*(aw*bh);
+        }
+        else if(ay+ah > by && ay+ah < by+bh){//B(2)-1
+            result = (aw*ah+bw*bh)-2*(bw*ah);
+        }
+    }
+
+    else if(ax+aw == bx+bw && ay+ah == by+bh){//B(3)
+        if(ax > bx && ax < bx+bw){{//B(3)-2
+            result = (aw*ah+bw*bh)-2*(aw*bh);
+            }
+        }
+        else if(ay > by && ay < by+bh){//B(3)-1
+            result = (aw*ah+bw*bh)-2*(bw*ah);
+        }
+    }
+
+    else if(ax == bx && ay+ah == by+bh){//B(4)
+        if(ax+aw > bx && ax+aw < bx+bw){//B(4)-2
+            result = (aw*ah+bw*bh)-2*(aw*bh);
+        }
+        else if(ay > by && ay < by+bh){//B(4)-1
+            result = (aw*ah+bw*bh)-2*(bw*ah);
+        }
+    }
+
+    /*C.no overlap pts*/
+    else if(ax > bx && ax < bx+bw && ay > by && ay < by+bh){//C(1)
+        if(ax+aw > bx && ax+aw < bx+bw){//C(1)-2
+            result = (aw*ah+bw*bh)-2*aw*((by+bh)-ay);
+        }
+        else{//C(1)-1
+            result = (aw*ah+bw*bh)-2*((bx+bw)-ax)*((by+bh)-ay);
+        }
+    }
+
+    else if(ax+aw > bx && ax+aw < bx+bw && ay > by && ay < by+bh){//C(2)
+        if(ay+ah > by && ay+ah < by+bh){//C(2)-2
+            result = (aw*ah+bw*bh)-2*((ax+aw)-bx)*ah;
+        }
+        else{//C(2)-1
+            result = (aw*ah+bw*bh)-2*((ax+aw)-bx)*((by+bh)-ay);
+        }
+    }
+
+    else if(ax+aw > bx && ax+aw < bx+bw && ay+ah > by && ay+ah < by+bh){//C(3)
+        if(ax > bx && ax < bx+bw){//C(3)-2
+            result = (aw*ah+bw*bh)-2*(aw*((ay+ah)-by));
+        }
+        else{//C(3)-1
+            result = (aw*ah+bw*bh)-2*((ax+aw)-bx)*((ay+ah)-by);
+        }
+    }
+
+    else if(ax > bx && ax < bx+bw && ay+ah > by && ay+ah < by+bh){//C(4)
+        if(ay > by && ay < by+bh){//C(4)-2-
+            result = (aw*ah+bw*bh)-2*((ax-(bx+bw))*ah);
+        }
+        else{//C(4)-1
+            result = (aw*ah+bw*bh)-2*((bx+bw)-ax)*((ay+ah)-by);
+        }
+    }
+    //C-2 AB reserve
+    else if(bx > ax && bx < ax+aw && by > ay && by < ay+ah && bx+bw > ax && bx+bw < ax+aw){
+        result = (aw*ah+bw*bh)-2*bw*((ay+ah)-by);
+    }
+    else if(bx+bw > ax && bx+bw < ax+aw && by > ay && by < ay+ah && by+bh > ay && by+bh < ax+aw){
+        result = (aw*ah+bw*bh)-2*((bx+bw)-ax)*bh;
+    }
+    else if(bx+bw > ax && bx+bw < ax+aw && by+bh > ay && by+bh < ay+ah && bx+bw > ay && bx+bw < ax+aw){
+        result = (aw*ah+bw*bh)-2*bw*((by+bh)-ay);
+    }
+    else if(bx > ax && bx < ax+aw && by+bh > ay && by+bh < ay+ah && by > ay && by+bh < ay){
+        result = (aw*ah+bw*bh)-2*bw*((ax+aw)-bx)*bh;
+    }
+
+    if(result){
+        printf("%d\n", abs(result));
+    }
+
+    /*D.none overlap*/
+    else if(result == 0){
+        printf("%d\n", aw*ah+bw*bh);
+    }
+    return 0;
+}
+

@@ -1,0 +1,92 @@
+import java.util.*;
+import java.util.stream.IntStream;
+
+public class Main {
+    static Scanner sc = new Scanner(System.in);
+    public static void main(String[] args) {
+        Dice dice = new Dice();
+        Dice other = new Dice();
+        StringBuilder res = new StringBuilder();
+        for (int i = 0; i < 6; i++) {
+            dice.setNum(i, getInt());
+        }
+        for (int i = 0; i < 6; i++) {
+            other.setNum(i, getInt());
+        }
+        System.out.println(dice.isSame(other) ? "Yes" : "No");
+    }
+    static int getInt() {
+        return Integer.parseInt(sc.next());
+    }
+    static class Dice {
+        int[] nums = new int[6];
+        int[][] rights = {
+                {-1, 2, 4, 1, 3, -1},
+                {3, -1, 0, 5, -1, 2},
+                {1, 5, -1, -1, 0, 4},
+                {4, 0, -1, -1, 5, 1},
+                {2, -1, 5, 0, -1, 3},
+                {-1, 3, 1, 4, 2, -1}
+        };
+        void rotate(char direction) {
+            if (direction == 'N') {
+                int tmp = nums[4];
+                nums[4] = nums[0];
+                nums[0] = nums[1];
+                nums[1] = nums[5];
+                nums[5] = tmp;
+            }
+            if (direction == 'S') {
+                int tmp = nums[1];
+                nums[1] = nums[0];
+                nums[0] = nums[4];
+                nums[4] = nums[5];
+                nums[5] = tmp;
+            }
+            if (direction == 'W') {
+                int tmp = nums[3];
+                nums[3] = nums[0];
+                nums[0] = nums[2];
+                nums[2] = nums[5];
+                nums[5] = tmp;
+            }
+            if (direction == 'E') {
+                int tmp = nums[2];
+                nums[2] = nums[0];
+                nums[0] = nums[3];
+                nums[3] = nums[5];
+                nums[5] = tmp;
+            }
+        }
+        void setNum(int idx, int num) {
+            nums[idx] = num;
+        }
+        int getRight(int top, int left) {
+            return nums[rights[indexOf(top)][indexOf(left)]];
+        }
+        int indexOf(int num) {
+            return IntStream.range(0, nums.length).filter(i -> nums[i] == num).findFirst().orElse(-1);
+        }
+        boolean isSame(Dice other) {
+            return isSamerec(other, 0);
+        }
+        boolean isSamerec(Dice other, int n) {
+            if (Arrays.equals(nums, other.nums)) {
+                return true;
+            }
+            if (n == 6) {
+                return false;
+            }
+            other.rotate('W');
+            boolean res = isSamerec(other, n + 1);
+            other.rotate('N');
+            res |= isSamerec(other, n + 1);
+            other.rotate('S');
+            res |= isSamerec(other, n + 1);
+            other.rotate('E');
+            res |= isSamerec(other, n + 1);
+            return res;
+        }
+    }
+}
+

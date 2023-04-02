@@ -1,0 +1,20 @@
+{-# LANGUAGE OverloadedStrings #-}
+import Data.Char (toLower, isLower)
+import Data.Monoid (mconcat)
+import Control.Monad (forM_)
+import Data.ByteString.Char8 (ByteString)
+import qualified Data.ByteString.Char8 as BC
+
+main :: IO ()
+main = do
+  bs <- BC.getContents
+  let lowered = BC.map toLower bs
+      allAlpha = mconcat [lowered, BC.pack ['a'..'z']]
+      filtered = BC.filter isLower allAlpha
+      grouped = BC.group . BC.sort $ filtered
+  forM_ grouped $ \bs ->
+    BC.putStrLn $ makeBS (BC.head bs) (BC.length bs - 1)
+
+makeBS :: Char -> Int -> ByteString
+makeBS c n = BC.cons c $ mconcat [" : " , (BC.pack $ show n)]
+

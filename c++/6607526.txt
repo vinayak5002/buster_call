@@ -1,0 +1,436 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define all(v) (v).begin(), (v).end()
+#define rall(v) (v).rbegin(), (v).rend()
+#define rep(i, n) for (int(i) = 0; (i) < (int)(n); ++(i))
+#define range(i, s, n) for (int i = (s); i < (n); ++(i))
+#define lange(i, s, n) for (long long i = (s); i < long long(n); ++(i))
+#define rrep(i, n) for (int(i) = (n)-1; (i) != -1; --(i))
+#define vep(i, v) for (auto(i) = v.begin(); distance((i), (v.end())) > 0; ++(i))
+template <class T>
+inline bool chmax(T &a, T b)
+{
+	if (a < b)
+	{
+		a = b;
+		return true;
+	}
+	return false;
+}
+template <class T>
+inline bool chmin(T &a, T b)
+{
+	if (a > b)
+	{
+		a = b;
+		return true;
+	}
+	return false;
+}
+template <class T>
+inline T GCD(T a, T b) { return b ? GCD(b, a % b) : a; }
+template <class T>
+inline T LCM(T a, T b) { return a / GCD(a, b) * b; }
+inline long long ceildiv(long long a, long long b) { return (a + b - 1) / b; }
+template <class T>
+inline T modinv(T a, T M) { return (1 - M * modinv(M % a, a)) / a + M; }
+typedef pair<long long, long long> P;
+typedef pair<int, int> PI;
+typedef std::vector<int> vi;
+typedef std::vector<long long> vl;
+typedef std::vector<std::vector<int>> vvi;
+typedef std::vector<std::vector<long long>> vvl;
+typedef std::vector<char> vc;
+typedef std::vector<std::vector<char>> vvc;
+typedef std::vector<long long> vl;
+typedef std::vector<bool> vb;
+typedef std::vector<std::vector<bool>> vvb;
+using Graph = std::vector<std::vector<int>>;
+const long long inf = 10e17;
+//int |x|<=2*10**9     long |x|<= 9*10**18
+//printf(".(小数点以下の桁数)lf(double時、float ならf)")
+#define ll long long
+#define print(i) std::cout << (i) << '\n'
+#define eb emplace_back
+struct input
+{
+	input(){};
+	template <class T>
+	operator T()
+	{
+		T t;
+		cin >> t;
+		return t;
+	}
+};
+//usage  int n= input();
+//const long long mod = 1000000007;
+//const long long mod = 998244353;
+#ifdef LOCAL
+#define debug(x) std::cout << x << "\n";
+#endif
+struct SplayNode
+{
+	//SplayTree  std
+	SplayNode *parent, *left, *right;
+	int size, value;
+
+	//for query data
+	int minimum;
+
+	SplayNode()
+	{
+		this->parent = nullptr;
+		this->left = nullptr;
+		this->right = nullptr;
+		this->size = 1;
+		this->value = 0;
+
+		this->minimum = 0;
+	}
+	int state()
+	{
+		if (this->parent)
+		{
+			if (this->parent->left == this)
+				return 1;
+			if (this->parent->right == this)
+				return -1;
+		}
+		return 0;
+	}
+	void update()
+	{
+		this->size = 1;
+		// for query update
+		this->minimum = this->value;
+
+		if (this->right)
+		{
+			this->size += this->right->size;
+			this->minimum = min(this->minimum, this->right->minimum);
+		}
+		if (this->left)
+		{
+			this->size += this->left->size;
+			this->minimum = min(this->minimum, this->left->minimum);
+		}
+	}
+	void rotate()
+	{
+		//thisを上げる
+		if (this->state() == 0)
+			return;
+		SplayNode *p, *pp;
+		p = this->parent;
+		pp = p->parent;
+		if (this->state() == 1)
+		{
+			if (this->right)
+			{
+				this->right->parent = p;
+				p->left = this->right;
+			}
+			else
+			{
+				p->left = nullptr;
+			}
+			this->right = p;
+		}
+		else
+		{
+			if (this->left)
+			{
+				this->left->parent = p;
+				p->right = this->left;
+			}
+			else
+			{
+				p->right = nullptr;
+			}
+			this->left = p;
+		}
+
+		p->parent = this;
+		p->update(); //updetaeの順序に注意、葉から
+		this->update();
+		this->parent = pp;
+		if (pp)
+		{
+			if (pp->left == p)
+				pp->left = this;
+			else if (pp->right == p)
+				pp->right = this;
+		}
+	}
+	void splay()
+	{
+		//thisをrootに
+		while (this->state())
+		{
+			if (this->parent->state() == 0)
+				this->rotate();
+			else if (this->state() == this->parent->state())
+			{
+				this->parent->rotate();
+				this->rotate();
+				//?最初の提案ではここもthis-rotate()*2だったらしい
+			}
+			else
+			{
+				this->rotate();
+				this->rotate();
+			}
+		}
+	}
+};
+typedef SplayNode SN;
+struct SplayTree
+{
+	SplayTree() {}
+	SN *build(const std::vector<int> &values)
+	{
+		assert(values.size() > 0);
+		SN *a = new SN; //ココ注意、ポインタにしないとローカル変数になり関数呼び出しの終了後に消される
+		a->value = values[0];
+		a->update();
+		for (int i = 1; i < values.size(); i++)
+		{
+			SN *b = new SN;
+			b->left = a;
+			a->parent = b;
+			b->value = values[i];
+			b->update();
+			a = b;
+		}
+		return a;
+	}
+
+	// splayTree std
+	void get(SN **root, int index)
+	{
+		// indexのノードを根にして返す
+		assert(root && 0 <= index && index < (*root)->size);
+		SN *now = (*root);
+		int lsize;
+		while (true)
+		{
+			lsize = now->left ? now->left->size : 0;
+			if (lsize == index)
+			{
+				now->splay();
+				(*root) = now;
+				return;
+			}
+			else if (lsize < index)
+			{
+				now = now->right;
+				index -= lsize + 1;
+			}
+			else
+				now = now->left;
+		}
+	}
+	void update(SN **root, int index, int new_value)
+	{
+		get(root, index);
+		(*root)->value = new_value;
+		(*root)->update();
+	}
+	SN *split(SN **root, int index)
+	{
+		//Tree を [0,index),[index,MAX) に分割
+		assert(root);
+		//get でindexが有効な範囲かを確かめるのでここではrootのチェックのみにした
+		if (index == 0)
+		{
+			SN *rec = nullptr;
+			swap(rec, (*root));
+			return rec;
+		}
+		else if (index == (*root)->size)
+			return nullptr;
+		else
+		{
+			get(root, index);
+			SN *loot;
+			loot = (*root)->left;
+			(*root)->left = nullptr;
+			loot->parent = nullptr;
+			(*root)->update();
+			swap(loot, (*root));
+			return loot;
+		}
+	}
+	void merge(SN **root1, SN *root2)
+	{
+		assert(root1 || root2);
+		if (!root2)
+			return;
+		if (!(*root1))
+		{
+			(*root1) = root2;
+			return;
+		}
+		get(root1, (*root1)->size - 1);
+		(*root1)->right = root2;
+		root2->parent = (*root1);
+		(*root1)->update();
+		return;
+	}
+	void insert(SN **root, int index, SN *node)
+	{
+		//assert(root && 0<=index && index<=root->size);
+		//split でrootを、そのなかのgetでindexを確認するのでここではassertしないことにした
+		SN *right = split(root, index);
+		merge(root, node);
+		merge(root, right);
+		return;
+	}
+	SN *remove(SN **root, int index)
+	{
+		//delete node[ind] ret:(New_root, Node), ただしnodeは一度根に変えられ,かつそのときの値を保持する
+		assert(root && index >= 0 && index < (*root)->size);
+		if ((*root)->size == 1)
+		{
+			SN *ret = nullptr;
+			swap((*root), ret);
+			return ret;
+		}
+		get(root, index);
+		SN *lroot = (*root)->left, *rroot = (*root)->right;
+		if (lroot)
+			lroot->parent = nullptr;
+		if (rroot)
+			rroot->parent = nullptr;
+
+		(*root)->right = nullptr;
+		(*root)->left = nullptr;
+		merge(&lroot, rroot);
+		swap(lroot, (*root));
+		return lroot;
+	}
+	// splayTree std end
+
+	// for queries
+	void shift(SN **root, int l, int r)
+	{
+		//[l,r) shifted right, ret:root
+		assert(root && 0 <= l && l <= r && r <= (*root)->size);
+		if (l == r || l == r - 1)
+			return;
+		SN *node = remove(root, r - 1);
+		node->update();
+		insert(root, l, node);
+		return;
+	}
+	int rmq(SN **root, int l, int r)
+	{
+		assert(root || 0 <= l || l < r || r <= (*root)->size);
+		SN *MID, *RIGHT;
+		RIGHT = split(root, r);
+		MID = split(root, l);
+		int ret = MID->minimum; //MIDもポインタなので以下のmergeで副作用を受ける。従ってここで記録しておかねばならない。
+		merge(root, MID);
+		merge(root, RIGHT);
+		return ret;
+	}
+
+	// for debug
+	void detail(SplayNode *root)
+	{
+		if (root)
+		{
+			string left, right;
+			if (root->left)
+			{
+				left = to_string(root->left->value);
+			}
+			else
+				left = "None";
+			if (root->right)
+			{
+				right = to_string(root->right->value);
+			}
+			else
+				right = "None";
+			printf("%d,%d.%d:left %s, right:%s\n", root->value, root->size, root->minimum, left.c_str(), right.c_str());
+			detail(root->left);
+			detail(root->right);
+		}
+	}
+	void line(SN *root)
+	{
+		if (root)
+		{
+
+			if (root->left)
+				line(root->left);
+			printf("%d, ", root->value);
+			if (root->right)
+				line(root->right);
+		}
+	}
+	void checkline(SplayNode *root)
+	{
+		printf("============\n");
+		if (root)
+			line(root);
+		printf("\n");
+		printf("=============\n\n");
+	}
+	void checkdetail(SplayNode *root)
+	{
+		printf("============\n");
+		if (root)
+			detail(root);
+		printf("=============\n\n");
+	}
+	void checkboth(SN *root)
+	{
+		printf("============\n");
+		if (root)
+		{
+			line(root);
+			printf("\n");
+			detail(root);
+		}
+		else
+			printf("root was nullptr.\n");
+		printf("=============\n\n");
+	}
+};
+
+int main()
+{
+	int N = input(), Q = input();
+	vi a(N);
+	for (auto &b : a)
+		cin >> b;
+	SplayTree st;
+	SN *root = st.build(a);
+	int ord, l, r, pos, val, res;
+	rep(i, Q)
+	{
+		cin >> ord;
+		//st.checkboth(root);
+		switch (ord)
+		{
+		case 0:
+			cin >> l >> r;
+			//printf("shift {%d,%d]\n",l,r);
+			st.shift(&root, l, r + 1);
+			break;
+		case 1:
+			cin >> l >> r;
+			//printf("RMQ [%d,%d]\n",l,r);
+			print(st.rmq(&root, l, r + 1));
+			break;
+		case 2:
+			cin >> pos >> val;
+			//printf("update [%d] = %d\n",pos,val );
+			st.update(&root, pos, val);
+			break;
+		}
+	}
+}

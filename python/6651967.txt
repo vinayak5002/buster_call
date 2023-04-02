@@ -1,0 +1,80 @@
+/************************************
+day after day
+night by night
+i still can't do anything ...
+************************************/
+
+#include <bits/stdc++.h>
+#define VOI23 ""
+#define ll long long
+#define st first
+#define nd second
+#define bit(n, i) ((n >> i) & 1)
+
+using namespace std;
+
+const int N = 1e5 + 1;
+const int mod = 1e9 + 7;
+const ll inf = 1e18;
+
+int V, E, s, t, num[N], low[N], time_dfs;
+vector<int> g[N], point;
+vector<pair<int, int>> bridge;
+
+void dfs(int u, int p) {
+    int live_child = 0;
+
+    time_dfs ++;
+    low[u] = num[u] = time_dfs;
+
+    for (auto v : g[u]) {
+        if (v == p) continue;
+
+        if (!num[v]) {
+            dfs(v, u);
+            low[u] = min(low[u], low[v]);
+
+            if (low[v] == num[v]) bridge.push_back({u, v});
+            live_child ++;
+
+            if (u == p && live_child >= 2 || u != p && low[v] >= num[u]) point.push_back(u);
+        }
+
+        else low[u] = min(low[u], num[v]);
+    }
+}
+
+int main() {
+    cin.tie(0) -> sync_with_stdio(0);
+	cout.tie(0) -> sync_with_stdio(0);
+
+    if (fopen(VOI23".inp","r")) {
+        freopen(VOI23".inp", "r", stdin);
+        freopen(VOI23".out", "w", stdout);
+    }
+
+	cin >> V >> E;
+
+	for (int i = 0; i < E; i++) {
+        cin >> s >> t;
+
+        g[s].push_back(t);
+        g[t].push_back(s);
+	}
+
+	for (int i = 0; i < V; i++) {
+        if (!num[i]) dfs(i, i);
+	}
+
+	sort(point.begin(), point.end());
+	sort(bridge.begin(), bridge.end());
+
+	for (int it : point) cout << it << '\n';
+	// for (pair<int, int> it : bridge) cout << it.st << ' ' << it.nd << '\n';
+}
+
+/** /\_/\
+ * (= ._.)
+ * / >WA \>AC
+**/
+

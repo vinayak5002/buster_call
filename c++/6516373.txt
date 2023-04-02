@@ -1,0 +1,79 @@
+#include<stdio.h>
+#include<string.h>
+#define LEN 100000
+//入力の構造体
+typedef struct{
+	char name[100];
+	int time;
+}Q;
+
+//グローバル変数
+Q a[LEN];
+int front, rear, n;
+
+//関数の宣言
+void Enqueue(Q q);
+Q Dequeue( );
+int minback(int a, int b);
+
+int main (void)
+{
+	int n, i, q, elapsed, c;
+	elapsed = c = 0;
+	scanf("%d", &n);
+	scanf("%d", &q);
+	Q u;
+	for(i=0;i<n;i++)
+	{
+		scanf("%s", a[i].name);
+		scanf("%d", &a[i].time);
+	}
+	front = 0;
+	rear = n + 1;
+	//メイン操作
+	while(front != rear)
+	{
+		u = Dequeue();
+		c = minback(q, u.time);
+		u.time  = u.time - c;
+		elapsed = elapsed + c;
+		if(u.time > 0)
+		{
+			Enqueue(u);
+		}
+		else
+		{
+			printf("%s %d\n", u.name, elapsed);
+		}
+		
+	}
+	
+	return 0;
+}
+	
+//データをキューに入れる
+void Enqueue(Q q)
+{
+	a[rear] = q;
+	rear = (rear + 1)%LEN;
+}
+//データをキューから取り出す
+Q Dequeue()
+{
+	Q q = a[front];
+	front = (front+1)%LEN;
+	return q;
+}
+//小さいほうを判定する
+int minback(int a, int b)
+{
+	if(a>b)
+	{
+		return b;
+	}
+	else 
+	{
+		return a;
+	}
+}
+

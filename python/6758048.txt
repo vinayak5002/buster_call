@@ -1,0 +1,56 @@
+class WeightedUnionFind:
+    def __init__(self, n):
+        self.parent = [i for i in range(n)]
+        self.rank = [0] * (n)
+        self.weight = [0] * (n)
+
+    def root(self, x):
+        if self.parent[x] == x:
+            return x
+        else:
+            y = self.root(self.parent[x])
+            self.weight[x] += self.weight[self.parent[x]]
+            self.parent[x] = y
+            return y
+            
+    def unite(self, x, y, w):
+        rootx = self.root(x)
+        rooty = self.root(y)
+
+        if self.rank[rootx] < self.rank[rooty]:
+            self.parent[rootx] = rooty
+            self.weight[rootx] = self.weight[y] - self.weight[x] + w 
+
+        else:
+            self.parent[rooty] = rootx
+            self.weight[rooty] = self.weight[x] - self.weight[y] - w
+
+            if self.rank[rootx] == self.rank[rooty]:
+                self.rank[rootx] += 1
+
+
+    def same(self, x, y):
+        return self.root(x) == self.root(y)
+
+
+    def diff(self, x, y):
+        if  self.same(x, y):
+            print(self.weight[x] - self.weight[y])
+        else:
+            print("?")
+            
+def main():
+    Q = []
+    n,q = map(int, input().split())
+    u = WeightedUnionFind(n)
+    for _ in range(q):
+        Q = list(map(int, input().split()))
+
+        if Q[0] == 0:
+            u.unite(Q[1], Q[2], Q[3])
+        else:
+            u.diff(Q[1], Q[2])
+
+
+if __name__ == '__main__':
+    main()

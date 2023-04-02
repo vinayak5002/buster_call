@@ -1,0 +1,68 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+using p = pair<ll, string>;
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  string s;
+  cin >> s;
+  vector<ll> cnt(26, 0);
+  vector<ll> len(26, 0);
+
+  ll n = SZ(s);
+  rep(i, 0, n) cnt[s[i] - 'a']++;
+
+  priority_queue<p, vector<p>, greater<p>> que;
+
+  rep(i, 0, 26){
+      string tmp = "a";
+      tmp[0] = (char)('a' + i);
+      if(cnt[i] > 0) que.push({cnt[i], tmp});
+  }
+
+  if(que.size() == 1){
+      rep(i, 0, 26) len[i] = 1;
+  }
+
+  while(que.size() > 1){
+      auto p1 = que.top();
+      que.pop();
+      auto p2 = que.top();
+      que.pop();
+
+      ll nkey = p1.first + p2.first;
+      string nstr = p1.second + p2.second;
+      que.push({nkey, nstr});
+      rep(i, 0, SZ(p1.second)) len[p1.second[i] - 'a']++;
+      rep(i, 0, SZ(p2.second)) len[p2.second[i] - 'a']++;
+  }
+  ll ans = 0;
+  rep(i, 0, 26){
+      ans += cnt[i] * len[i];
+  }
+  cout << ans << endl;
+
+
+
+
+  return 0;
+}

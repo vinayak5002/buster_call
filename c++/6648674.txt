@@ -1,0 +1,73 @@
+#include<bits/stdc++.h>
+
+#define F first
+#define S second
+#define PB push_back
+#define MP make_pair
+
+#define all(x) begin(x), end(x)
+#define sz(x) (int)(x).size()
+#define FOR(i,a,b) for(int i=(a);i<(b);i++)
+#define ROF(i,a,b) for(int i=(a);i>=(b);i--)
+#define FASTIO ios_base::sync_with_stdio(false);cin.tie(0);cout.tie(0);
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+typedef unsigned long long ull;
+typedef pair<int,int> pii;
+typedef pair<ll,ll> pll;
+typedef vector<int> vi;
+typedef vector<ll> vll;
+typedef vector<char> vc;
+typedef vector<bool> vb;
+typedef vector<string> vs;
+
+//Salesman
+/* la  bitmask 1*/
+/*Complexity O(N^2 * 2^N) N values for positions*/
+int V,E;
+int edge[16][16];
+int dp[1<<16][16];
+int xmin(int aux1, int aux2){
+    int xmin = V*1000;
+    FOR(i,0,V){
+        if(aux1<(1<<i)) break;
+        if(aux1&1<<i)
+            xmin=min(xmin,dp[aux1][i]+edge[i][aux2]);
+    }
+    return xmin;
+}
+
+int main(int argc, char const *argv[]) {
+    cin >> V >> E;
+    int s[E],t[E],d[E],auxiliar[1<<16];
+    FOR(i,0,V) FOR(j,0,V) edge[i][j]=V*1000;
+    FOR(i,0,1<<V){
+        FOR(j,0,V) dp[i][j]=V*1000;
+    }
+    FOR(i,0,E){
+        cin >> s[i] >> t[i] >> d[i];
+        edge[s[i]][t[i]]=d[i];
+    }
+    FOR(i,0,V-1){
+        auxiliar[1<<i] = 1;
+        dp[1<<i][i]=edge[V-1][i];
+    }
+    FOR(aux1,0,1<<V){
+        if(auxiliar[aux1])
+            continue;
+        FOR(j,0,V){
+            if(aux1<(1<<j)) break;
+            if(aux1&(1<<j)){
+                dp[aux1][j] = xmin(aux1-(1<<j),j);
+            }
+        }
+    }
+    int result = dp[(1<<V)-1][V-1];
+    if(result>=1000*V) cout << -1 << endl;
+    else cout << result << endl;
+
+  return 0;
+}

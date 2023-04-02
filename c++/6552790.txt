@@ -1,0 +1,83 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+using namespace std;
+
+#define all(x) (x).begin(),(x).end()
+#define print(x) cout << (x) << '\n'
+typedef long long ll;
+typedef long double ld;
+using P = pair<int,int>;
+using pll = pair<ll,ll>;
+using Graph = vector<vector<int>>;
+
+const ll MOD = 1000000007;
+//const ll MOD = 998244353;
+
+template <typename T> inline bool chmax(T &a, T b) {return a < b ? a = b, true : false;}
+template <typename T> inline bool chmin(T &a, T b) {return a > b ? a = b, true : false;}
+
+template <typename T>
+void vin(vector<T> &v) {
+    int l = v.size();
+    for(int i = 0; i < l; i++) cin >> v[i];
+}
+
+template <typename T>
+void vout(vector<T> &v) {
+    int l = v.size();
+    for(int i = 0; i < l; i++) cout << v[i] << (i < l - 1 ? ' ' : '\n');
+}
+
+const ll inf = 1e18 + 5;
+
+void solve() {
+    int n, m, r;    cin >> n >> m >> r;
+    vector<vector<pll>> g(n);
+    while(m--) {
+        int s, t;   cin >> s >> t;
+        ll d;   cin >> d;
+        g[s].push_back({t, d});
+    }
+    vector<ll> dist(n, inf);
+    priority_queue<pll, vector<pll>, greater<pll>> pq;
+    dist[r] = 0;
+    pq.push({0, r});
+    while(!pq.empty()) {
+        pll p = pq.top();
+        pq.pop();
+        int u = p.second;
+        ll c = p.first;
+        if(dist[u] < c) continue;
+        for(pll q : g[u]) {
+            int v = q.first;
+            ll c2 = q.second;
+            if(dist[v] > c + c2) {
+                dist[v] = c + c2;
+                pq.push({dist[v], v});
+            }
+        }
+    }
+    for(int i = 0; i < n; i++) {
+        if(dist[i] == inf) {
+            print("INF");
+        } else {
+            print(dist[i]);
+        }
+    }
+    return;
+}
+
+int main() {
+    cin.tie(0); cout.tie(0);
+    ios::sync_with_stdio(false);
+    cout << fixed << setprecision(18);
+
+    int Query = 1;
+    //cin >> Query;
+
+    for(int t = 1; t <= Query; t++) {
+        solve();
+    } 
+
+    return 0;
+}

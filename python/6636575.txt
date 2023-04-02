@@ -1,0 +1,51 @@
+n,k = (int(x) for x in input().split())
+
+track = [0] * k
+nimotsus = []
+mid = 0
+
+for i in range(n):
+    nimotsu = input()
+    nimotsu = int(nimotsu)
+    left = 0
+    right = i
+    while left < right:
+        mid = ( left + right ) // 2
+        if nimotsus[mid] == nimotsu:
+            nimotsus.insert(mid,nimotsu)
+            break
+        elif nimotsus[mid] > nimotsu:
+            right = mid
+        else:
+            left = mid + 1
+    if left >= right:
+        if i == 0:
+            nimotsus = nimotsus + [nimotsu]
+        elif nimotsus[mid] > nimotsu:
+            nimotsus.insert(mid,nimotsu)
+        else:
+            nimotsus.insert(mid+1,nimotsu)
+
+
+if k == 1:
+    print(sum(nimotsus))
+else:
+    for i in range(n):
+        newtrack = track.pop(-1) + nimotsus.pop(-1)
+        left = 0
+        right = k - 1
+        while left < right:
+            mid = ( left + right ) // 2
+            if track[mid] == newtrack:
+                track.insert(mid,newtrack)
+                break
+            elif track[mid] < newtrack:
+                right = mid
+            else:
+                left = mid + 1
+        if left >= right:
+            if track[mid] < newtrack:
+                track.insert(mid,newtrack)
+            else:
+                track.insert(mid+1,newtrack)
+    print(track[0])

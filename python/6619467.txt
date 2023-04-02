@@ -1,0 +1,114 @@
+aaaaaa
+#include<bits/stdc++.h>
+#define rep(i,n) for(int i=0; i< (n); i++)
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+const int mod = 1000000007;
+const int inf = (1<<30);
+int mv[4][2] = {{0,1}, {0,-1}, {1,0},{-1,0}};
+int h,w;
+struct pt{
+    int x;
+    int y;
+
+};
+
+bool check(int x1,int y1){
+    return h >= y1 && w >= x1 && x1 > 0 && y1 > 0 ;
+}
+
+bool can=true;
+int dfs(vector<int> v,vector<vector<int>> teabl, pt from,pt to ,int i,vector<pt> dast){
+    int res=0;
+    //cout<<"V"<<v.size()<<" d"<<dast.size()<<endl;
+    if( i > v.size()-1){
+        cout<<"finish"<<i<<endl;
+        return 0;
+    }else{
+        cout<<i<<endl;
+        res+=dfs(v, teabl,dast[v[i+1]-1],dast[v[i+2]-1],i+1, dast );
+        cout<<res<<endl;
+    }
+    queue<pt> q; q.push(from);
+        while(q.size()){
+            //cout<<"q"<<q.size()<<endl;
+            pt now=q.front(); q.pop();
+            if( now.x == to.x && now.y == to.y ){
+                cout<<"retrurn"<<-teabl[now.y][now.x]<<"+"<<res<<endl;
+                return -teabl[now.y][now.x]+res;
+            }
+            rep(e,4){
+                pt next;
+                if(check(now.y+mv[e][0],now.x+mv[e][1]) && teabl[now.y+mv[e][0]][now.x+mv[e][1]] > -1 ){
+                    //cout<<"if"<<endl;
+                    next.x=now.x+mv[e][1];
+                    next.y=now.y+mv[e][0];
+                    teabl[next.y][next.x]= teabl[now.y][now.x]-1;
+                    q.push(next);
+                }
+
+
+
+            }
+        }
+    can=false;
+    return res;
+}
+
+
+
+
+
+
+
+
+int main(){
+    vector<vector<int>> teabl(22,vector<int>(22,-1));
+    vector<pt> dast;
+    can=true;
+    cin>>w>>h;
+    int c=1;
+    pt r;
+    for(int i=1; i<=h; i++){
+        for(int j=1; j<=w; j++){
+            char k; cin>>k;
+            if(k == '.') teabl[i][j] = 0;
+            else if(k == 'x') teabl[i][j] = -1;
+            else if(k == 'o'){
+                r.y=i; r.x=j;
+                teabl[i][j] = 0;
+            }
+            else if(k == '*'){
+                teabl[i][j] = c;
+                c++;
+                pt r2; r2.x=j; r2.y=i;
+                dast.push_back(r2);
+            }
+        }
+    }
+
+    /*for(int i=1; i<=h; i++){
+        for(int j=1; j<=w; j++){
+            cout<<teabl[i][j]<<" ";
+        }
+        cout<<endl;
+    }*/
+    //cout<<c<<endl;
+    vector<int> v(c-1);
+    iota(v.begin(),v.end(), 1);
+    int ans=inf;
+    do{
+        ans=min(ans,dfs(v, teabl,r,dast[v[0]],0, dast ));
+        if(can=false){
+            cout<<-1<<endl;
+            break;
+        }
+        //for(auto x : v) cout << x << " "; cout << "\n"; 
+
+    }while(next_permutation(v.begin(),v.end()));
+    cout<<ans<<endl;
+
+
+
+}

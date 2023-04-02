@@ -1,0 +1,70 @@
+#define quick ios::sync_with_stdio(false), cin.tie(0), cout.tie(0)
+#define rep(i, n) for (int i = 0; i < n; i++)
+#define reps(i, n) for (int i = 1; i <= n; i++)
+#include <bits/stdc++.h>
+typedef long long ll;
+using namespace std;
+int N, K;
+ll L, R;
+vector<ll> a;
+vector<vector<ll>> A1, A2;
+//这是我观摩大佬sou的代码
+void choose1(int n, int k, ll sum)
+{
+    if (n == N / 2)
+    {
+        A1[k].push_back(sum);
+        return;
+    }
+    choose1(n + 1, k + 1, sum + a[n]);
+    choose1(n + 1, k, sum);
+}
+
+void choose2(int n, int k, ll sum)
+{
+    if (n == N)
+    {
+        A2[k].push_back(sum);
+        return;
+    }
+    choose2(n + 1, k + 1, sum + a[n]);
+    choose2(n + 1, k, sum);
+}
+
+int main()
+{
+    quick;
+    cin >> N >> K >> L >> R;
+    a.resize(N);
+    for (int i = 0; i < N; i++)
+        cin >> a[i];
+
+    A1.resize(N / 2 + 1);
+    A2.resize(N - N / 2 + 1);
+
+    choose1(0, 0, 0);
+    choose2(N / 2, 0, 0);
+
+    for (int i = 0; i < (int)A1.size(); i++)
+    {
+        sort(A1[i].begin(), A1[i].end());
+    }
+    for (int i = 0; i < (int)A2.size(); i++)
+    {
+        sort(A2[i].begin(), A2[i].end());
+    }
+
+    long long ans = 0;
+    for (int i = 0; i <= N - N / 2; i++)
+    {
+        for (int j = 0; j < (int)A2[i].size(); j++)
+        {
+            if (A2[i][j] > R || K - i < 0 || K - i > N / 2)
+                continue;
+            ans += (upper_bound(A1[K - i].begin(), A1[K - i].end(), R - A2[i][j]) - lower_bound(A1[K - i].begin(), A1[K - i].end(), L - A2[i][j]));
+        }
+    }
+
+    cout << ans << endl;
+}
+

@@ -1,0 +1,47 @@
+#include <bits/stdc++.h>
+
+#define rep(i, to) for (int i=0; i<to; i++)
+#define repr(i, from, to) for (int i=from; i<to; i++)
+#define all(v, func) [&](){ for (auto _: v) if (!(func)) return false; return true; }()
+#define some(v, func) [&](){ for (auto _: v) if (func) return true; return false; }()
+
+using namespace std;
+using ll = long long;
+using P = pair<int, int>;
+
+#ifdef DEBUG
+#include "debug.hpp"
+#else
+template<class T> void print(T v) { cout << v << endl; }
+void _main(); int main() { _main(); }
+#endif
+
+// ================================================================================ //
+
+using Graph = vector<vector<int>>;
+
+Graph graph;
+vector<int> d, f;
+vector<bool> used;
+
+void dfs(int v, int &t) {
+    if (used[v]) return; used[v] = true;
+    d[v] = t++;
+    for (auto e: graph[v]) dfs(e, t);
+    f[v] = t++;
+}
+
+void _main() {
+    int N; cin >> N;
+    graph.resize(N); f.resize(N); d.resize(N); used.resize(N, false);
+    rep(_, N) {
+        int u, k; cin >> u >> k; u--;
+        rep(_, k) { int v; cin >> v; v--; graph[u].push_back(v); }
+        sort(graph[u].begin(), graph[u].end());
+    }
+        
+    auto t = 1; dfs(0, t);
+    
+    rep(i, N) cout << i+1 << " " << d[i] << " " << f[i] << endl;
+}
+

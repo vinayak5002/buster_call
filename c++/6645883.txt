@@ -1,0 +1,55 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct point{
+	int x;
+	int y;
+	struct point *next;
+};
+
+struct point* n_point(int x, int y){
+	struct point* pointREI = (struct point *)malloc(sizeof(struct point));
+	pointREI->x = x;
+	pointREI->y = y;
+	pointREI->next = NULL;
+}
+
+int main(void) {
+	int i, j, n, q, b, e, t, x, y;
+	struct point *p, *p2, *sn, *head;
+
+	head = NULL;
+
+	scanf("%d" ,&n);
+	for (i = 0; i < n; i++){
+		scanf("%d %d", &x, &y);
+		sn = n_point(x, y);
+		if (head == NULL){
+			head = sn;
+		}
+		else {
+			if (head->x > sn->x || (head->x == sn->x && head->y >= sn->y)){
+				sn->next = head;
+				head = sn;
+			}
+			else {
+				p = head;
+				while (p->next != NULL){
+					if (p->next->x > sn->x || (p->next->x == sn->x && p->next->y >= sn->y)){
+						break;
+					}
+					p = p->next;
+				}
+				sn->next = p->next;
+				p->next = sn;
+			}
+		}
+	}
+
+	printf("\n");
+	for (p = head; p != NULL; p = p->next){
+		printf("%d %d\n",p->x, p->y);
+	}
+
+	return 0;
+}

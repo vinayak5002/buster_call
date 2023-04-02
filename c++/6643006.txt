@@ -1,0 +1,88 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+using ll = long long;
+
+const ll dx[] = {1, 0, -1, 0};
+const ll dy[] = {0, -1, 0, 1};
+
+const ll LIM = 45; // 深さの制限(制約)
+ll limit; // 現在の目標深さの制限
+
+ll mdis[16][16]; // (iがjにある時の)マンハッタン距離
+
+struct puzzle{
+  ll f[16];
+  ll space, md; // spaceの位置, マンハッタン距離の合計
+};
+
+puzzle state;
+
+ll getallmd(puzzle &pz){
+  ll res = 0;
+  for(ll i = 0; i < 16; i++){
+    if(pz.f[i] == 0) continue; // space
+    res += mdis[i][pz.f[i] - 1];
+  }
+  return res;
+}
+
+bool dfs(ll depth, ll prev){ // prev = 前回どちら方向へ進んだか
+  if(state.md == 0) return true;
+  if(depth + state.md > limit) return false; // 深さとヒューリスティックがlimitを超えたら枝刈り
+
+  ll sx = state.space / 4;
+  ll sy = state.space % 4;
+  puzzle tmp;
+
+  for(ll k = 0; k < 4; k++){
+    ll tx = sx + dx[k];
+    ll ty = sy + dy[k];
+    if(tx < 0 || ty < 0 || tx >= 4 || ty >= 4) continue;
+    if(max(prev, k) - min(prev, k) == 2) continue; // 前回探索した方向に進むのは k = (prev + 2) % 4のとき
+    tmp = state;
+
+    ll tpos = tx * 4 + ty;
+    ll spos = sx * 4 + sy;
+    state.md -= mdis[tpos][state.f[tpos] - 1];
+    state.md += mdis[spos][state.f[tpos] - 1];
+
+    swap(state.f[tpos], state.f[spos]);
+    state.space = tpos;
+    if(dfs(depth + 1, k)) return true;
+    state = tmp;
+  }
+  return false;
+}
+
+void calcmdis(){
+  for(ll i = 0; i < 16; i++){
+    for(ll j = 0; j < 16; j++){
+      mdis[i][j] = abs(i / 4 - j / 4) + abs(i % 4 - j % 4);
+    }
+  }
+}
+
+ll interactive_deepening(){
+  calcmdis();
+
+  state.md = getallmd(state); // 初期状態のマンハッタン距離
+  for(limit = state.md; limit <= LIM; limit++){
+    if(dfs(0, -10)) return limit;
+  }
+  return -1; // LIM以内に解けなかった
+}
+
+int main(){
+
+  for(ll i = 0; i < 16; i++){
+    cin >> state.f[i];
+    if(state.f[i] == 0) state.space = i;
+  }
+
+  cout << interactive_deepening() << endl;
+  return 0;
+}
+
+
+

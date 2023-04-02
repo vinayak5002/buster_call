@@ -1,0 +1,69 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class Main {
+	public static void main(String arg[]) {
+		Main main = new Main();
+		main.Run();
+	}
+	
+	public void Run() {
+		
+		Scanner scan = new Scanner(System.in);
+	
+		int N = scan.nextInt();
+		
+		ArrayList<Integer> list = new ArrayList<Integer>();
+		
+		int Ans = 0;
+		
+		list.add(0);
+		//連続して同じ値が出た場合省く
+		for(int i = 0;i < N;i++) {
+			int a = scan.nextInt();
+			if(i == 0 || list.get(list.size() - 1) != a) {
+				list.add(a);
+			}
+		}
+		list.add(0);
+		
+		int[][] A = new int[list.size()][2];
+		
+		for(int i = 0;i < list.size();i++) {
+			A[i][0] = list.get(i);
+			A[i][1] = i;
+		}
+		
+		for (int i = 0; i < list.size() - 1 ; i++) {
+			if (list.get(i) == 0 && list.get(i + 1) > 0) {
+				Ans++;
+			}
+		}
+		
+		Arrays.sort(A , (e1,e2) -> e1[0] - e2[0]);
+		
+		int island = Ans;
+		
+		for(int i = 0;A[i][0] != A[A.length - 1][0];i++){
+			
+			if(A[i][0] <= 0) {continue;}
+			
+			int lnum = list.get(A[i][1] - 1) - A[i][0];
+			int rnum = list.get(A[i][1] + 1) - A[i][0];
+			
+			if(lnum > 0 && rnum> 0) {
+				island++;
+			}
+			if(lnum <= 0 && rnum <= 0) {
+				island--;
+			}
+			if(A[i][0] != A[i + 1][0]) {
+				Ans = Math.max(island , Ans);
+			}
+		}
+		
+		System.out.println(Ans);
+		scan.close();
+	}
+}

@@ -1,0 +1,63 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define MAX 250
+#define NIL NULL
+
+typedef struct node{
+	int key;
+	struct node *parent;
+	struct node *left;
+	struct node *right;
+}node;
+
+node tree[MAX];
+
+int main(void){
+	int number;
+	int key[MAX+1];
+	int i;
+	
+	scanf("%d",&number);
+	
+	for(i=1;i<number+1;i++){
+		scanf("%d",&key[i]);
+		
+		if(i==1){
+			tree[i].key=key[i];
+			tree[i].parent=NIL;
+			tree[i].left=NIL;
+			tree[i].right=NIL;
+		}
+		else if(i%2==0){
+			tree[i].key=key[i];
+			tree[i].parent=tree[i/2].key;
+			tree[i].left=NIL;
+			tree[i].right=NIL;
+			
+			tree[i/2].left=&tree[i];
+		}
+		else{
+			tree[i].key=key[i];
+			tree[i].parent=tree[i/2].key;
+			tree[i].left=NIL;
+			tree[i].right=NIL;
+			
+			tree[i/2].right=&tree[i];
+		}
+	}
+	
+	for(i=1;i<number+1;i++){
+		printf("node %d: key = %d, ",i,key[i]);
+		if(tree[i].parent!=NIL)
+			printf("parent key = %d, ",tree[i].parent);
+		if(tree[i].left!=NIL)
+			printf("left key = %d, ",tree[i].left->key);
+		if(tree[i].right!=NIL)
+			printf("right key = %d, ",tree[i].right->key);	
+	
+		puts("");
+	}
+	
+	return 0;
+}

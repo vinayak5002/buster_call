@@ -1,0 +1,136 @@
+package main
+
+import (
+	"bufio"
+	"container/heap"
+	"fmt"
+	"os"
+	"strconv"
+)
+
+var sc = bufio.NewScanner(os.Stdin)
+var wr = bufio.NewWriter(os.Stdout)
+
+func out(x ...interface{}) {
+	fmt.Fprint(wr, x...)
+}
+
+func next() string {
+	sc.Scan()
+	return sc.Text()
+}
+
+func nextInt() int {
+	i, e := strconv.Atoi(next())
+	if e != nil {
+		panic(e)
+	}
+	return i
+}
+
+func nextInt64() int64 {
+	i, e := strconv.ParseInt(next(), 10, 64)
+	if e != nil {
+		panic(e)
+	}
+	return i
+}
+
+func main() {
+	defer wr.Flush()
+	sc.Buffer(make([]byte, 0), 1000000009)
+	sc.Split(bufio.ScanWords)
+
+	solve()
+}
+
+type Edge struct {
+	dst  int
+	cost int64
+}
+
+type Pair struct {
+	distance int64
+	vertex   int
+}
+
+type PairHeap []Pair
+
+func (h PairHeap) Len() int           { return len(h) }
+func (h PairHeap) Less(i, j int) bool { return h[i].distance < h[j].distance }
+func (h PairHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+
+func (h *PairHeap) Push(x any) {
+	// Push and Pop use pointer receivers because they modify the slice's length,
+	// not just its contents.
+	*h = append(*h, x.(Pair))
+}
+
+func (h *PairHeap) Pop() any {
+	old := *h
+	n := len(old)
+	x := old[n-1]
+	*h = old[0 : n-1]
+	return x
+}
+
+func dijkstra(start_vertex int, graph [][]Edge) []int64 {
+	const INF64 = 1000000000000000018
+
+	var n int = len(graph)
+	var dist []int64 = make([]int64, n)
+	for i := 0; i < n; i++ {
+		dist[i] = INF64
+	}
+
+	dist[start_vertex] = 0
+
+	h := &PairHeap{}
+	heap.Init(h)
+
+	heap.Push(h, Pair{distance: 0, vertex: start_vertex})
+
+	for h.Len() > 0 {
+		cur := (h.Pop()).(Pair)
+		if dist[cur.vertex] < cur.distance {
+			continue
+		}
+		for _, value := range graph[cur.vertex] {
+			var next_vertex int = value.dst
+			var cost int64 = value.cost
+
+			if dist[cur.vertex]+cost < dist[next_vertex] {
+				dist[next_vertex] = dist[cur.vertex] + cost
+				heap.Push(h, Pair{distance: dist[cur.vertex] + cost, vertex: next_vertex})
+			}
+		}
+	}
+
+	return dist
+}
+
+func solve() {
+	n := nextInt()
+
+	graph := make([][]Edge, n)
+	for i := 0; i < n; i++ {
+		graph[i] = make([]Edge, 0)
+	}
+
+	for i := 0; i < n; i++ {
+		u := nextInt()
+		k := nextInt()
+		for j := 0; j < k; j++ {
+			v := nextInt()
+			c := nextInt64()
+			graph[u] = append(graph[u], Edge{dst: v, cost: c})
+			graph[v] = append(graph[v], Edge{dst: u, cost: c})
+		}
+	}
+
+	dist := dijkstra(0, graph)
+
+	for i := 0; i < n; i++ {
+		out(i, " ", dist[i], "\n")
+	}
+}

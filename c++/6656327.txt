@@ -1,0 +1,219 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<math.h>
+#include<string.h>
+#define MAX 2000000000
+
+typedef struct{
+    int parent;
+    int left_child;
+    int right_sibling;
+}Node;
+
+int calc_depth(Node *Tree,int tmp,int count){
+    int i;
+
+    if(Tree[tmp].parent == -1){
+        return count;
+    }
+    count = calc_depth(Tree,Tree[tmp].parent,count);
+
+    return count+1;
+}
+
+int calc_height(Node *Tree, int tmp, int count,int max){
+
+    if(Tree[tmp].left_child == -1 && Tree[tmp].right_sibling == -1){
+        if(max < count){
+            max = count;
+        }
+        return max;
+    }
+
+    if(Tree[tmp].left_child== -1){
+        max = calc_height(Tree,Tree[tmp].right_sibling,count+1,max);
+    }else if(Tree[tmp].right_sibling== -1){
+        max = calc_height(Tree,Tree[tmp].left_child,count+1,max);    
+    }else{
+        max = calc_height(Tree,Tree[tmp].left_child,count+1,max);
+        max = calc_height(Tree,Tree[tmp].right_sibling,count+1,max);    
+    }
+
+    return max;
+}
+
+//tmp にはTree[id].left_c の値を入れる
+print_Tree(Node *Tree, int tmp){
+    int left = Tree[tmp].left_child;
+
+    if(left == -1 && Tree[tmp].right_sibling == -1){
+    }else{
+        while(Tree[left].right_sibling != -1){
+            
+            printf("%d, ",left);
+            left = Tree[left].right_sibling;
+        }
+        printf("%d",left);
+    }
+    
+}
+
+int calc_sibling(Node *Tree, int tmp){
+    int parent;
+
+    if(Tree[tmp].parent == -1){
+        return -1;
+    }
+    parent = Tree[tmp].parent;
+
+    if(Tree[parent].left_child == tmp){
+        return Tree[parent].right_sibling;
+    }else{
+        return Tree[parent].left_child;
+    }
+
+
+}
+
+int calc_degree(Node *Tree, int tmp){
+    if(Tree[tmp].left_child == -1 && Tree[tmp].right_sibling == -1){
+        return 0;
+    }else if(Tree[tmp].left_child == -1 || Tree[tmp].right_sibling == -1){
+        return 1;
+    }else{
+        return 2;
+    }
+}
+
+int  Preorder(Node *Tree, int n, int count, int parent){
+    // if(count == n-1){
+    //     printf(" %d\n",parent);
+    //     return count;
+    // }
+
+    if(Tree[parent].left_child == -1  && Tree[parent].right_sibling == -1){
+        printf(" %d",parent);
+        return count;
+    }
+
+    printf(" %d",parent);
+
+
+    count = Preorder(Tree,n,count+1,Tree[parent].left_child);
+    count = Preorder(Tree,n,count+1,Tree[parent].right_sibling);
+    return count;
+}
+
+int Inorder(Node *Tree, int n, int count, int parent){
+    // if(count == n-1){
+    //     printf(" %d\n",parent);
+    //     return count;
+    // }
+
+    if(Tree[parent].left_child == -1  && Tree[parent].right_sibling == -1){
+        printf(" %d",parent);
+        return count;
+    }
+
+    
+
+
+    count = Inorder(Tree,n,count+1,Tree[parent].left_child);
+    printf(" %d",parent);
+    count = Inorder(Tree,n,count+1,Tree[parent].right_sibling);
+    return count;
+}
+
+int Postorder(Node *Tree, int n, int count, int parent){
+    // if(count == n-1){
+    //     printf(" %d",parent);
+    //     return count;
+    // }
+
+    if(Tree[parent].left_child == -1  && Tree[parent].right_sibling == -1){
+        printf(" %d",parent);
+        return count;
+    }
+
+    
+
+
+    count = Postorder(Tree,n,count+1,Tree[parent].left_child);
+    count = Postorder(Tree,n,count+1,Tree[parent].right_sibling);
+    printf(" %d",parent);
+    return count;
+}
+
+
+
+
+
+int main(){
+    int i,j,k;
+    int n;
+    int id,dim;
+    int type;
+    int right_c;
+    int deepth;
+    int right;
+    int left;
+    int height;
+    int sibling;
+    int degree;
+    int count = 0;
+    int parent;
+
+    scanf("%d",&n);
+    Node Tree[100000];
+    for(i=0;i<n;i++){
+        Tree[i].parent = -1;
+        Tree[i].left_child = -1;
+        Tree[i].right_sibling = -1;
+    }
+
+    for(i=0;i<n;i++){
+        scanf("%d %d %d",&id,&left,&right);
+        if(left == -1 && right == -1){
+            continue;
+        }else if(left == -1){
+            Tree[id].right_sibling = right;
+            Tree[right].parent = id;
+        }else if(right == -1){
+            Tree[id].left_child = left;
+            Tree[left].parent = id;
+        }else{
+            Tree[id].left_child = left;
+            Tree[id].right_sibling = right;
+            Tree[left].parent = id;
+            Tree[right].parent = id;
+        }
+    }
+
+    for(i=0;i<n;i++){
+        if(Tree[i].parent == -1){
+            parent = i;
+        }
+    }
+
+    
+    printf("Preorder\n");
+    Preorder(Tree,n,count, parent);
+    printf("\n");
+
+    printf("Inorder\n");
+    Inorder(Tree,n,count, parent);
+    printf("\n");
+
+
+    printf("Postorder\n");
+    Postorder(Tree,n,count, parent);
+    printf("\n");
+
+
+    return 0;
+}
+
+
+
+
+

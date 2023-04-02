@@ -1,0 +1,557 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+//using namespace atcoder;
+#pragma GCC target ("avx2")
+#pragma GCC optimization ("O3")
+#pragma GCC optimization ("unroll-loops")
+using namespace std;
+ 
+typedef vector<int> VI;
+typedef vector<VI> VVI;
+typedef vector<string> VS;
+typedef pair<int, int> PII;
+typedef pair<int, int> pii;
+typedef pair<long long, long long> PLL;
+typedef pair<int, PII> TIII;
+ 
+typedef long long ll;
+typedef long double ld;
+typedef unsigned long long ull;
+ 
+ 
+#define FOR(i, s, n) for (int i = s; i < (int)n; ++i)
+#define REP(i, n) FOR(i, 0, n)
+#define rep(i, a, b) for (int i = a; i < (b); ++i)
+#define trav(a, x) for (auto &a : x)
+#define all(x) x.begin(), x.end()
+ 
+#define MOD 1000000007
+ 
+template<class T1, class T2> inline bool chmax(T1 &a, T2 b) {if (a < b) {a = b; return true;} return false;}
+template<class T1, class T2> inline bool chmin(T1 &a, T2 b) {if (a > b) {a = b; return true;} return false;}
+const double EPS = 1e-10, PI = acos(-1);
+const double pi = 3.141592653589793238462643383279;
+//ここから編集    
+typedef string::const_iterator State;
+ll GCD(ll a, ll b){
+  return (b==0)?a:GCD(b, a%b);
+}
+ll LCM(ll a, ll b){
+  return a/GCD(a, b) * b;
+}
+template<typename T> string tobin(T n) {
+  string res = "";
+  while(n) {
+    res += (char)('0' + n%2); n>>=2;
+  }
+  reverse(all(res));
+  return res;
+}
+template<typename T> vector<vector<T>> rotateMatrixclockwise(vector<vector<T>> v) {
+  int n = v.size(), m = v[0].size();
+  vector<vector<T>> res(m, vector<T>(n));
+  REP(i,n) REP(j,m) res[j][n-i-1] = v[i][j];
+  return res;
+}
+
+template< int mod >
+struct ModInt {
+  int x;
+ 
+  ModInt() : x(0) {}
+ 
+  ModInt(int64_t y) : x(y >= 0 ? y % mod : (mod - (-y) % mod) % mod) {}
+ 
+  ModInt &operator+=(const ModInt &p) {
+    if((x += p.x) >= mod) x -= mod;
+    return *this;
+  }
+ 
+  ModInt &operator-=(const ModInt &p) {
+    if((x += mod - p.x) >= mod) x -= mod;
+    return *this;
+  }
+ 
+  ModInt &operator*=(const ModInt &p) {
+    x = (int) (1LL * x * p.x % mod);
+    return *this;
+  }
+ 
+  ModInt &operator/=(const ModInt &p) {
+    *this *= p.inverse();
+    return *this;
+  }
+ 
+  ModInt operator-() const { return ModInt(-x); }
+ 
+  ModInt operator+(const ModInt &p) const { return ModInt(*this) += p; }
+ 
+  ModInt operator-(const ModInt &p) const { return ModInt(*this) -= p; }
+ 
+  ModInt operator*(const ModInt &p) const { return ModInt(*this) *= p; }
+ 
+  ModInt operator/(const ModInt &p) const { return ModInt(*this) /= p; }
+ 
+  bool operator==(const ModInt &p) const { return x == p.x; }
+ 
+  bool operator!=(const ModInt &p) const { return x != p.x; }
+ 
+  ModInt inverse() const {
+    int a = x, b = mod, u = 1, v = 0, t;
+    while(b > 0) {
+      t = a / b;
+      swap(a -= t * b, b);
+      swap(u -= t * v, v);
+    }
+    return ModInt(u);
+  }
+ 
+  ModInt pow(int64_t n) const {
+    ModInt ret(1), mul(x);
+    while(n > 0) {
+      if(n & 1) ret *= mul;
+      mul *= mul;
+      n >>= 1;
+    }
+    return ret;
+  }
+ 
+  friend ostream &operator<<(ostream &os, const ModInt &p) {
+    return os << p.x;
+  }
+ 
+  friend istream &operator>>(istream &is, ModInt &a) {
+    int64_t t;
+    is >> t;
+    a = ModInt< mod >(t);
+    return (is);
+  }
+ 
+  static int get_mod() { return mod; }
+};
+ 
+using modint = ModInt< 998244353 >;
+template< typename T >
+struct Combination {
+  vector< T > _fact, _rfact, _inv;
+ 
+  Combination(int sz) : _fact(sz + 1), _rfact(sz + 1), _inv(sz + 1) {
+    _fact[0] = _rfact[sz] = _inv[0] = 1;
+    for(int i = 1; i <= sz; i++) _fact[i] = _fact[i - 1] * i;
+    _rfact[sz] /= _fact[sz];
+    for(int i = sz - 1; i >= 0; i--) _rfact[i] = _rfact[i + 1] * (i + 1);
+    for(int i = 1; i <= sz; i++) _inv[i] = _rfact[i] * _fact[i - 1];
+  }
+ 
+  inline T fact(int k) const { return _fact[k]; }
+ 
+  inline T rfact(int k) const { return _rfact[k]; }
+ 
+  inline T inv(int k) const { return _inv[k]; }
+ 
+  T P(int n, int r) const {
+    if(r < 0 || n < r) return 0;
+    return fact(n) * rfact(n - r);
+  }
+ 
+  T C(int p, int q) const {
+    if(q < 0 || p < q) return 0;
+    return fact(p) * rfact(q) * rfact(p - q);
+  }
+ 
+  T H(int n, int r) const {
+    if(n < 0 || r < 0) return (0);
+    return r == 0 ? 1 : C(n + r - 1, r);
+  }
+};
+ 
+ll modpow(ll x, ll n, ll mod) {
+  ll res = 1;
+  x %= mod;
+  if(x == 0) return 0;
+  while(n) {
+    if(n&1) res = (res * x) % mod;
+    x = (x * x) % mod;
+    n >>= 1;
+  }
+  return res;
+} 
+inline long long mod(long long a, long long m) {
+    return (a % m + m) % m;
+}
+template<typename T> 
+struct BIT{
+  int N;
+  std::vector<T> node;
+  BIT(){}
+  BIT(int n){
+    N = n;
+    node.resize(N+10);
+  }
+  void build(int n) {
+    N = n;
+    node.resize(N+10);
+  }
+  /* a: 1-idxed */
+  void add(int a, T x){
+    for(int i=a; i<(int)node.size(); i += i & -i) node[i] += x;
+  }
+
+  /* [1, a] */
+  T sum(int a){
+    T res = 0;
+    for(int x=a; x>0; x -= x & -x) res += node[x];
+    return res;
+  }
+
+  /* [l, r] */
+  T rangesum(int l, int r){
+    if(l > r) return 0;
+    return sum(r) - sum(l-1);
+  }
+
+  /* 
+    a1+a2+...+aw >= valとなるような最小のwを返す
+    @verify https://codeforces.com/contest/992/problem/E
+  */
+  int lower_bound(T val) {
+    if(val < 0) return 0;
+
+    int res = 0;
+    int n = 1; 
+    while (n < N) n *= 2;
+
+    T tv=0;
+    for (int k = n; k > 0; k /= 2) {
+      if(res + k < N && node[res + k] < val){
+        val -= node[res+k];
+        res += k;
+      }
+    }
+    return res+1; 
+  }
+};
+
+struct UnionFind{
+  std::vector<int> par;
+  std::vector<int> siz;
+
+  UnionFind(int sz_): par(sz_), siz(sz_) {
+    for(int i=0; i<sz_; ++i) par[i] = i, siz[i] = 1;
+  }
+
+  void init(int sz_){
+    par.resize(sz_);
+    siz.resize(sz_);
+    for(int i=0; i<sz_; ++i) par[i] = i, siz[i] = 1;
+  }
+
+  int root(int x){
+    if(x == par[x]) return x;
+    return par[x] = root(par[x]);
+  }
+
+  bool merge(int x, int y){
+    x = root(x), y = root(y);
+    if(x == y) return false;
+    if(siz[x] < siz[y]) std::swap(x, y);
+    siz[x] += siz[y];
+    par[y] = x;
+    return true;
+  }
+
+  bool issame(int x, int y){
+    return root(x) == root(y);
+  }
+
+  int size(int x){
+    return siz[root(x)];
+  }
+};
+struct RollingHash{
+
+    using ull = unsigned long long;
+    const ull mod = (1ULL << 61) - 1;
+    const ull MASK30 = (1ULL << 30) - 1;
+    const ull MASK31 = (1ULL << 31) - 1;
+
+    const ull MASK61 = mod;
+
+    ull base;
+    int n;
+    vector<ull> hash, pow;
+
+    RollingHash(const string &s)
+    {
+        random_device rnd;
+        mt19937_64 mt(rnd());
+        base = 1001;
+        
+        n = (int)s.size();
+        hash.assign(n+1, 0);
+        pow.assign(n+1, 1);
+        
+        for(int i=0; i<n; i++){
+            hash[i+1] = calc_mod(mul(hash[i], base) + s[i]);
+            pow[i+1] = calc_mod(mul(pow[i], base));
+        }
+    }
+
+    ull calc_mod(ull x){
+        ull xu = x >> 61;
+        ull xd = x & MASK61;
+        ull res = xu + xd;
+        if(res >= mod) res -= mod;
+        return res;
+    }
+
+    ull mul(ull a, ull b){
+        ull au = a >> 31;
+        ull ad = a & MASK31;
+        ull bu = b >> 31;
+        ull bd = b & MASK31;
+        ull mid = ad * bu + au * bd;
+        ull midu = mid >> 30;
+        ull midd = mid & MASK30;
+        return calc_mod(au * bu * 2 + midu + (midd << 31) + ad * bd);
+    }
+
+    //[l,r)のハッシュ値
+    inline ull get(int l, int r){
+        ull res = calc_mod(hash[r] + mod*3-mul(hash[l], pow[r-l]));
+        return res;
+    }
+    //string tのハッシュ値
+    inline ull get(string t){
+        ull res = 0;
+        for(int i=0; i<t.size(); i++){
+            res = calc_mod(mul(res, base)+t[i]);
+        }
+        return res;
+    }
+    //string s中のtの数をカウント
+    inline int count(string t) {
+        if(t.size() > n) return 0;
+        auto hs = get(t);
+        int res = 0;
+        for(int i=0; i<n-t.size()+1; i++){
+            if(get(i, i+t.size()) == hs) res++; 
+        }
+        return res;
+    }
+
+    /* 
+        concat 
+        @verify https://codeforces.com/problemset/problem/514/C
+    */
+    inline ull concat(ull h1, ull h2, int h2len){
+      return calc_mod(h2 + mul(h1, pow[h2len]));
+    }
+
+    // LCPを求める S[a:] T[b:]
+    inline int LCP(int a, int b){
+        int len = min((int)hash.size()-a, (int)hash.size()-b);
+        
+        int lb = -1, ub = len;
+        while(ub-lb>1){
+            int mid = (lb+ub)/2;
+
+            if(get(a, a+mid) == get(b, b+mid)) lb = mid;
+            else ub = mid;
+        }
+        return lb;
+    }
+};
+const int MAX_ROW = 110; // to be set appropriately
+const int MAX_COL = 110; // to be set appropriately
+struct BitMatrix {
+    int H, W;
+    bitset<MAX_COL> val[MAX_ROW];
+    BitMatrix(int m = 1, int n = 1) : H(m), W(n) {}
+    inline bitset<MAX_COL>& operator [] (int i) {return val[i];}
+};
+
+int GaussJordan(BitMatrix &A, bool is_extended = false) {
+    int rank = 0;
+    for (int col = 0; col < A.W; ++col) {
+        if (is_extended && col == A.W - 1) break;
+        int pivot = -1;
+        for (int row = rank; row < A.H; ++row) {
+            if (A[row][col]) {
+                pivot = row;
+                break;
+            }
+        }
+        if (pivot == -1) continue;
+        swap(A[pivot], A[rank]);
+        for (int row = 0; row < A.H; ++row) {
+            if (row != rank && A[row][col]) A[row] ^= A[rank];
+        }
+        ++rank;
+    }
+    return rank;
+}
+
+int linear_equation(BitMatrix A, vector<int> b, vector<int> &res) {
+    int m = A.H, n = A.W;
+    BitMatrix M(m, n + 1);
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) M[i][j] = A[i][j];
+        M[i][n] = b[i];
+    }
+    int rank = GaussJordan(M, true);
+
+    // check if it has no solution
+    for (int row = rank; row < m; ++row) if (M[row][n]) return -1;
+
+    // answer
+    res.assign(n, 0);
+    for (int i = 0; i < rank; ++i) res[i] = M[i][n];
+    return rank;
+}
+
+struct max_flow {
+  struct edge { int to, cap, rev;};
+  int V;
+  vector<vector<edge>> G;
+  vector<int> itr, level;
+
+  max_flow(int V): V(V) {G.assign(V, vector<edge>());}
+
+  void add_edge(int from, int to, int cap) {
+    G[from].push_back((edge) {to, cap, (int)G[to].size()});
+    G[to].push_back((edge){from, 0, (int)G[from].size()-1});
+  }
+
+  void bfs(int s){
+    level.assign(V, -1);
+    queue<int> q;
+    level[s] = 0;
+    q.push(s);
+    while(q.size()){
+      int v = q.front(); q.pop();
+      for(auto &e: G[v]){
+        if(e.cap>0 && level[e.to] < 0){
+          level[e.to] = level[v] + 1;
+          q.push(e.to);
+        }
+      }
+    }
+  }
+
+  int dfs(int v, int t, int f){
+    if(v == t) return f;
+    for(int& i=itr[v]; i<(int)G[v].size(); i++){
+      edge& e = G[v][i];
+      if(e.cap > 0 && level[v] < level[e.to]) {
+        int d = dfs(e.to, t, min(f, e.cap));
+        if(d > 0){
+          e.cap -= d;
+          G[e.to][e.rev].cap += d;
+          return d;
+        }
+      }
+    }
+    return 0;
+  }
+
+  int run(int s, int t){
+    int ret = 0, f;
+    while(bfs(s), level[t] >= 0){
+      itr.assign(V, 0);
+      while((f = dfs(s, t, INT_MAX)) > 0) ret += f;
+    }
+    return ret;
+  }
+};
+#include <ext/pb_ds/assoc_container.hpp>
+#include <ext/pb_ds/tree_policy.hpp>
+template<typename T>
+struct LazySegmentTree{
+  const T INF = numeric_limits<T>::max();
+  int n0;
+  vector<T> node, lazy;
+
+  LazySegmentTree(vector<T> &v){
+    int n = v.size();
+    n0 = 1;
+    while(n0 < n) n0 <<= 1;
+    node.resize(2*n0-1);
+    lazy.assign(2*n0-1, 0);
+    for(int i=0; i<n; i++) node[i+n0-1] = v[i];
+    for(int i=n0-2; i>=0; i--) node[i] = min(node[i*2+1], node[i*2+2]);
+  }
+
+  void eval(int k){
+    if(lazy[k] == 0) return;
+    node[k] += lazy[k];
+    if(k < n0-1){
+      lazy[k*2+1] += lazy[k];
+      lazy[k*2+2] += lazy[k];
+    }
+    lazy[k] = 0;
+  }
+
+  void update(int a, int b, T x, int k, ll l, ll r){
+    eval(k);
+    if(a <= l && r <= b){
+      lazy[k] += x;
+      eval(k);
+    }else if(a < r && l < b) {
+      update(a, b, x, k*2+1, l, (l+r)/2);
+      update(a, b, x, k*2+2, (l+r)/2, r);
+      node[k] = min(node[k*2+1], node[k*2+2]);
+    }
+  }
+
+  void update(int l, int r, T x) { update(l, r, x, 0, 0, n0); }
+
+  T query(int a, int b, int k, ll l, ll r){
+    eval(k);
+    if(r <= a || b <= l) return INF;
+    else if(a <= l && r <= b){
+      return node[k];
+    }else{
+      T vl = query(a, b, k*2+1, l, (l+r)/2);
+      T vr = query(a, b, k*2+2, (l+r)/2, r);
+      return min(vl, vr);
+    }
+  }
+  T query(int l, int r) { return query(l, r, 0, 0, n0); }
+
+  inline T operator[](int a) { return query(a, a + 1); }
+};
+
+int main() {  
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  cout << fixed << setprecision(20);
+  
+  int n;
+  while(cin >> n, n) {
+    vector<int> w(n), l(n), d(n);
+    vector<string> name(n);
+    REP(i,n) {
+      cin >> name[i];
+      REP(j,n-1) {
+        int r; cin >> r;
+        if(r == 0) w[i]++;
+        else if(r == 1) l[i]++;
+        else d[i]++;
+      }
+    }
+    vector<int> idx(n);
+    REP(i,n) idx[i] = i;
+    sort(all(idx), [&](int i, int j) {
+      if(w[i] == w[j]) {
+        return d[i] > d[j];
+      }
+      return w[i] > w[j];
+    });
+    REP(i,n) {
+      cout << name[idx[i]] << '\n';
+    }
+  }
+  return 0;
+
+}

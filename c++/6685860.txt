@@ -1,0 +1,40 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+template <class T> void hentaiSort(class vector<T>::iterator l, class vector<T>::iterator r) {
+    while (l < r) {
+        reverse(l, r);
+        vector<T> is;
+        vector<int> id;
+        vector<bool> used(r - l);
+        T mn = numeric_limits<T>::max();
+        for (auto it = l; it != r; ++it) {
+            if (mn < *it) {
+                used[it - l] = true;
+                continue;
+            }
+            while (is.size() && *it < is.back()) {
+                used[id.back()] = true;
+                mn = min(mn, is.back());
+                is.pop_back();
+                id.pop_back();
+            }
+            is.emplace_back(*it);
+            id.emplace_back(it - l);
+        }
+        class vector<T>::iterator it = r - 1;
+        for (int i = r - l - 1; i >= 0; --i)
+            if (used[i]) { *it-- = *(l + i); }
+        copy(is.begin(), is.end(), l);
+        l += is.size();
+    }
+}
+
+int main() {
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; ++i) cin >> a[i];
+    hentaiSort<int>(a.begin(), a.end());
+    for (int i = 0; i < n; ++i) cout << a[i] << " \n"[i == n - 1];
+}

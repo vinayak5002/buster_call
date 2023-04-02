@@ -1,0 +1,84 @@
+#define READ_FROM_FILE 0
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+typedef pair<int, int> Pii; //first:最短距離，second:頂点番号
+
+
+#define MAX_COST (1000000000)
+
+
+class Edge {
+public:
+	int to;
+	int cost;
+
+	Edge() : to(-1), cost(-1) {
+		return;
+	}
+	~Edge() {
+		return;
+	}
+};
+
+vector<long> dijkstra(int num_vertexes, const vector<vector<Edge> >& adjacency_list, int start) {
+	vector<long> min_cost(num_vertexes, MAX_COST);
+	priority_queue<Pii, vector<Pii>, greater<Pii> > que;
+
+	min_cost[start] = 0;
+	que.push(Pii(0, start));
+
+	while (!que.empty()) {
+		Pii p = que.top(); que.pop();
+		int v = p.second;
+
+		if (min_cost[v] < p.first) continue;
+		for (const Edge& e : adjacency_list[v]) {
+			if (min_cost[e.to] > min_cost[v] + e.cost) {
+				min_cost[e.to] = min_cost[v] + e.cost;
+				que.push(Pii(min_cost[e.to], e.to));
+			}
+		}
+	}
+	return min_cost;
+}
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int n, m, r;
+	vector<vector<Edge> > adjacency_list;
+	vector<long> min_cost;
+
+	cin >> n >> m >> r;
+	adjacency_list.resize(n);
+	for (int i = 0; i < m; i++) {
+		int s, t, d;
+		Edge edge;
+
+		cin >> s >> t >> d;
+		edge.to = t;
+		edge.cost = d;
+		adjacency_list[s].push_back(edge);
+	}
+
+	min_cost = dijkstra(n, adjacency_list, r);
+	for (int i = 0; i < n; i++) {
+		if (min_cost[i] == MAX_COST) {
+			cout << "INF" << endl;
+		}
+		else {
+			cout << min_cost[i] << endl;
+		}
+	}
+	return 0;
+}

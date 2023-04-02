@@ -1,0 +1,33 @@
+import sys
+from operator import itemgetter
+
+def main(ioi):
+    rxs = lambda: map(int, ioi.readline().split())
+    N, Q = rxs()
+    As = [*rxs()]
+    Xs = [*rxs()]
+    Bs = [0]
+    acc = 0
+    for a in As:
+        acc += a
+        Bs.append(acc)
+
+    def solve(x):
+        rht = 0
+        for lft in range(N+1):
+            while rht < N+1 and Bs[rht]-Bs[lft] <= x:
+                rht += 1
+            yield rht-lft-1
+
+    ans = map(lambda x: sum(solve(x)), Xs)
+
+    return "\n".join(map(str, ans))
+
+print(main(sys.stdin))
+
+# import io
+# print(main(io.StringIO("""6 5
+# 1 2 3 4 5 6
+# 6 9 12 21 15
+# """)))
+

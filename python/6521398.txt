@@ -1,0 +1,50 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+    let n = si[0];
+    let xs = [];
+    let ys = [];
+    for (let i = 0; i < n; i++) {
+        let inp = si[i + 1].split(" ");
+        xs[i] = Number(inp[0]);
+        ys[i] = Number(inp[1]);
+        // console.log(xs[i][0]);// forDebug
+        // console.log(xs[i][1]);// forDebug
+    }
+    sort(xs, ys);
+    //console.log(xs);// forDebug
+    //console.log(ys);// forDebug
+    
+    let str = "";
+    for (let i = 0; i < n; i++) {
+        str += xs[i] + " " + ys[i] + "\n"
+    }
+    so.write(str)
+}
+
+function sort(xarr, yarr) {
+    for (let i = 0; i < xarr.length; i++) {
+        for (let j = i - 1; j >= 0; j--) {
+            if (xarr[i] < xarr[j]) {
+                let tmp_x1 = xarr[i];
+                let tmp_y1 = yarr[i];
+                let tmp_x2 = xarr[j];
+                let tmp_y2 = yarr[j];
+                xarr[i] = tmp_x2;
+                yarr[i] = tmp_y2;
+                xarr[j] = tmp_x1;
+                yarr[j] = tmp_y1;
+                i--;
+            } else if (xarr[i] == xarr[j] && yarr[i] < yarr[j]) {
+                let tmp_y1 = yarr[i];
+                let tmp_y2 = yarr[j];
+                yarr[i] = tmp_y2;
+                yarr[j] = tmp_y1;
+            }
+        }
+        //console.log(xarr);// forDebug
+        //console.log(yarr);// forDebug
+    }
+}

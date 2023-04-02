@@ -1,0 +1,168 @@
+#include <stdio.h>
+
+#define MAX 100000
+
+//構造体の宣言
+typedef struct
+{
+    int parent;
+    int right;
+    int left;
+} node;
+
+//構造体変数の宣言
+node N[MAX];
+
+//グローバル変数の宣言
+int H[MAX], D[MAX];
+
+//高さの再帰的な探索
+int setHeight(int u)
+{
+    int h1 = 0, h2 = 0;
+
+    //再帰的な高さの探索
+    if (N[u].left != -1)
+    {
+        h1 = setHeight(N[u].left) + 1;
+    }
+    if (N[u].right != -1)
+    {
+        h2 = setHeight(N[u].right) + 1;
+    }
+
+    //高さの格納
+    if (h1 > h2)
+    {
+        H[u] = h1;
+    }
+    else
+    {
+        H[u] = h2;
+    }
+
+    return H[u];
+}
+
+//深さの再帰的な探索
+int setDepth(int u, int p)
+{
+    if (u == -1)
+    {
+        return 0;
+    }
+
+    D[u] = p;
+
+    //再帰処理
+    setDepth(N[u].left, p + 1);
+    setDepth(N[u].right, p + 1);
+}
+
+//兄弟の探索
+int getSibling(int a)
+{
+    //親がいない時の処理
+    if (N[a].parent == -1)
+    {
+        return -1;
+    }
+    //兄弟が左にいるときの処理
+    if (N[N[a].parent].left != a && N[N[a].parent].left != -1)
+    {
+        return N[N[a].parent].left;
+    }
+    //兄弟が右にいるときの処理
+    if (N[N[a].parent].right != a && N[N[a].parent].right != -1)
+    {
+        return N[N[a].parent].right;
+    }
+
+    return -1;
+}
+
+int main(void)
+{
+    int n, pla, i, root = 0, l, r;
+
+    //節点の個数を取得
+    scanf("%d", &n);
+
+    //構造体の初期化
+    for (i = 0; i < n; i++)
+    {
+        N[i].parent = -1;
+    }
+
+    //節点の場所と子の情報の取得
+    for (i = 0; i < n; i++)
+    {
+        scanf("%d %d %d", &pla, &l, &r);
+
+        N[pla].left = l;
+        N[pla].right = r;
+
+        if (l != -1)
+        {
+            N[l].parent = pla;
+        }
+        if (r != -1)
+        {
+            N[r].parent = pla;
+        }
+    }
+
+    // rootの場所特定
+    for (i = 0; i < n; i++)
+    {
+        if (N[i].parent == -1)
+        {
+            root = i;
+        }
+    }
+
+    //高さの探索
+    setHeight(root);
+
+    //深さの探索
+    setDepth(root, 0);
+
+    //データの出力
+    for (i = 0; i < n; i++)
+    {
+        // node,parent,siblingの出力
+        printf("node %d: parent = %d, sibling = %d, degree = ", i, N[i].parent, getSibling(i));
+
+        // siblingの出力
+        if (N[i].left == -1 && N[i].right == -1)
+        {
+            printf("0, ");
+        }
+        else if (N[i].left == -1 || N[i].right == -1)
+        {
+            printf("1, ");
+        }
+        else
+        {
+            printf("2, ");
+        }
+
+        // depth,heightの出力
+        printf("depth = %d, height = %d, ", D[i], H[i]);
+
+        //根,節点,葉の判別の出力
+        if (N[i].parent == -1)
+        {
+            printf("root\n");
+        }
+        else if (N[i].left == -1 && N[i].right == -1)
+        {
+            printf("leaf\n");
+        }
+        else
+        {
+            printf("internal node\n");
+        }
+    }
+}
+

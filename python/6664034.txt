@@ -1,0 +1,61 @@
+def read_wgraph():
+    V, E, r = [int(v) for v in input().split()]
+    G = defaultdict(list)
+    W = {}
+    for e in range(E):
+        s, t, w = [int(v) for v in input().split()]
+        G[s].append(t)
+        if t not in G:
+            G[t] = []
+        W[(s,t)] = w
+    return G, W, r
+
+def DFS(G, st=None):
+    def Visit(G, v):
+        nonlocal T#, color, tin, tout
+        print(color, tout)
+        T += 1
+        color[v] = 1
+        tin[v] = T
+        for ch in G[v]:
+            if color[ch] == 0:
+                Visit(G, ch)
+        T += 1
+        color[v] = 2
+        tout[v] = T
+    T = 0
+    color = defaultdict(int)
+    tin = defaultdict(lambda: 1e7)
+    tout = defaultdict(lambda: 1e7)
+    if st is not None:
+        Visit(G, st)
+    for v in G:
+        if color[v] != 2:
+            Visit(G, v)
+    return tin, tout, color
+
+def Dijecstra(G, W, st):
+    def relax(G, v, W):
+        #print(dist)
+        for ch in G[v]:
+            if dist[ch] > dist[v] + W[(v, ch)]:
+                dist[ch] = dist[v] + W[(v, ch)]
+
+    dist = defaultdict(lambda: 1e7)
+    dist[st] = 0
+    tin, tout, color = DFS(G, st)
+    srt = sorted(tin.items(), key=lambda x: x[1])
+    print_dfs(tin, tout, color)
+    for vt in srt:
+        relax(G, vt[0], W)
+    return dist
+
+def print_dist(dist):
+    for v in dist:
+        if dist[v] == 1e7:
+            print("INF")
+        else:
+            print(v, dist[v])
+
+G, w, r = read_wgraph()
+print_dist(Dijecstra(G, w, st=r))

@@ -1,0 +1,68 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct queue{
+	int x;
+	struct queue *next;
+};
+
+struct queue* n_queue(int x){
+	struct queue* queueREI = (struct queue *)malloc(sizeof(struct queue));
+	queueREI->x = x;
+	queueREI->next = NULL;
+	return queueREI;
+}
+
+int main(void) {
+	int n, q, query, t, x, i, j;
+	struct queue *sn, *head[1000], *tail[1000], *head2;
+
+	scanf("%d %d", &n, &q);
+
+	for (i = 0; i < n; i++){
+		head[i] = NULL;
+		tail[i] = NULL;
+	}
+
+	for (i = 0; i < q; i++){
+		scanf("%d %d", &query, &t);
+		if (query == 0){
+			scanf("%d", &x);
+			sn = n_queue(x);
+			if (head[t] == NULL){
+				head[t] = sn;
+			}
+			else {
+				tail[t]->next = sn;
+			}
+			tail[t] = sn;
+		}
+
+		else if (query == 1){
+			if (head[t] != NULL){
+				printf("%d\n", head[t]->x);
+			}
+		}
+
+		else if (query == 2){
+			if (head[t] != NULL){
+				head2 = head[t]->next;
+				if (tail[t] == head[t]){
+					tail[t] = head2;
+				}
+				free(head[t]);
+				head[t] = head2;
+			}
+		}
+	}
+
+	for (i = 0; i < n; i++){
+		while (head[i] != NULL){
+			head2 = head[i]->next;
+			free(head[i]);
+			head[i] = head2;
+		}
+	}
+	
+	return 0;
+}

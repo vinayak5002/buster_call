@@ -1,0 +1,48 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+void init (int n, int r[]){
+    for (int i=0; i < n; i++) r[i] = i;
+}
+
+int root (int x, int r[]){
+    if (r[x] == x) return x;
+
+    return (r[x] = root(r[x], r));
+}
+
+bool is_same_set(int x, int y, int r[]){
+    return (root(x, r) == root(y, r));
+}
+
+void unite (int x, int y, int r[]) {
+    r[root(x, r)] = root(y, r);
+}
+
+int main(){
+    int n, q, com, x, y;
+    cin >> n >> q;
+
+    int r[n];
+    init(n, r);
+
+    vector<int> answer;
+
+    for (q; q > 0; q--){
+        cin >> com >> x >> y;
+
+        if (com == 0)
+            unite(x, y, r);
+        if (com == 1) {
+            if (is_same_set(x, y, r))
+                answer.push_back(1);
+            else
+                answer.push_back(0);
+        }
+    }
+
+    for (int i=0; i < answer.size(); i++)
+        cout << answer.at(i) << endl;
+
+    return 0;
+}

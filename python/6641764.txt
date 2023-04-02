@@ -1,0 +1,129 @@
+//#include <atcoder/all>
+#include <algorithm>
+#include <bitset>
+#include <complex>
+#include <deque>
+#include <exception>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <ios>
+#include <iosfwd>
+#include <iostream>
+#include <istream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <locale>
+#include <map>
+#include <memory>
+#include <new>
+#include <numeric>
+#include <ostream>
+#include <queue>
+#include <set>
+#include <sstream>
+#include <stack>
+#include <stdexcept>
+#include <streambuf>
+#include <string>
+#include <typeinfo>
+#include <utility>
+#include <valarray>
+#include <vector>
+#include <array>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <forward_list>
+#include <future>
+#include <initializer_list>
+#include <mutex>
+#include <random>
+#include <ratio>
+#include <regex>
+#include <scoped_allocator>
+#include <system_error>
+#include <thread>
+#include <tuple>
+#include <typeindex>
+#include <type_traits>
+#include <unordered_map>
+#include <unordered_set>
+using namespace std;
+typedef long long ll;
+typedef pair<ll,ll> P;
+typedef vector<int> vint;
+typedef vector<vector<int> > vvint;
+typedef vector<long long> vll;
+typedef vector<vector<long long> > vvll;
+typedef vector<pair<ll,ll>> vpll;
+typedef vector<string> vst;
+typedef vector<bool> vbo;
+typedef vector<vector<bool>> vvbo;
+#define rep(i,a) for(int i=0;i<a;i++)
+#define REP(i,a,b) for(int i=a;i<b;i++)
+#define rrep(i,a,b) for(int i=a;i>=b;i--)
+#define ALL(v) (v).begin(),(v).end()
+#define RALL(v) (v).rbegin(),(v).rend()
+ll gcd(ll a,ll b){return a?gcd(b%a,a):b;}
+ll lcm(ll a,ll b){return a / gcd(a,b) * b;}
+void oye(){cout << "Yes" << endl;}
+void ono(){cout << "No"  << endl;}
+//ll mod=998244353;
+//ll mod=1e9+7;
+
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(0);
+  ll n,now,d=1e9;cin>>n;
+  vll p(n);
+  vll dp(n,d);dp[0]=0;
+  map<ll,ll> go;
+  rep(i,n){
+    go[i]=i;
+  }
+  vbo usable(n,true);
+  rep(i,n){
+    cin>>p[i];
+  }
+  REP(i,1,n-1){
+    if(!usable[i] || go[i]!=i) continue;
+    now=i;
+    bool key=false;
+    set<ll> wroop;
+    wroop.insert(i);
+    while(p[now]!=0){
+      now+=p[now];
+      if(!usable[now]){key=true;break;}
+      if(wroop.count(now)){
+        key=true;break;
+      }
+      wroop.insert(now);
+    }
+    if(key){
+      for(ll j : wroop){
+        usable[j]=false;
+      }
+    }
+    else{
+      for(ll j : wroop){
+        go[j]=now;
+      }
+    }
+  }
+  queue<ll> nxt;
+  nxt.push(0);
+  vbo vst(n,false);vst[0]=true;
+  while(dp[n-1]==d){
+    now=nxt.front();nxt.pop();
+    REP(i,1,7){
+      if(now+i>=n) break;
+      if(!usable[now+i] || vst[go[now+i]]) continue;
+      nxt.push(go[now+i]);vst[go[now+i]]=true;
+      dp[go[now+i]]=dp[now]+1;
+    }
+  }
+  cout<<dp[n-1]<<endl;
+}

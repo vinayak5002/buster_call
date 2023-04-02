@@ -1,0 +1,33 @@
+from collections import deque
+
+n = int(input())
+
+parent = [-1]*n
+child = [[] for _ in range(n)]
+for _ in range(n):
+    i, k, *arg = map(int,input().split())
+    if k > 0:
+        child[i] = arg
+    for j in arg:
+        parent[j] = i
+
+depth = [0]*n
+types = [0]*n
+q = deque()
+q.append(parent.index(-1))
+types[parent.index(-1)] = "root"
+while q:
+    x = q.popleft()
+    dep_x = depth[x]
+    if child[x]:
+        if types[x] != "root":
+            types[x] = "internal node"
+        for i in child[x]:
+            depth[i] = dep_x + 1
+            q.append(i)
+    else:
+        types[x] = "leaf"
+
+for i in range(n):
+    print(f"node {i} : parent = {parent[i]}, depth = {depth[i]}, {types[i]}, {child[i]}")
+

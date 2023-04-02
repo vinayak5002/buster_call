@@ -1,0 +1,57 @@
+#include<stdio.h>
+#include<iostream>
+using namespace std;
+struct Node{
+    int key;
+    Node *prev, *next;
+};
+
+//初期化
+Node *nil;
+void init(){
+    //メモリの確保
+    nil = (Node *)malloc(sizeof(Node));
+    nil->next = nil;
+    nil->prev = nil;
+}
+//要素の追加
+void insert(int key){
+    Node *x = (Node *)malloc(sizeof(Node));
+    x->key = key;
+    x->next = nil->next;
+    nil->next->prev = x;
+    nil->next = x;
+    x->prev = nil;
+}
+//要素の探索
+Node* listserch(int key){
+    Node *cur = nil->next;
+    while(cur != nil && cur->key != key){
+        cur = cur->next;
+    }
+    return cur;
+}
+
+//要素の削除
+void deleteNode(Node *t){
+    if(t == nil) return;
+    t->prev->next = t->next;
+    t->next->prev = t->prev; 
+    //メモリの解放
+    free(t);
+}
+
+//最初の要素の削除
+void deleteFirst(){
+    deleteNode(nil->next);
+}
+
+//最後の要素の削除
+void deleteLast(){
+    deleteNode(nil->prev);
+}
+
+//指定した要素の削除
+void deleteKey(int  key){
+    deleteNode(listserch(key));
+}

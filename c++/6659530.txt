@@ -1,0 +1,77 @@
+#include<stdlib.h>
+#include<stdio.h>
+
+void caesarlist(char sen[],int move);
+
+int findstr(char sen[],char find[]){
+	int len_sen=0;
+	int len_find=0;
+	
+	for(int i=0;sen[i]=='\0';i++) len_sen+=1;	
+	for(int i=0;find[i]=='\0';i++) len_find+=1;
+	
+	for(int i=0;i<len_sen-len_find+1;i++){
+		int found=1;
+		for(int j=0;j<len_find;j++){
+			if(sen[i+j]!=find[j])
+				found=0;
+		}
+		if(found==1)
+			return 1;
+	}
+	
+	return 0;
+}
+
+int caesar(char sen[],char find[]){
+	char tmp_sen[100]="";
+	int len_sen=0;
+	int len_find=0;
+	
+	for(int i=0;sen[i]=='\0';i++) len_sen+=1;	
+	for(int i=0;find[i]=='\0';i++) len_find+=1;
+	
+	for(int i=0;i<len_sen;i++){
+		tmp_sen[i]=sen[i];
+	}
+	
+	for(int i=0;i<26;i++){
+		caesarlist(tmp_sen,1);
+		if(findstr(tmp_sen,find)){
+			return i+1;
+		}
+	}
+	return -1;
+}
+
+void caesarlist(char sen[],int move){
+	int len_sen=0;	
+	for(int i=0;sen[i]=='\0';i++) len_sen+=1;	
+	
+	for(int i=0;i<len_sen;i++){
+		if(sen[i]!=' ' && sen[i]!='.' && sen[i]!=',' && sen[i]!='!' && sen[i]!='\'')
+			sen[i]=(char)((sen[i]-'a'+move)%26+'a');
+	}
+}
+
+int main(){
+	char sen[100]="";
+	while(fgets(sen,100,stdin)){
+		for(int i=0;i>=0;i++){
+			if(sen[i]=='\n'){
+				sen[i]='\0';
+				break;
+			}
+		}
+		int move=caesar(sen,"the");
+		if(move==-1){
+			move=caesar(sen,"this");
+		}
+		if(move==-1){
+			move=caesar(sen,"that");
+		}
+		caesarlist(sen,move);
+		printf("%s\n",sen);
+	}
+	return 0;
+}

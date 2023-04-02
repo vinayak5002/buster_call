@@ -1,0 +1,46 @@
+import itertools
+import sys
+import math
+from collections import defaultdict, deque
+
+sys.setrecursionlimit(10 ** 6)
+stdin = sys.stdin
+
+INF = float('inf')
+
+ni = lambda: int(ns())
+na = lambda: list(map(int, stdin.readline().split()))
+ns = lambda: stdin.readline().strip()
+
+K = ni()
+d = [[-1] * 8 for _ in range(8)]
+
+for _ in range(K):
+    y, x = na()
+    d[y][x] = 1
+
+for p in itertools.permutations(range(8)):
+    coop = []
+    for i in range(8):
+        if d[i].count(1) == 0:
+            coop.append((i, p[i]))
+        else:
+            coop.append((i, d[i].index(1)))
+    flag = True
+    for i in range(8):
+        y, x = coop[i]
+        for j in range(i + 1, 8):
+            y2, x2 = coop[j]
+            if x == x2 or y == y2 or abs(x - x2) == abs(y - y2):
+                flag = False
+                break
+    if flag:
+        for i in range(8):
+            str = ""
+            for j in range(8):
+                if (i, j) in coop:
+                    str += "Q"
+                else:
+                    str += "."
+            print(str)
+        exit()

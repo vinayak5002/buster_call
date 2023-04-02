@@ -1,0 +1,53 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+int main() {
+    char strWords[128][128];
+    char strOneWord[128];
+    char strLine[1024];
+    char ch;
+    int i = 0;
+
+    while (fgets(strWords[i], 100, stdin)) {
+        i++;
+    }
+    int finalDiff[128];
+
+
+    for (int j = 0; j <i; j++) {
+        int nLen = strlen(strWords[j]);
+        for (int k = 0; k < nLen; k++) {
+            int nDiff = strWords[j][k] - 't';
+            if ((strWords[j][k+1] -'h') != nDiff) {
+                continue;
+            }
+            if (strWords[j][k+3]<'a' || strWords[j][k+3]>'z') {
+                if ((strWords[j][k+2] - 'e') != nDiff) {
+                    continue;
+                }
+                finalDiff[j] = nDiff;
+                break;
+            }
+            else if(strWords[j][k+4]<'a' || strWords[j][k+4]>'z') {
+                if ((strWords[j][k+2] - 'a') == nDiff && (strWords[j][k+3] - 't') == nDiff ||
+                    (strWords[j][k+2] - 'i') == nDiff && (strWords[j][k+3] - 's') == nDiff) {
+                    finalDiff[j] = nDiff;
+                    break;
+                }
+            }
+        }
+    }
+
+    for (int j = 0; j < i; j++) {
+        int nLen = strlen(strWords[j]);
+        for (int k = 0; k < nLen; k++) {
+            if (strWords[j][k] == '.' || strWords[j][k] == ' ' || strWords[j][k] =='\n') continue;
+            strWords[j][k] -= finalDiff[j];
+            if (strWords[j][k] < 'a') strWords[j][k]  += ('z'-'a' + 1);
+            if (strWords[j][k] > 'z') strWords[j][k]  -= ('z'-'a' + 1);
+        }
+        fputs(strWords[j], stdout);
+    }
+    return 0;
+}

@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+using std::cout;
+using std::cin;
+using std::endl;
+
+
+int N,M;
+
+void solve();
+// oddloop
+int main() {
+	while(cin>>N>>M,N) solve();
+}
+
+void solve(){
+	vector<int> dx={-1,0,1,0},dy={0,1,0,-1};
+	vector<vector<char>> table(N+2,vector<char>(M+2,'#'));
+	for(int i=0;i<N;i++) for(int j=0;j<M;j++) cin>>table[i+1][j+1];
+	queue<pair<int,int>> q;
+	vector<vector<int>> p(N+2,vector<int>(M+2));
+	for(int i=1;i<=N;i++) for(int j=1;j<=M;j++){
+		if(table[i][j]=='#') continue;
+		for(int k=0;k<4;k++){
+			if(table[i+dx[k]][j+dy[k]]=='.') p[i][j]++;
+		}
+		if(p[i][j]==1) q.push({i,j});
+	}
+	while(!q.empty()){
+		int s,t;
+		tie(s,t)=q.front();
+		q.pop();
+		for(int k=0;k<4;k++){
+			p[s+dx[k]][t+dy[k]]--;
+			if(p[s+dx[k]][t+dy[k]]==1){
+				q.push({s+dx[k],t+dy[k]});
+			}
+		}
+	}
+	for(int i=1;i<=N;i++) for(int j=1;j<=M;j++) if(p[i][j]<=1) table[i][j]='#';
+	if(table[1][1]=='#'){
+		cout<<"NO\n";
+		return ;
+	}
+	int dir=2;
+	int x=1,y=1;
+	while(table[x][y]!='c'){
+		//cout<<x<<" "<<y<<"\n";
+		table[x][y]='c';
+		int s=x+dx[(dir+1)%4],t=y+dy[(dir+1)%4];
+		if(table[s][t]!='#'){
+			dir=(dir+1)%4;
+			x=s,y=t;
+			continue;
+		}
+		s=x+dx[dir],t=y+dy[dir];
+		if(table[s][t]!='#'){
+			x=s,y=t;
+			continue;
+		}
+		else{
+			x+=dx[(dir+3)%4],y+=dy[(dir+3)%4];
+			dir=(dir+3)%4;
+		}
+	}
+	if(x!=1||y!=1){
+		cout<<"NO\n";
+		return ;
+	}
+	for(int i=1;i<=N;i+=N-1) for(int j=1;j<=M;j+=M-1){
+		if(table[i][j]!='c'){
+			cout<<"NO\n";
+			return ;
+		}
+	}
+	cout<<"YES\n";
+}
+

@@ -1,0 +1,103 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, n) for (int i = 0; (i) < (int) (n); (i) ++)
+#define all(a) (a).begin(), (a).end()
+#define rall(a) (a).rbegin(), (a).rend()
+using ll = long long;
+template<typename T, typename U> ostream& operator << (ostream& os, const pair<T, U>& p) { os << p.first << " " << p.second; return os; }
+template<typename T> ostream& operator << (ostream& os, const vector<T>& vec) { for (int i = 0; i < vec.size(); i ++) { os << vec[i] << (i + 1 == vec.size() ? "" : " "); } return os; }
+template<typename T> ostream& operator << (ostream& os, const set<T> &p) { os << "{"; for (auto it = p.begin(); it != p.end(); it ++) { if (it != p.begin()) { os << ", "; } os << *it; } os << "}"; return os; }
+template<typename T, typename U> ostream& operator << (ostream& os, const map<T, U> &p) { os << "{"; for (auto it = p.begin(); it != p.end(); it ++) { if (it != p.begin()) { os << ", "; } os << (*it).first << ": " << (*it).second; } os << "}"; return os; }
+template<typename T> bool chmin(T &a, const T& b) { if (a > b) { a = b; return true; } return false; }
+template<typename T> bool chmax(T &a, const T& b) { if (a < b) { a = b; return true; } return false; }
+void dump_inner() { cerr << endl; }
+template <typename T, typename... U> void dump_inner(T front, U... rest) { cerr << front; if (sizeof...(rest) > 0) { cerr << ", "; } dump_inner(rest...); }
+#ifdef LOCAL
+#define dump(...) cerr << #__VA_ARGS__ << " = ", dump_inner(__VA_ARGS__)
+#else
+#define dump(...)
+#endif
+
+string s;
+int p = 0;
+int expression();
+
+int number() {
+        int res = 0;
+        while (isdigit(s[p])) {
+                res *= 10;
+                res += s[p] - '0';
+                p ++;
+        }
+        return res;
+}
+int factor() {
+        if (s[p] == '(') {
+                p ++;
+                int res = expression();
+                assert(s[p] == ')');
+                p ++;
+                return res;
+        } else {
+                int res = number();
+                return res;
+        }
+}
+int term() {
+        int res = factor();
+        while (true) {
+                if (s[p] == '*') {
+                        p ++;
+                        int v = factor();
+                        res *= v;
+                } else if (s[p] == '/') {
+                        p ++;
+                        int v = factor();
+                        res /= v;
+                } else {
+                        break;
+                }
+        }
+        return res;
+}
+int expression() {
+        int res = term();
+        while (true) {
+                if (s[p] == '+') {
+                        p ++;
+                        int v = term();
+                        res += v;
+                } else if (s[p] == '-') {
+                        p ++;
+                        int v = term();
+                        res -= v;
+                } else {
+                        break;
+                }
+        }
+        return res;
+}
+
+void solve() {
+        int n;
+        cin >> n;
+        cin.ignore();
+        while (n --) {
+                getline(cin, s);
+                p = 0;
+                cout << expression() << '\n';
+        }
+}
+
+int main() {
+        cin.tie(nullptr);
+        ios::sync_with_stdio(false);
+        // int t; cin >> t;
+        int t = 1;
+        while (t --) {
+                solve();
+        }
+        return 0;
+}
+
+

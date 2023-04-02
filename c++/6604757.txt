@@ -1,0 +1,124 @@
+#include<iostream>
+#include<string>
+#include<vector>
+#include<stack>
+#include<queue>
+#include<set>
+#include<map>
+#include<algorithm>
+#include<numeric>
+#include<cmath>
+#include<iomanip>
+#include<regex>
+using namespace std;
+#define int long long
+const int mod=1e9+7;
+struct node{
+	int key;
+	node*par,*left,*right;
+};
+node*t=nullptr;
+void insert(node*z){
+	node*y=nullptr;
+	node*x=t;
+	while(x!=nullptr){
+		y=x;
+		if(z->key<x->key)
+			x=x->left;
+		else
+			x=x->right;
+	}
+	z->par=y;
+	if(y==nullptr)
+		t=z;
+	else if(z->key<y->key)
+		y->left=z;
+	else
+		y->right=z;
+}
+node*find(node*n,int k){
+	if(n==nullptr||n->key==k)
+		return n;
+	else if(k<n->key)
+		return find(n->left,k);
+	else
+		return find(n->right,k);
+}
+void del(node*z){
+	if(z->left==nullptr){
+		if(z->right==nullptr){
+			if(z->par!=nullptr){
+				if(z->par->left==z)
+					z->par->left=nullptr;
+				else
+					z->par->right=nullptr;
+			}
+		}else{
+			if(z->par->left==z)
+				z->par->left=z->right;
+			else
+				z->par->right=z->right;
+			z->right->par=z->par;
+		}
+	}else{
+		if(z->right==nullptr){
+			if(z->par->left==z)
+				z->par->left=z->left;
+			else
+				z->par->right=z->left;
+			z->left->par=z->par;
+		}else{
+			node*y=z;
+			node*x=z->right;
+			while(x!=nullptr){
+				y=x;
+				x=x->left;
+			}
+			z->key=y->key;
+			del(y);
+		}
+	}
+}
+void in(node*n){
+	if(n==nullptr)
+		return;
+	in(n->left);
+	cout<<' '<<n->key;
+	in(n->right);
+}
+void pre(node*n){
+	if(n==nullptr)
+		return;
+	cout<<' '<<n->key;
+	pre(n->left);
+	pre(n->right);
+}
+signed main(){
+	int m;
+	cin>>m;
+	string com;
+	while(cin>>com){
+		if(com=="insert"){
+			int k;
+			cin>>k;
+			node*n=(node*)malloc(sizeof(node));
+			n->key=k;
+			n->par=n->left=n->right=nullptr;
+			insert(n);
+		}else if(com=="find"){
+			int k;
+			cin>>k;
+			cout<<(find(t,k)?"yes":"no")<<endl;
+		}else if(com=="delete"){
+			int k;
+			cin>>k;
+			del(find(t,k));
+		}else if(com=="print"){
+			in(t);
+			cout<<endl;
+			pre(t);
+			cout<<endl;
+		}
+	}
+}
+

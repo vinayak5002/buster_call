@@ -1,0 +1,113 @@
+#include<bits/stdc++.h>
+//#pragma GCC target("avx2")
+//#pragma GCC optimize("O3")
+//#pragma GCC optimize("unroll-loops")
+using namespace std;
+using ll=long long;
+using ld=long double;
+using i128 = __int128_t;
+#define rep(i,n) for(ll i=0;i<ll(n);i++)
+#define rep2(i,n) for(ll i=n-1;i>=0;i--)
+#define rep3(i,a,b) for(ll i=a;i<=ll(b);i++)
+#define rep4(i,a,b) for(ll i=a;i>=ll(b);i--)
+#define forv(i,V) for(const auto& i:V)
+#define all(x) x.begin(),x.end()
+#define fi first
+#define se second
+#define SIZE(x) int(x.size())
+//constexpr ll mod=998244353;
+//constexpr ll mod=1000000007;
+#define pi 3.14159265358979323
+#define INF32 2147483647
+#define INF64 9223372036854775807
+#define faster ios::sync_with_stdio(false);std::cin.tie(nullptr)
+#define pii pair<int, int>
+#define pll pair<ll, ll>
+#define pb push_back
+#define eb emplace_back
+#define mp make_pair
+#define rev reverse
+#define vi vector<int>
+#define vll vector<ll>
+#define vpi vector<pair<int,int>>
+#define vpll vector<pair<ll,ll>>
+#define vvi vector<vector<int>>
+#define vvll vector<vector<ll>>
+#define lb lower_bound
+#define ub upper_bound
+const string YESNO[2] = {"NO", "YES"};
+const string YesNo[2] = {"No", "Yes"};
+const string yesno[2] = {"no", "yes"};
+#define rall(n) (n).rbegin(),(n).rend()
+#define INT(...) int __VA_ARGS__;scan(__VA_ARGS__)
+#define LL(...) ll __VA_ARGS__;scan(__VA_ARGS__)
+#define STR(...) string __VA_ARGS__;scan(__VA_ARGS__)
+#define CHR(...) char __VA_ARGS__;scan(__VA_ARGS__)
+#define DBL(...) double __VA_ARGS__;scan(__VA_ARGS__)
+#define LD(...) ld __VA_ARGS__;scan(__VA_ARGS__)
+template<typename T,typename U>
+ostream &operator<<(ostream&os,const pair<T,U>&p){os<<p.first<<" "<<p.second;return os;}
+template<typename T,typename U>
+istream &operator>>(istream&is,pair<T,U>&p){is>>p.first>>p.second;return is;}
+template<typename T>
+ostream &operator<<(ostream&os,const vector<T>&v){for(auto it=v.begin();it!=v.end();){os<<*it<<((++it)!=v.end()?" ":"");}return os;}
+template<typename T>
+istream &operator>>(istream&is,vector<T>&v){for(T &in:v){is>>in;}return is;}
+void scan(){}
+template<class Head,class... Tail>
+void scan(Head&head,Tail&... tail){cin>>head;scan(tail...);}
+template<class T>
+void print(const T &t){cout<<t<<'\n';}
+template<class Head, class... Tail>
+void print(const Head &head, const Tail &... tail){cout<<head<<' ';print(tail...);}
+template<class... T>
+void fin(const T &... a){print(a...);exit(0);}
+//setprecision(20)
+namespace yakisoba{
+    struct SegmentTree{
+        int n;
+        vector<ll> dat;
+        SegmentTree(int n_):n(n_),dat(n_*2+2,INF32){}
+        SegmentTree(vector<ll> dat_):n(dat_.size()),dat(dat_.size()*2+2,INF32){
+            for(int i=dat_.size()+1;i<=dat_.size()*2;i++){
+                dat[i]=dat_[i-dat_.size()-1];
+            }
+            for(int i=dat_.size();i>=1;i--){
+                dat[i]=min(dat[2*i],dat[2*i+1]);
+            }
+        }
+        void update(int i,ll x){
+            i+=n+1;
+            dat[i]=x;
+            while(i>0){
+                i=i/2;  // parent
+                dat[i]=min(dat[i*2],dat[i*2+1]);
+            }            
+        }
+        ll get(int i){
+            return dat[i+n+1];
+        }
+        //[l,r)
+        ll getRange(int l,int r){
+            ll res=INF64;
+            l+=n+1;r+=n+1;
+            while (l != r) {
+                if (l & 1) res=min(res,dat[l]),l++;
+                if (r & 1) r--,res=min(res,dat[r]);
+                l/=2;r/=2;
+            }
+            return res;
+        }
+    };
+}
+using namespace yakisoba;
+int main(){
+  LL(n,q);
+  SegmentTree s(n);
+  while(q--){
+    ll t,x,y;
+    scan(t,x,y);
+    if(!t) s.update(x,y);
+    else print(s.getRange(x,y+1));
+  }
+}

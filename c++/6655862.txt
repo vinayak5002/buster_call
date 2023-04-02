@@ -1,0 +1,89 @@
+#include<stdio.h>
+#define MAX 100000
+#define NIL -1
+
+typedef struct{
+    int parent;
+    int left;
+    int right;
+}Node;
+
+Node T[MAX];
+int dep;
+
+int Sibling(int node){
+    if(T[node].parent == NIL) return NIL;//親が存在しない=兄弟が存在しない
+    else if(T[T[node].parent].left == node) return T[T[node].parent].right;//nodeの親から見て、nodeが左の子であるなら右の子を返す
+    else return T[T[node].parent].left;
+}
+
+int Degree(int node){
+    if(T[node].left == NIL && T[node].right == NIL) return 0;
+    else if(T[node].left != NIL && T[node].right != NIL) return 2;
+    else  return 1;
+}
+
+//再帰的に深さを測る
+int Depth(int node){
+    if(T[node].parent == NIL) return 0;
+    if(T[node].parent != NIL){
+    dep++;
+    Depth(T[node].parent);
+    }
+    return dep;
+}
+
+//再帰的に高さを測る
+int Height(int node){
+    int hilef = 0, hiri = 0;
+
+    if(T[node].left != NIL) {
+    hilef = Height(T[node].left) +1;
+    }
+    if(T[node].right != NIL){
+    hiri = Height(T[node].right) +1;
+    }
+    if(hilef < hiri) return hiri;
+    else return hilef;
+}
+
+//出力用関数
+void Print(int node){
+    printf("node %d: ", node);
+    printf("parent = %d, ", T[node].parent);
+    printf("sibling = %d, ", Sibling(node));
+    printf("degree = %d, ", Degree(node));
+    dep=0;
+    printf("depth = %d, ", Depth(node));
+    printf("height = %d, ", Height(node));
+
+    if(T[node].parent == NIL) printf("root\n");
+    else if(T[node].left == NIL && T[node].right == NIL) printf("leaf\n");
+    else printf("internal node\n");
+}
+
+int main(){
+    int a, b, c, n;
+    int i;
+
+    scanf("%d", &n);
+
+    for(i=0; i<n; i++){//構造体の中身を全て初期化
+	    T[i].parent = NIL;
+	    T[i].left = NIL;
+	    T[i].right = NIL;
+    }
+
+    for(i=0; i<n; i++){//入力から親と左右の子の関係を代入
+        scanf("%d%d%d", &a, &b, &c);
+        T[b].parent = a;
+        T[c].parent = a;
+        T[a].left = b;
+        T[a].right = c;
+    }
+
+    for(i=0; i<n; i++){ //Print関数で全てのノードについての情報を出力
+        Print(i);
+    }
+    return 0;
+}

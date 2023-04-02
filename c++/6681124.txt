@@ -1,0 +1,80 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <tuple>
+#include <map>
+#include <queue>
+
+using namespace std;
+
+using ll = long long;
+using pii = pair<int, int>;	using pll = pair<ll, ll>;	using pil = pair<int, ll>;	using pli = pair<ll, int>;
+using vi = vector<int>;		using vvi = vector<vi>;		using vvvi = vector<vvi>;
+using vll = vector<ll>;		using vvll = vector<vll>;	using vvvll = vector<vvll>;
+using vb = vector<bool>;	using vvb = vector<vb>;		using vvvb = vector<vvb>;
+template <class T> using pqr = priority_queue<T, vector<T>, greater<T>>;
+
+const ll INFL = (ll)1e18;	const int INF = (int)1e9;
+const int MOD = 1000000007;
+
+template <class T> inline bool chmax(T& M, const T& x) { if (M < x) { M = x; return true; } return false; } // 最大値を更新（更新されたら true を返す）
+template <class T> inline bool chmin(T& m, const T& x) { if (m > x) { m = x; return true; } return false; } // 最小値を更新（更新されたら true を返す）
+
+
+int main()
+{
+	const int MAX_NUM = 1000000;
+	int t;
+	cin >> t;
+
+
+	//素数とオイラー関数の計算
+	vi prime(MAX_NUM + 1);
+	vb is_prime(MAX_NUM + 1);
+	vi euler(MAX_NUM + 1, 1);
+	int p = 0;
+	//初期化
+	for (int i = 0; i <= MAX_NUM; i++)
+		is_prime[i] = true;
+
+	is_prime[0] = is_prime[1] = false;
+	for (int i = 2; i <= MAX_NUM; i++) {
+		if (is_prime[i]) {
+			prime[p++] = i;
+			euler[i] = i - 1;
+			for (int j = 2 * i; j <= MAX_NUM; j += i) {
+				is_prime[j] = false;
+				int tmp = j, pow = 1;
+				//素因数のべきを求める
+				while (tmp % i == 0) {
+					tmp /= i;
+					pow *= i;
+				}
+				//オイラー関数の計算
+				euler[j] *= pow - pow / i;
+
+			}
+		}
+	}
+
+
+	//数列計算
+	vll F(MAX_NUM + 1);
+	F[1] = 2;
+	for (int i = 2; i <= MAX_NUM; i++) {
+		F[i] = F[i - 1] + euler[i];
+	}
+
+	vi ans;
+	for (int i = 0; i < t; i++) {
+		int n;
+		cin >> n;
+		ans.push_back(F[n]);
+	}
+
+
+	for (auto a : ans)
+		cout << a << endl;
+
+	return 0;
+}

@@ -1,0 +1,65 @@
+import java.util.Scanner;
+
+public class Main {
+
+	public static void main(String[] args) {
+
+		Scanner sc = new Scanner(System.in);
+		String nq = sc.nextLine();
+		int space = nq.indexOf(" ");
+		int n = Integer.parseInt(nq.substring(0, space)) + 1;
+		int q = Integer.parseInt(nq.substring(space+1, nq.length()));
+
+		String[] process = new String[n];
+		String[] name = new String[n];
+		int[] time = new int[n];
+
+		for(int i=1; i<n; i++) {
+
+			process[i] = sc.nextLine();
+			space = process[i].indexOf(" ");
+			name[i] = process[i].substring(0, space);
+			time[i] = Integer.parseInt(process[i].substring(space+1, process[i].length()));
+		}
+
+		queue(n, q, name, time);
+
+
+		sc.close();
+	}
+
+
+	//計算
+	static void queue(int n, int q, String[] name, int[] time) {
+
+		int resultTime = 0;
+		int tail= 0;
+		int head = 1;
+
+		//残りの処理時間がなくなるまで
+		while(head!=tail) {
+
+
+			if(time[head] > q) {
+				//ENQUEUE(余った時間をtailに追加)
+				time[head] -= q;
+				resultTime += q;
+				name[tail] = name[head];
+				time[tail] = time[head];
+
+				if(tail==n-1) tail = 0;
+				else tail++;
+			}
+			else {
+				//結果を出力(DEQUEUE)
+				resultTime += time[head];
+				time[head] = 0;
+				System.out.println(name[head] + " " + resultTime);
+			}
+
+			if(head==n-1) head = 0;
+			else head++;
+		}
+	}
+}
+

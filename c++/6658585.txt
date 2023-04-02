@@ -1,0 +1,63 @@
+#include<bits/stdc++.h>
+//#include<atcoder/all>
+using namespace std;
+//using namespace atcoder;
+//using ll = long long;
+#define rep(i,m,n) for(int (i)=(m);(i)<(n);++(i))
+#define rrep(i,m,n) for(int (i)=(n)-1;(i)>=(m);--(i))
+#define all(x) (x).begin(),(x).end()
+#define out(y,x,h,w) (y)<0||(x)<0||(y)>=(h)||(x)>=(w)
+
+template<class T>inline bool chmin(T& a, T b) {
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+template<class T>inline bool chmax(T& a, T b) {
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+inline void init() {
+    cin.tie(nullptr); cout.tie(nullptr);
+    ios::sync_with_stdio(false);
+    cout << fixed << setprecision(15);
+}
+
+const int max_N = 1024;
+const int INF = 1e9;
+int main() {
+    init();
+
+    string s, t;cin >> s >> t;
+    int dp[max_N][max_N];
+    rep(i, 0, max_N)rep(j, 0, max_N)dp[i][j] = INF;
+    dp[0][0] = 0;
+
+    rep(i, 0, s.size() + 1) {
+        rep(j, 0, t.size() + 1) {
+            //同じ文字
+            if (i > 0 && j > 0) {
+                if (s[i - 1] == t[j - 1]) {
+                    chmin(dp[i][j], dp[i - 1][j - 1]);
+                }
+                else {
+                    //変更
+                    chmin(dp[i][j], dp[i - 1][j - 1] + 1);
+                }
+            }
+            //s[i]削除
+            if (i > 0)chmin(dp[i][j], dp[i - 1][j] + 1);
+            //t[j]削除
+            if (j > 0)chmin(dp[i][j], dp[i][j - 1] + 1);
+
+        }
+    }
+    cout << dp[s.size()][t.size()] << endl;
+
+    return 0;
+}

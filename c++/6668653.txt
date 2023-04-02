@@ -1,0 +1,130 @@
+#include <bits/stdc++.h>
+using std::cin;
+using std::getline;
+using std::cout;
+using std::endl;
+using std::string;
+using std::bitset;
+using std::vector;
+using std::array;
+using std::stack;
+using std::queue;
+using std::priority_queue;
+using std::set;
+using std::map;
+using std::pair;
+using llong = long long;
+template<typename T> using nLimits = std::numeric_limits<T>;
+#define ALL(a) (a).begin(), (a).end()
+#define REP(i, n) for (int i = 0; i < static_cast<int>(n); ++i)
+#define RREP(i, n) for (int i = static_cast<int>(n) - 1; i >= 0; --i)
+#define FOR(i, a, b) for (int i = static_cast<int>(a); i < static_cast<int>(b); ++i)
+#define RFOR(i, a, b) for (int i = static_cast<int>(a) - 1; i >= static_cast<int>(b); --i)
+constexpr int INF = 1001001001;
+constexpr llong LINF = 1001001001001001001ll;
+
+template<typename T> inline bool chMin(T &a, T b) { return ((a > b) ? (a = b, true) : (false)); }
+template<typename T> inline bool chMax(T &a, T b) { return ((a < b) ? (a = b, true) : (false)); }
+template<typename T> void printArray(T a, int n = 0);
+
+
+static const int dx[4] = {-1, 0, 1, 0};  // l, d, r, u
+static const int dy[4] = {0, -1, 0, 1};  // l, d, r, u
+static const char dir[4] = {'u', 'l', 'd', 'r'};
+
+
+class SlidePuzzle {
+public:
+    SlidePuzzle(int n_) {
+        n = n_;
+        n2 = n_ * n_;
+        state.resize(n2);
+    }
+
+    bool operator<(const SlidePuzzle &sp) const {
+        REP(i, n2) {
+            if (state[i] != sp.state[i]) return state[i] > sp.state[i];
+        }
+        return false;
+    }
+
+    bool isTarget() {
+        REP(i, n2) if (state[i] != i + 1) return false;
+        return true;
+    }
+
+    void print() {
+        REP(i, n) {
+            REP(j, n) {
+                cout << state[i * n + j] << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
+
+    string BFS() {
+        queue<SlidePuzzle> q;
+        map<SlidePuzzle, bool> m;
+        SlidePuzzle u(n), v(n);
+        
+        path = "";
+        q.push(*this);
+        m[*this] = true;
+
+        while (!q.empty()) {
+            u = q.front();
+            q.pop();
+            if (u.isTarget()) return u.path;
+            int sx = u.space_idx / n;
+            int sy = u.space_idx % n;
+            REP(r, 4) {
+                int tx = sx + dx[r];
+                int ty = sy + dy[r];
+                if (tx < 0 || ty < 0 || tx >= n || ty >= n) continue;
+                v = u;
+                std::swap(v.state[u.space_idx], v.state[tx * n + ty]);
+                v.space_idx = tx * n + ty;
+                if (!m[v]) {
+                    m[v] = true;
+                    v.path += dir[r];
+                    q.push(v);
+                }
+            }
+        }
+        return "unsolvable";
+    }
+
+    vector<int> state;
+    string path;
+    int n, n2;
+    int space_idx;
+};
+
+
+int main() {
+    std::ios::sync_with_stdio(false);
+    cin.tie(0);
+    cout << std::fixed << std::setprecision(20);
+
+    SlidePuzzle sp(3);
+    
+    REP(i, sp.n2) {
+        cin >> sp.state[i];
+        if (sp.state[i] == 0) {
+            sp.state[i] = sp.n2;
+            sp.space_idx = i;
+        }
+    }
+
+    cout << sp.BFS().size() << endl;
+}
+
+
+template<typename T> 
+void printArray(T a, int n) {
+    string s = std::to_string(a[0]);
+    FOR(i, 1, n > 0 ? n : a.size()) s += " " + std::to_string(a[i]);
+    cout << s + "\n";
+}
+

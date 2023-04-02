@@ -1,0 +1,49 @@
+#include <iostream>
+#include <vector>
+#include<algorithm>
+using namespace std;
+const int MAX_N=100000;
+const int MAX_M=1000000000;
+typedef pair<double,double> pii;
+vector<pii> WV;
+long Average[2][MAX_N];
+int MAX[MAX_N];
+bool cmp(const pair<double,double>a,const pair<double,double>b){
+    return a.first<b.first;
+}
+
+double solve(int n,int m){
+    double result=0;
+    int sum=0;
+    sort(WV.begin(),WV.end(),cmp);
+    for(int i=n-1;i>=0;i--){
+        double weight=WV[i].second;
+        double value=WV[i].first;
+        if(m<0){
+            break;
+        }
+        if(weight<m){
+            m=m-weight;
+            result=result+weight*value;
+        }
+        else{
+            result=result+m*value;
+            break;
+        }
+    }
+    return result;
+}
+int main()
+{
+    int N,W;
+    float temp1,temp2;
+    cin>>N>>W;
+    for(int i=0;i<N;i++){
+        cin>>temp1>>temp2;
+        temp1=1.0*temp1/temp2;
+        WV.push_back(pii(temp1,temp2));
+    }
+    cout.precision(11);
+    cout<<solve(N,W)<<endl;
+}
+

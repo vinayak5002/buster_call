@@ -1,0 +1,122 @@
+#include <stdio.h>
+
+#define MAX 25
+#define NIL -1
+
+
+struct Node
+{
+	int parent;
+	int left;
+	int right;
+};
+
+
+struct Node T[MAX];
+int D[MAX], H[MAX];
+
+
+/* 再帰的に深さを求める */
+void setDepth(int u, int d)
+{
+	D[u] = d;
+	if(T[u].right != NIL){ setDepth(T[u].right, d + 1);} // d+1になる
+	if(T[u].left != NIL) { setDepth(T[u].left, d + 1); }
+}
+
+
+/* 再帰的に高さを求める */
+int setHeight(int u)
+{
+	int h1 = 0, h2 = 0;
+	
+	if(T[u].right != NIL)
+	{ 
+		h1 = setHeight(T[u].right) + 1; 
+	}
+	if(T[u].left != NIL)
+	{
+		h2 = setHeight(T[u].left) + 1;
+	}
+	
+	return H[u] = (h1 > h2 ? h1 : h2);
+}
+
+
+/* 節点 u の兄弟を返す */
+int getSibling(int u)
+{
+	if(T[u].parent == NIL){ return NIL; }
+	if(T[T[u].parent].left != u && T[T[u].parent].left != NIL){ return T[T[u].parent].left; }
+	if(T[T[u].parent].right != u && T[T[u].parent].right != NIL){ return T[T[u].parent].right; }
+	return NIL;
+}
+
+
+void print_Ndata(int u)
+{
+	printf("node %d: ", u);
+	printf("parent = %d, ", T[u].parent);
+	printf("sibling = %d, ", getSibling(u));
+	int deg = 0;
+	if(T[u].left != NIL){ deg++; }
+	if(T[u].right != NIL){ deg++; }
+	printf("degree = %d, ", deg);
+	printf("depth = %d, ", D[u]);
+	printf("height = %d, ", H[u]);
+}
+
+
+void print_Ntype(int u)
+{
+	if(T[u].parent == NIL){ printf("root\n"); }
+	else if(T[u].left == NIL){ printf("leaf\n"); }
+	else { printf("internal node\n"); }
+}
+
+
+int main (void)
+{
+	int n; //節点の個数
+	scanf("%d", &n);
+	
+	int i, node, left, right, root;
+	/* 根付き木 T の初期化 */
+	for(i = 0; i < n; i++)
+	{
+		T[i].parent = NIL;
+		T[i].left = NIL;
+		T[i].right = NIL;
+	}
+	
+	
+	/* 二分木 T にデータを格納 */
+	for(i = 0 ; i < n; i++)
+	{
+		scanf("%d %d %d", &node, &left, &right);
+		T[node],left = left;
+		T[node].right = right;
+		if(left != NIL){ T[left].parent = node; }
+		if(right != NIL){ T[right].parent = node; }
+	}
+	
+	/* rootノードを見つける */
+	for(i = 0; i < n; i++)
+	{
+		if(T[i].parent == NIL){ root = i; }
+	}
+	
+	/* 深さD[]に格納する */
+	setDepth(root, 0);
+	/* 高さH[]に格納する */
+	setHeight(root);
+	
+	/* 表示 */
+	for(i = 0; i < n; i++)
+	{
+		print_Ndata(i);
+		print_Ntype(i);
+	}
+	
+	return 0;
+}

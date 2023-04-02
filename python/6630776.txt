@@ -1,0 +1,135 @@
+/*  Yixian-Wu 110033203 PME */
+
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX 17
+
+typedef struct N N;
+typedef struct R R;
+struct N{
+    long times;
+    long cal;
+};
+struct R{
+    long a;
+    long b;
+    long c;
+};
+void transfer(int *a_tran, long a);
+void output(int *a);
+void mutiple(long a, long b, int *ans);
+void add(int *orig, int *a);
+
+int main()
+{
+    int n, r, j;
+    while(scanf("%d %d", &n, &r) != EOF){
+        N *training_equip;
+        training_equip = malloc(n * sizeof(N));
+        R *rules;
+        rules = malloc(r * sizeof(R));
+        
+        int i;  /*read input data*/
+        for(i=0;i<n;i++){
+            scanf("%ld %ld", &training_equip[i].times, &training_equip[i].cal);
+        }
+        for(i=0;i<r;i++){
+            scanf("%ld %ld %ld", &rules[i].a, &rules[i].b, &rules[i].c);
+        }
+        
+        for(j=0;j<r;j++){
+            for(i=0;i<r-j;i++){
+                long temp;
+                temp = training_equip[rules[i].b - 1].times + rules[i].c - 1;
+                if(training_equip[rules[i].a - 1].times >= temp){
+                    training_equip[rules[i].a - 1].times = temp;
+                }
+            }
+        }
+        
+        /*for(i=0;i<n;i++){
+            printf("%d:%ld, cal:%ld\n",i, training_equip[i].times, training_equip[i].cal);
+        }*/
+        
+        int *maxcal, *temp;
+        maxcal = malloc(MAX * sizeof(int));
+        temp = malloc(MAX * sizeof(int));
+        for(i=0;i<MAX;i++){
+            maxcal[i] = 0;
+        }
+        for(i=0;i<n;i++){
+            long t = training_equip[i].times;
+            long c = training_equip[i].cal;
+            mutiple(t, c, temp);
+            add(maxcal, temp);
+        }
+        
+        output(maxcal);
+        printf("\n");
+        
+        free(training_equip);
+        free(rules);
+        free(maxcal);
+        free(temp);
+    }
+    return 0;
+}
+
+void transfer(int *a_tran, long a){
+    int i;
+    for(i=0;i<MAX;i++){
+        a_tran[i] = 0;
+    }
+    i = 0;
+    while(a != 0){
+        a_tran[i] = a % 10;
+        a = a / 10;
+        i++;
+    }
+}
+void output(int *a){
+    int i, index = MAX - 1;
+    while(a[index] == 0){
+        index--;
+    }
+    for(i=index;i>=0;i--){
+        printf("%d", a[i]);
+    }
+    
+}
+void mutiple(long a, long b, int *ans){
+    int *a_tran, *b_tran;
+    a_tran = malloc(MAX * sizeof(int));
+    b_tran = malloc(MAX * sizeof(int));
+    transfer(a_tran, a);
+    transfer(b_tran, b);
+    int i, temp = 0, j;
+    for(i=0;i<MAX;i++){
+        ans[i] = 0;
+    }
+    for(i=0;i<MAX;i++){
+        if(a_tran[i] == 0)   continue;
+        for(j=0;i+j<MAX;j++){
+            ans[i+j] += a_tran[i] * b_tran[j];
+        }
+    }
+    for(i=0;i<MAX;i++){
+        ans[i] += temp;
+        temp = ans[i] / 10;
+        ans[i] = ans[i] % 10;
+    }
+    free(a_tran);
+    free(b_tran);
+}
+void add(int *orig, int *a){
+    int i, temp = 0;
+    for(i=0;i<MAX;i++){
+        orig[i] = orig[i] + a[i];
+    }
+    for(i=0;i<MAX;i++){
+        orig[i] += temp;
+        temp = orig[i] / 10;
+        orig[i] = orig[i] % 10;
+    }
+}
+

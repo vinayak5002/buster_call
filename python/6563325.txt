@@ -1,0 +1,137 @@
+typedef long long ll;
+#include <bits/stdc++.h>
+
+using namespace std;
+
+template < typename T > std::string to_string( const T& n )
+{
+    std::ostringstream stm ;
+    stm << n ;
+    return stm.str() ;
+}
+
+class Node {
+    public:
+    int key;
+    int parent;
+    int node_id;
+    int right;
+    int left;
+    Node() {
+        parent = -1;
+        right = -1;
+        left = -1;
+    }
+};
+
+class Tree {
+    public:
+    int node_size = 0;
+    int root_id = -1;
+    vector<Node> tree_node;
+    Tree() {
+    }
+    void insert(int k){
+        Node node;
+        if(root_id == -1){
+            node.node_id = node_size;
+            node.key = k;
+            root_id = node_size;
+            node_size++;
+            tree_node.push_back(node);
+        }else{
+            bool is_insert = false;
+            int insert_root_id = root_id;
+            while(is_insert != true){
+                if(tree_node.at(insert_root_id).key > k){
+                    if(tree_node.at(insert_root_id).left == -1){
+                        node.node_id = node_size;
+                        node.key = k;
+                        node.parent = insert_root_id;
+                        tree_node.at(insert_root_id).left = node_size;
+                        node_size++;
+                        tree_node.push_back(node);
+                        is_insert = true;
+                    }else{
+                        insert_root_id = tree_node.at(insert_root_id).left;
+                    }
+                }else if(tree_node.at(insert_root_id).key < k){
+                    if(tree_node.at(insert_root_id).right == -1){
+                        node.node_id = node_size;
+                        node.key = k;
+                        node.parent = insert_root_id;
+                        tree_node.at(insert_root_id).right = node_size;
+                        node_size++;
+                        tree_node.push_back(node);
+                        is_insert = true;
+                    }else{
+                        insert_root_id = tree_node.at(insert_root_id).right;
+                    }
+                }
+            }
+        }
+    }
+    int get_root(){
+        int id = 0;
+        for(int i = 0; i < node_size; i++){
+            if(tree_node.at(i).parent == -1){
+                id = tree_node.at(i).node_id;
+                break;
+            }
+        }
+        return id;
+    }
+
+    void Preorder(int root_id){
+        cout << " ";
+        cout << tree_node.at(root_id).key;
+        if(tree_node.at(root_id).left != -1){
+            Preorder(tree_node.at(root_id).left);
+        }
+        if(tree_node.at(root_id).right != -1){
+            Preorder(tree_node.at(root_id).right);
+        }
+    }
+    void Inorder(int root_id){
+        if(tree_node.at(root_id).left != -1){
+            Inorder(tree_node.at(root_id).left);
+        }
+        cout << " ";
+        cout << tree_node.at(root_id).key;
+        if(tree_node.at(root_id).right != -1){
+            Inorder(tree_node.at(root_id).right);
+        }
+    }
+    void Postorder(int root_id){
+        if(tree_node.at(root_id).left != -1){
+            Postorder(tree_node.at(root_id).left);
+        }
+        if(tree_node.at(root_id).right != -1){
+            Postorder(tree_node.at(root_id).right);
+        }
+        cout << " ";
+        cout << tree_node.at(root_id).key;
+    }
+};
+
+int main(){
+    Tree tree;
+    int m;
+    cin >> m;
+    string op;
+    int k;
+    for(int i = 0; i < m; i++){
+        cin >> op;
+        if(op == "insert"){
+            cin >> k;
+            tree.insert(k);
+        }else if(op == "print"){
+            tree.Inorder(tree.root_id);
+            cout << endl;
+            tree.Preorder(tree.root_id);
+            cout << endl;
+        }
+    }
+    return 0;
+}
+

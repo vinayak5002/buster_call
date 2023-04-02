@@ -1,0 +1,98 @@
+#include <bits/stdc++.h>
+#define rep(i,n) for (int i = 0; i < (n); ++i)
+using namespace std;
+using ll = long long;
+using P = pair<ll,ll>;
+using PP = pair<ll,P>;
+
+const ll DIST_MAX = 10000000000000000;
+const ll key_base = 100000000;
+
+
+vector<ll> dijkstra(ll s,ll n,vector<vector<P>> &edge){
+    vector<int> visited(n);
+    rep(i,n) visited[i]=0;
+
+    vector<ll> d(n);
+    rep(i,n) d[i] = DIST_MAX;
+    d[s]=0;
+    
+
+    priority_queue<PP,
+    vector<PP>,
+    greater<PP>
+    > S;
+    P data(s,0);
+    PP dataPP(0,data);
+    S.push(dataPP);
+
+    vector<ll> ans;
+    while(!S.empty()){
+        //cout << "hello" << endl;
+        PP temp;
+        temp = S.top();
+        S.pop();
+        if(visited[temp.second.first]==1) continue;
+        visited[temp.second.first]=1;
+        ans.push_back(temp.second.second);
+
+        for(int i=0;i<edge[temp.second.first].size();i++){
+            P e;
+            ll v;
+            e=edge[temp.second.first][i];
+            v = e.first;
+            //cout << "d" << temp.second << " " << e.first << " " << e.second << endl;
+            if(d[v]>(d[temp.second.first]+e.second)){
+                d[v]=d[temp.second.first]+e.second;
+                ll key;
+                if(temp.second.first<v){
+                    key = temp.second.first*key_base+v;
+                }else{
+                    key = temp.second.first+v*key_base;
+                }
+                P data(v,key);
+                PP dataPP(d[v],data);
+                S.push(dataPP);
+            }
+        }
+    }
+    //return ans;
+    return d;
+}
+
+int main(){
+    int n,m,r;
+    //r=0;
+    cin >> n >> m>>r;
+    vector<vector<P>> edge(n);
+    map<ll,int> ma;
+    rep(i,m){
+        ll a,b,c;
+        cin >> a >> b >> c;
+        P data(b,c);
+        //a=a-1;
+        //b=b-1;
+        edge[a].push_back(data);
+        //data.first = a;
+        //edge[b].push_back(data);
+        ll key=a*key_base+b;
+        ma[key]=i+1;
+    }
+    
+    vector<ll> ans;
+    
+    ans = dijkstra(r,n,edge);
+    for(int i=0;i<n;i++){
+        if(ans[i]==DIST_MAX){
+            cout << "INF" << endl;
+        }else{
+            cout << ans[i] << endl;
+        }
+    }
+    /*
+    ans = dijkstra(r,n,edge);
+    for(int i=1;i<n;i++) cout << ma[ans[i]] << " ";
+    cout << endl;
+    */
+}   
+

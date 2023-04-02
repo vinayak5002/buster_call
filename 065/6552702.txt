@@ -1,0 +1,105 @@
+#include<bits/stdc++.h>
+#define int ll
+#define rep(i, N) for(int i = 0; i < (int)N; ++i)
+#define rep1(i, N) for(int i = 1; i <= (int)N; ++i)
+#define per(i, N) for(int i = N-1; i >= 0; --i)
+#define per1(i, N) for(int i = N; i >= 1; --i)
+#define FOR(i, f, t) for(int i = f; i < (int)t; ++i)
+#define all(v) (v).begin(), (v).end()
+#define rall(v) (v).rbegin(), (v).rend()
+#define bit(n) (1 << (n))
+#define pcnt(n) (__builtin_popcount(n))
+#define TakAo(ans) ans ? cout << "Takahashi\n" : cout << "Aoki\n"
+#define YesNo(ans) ans ? cout << "Yes\n" : cout << "No\n"
+#define endl '\n'
+#define fi first
+#define se second
+#define mkpr make_pair
+#define mktpl make_tuple
+#define eb emplace_back
+
+using namespace std;
+using ll = int64_t;
+using ull = uint64_t;
+using ld = long double;
+template<class T> using max_heap = priority_queue<T>;
+template<class T> using min_heap = priority_queue<T, vector<T>, greater<T>>;
+template<class T> using vec = vector<T>;
+template<class T> using vvec = vec<vec<T>>;
+template<class T> using vvvec = vec<vec<vec<T>>>;
+template<class T> using vvvvec = vec<vec<vec<vec<T>>>>;
+
+constexpr ld EPS = 1e-10;
+constexpr int INF = 1001001001;
+constexpr ll LINF = 1001001001001001001ll;
+//constexpr int MOD = 1e9+7;
+constexpr ll MOD = 998244353;
+constexpr int div2 = (MOD + 1) >> 1;
+constexpr int NIL = -1;
+constexpr int pm[2] = {1, -1};
+constexpr int dy[4] = {0, 1, 0, -1};
+constexpr int dx[4] = {1, 0, -1, 0};
+
+ll cel(ll a, ll b){ return (a + b - 1) / b;}
+ll Gcd(ll a, ll b){ return b ? Gcd(b, a % b) : a;}
+ll powi(ll x, ll exp){
+    return exp > 0 ? (exp & 1 ? x : 1) * powi(x * x, exp >> 1) : 1;
+}
+ll modpow(ll x, ll exp, ll mod){
+    x %= mod;
+    return exp > 0 ? (exp & 1 ? x : 1) * modpow(x * x, exp >> 1, mod) % mod : 1;
+}
+template<class T> bool chmin(T &a, T b){ return a > b ? (a = b, true) : 0;}
+template<class T> bool chmax(T &a, T b){ return a < b ? (a = b, true) : 0;}
+
+using P = pair<ll, ll>;
+using Tpl = tuple<int, int, int, int>;
+
+ld H(vec<int>& R){
+    int num[256] = {}, N = R.size() - 1;
+    rep1(i, N) num[R[i]]++;
+    ld res = 0;
+    rep(i, 256){
+        if(num[i] != 0){
+            res -= num[i] * (log2(ld(num[i])) - log2(ld(N)));
+        }
+    }
+    return res;
+}
+
+void Main(){
+    while(1){
+        int N; cin >> N;
+        if(N == 0) return;
+        vec<int> I(N); rep(i, N) cin >> I[i];
+
+        int S = 0, A = 0, C = 0, M = 256;
+        ld mn = LINF;
+
+        rep(i, 16)rep(j, 16)rep(k, 16){
+            vec<int> R(N + 1, i);
+            rep1(l, N){
+                R[l] = (j * R[l - 1] + k) % M;
+            }
+            rep1(l, N){
+                R[l] = (R[l] + I[l - 1]) % M;
+                //if(i == 8 && j == 7 && k == 14) cout << R[l] << " ";
+            }
+            if(chmin(mn, H(R))){
+                S = i, A = j, C = k;
+                //rep1(l, N) cout << R[l] << " ";
+                //cout << endl;
+            }
+        }
+        cout << S << " " << A << " " << C << endl;
+        //cout << mn << endl;
+    }
+}
+
+signed main(){
+    cin.tie(nullptr);
+    ios_base::sync_with_stdio(false);
+    cout << fixed << setprecision(10);
+    Main();
+    return 0;
+}

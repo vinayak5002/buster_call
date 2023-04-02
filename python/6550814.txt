@@ -1,0 +1,75 @@
+import java.util.Scanner;
+
+
+class Queue
+{
+    private int max;
+    private int[] Q;
+    private int head;
+    private int tail;
+
+    Queue(int n)
+    {
+        this.head = 0;
+        this.tail = 0;
+        this.max = n;
+        this.Q = new int[n];
+    }
+
+    public void push(int id_car)
+    {
+        Q[head] = id_car;
+        head++;
+        if( head == max ) head = 0;
+    }   
+
+    public void pop()
+    {
+        System.out.println(Q[tail]);
+        tail++;
+        if(tail == max ) tail = 0;
+    }
+
+    public int getNumOfCar()
+    {
+        if( head < tail ) return head - tail + max;
+        else return head - tail;
+    } 
+}
+
+class GasApplication
+{
+    public static void main(String[] args)
+    {
+        Scanner sc = new Scanner(System.in);
+        int N = sc.nextInt();
+        int M = sc.nextInt();
+        Queue[] q = new Queue[N];
+
+        for( int i = 0 ; i < N ; i++ ) q[i] = new Queue(M);
+
+        for( int i = 0 ; i < M ; i++ )
+        {
+            int command = sc.nextInt();
+            int index = sc.nextInt();
+
+            if ( command == 1 )
+            {
+				int min = 0;
+
+				for ( int j = 0 ; j < N ; j++ )
+				{
+					if(q[j].getNumOfCar() < q[min].getNumOfCar()) min = j;
+				}
+
+                q[min].push(index);
+            }
+            else
+            {
+                q[index-1].pop();
+            }
+        }   
+    } 
+	
+}
+

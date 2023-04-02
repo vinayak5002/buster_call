@@ -1,0 +1,115 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	//0 ~ n - 1 で考えられるすべての組み合わせを列挙(集合Uのすべての部分集合を列挙)
+	//0 ~ n - 1 を2のx乗のxとして扱う(0 ~ n - 1 = 00...01 , 00...10 ~ 01...00 , 10...00)
+	//組み合わせの要素の2のx乗ごとの論理和を整数値dとする(組み合わせの要素のビットごとの論理和を整数値とする)
+	const n = parseInt(si[0].split("\n"));
+	const BIT_NUM = n;
+
+    const second_line = si[1].split(' ');
+    let t = Number(second_line[0]);
+    let array_t = new Array(t);
+    for (let i = 1; i <= t; i++) {
+        array_t[i - 1] = Number(second_line[i]);
+    }
+
+	let combi = new Combination(n);
+	let result  = [];
+	
+	for (let i = 1; i <= n; i++) {
+		result.push(combi.getCombination(i));
+	}
+
+    let ans = combi.makeAns_Subsets(array_t, result);
+	so.write(ans);
+
+}
+
+class Combination {
+	constructor(vol) {
+		this.array = [];
+		for (let i = 0; i < vol; i++) {
+			this.array.push(i);
+		}
+	}
+
+	getCombination(r, types) {
+		const result = [];
+		types = types || this.array;
+		r = r || this.array.length;
+		if (types.length < r) {
+			return [];
+		}
+		if (r === 1) {
+			for (let i = 0; i < types.length; i++) {
+				result[i] = [types[i]];
+			}
+		} else {
+			for (let i = 0; i < types.length; i++) {
+				const parts = types.slice(i + 1);
+				const row = this.getCombination(r - 1, parts);
+				for (let j = 0; j < row.length; j++) {
+					result.push([types[i]].concat(row[j]));
+				}
+			}
+		}
+		return result;
+	}
+
+    makeAns_Subsets(array_t, result) {
+        const subset_all = [];
+        let set = new Set();
+        for (let i = 0; i < result.length; i++) {
+            for (let j = 0; j < result[i].length; j++) {
+                subset_all.push(new Set(result[i][j]));
+            }
+        }
+        
+        const subset_t = [];
+        for (let i = 0; i < subset_all.length; i++) {
+            let check = true;
+            for (let j = 0; j < array_t.length; j++) {
+                if (!subset_all[i].has(array_t[j])) {
+                    check = false;
+                    break;
+                }
+            }
+            if (check) {
+                subset_t.push(subset_all[i]);
+            }
+        }
+        
+        let data = [];
+
+        for (const subset of subset_t) {
+            let d = 0;
+            for (const num of subset) {
+                d |= Math.pow(2, num);
+            }
+            let map = new Map();
+            map.set('d', d);
+            map.set('subset', subset)
+            data.push(map);
+        }
+
+        data.sort((a, b) => a.get('d') - b.get('d'));
+
+        
+        let ans = '';
+        if (array_t.length === 0) {
+            ans += '\n';
+        } else {
+            for (const d of data) {
+                ans += d.get('d') + ':';
+                for (const num of d.get('subset')) {
+                    ans += ' ' + num;
+                }
+                ans += '\n'
+            }
+        }
+        return ans;
+    }
+}

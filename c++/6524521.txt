@@ -1,0 +1,90 @@
+#include <bits/stdc++.h>
+#pragma GCC optimize("Ofast")
+#define _GLIBCXX_DEBUG
+using namespace std;
+using std::cout;
+using std::cin;
+using std::endl;
+using ll=long long;
+using ld=long double;
+ll ILL=2167167167167167167;
+const int INF=2100000000;
+const ll mod=1e9+7;
+#define rep(i,a) for (ll i=0;i<a;i++)
+#define all(p) p.begin(),p.end()
+template<class T> using _pq = priority_queue<T, vector<T>, greater<T>>;
+template<class T> ll LB(vector<T> &v,T a){return lower_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> ll UB(vector<T> &v,T a){return upper_bound(v.begin(),v.end(),a)-v.begin();}
+template<class T> bool chmin(T &a,const T &b){if(a>b){a=b;return 1;}else return 0;}
+template<class T> bool chmax(T &a,const T &b){if(a<b){a=b;return 1;}else return 0;}
+template<class T> void So(vector<T> &v) {sort(v.begin(),v.end());}
+template<class T> void Sore(vector<T> &v) {sort(v.begin(),v.end(),[](T x,T y){return x>y;});}
+void yneos(bool a){if(a) cout<<"Yes\n"; else cout<<"No\n";}
+template<class T> void vec_out(vector<T> &p){for(int i=0;i<(int)(p.size());i++){if(i) cout<<" ";cout<<p[i];}cout<<"\n";}
+
+ll jyo(ll a,ll b){
+	ll ans=1;
+	while(b){
+		if(b&1) ans=(ans*a)%mod;
+		a=(a*a)%mod;
+		b>>=1;
+	}
+	return ans;
+}
+
+void solve();
+// oddloop
+int main() {
+	ios::sync_with_stdio(false);
+	cin.tie(nullptr);
+	
+	solve();
+}
+
+void solve(){
+	int N;
+	cin>>N;
+	vector<string> S(N);
+	rep(i,N) cin>>S[i];
+	string T;
+	cin>>T;
+	int L=T.size();
+	ll g=32;
+	vector<set<ll>> s(L+1);
+	rep(i,N){
+		int X=S[i].size();
+		if(X>L) continue;
+		ll tmp=1;
+		ll v=0;
+		rep(j,X){
+			v=(v+tmp*(ll)(S[i][j]-'a'))%mod;
+			tmp=(tmp*g)%mod;
+		}
+		//cout<<v<<endl;
+		s[X].insert(v);
+	} 
+	vector<vector<int>> move(L);
+	vector<ll> dp(L+1);
+	dp[0]=1;
+	ll rev=jyo(g,mod-2);
+	rep(i,L+1){
+		if(s[i].empty()) continue;
+		ll v=0,tmp=jyo(g,i);
+		rep(j,L){
+			v=(v+tmp*(ll)(T[j]-'a'))%mod;
+			v=(v*rev)%mod;
+			//cout<<i<<" "<<j<<" "<<v<<endl;
+			if(j+1>=i){
+				if(s[i].count(v)) move[j+1-i].push_back(j+1);
+				v=(v+mod-(int)(T[j+1-i]-'a'))%mod;
+			}
+		}
+	}
+	rep(i,L){
+		/*cout<<i<<" ";
+		vec_out(move[i]);*/
+		for(auto x:move[i]) dp[x]=(dp[x]+dp[i])%mod;
+	}
+	cout<<dp[L]<<"\n";
+}
+

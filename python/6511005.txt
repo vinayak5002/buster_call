@@ -1,0 +1,36 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let permNum = Number(si[0])
+	let num = [permNum]
+	for (let i = 0; i < permNum; i++){
+		num[i] = i + 1
+	}
+	
+	let ans = perm(num, permNum)
+	for (let output of ans){
+		so.write(output.join(" ") + "\n")
+	}
+	
+	function perm (val, pNum){
+		let res = []
+		if (pNum == 1){
+			for (let i = 0; i < val.length; i++){
+				res[i] = [val[i]]
+			}
+			return res 
+		}
+		for (let i = 0; i < val.length; i++){
+			let tmp = val.slice()
+			tmp.splice(i,1)
+			let raw = perm(tmp, (pNum - 1))
+			for (let j = 0; j < raw.length; j++){
+				res.push([val[i]].concat(raw[j]))
+			}
+		}
+		return res
+	}
+}
+

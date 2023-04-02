@@ -1,0 +1,53 @@
+import sys
+from heapq import heappush, heappop
+from copy import copy
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def search(n, max_l, adjacency_list):
+    hq = [(0, 0, 0, {0})]
+
+    while len(hq) > 0:
+        c_num_inversions, cl, cv, c_is_visited_set = heappop(hq)
+        if cv == n - 1:
+            return c_num_inversions
+
+        for nv, length, is_inverse_edge in adjacency_list[cv]:
+            if nv not in c_is_visited_set:
+                nl = cl + length
+                if nl <= max_l:
+                    n_num_inversions = c_num_inversions if not is_inverse_edge else c_num_inversions + 1
+                    n_is_visited_set = copy(c_is_visited_set)
+                    n_is_visited_set.add(nv)
+                    heappush(hq, (n_num_inversions, nl, nv, n_is_visited_set))
+
+    return -1
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, m, max_l = map(int, f.readline().split())
+    adjacency_list = [[] for _ in range(n)]
+    for _ in range(m):
+        a, b, c = map(int, f.readline().split())
+        a -= 1
+        b -= 1
+        adjacency_list[a].append((b, c, False))
+        adjacency_list[b].append((a, c, True))
+
+    print(search(n, max_l, adjacency_list))
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

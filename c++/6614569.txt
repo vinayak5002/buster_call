@@ -1,0 +1,148 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef pair<int, int> pii;
+typedef pair<double, double> pdd;
+typedef pair<long long, long long> pll;
+typedef long long ll;
+
+#define YESNO(bool)            \
+    if (bool) {                \
+        cout << "YES" << endl; \
+    } else {                   \
+        cout << "NO" << endl;  \
+    }
+#define yesno(bool)            \
+    if (bool) {                \
+        cout << "yes" << endl; \
+    } else {                   \
+        cout << "no" << endl;  \
+    }
+#define YesNo(bool)            \
+    if (bool) {                \
+        cout << "Yes" << endl; \
+    } else {                   \
+        cout << "No" << endl;  \
+    }
+#define REP(i, n) for (ll i = 0; i < ll(n); i++)
+#define REPD(i, n) for (ll i = n - 1; i >= 0; i--)
+#define FOR(i, a, b) for (ll i = a; i <= ll(b); i++)
+#define FORD(i, a, b) for (ll i = a; i >= ll(b); i--)
+#define FORA(i, I) for (const auto& i : I)
+
+#define ALL(x) x.begin(), x.end()
+#define SIZE(x) ll(x.size())
+
+#define INF32 2147483647
+#define INF64 9223372036854775807
+#define MOD 1000000007
+#define INF 1000000000
+
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+
+#define OP(m) cout << m << endl;
+ll myceil(ll a, ll b) { return (a + (b - 1)) / b; }
+ll myfloor(ll a, ll b) { return a / b; }
+
+int dx4[4] = {1, 0, -1, 0};
+int dy4[4] = {0, 1, 0, -1};
+int dx8[8] = {-1, -1, 0, 1, 1, 1, 0, -1};
+int dy8[8] = {0, -1, -1, -1, 0, 1, 1, 1};
+// cout<<fixed<<setprecision(10);
+
+template <typename T>
+struct edge {
+    int from;
+    int to;
+    T cost;
+};
+
+template <typename T>
+struct link {
+    int to;
+    T cost;
+    bool operator>(const link& other) const { return cost > other.cost; }
+    bool operator<(const link& other) const { return cost < other.cost; }
+};
+
+template <typename T>
+class graph {
+   public:
+    vector<edge<T>> edges;
+    vector<vector<link<T>>> adj;
+    int n;
+    graph(int sz) : n(sz) { adj.resize(n); }
+    virtual void add(int from, int to, T cost) = 0;
+};
+
+template <typename T>
+class digraph : public graph<T> {
+   public:
+    using graph<T>::edges;
+    using graph<T>::adj;
+    using graph<T>::n;
+
+    digraph(int sz) : graph<T>(sz) {}
+
+    void add(int from, int to, T cost = 1) {
+        assert(0 <= from && from < n && 0 <= to && to < n);
+        edges.push_back({from, to, cost});
+        adj[from].push_back({to, cost});
+    }
+
+    digraph<T> reverse() const {
+        digraph<T> rev(n);
+        for (auto& e : edges) {
+            rev.add(e.to, e.from, e.cost);
+        }
+        return rev;
+    }
+};
+
+template <typename T>
+vector<T> dijkstra(const graph<T>& g, int start) {
+    assert(0 <= start && start < g.n);
+    priority_queue<link<T>, vector<link<T>>, greater<link<T>>> Q;
+    vector<T> dist(g.n, INF);
+    dist[start] = static_cast<T>(0);
+    Q.push({start, static_cast<T>(0)});
+    while (!Q.empty()) {
+        link<T> node = Q.top();
+        Q.pop();
+        int to = node.to;
+        if (node.cost > dist[to]) {
+            continue;
+        }
+        for (link<T> neighbor : g.adj[to]) {
+            T newCost = dist[to] + neighbor.cost;
+            if (newCost < dist[neighbor.to]) {
+                Q.push({neighbor.to, newCost});
+                dist[neighbor.to] = newCost;
+            }
+        }
+    }
+    return dist;
+}
+// Usage:
+//   digraph<int> g(n); or undigraph<int> g(n);
+//   g.add(from, to, cost);
+//   vector<int> dist = dijkstra(g, start);
+
+signed main() {
+    int n;
+    cin >> n;
+    digraph<int> g(n);
+    REP(i, n) {
+        int u, k;
+        cin >> u >> k;
+        REP(j, k) {
+            int v, c;
+            cin >> v >> c;
+            g.add(u, v, c);
+        }
+    }
+    vector<int> dist = dijkstra(g, 0);
+    REP(i, n) { cout << i << " " << dist[i] << endl; }
+}

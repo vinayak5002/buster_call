@@ -1,0 +1,117 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <deque>
+#include <queue>
+#include <string>
+#include <iomanip>
+#include <set>
+#include <unordered_set>
+#include <map>
+#include <unordered_map>
+#include <utility>
+#include <stack>
+#include <random>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+#include <assert.h>
+#if __has_include(<atcoder/all>)
+#include <atcoder/all>
+using namespace atcoder;
+#endif
+using namespace std;
+using ll=long long;
+#define read(x) cin>>(x);
+#define readll(x) ll (x);cin>>(x);
+#define readS(x) string (x);cin>>(x);
+#define readvll(x,N) vector<ll> (x)((N));for(int i=0;i<(N);i++){cin>>(x)[i];}
+#define rep(i,N) for(ll (i)=0;(i)<(N);(i)++)
+#define rep2d(i,j,H,W) for(ll (i)=0;(i)<(H);(i)++)for(ll (j)=0;(j)<(W);j++)
+#define is_in(x,y) (0<=(x) && (x)<H && 0<=(y) && (y)<W)
+#define yn {cout<<"Yes"<<endl;}else{cout<<"No"<<endl;}
+
+long long powll(long long x,long long n){
+  long long res=1;
+  while(n>0){
+    if(n&1){
+      res*=x;
+    }
+    x*=x;
+    n>>=1;
+  }
+  return res;
+}
+
+void solve(ll n,ll m){
+  readvll(a,n);
+  readvll(w,m);
+  set<ll> us;
+  for(ll i=0;i<powll(3,m);i++){
+    ll cnt=0;
+    for(ll j=0,c=i;j<m;j++){
+      if(c%3==1){
+        cnt+=w[j];
+      }else if(c%3==2){
+        cnt-=w[j];
+      }
+      c/=3;
+    }
+    if(cnt>0){
+      us.insert(cnt);
+    }
+  }
+  ll cnt2=0;
+  map<ll,ll> um;
+  for(ll i:a){
+    if(us.find(i)==us.end()){
+      //cerr<<i<<" is not found"<<endl;
+      cnt2++;
+      set<ll> us2;
+      for(ll j:us){
+        us2.insert(abs(i-j));
+        us2.insert(abs(i+j));
+      }
+      for(ll j:us2){
+        //cerr<<j<<" ";
+        um[j]++;
+      }//cerr<<endl;
+    }
+  }
+  // for(ll i:us){
+  //   cerr<<i<<" ";
+  // }cerr<<endl;
+  if(cnt2==0){
+    cout<<0<<endl;
+  }else{
+    ll mx=0;
+    ll val;
+    for(pair<ll,ll> i:um){
+      //cerr<<i.first<<" "<<i.second<<endl;
+      if(mx<i.second){
+        mx=i.second;
+        val=i.first;
+      }      
+    }
+    //cerr<<"mx: "<<mx<<" ,val: "<<val<<" ,cnt2: "<<cnt2<<endl;
+    if(mx==cnt2){
+      cout<<val<<endl;
+    }else{
+      cout<<-1<<endl;
+    }
+  }
+}
+
+int main(){
+  ll n,m;
+  for(int i=0;i<100;i++){
+    cin>>n>>m;
+    if(n==0 && m==0){
+      break;
+    }
+    solve(n,m);
+  }
+}
+
+

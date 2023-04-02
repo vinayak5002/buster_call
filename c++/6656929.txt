@@ -1,0 +1,96 @@
+#include <stdio.h>
+#define N 10000
+#define NIL -1
+
+typedef struct{
+	int p,l,r;
+}Node;
+Node tree[N];
+
+int depth[N],height[N];
+
+void setDepth(int u,int d)  //再帰的に深さを求める//
+{
+	if(u==NIL) return;
+	depth[d]=d;
+	setDepth(tree[u].l,d+1);
+	setDepth(tree[u].r,d+1);
+}
+int setHeight(int u)
+{
+	int h1,h2;
+	h1=h2=0;
+	if(tree[u].l!=NIL) h1=setHeight(tree[u].l)+1;
+	if(tree[u].r!=NIL) h2=setHeight(tree[u].r)+1;
+	
+	return height[u]=(h1>h2 ?h1:h2);
+}
+int getDepth(int u)
+{
+	if(tree[u].p==NIL) return NIL;
+	if(tree[tree[u].p].l!=u && tree[tree[u].p].l!=NIL)  return tree[tree[u].p].l;
+	if(tree[tree[u].p].r!=u && tree[tree[u].p].r!=NIL)  return tree[tree[u].p].r;
+	
+	return NIL;
+}
+void print(int u)//出力//
+{
+	int dep=0;
+	printf("node %d: ",u);
+	printf("parent = %d, ",tree[u].p);
+	printf("sibiling = %d, ",getDepth(u));
+	if(tree[u].l!=NIL) dep++;
+	if(tree[u].r!=NIL) dep++;
+	printf("degree = %d, ",dep);
+	printf("depth = %d, ",depth[u]);
+	printf("height = %d, ",height[u]);
+	
+	if(tree[u].p==NIL)
+	{
+		printf("root\n");
+	}
+	else if(tree[u].l==NIL && tree[u].r==NIL)
+	{
+		printf("leaf\n");
+	}
+	else
+	{
+		printf("internal node\n");
+	}
+}
+int main(void)
+{
+	int i,s,l,r,root,n;
+	root=0;
+	scanf("%d",&n);
+	
+	for(i=0;i<n;i++)
+	{
+		tree[i].p==NIL;
+	}
+	for(i=0;i<n;i++)
+	{
+		scanf("%d %d %d",&s,&l,&r);
+		tree[s].l=l;
+		tree[s].r=r;
+		if(l!=NIL) tree[l].p=s;
+		if(r!=NIL) tree[r].p=s;
+	}
+	for(i=0;i<n;i++)
+	{
+		if(tree[i].p==NIL)
+		{
+			root=i;
+		}
+	}
+	setDepth(root,0);
+	setHeight(root);
+	
+	for(i=0;i<n;i++)
+	{
+		print(i);
+	}
+	return 0;
+
+}	
+	

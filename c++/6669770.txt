@@ -1,0 +1,36 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+int main(){
+    while(true){
+        int W,H,x,y,r;
+    cin >> W >> H >> x >> y >> r;
+    if(x<=0||y<=0){
+        cout << "No" << endl;
+        break;
+    }
+        
+    
+    bool a=false;
+    bool b=false;
+    if(x+r<=W){
+        if(x-r>=0||r-x>=0){
+            a=true;
+        }
+    }
+    if(y+r<=H){
+        if(y-r>=0||r-y>=0){
+            b=true;
+        }
+    }
+    if(a==true&&b==true){
+        cout << "Yes" << endl;
+        break;
+    }
+    else if(a!=true||b!=true){
+        cout << "No" << endl;
+        break;
+    }
+    }
+    
+}

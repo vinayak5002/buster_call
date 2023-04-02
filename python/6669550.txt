@@ -1,0 +1,35 @@
+int main()
+{
+    int v, e;
+    cin >> v >> e;
+    vector<vector<int>> graph(v);
+    vector<int> invec(v, 0);
+    for(int i = 0;i < e;++i){
+        int s,t;
+        cin >> s >> t;
+        graph.at(s).push_back(t);
+        ++invec.at(t);
+    }
+    queue<int> que;
+    for(int i = 0;i < v;++i){
+        if(invec.at(i) == 0) que.push(i);
+    }
+    while(!que.empty()){
+        int now = que.front();
+        que.pop();
+        for(auto next:graph.at(now)){
+            --invec.at(next);
+            if(invec.at(next) == 0) que.push(next);
+        }
+    }
+    for(int i = 0;i < v;++i){
+        if(invec.at(i) > 0){
+            cout << 1 << endl;
+            return 0;
+        }
+    }
+
+    cout << 0 << endl;
+    return 0;
+}
+

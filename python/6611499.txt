@@ -1,0 +1,36 @@
+import sys
+input = sys.stdin.buffer.readline
+sys.setrecursionlimit(10 ** 7)
+mod = 10 ** 9 + 7
+
+
+N, W = map(int, input().split())
+X = [int(input()) for _ in range(N)]
+
+if sum(X) <= W or min(X) > W:
+    print(1)
+    exit()
+
+X.sort()
+dp = [0] * (W + 1)
+dp[0] = 1
+for x in X:
+    for i in range(x, W+1)[::-1]:
+        dp[i] += dp[i-x]
+        dp[i] %= mod
+
+ans = 0
+L = W + 1
+R = W + 1
+for x in X:
+    for i in range(x, W+1):
+        dp[i] -= dp[i-x]
+        dp[i] %= mod
+
+    L = max(0, L - x)
+    for i in range(L, R):
+        ans += dp[i]
+        ans %= mod
+    R = max(0, R - x)
+
+print(ans)

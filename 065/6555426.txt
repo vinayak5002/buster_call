@@ -1,0 +1,103 @@
+import java.util.Scanner;
+
+public class Main {
+    static Scanner sc = new Scanner(System.in);
+
+    public static void main(String[] args) {
+        int n = getInt();
+        BinaryTree bt = new BinaryTree();
+        StringBuilder res = new StringBuilder();
+        for (int i = 0; i < n; i++) {
+            String com = sc.next();
+            if (com.equals("insert")) {
+                bt.insert(getInt());
+            }
+            if (com.equals("find")) {
+                res.append(bt.find(getInt()) ? "yes\n" : "no\n");
+            }
+            if (com.equals("print")){
+                bt.walk(bt.root, res, 1);
+                res.append('\n');
+                bt.walk(bt.root, res, 0);
+                res.append('\n');
+            }
+        }
+        System.out.print(res);
+    }
+
+    static int getInt() {
+        return Integer.parseInt(sc.next());
+    }
+
+    static class BinaryTree {
+        Node root;
+
+        void insert(int key) {
+            Node node = new Node(key);
+            if(root == null) {
+                root = node;
+                return;
+            }
+
+            Node parent = null;
+            Node current = root;
+
+            while (current != null) {
+                parent = current;
+                if (node.key < current.key) {
+                    current = current.left;
+                } else {
+                    current = current.right;
+                }
+            }
+
+            if (node.key < parent.key) {
+                parent.left = node;
+            } else {
+                parent.right = node;
+            }
+        }
+
+        boolean find(int key) {
+            Node current = root;
+            while (current != null) {
+                if (key == current.key) {
+                    return true;
+                }
+                if (key < current.key) {
+                    current = current.left;
+                } else {
+                    current = current.right;
+                }
+            }
+            return false;
+        }
+
+        void walk(Node node, StringBuilder res, int order) {
+            if (node == null) {
+                return;
+            }
+            if (order == 0) {
+                res.append(' ').append(node.key);
+            }
+            walk(node.left, res, order);
+            if (order == 1) {
+                res.append(' ').append(node.key);
+            }
+            walk(node.right, res, order);
+        }
+    }
+
+    static class Node {
+        int key;
+        Node left;
+        Node right;
+        Node(int key) {
+            this.key = key;
+        }
+    }
+}
+
+
+
+

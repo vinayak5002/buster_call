@@ -1,0 +1,63 @@
+// AOJ2015 Square Route
+// https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2015&lang=jp
+#include <bits/stdc++.h>
+using namespace std;
+
+int N, M, tmp;
+int main() {
+    while (cin >> N >> M && N > 0) {
+        int harr[N + 1];
+        int warr[M + 1];
+
+        harr[0] = 0;
+        // c++では気にする必要あり。C#ではなくても0に初期化される。
+        cin >> harr[1];
+        for (int i = 1; i < N; i++) {
+            cin >> tmp;
+            harr[i + 1] = harr[i] + tmp;
+            // 道路間距離を位置に変換
+        }
+        warr[0] = 0;
+        cin >> warr[1];
+        for (int i = 1; i < M; i++) {
+            cin >> tmp;
+            warr[i + 1] = warr[i] + tmp;
+        }
+
+        map<int, int> hdict;
+        map<int, int> wdict;
+
+        for (int i = 0; i < N; i++) {
+            for (int j = i + 1; j < N + 1; j++) {
+                // 全ての道路ペアに関して、位置から道路のペア間の距離を求める、それをmap(辞書)に入れる
+                int len = harr[j] - harr[i];
+                if (hdict.count(len)) {
+                    hdict[len] = hdict[len] + 1;
+                } else {
+                    hdict[len] = 1;
+                }
+            }
+        }
+
+        for (int i = 0; i < M; i++) {
+            for (int j = i + 1; j < M + 1; j++) {
+                int len = warr[j] - warr[i];
+                if (wdict.count(len)) {
+                    wdict[len] = wdict[len] + 1;
+                } else {
+                    wdict[len] = 1;
+                }
+            }
+        }
+
+        long ans = 0;
+        for (pair<int, int> kvp : hdict) {
+            if (wdict.count(kvp.first)) {
+                // 縦横両方の道路間距離を入れるmap(辞書)にあれば正方形
+                ans += kvp.second * wdict[kvp.first];
+            }
+        }
+
+        cout << ans << endl;
+    }
+}

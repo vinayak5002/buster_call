@@ -1,0 +1,65 @@
+import java.util.*;
+import java.io.*;
+
+public class Main {
+    
+    public static Scanner sc = new Scanner(System.in);
+    public static PrintWriter pw = new PrintWriter(System.out);
+    
+    public static void main(String[] args) {
+        
+        solve();
+        pw.flush();
+        
+    }
+    
+    static void solve() {
+        
+        int N = sc.nextInt();
+        long C = sc.nextLong();
+        long[] a = new long[N];
+        long[] b = new long[N];
+        long[] x = new long[N];
+        long sx = 0;
+        for( int i = 0; i < N; i++ ) {
+            a[i] = sc.nextInt();
+        }
+        
+        for( int i = 0; i < N; i++ ) {
+            b[i] = sc.nextInt();
+        }
+        
+        for( int i = 0; i < N; i++ ) {
+            x[i] = sc.nextInt();
+            sx += x[i];
+        }
+        
+        long low = 0;
+        long high = (long)Math.pow(10,15)/sx;
+        long mid = 0;
+        while( low < high ) {
+            mid = (low+high)/2;
+            if( subtask(N,C,mid,a,b,x) ) {
+                low = mid+1;
+            }else {
+                high = mid;
+            }
+        }
+        
+        pw.println((low-1)*sx);
+        
+    }
+    
+    static boolean subtask( int N, long C, long val, long[] a, long[] b, long[] x) {
+        
+        long paid = 0;
+        for( int i = 0; i < N; i++ ) {
+            paid += Math.max(0,(x[i]*val-b[i])*a[i]);
+            if( paid > C ) return false;
+        }
+        
+        return paid <= C;
+        
+    }
+    
+}

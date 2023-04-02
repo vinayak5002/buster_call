@@ -1,0 +1,129 @@
+#include <String.h>
+#include <stdio.h>
+
+struct node
+{
+  struct node *right;
+  struct node *left;
+  struct node *parent;
+  int key;
+};
+typedef struct node *Node;
+#define NIL NULL
+
+Node root;
+
+Node treeMinimum(Node x)
+{
+  if(x == NULL)
+        return NULL;
+    else if(x->left != NULL)
+        return find_minimum(x->left);
+    return x;
+}
+
+Node treeMaximum(Node x)
+{
+  Node current = x;
+  while (current->right != NULL){
+    current = current->right;
+  }
+
+  return (current->key);
+}
+
+Node treeSearch(Node u, int k)
+{
+  if (u == NULL || u->key == k)
+       return u;
+    
+    //キーと子の比較(再帰的処理)
+    if (u->key < k)
+      return search(u->right, k);
+    return search(u->left, k);
+}
+
+Node treeSuccessor(Node x)
+{
+}
+
+void treeDelete(Node z)
+{
+  Node y; // node to be deleted
+  Node x; // child of y
+}
+
+void insert(int k)
+{
+  Node y = NIL;
+  Node x = root;
+  Node z;
+
+  z = malloc(sizeof(struct node));
+  z->key = k;
+  z->left = NIL;
+  z->right = NIL;
+}
+
+void inorder(Node u)
+{
+  if (u == NULL)
+        return;
+ 
+    printInorder(u->left);
+ 
+    printf("%d ",u->key);
+ 
+    printInorder(u->right);
+}
+void preorder(Node u)
+{
+  if (u == NULL)
+        return;
+ 
+    printf("%d ",u->key);
+ 
+    printPreorder(u->left);
+ 
+    printPreorder(u->right);
+}
+
+int main()
+{
+  int n, i, x;
+  char com[20];
+  scanf("%d", &n);
+
+  for (i = 0; i < n; i++)
+  {
+    scanf("%s", com);
+    if (com[0] == 'f')
+    {
+      scanf("%d", &x);
+      Node t = treeSearch(root, x);
+      if (t != NIL)
+        printf("yes\n");
+      else
+        printf("no\n");
+    }
+    else if (com[0] == 'i')
+    {
+      scanf("%d", &x);
+      insert(x);
+    }
+    else if (com[0] == 'p')
+    {
+      inorder(root);
+      printf("\n");
+      preorder(root);
+      printf("\n");
+    }
+    else if (com[0] == 'd')
+    {
+      scanf("%d", &x);
+      treeDelete(treeSearch(root, x));
+    }
+  }
+
+  return 0;
+}

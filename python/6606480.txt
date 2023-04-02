@@ -1,0 +1,104 @@
+import java.io.*;
+import java.util.*;
+
+public class Main {
+
+  static class Reader {
+    
+    private BufferedReader br;
+    private String content;
+    private StringTokenizer st;
+    
+    public Reader() {
+        br = new BufferedReader(new InputStreamReader(System.in));
+    }
+    
+    public boolean hasNext() throws IOException {
+      if (st != null && hasNextToken())
+        return true;
+      
+      boolean next = (content = br.readLine()) != null && !content.isEmpty();
+      if (next)
+        st = new StringTokenizer(content);
+      return next;
+    }
+    
+    public String next() {
+      try{
+        hasNext();
+      }catch(IOException e){
+          
+      }    
+      return st.nextToken();
+    }
+    
+    public boolean hasNextToken() {
+      return st.hasMoreTokens();
+    }
+    
+    public int nextInt() {
+      return Integer.parseInt(next());
+    }
+    
+    public long nextLong() {
+      return Long.parseLong(next());
+    }
+    
+    public double nextDouble() {
+      return Double.parseDouble(next());
+    }
+    
+    public String nextLine() throws IOException {
+      return st.hasMoreTokens() ? st.nextToken("\n") : br.readLine();
+    }
+    
+  }
+  
+  static class Pair<U, V>{
+      public U u;
+      public V v;
+      
+      public Pair(U u, V v){
+          this.u = u;
+          this.v = v;
+      }
+      
+  }
+  
+  
+  public static void startQueue(int k, Queue<Pair<String, Integer>> q) {
+    //  System.out.println(q.size());
+
+     int sum = 0;
+     while(!q.isEmpty()){
+          Pair<String, Integer> node = q.poll();
+          
+          int diff = node.v - k;
+          if( diff > 0){
+              sum+=k;
+              q.offer(new Pair<String, Integer>(node.u, diff));
+          }else{ 
+              sum+=node.v;
+              System.out.println(node.u +" " + sum);
+          }
+     }
+  }
+  
+  public static void main(String[] args) throws IOException {
+
+    Reader r = new Reader();
+    int n = r.nextInt();
+    int k = r.nextInt();
+    
+    Queue<Pair<String, Integer>> q = new LinkedList<>();
+    
+
+    while(r.hasNext() && n-- > 0){
+        String name = r.next();
+        int val = r.nextInt();
+        q.offer(new Pair<String, Integer>(name, val));
+    }
+     startQueue(k, q);
+    
+  }
+}

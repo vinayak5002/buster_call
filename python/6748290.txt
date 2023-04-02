@@ -1,0 +1,235 @@
+
+"""
+
+●構文解析パート
+
+木の形式だが…
+node番号
+node type
+L,R
+で情報は十分
+
+
+グラフとして分割する
+これはスタックで行けるはず
+
+根として有りうるノードは、
+左の部分木の演算ノード全部だ…
+
+次に、木dpを行う。
+
+dp2[v] = 頂点vが根でないときの、最大・最小
+dp3[v] = 頂点vが根の時の最大・最小
+
+根は左にしか降りて行かないので、それを利用できる…？
+
+dp2の方は簡単に求まる。
+
+dp3は、どこから推移するかが重要。
+dp2の組み合わせで行けるが…
+
+あるノードが根になった時…
+左 = 元々の左
+中 = 元々の中　←この2個は元の根でなければ、反転可能。
+右 = 元々の親
+
+元々の親の方は別のdpが必要
+
+(4+(4+1))-((3-(6+0))+9)-((3+9)+7)
+が33にならないとおかしい？
+
+左は 9のみ
+中は 6?
+右は19
+
+"""
+
+import sys
+from sys import stdin
+import math
+from collections import deque
+
+ANS = []
+
+while True:
+
+    sin = stdin.readline()
+    s = list(sin)
+    if sin == "-1\n":
+        break
+
+    node_type = [] #0=num,1 = +,2 = -
+    node_L = [] #if type=0 then L=integer on node v  else Leftnodeidx 
+    node_R = [] #右側の子
+
+    stk = [] #スタック
+    buf = [] #複数桁の整数処理用のバッファ
+
+    v_from_depth = [] #深いほうから順にindexを入れる
+
+    for c in s:
+
+        if c == " " or c == "\n":
+            continue
+        elif "0" <= c <= "9":
+            buf.append(c)
+        else:
+
+            if buf:
+                num = int("".join(buf))
+
+                idx = len(node_type)
+                node_type.append(0)
+                node_L.append(num)
+                node_R.append(None)
+                stk.append(idx)
+                buf = []
+
+            if c == "(":
+                continue
+            
+            elif c == ")":
+                a,b,c = stk[-1],stk[-2],stk[-3]
+                del stk[-1];del stk[-1];del stk[-1]
+                node_L[b] = a
+                node_R[b] = c
+                stk.append(b)
+
+                v_from_depth.append(a)
+                v_from_depth.append(c)
+                
+            elif c == "+":
+
+                idx = len(node_type)
+                node_type.append(1)
+                node_L.append(None)
+                node_R.append(None)
+                stk.append(idx)
+
+            else:
+
+                idx = len(node_type)
+                node_type.append(2)
+                node_L.append(None)
+                node_R.append(None)
+                stk.append(idx)
+
+    if buf:
+        num = int("".join(buf))
+        idx = len(node_type)
+        node_type.append(0)
+        node_L.append(num)
+        node_R.append(None)
+        stk.append(idx)
+        buf = []
+
+    v_from_depth.append(stk[0])
+    v_from_depth.append(stk[2])
+    v_from_depth.append(stk[4])
+    
+
+    # ここから探索パート
+    # dp2をまず求める。
+
+    #この2つがdp2
+    maxi = [None] * len(node_type)
+    mini = [None] * len(node_type)
+
+    for v in v_from_depth:
+        
+        if node_type[v] == 0:
+            maxi[v] = mini[v] = node_L[v]
+            
+        elif node_type[v] == 1:
+            maxi[v] = maxi[node_L[v]] + maxi[node_R[v]]
+            mini[v] = mini[node_L[v]] + mini[node_R[v]]
+
+        else:
+            maxi[v] = max( maxi[node_L[v]] - mini[node_R[v]] , maxi[node_R[v]] - mini[node_L[v]] )
+            mini[v] = -maxi[v]
+
+    os = [i for i in stk]
+    for chh in range(6): #一番上の並び替えを考える
+
+        if chh == 0:
+            stk = [ os[0] , os[1] , os[2] , os[3] , os[4] ]
+        elif chh == 1:
+            stk = [ os[0] , os[1] , os[4] , os[3] , os[2] ]
+        elif chh == 2:
+            stk = [ os[2] , os[1] , os[0] , os[3] , os[4] ]
+        elif chh == 3:
+            stk = [ os[2] , os[1] , os[4] , os[3] , os[0] ]
+        elif chh == 4:
+            stk = [ os[4] , os[1] , os[0] , os[3] , os[2] ]
+        elif chh == 5:
+            stk = [ os[4] , os[1] , os[2] , os[3] , os[0] ]
+
+
+        #根を変えない場合の最大の答えを計算する。
+        if node_type[stk[1]] == 1: #+の場合
+            ans = maxi[stk[0]] + maxi[stk[2]] + maxi[stk[4]]
+        else: #-の場合
+            ans = maxi[stk[0]] - mini[stk[2]] - mini[stk[4]]
+
+        #次に、根を変える場合の答えを計算
+
+        q = deque() #(頂点番号,親の最大値,親の最小値)を入れていく
+
+        #まず、根のすぐ左の子をpushする
+        if node_type[stk[1]] == 1: #+の場合
+            q.append( (stk[0] , maxi[stk[2]]+maxi[stk[4]] , mini[stk[2]] + mini[stk[4]] ) )
+        else:
+            nmax = max(maxi[stk[2]]-mini[stk[4]] , maxi[stk[4]]-mini[stk[2]] )
+            nmin = -nmax
+            nmax,nmin = max(nmax,nmin),min(nmax,nmin)
+            q.append( (stk[0] , nmax , nmin ) )
+
+        #後は、幅優先探索を行う
+        while q:
+
+            v,pmax,pmin = q.popleft()
+            pmax,pmin = max(pmax,pmin),min(pmax,pmin)
+            if node_type[v] == 0: #数字の場合、親になれない
+                continue
+
+            # ansの更新
+            if node_type[v] == 1:
+                ans = max(ans , maxi[node_L[v]] + maxi[node_R[v]] + pmax)
+            elif node_type[v] == 2:
+                ans = max(ans , maxi[node_L[v]] - mini[node_R[v]] - pmin) #交換してない場合
+                ans = max(ans , maxi[node_R[v]] - mini[node_L[v]] - pmin) #交換している場合
+                ans = max(ans , pmax - mini[node_L[v]] - mini[node_R[v]])
+
+            #推移
+            if node_type[v] == 1: #+の場合
+                
+                #左に推移する場合
+                tmax = pmax + maxi[node_R[v]]
+                tmin = pmin + mini[node_R[v]]
+                tmax,tmin = max(tmax,tmin),min(tmax,tmin)
+                q.append( (node_L[v] , tmax , tmin) )
+
+                #右に推移する場合
+                tmax = pmax + maxi[node_L[v]]
+                tmin = pmin + mini[node_L[v]]
+                tmax,tmin = max(tmax,tmin),min(tmax,tmin)
+                q.append( (node_R[v] , tmax , tmin) )
+
+            else: #-の場合
+
+                #左に推移する場合
+                tmax = max(pmax-mini[node_R[v]] , maxi[node_R[v]]-pmin)
+                tmin = -tmax
+                tmax,tmin = max(tmax,tmin),min(tmax,tmin)
+                q.append( (node_L[v] , tmax , tmin) )
+
+                #右に推移する場合
+                tmax = max(pmax-mini[node_L[v]] , maxi[node_L[v]]-pmin)
+                tmin = -tmax
+                tmax,tmin = max(tmax,tmin),min(tmax,tmin)
+                q.append( (node_R[v] , tmax , tmin) )
+
+    ANS.append(ans)
+
+print ("\n".join(map(str,ANS)))
+

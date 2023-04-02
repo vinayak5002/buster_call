@@ -1,0 +1,113 @@
+#include<stdio.h>
+
+#define SIZE 100001 //n <= 100000から
+
+typedef struct{
+    int parent;//親
+    int left;//左の最初の子
+    int right;//右の兄弟
+}node_t;//nodeの構造体定義
+
+node_t tree[SIZE];//根付き木構造の配列定義
+int deep[SIZE];//各nodeの深さの配列
+
+int getdepth(int x)//深さを計算する関数
+{
+    int deep = 0;
+    while(tree[x].parent != -1)//引数のnodeから根までdeepを計算
+    {
+        x = tree[x].parent;
+        deep++;
+    }
+
+    return deep;
+}
+
+void node_print(int x)//要求された仕様で出力する関数
+{
+    int child;//子を代入するための変数
+    printf("node %d: parent = %d, depth = %d, ",x, tree[x].parent, deep[x]);//node自身、親、深さを出力
+
+    if( tree[x].parent == -1 )//もし親がnilなら根である
+    {
+        printf("root, ");
+    }
+    else if (tree[x].left == -1)//もし子が存在しないなら葉
+    {
+        printf("leaf, ");
+    }
+    else//他のnodeは内部節点(せってん)
+    {
+        printf("internal node, ");
+    }
+
+    //子を出力する
+    printf("[");
+
+    child = tree[x].left;//一番左の子をchildに代入
+    if(child == -1)//もし子がなければ
+    {
+        printf("]\n");
+    }
+    else//子があるなら
+    {
+        printf("%d",child);//一番左の子を出力
+        while(tree[child].right != -1)//まだ子があれば続く
+        {
+            child = tree[child].right;//子を右の兄弟に変換
+            printf(", %d",child);//二番目左の子から一番右の子まで出力する
+        }
+        printf("]\n");
+    }
+
+}
+
+int main(void)
+{
+    int n;//入力したnodeの数
+    scanf("%d",&n);
+
+    int i,j;// for loop
+    int id,child,c_num;//idは今のnode、childは子を代入するための変数、c_numは子の数
+
+    for( i = 0; i < n; i++ )
+    {
+        tree[i].parent = -1;
+        tree[i].left = -1;
+        tree[i].right = -1;
+    }//tree[]初期化
+
+    for( i = 0; i < n; i++ )
+    {
+        int child1;//child1は一番左の子の変数
+        scanf("%d %d", &id, &c_num);
+        for( j = 0; j < c_num; j++)//全ての子と連結する
+        {
+            scanf("%d",&child);//子の値を読み込む
+            if(j == 0)//もし最初の子なら（一番左の子）
+            {
+                tree[id].left = child;//今のnodeのleftに代入
+                child1 = child;//child1に代入
+                tree[child1].parent = id;//一番左の子のparentにidを代入
+            }
+            else//もし最初の子でなければ
+            {
+                tree[child1].right = child;//連結済みの子と連結
+                tree[child].parent = id;//id（親と連結）
+                child1 = child;//連結済みの子として代入（child1の意味が変化）
+            }
+        }
+    }
+
+    for( i = 0; i < n; i++ )
+    {
+        deep[i] = getdepth(i);
+    }//深さを計算
+
+    for( i = 0; i < n; i++ )
+    {
+        node_print(i);
+    }//出力
+
+    return 0;
+}

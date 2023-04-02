@@ -1,0 +1,47 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	let pair = si[0].split(" ");
+	let n = Number(pair[0]);
+	let q = Number(pair[1]);
+
+	let array = new Array(n);
+	for (let i = 0; i < n; i++) {// 二次元配列をn個作成
+		let tmp = [];
+		array[i] = tmp;
+	}
+	let arrHeads = new Array(n).fill(0);// 各配列の先頭情報を管理. array[n]の先頭　= array[n][arrHeads[n]]
+
+	for (let i = 0; i < q; i++) {// q回命令を実行.
+		pair = si[i + 1].split(" ");
+		let leftN = Number(pair[0]);
+		let midN = Number(pair[1]);
+		let rightN = Number(pair[2]);
+
+		switch (leftN) {
+			case 0:
+				array[midN].push(rightN);
+				break;
+
+			case 1:
+				if (arrHeads[midN] < array[midN].length) {
+					so.write(array[midN][arrHeads[midN]] + "\n");
+				} // 要素がない場合はなにもしない
+				break;
+
+			case 2:
+				if (array[midN].length > 0) {
+					arrHeads[midN]++;
+				}// 要素がない場合はなにもしない
+				break;
+		}
+		
+		if (arrHeads[midN] == array[midN].length) {
+			arrHeads[midN] = 0;
+		}
+	}
+}
+
+

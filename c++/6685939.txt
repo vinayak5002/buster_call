@@ -1,0 +1,114 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+struct Node {
+	int id;
+	int key;
+	Node* left, * right, *parent;
+};
+
+Node* root;
+Node* NIL = NULL;
+vector<Node> tree;
+
+void insert(Node* z)
+{
+	Node* y = NIL;
+	Node* x = root;
+
+	while (x != NIL)
+	{
+		y = x;
+		if (z->key < x->key)
+			x = x->left;
+		else
+			x = x->right;
+	}
+	z->parent = y;
+
+	if (y == NIL) {
+		root = z;
+	}
+	else if (z->key < y->key) {
+		y->left = z;
+	}
+	else if (z->key > y->key) {
+		y->right = z;
+	}
+}
+
+void print_InOrder(Node * node) {
+	if (node == NIL) {
+		return;
+	}
+	print_InOrder(node->left);
+	cout << " " << node->key;
+	print_InOrder(node->right);
+}
+
+void print_PreOrder(Node* node) {
+	if (node == NIL) {
+		return;
+	}
+	cout << " " << node->key;
+	print_PreOrder(node->left);
+	print_PreOrder(node->right);
+}
+
+bool find_key(Node * root, int key) {
+	Node* node = root;
+	while (node != NIL) {
+		if (node->key == key) {
+			return true;
+		}
+		else {
+			if (key < node->key) {
+				node = node->left;
+			}
+			else {
+				node = node->right;
+			}
+		}
+	}
+	return false;
+}
+
+int main() {
+	int n;
+	cin >> n;
+	string cmd;
+	int param;
+	Node* add;
+
+	for (int i = 0; i < n; i++) {
+		cin >> cmd;
+		if (cmd == "insert") {
+			cin >> param;
+			add = new Node();
+			add->key = param;
+			add->left = NIL;
+			add->right = NIL;
+			insert(add);
+		}
+		else if (cmd == "print") {
+			print_InOrder(root);
+			cout << endl;
+			print_PreOrder(root);
+			cout << endl;
+		}
+		else if (cmd == "find") {
+			cin >> param;
+			if (find_key(root, param)) {
+				cout << "yes" << endl;
+			}
+			else {
+				cout << "no" << endl;
+			}
+		}
+	}
+
+
+	return 0;
+}

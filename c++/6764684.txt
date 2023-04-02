@@ -1,0 +1,96 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll = long long;
+#define BEGIN_STACK_EXTEND(size)                                                                                  \
+    void *stack_extend_memory_ = malloc(size);                                                                    \
+    void *stack_extend_origin_memory_;                                                                            \
+    char *stack_extend_dummy_memory_ = (char *)alloca((1 + (int)(((long long)stack_extend_memory_) & 127)) * 16); \
+    *stack_extend_dummy_memory_ = 0;                                                                              \
+    asm volatile("mov %%rsp, %%rbx\nmov %%rax, %%rsp"                                                             \
+                 : "=b"(stack_extend_origin_memory_)                                                              \
+                 : "a"((char *)stack_extend_memory_ + (size)-1024));
+#define END_STACK_EXTEND                                                 \
+    asm volatile("mov %%rax, %%rsp" ::"a"(stack_extend_origin_memory_)); \
+    free(stack_extend_memory_);
+#define mod 1000000007ll
+#define loop(i, n) for (int i = 0; i < n; i++)
+#define flagcount(bit) __builtin_popcount(bit)
+#define flag(x) (1ll << x)
+#define flagadd(bit, x) bit |= flag(x)
+#define flagpop(bit, x) bit &= ~flag(x)
+#define flagon(bit, i) bit &flag(i)
+#define flagoff(bit, i) !(bit & (1ll << i))
+#define all(v) v.begin(), v.end()
+#define putout(a) cout << a << '\n'
+#define Sum(v) accumulate(all(v), 0ll)
+template <typename T>
+bool chmax(T &a, const T &b)
+{
+    if (a < b)
+    {
+        a = b; // aをbで更新
+        return true;
+    }
+    return false;
+}
+template <typename T>
+bool chmin(T &a, const T &b)
+{
+    if (a > b)
+    {
+        a = b; // aをbで更新
+        return true;
+    }
+    return false;
+}
+void AS(ll X, ll L, ll R) { assert(L <= X && X <= R); }
+//場合によって使い分ける
+const ll dx[4] = {1, 0, -1, 0};
+const ll dy[4] = {0, 1, 0, -1};
+// const ll dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
+// const ll dy[8] = {0, 1, 1, 1, 0, -1, -1, -1};
+// cout << fixed << setprecision(10);
+// vector<vector<ll>> field(h, vector<ll>(w));
+int main()
+{
+    while (true)
+    {
+        ll N, M;
+        cin >> N >> M;
+        if (N == 0)
+            return 0;
+        ll maxx = max(N, M);
+        vector<ll> hc(1000 * maxx + 1, 0), wc(1000 * maxx + 1, 0);
+        vector<ll> h(N), w(M), sh(N + 1), sw(M + 1);
+        loop(i, N)
+        {
+            cin >> h[i];
+            sh[i + 1] = sh[i] + h[i];
+        }
+        loop(i, M)
+        {
+            cin >> w[i];
+            sw[i + 1] = sw[i] + w[i];
+        }
+        for (int i = 0; i < N; i++)
+        {
+            for (int j = i; j < N; j++)
+            {
+                //[i,j]=[0,j]-[0,i-1]=[0,j+1)-[0,i)
+                hc[sh[j + 1] - sh[i]]++;
+            }
+        }
+        for (int i = 0; i < M; i++)
+        {
+            for (int j = i; j < M; j++)
+            {
+                //[i,j]=[0,j]-[0,i-1]=[0,j+1)-[0,i)
+                wc[sw[j + 1] - sw[i]]++;
+            }
+        }
+        ll ans = 0;
+        loop(i, 1000 * maxx + 1) ans += min(hc[i], wc[i]);
+        putout(ans);
+    }
+    return 0;
+}

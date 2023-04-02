@@ -1,0 +1,76 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+	const bitNum = 64
+	
+	let maskNum = Number(si[0])
+	let mask = new Array(maskNum).fill(0)
+	for (let i = 0; i < maskNum; i++) {
+		let maskQuery = si[i + 1].split(" ")
+		let maskQueryNum = maskQuery[0]
+		for (let j = 1; j <= maskQueryNum; j++) {
+			mask[i] += Math.pow(2, maskQuery[j])
+		}
+	}
+	let flag = 0
+	let queryNum = Number(si[maskNum + 1])
+	
+	for (let i = 1; i <= queryNum; i++) {
+		let query = si[maskNum + 1 + i].split(" ").map(val => Number(val))
+		let order = query[0]
+		let maskElem =query[1]
+		if(order == 0) {
+			// flagがON(1)のとき1、OFF(0)のとき0を表示
+			if (flag.toString(2).charAt(maskElem) == 1) {
+				so.write("1\n")
+			} else {
+				so.write("0\n")
+			}
+		} else if(order == 1) {
+			// 指定されたflagをON
+			flag = flag | mask[maskElem]
+		} else if(order == 2) {
+			// 指定されたflagをOFF
+			flag = flag & ( ~ mask[maskElem])
+		} else if(order == 3) {
+			// 指定されたflagを反転
+			flag = flag ^ mask[maskElem]
+		} else if(order == 4) {
+			// flagがすべてONで1、そうでないなら0
+			if ((flag & mask[maskElem]) == mask[maskElem]){
+				so.write("1\n")
+			} else {
+				so.write("0\n")
+			}
+		} else if(order == 5) {
+			// いずれかのflagがONで1、そうでないなら0
+			if ((flag & mask[maskElem]) != 0) {
+				so.write("1\n")
+			} else {
+				so.write("0\n")
+			}
+		} else if(order == 6) {
+			// flagがすべてOFFで1、そうでないなら0
+			if ((flag & mask[maskElem]) == 0) {
+				so.write("1\n")
+			} else {
+				so.write("0\n")
+			}
+		} else if(order == 7) {
+			// ONになってるflagの数を表示
+			extractFlag = (flag & mask[maskElem]).toString(2)
+			let onFlagCount = 0
+			for (let j = 0; j < extractFlag; j++) {
+				if (extractFlag.charAt(j) == 1) {
+					onFlagCount++
+				}
+			}
+			so.write(onFlagCount + "\n")
+		} else if(order == 8) {
+			// flagの整数値を表示
+			so.write((flag & mask[maskElem]) + "\n")
+		}
+	}
+}

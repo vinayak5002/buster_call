@@ -1,0 +1,79 @@
+#include <bits/stdc++.h>
+
+const int MAX_N = 1e4 + 10 , MAX_M = 5e2 + 10 , mod = 1e9 + 7 ;
+
+char a[MAX_N] , b[MAX_N] , c[MAX_M] ;
+int nxt[MAX_M] , f[2][MAX_M][2][2] , g[2][MAX_M][2][2] ;
+
+void dec(char *a) {
+    int l = strlen(a + 1) ;
+    --a[l] ;
+    for (int i = l ; i > 1 ; --i)
+        if (a[i] < '0') a[i] += '9' , --a[i - 1] ;
+        else break ;
+}
+
+int work(char *a) {
+    int n = strlen(a + 1) , m = strlen(c + 1) - 1 ;
+    for (int j = 0 ; j <= m ; ++j)
+        for (int p = 0 ; p < 2 ; ++p)
+            for (int q = 0 ; q < 2 ; ++q) f[0][j][p][q] = g[0][j][p][q] = 0 ;
+    
+    int t = 0 ; f[0][0][1][1] = 1 ;
+    for (int i = 0 ; i < n ; ++i , t ^= 1) {
+        for (int j = 0 ; j <= m ; ++j)
+            for (int p = 0 ; p < 2 ; ++p)
+                for (int q = 0 ; q < 2 ; ++q) f[t ^ 1][j][p][q] = g[t ^ 1][j][p][q] = 0 ;
+
+        for (int j = 0 ; j <= m ; ++j)
+            for (int p = 0 ; p < 2 ; ++p)
+                for (int q = 0 ; q < 2 ; ++q)
+                    for (char ad = '0' ; ad <= '9' ; ++ad) {
+                        int ni = i + 1 ;
+                        if (p && a[ni] < ad) break ;
+
+                        int nj = j , np = (p & (ad == a[ni])) , nq = (q & (ad == '0')) ;
+                        for (; nj && ad != c[nj + 1] ; nj = nxt[nj]) ;
+                        if (c[nj + 1] == ad) ++nj ;
+
+                        if (nj == m && !nq) (g[t ^ 1][nj][np][nq] += f[t][j][p][q]) %= mod ;
+                        (f[t ^ 1][nj][np][nq] += f[t][j][p][q]) %= mod ; (g[t ^ 1][nj][np][nq] += g[t][j][p][q]) %= mod ;
+                    }
+    }
+
+    int ans = 0 ;
+    for (int j = 0 ; j <= m ; ++j)
+        for (int p = 0 ; p < 2 ; ++p)
+                for (int q = 0 ; q < 2 ; ++q) (ans += g[t][j][p][q]) %= mod ;
+
+    return ans ;
+}
+
+int main() {
+    scanf("%s %s %s" , a + 1 , b + 1 , c + 1) ;
+
+    int l = strlen(c + 1) , p = 0 ;
+    nxt[1] = 0 ; c[l + 1] = '#' ;
+    for (int i = 2 ; i <= l ; ++i) {
+        for (; p && c[p + 1] != c[i] ; p = nxt[p]) ;
+        if (c[p + 1] == c[i]) ++p ;
+        nxt[i] = p ;
+    }
+
+    ///
+    
+    int l1 = strlen(a + 1) ;
+    if (l1 == 1 && a[1] == '0') {
+        int r = work(b) ;
+        if (l == 1 && c[1] == '0') (++r) %= mod ;
+
+        printf("%d\n" , r) ;
+    }
+    else {
+        dec(a) ;
+        int r1 = work(a) , r2 = work(b) ;
+        printf("%d\n" , (r2 - r1 + mod) % mod) ;
+    }
+
+    return 0 ;
+}

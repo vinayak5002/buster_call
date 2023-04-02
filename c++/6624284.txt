@@ -1,0 +1,153 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+typedef unsigned long long ull;
+#define REP(i, n) for (ll i = 0; i < ll(n); i++)
+#define RREP(i, n) for (ll i = (ll)(n - 1); i >= 0; i--)
+#define REPE(i, l, n) for (ll i = l; i <= ll(n); i++)
+#define RREPE(i, l, n) for (ll i = ll(n); i >= l; i--)
+#define FORA(i, I) for (const auto &i : I)
+#define ALL(v) v.begin(), v.end()
+#define UQ(v) v.erase(unique(ALL(v)), v.end())
+#define ACM(v) accumulate(ALL(v), 0LL)
+#define C cin >>
+#define P(str) cout << str << endl
+#define PLL pair<ll, ll>
+#define PDBL pair<double, double>
+#define TULL tuple<ll, ll, ll>
+#define VPLL vector<PLL>
+#define VLL vector<ll>
+#define VVLL vector<VLL>
+#define VVVLL vector<VVLL>
+#define VDBL vector<double>
+#define DLL deque<ll>
+#define INCANT cin.tie(nullptr), ios::sync_with_stdio(false)
+#define INT(...)     \
+    int __VA_ARGS__; \
+    IN(__VA_ARGS__)
+#define LL(...)     \
+    ll __VA_ARGS__; \
+    IN(__VA_ARGS__)
+#define STR(...)        \
+    string __VA_ARGS__; \
+    IN(__VA_ARGS__)
+#define CHR(...)      \
+    char __VA_ARGS__; \
+    IN(__VA_ARGS__)
+#define DBL(...)        \
+    double __VA_ARGS__; \
+    IN(__VA_ARGS__)
+template <typename T>
+inline bool chmax(T &a, T b) {
+    return ((a < b) ? (a = b, true) : (false));
+}
+template <typename T>
+inline bool chmin(T &a, T b) {
+    return ((a > b) ? (a = b, true) : (false));
+}
+int scan() { return getchar(); }
+void scan(int &a) { cin >> a; }
+void scan(long long &a) { cin >> a; }
+void scan(char &a) { cin >> a; }
+void scan(double &a) { cin >> a; }
+void scan(string &a) { cin >> a; }
+template <class T, class S>
+void scan(pair<T, S> &p) {
+    scan(p.first), scan(p.second);
+}
+template <class T>
+void scan(vector<T> &);
+template <class T>
+void scan(vector<T> &a) {
+    for (auto &i : a) scan(i);
+}
+template <class T>
+void scan(T &a) {
+    cin >> a;
+}
+void IN() {}
+template <class Head, class... Tail>
+void IN(Head &head, Tail &...tail) {
+    scan(head);
+    IN(tail...);
+}
+const long long INF = 1100000000000000000;
+
+template <typename T>
+class SegTree {
+   private:
+    vector<T> seg;
+    ll len = 1;
+    T ue;
+    ll mod = 0;
+
+   public:
+    SegTree(ll _len, T _ue) : ue(_ue) {
+        while (len < _len) len = len << 1;
+        seg.resize(len * 2, ue);
+    }
+    SegTree(ll _len, T _ue, ll _mod) : ue(_ue), mod(_mod) {
+        while (len < _len) len = len << 1;
+        seg.resize(len * 2, ue);
+    }
+
+    void add(ll a, T val) { return add(a, a + 1, val); }
+    void add(ll a, ll b, T val) { return add(a, b, 0, len, 1, val); }
+    void add(ll a, ll b, ll l, ll r, ll no, ll val) {
+        if (r <= a || b <= l) return;
+        if (a <= l && r <= b) {
+            seg[no] += val;
+            if (mod != 0) seg[no] %= mod;
+            return;
+        }
+        ll mid = (l + r) / 2;
+        add(a, b, l, mid, 2 * no, val);
+        add(a, b, mid, r, 2 * no + 1, val);
+    }
+
+    T get(ll a) {
+        a += len;
+        T res = ue;
+        res += seg[a];
+        if (mod != 0) res %= mod;
+        while (1) {
+            a /= 2;
+            if (a == 0) break;
+            res += seg[a];
+            if (mod != 0) res %= mod;
+        }
+        return res;
+    }
+
+    void printSeg() {
+        ll bi = 1LL;
+        REPE(i, 1, seg.size() - 1) {
+            if (i == bi) {
+                bi *= 2;
+                cout << endl;
+                cout << string(len / bi, ' ');
+            }
+            cout << seg[i] << " ";
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    //入力
+    INCANT;
+    LL(n, q);
+    SegTree<ll> tree(n, 0LL);
+
+    REP(i, q) {
+        LL(c);
+        if (c == 0) {
+            LL(s, t, x);
+            tree.add(s - 1, t, x);
+        } else {
+            LL(idx);
+            P(tree.get(idx - 1));
+        }
+    }
+}
+

@@ -1,0 +1,82 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for(int i=0; i<(n); i++)
+#define INF ((1LL<<62)-(1LL<<31))
+#define all(a)  (a).begin(),(a).end()
+#define rall(a)  (a).rbegin(),(a).rend()
+typedef long long ll;
+typedef pair<ll,ll> pl;
+
+struct Graph {
+    struct Edge {
+        int rev,from,to; ll cap,cost;
+        Edge(int r,int f,int t,ll cp,ll ct):rev(r),from(f),to(t),cap(cp),cost(ct) {}
+    };
+    vector<vector<Edge>> list;
+    Graph(int N=0):list(N) {}
+    size_t size() { return list.size(); }
+    vector<Edge> &operator [] (int i) { return list[i]; }
+    Edge& redge(const Edge &e) { return list[e.to][e.rev]; }
+    void run_flow(Edge &e,int f) {
+        e.cap-=f;
+        redge(e).cap+=f;
+    }
+    void addedge(int from,int to,ll cap,ll cost) {
+        int fromrev=(int)list[from].size();
+        int torev=(int)list[to].size();
+        list[from].push_back(Edge(torev,from,to,cap,cost));
+        list[to].push_back(Edge(fromrev,to,from,0LL,-cost));
+    }
+    //Graph g(n);
+};
+
+
+struct Mincostflow {
+    Mincostflow() {}
+    int solve(Graph &G,int s,int t,ll f) {
+        int gs=G.size();
+        ll res=0;
+        vector<ll> pot(gs),pre_v(gs),pre_e(gs);
+        while(f>0) {
+            vector<ll> dist(gs,INF);
+            dist[s]=0;
+            priority_queue<pl,vector<pl>,greater<pl>> pq;
+            pq.push({0,s});
+            while(!pq.empty()) {
+                ll cd=pq.top().first,cv=pq.top().second; pq.pop();
+                if(dist[cv]<cd) continue;
+                rep(i,(int)G[cv].size()) { 
+                    auto &nv=G[cv][i];
+                    if(nv.cap>0&&dist[nv.to]>dist[cv]+nv.cost+pot[cv]-pot[nv.to]) {
+                        dist[nv.to]=dist[cv]+nv.cost+pot[cv]-pot[nv.to];
+                        pre_v[nv.to]=cv; pre_e[nv.to]=i;
+                        pq.push({dist[nv.to],nv.to});
+                    }
+                }
+            }
+            if(dist[t]==INF) return -1;
+            rep(i,gs) pot[i]+=dist[i];
+            ll cf=f;
+            for(int i=t;i!=s;i=pre_v[i]) cf=min(cf,G[pre_v[i]][pre_e[i]].cap);
+            f-=cf;
+            res+=cf*pot[t];
+            for(int i=t;i!=s;i=pre_v[i]) G.run_flow(G[pre_v[i]][pre_e[i]],cf);
+        }
+        return res;
+    }
+    //Mincostflow mcf;
+};
+
+int main() {
+    ll n,m,f;
+    cin >> n >> m >> f;
+    Graph g(n);
+    rep(i,m) {
+        int u,v; ll c,d;
+        cin >> u >> v >> c >> d;
+        g.addedge(u,v,c,d);
+    }
+    Mincostflow mcf;
+    cout << mcf.solve(g,0,n-1,f) << endl;
+    return 0;
+}

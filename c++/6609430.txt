@@ -1,0 +1,185 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+#define NIL NULL
+
+struct node{   
+  	int key;
+  	struct node *parent;
+  	struct node *right;
+  	struct node *left;
+};
+typedef struct node *Node;
+Node T;
+
+void Insert(int key){
+  	Node y,x,z;
+  	y=NIL;
+  	x=T;
+  	z=malloc(sizeof(struct node));
+ 	z->key=key;
+  	z->left=NIL;
+  	z->right=NIL;
+  	while(x!=NULL){
+    	y=x;
+    	if( z->key < x->key )
+			x=x->left;
+    	else
+			x=x->right;
+  	}
+  	z->parent=y;
+  	if(y==NULL){
+    	T=z;
+  	}
+  	else if(z->key<y->key){
+      	y->left=z;
+  	}
+  	else{
+    	y->right=z;
+  	}
+}
+
+void Find(int key){
+	Node x;
+	
+  	x=T;
+  	while(x!=NULL&&x->key!=key){
+    	if(key<x->key)
+			x=x->left;
+    	else
+			x=x->right;
+  	}
+  	if(x==NULL)
+	  	puts("no");
+  	else
+	  	puts("yes");
+}
+
+void Delete(int key){
+	Node x;
+	Node max;
+	int i;
+	
+  	x=T;
+  	while(x!=NULL&&x->key!=key){
+    	if(key<x->key)
+			x=x->left;
+    	else
+			x=x->right;
+  	}
+  	if(x==NULL){
+  		puts("error");
+  		return;
+	  }
+  	
+  	if(x->key<x->parent->key){
+		if(x->left==NULL&&x->right==NULL){
+			x->parent->left=NULL;
+			free(x);
+			return;
+		}
+		if(x->left!=NULL&&x->right==NULL){
+			x->parent->left=x->left;
+			x->left->parent=x->parent;
+			free(x);
+			return;
+		}
+		if(x->left==NULL&&x->right!=NULL){
+			x->parent->left=x->right;
+			x->right->parent=x->parent;
+			free(x);
+			return;
+		}
+		if(x->left!=NULL&&x->right!=NULL){
+			max=x->left;
+			while(max->right!=NULL){
+				max=max->right;
+			}
+			x->key=max->key;
+			max->parent->left=NULL;
+			free(max);
+			return;
+		}
+	}
+	else{
+		if(x->left==NULL&&x->right==NULL){
+			x->parent->right=NULL;
+			free(x);
+			return;
+		}
+		if(x->left!=NULL&&x->right==NULL){
+			x->parent->right=x->left;
+			x->left->parent=x->parent;
+			free(x);
+			return;
+		}
+		if(x->left==NULL&&x->right!=NULL){
+			x->parent->right=x->right;
+			x->right->parent=x->parent;
+			free(x);
+			return;
+		}
+		if(x->left!=NULL&&x->right!=NULL){
+			max=x->right;
+			while(max->left!=NULL){
+				max=max->left;
+			}
+			x->key=max->key;
+			max->parent->left=NULL;
+			free(max);
+			return;
+		}
+	}
+}
+
+void Preorder(Node T){
+    if(T!=NULL){
+        printf(" %d",T->key);
+        Preorder(T->left);
+        Preorder(T->right);
+    }
+}
+
+void Inorder(Node T){
+    if (T!=NULL){
+        Inorder(T->left);
+        printf(" %d",T->key);
+        Inorder(T->right);
+    }
+}
+
+int main(void){
+  	int n,key;
+  	int i;
+  	char command[10];
+
+  	scanf("%d",&n);
+
+  	for(i=0;i<n;i++){
+    	scanf("%s",command);
+    	if(command[0]=='i'){
+      		scanf("%d",&key);
+      		Insert(key);
+    	}
+    	else if(command[0]=='p'){
+      		Inorder(T);
+      		puts("");
+      		Preorder(T);
+      		puts("");
+    	}
+    	else if(command[0]=='f'){
+    		scanf("%d",&key);
+			Find(key);
+		}
+		else if(command[0]=='d'){
+    		scanf("%d",&key);
+			Delete(key);
+		}
+    	else{
+    		puts("error");
+    		return 0;
+		}
+  	}
+  	return 0;
+}
+	

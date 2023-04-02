@@ -1,0 +1,41 @@
+#include<cstdio>
+#include<iostream>
+#include<cstring>
+#include<stack>
+using namespace std;
+const int N=21000;
+struct node{
+	int s;
+	int left;
+};
+stack<int>stack1;
+stack<node>stack2;
+char s[N];
+int a[N];
+int n;
+int main(){
+	scanf("%s",s+1);
+	n=strlen(s+1);
+	int ans=0;
+	for(int i=1;i<=n;i++){
+		if(s[i]=='\\')stack1.push(i);
+		if(s[i]=='/'){
+			if(!stack1.empty()){
+				int j=stack1.top();stack1.pop();
+				int tem=i-j;
+				ans+=tem;
+				while(!stack2.empty()&&j<stack2.top().left){
+					tem+=stack2.top().s;
+					stack2.pop();
+				}
+				stack2.push((node){tem,j});
+			}
+		}
+	}
+	printf("%d\n",ans);
+	int tot=0;
+	while(!stack2.empty())a[++tot]=stack2.top().s,stack2.pop();
+	printf("%d",tot);
+	for(int i=tot;i>0;i--)printf(" %d",a[i]); 
+	return 0;
+}

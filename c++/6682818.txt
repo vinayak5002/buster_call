@@ -1,0 +1,67 @@
+#include <iostream>
+#include <cstring>
+#define MAXN 205
+#define MAXR 1005
+#define INF 0x3f3f3f3f
+using namespace std;
+int N, M, D;
+typedef long long ll;
+
+ll solid[MAXN][MAXN], sea[MAXN][MAXN], mix[MAXN][MAXN], seq[MAXR];
+// mix[i][j] 到达目的第i个, 船在j位置的
+void solve();
+void floyd();
+int main() {
+    ll x, y, c; char type;
+    while (cin >> N >> M && N + M != 0) {
+        for (int i = 1; i <= N; i++) {
+            for (int j = 1; j <= N; j++) {
+                if (i == j) solid[i][j] = sea[i][j] = 0;
+                else solid[i][j] = sea[i][j] = INF;
+            }
+        }
+        for (int i = 0; i < M; i++) {
+            cin >> x >> y >> c >> type;
+            solid[x][x] = sea[x][x] = solid[y][y] = sea[y][y] = 0;
+            if (type == 'L') solid[x][y] = solid[y][x] = min(solid[x][y], c);
+            else sea[x][y] = sea[y][x] = min(sea[x][y], c);
+        }
+        cin >> D;
+        for (int i = 1; i <= D; i++) cin >> seq[i];
+        solve();
+    }
+}
+
+void floyd() {
+    for (int k = 1; k <= N; k++) {
+        for (int i = 1; i <= N; i++) {
+            for (int j = 1; j <= N; j++) {
+                sea[i][j] = min(sea[i][k] + sea[k][j], sea[i][j]);
+                solid[i][j] = min(solid[i][j], solid[i][k] + solid[k][j]);
+            }
+        }
+    }
+}
+
+void solve() {
+    floyd();
+    for (int i = 1; i <= D; i++)
+        for (int j = 1; j <= N; j++)
+            mix[i][j] = INF;
+    // mix: 第i个目的地, j号城市
+    for (int i = 1; i <= N; i++) mix[1][i] = min(sea[seq[1]][i] + solid[i][seq[1]], mix[1][i]);
+
+    for (int i = 2; i <= D; i++) {
+        for (int j = 1; j <= N; j++) {
+            mix[i][j] = min(mix[i - 1][j] + solid[seq[i - 1]][seq[i]], mix[i][j]);
+            for (int k = 1; k <= N; k++) {
+                mix[i][k] = min(mix[i][k],
+                                mix[i - 1][j] + solid[seq[i - 1]][j] + sea[j][k] + solid[k][seq[i]]);
+            }
+        }
+    }
+
+    ll m = INF;
+    for (int i = 1; i <= N; i++) m = min(mix[D][i], m);
+    cout << m << endl;
+}

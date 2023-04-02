@@ -1,0 +1,78 @@
+//https://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1173&lang=jp
+
+import java.util.Scanner;
+import java.util.Stack;
+
+public class Main{
+    public static void main(String[] args) {
+
+        try (Scanner sc = new Scanner(System.in)){
+            //スタックの要素
+            char a,b='a';
+            //スタック
+            Stack<Character> sta = new Stack<Character>();
+
+            while(true){
+                //フラッグ
+                boolean ch =true;
+                //入力文字列
+                String st = sc.nextLine();
+                //.入力で終了
+                if(st.equals(".")){
+                    break;
+                }
+
+                //文字列の長さ繰り返す
+                for(int i=0;i<st.length();i++){
+                    //フラッグが偽で終了
+                    if(ch==false){
+                        break;
+                    }
+                    //i番目の文字判定
+                    a = st.charAt(i);
+                    
+                    //前括弧入力でプッシュ
+                    if(a=='('){
+                        sta.push(a);
+                    }
+                    if(a=='['){
+                        sta.push(a);
+                    }
+
+                    //前括弧がないのに後ろ括弧が入力されたとき偽
+                    if((a==')'||a==']')&&sta.empty()){
+                        ch=false;
+                    }
+                    //前括弧が既に入力されており後ろ括弧が入力されたとき、前括弧はpopしてbに代入
+                    if((a==')'||a==']')&&sta.size()>0){
+                        b = sta.pop();
+                    }
+                    //後ろ括弧がpopした前括弧と同じ種類じゃないとき偽
+                    if(a==')'&&b!='('){
+                        ch=false;
+                    }
+                    if(a==']'&&b!='['){
+                        ch=false;
+                    }
+                }
+
+                //前括弧が残ってしまったら偽
+                if(sta.size()>0){
+                    ch = false;
+                }
+
+                //出力
+                if(ch==true){
+                    System.out.println("yes");
+                }else{
+                    System.out.println("no");
+                }
+
+                //スタックを初期化
+                while(sta.size()>0){
+                    sta.pop();
+                }
+            }
+        }
+    }
+}

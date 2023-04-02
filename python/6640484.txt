@@ -1,0 +1,163 @@
+import java.util.ArrayDeque;
+import java.util.HashSet;
+import java.util.Scanner;
+
+
+
+  public class Main{
+	  
+	  static StringBuffer st = new StringBuffer();
+	  static StringBuffer st2 = new StringBuffer();
+	  static ArrayDeque<String> que = new ArrayDeque<String>();
+	  static int children;
+	  
+	  public static void main(String[] args) {
+		  Scanner sc =new Scanner(System.in);
+		  int[] node = new int[9];
+		  var hs = new HashSet<String>();
+		  String correct = "123456780";
+		  int point = 0,con = 0,parents = 1,degree = 0;
+		  
+		  for(int y=0;y<3;y++) {
+				for(int x=0;x<3;x++) {
+					node [x+3*y] = sc.nextInt();
+					if(node[x+3*y] == 0) {
+						point = x+3*y;
+					}
+				}
+			}
+		  
+		  insertHash(node,hs);
+		  String str = que.pop();
+		  
+		  
+		//idは右１左２上３下４
+		  while(!str.equals(correct)) {
+			  if(con == parents) {
+				  degree++;
+				  parents = children;
+				  children = 0;
+				  con = 0;
+			  }
+			  point = insertNode(str,node);
+			  print(node);
+			  int[] memory = new int[9];
+			  insertMemory(memory,node);
+			  if(point != 2 && point != 5 && point != 8) {
+				  move(node,1,point);
+				  insertHash(node,hs);
+				  insertMemory(node,memory);
+			  }
+			  if(point != 6 && point != 7 && point != 8) {
+				  move(node,4,point);
+				  insertHash(node,hs);
+				  insertMemory(node,memory);
+			  }
+			  if(point != 0 && point != 1 && point != 2) {
+				  move(node,3,point);
+				  insertHash(node,hs);
+				  insertMemory(node,memory);
+			  }
+			  if(point != 0 && point != 3 && point != 6) {
+				  move(node,2,point);
+				  insertHash(node,hs);
+				  insertMemory(node,memory);
+			  }
+			  str = que.pop();
+			  con++;
+		  }
+		  
+		  System.out.println("success " + degree);
+				  
+	  }
+	  
+	  static void print(int[] node) {
+			for(int y=0;y<3;y++) {
+				for(int x=0;x<3;x++) {
+					System.out.print(node[x+3*y] + " ");
+				}
+				System.out.println();
+			}
+		}
+	  
+//	  static String translate(int[] node) {
+//		  for(int i=0;i<9;i++) {
+//				st2.append(Integer.toString(node[i]));
+//		  }
+//		  String str = st2.toString();
+//		  return str;
+//	  }
+	  
+	  static void insertMemory(int[] memory,int[] node) {
+		  for(int i=0;i<9;i++) {
+			  memory[i] = node[i];
+		  }
+	  }
+	  
+	  
+	  static void insertQue(StringBuffer st) {
+			que.add(st.toString());
+			st.delete(0, st.length());
+			children++;
+	  }
+	  
+	  static void insertHash(int[] node ,HashSet<String> hs) {
+		  for(int i=0;i<9;i++) {
+				st.append(Integer.toString(node[i]));
+		  }
+		  if(!hs.contains(st.toString())) {
+			  hs.add(st.toString());
+			  insertQue(st);
+		  }else {
+			  st.delete(0, st.length());
+		  }
+	  }
+	  
+	  
+	  static int insertNode(String str,int[] node) {
+			String[] strArray = str.split("");
+			int point = 0;
+				for(int i=0;i<9;i++) {
+					node[i] =Integer.parseInt(strArray[i]);
+					if(node[i] == 0) {
+						point = i;
+					}
+				}
+			return point;
+			
+	  }
+	  
+	  static void move(int[] node,int id,int point) {
+			switch(id) {
+			case 1:
+				swap(node,point+1,point);
+				point = point +1;
+				break;
+			case 2:
+				swap(node,point-1,point);
+				point = point -1;
+				break;
+			case 3:
+				swap(node,point-3,point);
+				point = point-3;
+				break;
+			case 4:
+				swap(node,point+3,point);
+				point = point+3;
+				break;
+			}
+			
+	  }
+	  
+	  
+	  static void swap(int[] node,int y,int point) {
+		    int tmp;
+			tmp = node[point];
+			node[point] = node[y];
+			node[y] = tmp;
+	  }
+	  
+  }
+  
+  
+

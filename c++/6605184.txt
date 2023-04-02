@@ -1,0 +1,107 @@
+#include <stdio.h>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <unordered_set>
+#include <queue>
+#define INF 1012345678
+using namespace std;
+
+char buff1[32], buff2[32];
+unordered_map<string, vector<pair<string, int>>> ed, ed2;
+unordered_map<string, int> dist;
+unordered_set<string> city, lpg, vis;
+priority_queue<pair<int, string>, vector<pair<int, string>>, greater<>> pq;
+
+void dijk(string src, string node, int cap) {
+    int d;
+    dist.clear();
+    vis.clear();
+    for (auto& i : city) dist.insert({ i, cap + 1 });
+    pq.push({ 0, src });
+    while (pq.size()) {
+        node = pq.top().second;
+        d = pq.top().first;
+        pq.pop();
+        if (vis.find(node) != vis.end()) continue;
+        else vis.insert(node);
+        for (auto& i : ed[node]) {
+            if (d + i.second < dist[i.first]) {
+                dist[i.first] = d + i.second;
+                pq.push({ dist[i.first], i.first });
+            }
+        }
+    }
+
+    for (auto& i : dist) {
+        if (i.second <= cap && lpg.find(i.first) != lpg.end()) {
+            if (ed2.find(src) == ed2.end()) ed2.insert({ src, {{i.first, i.second}} });
+            else ed2[src].push_back({ i.first, i.second });
+        }
+    }
+}
+
+int dijk2(string src, string dest) {
+    string node;
+    int d;
+    dist.clear();
+    vis.clear();
+    for (auto& i : lpg) dist.insert({ i, INF });
+    pq.push({ 0, src });
+    while (pq.size()) {
+        node = pq.top().second;
+        d = pq.top().first;
+        pq.pop();
+        if (node == dest) return d;
+        if (vis.find(node) != vis.end()) continue;
+        else vis.insert(node);
+        for (auto& i : ed2[node]) {
+            if (d + i.second < dist[i.first]) {
+                dist[i.first] = d + i.second;
+                pq.push({ dist[i.first], i.first });
+            }
+        }
+    }
+
+    return -1;
+}
+
+int main(void) {
+    string src, dest;
+    int n, m, cap, x;
+    while (1) {
+        scanf("%d %d %d", &n, &m, &cap);
+        if (n == 0 && m == 0 && cap == 0) break;
+        else cap *= 10;
+        scanf("%s %s", buff1, buff2);
+        src = buff1, dest = buff2;
+        for (int i = 0; i < n; i++) {
+            scanf("%s %s %d", buff1, buff2, &x);
+            if (ed.find(buff1) == ed.end()) ed.insert({ buff1, {{buff2, x}} });
+            else ed[buff1].push_back({ buff2, x });
+            if (ed.find(buff2) == ed.end()) ed.insert({ buff2, {{buff1, x}} });
+            else ed[buff2].push_back({ buff1, x });
+            if (city.find(buff1) == city.end()) city.insert(buff1);
+            if (city.find(buff2) == city.end()) city.insert(buff2);
+        }
+        for (int i = 0; i < m; i++) {
+            scanf("%s", buff1);
+            lpg.insert(buff1);
+        }
+        lpg.insert(src);
+        lpg.insert(dest);
+        for (auto& i : lpg) {
+            dijk(i, i, cap);
+        }
+        printf("%d\n", dijk2(src, dest));
+
+
+        city.clear();
+        lpg.clear();
+        dist.clear();
+        vis.clear();
+        ed.clear();
+        ed2.clear();
+    }
+    return 0;
+}

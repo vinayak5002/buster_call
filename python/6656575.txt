@@ -1,0 +1,80 @@
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.right = null;
+    this.left = null;
+  }
+}
+
+function insert(root, node) {
+  let parent = null;
+  let current = root;
+
+  while (current) {
+    parent = current;
+    if (node.value < current.value) {
+      current = current.left;
+    } else {
+      current = current.right;
+    }
+  }
+
+  if (!parent) return node;
+
+  if (node.value < parent.value) {
+    parent.left = node;
+  } else {
+    parent.right = node;
+  }
+
+  return root;
+}
+
+function* traverse(tree) {
+  if (!tree) return;
+  yield* traverse(tree.left);
+  yield tree.value;
+  yield* traverse(tree.right);
+}
+
+function* traverse_pre(tree) {
+  if (!tree) return;
+  yield tree.value;
+  yield* traverse_pre(tree.left);
+  yield* traverse_pre(tree.right);
+}
+
+function print(tree) {
+  console.log(` ${Array.from(traverse(tree)).join(" ")}`);
+  console.log(` ${Array.from(traverse_pre(tree)).join(" ")}`);
+}
+
+function find(tree, value) {
+  if (!tree) return false;
+  if (tree.value === value) return true;
+  if (value < tree.value) {
+    return find(tree.left, value);
+  } else {
+    return find(tree.right, value);
+  }
+}
+
+let tree = null;
+const lines = [];
+
+const reader = require("readline").createInterface({
+  input: process.stdin,
+});
+
+reader.on("line", (line) => {
+  if (line.startsWith("insert")) {
+    const [_, v] = line.split(" ");
+    tree = insert(tree, new Node(Number(v)));
+  } else if (line.startsWith("find")) {
+    const [_, v] = line.split(" ");
+    console.log(find(tree, Number(v)) ? "yes" : "no");
+  } else if (line.startsWith("print")) {
+    print(tree);
+  }
+});
+

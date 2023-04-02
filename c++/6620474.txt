@@ -1,0 +1,41 @@
+#include <bits/stdc++.h>
+using namespace std;
+const long long INF = 1LL << 60; // 十分大きな値に
+typedef long long ll;
+typedef long double ld;
+
+int main() {
+    ll N, W; cin >> N >> W;
+    vector<ll> val(N+1, 0);
+    vector<ll> wei(N+1, 0);
+    
+    for (ll i=1; i<=N; i++) {
+        cin >> val[i] >> wei[i];
+    }
+
+    // 初期化
+    vector<vector<ll>> dp(N+1, vector<ll>(W+1, 0));
+
+    for (ll w_=0; w_<W+1; w_++) {
+        dp[0][w_] = 0; // 0番目までの荷物を使って重さXXにした場合の価値は0
+    }
+
+    for (ll i=0; i<N+1; i++) {
+        dp[i][0] = 0; // i番目の荷物を使って重さ0にした場合の最大の価値は0
+    }
+
+    for (ll i=1; i<=N; i++) {
+        for (ll w_=wei[i]; w_<=W; w_++) {
+            // i番目までの品物を使ってw_のリュックをつくる場合の最大の価値を考える
+            // dp[i][w]はi番目までの品物を使ってwの重さをつくるときの最大の価値
+
+            if (wei[i]<=w_) {
+                dp[i][w_] = max(dp[i-1][w_], dp[i-1][w_-wei[i]] + val[i]); // i番目の品物をとるか？とらないか？とらない場合はi-1番目までの最大の価値が残る
+            } else { // i番目の品物がそもそも単体でリュックに入らない
+                dp[i][w_] = dp[i-1][w_];
+            }
+            
+        }
+    }
+    cout << dp[N][W] << endl;
+}

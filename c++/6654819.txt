@@ -1,0 +1,71 @@
+#include <algorithm>
+#include <iostream>
+#include <queue>
+#include <vector>
+
+using namespace std;
+
+struct Edge {
+  int dst;
+  long long cost;
+  Edge() {}
+  Edge(int x, long long y) : dst(x), cost(y) {}
+};
+
+std::vector<long long> dijkstra(int sv, std::vector<std::vector<Edge>> &graph) {
+  const long long LINF = 1000000000000000018;
+
+  std::vector<long long> dist(graph.size(), LINF);
+  dist[sv] = 0;
+
+  typedef std::pair<long long, int> PLI;
+  std::priority_queue<PLI, std::vector<PLI>, std::greater<PLI>> que;
+
+  que.push(make_pair(0, sv));
+
+  while (!que.empty()) {
+    std::pair<long long, int> cur = que.top();
+    que.pop();
+
+    if (dist[cur.second] < cur.first) {
+      continue;
+    }
+
+    for (int i = 0; i < graph[cur.second].size(); i++) {
+      Edge edge = graph[cur.second][i];
+      if (dist[cur.second] + edge.cost < dist[edge.dst]) {
+        dist[edge.dst] = dist[cur.second] + edge.cost;
+        que.push(make_pair(dist[edge.dst], edge.dst));
+      }
+    }
+  }
+
+  return dist;
+}
+
+int main() {
+  std::cin.tie(0);
+  std::ios::sync_with_stdio(false);
+
+  int n;
+  std::cin >> n;
+
+  std::vector<std::vector<Edge>> graph(n);
+  for (int i = 0; i < n; i++) {
+    int u, k;
+    std::cin >> u >> k;
+    for (int j = 0; j < k; j++) {
+      int v;
+      long long c;
+      std::cin >> v >> c;
+      graph[u].push_back(Edge(v, c));
+    }
+  }
+
+  std::vector<long long> dist = dijkstra(0, graph);
+  for (int i = 0; i < n; i++) {
+    std::cout << i << " " << dist[i] << "\n";
+  }
+
+  return 0;
+}

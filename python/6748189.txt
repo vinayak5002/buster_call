@@ -1,0 +1,125 @@
+import java.io.IOException;
+import java.util.Scanner;
+
+public class Main {
+    public static void main (String[] args) throws IOException {
+    	Scanner sc = new Scanner(System.in);
+    	//さいころ数
+    	int number = sc.nextInt();
+    	
+    	Dice[] diceList = new Dice[number];
+    	
+        //ダイス生成
+    	for (int i = 0; i < number; i ++) {
+    		diceList[i] = new Dice(sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt(), sc.nextInt());
+    	}
+    	
+    	//チェック
+    	for (int i = 0; i < number; i++) {
+    		for (int j = (i + 1); j < number; j++) {
+    			if (check(diceList[i], diceList[j], 0)) {
+    				System.out.println("No");
+    				return;
+    			}
+    		}
+    	}
+    	
+    	System.out.println("Yes");
+    	
+    	sc.close();
+    }
+    
+    public static boolean check(Dice dice1, Dice dice2, int count) {
+		boolean check = false;
+		
+		if (dice1.top == dice2.top &&
+			dice1.bottom == dice2.bottom &&
+			dice1.E == dice2.E &&
+			dice1.N == dice2.N &&
+			dice1.S == dice2.S &&
+			dice1.W == dice2.W) {
+			check = true;
+			return check;
+		}
+		
+		if(count == 6) {
+			return check;
+		}
+		
+		Dice dice3 = new Dice(dice2.top, dice2.S, dice2.E, dice2.W, dice2.N, dice2.bottom);
+		dice3.turnN();
+		if (check(dice1, dice3, count + 1)) {
+			check = true;
+			return check;
+		}
+		
+		dice3 = new Dice(dice2.top, dice2.S, dice2.E, dice2.W, dice2.N, dice2.bottom);
+		dice3.turnE();
+		dice3 = new Dice(dice2.top, dice2.S, dice2.E, dice2.W, dice2.N, dice2.bottom);
+		dice3.turnW();
+		if (check(dice1, dice3, count + 1)) {
+			check = true;
+			return check;
+		}
+		
+		return check;
+	}
+}
+
+/**
+ * さいころクラス
+ * @author Yamamoto
+ *
+ */
+class Dice {
+	int top; //1
+	int bottom; //6
+	int E; //3
+	int N; //5
+	int S; //2
+	int W; //4
+	
+	//コンストラクタ
+	Dice(int d1, int d2, int d3, int d4, int d5, int d6) {
+		top = d1;
+		S = d2;
+		E = d3;
+		W = d4;
+		N = d5;
+		bottom = d6;
+	}
+	
+	public void turnE() {
+		int t = top;
+		top = W;
+		W = bottom;
+		bottom = E;
+		E = t;
+	}
+	
+	public void turnN() {
+		int t = top;
+		top = S;
+		S = bottom;
+		bottom = N;
+		N = t;
+	}
+	
+	public void turnS() {
+		int t = top;
+		top = N;
+		N = bottom;
+		bottom = S;
+		S = t;
+	}
+	
+	public void turnW() {
+		int t = top;
+		top = E;
+		E = bottom;
+		bottom = W;
+		W = t;
+	}
+	
+}
+

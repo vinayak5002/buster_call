@@ -1,0 +1,95 @@
+#include<bits/stdc++.h>
+using namespace std;
+using pii = pair<int,int>;
+
+using T = tuple<int,int,int>;
+T rotate(T x){
+	return T(get<1>(x),-get<0>(x),(get<2>(x)+1) % 4);
+}
+
+set<T> input(){
+	int n;
+	cin >> n;
+	set<T> res;
+	vector<pii> line(n);
+	int dx[]={1,0,-1,0};
+	int dy[]={0,1,0,-1};
+	for(int i=0;i<n;++i){
+		cin >> line[i].second >> line[i].first;
+	}
+	for(int i=0;i+1<n;++i){
+		for(int j=0;j<4;++j){
+			if(dy[j]*(line[i+1].first-line[i].first)>0 || 
+					dx[j]*(line[i+1].second-line[i].second)>0){
+				res.emplace(line[i].first,line[i].second,j);
+			}
+		}
+	}
+	for(int i=1;i<n;++i){
+		for(int j=0;j<4;++j){
+			if(dy[j]*(line[i-1].first-line[i].first)>0 || 
+					dx[j]*(line[i-1].second-line[i].second)>0){
+				res.emplace(line[i].first,line[i].second,j);
+			}
+		}
+	}
+	return res;
+}
+
+set<T> cons(set<T> xs){
+	set<T> res;
+	int miny = 10000000;
+	int minx = 10000000;
+	for(auto i:xs){
+		miny = min(miny,get<0>(i));
+		minx = min(minx,get<1>(i));
+	}
+	for(auto i:xs){
+		res.emplace(get<0>(i)-miny,get<1>(i)-minx,get<2>(i));
+	}
+	return res;
+}
+
+set<T> rotate(set<T> xs){
+	set<T> rotated;
+	for(auto i:xs){
+		rotated.emplace(rotate(i));
+	}
+	return cons(rotated);
+}
+
+set<T> minify(set<T> xs){
+	set<T> res = rotate(xs);
+	for(int i=0;i<6;++i){
+		xs = rotate(xs);
+		res = min(res,xs);
+	}
+	return res;
+}
+
+vector<int> func(int n){
+	set<T> v = minify(input());
+	vector<int> res;
+	for(int i=1;i<=n;++i){
+		set<T> c = minify(input());
+
+		if(v == c){
+			res.emplace_back(i);
+		}
+	}
+	return res;
+}
+
+int main(){
+	while(true){
+		int n;
+		cin >> n;
+		if(n == 0)break;
+		for(auto i:func(n)){
+			cout << i << endl;
+		}
+		cout << "+++++" << endl;
+	}
+	return 0;
+}
+

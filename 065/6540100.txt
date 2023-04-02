@@ -1,0 +1,57 @@
+const input = 1 ? process.stdin : require('fs').createReadStream('./inp.txt')
+const stdin = []
+require('readline').createInterface({ input }).on('line', (line) => stdin.push(line)).on('close', () => main(stdin, process.stdout))
+// 以下 main 内に処理を追加
+function main(si, so) {
+
+	const q = parseInt(si[0].split("\n"));
+	let m = new Map();
+	let ans = '';
+
+	for (let i = 1; i < q + 1; i++) {
+		let order = si[i].split(" ");
+		let key = order[1];
+		switch (order[0]) {
+			case '0':
+				if (m.has(key)) {
+                    m.get(key).push(order[2])
+                } else {
+                    m.set(key, [order[2]])
+                }
+				break;
+
+			case '1':
+				let get = m.get(key);
+                if (get) {
+                    for (let j = 0; j < get.length; j++) {
+                        ans += get[j] + '\n';
+                    }
+                }
+				
+				break;
+
+			case '2':
+				m.delete(key);
+				break;
+				
+			case '3':
+			let arr = [];
+				for (let data of m) {
+					if (data[0] >= order[1] && data[0] <= order[2]) {
+						arr.push(data)
+					}
+				}
+				arr.sort();
+                //console.log(arr[0][1].length);
+				for (let j = 0; j < arr.length; j++) {
+                    for (let k = 0; k < arr[j][1].length; k++) {
+                        ans +=arr[j][0] + ' ' + arr[j][1][k] + '\n';
+                    }
+				}
+				break;
+		}
+        //console.log(m);
+	}
+	so.write(ans);
+
+}

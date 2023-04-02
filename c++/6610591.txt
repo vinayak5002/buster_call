@@ -1,0 +1,75 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct list{
+	int x;
+	struct list *prev;
+	struct list *next;
+};
+
+struct list* n_list(int x){
+	struct list* listREI = (struct list *)malloc(sizeof(struct list));
+	listREI->x = x;
+	listREI->prev = NULL;
+	listREI->next = NULL;
+	return listREI;
+}
+
+int main(void) {
+	int q, i, quer, d, x;
+	struct list *point, *p, *n, *sn, *kouhou;
+	point = n_list(2000000000);
+	scanf("%d", &q);
+	for (i = 0; i < q; i++){
+		scanf("%d", &quer);
+		if (quer == 0){
+			scanf("%d", &x);
+			sn = n_list(x);
+			p = point->prev;
+			sn->next = point;
+			sn->prev = point->prev;
+			if (point->prev != NULL){
+				p->next = sn;
+			}
+			point->prev = sn;
+			point = sn;
+		}
+
+		else if (quer == 1){
+			scanf("%d", &d);
+			while (d != 0){
+				if (d < 0){
+					point = point->prev;
+					d++;
+				}
+				else {
+					point = point->next;
+					d--;
+				}
+			}
+		}
+
+		else if (quer == 2){
+			p = point->prev;
+			n = point->next;
+			if (p != NULL){
+				p->next = point->next;
+			}
+			n->prev = point->prev;
+			free(point);
+			point = n;
+		}
+	}
+
+	while (point->prev != NULL){
+		point = point->prev;
+	}
+
+	while (point->x != 2000000000){
+		kouhou = point->next;
+		printf("%d\n", point->x);
+		free(point);
+		point = point->next;
+	}
+	return 0;
+}

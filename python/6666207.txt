@@ -1,0 +1,112 @@
+    #include <bits/stdc++.h>
+    using std::cin;
+    using std::getline;
+    using std::cout;
+    using std::endl;
+    using std::string;
+    using std::bitset;
+    using std::vector;
+    using std::array;
+    using std::stack;
+    using std::queue;
+    using std::priority_queue;
+    using std::set;
+    using std::map;
+    using std::pair;
+    using llong = long long;
+    template<typename T> using nLimits = std::numeric_limits<T>;
+    #define ALL(a) (a).begin(), (a).end()
+    #define REP(i, n) for (llong i = 0; i < static_cast<llong>(n); ++i)
+    #define RREP(i, n) for (llong i = static_cast<llong>(n) - 1; i >= 0; --i)
+    #define FOR(i, a, b) for (llong i = static_cast<llong>(a); i < static_cast<llong>(b); ++i)
+    #define RFOR(i, a, b) for (llong i = static_cast<llong>(a) - 1; i >= static_cast<llong>(b); --i)
+    constexpr int INF = 1001001001;
+    constexpr llong LINF = 1001001001001001001ll;
+
+    template<typename T> inline bool chMin(T &a, T b) { return ((a > b) ? (a = b, true) : (false)); }
+    template<typename T> inline bool chMax(T &a, T b) { return ((a < b) ? (a = b, true) : (false)); }
+    template<typename T> void printArray(T a, int n = 0);
+
+
+    class Graph {
+    public:
+        Graph(int n_, int flag_use_adj_list_ = true) {
+            n = n_;
+            flag_use_adj_list = flag_use_adj_list_;
+            if (flag_use_adj_list) adj_lists.resize(n);
+            else adj_mat.resize(n, vector<int>(n, INF));
+            dists.resize(n, -1);
+            visited.resize(n, -1);
+        }
+        
+        void AddPath(int from, int to, int weight = 1) {
+            if (flag_use_adj_list) adj_lists[from].emplace_back(pair<int, int>(weight, to));
+            else adj_mat[from][to] = weight;
+        }
+
+        void DFS(int start = 0) {
+            stack<int> st;
+            st.emplace(start);
+            visited[start] = start;
+            while(!st.empty()) {
+                auto u = st.top();
+                st.pop();
+                visited[u] = start;
+                for (auto v : adj_lists[u]) {
+                    if (visited[v.second] >= 0) continue;
+                    st.emplace(v.second);
+                }
+            }
+        }
+
+        void reset() {
+            visited.assign(n, -1);
+            dists.assign(n, -1);
+        }
+
+        bool flag_use_adj_list;
+        int n;
+        vector<vector<pair<int, int>>> adj_lists;
+        vector<vector<int>> adj_mat;
+        vector<int> dists;
+        vector<int> visited;  // -1 : false, i : from i
+    };
+
+
+    int main() {
+        std::ios::sync_with_stdio(false);
+        cin.tie(0);
+        cout << std::fixed << std::setprecision(20);
+
+        int N, M;
+        cin >> N >> M;
+        Graph g(N);
+
+        REP(i, M) {
+            int u, v;
+            cin >> u >> v;
+            g.AddPath(u, v);
+            g.AddPath(v, u);
+        }
+
+        int Q;
+        cin >> Q;
+
+        REP(i, N) if (g.visited[i] < 0) g.DFS(i);
+
+        REP(i, Q) {
+            int s, t;
+            cin >> s >> t;
+            if (g.visited[s] >= 0 && g.visited[t] == g.visited[s]) cout << "yes\n";
+            else cout << "no\n";
+        }
+    }
+
+
+    template<typename T> 
+    void printArray(T a, int n) {
+        string s = std::to_string(a[0]);
+        FOR(i, 1, n > 0 ? n : a.size()) s += " " + std::to_string(a[i]);
+        cout << s + "\n";
+    }
+

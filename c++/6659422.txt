@@ -1,0 +1,62 @@
+#include<bits/stdc++.h>
+#define int long long
+using namespace std;
+int const N=100010;
+double const pi=acos(-1.0);
+int n,seed=time(0);
+double x,y,ans=2e18;
+inline int read(){
+	int x=0,flg=1;char c=getchar();
+	while(!isdigit(c))flg=c=='-'?-flg:flg,c=getchar();
+	while(isdigit(c))x=(x<<1)+(x<<3)+(c^48),c=getchar();
+	return x*flg;
+}
+struct node{
+	double a,b,c,d;
+	inline int operator<(const node&r)const{
+		return a*b<r.a*r.b;
+	}
+}p[N];
+unsigned z1,z2,z3,z4,b;
+unsigned rand_(){
+	b=((z1<<6)^z1)>>13;
+	z1=((z1&4294967294U)<<18)^b;
+	b=((z2<<2)^z2)>>27;
+	z2=((z2&4294967288U)<<2)^b;
+	b=((z3<<13)^z3)>>21;
+	z3=((z3&4294967280U)<<7)^b;
+	b=((z4<<3)^z4)>>12;
+	z4=((z4&4294967168U)<<13)^b;
+	return (z1^z2^z3^z4);
+}
+void srand(unsigned x){
+	z1=x;
+	z2=(~x)^0x114514810U;
+	z3=x^0x1234598766U; 
+	z4=(~x)+51;
+}
+signed myrand(){
+    int a=rand_()&32767,b=rand_()&32767;
+    return a*32768+b;
+}
+signed main(){
+	srand(time(0));
+	n=read();
+	double ang=myrand()/1073741824.0*pi;
+	for(int i=1;i<=n;i++){
+		x=read(),y=read();
+		p[i]={x*cos(ang)-y*sin(ang),x*sin(ang)+y*cos(1.1),x,y};
+	}
+	sort(p+1,p+n+1);
+	for(int i=n+1;i<=n+666;i++)
+		p[i]={-ans,-ans,-ans,-ans};
+	for(int i=1;i<n;i++){
+		for(int j=1;j<=233;j++)
+			ans=min(ans,(p[i].c-p[i+j].c)*(p[i].c-p[i+j].c)+(p[i].d-p[i+j].d)*(p[i].d-p[i+j].d));
+		for(int k=1;k<=5;k++){
+			int j=myrand()%(n-i)+i+1;
+			ans=min(ans,(p[i].c-p[j].c)*(p[i].c-p[j].c)+(p[i].d-p[j].d)*(p[i].d-p[j].d));
+		}
+	}
+	printf("%.12lf",ans);
+}

@@ -1,0 +1,93 @@
+#include <bits/stdc++.h>
+using namespace std;
+typedef pair<int, int> pii;
+typedef pair<double, double> pdd;
+typedef pair<long long, long long> pll;
+typedef long long ll;
+
+#define YESNO(bool)            \
+    if (bool) {                \
+        cout << "YES" << endl; \
+    } else {                   \
+        cout << "NO" << endl;  \
+    }
+#define yesno(bool)            \
+    if (bool) {                \
+        cout << "yes" << endl; \
+    } else {                   \
+        cout << "no" << endl;  \
+    }
+#define YesNo(bool)            \
+    if (bool) {                \
+        cout << "Yes" << endl; \
+    } else {                   \
+        cout << "No" << endl;  \
+    }
+#define REP(i, n) for (ll i = 0; i < ll(n); i++)
+#define REPD(i, n) for (ll i = n - 1; i >= 0; i--)
+#define FOR(i, a, b) for (ll i = a; i <= ll(b); i++)
+#define FORD(i, a, b) for (ll i = a; i >= ll(b); i--)
+#define FORA(i, I) for (const auto& i : I)
+
+#define ALL(x) x.begin(), x.end()
+#define SIZE(x) ll(x.size())
+
+#define INF32 2147483647
+#define INF64 9223372036854775807
+#define MOD 1000000007
+#define INF 1000000000
+
+#define F first
+#define S second
+#define pb push_back
+#define mp make_pair
+
+#define OP(m) cout << m << endl;
+ll myceil(ll a, ll b) { return (a + (b - 1)) / b; }
+ll myfloor(ll a, ll b) { return a / b; }
+
+int dx4[4] = {1, 0, -1, 0};
+int dy4[4] = {0, 1, 0, -1};
+int dx8[8] = {-1, -1, 0, 1, 1, 1, 0, -1};
+int dy8[8] = {0, -1, -1, -1, 0, 1, 1, 1};
+// cout<<fixed<<setprecision(10);
+
+ll dp[20005][256];
+
+int round255(int n) {
+    if (n > 255) {
+        return 255;
+    } else if (n < 0) {
+        return 0;
+    } else {
+        return n;
+    }
+}
+
+signed main() {
+    int n, m;
+
+    while (cin >> n >> m) {
+        if (n == 0 && m == 0) break;
+        vector<int> c(m), x(n);
+
+        REP(i, m) cin >> c[i];
+        REP(i, n) cin >> x[i];
+        REP(i, 20005) REP(j, 256) dp[i][j] = INF32;
+
+        dp[0][128] = 0;
+        REP(i, n) {
+            REP(j, 256) {
+                REP(k, m) {
+                    int yn = round255(j + c[k]);
+                    dp[i + 1][yn] = min(
+                        dp[i + 1][yn], dp[i][j] + (ll)pow(abs((yn - x[i])), 2));
+                }
+            }
+        }
+        ll ans = INF32;
+        REP(i, 256) ans = min(ans, dp[n][i]);
+        OP(ans)
+    }
+}
+

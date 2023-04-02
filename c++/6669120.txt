@@ -1,0 +1,146 @@
+### 課題５ 8パズル
+import copy
+import heapq
+
+class Node:
+    def __init__(self, state, g, h, parent):
+        self.state = state
+        self.g = g
+        self.h = h
+        self.parent = parent
+        
+    def cost(self):
+        return self.g + self.h
+
+    def __lt__(self, other):
+        if (self.g + self.h) < (other.g + other.h):
+            return True
+        elif (self.g + self.h) == (other.g + other.h):
+            return self.h < other.h
+        else:
+            return False
+
+class State:
+    def __init__(self, pos):
+        '''
+        state: panel position in 3x3 integer list
+        '''
+        self.pos = pos
+
+    def __str__(self):
+        string = ""
+        for i in range(3):
+            for j in range(3):
+                string += str(self.pos[i][j])
+            string += '\n'
+        return string
+
+    def __eq__(self, other):
+        return self.pos == other.pos
+
+    def get_position(self, num):
+        for i in range(3):
+            for j in range(3):
+                if self.pos[i][j] == num:
+                    return (i, j)
+        # should throw exception
+        return None
+
+    def expand(self, p, node):
+        children = []
+        
+        ns = node.state
+        nsp = node.state.pos 
+        (i,j) = ns.get_position(0)
+        
+        
+        st = State([[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]])
+        st1 = State([[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]])
+        st2 = State([[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]])
+        st3 = State([[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]])
+        n_copy = copy.deepcopy(node)
+        
+        if i != 0:
+            st.pos = copy.deepcopy(nsp)
+            st.pos[i][j], st.pos[i-1][j] = st.pos[i-1][j],st.pos[i][j]
+            children.append(Node(st, node.g+1, p.heuristic(st), n_copy)) 
+            
+        if i != 2:
+            st1.pos = copy.deepcopy(nsp)
+            st1.pos[i][j], st1.pos[i+1][j] = st1.pos[i+1][j],st1.pos[i][j]
+            children.append(Node(st1, node.g+1, p.heuristic(st1), n_copy))
+            
+        if j != 0:
+            st2.pos = copy.deepcopy(nsp)
+            st2.pos[i][j], st2.pos[i][j-1] = st2.pos[i][j-1],st2.pos[i][j]
+            children.append(Node(st2, node.g+1, p.heuristic(st2), n_copy))
+    
+        if j != 2:
+            st3.pos = copy.deepcopy(nsp)
+            st3.pos[i][j], st3.pos[i][j+1] =  st3.pos[i][j+1],st3.pos[i][j]
+            children.append(Node(st3, node.g+1, p.heuristic(st3), n_copy))
+        
+        return children
+
+
+class Puzzle:
+    def __init__(self, init_pos):
+        self.start = State(init_pos)
+        self.goal = State([[1, 2, 3], [4, 5, 6], [7, 8, 0]])
+
+    def heuristic(self, state):
+        #ハミング距離
+        h_value = 0
+        for i in range(3):
+            for j in range(3):
+                if self.goal.pos[i][j] != state.pos[i][j]:
+                    h_value += 1
+        
+        return h_value
+                
+
+class IDA:
+    def __init__(self, puzzle):
+        self.puzzle = puzzle
+        self.closed_list = { }
+
+    def iter(self, node, max_depth):
+        if node.state == self.puzzle.goal:
+            return node
+        if node.g+node.h >= max_depth:
+            return None
+        child_nodes = node.state.expand(self.puzzle, node)
+        ret = None
+        for c in child_nodes:
+            found = self.iter(c, max_depth)
+            if found != None:
+                ret = found
+        return ret
+
+    def search(self):
+        start_state = self.puzzle.start
+        dummy_node = Node(State([[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]]), -1, -1, -1)
+        start_node = Node(start_state, 0, self.puzzle.heuristic(start_state), dummy_node)
+        
+        if start_state == self.puzzle.goal:
+            return start_node
+
+        max_depth = 0
+        while True:
+            found = self.iter(start_node, max_depth)
+            if found != None:
+                return found
+            max_depth += 1
+       
+     
+pz = Puzzle([[-1,-1,-1],[-1,-1,-1],[-1,-1,-1]])
+
+for i in range(3):
+    nums = [int(e) for e in input().split()]
+    for j in range(3):
+        pz.start.pos[i][j] = nums[j]
+
+#print(pz.start)
+solver = IDA(pz)
+solution = solver.search()
+print(solution.g)

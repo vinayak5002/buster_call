@@ -1,0 +1,232 @@
+/*
+2022 NTHU PME Programming Practice #1
+F - (Bonus) Gym with Many Rules
+*/
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+
+/*
+version:4
+*/
+
+#define			N_MAX_SIZE		100000
+#define			R_MAX_SIZE		100000		//100000
+#define			MODE_S2B		0
+#define			MODE_B2S		1
+
+//#define IF_DEBUGGING_ON
+
+void		bubble_sort0			(	unsigned int		array[]			,
+							unsigned int		index[]			,
+							unsigned int		size			,
+							unsigned char		mode
+						) ;
+void		bubble_sort1			(	unsigned int		array[][3]		,
+							unsigned int		index[]			,
+							unsigned int		size			,
+							unsigned char		mode
+						) ;
+void		swap				(	int			*a			,
+							int			*b
+						) ;
+
+int main(void)
+{
+	unsigned int	N		;
+	unsigned int	R		;
+
+	int		loop_i		;
+	int		loop_j		;
+	int		loop_k		;
+	unsigned int	tickets 		[N_MAX_SIZE]			;
+	unsigned int	calories		[N_MAX_SIZE]			;
+	unsigned int	sortb2s			[N_MAX_SIZE]			;
+	unsigned int	startidx		[N_MAX_SIZE]			;
+	unsigned int	constraint		[R_MAX_SIZE][3]			;
+	unsigned int	sorts2b			[R_MAX_SIZE]			;
+	unsigned int	tempvars		[3]				;
+	unsigned int	index0		;
+	unsigned int	index1		;
+	unsigned int	indexi		;
+	unsigned int	indexj		;
+	unsigned int	bigger		;
+	unsigned char	violated	;
+	unsigned char	roundno		;
+	double		max_calories	;
+	
+	unsigned char	running	;
+
+	for(loop_i=0;loop_i<N_MAX_SIZE;loop_i++)
+				sortb2s		[loop_i]	=	loop_i		;
+	for(loop_i=0;loop_i<R_MAX_SIZE;loop_i++)
+				sorts2b		[loop_i]	=	loop_i		;
+
+				roundno				=	0		;
+				running				=	1		;
+	while(	running==1			)  {
+	  if(scanf("%d%d\n",&N,&R)==EOF		)
+				running				=	0		;
+	  else if(N>N_MAX_SIZE)	running				=	0		;
+	  else if(R>R_MAX_SIZE)	running				=	0		;
+
+	  if(	running==1			) {
+	    for(loop_i=0;loop_i<N;loop_i++) {
+		if(scanf("%d%d\n",tickets+loop_i,calories+loop_i)==EOF		) {
+				running				=	0		;
+				break							;
+		}
+//		printf("(t%d,e%d)=(%d,%d)\n",loop_i,loop_i,tickets[loop_i],calories[loop_i]);
+	    }
+	  }
+
+	  if(	running==1			) {
+	    for(loop_i=0;loop_i<R;loop_i++) {
+		if(scanf("%d%d%d\n",tempvars+0,tempvars+1,tempvars+2)==EOF		) {
+				running				=	0		;
+				break							;
+		}
+				constraint[loop_i][0]		=	tempvars[0]-1	;	//ai
+				constraint[loop_i][1]		=	tempvars[1]-1	;	//bi
+				constraint[loop_i][2]		=	tempvars[2]	;	//ci
+//		printf("(a%d,b%d,c%d)=(%d,%d,%d)\n",loop_i,loop_i,loop_i,tempvars[0],tempvars[1],tempvars[2]);
+	    }
+	  }
+
+	  if(	running==1			) {
+				bubble_sort0	(calories,sortb2s,N,MODE_B2S)				;
+				bubble_sort1	(constraint,sorts2b,R,MODE_S2B)				;		
+#ifdef IF_DEBUGGING_ON
+	    for(loop_i=0;loop_i<N;loop_i++) {
+				index0			=	sortb2s[loop_i]		;
+		printf("(t%d,e%d)=(%d,%d)\n",index0,index0,tickets[index0],calories[index0]);
+	    }
+#endif
+#ifdef IF_DEBUGGING_ON
+	    for(loop_i=0;loop_i<R;loop_i++) {
+				index1			=	sorts2b[loop_i]		;
+		printf("(a%d,b%d,c%d)=(%d,%d,%d)\n",index1,index1,index1,constraint[index1][0],constraint[index1][1],constraint[index1][2]);
+	    }
+#endif
+	    for(loop_i=0;loop_i<N;loop_i++) {
+				startidx [loop_i]	=	R_MAX_SIZE		;
+	    }
+	    for(loop_i=0;loop_i<N;loop_i++) {
+	      for(loop_j=0;loop_j<R;loop_j++) {
+				index1			=	sorts2b[loop_j]		;
+		  if(			loop_i==index1				) {
+				startidx [loop_i]	=	index1			;
+		  }	
+	      }
+	    }
+
+				loop_i			=	0			;			
+	    while(loop_i<N) {
+		int		temp		[2]		;
+
+				index0			=	sortb2s[loop_i]		;
+				violated		=	0			;
+		for(loop_j=0;loop_j<R;loop_j++) {
+				index1			=	sorts2b[loop_j]		;
+				indexi			=	constraint[index1][0]	;
+				indexj			=	constraint[index1][1]	;
+				bigger			=	constraint[index1][2]	;
+				
+				temp		[0]	=	tickets[indexi]		;
+				temp		[1]	=	tickets[indexj]+bigger	;
+		  if(			index0==indexi				&&
+					temp[0]>0				&&
+					temp[0]>=temp[1]			) {
+				violated		=	1		;
+			if(		temp[1]>0				)
+				tickets	[indexi]	=	temp[1]-1	;	//max.
+				break;
+#ifdef IF_DEBUGGING_ON
+				printf("(a%d,b%d,c%d)=(%d,%d,%d) violated\n",index1,index1,index1,constraint[index1][0],constraint[index1][1],constraint[index1][2]);				
+#endif
+		  }
+		}
+/*
+		if(			roundno>5				)
+				violated		=	0		;
+*/
+		if(			violated==0				)
+				loop_i			+=	1			;
+		else		loop_i			=	0			;
+	    }
+
+				max_calories		=	0			;
+	    for(loop_i=0;loop_i<N;loop_i++) {
+				index0			=	sortb2s[loop_i]			;
+				max_calories		+=	((double)calories	[index0])	*
+								((double)tickets	[index0])	;	
+#ifdef IF_DEBUGGING_ON
+		printf("resolved (t%d,e%d)=(%d,%d)\n",index0,index0,tickets[index0],calories[index0]);
+#endif
+	    }
+		printf("%.0f\n",max_calories);
+				roundno				+=	1		;
+	  }
+	}
+#ifdef IF_DEBUGGING_ON
+		printf("roundno=%d\n",roundno);
+#endif
+
+    	return 0;
+}
+
+void		bubble_sort0			(	unsigned int		array[]			,
+							unsigned int		index[]			,
+							unsigned int		size			,
+							unsigned char		mode
+						) {
+
+		int		loop_i			;
+		int 		loop_j			;
+
+		for(loop_i=0;loop_i<size;loop_i++)
+				index	[loop_i]	=		loop_i			;
+		if(size>1) {
+		  for(loop_i=0;loop_i<(size-1);loop_i++)
+		   for (loop_j=loop_i+1;loop_j<size;loop_j++) {
+ 			if(		mode==MODE_B2S					?
+					array[index[loop_i]]<array[index[loop_j]]	:		
+					array[index[loop_i]]>array[index[loop_j]]	)
+				swap(index+loop_i,index+loop_j)				;
+		  }
+		}
+}
+
+void		bubble_sort1			(	unsigned int		array[][3]		,
+							unsigned int		index[]			,
+							unsigned int		size			,
+							unsigned char		mode
+						) {
+
+		int		loop_i			;
+		int 		loop_j			;
+
+		for(loop_i=0;loop_i<size;loop_i++)
+				index	[loop_i]	=		loop_i			;
+		if(size>1) {
+		  for(loop_i=0;loop_i<(size-1);loop_i++)
+		   for (loop_j=loop_i+1;loop_j<size;loop_j++) {
+ 			if(		mode==MODE_B2S					?
+					array[loop_i][0]<array[loop_j][0]		:		
+					array[loop_i][0]>array[loop_j][0]		)
+				swap(index+loop_i,index+loop_j)				;
+		  }
+		}
+}
+
+void		swap				(	int			*a			,
+							int			*b
+						) {
+ 		int		temp			;
+ 
+ 				temp			=		*a			;
+				*a			=		*b			;
+				*b			=		temp			;
+}
+

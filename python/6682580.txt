@@ -1,0 +1,118 @@
+import java.util.Scanner;
+
+public class Main {
+	
+	static class Bowl{//お椀の中を扱うクラス
+		int rock_num;
+		
+		Bowl(int rock_num){//コンストラクタ
+			this.rock_num = rock_num;
+		}
+		
+		boolean empty_judge() {//お椀の中身が空かどうか判定する
+			if(this.rock_num == 0) {
+				return true;
+			}
+			return false;
+		}
+		
+		void remove_rock() {//お椀から小石を一つ取り出す（減らす）
+			this.rock_num--;
+		}
+		
+		void in_rock(int rock_num) {//候補者の持つ小石を全部お椀の中に入れる
+			this.rock_num = this.rock_num + rock_num;
+		}
+	}
+	
+	static class Candidate{//候補者を表すクラス（全体の処理もここで行う）
+		int can_num;
+		int rock_num = 0;
+		Committee cm = new Committee();
+		
+		Candidate(int can_num){//コンストラクタ
+			this.can_num = can_num;
+		}
+		
+		void processing(Bowl bowl) {//お椀の小石の数や候補者の順番などを呼び出して全体の処理を行う
+			
+			Candidate who = cm.who(n);
+			if(bowl.empty_judge()) {
+				bowl.in_rock(can[who.can_num].rock_num);
+				can[who.can_num].rock_num = 0;
+				now++;
+			}else {
+				can[who.can_num].rock_num++;
+				bowl.remove_rock();
+				now++;
+			}
+		}
+		
+	}
+	
+	static class Committee{//候補者をまとめる委員会を表したクラス
+		
+		Candidate who(int allCanNum) {//次にお椀が回ってくる候補者を判定するメソッド
+			if(allCanNum > now) {
+				return can[now];
+			}
+			now = 0;
+			return can[now];
+		}
+		
+		Candidate judge(Bowl bowl) {//候補者が決まったか、また、その候補者は誰か判定して返すメソッド
+			int con = 0,mayor = 0;
+			if(bowl.empty_judge()) {
+				for(int i=0;i<n;i++) {
+					if(can[i].rock_num > 0) {
+						con++;
+						mayor = i;
+					}
+				}
+				if(con == 1) {
+					return can[mayor];
+				}
+			}
+			
+			return null;
+		}
+	}
+	
+	static int now = 0;
+	static int n;
+	static Candidate[] can ;
+	
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+
+		
+		n = sc.nextInt();
+		int p = sc.nextInt();
+		
+		while(n != 0 || p != 0) {//入力が(0,0)になるまで繰り返す
+		
+			can = new Candidate[n];
+			Committee cm = new Committee();
+			
+			for(int i=0;i<n;i++) {
+				can[i] = new Candidate(i);
+			}
+			
+			Bowl bowl = new Bowl(p);
+			
+			Candidate result = null;
+			while(result == null) {//候補者が決まるまで小石を移動する処理を繰り返す
+				can[0].processing(bowl);
+				result = cm.judge(bowl);
+			}
+			
+			System.out.println(result.can_num);
+			
+			n = sc.nextInt();//次の市長選のための準備
+			p = sc.nextInt();
+			now = 0;
+		}
+		
+	}
+}
+

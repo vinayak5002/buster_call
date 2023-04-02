@@ -1,0 +1,54 @@
+N=int(input())
+
+def cal_child(node,nodes): #子孫の数計算
+    count=0
+    if "children" in nodes[node]:
+        count+=nodes[node]["number"]
+        for i in nodes[node]["children"]:
+            count+=cal_child(str(i),nodes)
+            # print(i,count)
+    
+    else:
+        return 0
+        
+    return count
+
+nodes={}
+for i in range(N):
+    key=input().split()
+    nodes[key[0]]={"children":[],"number":int(key[1])}
+    index=2
+    for i in range(int(key[1])):
+        nodes[key[0]]["children"].append(int(key[index]))
+        index+=1
+    
+# print(nodes)
+    
+for i in range(N):
+    if(cal_child(str(i),nodes)==N-1):
+        nodes[str(i)]["parent"]=-1
+        nodes[str(i)]["depth"]=0
+        nodes[str(i)]["property"]="root"
+        parent=str(i)
+
+# for n in nodes[parent]["children"]:
+#     nodes[n]["parent"]=int(parent)
+#     nodes[n]["depth"]=1
+#     if(nodes[n]["number"]==0):
+#         nodes[n]["property"]="leaf"
+#     else:
+#         nodes[n]["property"]="internal node"
+def node(nodes,parent):
+    for n in nodes[parent]["children"]:
+        nodes[str(n)]["parent"]=int(parent)
+        nodes[str(n)]["depth"]=nodes[parent]["depth"]+1
+        if(nodes[str(n)]["number"]==0):
+            nodes[str(n)]["property"]="leaf"
+        else:
+            nodes[str(n)]["property"]="internal node"
+            node(nodes,str(n))
+    
+        
+node(nodes,parent)
+for i in range(N):
+    print("node "+str(i)+": "+"parent = " +str(nodes[str(i)]["parent"])+", depth = "+str(nodes[str(i)]["depth"])+", "+str(nodes[str(i)]["property"])+", "+str(nodes[str(i)]["children"]))

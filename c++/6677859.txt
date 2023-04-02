@@ -1,0 +1,71 @@
+#include <bits/stdc++.h>
+using namespace std;
+using ll=long long;
+using ld=long double;
+using P=pair<ll,ll>;
+using V=vector<ll>;
+#define rep(i,n) for(int i=0;i<n;i++)
+#define REP(i,n) for(int i=1;i<=n;i++)
+
+int n=1;
+ll inf=2147483647;
+vector<ll> k(400000,inf);
+vector<bool> flag(400000,false);
+vector<ll> lazy(400000);
+
+void eval(int x,int l,int r){
+    if(flag[x]){
+        k[x]=lazy[x];
+        if(l+1<r){
+            lazy[x*2+1]=lazy[x*2+2]=lazy[x];
+            flag[x*2+1]=flag[x*2+2]=true;
+        }
+        flag[x]=false;
+    }
+    return;
+}
+
+void update(int a,int b,ll x,int i,int l,int r){
+    eval(i,l,r);
+    if(r<=a||b<=l) return;
+    if(a<=l&&r<=b){
+        flag[i]=true;
+        lazy[i]=x;
+        eval(i,l,r);
+        return;
+    }
+    update(a,b,x,i*2+1,l,(l+r)/2);
+    update(a,b,x,i*2+2,(l+r)/2,r);
+    k[x]=min(k[i*2+1],k[i*2+2]);
+    return;
+}
+
+ll query(int a,int b,int i,int l,int r){
+    eval(i,l,r);
+    if(a<=l&&r<=b) return k[i];
+    if(b<=l||r<=a) return inf;
+    ll v1=query(a,b,i*2+1,l,(l+r)/2);
+    ll v2=query(a,b,i*2+2,(l+r)/2,r);
+    return min(v1,v2);
+}
+
+int main(){
+    int _n,q;
+    cin >> _n >> q;
+    while(n<=_n) n*=2;
+
+    rep(i,q){
+        int l;
+        cin >> l;
+        if(l==0){
+            int s,t,x;
+            cin >> s >> t >> x;
+            update(s,t+1,x,0,0,n);
+        }
+        else{
+            int s,t;
+            cin >> s >> t;
+            cout << query(s,t+1,0,0,n) << endl;
+        }
+    }
+}

@@ -1,0 +1,57 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <queue>
+#include <algorithm>
+typedef long long ll;
+using namespace std;
+static const int INF=1<<30;
+
+vector<vector<pair<int,int> > > edges;
+bool is_reached[100000];
+int d[100000];
+
+void digustra(int start) {
+
+  priority_queue<pair<int,int> > Q;
+  Q.push({(-1)*d[start],start});
+  while(!Q.empty()) {
+    pair<int,int> p=Q.top();Q.pop();
+    int current=p.second;
+    if (is_reached[current]) continue;
+    d[current]=p.first*(-1);
+    is_reached[current]=true;
+    for(int i=0;i<edges[current].size();i++) {
+      int next_p=edges[current][i].first;
+      int next_d=edges[current][i].second;
+      Q.push({(-1)*(d[current]+next_d),next_p});
+    }
+  }
+}
+
+int main() {
+  int point_num,edge_num,r;
+  cin >> point_num>>edge_num>>r;
+  edges.assign(point_num,vector<pair<int,int> >());
+
+  for(int i=0;i<edge_num;i++) {
+    int s,t,d;cin >>s >>t >>d;
+    edges[s].push_back({t,d});
+  }
+  for(int i=0;i<point_num;i++) {
+    d[i]=0;
+    is_reached[i]=false;
+  }
+  digustra(r);
+  for(int i=0;i<point_num;i++) {
+    if(!is_reached[i]) {
+      cout << "INF" << endl;
+    } else {
+      cout << d[i] << endl;
+    }
+  }
+}
+
