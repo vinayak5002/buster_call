@@ -1,0 +1,81 @@
+import sys
+import math
+from heapq import heappush, heappop
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def calc_most_efficient_idx(n2, t_list, left, right, min_num_snacks):
+    max_efficiency = 0
+    max_efficiency_idx = math.inf
+    max_efficiency_added_num_snacks = 0
+
+    for i in range(left, right - 1):
+        t = t_list[i]
+        added_num_snacks0 = i - left + 1
+        added_num_snacks1 = right - i - 1
+
+        if min_num_snacks + added_num_snacks0 >= n2 and min_num_snacks + added_num_snacks1 >= n2:
+            continue
+
+        if min_num_snacks + added_num_snacks0 < n2 <= min_num_snacks + added_num_snacks1:
+            added_num_snacks = added_num_snacks0
+        elif min_num_snacks + added_num_snacks1 < n2 <= min_num_snacks + added_num_snacks0:
+            added_num_snacks = added_num_snacks1
+        else:
+            added_num_snacks = max(added_num_snacks0, added_num_snacks1)
+
+        efficiency = added_num_snacks / t
+        if max_efficiency < efficiency:
+            max_efficiency = efficiency
+            max_efficiency_idx = i
+            max_efficiency_added_num_snacks = added_num_snacks
+
+    return max_efficiency_idx, max_efficiency_added_num_snacks
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n = int(f.readline())
+    t_list = [int(f.readline()) for _ in range(n - 1)]
+    n2 = n // 2
+    hq = [(0, (0, n), [(0, n)])]
+
+    while hq:
+        ct, (min_num_snacks, max_num_snacks), c_lr_list = heappop(hq)
+        if min_num_snacks == n2:
+            print(ct)
+            break
+
+        r_num_snacks = n2 - min_num_snacks
+        for left, right in c_lr_list:
+            if right - left == 1:
+                continue
+
+            if right - left >= r_num_snacks:
+                t0 = t_list[left + r_num_snacks - 1]
+                t1 = t_list[right - r_num_snacks - 1]
+                heappush(hq, (ct + min(t0, t1), (n2, n2), []))
+
+            max_efficiency_idx, added_num_snacks = calc_most_efficient_idx(n2, t_list, left, right, min_num_snacks)
+            if max_efficiency_idx == math.inf:
+                continue
+
+            n_lr_list = [(left, max_efficiency_idx + 1), (max_efficiency_idx + 1, right)]
+            heappush(hq,
+                     (ct + t_list[max_efficiency_idx],
+                      (min_num_snacks + added_num_snacks, max_num_snacks - added_num_snacks), n_lr_list))
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

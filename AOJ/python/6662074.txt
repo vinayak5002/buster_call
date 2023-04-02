@@ -1,0 +1,51 @@
+import sys
+from heapq import heapify, heappush, heappop
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def prim(num_vertexes, adjacency_list):
+    min_cost = 0
+    is_used = [False] * num_vertexes
+    is_used[0] = True
+    hq = [edge for edge in adjacency_list[0]]
+    heapify(hq)
+
+    while hq:
+        w, v = heappop(hq)
+        if is_used[v]:
+            continue
+
+        is_used[v] = True
+        min_cost += w
+        for edge in adjacency_list[v]:
+            heappush(hq, edge)
+
+    return min_cost
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    num_vertexes, num_edges = list(map(int, f.readline().split()))
+    adjacency_list = [[] for _ in range(num_vertexes)]
+    for _ in range(num_edges):
+        s, t, w = list(map(int, f.readline().split()))
+        adjacency_list[s].append([w, t])
+        adjacency_list[t].append([w, s])
+
+    weight = prim(num_vertexes, adjacency_list)
+    print(weight)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

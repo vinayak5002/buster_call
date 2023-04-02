@@ -1,0 +1,41 @@
+n, q = map(int, input().split())
+
+par = [-1] * n
+wei = [0] * n
+
+INF = float("inf")
+
+def find(x):
+    if par[x] == -1:
+        return x
+    else:
+        par[x] = find(par[x])
+        wei[x] += wei[par[x]]
+        return par[x]
+
+def union(x, y, w):
+    p_x = find(x)
+    p_y = find(y)
+    if p_x == p_y:
+        return
+    par[p_x] = p_y
+    wei[p_y] = w - wei[x] + wei[y]
+
+def diff(x, y):
+    if find(x) == find(y):
+        return wei[y] - wei[x]
+    else:
+        return INF
+
+
+for _ in range(q):
+    com, *arg = map(int, input().split())
+    if com == 0:
+        union(arg)
+    else:
+        ans = diff(arg)
+        if ans == INF:
+            print("?")
+        else:
+            print(ans)
+            

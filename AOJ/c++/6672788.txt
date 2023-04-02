@@ -1,0 +1,75 @@
+#include<iostream>
+#include<set>
+using namespace std;
+
+int find(int arr[],int num){
+    for (int i=0;i<6;++i){
+        if(arr[i]==num){
+            return i;
+        }
+    }
+    return 0;
+}
+
+int main(){
+    
+    int dice1[6];
+    int dice2[6];
+    int tmp;
+    
+    for (int i=0;i<6;++i){
+        cin>>dice1[i];
+    }
+    
+    for (int i=0;i<6;++i){
+        cin>>dice2[i];
+    }
+    
+    set<set <int> > st1;
+    set<set <int> > st2;
+    set<int> tmpst;
+    
+    //3軸それぞれのペアが等しいか
+    for (int i=0;i<3;++i){
+        tmpst = {dice1[i], dice1[5-i]};
+        st1.insert(tmpst);
+        tmpst = {dice2[i], dice2[5-i]};
+        st2.insert(tmpst);
+    }
+    if (st1!=st2){
+        cout<<"No"<<endl;
+        return 0;
+    }
+    
+    if (st1.size()<3){
+        cout<<"Yes"<<endl;
+        return 0;
+    }
+    //右手系か左手系か
+    while(dice2[0]==dice1[3] or dice2[0]==dice1[4] or dice2[0]==dice1[5]){
+        tmp=dice2[0];
+        dice2[0]=dice2[1];
+        dice2[1]=dice1[5-find(dice1,tmp)];
+    }
+    if (dice2[2]==dice1[3] or dice2[2]==dice1[4] or dice2[2]==dice1[5]){
+        tmp=dice2[2];
+        dice2[2]=dice2[0];
+        dice2[0]=dice1[5-find(dice1,tmp)];
+    }
+    int ct;
+    for (int i=0;i<3;++i){
+        ct=0;
+        for (int j=0;j<3;++j){
+            if (dice1[j]==dice2[(i+j)%3]){
+                ct+=1;
+            }
+        }
+        if (ct==3){
+            cout<<"Yes"<<endl;
+            return 0;
+        }
+    }
+    cout<<"No"<<endl;
+    return 0;
+}
+

@@ -1,0 +1,29 @@
+import bisect
+
+def prime(n):
+    jud = [True for i in range(n+1)]
+    jud[0] = False
+    jud[1] = False
+    
+    for i in range(2, n+1):
+        if jud[i]:
+            j = 2 * i
+            while j <= n:
+                jud[j] = False
+                j += i
+    p = [i for i in range(1, n+1) if jud[i]]
+    return jud, p
+
+jud,pr = prime(10**6)
+
+while True:
+    n,p = map(int,input().split())
+    if n == -1:
+        break
+    m = bisect.bisect_right(pr,n)
+    l = []
+    for i in range(p):
+        for j in range(p):
+            l.append(pr[m+i]+pr[m+i+j])
+    l.sort()
+    print(l[p-1])

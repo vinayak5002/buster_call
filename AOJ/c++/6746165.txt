@@ -1,0 +1,94 @@
+#define _GLIBCXX_DEBUG
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+using vi = vector<int>;
+using vvi = vector<vi>;
+using vl = vector<ll>;
+using vvl = vector<vl>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using pii = pair<int, int>;
+using pll = pair<ll, ll>;
+#define rep(i, s, n) for(int i = (int)(s); i < (int)(n); ++i)
+
+ll INF = 1ll << 60;
+
+map<string, ll> PT;
+
+ll calc(string s, int &idx){
+    ll ret = 0;
+    int n = s.size();
+    while(idx < n){
+        if(s[idx] == ')'){
+            idx++;
+            int t = 1;
+            if(idx < n && s[idx]-'0' >= 0 && s[idx]-'0' < 10){
+                t = s[idx]-'0';
+                idx++;
+                if(idx < n && s[idx]-'0' >= 0 && s[idx]-'0' < 10){
+                    t*=10;
+                    t += s[idx]-'0';
+                    idx++;
+                }
+            }
+            ret *= t;
+            break;
+        }
+        else if(s[idx]-'A' >= 0 && s[idx]-'A' < 26){
+            string molecule = "";
+            molecule += s[idx];
+            idx++;
+            if(idx < n && s[idx]-'a' >= 0 && s[idx]-'a' < 26){
+                molecule += s[idx];
+                idx++;
+            }
+            int t = 1;
+            if(idx < n && s[idx]-'0' >= 0 && s[idx]-'0' < 10){
+                t = s[idx]-'0';
+                idx++;
+                if(idx < n && s[idx]-'0' >= 0 && s[idx]-'0' < 10){
+                    t*=10;
+                    t += s[idx]-'0';
+                    idx++;
+                }
+            }
+            ret += PT[molecule]*t;
+        }
+        else if(s[idx] == '('){
+            ret += calc(s, idx);
+        }
+    }
+    return ret;
+}
+
+
+int main(){
+    string atom;
+    while(cin >> atom){
+        if(atom == "END_OF_FIRST_PART"){
+            break;
+        }
+        ll Z;
+        cin >> Z;
+        PT[atom] = Z;
+    }
+    string molecule;
+    vl ret;
+    while(cin >> molecule){
+        if(molecule == "0"){
+            break;
+        }
+        int idx = 0;
+        ll Fw = calc(molecule, idx);
+        ret.push_back(Fw);
+    }
+
+    for(auto r : ret){
+        cout << r << endl;
+    }
+    
+    return 0;
+    
+}

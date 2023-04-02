@@ -1,0 +1,53 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+using Graph = vector<vector<int>>;
+
+vector<bool> seen;
+vector<int> d; // 行きがけ順
+vector<int> f; // 帰りがけ順
+
+void DFS(const Graph &G, int u, int& ptr) {
+    // 行きがけ順をインクリメントしながらメモ
+    d[u] = ptr;
+    ptr=ptr+1;
+
+    seen[u] = true;
+    for (auto next_u : G[u]) { 
+        if (seen[next_u]) 
+            continue;
+        DFS(G, next_u, ptr);
+    }
+
+    // 帰りがけ順をインクリメントしながらメモ
+    f[u] = ptr;
+    ptr=ptr+1;
+}
+
+int main() {
+    int N;// 頂点数
+    cin >> N ;
+    int i,j,u,k,v;
+
+    // グラフ入力受取
+    Graph G(N+1);
+    G[0].push_back(-1);
+    for (i = 0; i < N; i++) {
+        cin >> u >> k;
+        for(j=0;j<k;j++){
+            cin >> v;
+            G[u].push_back(v);
+        }
+    }
+
+    // 頂点 1 をスタートとした探索
+    seen.assign(N+1, false); // 全頂点を「未訪問」に初期化
+    d.resize(N+1);
+    f.resize(N+1);
+    int d_ptr = 1, f_ptr = 1;
+    DFS(G, d_ptr, f_ptr);
+
+    // 各頂点 u の行きがけ順、帰りがけ順を出力
+    for (u = 1; u <= N; u++)
+        cout << u << " " << d[u] << " " << f[u] << endl;
+}

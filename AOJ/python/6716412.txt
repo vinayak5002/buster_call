@@ -1,0 +1,56 @@
+import queue
+
+V,E = map(int,input().split())
+edge = [[0] * 2 for i in range(E)]
+
+
+for i in range(E):
+    edge[i][0],edge[i][1] = map(int,input().split())
+
+edge.sort(key=lambda x: x[0])
+
+ind_edge = [-1] * V
+pre = -1
+
+for i in range(E):
+    if pre != edge[i][0]:
+        ind_edge[edge[i][0]] = i
+    pre = edge[i][0]
+
+
+flag = 0
+
+
+finded = set()
+q = queue.Queue()
+q.put(0)
+
+
+while not q.empty():
+    node = q.get()
+
+    if node in finded:
+        flag = 1
+        break
+        
+    finded.add(node)
+    if ind_edge[node] == -1:
+        continue
+
+    id = ind_edge[node]
+
+    while True:
+        if edge[id][0] != node:
+            break
+        q.put(edge[id][1])
+        id += 1
+        if id == E:
+            break
+
+
+
+print(flag)
+
+
+
+

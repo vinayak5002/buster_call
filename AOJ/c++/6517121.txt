@@ -1,0 +1,71 @@
+#include <stdio.h>
+#include <string.h>
+#define LEN 10000010
+
+typedef struct p
+{
+  char name[100];
+  int time;
+} P;
+
+P Q[LEN];
+int head, tail, n;
+
+void enqueue(P x)
+{
+  Q[tail] = x;
+  tail = (tail + 1) % LEN;
+}
+
+P dequeue()
+{
+  P a;
+  a = Q[head];
+  head = (head + 1) % LEN;
+
+  return a;
+}
+
+int min(int a, int b)
+{
+  return a < b ? a : b;
+}
+
+int main(void)
+{
+  int e, c, i, q;
+  P a;
+
+  e = 0;
+
+  scanf("%d %d", &n, &q);
+
+  for (i = 1; i <= n; i++)
+  {
+    scanf("%s", Q[i].name);
+    scanf("%d", &Q[i].time);
+  }
+
+  head = 1;
+  tail = n + 1;
+
+  for (; head != tail;)
+  {
+
+    a = dequeue();
+    c = min(q, a.time);
+    a.time = a.time - c;
+    e = e + c;
+    if (a.time > 0)
+    {
+      enqueue(a);
+    }
+
+    else
+    {
+      printf("%s %d\n", a.name, e);
+    }
+  }
+
+  return 0;
+}

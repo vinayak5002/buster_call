@@ -1,0 +1,94 @@
+class node():
+    def __init__(self, id, left, right, key):
+        self.id = id
+        self.leftchildid = left
+        self.rightchildid = right
+        self.key = key
+
+    def set_parent(self, p):
+        self.parent = p
+
+
+class Binary_Search_Tree():
+    def __init__(self):
+        self.nodelist = []
+        self.root = -1
+
+
+
+
+
+
+    def preorder_tree_walk_printkey(self, PL, IDtoNode, node):
+        PL.append(node.key)
+        if node.leftchildid >= 0:
+            self.preorder_tree_walk_printkey(PL, IDtoNode, IDtoNode[node.leftchildid])
+        if node.rightchildid >= 0:
+            self.preorder_tree_walk_printkey(PL, IDtoNode, IDtoNode[node.rightchildid])
+
+    def inorder_tree_walk_printkey(self, IL, IDtoNode, node):
+        if node.leftchildid >= 0:
+            self.inorder_tree_walk_printkey(IL, IDtoNode, IDtoNode[node.leftchildid])
+        IL.append(node.key)
+        if node.rightchildid >= 0:
+            self.inorder_tree_walk_printkey(IL, IDtoNode, IDtoNode[node.rightchildid])
+
+    def insert(self, nodez, IDtoNode):
+        nodey = -1
+        nodex = self.root
+        while nodex != -1:
+            nodey = nodex
+            if nodez.key < nodex.key:
+                nodex = IDtoNode[nodex.leftchildid]
+            else:
+                nodex = IDtoNode[nodex.rightchildid]
+
+        if nodey != -1:
+            nodez.set_parent(nodey)
+            if nodez.key < nodey.key:
+                nodey.leftchildid = nodez.id
+            else:
+                nodey.rightchildid = nodez.id
+
+        else:
+            nodez.set_parent(nodez)
+            self.root = nodez
+
+    
+
+
+
+import sys
+readline = sys.stdin.readline
+
+#input
+BST = Binary_Search_Tree()
+
+n = int(input())
+
+IDtoNode=[""]*500001
+
+IDtoNode[-1] = -1
+
+for i in range(n):
+    comm = readline()
+    if comm[:7] == "insert ":
+        new_node = node(i, -1, -1, int(comm[7:]))
+        IDtoNode[new_node.id] = new_node
+
+        #set position
+        BST.insert(new_node, IDtoNode)
+
+    else:
+        #print
+        Inorderlist = []
+        BST.inorder_tree_walk_printkey(Inorderlist, IDtoNode,  BST.root)
+        #print("Inorder")
+        print("", *Inorderlist)
+
+
+        Preorderlist = []
+        BST.preorder_tree_walk_printkey(Preorderlist, IDtoNode,  BST.root)
+        #print("Preorder")
+        print("", *Preorderlist)
+

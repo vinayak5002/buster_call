@@ -1,0 +1,36 @@
+#include<bits/stdc++.h>
+using namespace std;
+#pragma GCC target("avx2")
+#pragma GCC optimize("O3")
+using ll = long long;
+using pii = pair<ll, ll>;
+
+int dp[110][110] = {};
+
+int solve(int x, int y, vector<pair<int, int>> &a){
+	if (dp[x][y] != -1) return dp[x][y];
+	if (y == x) return 0;
+
+	int pos = 1<<29;
+	for (int i = x; i < y; i++){
+		pos = min(pos, solve(x, i, a) + solve(i + 1, y, a) + a[x].first * a[y].second * a[i].second);
+	}
+	return dp[x][y] = pos;
+}
+
+int main(){
+ios::sync_with_stdio(false);
+std::cin.tie(nullptr);
+	int n;
+	cin >> n;
+	vector<pair<int, int>> a(n);
+	for (int i = 0; i < n; i++) cin >> a[i].first >> a[i].second;
+	
+	for (int i = 0; i < 110; i++){
+		for (int j = 0; j < 110; j++){
+			dp[i][j] = -1;
+		}
+	}
+
+	cout << solve(0, n - 1, a) << endl;
+}

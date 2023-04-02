@@ -1,0 +1,109 @@
+#include <iostream>
+#include <array>
+#include <cmath>
+
+// using Point2D = std::array<double, 2>;
+// using Vector2D = std::array<double, 2>;
+
+// void read_point(Point2D &p)
+// {
+//     std::cin >> p[0] >> p[1];
+// }
+
+// Vector2D generate_vector(const Point2D &start_point, const Point2D &end_point)
+// {
+//     Vector2D v;
+//     v[0] = (fabs(end_point[0] - start_point[0]) < 1.0e-10) ? 0.0 : end_point[0] - start_point[0];
+//     v[1] = (fabs(end_point[1] - start_point[1]) < 1.0e-10) ? 0.0 : end_point[1] - start_point[1];
+//     return v;
+// }
+
+// double inner_product(const Vector2D &v1, const Vector2D &v2)
+// {
+//     double value = 0;
+//     value += v1[0] * v2[0];
+//     value += v1[1] * v2[1];
+//     return value;
+// }
+
+// double subtended_angle(const Vector2D &a, const Vector2D &b)
+// {
+//     double norm_a = inner_product(a, a);
+//     double norm_b = inner_product(b, b);
+//     if (norm_a == 0 || norm_b == 0)
+//         return 0;
+
+//     double value = inner_product(a, b) / (std::sqrt(norm_a) * std::sqrt(norm_b));
+//     return std::acos(value);
+// }
+
+#define fequal(a, b) (fabs((a) - (b)) < 1.0e-10)
+
+struct Point2D
+{
+    double x, y;
+};
+
+class Vector2D
+{
+public:
+    double x, y;
+    Vector2D(double x, double y) : x(x), y(y) {}
+    Vector2D(Point2D &p_start, Point2D &p_end) : x(p_end.x - p_start.x), y(p_end.y - p_start.y) {}
+
+    Vector2D operator+(const Vector2D &v) const { return Vector2D(x + v.x, y + v.y); };
+    Vector2D operator-(const Vector2D &v) const { return Vector2D(x - v.x, y - v.y); };
+    Vector2D operator*(double k) const { return Vector2D(x * k, y * k); };
+    Vector2D operator/(double k) const { return Vector2D(x / k, y / k); };
+
+    double dot(const Vector2D &v) const { return x * v.x + y * v.y; };
+    double cross(const Vector2D &v) const { return x * v.y - y * v.x; };
+    double norm() const { return std::sqrt(x * x + y * y); };
+    Vector2D unit() const { return (*this) / norm(); };
+
+    double subtended_angle(const Vector2D &v) const
+    {
+        double norm_a = dot(*this);
+        double norm_b = v.dot(v);
+        if (norm_a == 0 || norm_b == 0)
+            return 0;
+
+        double value = dot(v) / (norm_a * norm_b);
+        return std::acos(value);
+    };
+};
+
+void read_point(Point2D &p)
+{
+    std::cin >> p.x >> p.y;
+}
+
+Vector2D projection(const Vector2D &a, const Vector2D &b)
+{
+    double x = a.dot(b) / a.dot(a);
+    return a * x;
+}
+
+int main()
+{
+    Point2D p1, p2;
+
+    read_point(p1);
+    read_point(p2);
+
+    auto vec_a = Vector2D(p1, p2);
+
+    double q;
+    std::cin >> q;
+
+    for (int i = 0; i < q; i++)
+    {
+        Point2D p{};
+        read_point(p);
+
+        auto vec_b = Vector2D(p1, p);
+        auto proj_vec = projection(vec_a, vec_b);
+
+        printf("%.10f %.10f\n", p1.x + proj_vec.x, p1.y + proj_vec.y);
+    }
+}

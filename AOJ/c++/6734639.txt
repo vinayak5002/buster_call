@@ -1,0 +1,73 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using Graph = vector<vector<int>>;
+
+int dx[] = {-1,0,1,0};
+int dy[] = {0,1,0,-1};
+
+template<class T> void chmin(T& a, T b) {
+    if (a > b) {
+        a = b;
+    }
+}
+
+template<class T> void chmax(T& a, T b) {
+    if (a < b) {
+        a = b;
+    }
+}
+
+const int Inf = 1<<30;
+const long long INF = 1LL<<60;
+const long long MOD = 1000000007;
+const long long mod = 998244353;
+
+struct RMQ {
+ private:
+    int n; // 葉の数
+    vector<int> node;
+ public:
+    RMQ(vector<int> v) {
+        int sz = v.size();
+        n = 1; while (n < sz) n *= 2; // 最小の2冪を求める
+        node.resize(2*n-1, Inf);
+
+        for (int i = 0; i < sz; ++i) node[n-1+i] = v[i];
+        for (int i = n-2; i >= 0; --i) node[i] = min(node[i*2+1], node[i*2+2]);
+    }
+
+    void update(int i, int val) {
+        i = i + n - 1;
+        node[i] = val;
+        while (i > 0) {
+            i = (i-1) / 2;
+            node[i] = min(node[i*2+1], node[i*2+2]);
+        }
+    }
+
+    int getmin(int a, int b, int k, int l, int r=-1) {
+        if (r < 0) r = n;
+        if (r <= a || b <= l) return Inf;
+        if (a <= l && r <= b) return node[k];
+
+        int vl = getmin(a, b, k*2+1, l, (l+r)/2);
+        int vr = getmin(a, b, k*2+2, (l+r)/2, r);
+        return min(vl, vr);
+    }
+};
+ 
+int main() {
+    int n, q; cin >> n >> q;
+    vector<int> a(n, (1<<31)-1);
+    RMQ st(a);
+    for (int i = 0; i < q; ++i) {
+        int com, x, y; cin >> com >> x >> y;
+        if (!com) {
+            st.update(x, y);
+        } else {
+            cout << st.getmin(x, y+1, 0, 0, -1) << endl;
+        }
+    }
+}

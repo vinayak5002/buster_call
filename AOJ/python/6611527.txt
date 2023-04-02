@@ -1,0 +1,49 @@
+import sys
+input = lambda: sys.stdin.readline().rstrip()
+
+##################
+
+N, W, H = map(int, input().split())
+xyw = [list(map(int, input().split())) for _ in range(N)]
+
+tate = [0] * (H+10)
+yoko = [0] * (W+10)
+
+for x,y,w in xyw:
+  tate[max(0, y-w)]   += 1 
+  tate[min(H, y+w)+1] -= 1
+
+  yoko[max(0, x-w)]   += 1
+  yoko[min(W, x+w)+1] -= 1
+
+for i in range(H+7):
+  tate[i+1] += tate[i]
+for i in range(W+7):
+  yoko[i+1] += yoko[i]
+# print('tate', tate)
+# print('yoko', yoko)
+if not (tate[:H+1].count(0) == 0 or yoko[:W+1].count(0) == 0):
+  print('No')
+  exit()
+
+# マス目について考える
+tate = [0] * (H+10)
+yoko = [0] * (W+10)
+
+for x,y,w in xyw:
+  tate[max(0, y-w)]   += 1 
+  tate[min(H, y+w)]   -= 1
+
+  yoko[max(0, x-w)]   += 1
+  yoko[min(W, x+w)]   -= 1
+
+for i in range(H+7):
+  tate[i+1] += tate[i]
+for i in range(W+7):
+  yoko[i+1] += yoko[i]
+
+if not (tate[:H].count(0) == 0 or yoko[:W].count(0) == 0):
+  print('No')
+  exit()
+print('Yes')
+

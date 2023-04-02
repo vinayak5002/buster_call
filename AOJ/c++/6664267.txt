@@ -1,0 +1,92 @@
+#include <stdio.h>
+#include <string.h>
+
+struct card{
+	char suit;
+	char value;
+};
+
+
+int main (void){
+	struct card c1[100], c2[100], tmp;
+	char s[4];
+	int N, i, j, min, count = 0;
+	scanf("%d", &N);
+	for(i = 0; i < N; i++){
+		scanf("%s", s);
+		c1[i].suit = s[0];
+		c1[i].value = s[1];
+	}
+	
+	for(i = 0; i < N; i++){
+		c2[i] = c1[i];
+	}
+	
+	
+	//バブルソート
+	int flag = 1;
+	i = 0;
+	while(flag){
+		flag = 0;
+		for(j = N - 1; j > i; j--){
+			if(c1[j].value <  c1[j - 1].value){
+				tmp = c1[j];
+				c1[j] = c1[j - 1];
+				c1[j - 1] = tmp;
+				flag = 1;
+			}
+		}
+		
+		i++;
+	}
+	
+	
+	for(i = 0; i < N; i++){
+		printf("%c%c", c1[i].suit, c1[i].value);
+		if(i != N - 1){
+			printf(" ");
+		}
+	}
+	
+	printf("\n");
+	printf("Stable\n");
+	
+	
+	//選択ソート
+	for(i = 0; i < N; i++){
+		min = i;
+		for(j = i; j < N; j++){
+			if(c2[min].value > c2[j].value){
+				min = j;
+			}
+		}
+		
+		if(min != i){
+			tmp = c2[min];
+			c2[min] = c2[i];
+			c2[i] = tmp;
+		}
+	}
+	
+	for(i = 0; i < N; i++){
+		printf("%c%c", c2[i].suit, c2[i].value);
+		if(i != N - 1){
+			printf(" ");
+		}
+	}
+	
+	printf("\n");
+	for(i = 0; i < N; i++){
+		if(c1[i].suit != c2[i].suit){
+			printf("Not stable\n");
+			count++;
+			break;
+		}
+	}
+	
+	if(count == 0){
+		printf("Stable\n");
+	}
+	
+	return 0;
+}

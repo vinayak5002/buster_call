@@ -1,0 +1,40 @@
+K = int(input())
+X = [-1] * 8
+for _ in range(K):
+    r, c = map(int, input().split())
+    X[r] = c
+
+def check(A):
+    for sx in range(8):
+        for sy in range(8):
+            if A[sx][sy] == ".":
+                continue
+
+            for dx in range(-1, 2):
+                for  dy in range(-1, 2):
+                    if dx == dy == 0:
+                        continue
+                    x = sx + dx
+                    y = sy + dy
+                    while 0 <= x < 8 and 0 <= y < 8:
+                        if A[x][y] == "Q":
+                            return False
+                        x += dx
+                        y += dy
+    return True
+
+
+import itertools
+for Z in itertools.permutations(range(8)):
+    for i in range(8):
+        if X[i] != -1 and X[i] != Z[i]:
+            break
+    else:
+        A = [["."] * 8 for _ in range(8)]
+        for i in range(8):
+            A[i][Z[i]] = "Q"
+
+        if check(A):
+            for a in A:
+                print("".join(a))
+

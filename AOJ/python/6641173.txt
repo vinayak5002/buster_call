@@ -1,0 +1,75 @@
+using System;
+using System.Linq;
+using System.Collections.Generic;
+
+internal class Program
+{
+    static void Main()
+    {
+
+
+        while (true)
+        {
+            int n = int.Parse(Console.ReadLine());
+            int m = int.Parse(Console.ReadLine());
+            if (n == 0 && m == 0)
+            {
+                break;
+            }
+            List<List<int>> graph = new List<List<int>>();
+            for(int i = 0; i < n; ++i)
+            {
+                graph.Add(new List<int>());
+            }
+
+            for(int i = 0; i < m; ++i)
+            {
+                int[] xs = Console.ReadLine().Split().Select(int.Parse).ToArray();
+                xs[0] -= 1;
+                xs[1] -= 1;
+                graph[xs[0]].Add(xs[1]);
+                graph[xs[1]].Add(xs[0]);
+            }
+
+            List<bool> visited = new List<bool>();
+            for(int i = 0; i < n; ++i)
+            {
+                visited.Add(false);
+            }
+            foreach(int i in graph[0])
+            {
+                foreach(int k in graph[i])
+                {
+                    visited[k] = true;
+                }
+            }
+            /*
+            for(int i = 0; i < n; ++i)
+            {
+                visited.Add(false);
+            }
+
+            visited[0] = true;
+            Queue<int> q = new Queue<int>();
+            q.Enqueue(0);
+            while (q.Count > 0)
+            {
+                int i = q.Dequeue();
+                foreach(int k in graph[i])
+                {
+                    if (visited[k])
+                    {
+                        continue;
+                    }
+                    visited[k] = true;
+                    q.Enqueue(k);
+                }
+            }
+            */
+
+            int res = Math.Max(0, visited.Where(x => x).Count() - 1);
+            Console.WriteLine(res);
+        }
+    }
+}
+

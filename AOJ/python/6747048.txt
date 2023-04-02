@@ -1,0 +1,19 @@
+N, M = map(int, input().split())
+A = []
+B = []
+for i in range(N):
+    price, weight = map(int, input().split())
+    A.append(weight)
+    B.append(price)
+
+dp = [[0]*(M+1) for i in range(N+1)]
+for i in range(N):
+    for j in range(M+1):
+        # i番目の要素を選んでもよいとき、選ぶのがmaxの第一項、選ばないのが第二項
+        if j - A[i] >= 0:
+            dp[i+1][j] = max(dp[i][j-A[i]]+B[i], dp[i][j])
+        # 選べないとき
+        else:
+            dp[i+1][j] = max(dp[i][j], dp[i+1][j])
+
+print(dp[N][M])

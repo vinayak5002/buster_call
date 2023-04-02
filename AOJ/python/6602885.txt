@@ -1,0 +1,25 @@
+from collections import deque
+
+A = input()
+x1 = deque() # 斜面
+x2 = deque() # 水たまり
+
+for i, a in enumerate(A):
+    if a == '\\': x1.append(i)
+    elif a == '/' and x1:
+        idx = x1.pop()
+        if not x2: x2.append([i, i-idx])
+        else:
+            pos, S = x2.pop()
+            if idx > pos:
+                x2.append([pos, S])
+                x2.append([i, i-idx])
+            else:
+                while x2 and idx < x2[-1][0]:
+                    c, d = x2.pop()
+                    pos = c
+                    S += d
+                x2.append([i, i-idx+S])
+
+print(sum(x[1] for x in x2))
+print(len(x2), *(S for pos, S in x2))

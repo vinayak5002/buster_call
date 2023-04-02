@@ -1,0 +1,122 @@
+import sys
+import math
+import operator
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def calc_length(v):
+    length = 0
+    for element in v:
+        length += element ** 2
+    return math.sqrt(length)
+
+
+def v_diff(v0, v1):
+    dif = []
+    for i in range(len(v0)):
+        dif.append(v1[i] - v0[i])
+    return dif
+
+
+def cross_product2d(v0, v1):
+    return v0[0] * v1[1] - v0[1] * v1[0]
+
+
+# point_list will be converted
+def calc_convex_hull_graham_scan(p_list):
+    n = len(p_list)
+    p_list.sort(key=operator.itemgetter(1, 0))
+    p0 = p_list[0]
+    p_with_angle_list = []
+
+    min_angle = math.inf
+    max_angle = -1
+    for i in range(1, n):
+        pi = p_list[i]
+        v0i = v_diff(p0, pi)
+        dist = calc_length(v0i)
+        angle = math.atan2(v0i[1], v0i[0])
+        min_angle = min(min_angle, angle)
+        max_angle = max(max_angle, angle)
+        p_with_angle_list.append((angle, dist, pi[0], pi[1]))
+    p_with_angle_list.sort(key=operator.itemgetter(0, 1))
+
+    min_angle_b_idx = -1
+    min_angle_e_idx = -1
+    l_pwa_lst = len(p_with_angle_list)
+    for i in range(l_pwa_lst):
+        angle = p_with_angle_list[i][0]
+        if angle != min_angle:
+            break
+        if min_angle_b_idx < 0:
+            min_angle_b_idx = i
+        min_angle_e_idx = i
+
+    if min_angle_e_idx > 0:
+        p_with_angle_list[min_angle_b_idx:min_angle_e_idx + 1] = \
+            sorted(p_with_angle_list[min_angle_b_idx:min_angle_e_idx + 1], key=operator.itemgetter(1))
+
+    max_angle_b_idx = -1
+    max_angle_e_idx = -1
+    for i in reversed(range(l_pwa_lst)):
+        angle = p_with_angle_list[i][0]
+        if angle != max_angle:
+            break
+        if max_angle_e_idx < 0:
+            max_angle_e_idx = i
+        max_angle_b_idx = i
+
+    if max_angle_e_idx > 0:
+        p_with_angle_list[max_angle_b_idx:max_angle_e_idx + 1] = \
+            sorted(p_with_angle_list[max_angle_b_idx:max_angle_e_idx + 1], key=operator.itemgetter(1), reverse=True)
+
+    p_list = []
+    for point_with_angle in p_with_angle_list:
+        p_list.append((point_with_angle[2], point_with_angle[3]))
+
+    n = len(p_list)
+    stack = [p0, p_list[0], p_list[1]]
+    for i in range(2, n):
+        pi = p_list[i]
+        while True:
+            p0 = stack[-2]
+            p1 = stack[-1]
+            v01 = v_diff(p0, p1)
+            v1i = v_diff(p1, pi)
+            cp = cross_product2d(v01, v1i)
+            if cp >= 0:
+                break
+            else:
+                stack.pop()
+        stack.append(p_list[i])
+    return stack
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test1.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n = int(f.readline())
+    p_list = []
+    for _ in range(n):
+        x, y = map(int, f.readline().split())
+        p_list.append((x, y))
+
+    ch_p_list = calc_convex_hull_graham_scan(p_list)
+    l_ch_pl = len(ch_p_list)
+    print(l_ch_pl)
+    for p in ch_p_list:
+        print(p[0], p[1])
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

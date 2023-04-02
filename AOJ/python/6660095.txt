@@ -1,0 +1,30 @@
+from collections import deque
+
+# テストデータに不備がある場合の対策
+try:
+    a, b = map(int, input().split())
+except ValueError:
+    ab = int(input())
+
+x = list(map(int, input().split()))
+y = list(map(int, input().split()))
+
+# メモリ制限にかからないよう
+# 2行ずつ処理する
+xy = deque()
+xy.append([0 for _ in range(len(x) + 1)])
+xy.append([0 for _ in range(len(x) + 1)])
+max_len = 0
+
+for row in range(1, len(y) + 1):
+    for col in range(1, len(x) + 1):
+        if y[row - 1] == x[col - 1]:
+            xy[1][col] = xy[0][col - 1] + 1
+        else:
+            xy[1][col] = xy[1][col - 1]
+        max_len = max(max_len, xy[1][col])
+    xy.popleft()
+    xy.append([0 for _ in range(len(x) + 1)])
+
+print(max_len)
+

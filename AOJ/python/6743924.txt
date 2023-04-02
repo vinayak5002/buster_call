@@ -1,0 +1,23 @@
+from collections import deque
+n = int(input())
+ukv = [list(map(int, input().split())) for _ in range(n)]
+
+distance = [-1]*(n+1) # 頂点1からの距離を記録
+
+q = deque() # キューを宣言して
+q.append(1) # 探索開始地点を追加
+
+# bfs
+distance[1] = 0 # 距離の初期化
+while len(q) > 0:
+   now = q.popleft() # 今探索する点の情報の取得(popした時点でqから値は消えている)
+
+   for i in range(ukv[now - 1][1]): # ukv[now - 1][1] : nowから出てるパスの数
+       node = ukv[now - 1][2+i] # node = 今注目している頂点
+       if distance[node] == -1: # nodeが未探索ならば
+           q.append(node) # q(探索リスト)に追加する
+           distance[node] = distance[now] + 1 # bfsでは一つ前にどの頂点にいたかの情報がqからpopした時点ではわからないのでqに追加する段階で更新しておくと良い
+   
+
+for i in range(1, n+1):
+   print(i, distance[i])

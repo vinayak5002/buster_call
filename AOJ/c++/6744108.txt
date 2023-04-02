@@ -1,0 +1,133 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <cstdio>
+#include <iostream>
+#include <stack>
+#include <queue>
+#include <algorithm>
+#include <functional>
+#include <set>
+#include <map>
+#include <string>
+#include <vector>
+#include <cmath>
+#include<sstream>
+#include<list>
+#include<iomanip>
+#include <cstdlib>
+#include <cstring>
+#include <stack>
+#include <bitset>
+#include <cassert>
+#include <stdlib.h>
+#include <stdio.h>
+using namespace std;
+const int INF = 1000000000;
+const long long LINF = 3e15 + 7;
+const int MAX_N = 700010;
+const int MAX_W = 1000010;
+const int MAX_ARRAYK = 100000;
+double PI = 3.14159265358979323846;
+//using ll = long long;
+
+
+int N, M;
+int R;
+long long cost_l[210][210];
+long long cost_s[210][210];
+int z[1110];
+long long dp[1100][210];
+
+void warshall_floyd_l() {
+	int V = N;
+	for (int k = 0; k < V; k++) {
+		for (int i = 0; i < V; i++) {
+			for (int j = 0; j < V; j++) {
+				cost_l[i][j] = min(cost_l[i] [j] , cost_l[i][k] + cost_l[k][j]);
+			}
+		}
+	}
+}
+
+void warshall_floyd_s() {
+	int V = N;
+	for (int k = 0; k < V; k++) {
+		for (int i = 0; i < V; i++) {
+			for (int j = 0; j < V; j++) {
+				cost_s[i][j] = min(cost_s[i][j], cost_s[i][k] + cost_s[k][j]);
+			}
+		}
+	}
+}
+
+
+int main() {
+
+	while (cin >> N >> M) {
+		if (N == 0 && M == 0) {
+			break;
+		}
+
+		for (int i = 0; i < N; i++) {
+			for (int j = 0; j < N; j++) {
+				cost_l[i][j] = LINF;
+				cost_s[i][j] = LINF;
+			}
+			cost_l[i][i] = 0;
+			cost_s[i][i] = 0;
+		}
+
+		for (int i = 0; i < M; i++) {
+			int a, b; long long c;
+			char ch;
+			cin >> a >> b >> c >> ch;
+			a--;
+			b--;
+			if (ch == 'L') {
+				cost_l[a][b] = c;
+				cost_l[b][a] = c;
+			}
+			else {
+				cost_s[a][b] = c;
+				cost_s[b][a] = c;
+			}
+		}
+
+		cin >> R;
+		for (int r = 0; r < R; r++) {
+			cin >> z[r];
+			z[r]--;
+		}
+
+		warshall_floyd_l();
+		warshall_floyd_s();
+
+		for (int i = 0; i <= R; i++) {
+			for (int j = 0; j < M; j++) {
+				dp[i][j] = LINF;
+			}
+		}
+
+		dp[0][z[0]] = 0LL;
+
+		for (int i = 0; i < R - 1; i++) {
+			for (int j = 0; j < M; j++) {
+				for (int k = 0; k < M; k++) {
+					dp[i + 1][j] = min(dp[i + 1][j], dp[i][k] + cost_l[z[i]][k] + cost_s[k][j] + cost_l[j][z[i + 1]]);
+				}
+
+			}
+		}
+		
+		long long ans = LINF;
+		for (int j = 0; j < M; j++) {
+			ans = min(ans, dp[R - 1][j]);
+		}
+		cout << ans << endl;
+
+
+
+	}
+	
+	
+	return 0;
+}

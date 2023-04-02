@@ -1,0 +1,17 @@
+import sys
+from math import inf
+rxs = lambda: map(int, sys.stdin.readline().split())
+N, W = rxs()
+vw = [[*rxs()] for _ in range(N)]
+V = sum(v for v, _ in vw)
+dp = [[0, *((inf if vv > v else w) for v, w in [vw[0]] for vv in range(1, V+1))]]
+
+for n in range(1, N):
+    v, w = vw[n]
+    dp.append([
+        0,
+        *(min(dp[n-1][vv], (dp[n-1][vv-v] + w) if vv >= v else w) for vv in range(1, V+1))
+    ])
+
+print(max([v for n in range(N) for v, w in enumerate(dp[n]) if w <= W]))
+

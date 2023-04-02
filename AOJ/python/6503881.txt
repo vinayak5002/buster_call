@@ -1,0 +1,57 @@
+def kdtree(xss, dims=None, axis=0, leaf_size=10):
+    class Node:
+        def __init__(self, dims, axis, nodes):
+            self.dims, self.axis = dims, axis
+            self.nodes = nodes
+            self.left = self.right = None
+        def out_of_bounds(self, ys, zs):
+            zipped = zip(self.lowers, self.uppers, ys, zs)
+            return all((max(y, z) < l and u < min(y, z)) for l, u, y, z in zipped)
+        def in_bounds(self, ys, zs):
+            zipped = zip(self.lowers, self.uppers, ys, zs)
+            return all((min(y, z) <= l and u <= max(y, z)) for l, u, y, z in zipped)
+        def tolist(self):
+            return sum([
+                self.values,
+                self.left.tolist() if self.left else [],
+                self.right.tolist() if self.right else [],
+            ], [])
+        def query_range(self, ys, zs):
+            if self.out_of_bounds(ys, zs): return []
+            if self.in_bounds(ys, zs): return self.tolist()
+            return sum([
+                [ vs for vs in self.values if all(min(y, z) <= v <= max(y, z) for v, y, z in zip(vs, ys, zs)) ],
+                self.left.query_range(ys, zs) if self.left else [],
+                self.right.query_range(ys, zs) if self.right else [],
+            ], [])
+        pass
+
+    if not xss: return None
+
+    dims = dims or len(xss[0])
+    node = Node(dims, axis, len(xss))
+    node.lowers, node.uppers = zip(*((min(xs), max(xs)) for xs in zip(*xss)))
+    xss.sort(key=lambda xs: xs[axis])
+
+    if node.nodes <= leaf_size:
+        node.values = xss
+        return node
+
+    mid = node.nodes//2
+    node.values = [xss[mid]]
+    node.left = kdtree(xss[0:mid], dims, (axis+1)%dims, leaf_size)
+    
+    if node.nodes > 1:
+        node.right = kdtree(xss[mid+1:], dims, (axis+1)%dims, leaf_size)
+
+    return node
+
+rxs = lambda: [*map(int, input().split())]
+N, = rxs()
+tree = kdtree([(x, y, i) for i, (x, y) in [(i, rxs()) for i in range(N)]], dims=2)
+Q, = rxs()
+
+for sx, tx, sy, ty in [rxs() for _ in range(Q)]:
+    ans = "\n".join(map(str, sorted(i[2] for i in tree.query_range((sx, sy), (tx, ty)))))
+    print((ans + "\n") if ans else "")
+

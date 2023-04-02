@@ -1,0 +1,100 @@
+from typing import List, Tuple, Deque, Set, Dict, TypeVar, Callable, Generic
+import sys
+import collections
+import itertools
+import heapq
+import copy
+
+
+sys.setrecursionlimit(1000000)
+input = sys.stdin.readline
+
+
+class Dijkstra:
+    def __init__(self, graph: List[List[Tuple[int, int]]]):
+        self.graph: List[List[Tuple[int, int]]] = copy.deepcopy(graph)
+        self.N: int = len(graph)
+
+        self.distance: List[int] = [1 << 60 for i in range(self.N)]
+        self.previous: List[int] = [-1 for i in range(self.N)]
+
+    def search(self, start_node: int) -> Tuple[List[int], List[int]]:
+        candidate: List[Tuple[int, int]] = [(0, start_node)]
+        self.distance[start_node] = 0
+
+        while candidate:
+            d, node = heapq.heappop(candidate)
+
+            if d > self.distance[node]:
+                continue
+
+            for next_node, weight in self.graph[node]:
+                if self.distance[next_node] > self.distance[node] + weight:
+                    self.distance[next_node] = self.distance[node] + weight
+                    self.previous[next_node] = node
+                    heapq.heappush(candidate, (self.distance[next_node], next_node))
+
+        return (self.distance, self.previous)
+
+    def restore_path(self, end_node: int) -> List[int]:
+        path: List[int] = []
+        t: int = end_node
+        while t != -1:
+            path.append(t)
+            t = self.previous[t]
+
+        return list(reversed(path))
+
+
+def dijkstra(
+    graph: List[List[Tuple[int, int]]], start_node: int
+) -> Tuple[List[int], List[int]]:
+    N: int = len(graph)
+    candidate: List[Tuple[int, int]] = [(0, start_node)]
+    distance: List[int] = [0 if i == start_node else 1 << 60 for i in range(N)]
+    previous: List[int] = [-1 for i in range(N)]
+
+    while candidate:
+        d, node = heapq.heappop(candidate)
+
+        if d > distance[node]:
+            continue
+
+        for next_node, weight in graph[node]:
+            if distance[next_node] > distance[node] + weight:
+                distance[next_node] = distance[node] + weight
+                previous[next_node] = node
+                heapq.heappush(candidate, (distance[next_node], next_node))
+
+    return (distance, previous)
+
+
+def restore_path(previous: List[int], end_node: int) -> List[int]:
+    path: List[int] = []
+
+    t: int = end_node
+    while t != -1:
+        path.append(t)
+        t = previous[t]
+
+    return list(reversed(path))
+
+
+def main():
+    V, E, r = map(int, input().split())
+    graph: List[List[Tuple[int, int]]] = [[] for i in range(V)]
+    for i in range(E):
+        s, t, d = map(int, input().split())
+        graph[s].append((t, d))
+        # graph[t].append((s, d))
+
+    dijkstra = Dijkstra(graph)
+    distance, previous = dijkstra.search(r)
+
+    for d in distance:
+        print(d if d != 1 << 60 else "INF")
+
+
+if __name__ == "__main__":
+    main()
+

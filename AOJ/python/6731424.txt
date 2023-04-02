@@ -1,0 +1,73 @@
+from cmath import inf
+from queue import Queue
+
+WHITE = 0
+GRAY = 1 
+BLACK = 2
+
+class Vertex: 
+    def __init__(self, id):
+        self.id = id
+        self.d = inf # start time 
+        self.f = inf # finish time 
+        self.color = WHITE # 'w': white, 'g': grey, 'b': black 
+        self.parent = None 
+        self.adj = list()
+
+class Graph: 
+    def __init__(self, num_vertices, directed=True):
+        self.vertices = list(Vertex(id) for id in range(num_vertices))
+        self.time = 0 
+    
+    def add_edge(self, u_id, v_id): 
+        self.vertices[u_id].adj.append(v_id)
+    
+    def dfs_visit_is_cyclic(self, u): 
+        is_cyclic = False 
+        self.time += 1 
+        u.d = self.time 
+        u.color = GRAY
+        for v_id in u.adj: 
+            v = self.vertices[v_id]
+            if v.color == GRAY: 
+                is_cyclic = True
+                break 
+            if v.color == WHITE:
+                v.parent = u
+                is_cyclic = self.dfs_visit_is_cyclic(v)
+                if is_cyclic: 
+                    break
+
+        u.color = BLACK
+        self.time = self.time + 1 
+        u.f = self.time
+        return is_cyclic
+    
+    def is_cyclic(self): 
+        is_cyclic = False 
+        for u in self.vertices: 
+            if u.color == WHITE: 
+                if self.dfs_visit_is_cyclic(u): 
+                    is_cyclic = True 
+                    break 
+
+        return is_cyclic  
+
+def load_data(): 
+    V,E = input().split()
+    E = int(E)
+    V = int(V)
+    graph = Graph(V)
+    for i in range(E): 
+        n1,n2 = input().split()
+        n1 = int(n1)
+        n2 = int(n2)
+        graph.add_edge(n1,n2)
+    return graph
+
+if __name__ == '__main__': 
+    graph = load_data()
+    if graph.is_cyclic(): 
+        print(1)
+    else: 
+        print(0)

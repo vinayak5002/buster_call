@@ -1,0 +1,30 @@
+def getkmpnext(S):
+    N = len(S)
+    KMPNext = [-1] * (N + 1)
+    j = -1
+    for i in range(1, N + 1):
+        while j >= 0 and S[i - 1] != S[j]: j = KMPNext[j]
+        j += 1
+        if i == N or S[i] != S[j]: KMPNext[i] = j
+        else: KMPNext[i] = KMPNext[j]
+    return KMPNext
+
+def kmp(S, T):
+    N = len(S)
+    M = len(T)
+    KMPNext = getkmpnext(T)
+    j = 0
+    Ret = []
+    for i in range(N):
+        while j != KMPNext[0] and S[i] != T[j]: j = KMPNext[j]
+        j += 1
+        if j == M:
+            Ret.append(i - j + 1)
+            j = KMPNext[j]
+    return Ret
+
+while True:
+    N = int(input())
+    if N == 0: break
+    A = list(map(int, input().split()))
+    print(len(kmp(A, [2, 0, 2, 0])))

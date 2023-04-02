@@ -1,0 +1,68 @@
+from collections import defaultdict, deque
+
+X, Y, E = map(int, input().split())
+
+d = defaultdict(dict)
+FD = defaultdict(dict)
+
+S = 0
+G = X + Y + 1
+
+for _ in range(E):
+  x, y = map(int, input().split())
+  x = x + 1
+  y = X + y + 1
+  d[x][y] = 1
+  FD[x][y] = 1
+  FD[y][x] = 0
+
+  d[S][x] = 1
+  FD[S][x] = 1
+  FD[x][S] = 0
+
+  d[y][G] = 1
+  FD[y][G] = 1
+  FD[G][y] = 0
+
+def bfs():
+  q = deque()
+  q.append(S)
+  visited = [True for _ in range(X+Y+2)]
+  visited[S] = False
+  history = [-1 for _ in range(X+Y+2)]
+
+  while q:
+    c = q.popleft()
+    for i in FD[c].keys():
+      if visited[i] and FD[c][i] > 0:
+        visited[i] = False
+        history[i] = c
+        q.append(i)
+      
+
+
+  current = G
+  if history[current] == -1:
+    return []
+
+  augmenting_path = []
+  while current != -1:
+    prev = history[current]
+    if (prev != -1):
+      augmenting_path.append([prev, current, FD[prev][current]])
+    current = history[current]
+
+  return augmenting_path
+
+f = 0
+while bfs():
+  path = bfs()
+  costs = list(map(lambda x: x[2], path))
+  increase = min(costs)
+  f += increase
+  for i in path:
+    FD[i[0]][i[1]] -= increase
+    FD[i[1]][i[0]] += increase
+
+print(f)
+

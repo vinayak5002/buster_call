@@ -1,0 +1,50 @@
+class djset:
+    def __init__(self,V):
+        self.p = [i for i in range(V)]
+        self.rank = [0] *(V+1)
+        self.w = [0] * (V+1)
+    
+    def findSet(self,x):
+        if self.p[x] != x:
+            p = self.findSet(self.p[x])
+            self.w[x]  += self.w[self.p[x]]
+            self.p[x] = p
+        
+        return self.p[x]
+    
+    def union(self,x,y,w):
+        px = self.findSet(x)
+        py = self.findSet(y)
+
+        if self.rank[px] < self.rank[py]:
+            self.p[px] = py
+            self.w[px] = - w - self.w[x] + self.w[y]
+        
+        else:
+            self.p[py] = px
+            self.w[py] = w - self.w[y] + self.w[x]
+
+            if self.rank[px] == self.rank[py]:
+                self.rank[px] += 1
+
+    def solve(self,x,y):
+        px = self.findSet(x)
+        py = self.findSet(y)
+
+        if px == py:
+            print(self.w[y]-self.w[x])
+        else:
+            print("?")
+
+V,E = map(int,input().split())
+dj = djset(V)
+
+for _ in range(E):
+    q = list(map(int,input().split()))
+    if q[0] == 0:
+        dj.union(q[1],q[2],q[3])
+    if q[0] == 1:
+        dj.solve(q[1],q[2])
+    
+
+

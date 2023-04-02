@@ -1,0 +1,35 @@
+N = int(input())
+M = [tuple(map(int, input().split())) for _ in range(N)]
+
+def calc(A, B):
+    r1, c1 = A
+    r2, c2 = B
+
+    if c1 != r2:
+        return False
+
+    return c1 * r1 * c2
+
+
+inf = float("inf")
+dp = [[inf]*N for _ in range(N)]
+
+for i in range(N):
+    dp[i][i] = 0
+
+for i in range(N-1):
+    dp[i][i+1] = calc(M[i], M[i+1])
+
+
+
+for w in range(2, N):
+    for l in range(N):
+        r = l + w
+        if r >= N:
+            break
+
+        for k in range(l, r):
+            dp[l][r] = min(dp[l][r], dp[l][k] + dp[k+1][r] + calc((M[l][0], M[k][1]), (M[k+1][0], M[r][1])))
+
+
+print(dp[0][N-1])

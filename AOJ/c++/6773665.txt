@@ -1,0 +1,51 @@
+#include<stdio.h>
+
+/*partition ( A, l, r )は、基準値をA[q]と指定し、qの左は基準値以下で、qの右は基準値以上でアレンジし、インデックス q を戻り値として返します。
+  詳細:　loopのjが左から右へ進む際に、a[j]が基準値より大きいなら何もせず、jが大きくなるだけ。その一方、iは値がa[j]が基準値以下になったら1を増やすので、i(具体的にi-l+1)は基準値以下の数字の数量を表すと言える。a[i]の左側は全部基準値より小さい数字で、a[j]が基準値以下になったら、a[i]と位置変えて、i++で次の基準値以下の数字を待つ
+  j は　一番左から　二番目右までなので、最後は一番右の基準値をiの次の位置に置く
+                j
+  a[0][1][2][5][4][3]           (イメージ図)
+          i
+*/
+int partition(int a[], int l, int r)//l is left, r is right
+{
+    int tmp;//for swap
+    int pivot = a[r];//一番右の要素を基準値と設定する
+    int i = l - 1;
+    for(int j = l; j < r; j++)//j は　一番左から　二番目右まで
+    {
+        if(a[j] <= pivot)//値が基準値以下ならi++ 、swap( a[i], a[j] )
+        {
+            i++;
+            tmp = a[i];
+            a[i] = a[j];
+            a[j] = tmp;//swap( a[i], a[j] )
+        }
+    }
+    tmp = a[r];
+    a[r] = a[i+1];
+    a[i+1] = tmp;//swap( a[r], a[i+1] )
+
+    return  i+1;
+}
+
+int main(void)
+{
+    int n;//入力の数量
+    scanf("%d",&n);
+    int a[n];
+    for(int i = 0; i < n; i++)
+    {
+        scanf("%d",&a[i]);//入力データを保存
+    }
+
+    int pivot = partition(a, 0, n-1);//基準値の位置をpivotに保存 要注意:第三引数はn-1です(0-オリジンのため)
+
+    for(int i = 0; i < n; i++)//出力
+    {
+        if(i == pivot)    printf("[%d] ",a[i]);
+        else if(i == n-1)   printf("%d\n",a[i]);
+        else    printf("%d ",a[i]);
+    }
+    return 0;
+}

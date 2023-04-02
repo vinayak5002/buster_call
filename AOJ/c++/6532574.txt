@@ -1,0 +1,56 @@
+#include<stdio.h>
+#include<iostream>
+#include<string.h>
+using namespace std;
+const int MAX_Length_T = 1000000;
+const int MAX_Length_P = 10000;
+const int SGM = 26 + 26 + 10;
+bool shift_valid[MAX_Length_T];
+char T[MAX_Length_T + 1], P[MAX_Length_P + 1];
+int charTonum[128];
+
+bool IsValidShift(int s) {
+	int length_P = strlen(P);
+	for (int i = 0; i < length_P; i++) {
+		if (P[i] != T[s + i])
+			return false;
+	}
+	return true;
+}
+
+void initial() {
+	int t = 0;
+	for (int i = 0; i < 10; i++)
+		charTonum['0' + i] = t++;
+	for (int i = 0; i < 26; i++)
+		charTonum['a' + i] = t++;
+	for (int i = 0; i < 26; i++)
+		charTonum['A' + i] = t++;
+}
+
+void Rabin_Karp(int d,int q) {
+	int length_p = strlen(P);
+	int length_t = strlen(T);
+	long long h = 1;
+	for (int i = 0; i < length_p; i++)
+		h = h * d%q;
+	long long p = 0;
+	long long t0 = 0;
+	for (int i = 0; i < length_p; i++) {
+		p = (d*p + charTonum[P[i]]) % q;
+		t0 = (d*t0 + charTonum[T[i]]) % q;
+	}
+	long long ts = t0;
+	for (int s = 0; s + length_p <= length_t; s++) {
+		if (p == ts)
+			cout << s << endl;
+		ts = (ts*d%q - charTonum[T[s]] * h%q + charTonum[T[s + length_p]] % q);
+		ts = (ts + q) % q;
+	}
+}
+int main() {
+	cin >> T >> P;
+	initial();
+	Rabin_Karp(SGM, 1000000007);
+	return 0;
+}

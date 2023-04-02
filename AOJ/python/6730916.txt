@@ -1,0 +1,64 @@
+from cmath import inf
+from queue import Queue
+
+class Vertex: 
+    def __init__(self, id):
+        self.id = id
+        self.dist = inf 
+        self.color = 'w' # 'w': white, 'g': grey, 'b': black 
+        self.parent = None 
+        self.adj = list()
+
+class Graph: 
+    def __init__(self, num_vertices, directed=True):
+        self.vertices = list(Vertex(id) for id in range(num_vertices))
+    
+    def add_edge(self, u_id, v_id): 
+        self.vertices[u_id].adj.append(v_id)
+    
+    def is_cyclic(self): 
+        # initilize an empty queue 
+        queue = Queue()
+        is_cyclic = False 
+        
+        # choose a source vertex  
+        src = self.vertices[0]
+        src.color = 'g'
+        # src.dist = 0 
+
+        queue.put(src) # add src to queue 
+
+        # dfs from the source vertex 
+        while queue.empty() != True:
+            u = queue.get()
+            for v_id in u.adj: 
+                v = self.vertices[v_id]
+                if v.color == 'w': 
+                    v.color = 'g'
+                    v.parent = u
+                    queue.put(v)
+                
+                if v.color == 'b': 
+                    is_cyclic = True 
+                    break
+            u.color = 'b'
+
+        return is_cyclic
+
+def load_data(): 
+    V,E = input().split()
+    E = int(E)
+    V = int(V)
+    graph = Graph(V)
+    for i in range(E): 
+        n1,n2 = input().split()
+        n1 = int(n1)
+        n2 = int(n2)
+        graph.add_edge(n1,n2)
+    return graph
+
+graph = load_data()
+if graph.is_cyclic(): 
+    print(1)
+else: 
+    print(0)

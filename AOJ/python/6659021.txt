@@ -1,0 +1,81 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class RangeAddSumQuery:
+    def __init__(self, num_nodes, init_val=0):
+        self._n = 1
+        while self._n < num_nodes:
+            self._n <<= 1
+
+        self._partial = [init_val] * (2 * self._n - 1)
+        self._uniform = [init_val] * (2 * self._n - 1)
+        return
+
+    def _get_sum_sub(self, s, t, k, left, right):
+        if right <= s or t <= left:
+            return 0
+
+        if s <= left and right <= t:
+            return (right - left) * self._uniform[k] + self._partial[k]
+
+        result = (min(t, right) - max(s, left)) * self._uniform[k]
+        mid = (left + right) // 2
+        result += self._get_sum_sub(s, t, 2 * k + 1, left, mid)
+        result += self._get_sum_sub(s, t, 2 * k + 2, mid, right)
+        return result
+
+    def _add_sub(self, s, t, x, k, left, right):
+        if right <= s or t <= left:
+            return
+
+        if s <= left and right <= t:
+            self._uniform[k] += x
+            return
+
+        self._partial[k] += (min(t, right) - max(s, left)) * x
+        mid = (left + right) // 2
+        self._add_sub(s, t, x, 2 * k + 1, left, mid)
+        self._add_sub(s, t, x, 2 * k + 2, mid, right)
+        return
+
+    """[s, t), 0-indexed"""
+    def get_sum(self, s, t):
+        return self._get_sum_sub(s, t, 0, 0, self._n)
+
+    """[s, t), 0-indexed"""
+    def add(self, s, t, x):
+        self._add_sub(s, t, x, 0, 0, self._n)
+        return
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, q = map(int, f.readline().split())
+    ras_q = RangeAddSumQuery(n, 0)
+
+    for _ in range(q):
+        query_list = list(map(int, f.readline().split()))
+        s = query_list[1] - 1
+        t = query_list[2]
+
+        if query_list[0] == 0:
+            x = query_list[3]
+            ras_q.add(s, t, x)
+        else:
+            print(ras_q.get_sum(s, t))
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

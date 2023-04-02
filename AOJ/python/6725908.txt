@@ -1,0 +1,64 @@
+class Bit:
+    def __init__(self, n):
+        self.size = n
+        self.n0 = 1 << (n.bit_length() - 1)
+        self.tree = [0] * (n + 1)
+    
+    def range_sum(self, l, r):
+        return self.sum(r - 1) - self.sum(l - 1)
+        
+    def sum(self, i):
+        i += 1
+        s = 0
+        while i > 0:
+            s += self.tree[i]
+            i -= i & -i
+        return s
+        
+    def get(self, i):
+        return self.sum(i) - self.sum(i - 1)
+ 
+    def add(self, i, x):
+        i += 1
+        while i <= self.size:
+            self.tree[i] += x
+            i += i & -i
+         
+    def lower_bound(self, x):
+        pos = 0
+        plus = self.n0
+        while plus > 0:
+            if pos + plus <= self.size and self.tree[pos + plus] < x:
+                x -= self.tree[pos + plus]
+                pos += plus
+            plus //= 2
+        return pos
+
+class RAQ_RSQ:
+    def __init__(self, n):
+        self.n = n
+        self.bit1 = Bit(n)
+        self.bit2 = Bit(n)
+
+    def add(self, l, r, x):
+        self.bit1.add(l, -x * (l - 1))
+        self.bit1.add(r - 1, x * (r - 1))
+        self.bit2.add(l, x)
+        self.bit2.add(r - 1, -x)
+
+    def sum(self, l, r):
+        ret = self.bit2.sum(r - 1) * (r - 1) + self.bit1.sum(r - 1)
+        ret -= self.bit2.sum(l - 1) * (l - 1) + self.bit1.sum(l - 1)
+        return ret
+
+
+n, q = map(int, input().split())
+bit = RAQ_RSQ(n)
+for _ in range(q):
+    query = list(map(int, input().split()))
+    if query[0] == 0:
+        s, t, x = query[1:]
+        bit.add(s - 1, t, x)
+    else:
+        s, t = query[1:]
+        print(bit.sum(s - 1, t))

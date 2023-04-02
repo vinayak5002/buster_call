@@ -1,0 +1,74 @@
+import array
+import collections
+
+Edge = collections.namedtuple("Edge", "start end weight")
+
+class UnionFind(object):
+
+
+    def __init__(slf, num_node):
+
+        slf.par = array.array("L",range(num_node))
+        slf.rank = array.array("L",(0 for i in range(num_node)))
+
+
+    def rt(slf, nd):
+
+        if slf.par[nd] == nd:
+            return nd
+        else:
+            r = slf.rt(slf.par[nd])
+            slf.par[nd] = r
+            return r
+
+
+    def In_SameSet(slf, nd1, nd2):
+
+        return slf.rt(nd1) == slf.rt(nd2)
+
+
+    def unite(slf, nd1, nd2):
+
+        x = slf.rt(nd1)
+        y = slf.rt(nd2)
+
+        if x == y:
+            pass
+        elif slf.rank[x] < slf.rank[y]:
+            slf.par[x] = y
+        else:
+            slf.par[y] = x
+            if slf.rank[x] == slf.rank[y]:
+                slf.rank[x] += 1
+
+
+
+def Cal_MinTree_Kru(V_max, ed):
+
+    ed.sort(key = lambda E: E.weight)
+
+    uf = UnionFind(V_max)
+    min_tr = []
+
+    for E in ed:
+        if not uf.In_SameSet(E.start, E.end):
+            uf.unite(E.start, E.end)
+            min_tr.append(E)
+
+    return min_tr
+
+
+
+def main():
+
+    V_max, E_max = map(int,input().split())
+    ed = [Edge(*map(int,input().split())) for _ in range(E_max)]
+    min_tr = Cal_MinTree_Kru(V_max, ed)
+
+    print(sum(E.weight for E in min_tr))
+
+
+
+if __name__ == '__main__':
+    main()
+

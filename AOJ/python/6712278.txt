@@ -1,0 +1,17 @@
+import Control.Monad ( forM_, when )
+import Data.Maybe ( fromJust )
+import qualified Data.ByteString.Char8 as B
+import qualified Data.Vector as V
+
+main :: IO ()
+main = do
+  n  <- readLn
+  xv <- fmap (V.fromList . (0:) . map (fst . fromJust . B.readInt) . B.words) B.getLine
+  forM_ [1..n] $ \i -> do
+    putStr $ "node " ++ show i ++ ": "
+    putStr $ "key = " ++ show (xv V.! i) ++ ", "
+    when (i/=1) $ do putStrLn ("parent key = " ++ show (xv V.! (i `div` 2)) ++ ", ")
+    let j=i*2 in when (j<=n) $ do putStr $ "left key = " ++ show (xv V.! j) ++ ", "
+    let j=1*2+1 in when (j<=n) $ do putStr $ "right key = " ++ show (xv V.! j) ++ ", "
+    putStrLn ""
+

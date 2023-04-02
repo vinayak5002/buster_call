@@ -1,0 +1,80 @@
+######################
+# AtCoderテンプレ
+import sys
+from collections import deque, defaultdict, Counter
+from bisect import bisect, bisect_left, bisect_right, insort_left
+from heapq import heappop, heappush, heappushpop, heapify
+from itertools import combinations, permutations, accumulate
+from math import gcd, ceil, floor, sqrt, factorial
+from functools import lru_cache
+
+sys.setrecursionlimit(10**7)
+mod = 998244353
+MOD = 1000000007
+INF = float("inf")
+arrays = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+
+input = sys.stdin.readline
+def ii(): return int(input())
+def fi(): return float(input())
+def si(): return input().rstrip()
+def mii(): return map(int, input().split())
+def mfi(): return map(float, input().split())
+def mi1i(): return map(lambda x: int(x) - 1, input().split())
+
+def lmii(): return list(map(int, input().split()))
+def lmi1i(): return list(map(lambda x: int(x) - 1, input().split()))
+def lmfi(): return list(map(float, input().split()))
+def lsi(): return list(input().rstrip())
+def lmsi(): return list(map(str, input().split()))
+
+def iir(n): return [int(input()) for _ in range(n)]
+def fir(n): return [float(input()) for _ in range(n)]
+def isr(n): return [input().rstrip() for _ in range(n)]
+
+def lmiir(n): return [list(map(int, input().split())) for _ in range(n)]
+def lmi1ir(n): return [list(map(lambda x: int(x) - 1, input().split())) for _ in range(n)]
+def lmfir(n): return [list(map(float, input().split())) for _ in range(n)]
+def lsir(n): return [list(input().rstrip()) for _ in range(n)]
+
+def lii_alp(): return list(map(lambda x: ord(x) - 97, input().rstrip()))
+def lii_ALP(): return list(map(lambda x: ord(x) - 65, input().rstrip()))
+# テンプレここまで
+##########################
+
+def f(data):
+    n = len(data)
+    res = []
+    for bit in range(2 ** n):
+        v_bit = 0
+        w_bit = 0
+        for i in range(n):
+            if (bit >> i) & 1:
+                v_bit += data[i][0]
+                w_bit += data[i][1]
+        res.append([w_bit, v_bit])
+
+    res.sort()
+    for i in range(len(res) - 1):
+        if res[i][1] > res[i + 1][1]:
+            res[i + 1][1] = res[i][1]
+    return res
+
+
+n, w = mii()
+data = lmiir(n)
+
+data_a = f(data[:n // 2])
+data_b = f(data[n // 2:])
+
+check_b = len(data_b) - 1
+ans = 0
+for a_w, a_v in data_a:
+    if a_w > w:
+        continue
+    while check_b >= 0 and a_w + data_b[check_b][0] > w:
+        check_b -= 1
+    ans = max(ans, a_v + data_b[check_b][1])
+
+print(ans)
+

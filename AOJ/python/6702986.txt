@@ -1,0 +1,76 @@
+class Dice:
+    def __init__(self,u,w,s,e,n,d):
+        self.u=u
+        self.w=w
+        self.s=s
+        self.e=e
+        self.n=n
+        self.d=d
+    
+    def roll(self,way):
+        if(way=='W'): # 西
+            c=self.u
+            self.u=self.e
+            self.e=self.d
+            self.d=self.w
+            self.w=c
+        elif way=='S': # 南
+            c=self.u
+            self.u=self.n
+            self.n=self.d
+            self.d=self.s
+            self.s=c
+        elif way=='E': # 東
+            c=self.u
+            self.u=self.w
+            self.w=self.d
+            self.d=self.e
+            self.e=c
+        elif way=='N': # 北
+            c=self.u
+            self.u=self.s
+            self.s=self.d
+            self.d=self.n
+            self.n=c
+
+    def rot(self,way):
+        if way=='R': # 右に回転
+            c=self.s
+            self.s=self.w
+            self.w=self.n
+            self.n=self.e
+            self.e=c
+        elif way=='L': #　左に回転
+            c=self.s
+            self.s=self.e
+            self.e=self.n
+            self.n=self.w
+            self.w=c
+    
+    def print_east(self):
+        print(self.e)
+
+u,s,e,w,n,d=map(int,input().split())
+dice=Dice(u,w,s,e,n,d)
+
+q = int(input())
+n = []
+for i in range(q):
+    n.append(list(map(int,input().split())))
+
+for i in range(q):
+    for j in range(4):
+        if dice.u == n[i][0]:break
+        dice.roll('N')
+
+    if dice.u != n[i][0]:
+        if dice.e == n[i][0]:
+            dice.roll('W')
+        else:
+            dice.roll('E')
+
+    for j in range(4):
+        if dice.s == n[i][1]:break
+        dice.rot('R')
+
+    dice.print_east()

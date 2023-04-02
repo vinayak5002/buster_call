@@ -1,0 +1,47 @@
+from collections import deque
+
+while True:
+  w,h = map(int, input().split())
+  if w == 0 and h == 0:
+    break
+  
+  s = list([] for _ in range(2*h))
+  for i in range(2*h-1):
+    c = list(map(int, input().split()))
+    s[i] = c
+    if i % 2 == 0:
+      s[i].append(1)
+  s[2*h-1] = [1]*(w-1)
+  s[2*h-1].append(0)
+  
+  d = deque()
+  d.append((0,0))
+
+  dist = list([-1]*w for _ in range(h))
+  dist[0][0] = 1
+  while d:
+    y, x = d.popleft()
+    
+    D0 = [-1, 0, 1, 0]
+    D1 = [0, -1, 0, 1]
+    for i in range(4):
+      nc = [0, 0]
+      nc[0] = y + D0[i]
+      nc[1] = x + D1[i]
+      
+      if nc[0] < 0 or nc[0] >= h or nc[1] < 0 or nc[1] >= w:
+        continue
+      if dist[nc[0]][nc[1]] != -1:
+        continue
+      if D1[i] == 1 and s[y*2][x] == 1:
+        continue
+      if D1[i] == -1 and s[y*2][x-1] == 1:
+        continue
+      if D0[i] == 1 and s[y*2+1][x] == 1:
+        continue
+      if D0[i] == -1 and s[(y-1)*2+1][x] == 1:
+        continue
+      
+      dist[nc[0]][nc[1]] = dist[y][x] + 1
+      d.append((nc[0],nc[1]))
+  print(dist[h-1][w-1] if dist[h-1][w-1] != -1 else 0)

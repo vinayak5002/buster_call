@@ -1,0 +1,313 @@
+#include <bits/stdc++.h>
+
+
+// #include <atcoder/convolution>
+#include <iostream>
+
+#include <algorithm>
+#include <cassert>
+#include <vector>
+
+namespace rklib {
+
+template <class T>
+bool chmax(T &a, const T &b) {
+    if (a < b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template <class T>
+bool chmin(T &a, const T &b) {
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template <class T>
+bool chmin_non_negative(T &a, const T &b) {
+    if (a < 0 || a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+template <class T>
+T div_floor(T a, T b) {
+    if (b < 0) a *= -1, b *= -1;
+    return a >= 0 ? a / b : (a + 1) / b - 1;
+}
+
+template <class T>
+T div_ceil(T a, T b) {
+    if (b < 0) a *= -1, b *= -1;
+    return a > 0 ? (a - 1) / b + 1 : a / b;
+}
+
+}  // namespace rklib
+
+#include <string>
+#include <type_traits>
+#include <vector>
+
+namespace rklib {
+
+struct BigInt {
+   public:
+    BigInt() : BigInt(0) {}
+    template <typename T, std::enable_if_t<std::is_integral<T>::value,
+                                           std::nullptr_t> = nullptr>
+    BigInt(T x) : BigInt(std::vector<T>(1, x)) {}
+    template <typename T, std::enable_if_t<std::is_integral<T>::value,
+                                           std::nullptr_t> = nullptr>
+    BigInt(std::vector<T> a) {
+        while (a.size() >= 2 && a.back() == 0) a.pop_back();
+        if (a.size() == 1 && a[0] == 0) {
+            sgn = 0;
+            return;
+        }
+        sgn = (a.back() > 0 ? 1 : -1);
+        if (sgn < 0) {
+            std::transform(a.begin(), a.end(), a.begin(),
+                           [](T x) { return -x; });
+        }
+        v = normalize(a);
+    }
+    BigInt(std::string s) : sgn(1) {
+        if (s[0] == '-') {
+            s.erase(s.begin());
+            sgn = -1;
+        }
+        if (s == "0") {
+            sgn = 0;
+            v = {0};
+            return;
+        }
+        for (int r = int(s.size()), l = std::max(0, r - log10_base); r > 0;
+             r = l, l = std::max(0, r - log10_base)) {
+            int tmp = 0;
+            for (int i = l; i < r; ++i) {
+                tmp = tmp * 10 + (s[i] - '0');
+            }
+            v.push_back(tmp);
+        }
+    }
+
+    BigInt& operator+=(const BigInt& rhs) {
+        int r_sgn = rhs.sgn;
+        if (r_sgn == 0) return *this;
+        if (sgn == 0) return *this = rhs;
+        if (v.size() < rhs.v.size()) v.resize(rhs.v.size(), 0);
+        for (size_t i = 0; i < rhs.v.size(); i++) {
+            if (sgn == r_sgn)
+                v[i] += rhs.v[i];
+            else
+                v[i] -= rhs.v[i];
+        }
+        normalize();
+        return *this;
+    }
+    BigInt& operator-=(const BigInt& rhs) {
+        int r_sgn = rhs.sgn;
+        if (r_sgn == 0) return *this;
+        if (sgn == 0) return *this = -rhs;
+        if (v.size() < rhs.v.size()) v.resize(rhs.v.size(), 0);
+        for (size_t i = 0; i < rhs.v.size(); i++) {
+            if (sgn == r_sgn)
+                v[i] -= rhs.v[i];
+            else
+                v[i] += rhs.v[i];
+        }
+        normalize();
+        return *this;
+    }
+    BigInt& operator*=(const BigInt& rhs) {
+        int r_sgn = rhs.sgn;
+        if (sgn == 0) return *this;
+        if (r_sgn == 0) return *this = rhs;
+        sgn *= r_sgn;
+
+        // if (v.size() <= 10 || rhs.v.size() <= 10) {
+        //     v = multiply_naive(v, rhs.v);
+        // } else if (v.size() + rhs.v.size() - 1 <= (1 << 24)) {
+        //     v = multiply_ntt(v, rhs.v);
+        // }
+
+        if (v.size() <= 2 || rhs.v.size() <= 2) {
+            v = multiply_naive(v, rhs.v);
+        } else {
+            *this = multiply_karatsuba(*this, rhs);
+        }
+
+        return *this;
+    }
+
+    friend BigInt operator+(const BigInt& lhs, const BigInt& rhs) {
+        return BigInt(lhs) += rhs;
+    }
+    friend BigInt operator-(const BigInt& lhs, const BigInt& rhs) {
+        return BigInt(lhs) -= rhs;
+    }
+    friend BigInt operator*(const BigInt& lhs, const BigInt& rhs) {
+        return BigInt(lhs) *= rhs;
+    }
+
+    BigInt operator+() const { return *this; }
+    BigInt operator-() const { return {-sgn, v}; }
+
+    friend std::istream& operator>>(std::istream& is, BigInt& rhs) {
+        std::string s;
+        is >> s;
+        rhs = BigInt(s);
+        return is;
+    }
+    friend std::ostream& operator<<(std::ostream& os, const BigInt& rhs) {
+        if (rhs.sgn < 0) os << "-";
+        for (int i = int(rhs.v.size()) - 1; i >= 0; i--) {
+            if (i == int(rhs.v.size()) - 1) {
+                os << rhs.v[i];
+            } else {
+                os << std::to_string(rhs.v[i] + base).substr(1, log10_base);
+            }
+        }
+        return os;
+    }
+
+   private:
+    static constexpr int base = 10, log10_base = 1;
+    int sgn;
+    std::vector<int> v;
+
+    BigInt(int sgn, std::vector<int> v) : sgn(sgn), v(v) {}
+
+    void normalize() {
+        if (v.back() < 0) {
+            sgn = -sgn;
+            std::transform(v.begin(), v.end(), v.begin(),
+                           [](int x) { return -x; });
+        }
+        int carry = 0;
+        for (size_t i = 0; i < v.size(); i++) {
+            v[i] += carry;
+            if (0 <= v[i] && v[i] < base) {
+                carry = 0;
+                continue;
+            }
+            carry = div_floor(v[i], base);
+            v[i] -= carry * base;
+            if (i == v.size() - 1 && carry != 0) {
+                v.push_back(carry % base);
+                carry /= base;
+            }
+        }
+
+        while (v.size() >= 2 && v.back() == 0) v.pop_back();
+        if (v.size() == 1 && v[0] == 0) sgn = 0;
+    }
+
+    template <class T>
+    static std::vector<int> normalize(const std::vector<T>& c) {
+        std::vector<int> res(c.size());
+        T carry = 0;
+        for (size_t i = 0; i < c.size(); i++) {
+            T tmp = c[i];
+            tmp += carry;
+            if (0 <= tmp && tmp < T(base)) {
+                carry = 0;
+                res[i] = int(tmp);
+                continue;
+            }
+            carry = div_floor(tmp, T(base));
+            res[i] = int(tmp - carry * base);
+        }
+        while (carry > 0) {
+            res.push_back(int(carry % base));
+            carry /= base;
+        }
+
+        while (res.size() >= 2 && res.back() == 0) res.pop_back();
+
+        return res;
+    }
+
+    static std::vector<int> multiply_naive(const std::vector<int>& a,
+                                           const std::vector<int>& b) {
+        std::vector<long long> c(a.size() + b.size() - 1, 0);
+        for (size_t i = 0; i < a.size(); i++) {
+            for (size_t j = 0; j < b.size(); j++) {
+                c[i + j] += a[i] * b[j];
+            }
+        }
+
+        return normalize(c);
+    }
+    // static std::vector<int> multiply_ntt(const std::vector<int>& a,
+    //                                      const std::vector<int>& b) {
+    //     std::vector<long long> al(a.size()), bl(b.size());
+    //     for (size_t i = 0; i < a.size(); i++) {
+    //         al[i] = (long long)a[i];
+    //     }
+    //     for (size_t i = 0; i < b.size(); i++) {
+    //         bl[i] = (long long)b[i];
+    //     }
+
+    //     std::vector<long long> c = atcoder::convolution_ll(al, bl);
+
+    //     return normalize(c);
+    // }
+    static BigInt multiply_karatsuba(BigInt a, BigInt b) {
+        a.sgn = b.sgn = 1;
+        int na = a.v.size(), nb = b.v.size();
+        if (na <= 2 || nb <= 2) return a * b;
+
+        int n = std::max(na, nb);
+        if (na < n) a.v.resize(n, 0);
+        if (nb < n) b.v.resize(n, 0);
+
+        int k = n / 2;
+        BigInt x(std::vector<int>(a.v.begin() + k, a.v.end()));
+        BigInt y(std::vector<int>(a.v.begin(), a.v.begin() + k));
+        BigInt z(std::vector<int>(b.v.begin() + k, b.v.end()));
+        BigInt w(std::vector<int>(b.v.begin(), b.v.begin() + k));
+
+        BigInt xz = multiply_karatsuba(x, z);
+        BigInt yw = multiply_karatsuba(y, w);
+        BigInt t = multiply_karatsuba(x + y, z + w) - xz - yw;
+
+        a.v = std::vector<int>(2 * k, 0);
+        a.v.insert(a.v.end(), xz.v.begin(), xz.v.end());
+        b.v = std::vector<int>(k, 0);
+        b.v.insert(b.v.end(), t.v.begin(), t.v.end());
+
+        return a + b + yw;
+    }
+};
+
+}  // namespace rklib
+
+
+#define For(i, a, b) for (int i = (int)(a); (i) < (int)(b); ++(i))
+#define rFor(i, a, b) for (int i = (int)(a)-1; (i) >= (int)(b); --(i))
+#define rep(i, n) For(i, 0, n)
+#define rrep(i, n) rFor(i, n, 0)
+#define fi first
+#define se second
+
+using namespace std;
+using namespace rklib;
+
+using lint = long long;
+using pii = pair<int, int>;
+using pll = pair<lint, lint>;
+
+int main() {
+    BigInt a, b;
+    cin >> a >> b;
+    cout << a * b << "\n";
+}
+

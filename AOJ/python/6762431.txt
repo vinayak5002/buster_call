@@ -1,0 +1,40 @@
+import sys
+
+# 再帰の深さの上限変更
+sys.setrecursionlimit(10**4)
+
+def DFS(v,visit):
+  visit[v] = True
+  for u in adj[v]:
+    if visit[u] == False:
+      DFS(u,visit)
+
+while(1):
+  W, H = map(int, input().split())
+  if (W,H) == (0,0):# 入力終了
+    sys.exit()
+  
+  C = []
+  for _ in range(H):
+    tmp = list(map(int, input().split()))
+    C.append(tmp)
+
+  # 縦横斜め8方向が島か探索し、隣接リストを作成する
+  dx = [1,-1,0,0,1,-1,-1,1]
+  dy = [0,0,1,-1,1,1,-1,-1]
+  
+  # 隣接リスト
+  adj = [[] for i in range(H*W)]
+  
+  for i in range(H):
+    for j in range(W):
+      if C[i][j] == 1:# 陸である
+        # 周りが陸か探索する
+        tmp = []
+        for k in range(8):
+          x,y = j+dx[k], i+dy[k]
+          if 0 <= y < H and 0 <= x < W:
+            if C[y][x] == 1:
+              tmp.append(W*y + x)
+        adj[W*i+j] = tmp
+  # print(adj)

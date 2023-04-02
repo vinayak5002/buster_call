@@ -1,0 +1,77 @@
+
+INF = 2**31 - 1
+class SegmentTree: 
+    def __init__(self, N):
+        
+        # D[i] is the minimum values for the range represented by the node i for the segment tree 
+        self.D, self.N, self.lazy = self.initRMQ(N)
+        
+    
+    def initRMQ(self,n_):
+        '''
+        _n: input of the require array size 
+        '''
+
+        n = 1 
+        while n < n_: # the size of the array is the power of 2 
+            n *= 2
+        D = [INF] * (2*n-1) 
+        lazy = [INF] * (2*n-1)
+        return D, n, lazy 
+    
+    def lazy_evaluate(self, k): 
+        if self.lazy[k] == INF: 
+            return 
+        if k < self.N - 1: 
+            self.lazy[k*2+1] = self.lazy[k]
+            self.lazy[k*2+2] = self.lazy[k]
+        self.lazy[k] = INF 
+
+    
+    def update(self, a, b, k, l, r, x): 
+        '''
+        k: the index of the node 
+        x: the value to update 
+        '''
+        self.lazy_evaluate(k)
+        if r <= a or b <= l: 
+            return 
+        if a <= l and r <= b: 
+            self.lazy[k] = x
+        else: 
+            self.update(a, b, k*2+1, l, (l+r)//2, x)
+            self.update(a, b, k*2+2, (l+r)//2, r, x)
+            self.D[k] = min(self.D[k*2+1], self.D[k*2+2])
+        self.lazy_evaluate(k)
+
+    def query(self, a, b, k, l, r):
+        if (r <= a) or (b <= l): # case 1 
+            return INF 
+        if (a <= l) and (r <= b): # case 2 
+            return self.D[k]
+        
+        # case 3 
+        vl = self.query(a, b, k*2+1, l, (l+r)//2)
+        vr = self.query(a, b, k*2+2, (l+r)//2, r)
+        return min(vl, vr)
+    
+    def find_min(self, a, b):
+        return self.query(a, b + 1, 0, 0, self.N)
+    
+    def update_range(self, a, b, x):
+        self.update(a, b + 1, 0, 0, self.N, x)
+
+    def find(self, k): 
+        k += self.N - 1 # convert array index to tree index
+        return self.D[k]
+
+num_nodes, num_queries = map(int, input().split())
+st = SegmentTree(num_nodes)
+for _ in range(num_queries): 
+    temp = input()
+    if temp[0] == '0':
+        op, s, t, x = map(int, temp.split())
+        st.update_range(s, t, x)
+    elif temp[0] == '1':
+        op, s, t = map(int, temp.split())
+        print(st.find_min(s, t)) 

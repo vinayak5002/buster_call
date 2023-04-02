@@ -1,0 +1,42 @@
+import sys
+from collections import Counter
+from heapq import heappush, heappop
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    input_list = list(f.readline().rstrip('\n'))
+    frequency_dic = Counter(input_list)
+
+    hq = []
+    for v in frequency_dic.values():
+        heappush(hq, v)
+
+    counter = 0
+    while hq:
+        right = heappop(hq)
+        if len(hq) == 0:
+            if counter == 0:
+                counter += right
+            print(counter)
+            break
+        left = heappop(hq)
+        s = left + right
+        counter += s
+        heappush(hq, s)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

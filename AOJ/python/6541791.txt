@@ -1,0 +1,160 @@
+/**
+ *    author:  gary
+ *    created: 27.04.2022 17:40:31
+**/
+#include<iostream>
+#include<cstring>
+#include<algorithm>
+#include<vector>
+#include<stack>
+#define rb(a,b,c) for(int a=b;a<=c;++a)
+#define rl(a,b,c) for(int a=b;a>=c;--a)
+#define rep(a,b) for(int a=0;a<b;++a)
+#define LL long long
+#define PB push_back
+#define POB pop_back
+#define II(a,b) make_pair(a,b)
+#define FIR first
+#define SEC second
+#define SRAND mt19937 rng(chrono::steady_clock::now().time_since_epoch().count())
+#define random(a) rng()%a
+#define ALL(a) a.begin(),a.end()
+#define check_min(a,b) a=min(a,b)
+#define check_max(a,b) a=max(a,b)
+using namespace std;
+const int INF=0x3f3f3f3f;
+typedef pair<int,int> mp;
+string f[26][21];
+vector<string> to[26];
+bool canempty[26];
+vector<int> g[26],rg[26];
+int vis[26];
+bool type(char c){
+    if(c<='z'&&c>='a') return 0;
+    return 1;
+}
+string solve(vector<string> v,int len){
+    string dp[21][2];
+    rep(i,len+1) rep(j,2) dp[i][j]="{";
+    dp[0][0]="";
+    rep(t,v.size()){
+        rep(i,len+1) dp[i][(t+1)&1]="{";
+        rep(i,len+1) if(dp[i][t&1]!="{"){
+            string val=dp[i][t&1];
+            if(type(v[t][0])==0){
+                if(i+v[t].length()>len) break;
+                check_min(dp[i+v[t].length()][(t+1)&1],val+v[t]);
+            }
+            else{
+                rep(k,len+1-i) if(f[v[t][0]-'A'][k]!="{"){
+                    check_min(dp[i+k][(t+1)&1],val+f[v[t][0]-'A'][k]);
+                }
+            }
+        }
+    }
+    return dp[len][v.size()&1];
+}
+stack<int> sta;
+vector<int> ord;
+void dfs1(int now){
+    vis[now]=1;
+    rep(i,g[now].size()) if(!vis[g[now][i]]) dfs1(g[now][i]);
+    sta.push(now);
+}
+void dfs2(int now){
+    vis[now]=1;
+    ord.PB(now);
+    rep(i,rg[now].size()) if(!vis[rg[now][i]]) dfs2(rg[now][i]);
+}
+int main(){
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    int n,l;
+    while (true)
+    {
+        cin>>n>>l;
+        if(n==0&&l==0) break;
+        rep(i,26) rb(j,0,20) f[i][j]="{";
+        rep(i,26) to[i].clear(),canempty[i]=0;
+        // vector<string> save;
+        rb(z,1,n){
+            string s;
+            cin>>s;
+            // save.PB(s);
+            string t;
+            rb(i,2,s.length()-1) t.PB(s[i]);
+            int x=s[0]-'A';
+            to[x].PB(t);
+            if(t.empty()) canempty[x]=1;
+        }
+        while (true){
+            bool ok=0;
+            rep(i,26){
+                if(!canempty[i]){
+                    rep(j,to[i].size()){
+                        string tmp=to[i][j];
+                        canempty[i]=1;
+                        rep(k,tmp.length()){
+                            canempty[i]&=type(tmp[k])==1&&canempty[tmp[k]-'A']&&tmp[k]!=('A'+i);
+                        }
+                        if(canempty[i]) break;
+                    }
+                    ok|=canempty[i];
+                }
+            }
+            if(!ok) break;
+        }
+        rep(i,26) g[i].clear(),rg[i].clear(),vis[i]=0;
+        ord.clear();
+        rep(i,26){
+            rep(j,to[i].size()){
+                string tmp=to[i][j];
+                rep(k,tmp.length()){
+                    bool ok=(type(tmp[k])==1);
+                    rep(y,tmp.length()){
+                        if(y!=k){
+                            ok&=(type(tmp[y])==1)&&canempty[tmp[y]-'A'];
+                        }
+                    }
+                    if(ok){
+                        // cout<<canempty<<" "<<tmp<<" "<<char('A'+i)<<" "<<tmp[k]<<endl;
+                        rg[i].PB(tmp[k]-'A');
+                        g[tmp[k]-'A'].PB(i);
+                    }
+                }
+            }
+        }
+        rep(i,26) sort(ALL(rg[i])),rg[i].erase(unique(ALL(rg[i])),rg[i].end());
+        rep(i,26) if(!vis[i]) dfs1(i);
+        rep(i,26) vis[i]=0;
+        while (!sta.empty())
+        {
+            int tmp=sta.top();
+            sta.pop();
+            if(!vis[tmp]) dfs2(tmp);
+        }
+        rb(j,0,l){
+            rep(i_,26){
+                int i=ord[i_];
+                rep(z,rg[i].size()) check_min(f[i][j],f[rg[i][z]][j]);
+                rep(itx,to[i].size()){
+                    string it=to[i][itx];
+                    vector<string> v;
+                    rep(xx,it.length()){
+                        char itt=it[xx];
+                        if(v.empty()||type(v.back()[0])!=type(itt)||type(itt)==1) v.PB("");
+                        v.back().PB(itt);
+                    }
+                    check_min(f[i][j],solve(v,j));
+                }
+            }
+        }
+        // if(f['S'-'A'][l]=="ieeeeeeeee"){
+            // cerr<<n<<" "<<l<<endl;
+            // for(auto it:save) cerr<<it<<endl;
+        // }
+        if(f['S'-'A'][l]=="{") cout<<"-\n";
+        else cout<<f['S'-'A'][l]<<endl;
+    }
+    return 0;
+}

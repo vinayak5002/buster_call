@@ -1,0 +1,41 @@
+def prim():
+    # 入力受け取り
+    v, e = map(int,input().split())
+    # s = []
+    # t = []
+    # w = []
+    cost = [[] for _ in range(v)]
+    for _ in range(e):
+        tmp_s, tmp_t, tmp_w = map(int,input().split())
+        cost[tmp_s].append((tmp_t, tmp_w))
+        cost[tmp_t].append((tmp_s, tmp_w))
+    # print(cost)
+
+    # アルゴリズム
+    mincost = [float("inf") for _ in range(v+1)]
+    used = [False for _ in range(v)]
+
+    mincost[0] = 0
+    res = 0
+
+    while True:
+        v_idx = -1
+        for u in range(v):
+            if not used[u] and (v_idx == -1 or mincost[u] < mincost[v_idx]):
+                v_idx = u
+        
+        if v_idx == -1:
+            break
+        used[v_idx] = True
+        res += mincost[v_idx]
+
+        for u in range(v):
+            for i in range(len(cost[v_idx])):
+                tmp_cost = (cost[v_idx])[i][1]
+                # print(tmp_cost)
+                mincost[u] = min(mincost[u], tmp_cost)
+        
+    return res
+
+print(prim())
+

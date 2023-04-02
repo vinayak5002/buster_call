@@ -1,0 +1,85 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class StronglyConnectedComponents:
+    def __init__(self, num_vertexes, adjacency_list):
+        self._num_vertexes = num_vertexes
+        self._adjacency_list = adjacency_list
+        self._is_checked = [False] * num_vertexes
+        self._order_list = [-1] * num_vertexes
+        self._group_list = [-1] * num_vertexes
+        self._counter = 0
+        return
+
+    def _dfs0(self, cur, pre):
+        self._is_checked[cur] = True
+        for e in self._adjacency_list[cur]:
+            if self._is_checked[e[0]] or e[0] == pre or not e[1]:
+                continue
+            self._dfs0(e[0], cur)
+        self._order_list[self._counter] = cur
+        self._counter += 1
+        return
+
+    def _dfs1(self, cur, group_idx):
+        self._group_list[cur] = group_idx
+        for e in self._adjacency_list[cur]:
+            if self._group_list[e[0]] != -1 or e[1]:
+                continue
+            self._dfs1(e[0], group_idx)
+        return
+
+    def decompose(self):
+        self._counter = 0
+        for i in range(self._num_vertexes):
+            if not self._is_checked[i]:
+                self._dfs0(i, -1)
+
+        for i in reversed(range(self._num_vertexes)):
+            if self._order_list[i] == -1:
+                break
+            if self._group_list[self._order_list[i]] != -1:
+                continue
+            self._dfs1(self._order_list[i], self._order_list[i])
+        return
+
+    def is_same(self, u, v):
+        return self._group_list[u] == self._group_list[v]
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    sys.setrecursionlimit(2 ** 16 - 1)
+    num_vertexes, num_edges = map(int, f.readline().split())
+    adjacency_list = [[] for _ in range(num_vertexes)]
+    for _ in range(num_edges):
+        s, t = map(int, f.readline().split())
+        adjacency_list[s].append([t, True])
+        adjacency_list[t].append([s, False])
+
+    scc = StronglyConnectedComponents(num_vertexes,adjacency_list)
+    scc.decompose()
+
+    q = int(f.readline())
+    for _ in range(q):
+        u, v = map(int, f.readline().split())
+        if scc.is_same(u, v):
+            print(1)
+        else:
+            print(0)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

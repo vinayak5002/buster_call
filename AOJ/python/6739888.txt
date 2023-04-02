@@ -1,0 +1,96 @@
+S = [list(input()) for _ in range(8)]
+d8 = [(1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
+FL = False
+while True:
+    # oのターン
+    mx = 0
+    mx_p = (0, 0)
+    for i in range(8):
+        for j in range(8):
+            if S[i][j] in "ox":
+                continue
+            cnt = 0
+            for d in d8:
+                k = 1
+                flag = False
+                while 0 <= i+k*d[0] < 8 and 0 <= j+k*d[1] < 8:
+                    if S[i+k*d[0]][j+k*d[1]] == "o":
+                        if flag:
+                            cnt += k - 1
+                        break
+                    if S[i+k*d[0]][j+k*d[1]] == "x":
+                        flag = True
+                    if S[i+k*d[0]][j+k*d[1]] == ".":
+                        break
+                    k += 1
+            if cnt > mx:
+                mx = cnt
+                mx_p = (i, j)
+    if mx == 0:
+        FL = True
+    else:
+        # oを置く
+        S[mx_p[0]][mx_p[1]] = "o"
+        for d in d8:
+            k = 1
+            flag = False
+            while 0 <= mx_p[0]+k*d[0] < 8 and 0 <= mx_p[1]+k*d[1] < 8:
+                if S[mx_p[0]+k*d[0]][mx_p[1]+k*d[1]] == "o":
+                    if flag:
+                        l = k - 1
+                        for l in range(k):
+                            S[mx_p[0]+l*d[0]][mx_p[1]+l*d[1]] = "o"
+                    break
+                if S[mx_p[0]+k*d[0]][mx_p[1]+k*d[1]] == "x":
+                    flag = True
+                if S[mx_p[0]+k*d[0]][mx_p[1]+k*d[1]] == ".":
+                    break
+                k += 1
+    
+
+    # xのターン
+    mx = 0
+    mx_p = (0, 0)
+    for i in reversed(range(8)):
+        for j in reversed(range(8)):
+            if S[i][j] in "xo":
+                continue
+            cnt = 0
+            for d in d8:
+                k = 1
+                flag = False
+                while 0 <= i+k*d[0] < 8 and 0 <= j+k*d[1] < 8:
+                    if S[i+k*d[0]][j+k*d[1]] == "x":
+                        if flag:
+                            cnt += k - 1
+                        break
+                    if S[i+k*d[0]][j+k*d[1]] == "o":
+                        flag = True
+                    if S[i+k*d[0]][j+k*d[1]] == ".":
+                        break
+                    k += 1
+            if cnt > mx:
+                mx = cnt
+                mx_p = (i, j)
+    if mx == 0:
+        if FL:
+            break
+    else:
+        # xを置く
+        S[mx_p[0]][mx_p[1]] = "x"
+        for d in d8:
+            k = 1
+            flag = False
+            while 0 <= mx_p[0]+k*d[0] < 8 and 0 <= mx_p[1]+k*d[1] < 8:
+                if S[mx_p[0]+k*d[0]][mx_p[1]+k*d[1]] == "x":
+                    if flag:
+                        l = k - 1
+                        for l in range(k):
+                            S[mx_p[0]+l*d[0]][mx_p[1]+l*d[1]] = "x"
+                    break
+                if S[mx_p[0]+k*d[0]][mx_p[1]+k*d[1]] == "o":
+                    flag = True
+                if S[mx_p[0]+k*d[0]][mx_p[1]+k*d[1]] == ".":
+                    break
+                k += 1
+print("\n".join("".join(S[i]) for i in range(8)))

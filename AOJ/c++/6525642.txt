@@ -1,0 +1,96 @@
+#line 1 "test/DualSegtree.test.cpp"
+#define PROBLEM "http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=DSL_2_E"
+
+#line 2 "data_structure/DualSegtree.hpp"
+
+#include <vector>
+#include <cassert>
+
+namespace ebi {
+
+template<class Monoid, Monoid (*op)(Monoid, Monoid), Monoid (*e)()>
+struct DualSegtree {
+private:
+    std::vector<Monoid> data;
+    int n;
+public:
+    DualSegtree(int _n) : n(1) {
+        while(n<_n){
+            n <<= 1;
+        }
+        data.assign(2*n-1, e());
+    }
+
+    DualSegtree(std::vector<Monoid> v) : n(1) {
+        int _n = v.size();
+        while(n<_n){
+            n <<= 1;
+        }
+        data.assign(2*n-1, e());
+        for(int i = 0; i<_n; i++){
+            data[i+n-1] = v[i];
+        }
+    }
+
+    Monoid get(int p) {
+        int k = p+n-1;
+        Monoid val = data[k];
+        while(k>0){
+            k = (k-1)/2;
+            val = op(val, data[k]);
+        }
+        return val;
+    }
+
+    void apply(int l, int r, Monoid x) {
+        assert(0 <= l && l <= r && r <= n);
+        l += n;
+        r += n;
+        while(l < r) {
+            if(l & 1) {
+                data[l] = op(data[l], x);
+                l++;
+            }
+            if(r & 1) {
+                r--;
+                data[r] = op(data[r], x);
+            }
+            l >>= 1;
+            r >>= 1;
+        }
+        return;
+    }
+};
+
+} // namespace ebi
+#line 4 "test/DualSegtree.test.cpp"
+
+#include <iostream>
+#line 7 "test/DualSegtree.test.cpp"
+
+int op(int a, int b) {
+    return a+b;
+}
+
+int e(){
+    return 0;
+}
+
+int main() {
+    int n,q; std::cin >> n >> q;
+    ebi::DualSegtree<int, op, e> dseg(n);
+    while(q--){
+        int flag;
+        std::cin >> flag;
+        if(flag==0){
+            int s,t,x; std::cin >> s >> t >> x;
+            s--;
+            dseg.apply(s,t,x);
+        }
+        else{
+            int t; std::cin >> t;
+            t--;
+            std::cout << dseg.get(t) << std::endl;
+        }
+    }
+}

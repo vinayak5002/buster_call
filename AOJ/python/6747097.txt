@@ -1,0 +1,32 @@
+def com(k):
+	global ans
+	if k == 9:
+		ans += 1
+		return
+	for y in range(4):
+		for x in range(4):
+			if ar[y][x]: continue
+			ar[y][x] = k
+			for i in range(4):
+				x2, y2 = x + a[i<<1], y + a[(i<<1)+1]
+				if ((x2 < 0) or (x2 >= 4) or (y2 < 0) or (y2 >= 4) or (ar[y2][x2])): continue
+				ar[y2][x2] = k
+				com(k+1)
+				ar[y2][x2] = 0
+			ar[y][x] = 0
+			return
+
+while True:
+	a = list(map(int, input().split()))
+	if (len(a) == 1): break
+	ar = [[0 for i in range(4)] for j in range(4)]
+	ans = 0
+	ar[0][0] = 1
+	for i in range(4):
+		x, y = a[i<<1], a[(i<<1)+1]
+		if ((x >= 0) and (y >= 0)):
+			ar[y][x] = 1
+			com(2)
+			ar[y][x] = 0
+	print(ans)
+

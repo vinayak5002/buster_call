@@ -1,0 +1,40 @@
+import sys
+import builtins
+import math
+sys.setrecursionlimit(10**7)
+builtins.input = lambda: sys.stdin.readline().strip()
+
+
+def main():
+    n = int(input())
+    g = [None] * n
+
+    d = [math.inf] * n
+    f = [math.inf] * n
+
+    for _ in range(n):
+        i, node_n, *nodes = list(map(int, input().split(' ')))
+        g[i-1] = [x-1 for x in nodes]
+
+    def rc(idx, tick):
+        d[idx] = min(d[idx], tick)
+
+        last = tick
+        for node in g[idx]:
+            if d[node] != math.inf:
+                continue
+            last = rc(node, last+1)
+
+        f[idx] = last+1
+
+        return last+1
+
+    rc(0, 1)
+
+    for i in range(n):
+        print(' '.join(map(str, [i+1, d[i], f[i]])))
+
+
+if __name__ == '__main__':
+    main()
+

@@ -1,0 +1,53 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef pair<ll, ll> pr;
+typedef pair<pr, ll> prpl;
+typedef pair<ll, pr> prlp;
+
+const ll INF = (ll)1e18;
+
+#define rep(i, n) for (ll i = 0; i < (ll)(n); i++)
+#define All(A) A.begin(), A.end()
+
+
+
+
+int main(void){
+    while(1){
+        ll R, C; cin >> R >> C;
+        if(R == 0) break;
+        vector<vector<ll>> A(C, vector<ll>(R));
+        rep(i, R){
+            rep(j, C){
+                cin >> A[j][i];
+            }
+        }
+        vector<ll> num_pat((1 << R), 0);
+        rep(i, C){
+            ll tmp = 0;
+            rep(j, R){
+                if(A[i][j] == 1){
+                    tmp++;
+                }
+                if(j < R - 1) tmp = tmp << 1;
+            }
+            num_pat[tmp]++;
+        }
+        ll ans = 0;
+        rep(i, (1 << R)){
+            bitset<10> row_rev(i);
+            ll max_tmp = 0;
+            rep(j, (1 << R)){
+                bitset<10> column_rev(j);
+                bitset<10> prod = row_rev ^ column_rev;
+                ll num_tmp = prod.count();
+                max_tmp += num_pat[j] * max(num_tmp, R - num_tmp);
+            }
+            ans = max(ans, max_tmp);
+        }
+        cout << ans << endl;
+    }
+}
+

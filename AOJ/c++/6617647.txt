@@ -1,0 +1,78 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct queue{
+	int x;
+	struct queue *prev;
+};
+
+struct queue* n_queue(int x){
+	struct queue* queueREI = (struct queue *)malloc(sizeof(struct queue));
+	queueREI->x = x;
+	queueREI->prev = NULL;
+	return queueREI;
+}
+
+int main(void) {
+	int n, q, query, t, x, i, j;
+	struct queue *sn, *tail[1000], *point, *max, *maxnext;
+
+	scanf("%d %d", &n, &q);
+
+	for (i = 0; i < n; i++){
+		tail[i] = NULL;
+	}
+
+	for (i = 0; i < q; i++){
+		scanf("%d %d", &query, &t);
+		if (query == 0){
+			scanf("%d", &x);
+			sn = n_queue(x);
+			sn->prev = tail[t];
+			tail[t] = sn;
+		}
+
+		else if (query == 1){
+			if (tail[t] != NULL){
+				max = tail[t];
+				if (tail[t]->prev != NULL){
+					for (point = tail[t]->prev; point != NULL; point = point->prev){
+						if (point->x > max->x){
+							max = point;
+						}
+					}
+				}
+
+				printf("%d\n", max->x);
+			}
+		}
+		else if (query == 2){
+			if (tail[t] != NULL){
+				max = tail[t];
+				maxnext = tail[t];
+				for (point = tail[t]; point->prev != NULL; point = point->prev){
+					if (point->prev->x > max->x){
+						maxnext = point;
+						max = point->prev;
+					}
+				}
+				if (maxnext != max){
+					maxnext->prev = max->prev;
+				}
+				else {
+					tail[t] = tail[t]->prev;
+				}
+				free(max);
+			}
+		}
+	}
+	for (i = 0; i < n; i++){
+		while (tail[i] != NULL){
+			point = tail[i]->prev;
+			free(tail[i]);
+			tail[i] = point;
+		}
+	}
+
+	return 0;
+}

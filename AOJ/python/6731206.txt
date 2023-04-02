@@ -1,0 +1,95 @@
+class UnionFind:
+    def __init__(self, n):
+        self.n = n
+        self.parents = [-1] * n
+        self.group = n
+
+    def find(self, x):
+        if self.parents[x] < 0:
+            return x
+        else:
+            self.parents[x] = self.find(self.parents[x])
+            return self.parents[x]
+
+    def union(self, x, y):
+        x = self.find(x)
+        y = self.find(y)
+
+        if x == y:
+            return
+        self.group -= 1
+        if self.parents[x] > self.parents[y]:
+            x, y = y, x
+
+        self.parents[x] += self.parents[y]
+        self.parents[y] = x
+
+    def size(self, x):
+        return -self.parents[self.find(x)]
+
+    def same(self, x, y):
+        return self.find(x) == self.find(y)
+
+    def members(self, x):
+        root = self.find(x)
+        return [i for i in range(self.n) if self.find(i) == root]
+
+    def roots(self):
+        return [i for i, x in enumerate(self.parents) if x < 0]
+
+    def group_count(self):
+        return self.group
+
+    def all_group_members(self):
+        dic = {r:[] for r in self.roots()}
+        for i in range(self.n):
+            dic[self.find(i)].append(i)
+        return dic
+
+    def __str__(self):
+        return '\n'.join('{}: {}'.format(r, self.members(r)) for r in self.roots())
+
+while 1:
+    n, m = map(int, input().split())
+    if n == m == 0:
+        break
+    H = [int(input()) for _ in range(n)]
+    edges = {}
+    for _ in range(m):
+        a, b, c = map(int, input().split())
+        a -= 1
+        b -= 1
+        mi = min(H[a], H[b])
+        if mi not in edges:
+            edges[mi] = []
+        edges[mi].append((a, b, c))
+
+    cnt = {}
+    ind = {}
+    for i, h in enumerate(H):
+        cnt[h] = cnt.get(h, 0) + 1
+        ind[h] = i
+    H = list(set(H))
+    H.sort(reverse = True)
+    ans = 0
+    UF = UnionFind(n)
+    UF2 = UnionFind(n)
+    E = []
+    cn = 0
+    for h in H:
+        cn += cnt[h]
+        if h not in edges:
+            continue
+        for a, b, c in edges[h]:
+            UF2.union(a, b)
+            E.append((c, a, b))
+        
+        if UF2.size(ind[h]) == cn:
+            E.sort()
+            for c, a, b in E:
+                if not UF.same(a, b):
+                    ans += c
+                    UF.union(a, b)
+
+    print(ans)
+

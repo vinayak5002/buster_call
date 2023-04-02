@@ -1,0 +1,78 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class LowestCommonAncestor:
+    def __init__(self, num_vertexes, adjacency_list, root=0):
+        self._num_vertexes = num_vertexes
+        self._max_k = 1
+        while 1 << self._max_k < num_vertexes:
+            self._max_k += 1
+
+        self._doubling_parent_list = [[-1] * num_vertexes for _ in range(self._max_k)]
+        self._distance_list = [-1] * num_vertexes
+        self._dfs(adjacency_list, root, -1, 0)
+        for k in range(self._max_k - 1):
+            for v in range(num_vertexes):
+                if self._doubling_parent_list[k][v] < 0:
+                    self._doubling_parent_list[k + 1][v] = -1
+                else:
+                    self._doubling_parent_list[k + 1][v] = \
+                        self._doubling_parent_list[k][self._doubling_parent_list[k][v]]
+        return
+
+    def _dfs(self, adjacency_list, v, p, d):
+        self._doubling_parent_list[0][v] = p
+        self._distance_list[v] = d
+        for u in adjacency_list[v]:
+            self._dfs(adjacency_list, u, v, d + 1)
+        return
+
+    def get_lca(self, u, v):
+        if self._distance_list[u] < self._distance_list[v]:
+            u, v = v, u
+
+        for k in range(self._max_k):
+            if (self._distance_list[u] - self._distance_list[v]) >> k & 1:
+                u = self._doubling_parent_list[k][u]
+
+        if u == v:
+            return u
+
+        for k in reversed(range(self._max_k)):
+            if self._doubling_parent_list[k][u] != self._doubling_parent_list[k][v]:
+                u = self._doubling_parent_list[k][u]
+                v = self._doubling_parent_list[k][v]
+
+        return self._doubling_parent_list[0][u]
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n = int(f.readline())
+    adjacency_list = [[] for _ in range(n)]
+    for i in range(n):
+        child_list = list(map(int, f.readline().split()))[1:]
+        for c in child_list:
+            adjacency_list[i].append(c)
+
+    lca = LowestCommonAncestor(n, adjacency_list, 0)
+    q = int(f.readline())
+    for _ in range(q):
+        u, v = map(int, f.readline().split())
+        print(lca.get_lca(u, v))
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

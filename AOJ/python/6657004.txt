@@ -1,0 +1,85 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class RangeSumQuery:
+    def __init__(self, n):
+        self._n = n
+        self._bit = [0] * (self._n + 1)
+        return
+
+    def _query_sub(self, i):
+        s = 0
+        while i > 0:
+            s += self._bit[i]
+            i -= i & -i
+        return s
+
+    """i: 1-indexed"""
+    def add(self, i, x):
+        while i <= self._n:
+            self._bit[i] += x
+            i += i & -i
+        return
+
+    """[s, t]: 1-indexed"""
+    def get_sum(self, s, t):
+        return self._query_sub(t) - self._query_sub(s - 1)
+
+
+class EulerTour:
+    def __init__(self, n, children_list):
+        self._children_list = children_list[:]
+        self.left = [0] * n
+        self.right = [0] * n
+        self._tour = []
+        self._dfs(0)
+        return
+
+    def _dfs(self, n):
+        self.left[n] = len(self._tour)
+        self._tour.append(n)
+        for c in self._children_list[n]:
+            self._dfs(c)
+            self._tour.append(n)
+
+        self.right[n] = len(self._tour)
+        return
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    num_nodes = int(f.readline())
+    children_list = [[] for _ in range(num_nodes)]
+    for i in range(num_nodes):
+        children_list[i] = list(map(int, f.readline().split()))[1:]
+
+    euler_tour = EulerTour(num_nodes, children_list)
+    rsq = RangeSumQuery(2 * num_nodes)
+
+    q = int(f.readline())
+    for _ in range(q):
+        query_list = list(map(int, f.readline().split()))
+        n = query_list[1]
+
+        if query_list[0] == 0:
+            w = query_list[2]
+            rsq.add(euler_tour.left[n] + 1, w)
+            rsq.add(euler_tour.right[n] + 1, -w)
+        else:
+            print(rsq.get_sum(1, euler_tour.left[n] + 1))
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

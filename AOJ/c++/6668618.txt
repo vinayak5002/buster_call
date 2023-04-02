@@ -1,0 +1,181 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+typedef long long LL;
+typedef long double LD;
+
+#define rep(i,n) for(LL i=0;i<(n);i++)
+
+template <class T>
+void output(vector<T> &data){
+
+    rep(i,data.size()){
+        cout << data.at(i) << " ";
+    }
+    cout << endl;
+
+}
+
+template<>
+void output(vector<string> &data){
+ 
+    rep(i,data.size()){
+        cout << data.at(i) << endl;
+    }
+ 
+}
+
+template <class T>
+void output(vector<vector<T>> &data){
+
+    rep(i,data.size()){
+
+        rep(j,data.at(i).size()){
+            cout << data.at(i).at(j) << " ";
+        }
+
+        cout << endl;
+
+    }
+
+}
+
+template <>
+void output(vector<vector<bool>> &data){
+
+    rep(i,data.size()){
+
+        rep(j,data.at(i).size()){
+
+            if(data.at(i).at(j)){
+                cout << "*";
+            }
+            else{
+                cout << "-";
+            }
+
+        }
+
+        cout << endl;
+
+    }
+
+}
+
+template<class T>
+void input(vector<T> &data,LL n){
+    
+    rep(i,n){
+        LL a; cin >> a;
+        data.push_back(a);
+    }
+
+}
+
+template<>
+void input(vector<string> &data,LL n){
+
+    rep(i,n){
+        string s; cin >> s;
+        data.push_back(s);
+    }
+
+}
+
+template<class T>
+void input(vector<vector<T>> &data,LL h, LL w){
+
+    rep(i,h){
+        vector<T> add;
+
+        rep(j,w){
+            T a; cin >> a;
+            add.push_back(a);
+        }
+
+        data.push_back(add);
+
+    }
+
+}
+
+vector<LL> divisor(LL n) {
+    vector<LL> ret;
+    for (LL i = 1; i * i <= n; i++) {
+        if (n % i == 0) {
+            ret.push_back(i);
+            if (i * i != n) ret.push_back(n / i);
+        }
+    }
+    sort(ret.begin(), ret.end()); // 昇順に並べる
+    return ret;
+}
+
+int main(){
+    LL n;
+
+    while(1){
+        cin >> n;
+
+        if(n == 1){
+            break;
+        }
+
+        vector<LL> data = divisor(n);
+        vector<LL> canditate;
+
+        rep(i,data.size()){
+
+            if(data.at(i) == 1){
+                continue;
+            }
+
+            LL mod = data.at(i)%7;
+
+            if(mod != 1 && mod != 6){
+                continue;
+            }
+
+            canditate.push_back(data.at(i));
+
+
+        }
+
+        vector<LL> ans;
+
+        rep(i,canditate.size()){
+
+            bool flag = true;
+            vector<LL> check = divisor(canditate.at(i));
+            check.pop_back();
+
+            rep(j,check.size()){
+                LL mod = check.at(j)%7;
+
+                if(check.at(j) == 1){
+                    continue;
+                }
+
+                if(mod == 1 || mod == 6){
+                    flag = false;
+                }
+
+            }
+
+            if(flag){
+                ans.push_back(canditate.at(i));
+            }
+
+        }
+
+        cout << n << ":";
+        rep(i,ans.size()){
+            cout << " " << ans.at(i) ;
+        }
+        cout << endl;
+        
+    }
+
+    return 0;
+}

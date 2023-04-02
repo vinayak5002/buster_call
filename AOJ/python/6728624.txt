@@ -1,0 +1,62 @@
+import sys
+import math
+import heapq
+from collections import deque, Counter, defaultdict
+from sys import stdin
+
+from numpy import histogram_bin_edges
+
+
+INF = 10 ** 10
+int1 = lambda x: int(x) - 1
+stinput = lambda: stdin.readline()[:-1]
+ii = lambda: int(stinput())  # int input
+mi = lambda: map(int, stdin.readline().split())  # map input (int)
+li = lambda: list(mi())  # list input (int)
+mi1 = lambda: map(int1, stdin.readline().split())  # map input (int)-1
+li1 = lambda: list(mi1())  # list input (int)-1
+mis = lambda: map(str, stdin.readline().split())  # map input (string)
+lis = lambda: list(mis())  # list input (string)
+
+# x, yの順番で実装しよう
+dxys = [[1, 0], [0, 1], [-1, 0], [0, -1]]
+
+while 1:
+W, H = mi()
+if W == 0: break
+dist = [[INF for i in range(H)] for j in range(W)]
+dist[0][0] = 1
+wallX = []
+wallY = []
+for i in range(2*H - 1):
+    if i % 2: # 上下移動の時にかかわる線
+        wallY.append(li())
+    else: # 左右移動の時にかかわる線
+        wallX.append(li())
+
+begin = (0, 0)
+que = deque()
+que.append(begin)
+while que:
+    (x, y) = que.popleft()
+    for dx, dy in dxys:
+        nx, ny = x + dx, y + dy
+        # 枠内にある？
+        if not(0 <= nx < W and 0 <= ny < H): continue
+        # 壁じゃない？
+        if dx: # 左右への移動
+            if dx - 1 and wallX[y][x - 1]: continue # 左への移動できる？
+            if not(dx - 1) and wallX[y][x]: continue # 右への移動できる？
+        else: # 上下への移動   
+            if dy - 1 and wallY[y - 1][x]: continue # 上への移動できる？
+            if not(dy - 1) and wallY[y][x]: continue # 下への移動できる？   
+        if dist[nx][ny] > dist[x][y] + 1:
+            dist[nx][ny] = dist[x][y] + 1
+            que.append([nx, ny])
+    
+if dist[-1][-1] == INF:
+    print(0)
+else:
+    print(dist[-1][-1])
+
+

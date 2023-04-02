@@ -1,0 +1,33 @@
+import sys
+sys.setrecursionlimit(2000)
+
+N = int(input())
+edge_L = [[] for i in range(N)]
+for i in range(N):
+	tmp_L = list(map(int,input().split()))
+	start = tmp_L[0]-1
+	cnt = tmp_L[1]
+	if cnt == 0:continue
+	for goal in tmp_L[2:]:
+		edge_L[start].append(goal-1)
+
+d = [0]*N
+f = [0]*N
+
+time = 1
+def dfs(now_node):
+	global time
+	d[now_node] = time
+	time+=1
+
+	for next_node in edge_L[now_node]:
+		if d[next_node] == 0:
+			dfs(next_node)
+
+	f[now_node] = time
+	time+=1
+
+dfs(0)
+
+for i in range(N):
+	print(i+1,d[i],f[i])

@@ -1,0 +1,72 @@
+class PriorityQueue:
+
+    def __init__(self):
+        self.size = 0
+        self.data = [0]
+
+    def insert(self, value):
+        self.size += 1
+        size = self.size
+        data = self.data
+        if len(data) <= size:
+            data.append(value)
+        else:
+            data[size] = value
+        self.bottom_up(size)
+
+    def bottom_up(self, i):
+        if i <= 1:
+            return
+        if i % 2 == 0:
+            parent = int(i / 2)
+        else:
+            parent = int(i - 1 / 2)
+        if self.data[i] > self.data[parent]:
+            self.swap(i, parent)
+            self.bottom_up(parent)
+
+    def extract(self):
+        self.size -= 1
+        ret = self.data[1]
+        self.data[1] = self.data[self.size + 1]
+        self.top_down(1)
+        return ret
+
+    def top_down(self, i):
+        size = self.size
+        data = self.data
+        l = i * 2
+        r = i * 2 + 1
+        if l <= size and data[l] > data[i]:
+            largest = l
+        else:
+            largest = i
+        if r <= size and data[r] > data[largest]:
+            largest = r
+
+        if largest != i:
+            self.swap(largest, i)
+            self.top_down(largest)
+
+    def swap(self, a, b):
+        tmp = self.data[a]
+        self.data[a] = self.data[b]
+        self.data[b] = tmp
+
+    def __str__(self):
+        return str(self.size) + str(self.data)
+
+
+pq = PriorityQueue()
+while True:
+    commands = input().split()
+    cmd = commands[0]
+    if len(commands) == 2:
+        value = int(commands[1])
+    if cmd == 'insert':
+        pq.insert(value)
+    elif cmd == 'extract':
+        print(pq.extract())
+    else:
+        break
+

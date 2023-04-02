@@ -1,0 +1,123 @@
+#include <bits/stdc++.h>
+//#include <atcoder/all>
+//using namespace atcoder;
+using namespace std;
+using ll = long long;
+using vll = vector<ll>;
+using vvll = vector<vll>;
+using vvvll = vector<vvll>;
+using vb = vector<bool>;
+using vvb = vector<vb>;
+using vvvb = vector<vvb>;
+#define all(A) A.begin(),A.end()
+#define rep(i, n) for (ll i = 0; i < (ll) (n); i++)
+using pqr = priority_queue<pair<ll, ll>, vector<pair<ll, ll>>, greater<pair<ll, ll>>>;
+
+template<class T>
+bool chmax(T& p, T q) {
+    if (p < q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+template<class T>
+bool chmin(T& p, T q) {
+    if (p > q) {
+        p = q;
+        return 1;
+    }
+    else {
+        return 0;
+    }
+}
+ll gcd(ll(a), ll(b)) {
+    ll c = a;
+    while (a % b != 0) {
+        c = a % b;
+        a = b;
+        b = c;
+    }
+    return b;
+}
+ll Eugrid(ll A, ll B, ll& x, ll& y) {
+    if (B == 0) {
+        x = 1;
+        y = 0;
+        return A;
+    }
+    ll C = gcd(A, B);
+    ll D = Eugrid(B, A % B, y, x);
+    y -= A / B * x;
+    return D;
+}//Ax+By=gcd(A,B)の解
+vector<ll> fact, factinv, inv;
+ll mod = 1e9 + 7;
+void prenCkModp(ll n) {
+	fact.resize(n + 5);
+	factinv.resize(n + 5);
+	inv.resize(n + 5);
+	fact.at(0) = fact.at(1) = 1;
+	factinv.at(0) = factinv.at(1) = 1;
+	inv.at(1) = 1;
+	for (ll i = 2; i < n + 5; i++) {
+		fact.at(i) = (fact.at(i - 1) * i) % mod;
+		inv.at(i) = mod - (inv.at(mod % i) * (mod / i)) % mod;
+		factinv.at(i) = (factinv.at(i - 1) * inv.at(i)) % mod;
+	}
+
+}
+ll nCk(ll n, ll k) {
+	if (n < k) return 0;
+	return fact.at(n) * (factinv.at(k) * factinv.at(n - k) % mod) % mod;
+}
+ll N,M;
+vvll G;
+
+vll DP;
+vector<bool> seen;
+ll dfs(ll X){
+    if(seen[X])return DP[X];
+    seen[X]=1;
+    ll res=0;
+    for(auto v:G[X]){
+        chmax(res,dfs(v)+1);
+    }
+    DP[X]=res;
+    return res;
+}
+
+int main() {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    while(1){
+    ll N,M;
+    cin>>N>>M;if(N==0)return 0;
+    vll P(N);
+    rep(i,N)cin>>P[i];
+    ll an=0;
+    set<ll> S;
+    S.insert(0);
+    rep(i,N){
+        if(P[i]<=M)chmax(an,P[i]);
+        S.insert(P[i]);
+        rep(j,N){
+            if(P[i]+P[j]<=M){
+                chmax(an,P[i]+P[j]);
+                S.insert(P[i]+P[j]);
+            }
+        }
+    }
+    rep(i,N){
+        rep(j,N){
+            ll x=P[i]+P[j];
+            if(x>M)continue;
+            auto p=S.upper_bound(M-x);
+            p--;
+            chmax(an,x+*p);
+        }
+    }
+    cout<<an<<endl;}
+}

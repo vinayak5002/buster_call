@@ -1,0 +1,44 @@
+n = int(input())
+a = []
+for i in range(n):
+  a.append(list(map(int,input().strip().split(' '))))
+b = []
+for i in range(n):
+  for j in range(n):
+    if i > j and a [i][j] != -1:
+      b.append([a[i][j],i,j])
+c = sorted(b)
+
+X = []
+for i in range(n):
+  X.append(i)
+
+def root(r):
+  R = []
+  while X[r] != r:
+    R.append(r)
+    r = X[r]
+  for number in R:
+    X[number] = r
+  return r
+
+def unite(X,a,b):
+  X[root(b)] = root(a)
+
+def same(a,b):
+  return root(a) == root(b)
+
+def check(X):
+  for i in range(len(X)-1):
+    same(i,i+1)
+
+ans = 0
+for i in range(len(c)):
+  if check(X):
+    break
+  else:
+    if not(same(c[i][1],c[i][2])):
+      unite(X,c[i][1],c[i][2])
+      ans += c[i][0]
+
+print(ans)

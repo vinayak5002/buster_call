@@ -1,0 +1,41 @@
+def find_Root(x):
+    if parent[x] == x:
+        return x
+    else:
+        temp = find_Root(parent[x])
+        weight[x] += weight[parent[x]]
+        parent[x] = temp
+        return parent[x]
+
+def unite(x, y, w):
+    root_x = find_Root(x)
+    root_y = find_Root(y)
+
+    if rank[root_x] == rank[root_y]:
+        parent[root_y] = root_x
+        rank[root_x] += 1
+        weight[r_Y] = weight[x] + w - weight[y]
+    elif rank[root_x] < rank[root_y]:
+        parent[root_x] = root_y
+        weight[root_x] = weight[y] - w - weight[x]
+    else:
+        parent[root_y] = root_x
+        weight[root_y] = weight[x] + w - weight[y]
+
+
+N, Q = map(int,input().split())
+parent = list(range(N))
+weight = list(range(N))
+rank = list(range(N))
+
+sum = 0
+for _ in range(Q):
+    query = list(map(int, input().split()))
+    if query[0] == 0:
+        unite(*query[1:4])
+    else:
+        if find_Root(query[1]) == find_Root(query[2]):
+            print(weight[query[2]] - weight[query[1]])
+        else:
+            print("?")
+

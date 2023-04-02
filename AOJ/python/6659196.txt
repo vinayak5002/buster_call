@@ -1,0 +1,144 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class RangeAddSumQuery:
+    def __init__(self, num_nodes, init_val=0):
+        self._n = 1
+        while self._n < num_nodes:
+            self._n <<= 1
+
+        self._partial = [init_val] * (2 * self._n - 1)
+        self._uniform = [init_val] * (2 * self._n - 1)
+        return
+
+    def _get_sum_sub(self, s, t, k, left, right):
+        if right <= s or t <= left:
+            return 0
+
+        if s <= left and right <= t:
+            return (right - left) * self._uniform[k] + self._partial[k]
+
+        result = (min(t, right) - max(s, left)) * self._uniform[k]
+        mid = (left + right) // 2
+        result += self._get_sum_sub(s, t, 2 * k + 1, left, mid)
+        result += self._get_sum_sub(s, t, 2 * k + 2, mid, right)
+        return result
+
+    def _add_sub(self, s, t, x, k, left, right):
+        if right <= s or t <= left:
+            return
+
+        if s <= left and right <= t:
+            self._uniform[k] += x
+            return
+
+        self._partial[k] += (min(t, right) - max(s, left)) * x
+        mid = (left + right) // 2
+        self._add_sub(s, t, x, 2 * k + 1, left, mid)
+        self._add_sub(s, t, x, 2 * k + 2, mid, right)
+        return
+
+    """[s, t), 0-indexed"""
+    def get_sum(self, s, t):
+        return self._get_sum_sub(s, t, 0, 0, self._n)
+
+    """[s, t), 0-indexed"""
+    def add(self, s, t, x):
+        self._add_sub(s, t, x, 0, 0, self._n)
+        return
+
+
+class HeavyLightDecomposition:
+    def __init__(self, num_nodes, children_list, root=0):
+        self._parent = [root] * num_nodes
+        self._children = [[] for _ in range(num_nodes)]
+        self._order = []
+        self._size = [1] * num_nodes
+        self._group = [-1] * num_nodes
+        self._index = [-1] * num_nodes
+
+        que = [root]
+        for n in que:
+            self._order.append(n)
+            for c in children_list[n]:
+                self._parent[c] = n
+                self._children[n].append(c)
+                que.append(c)
+
+        for n in reversed(self._order):
+            for c in self._children[n]:
+                self._size[n] += self._size[c]
+
+        t = 0
+        for n in self._order:
+            if self._index[n] != -1:
+                continue
+            leader = n
+            while True:
+                self._group[n] = leader
+                self._index[n] = t
+                t += 1
+                if self._size[n] == 1:
+                    break
+
+                n = max(self._children[n], key=lambda i: self._size[i])
+
+        self._ras_q = RangeAddSumQuery(num_nodes, 0)
+        return
+
+    def add(self, n, w):
+        p = n
+        while p != self._parent[p]:
+            g = self._group[p]
+            t = self._index[p] + 1
+            s = max(1, self._index[g])
+            self._ras_q.add(s, t, w)
+            p = self._parent[g]
+        return
+
+    def get_sum(self, n):
+        result = 0
+        p = n
+        while p != self._parent[p]:
+            g = self._group[p]
+            t = self._index[p] + 1
+            s = self._index[g]
+            result += self._ras_q.get_sum(s, t)
+            p = self._parent[g]
+        return result
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n = int(f.readline())
+    children_list = [[] for _ in range(n)]
+    for i in range(n):
+        children_list[i] = list(map(int, f.readline().split()))[1:]
+
+    hld = HeavyLightDecomposition(n, children_list, 0)
+
+    q = int(f.readline())
+    for _ in range(q):
+        query_list = list(map(int, f.readline().split()))
+        v = query_list[1]
+        if query_list[0] == 0:
+            w = query_list[2]
+            hld.add(v, w)
+        else:
+            print(hld.get_sum(v))
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

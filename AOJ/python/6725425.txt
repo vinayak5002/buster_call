@@ -1,0 +1,44 @@
+import heapq
+from collections import deque, defaultdict
+import math
+import copy
+from itertools import cycle, permutations
+
+INF = float("inf")
+mod = 10**9+7
+
+N = int(input())
+#S = input()
+#m,n = map(int,input().split())
+#A = list(map(int,input().split()))
+# c = []
+# for _ in range(n):
+#     c.append(list(map(int,input().split())))
+#N,M = map(int,input().split())
+#Q = int(input())
+
+p = [[] for _ in range(N)]
+for i in range(N):
+    p[i] = list(map(int,input().split()))[2:]
+
+###グラフ構造
+def dijkstra(s):
+    d = [INF]*N
+    d[s] = 0
+    q = []
+    heapq.heappush(q,(0,s))
+    while q:
+        (cost,node) = heapq.heappop(q)
+        if cost > d[node]:
+            continue
+        for n in p[node]:
+            if d[n-1] > d[node] + 1:
+                d[n-1] = d[node] + 1
+                heapq.heappush(q,(d[n-1],n-1))
+    return d
+ans = dijkstra(0)
+for i in range(N):
+    if ans[i] == INF:
+        print(i+1,-1)
+    else:
+        print(i+1,ans[i])

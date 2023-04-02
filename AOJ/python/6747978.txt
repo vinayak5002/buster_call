@@ -1,0 +1,75 @@
+
+import sys
+from sys import stdin
+import math
+
+class DSU():
+
+    def __init__(self,n):
+
+        self.n = n
+        self.p = [i for i in range(n)]
+        self.rank = [0] * n
+
+    def get_parent(self,v):
+
+        ufl = []
+
+        while self.p[v] != v:
+            ufl.append(v)
+            v = self.p[v]
+
+        for i in ufl:
+            self.p[i] = v
+
+        return v
+
+
+    def merge(self,a,b):
+
+        ap = self.get_parent(a)
+        bp = self.get_parent(b)
+
+        if ap == bp:
+            return False
+        else:
+
+            if self.rank[ap] > self.rank[bp]:
+                self.p[bp] = ap
+            elif self.rank[ap] < self.rank[bp]:
+                self.p[ap] = bp
+            else:
+                self.p[bp] = ap
+                self.rank[ap] += 1
+
+            return True
+
+ANS = []
+
+while True:
+
+    w,h = map(int,stdin.readline().split())
+    if w == h == 0:
+        break
+
+    uf = DSU(w+h)
+
+    for i in range(w+h-1):
+        x,y,n = map(int,stdin.readline().split())
+        x -= 1
+        y -= 1
+
+        uf.merge(x,y+w)
+
+    parts = 0
+    for i in range(w+h):
+        if uf.get_parent(i) == i:
+            parts += 1
+
+    if parts == 1:
+        ANS.append("YES")
+    else:
+        ANS.append("NO")
+
+print ("\n".join(ANS))
+

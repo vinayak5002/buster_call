@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#ifdef _RUTHEN
+#include "debug.hpp"
+#else
+#define show(...) true
+#endif
+
+using ll = long long;
+#define rep(i, n) for (int i = 0; i < (n); i++)
+template <class T> using V = vector<T>;
+
+const ll MOD = 1000000007;
+
+ll modpow(ll A, ll N, ll MOD) {
+    A %= MOD;
+    ll ret = 1;
+    while (N) {
+        if (N & 1) ret = ret * A % MOD;
+        A = A * A % MOD;
+        N >>= 1;
+    }
+    return ret;
+}
+
+ll inv(ll x, ll MOD) { return modpow(x, MOD - 2, MOD); }
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(0);
+    ll N, D, X;
+    while (cin >> N >> D >> X) {
+        if (N == 0 and D == 0 and X == 0) break;
+        V<V<ll>> dp(N + 1, V<ll>(N + 1, 0));
+        dp[0][0] = 1;
+        rep(i, N) {
+            V<ll> cp(N + 2, 0);
+            rep(j, N + 1) cp[j + 1] = (cp[j] + dp[i][j]) % MOD;
+            rep(j, N + 1) dp[i + 1][j] = (cp[j + 1] - cp[max(0LL, j - X + 2)] + MOD) % MOD;
+        }
+        ll ans = 0;
+        ll C = 1, Cinv = 1;
+        for (int m = 1; m <= N; m++) {
+            C = C * (D--) % MOD;
+            Cinv = Cinv * m % MOD;
+            ll DCm = C * inv(Cinv, MOD) % MOD;
+            ans = (ans + DCm * dp[m][N - m] % MOD) % MOD;
+        }
+        cout << ans << '\n';
+    }
+    return 0;
+}
+

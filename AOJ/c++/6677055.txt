@@ -1,0 +1,128 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define eps (1e-10)
+#define equals(a,b) (fabs((a)-(b))<eps)
+const int N=1e5+1;
+class point{
+    public:
+        double x,y;
+        point(double a=0,double b=0){x=a,y=b;}
+        point operator + (point p){
+            return point(x+p.x,y+p.y);
+        }
+        point operator - (point p){
+            return point(x-p.x,y-p.y);
+        }       
+        point operator * (double p){
+            return point(x*p,y*p);
+        }
+        point operator / (double p){
+            return point(x/p,y/p);
+        }
+        double abs(){//向量模
+            return sqrt(norm());
+        }
+        double norm(){//向量长
+            return x*x+y*y;
+        }
+        bool operator < (const point &p)const{
+            return x!=p.x?x<p.x:y<p.y;
+        }
+        bool operator == (const point &p)const{
+            return fabs(x-p.x)<eps&&fabs(y-p.y)<eps;
+        }
+};
+typedef point Vector;
+struct Segment{
+    point p1,p2;
+};
+typedef Segment Line;
+double dot(Vector a,Vector b){//点积
+    return a.x*b.x+a.y*b.y;
+}
+double cross(Vector a,Vector b){//叉积
+    return a.x*b.y-a.y*b.x;
+}
+point project(Segment s,point p){//投影
+    Vector base=s.p2-s.p1;
+    double r=dot(p-s.p1,base)/base.norm();
+    return s.p1+base*r;
+}
+point reflect(Segment s,point p){//映像
+    return p+(project(s,p)-p)*2.0;
+}
+static const int COUNTER_CLOCKWISE=1;
+static const int CLOCKWISE=-1;
+static const int ONLINE_BACK=2;
+static const int ONLINE_FRONT=-2;
+static const int ON_SEGMENT=0;
+int ccw(point p0,point p1,point p2){//旋转方向
+    Vector a=p1-p0;
+    Vector b=p2-p0;
+    if(cross(a,b)>eps) return COUNTER_CLOCKWISE;
+    if(cross(a,b)<-eps) return CLOCKWISE;
+    if(dot(a,b)<-eps) return ONLINE_BACK;
+    if(a.norm()<b.norm()) return ONLINE_FRONT;
+    return ON_SEGMENT;
+}
+bool intersect(point p1,point p2,point p3,point p4){//判线段相交
+    return (ccw(p1,p2,p3)*ccw(p1,p2,p4)<=0&&ccw(p3,p4,p1)*ccw(p3,p4,p2)<=0);
+}
+bool intersect(Segment s1,Segment s2){//判线段相交
+    return intersect(s1.p1,s1.p2,s2.p1,s2.p2);
+}
+bool isOrthogonal(Vector a,Vector b){//判线段正交
+    return equals(dot(a,b),0.0);
+}
+bool isOrthogonal(point a1,point a2,point b1,point b2){//判线段正交
+    return isOrthogonal(a1-a2,b1-b2);
+}
+bool isOrthogonal(Segment s1,Segment s2){//判线段正交
+    return equals(dot(s1.p2-s1.p1,s2.p2-s2.p1),0.0);
+}
+bool isParallel(Vector a,Vector b){//判线段平行
+    return equals(cross(a,b),0.0);
+}
+bool isParallel(point a1,point a2,point b1,point b2){//判线段平行
+    return isOrthogonal(a1-a2,b1-b2);
+}
+bool isParallel(Segment s1,Segment s2){//判线段平行
+    return equals(cross(s1.p2-s1.p1,s2.p2-s2.p1),0.0);
+}
+point getCrossPoint(Segment s1,Segment s2){//线段交点
+    Vector base=s2.p2-s2.p1;
+    double d1=abs(cross(base,s1.p1-s2.p1));
+    double d2=abs(cross(base,s1.p2-s2.p1));
+    double t=d1/(d1+d2);
+    return s1.p1+(s1.p2-s1.p1)*t;
+}
+double getDistance(point a,point b){
+    return (a-b).abs();
+}
+double getDistanceLp(Line s,point p){
+    return abs(cross(s.p2-s.p1,p-s.p1)/(s.p2-s.p1).abs());
+}
+double getDistanceSp(Segment s,point p){
+    if(dot(s.p2-s.p1,p-s.p1)<0.0) return getDistance(p,s.p1); 
+    if(dot(s.p1-s.p2,p-s.p2)<0.0) return getDistance(p,s.p2);
+    return getDistanceLp(s,p);
+}
+double getDistance(Segment s1,Segment s2){
+    if(intersect(s1,s2)) return 0.0;
+    return min(min(getDistanceSp(s1,s2.p1),getDistanceSp(s1,s2.p2)),min(getDistanceSp(s2,s1.p1),getDistanceSp(s2,s1.p2)));
+}
+int q;
+point p0,p1,p2,p3;
+signed main(){
+    std::ios::sync_with_stdio(0);
+    cin.tie(0);cout.tie(0);
+    cin>>q;
+    while(q--){
+        cin>>p0.x>>p0.y>>p1.x>>p1.y>>p2.x>>p2.y>>p3.x>>p3.y;
+        Segment s1,s2;
+        s1.p1=p0,s1.p2=p1;
+        s2.p1=p2,s2.p2=p3;
+        printf("%.10lf\n",getDistance(s1,s2));
+    }
+    return 0;
+}

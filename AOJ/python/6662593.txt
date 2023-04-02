@@ -1,0 +1,82 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+OTHERWISE = 0
+ORTHOGONAL = 1
+PARALLEL = 2
+
+
+def v_diff(v0, v1):
+    dif = []
+    for i in range(len(v0)):
+        dif.append(v1[i] - v0[i])
+    return dif
+
+
+def inner_product(v0, v1):
+    ip = 0
+    for i in range(len(v0)):
+        ip += v0[i] * v1[i]
+    return ip
+
+
+def cross_product2d(v0, v1):
+    return v0[0] * v1[1] - v0[1] * v1[0]
+
+
+def decide_2lines_relation(p0, p1, p2, p3):
+    if p0[0] == p1[0]:
+        if p2[0] == p3[0]:
+            return PARALLEL
+        elif p2[1] == p3[1]:
+            return ORTHOGONAL
+        else:
+            return OTHERWISE
+    elif p0[1] == p1[1]:
+        if p2[0] == p3[0]:
+            return ORTHOGONAL
+        elif p2[1] == p3[1]:
+            return PARALLEL
+        else:
+            return OTHERWISE
+    else:
+        v01 = v_diff(p0, p1)
+        v23 = v_diff(p2, p3)
+
+        ip = inner_product(v01, v23)
+        if ip == 0:
+            return ORTHOGONAL
+        else:
+            cp = cross_product2d(v01, v23)
+            if cp == 0:
+                return PARALLEL
+            else:
+                return OTHERWISE
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    q = int(f.readline())
+    for _ in range(q):
+        coord_list = list(map(int, f.readline().split()))
+        p0 = (coord_list[0], coord_list[1])
+        p1 = (coord_list[2], coord_list[3])
+        p2 = (coord_list[4], coord_list[5])
+        p3 = (coord_list[6], coord_list[7])
+
+        print(decide_2lines_relation(p0, p1, p2, p3))
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

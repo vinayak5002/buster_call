@@ -1,0 +1,54 @@
+import sys
+input = lambda: sys.stdin.readline().rstrip()
+inf = float('inf')
+sys.setrecursionlimit(10**6)
+
+def get_bridge(G: list) -> list:
+  n = len(G)
+  order = [-1] * n
+  low = [inf] * n
+  k = 0
+  def dfs1(v, p):
+    nonlocal k
+    order[v] = k
+    k += 1
+    low[v] = order[v]
+    for x in G[v]:
+      if x == p:
+        continue
+      if order[x] == -1:
+        dfs1(x, v)
+        low[v] = min(low[v], low[x])
+      else:
+        low[v] = min(low[v], order[x])
+  dfs1(0, -1)
+
+  res = []
+  seen = [0] * n
+  def dfs2(v, p):
+    seen[v] = 1
+    for x in G[v]:
+      if seen[x]:
+        continue
+      # vとxが橋かどうか
+      if order[v] < low[x]:
+        res.append([v, x])
+      dfs2(x, v)
+  dfs2(0, -1)
+
+  return res
+
+#  -----------------------  #
+
+v, e = map(int, input().split())
+G = [[] for _ in range(v)]
+for _ in range(e):
+  s, t = map(int, input().split())
+  G[s].append(t)
+  G[t].append(s)
+
+bridge = get_bridge(G)
+bridge.sort()
+for b in bridge:
+  print(*b)
+

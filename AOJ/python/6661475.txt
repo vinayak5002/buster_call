@@ -1,0 +1,53 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, max_w = map(int, f.readline().split())
+    v_list = []
+    w_list = []
+    for _ in range(n):
+        v, w, m = map(int, f.readline().split())
+        j = 1
+        while True:
+            if j <= m:
+                v_list.append(j * v)
+                w_list.append(j * w)
+                m -= j
+                j <<= 1
+            else:
+                if m > 0:
+                    v_list.append(m * v)
+                    w_list.append(m * w)
+                break
+
+    n = len(v_list)
+    dp = [[0] * (max_w + 1) for _ in range(n)]
+    for j in range(w_list[0], max_w + 1):
+        dp[0][j] = v_list[0]
+
+    for i in range(1, n):
+        for j in range(max_w + 1):
+            dp[i][j] = dp[i - 1][j]
+            w = w_list[i]
+            v = v_list[i]
+            if j - w >= 0:
+                dp[i][j] = max(dp[i][j], dp[i - 1][j - w] + v)
+
+    print(dp[-1][-1])
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

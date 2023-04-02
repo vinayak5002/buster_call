@@ -1,0 +1,133 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <vector>
+#include <bitset>
+using namespace std;
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	bitset<64> flag;
+	vector<bitset<64>> masks;
+	int q;
+	int com, n, m, k, b;
+
+	cin >> n;
+	masks.resize(n);
+	for (int i = 0; i < n; i++) {
+		cin >> k;
+		for (int j = 0; j < k; j++) {
+			cin >> b;
+			masks[i].set(b);
+		}
+	}
+
+	cin >> q;
+	for (int i = 0; i < q; i++) {
+		cin >> com >> m;
+		if (com == 0) {
+			if (flag.test(m)) {
+				cout << "1" << endl;
+			}
+			else {
+				cout << "0" << endl;
+			}
+		}
+		else if (com == 1) {
+			flag = (flag | masks[m]);
+		}
+		else if (com == 2) {
+			for (int i = 0; i < 64; i++) {
+				if (masks[m].test(i)) {
+					flag.reset(i);
+				}
+			}
+		}
+		else if (com == 3) {
+			for (int i = 0; i < 64; i++) {
+				if (masks[m].test(i)) {
+					flag.flip(i);
+				}
+			}
+		}
+		else if (com == 4) {
+			bool is_all = true;
+
+			for (int i = 0; i < 64; i++) {
+				if (masks[m].test(i) && !flag.test(i)) {
+					is_all = false;
+					break;
+				}
+			}
+
+			if (is_all) {
+				cout << "1" << endl;
+			}
+			else {
+				cout << "0" << endl;
+			}
+		}
+		else if (com == 5) {
+			bool is_any = false;
+
+			for (int i = 0; i < 64; i++) {
+				if (masks[m].test(i) && flag.test(i)) {
+					is_any = true;
+					break;
+				}
+			}
+
+			if (is_any) {
+				cout << "1" << endl;
+			}
+			else {
+				cout << "0" << endl;
+			}
+		}
+		else if (com == 6) {
+			bool is_none = true;
+
+			for (int i = 0; i < 64; i++) {
+				if (masks[m].test(i) && flag.test(i)) {
+					is_none = false;
+					break;
+				}
+			}
+			if (is_none) {
+				cout << "1" << endl;
+			}
+			else {
+				cout << "0" << endl;
+			}
+		}
+		else if (com == 7) {
+			int count = 0;
+
+			for (int i = 0; i < 64; i++) {
+				if (masks[m].test(i) && flag.test(i)) {
+					count++;
+				}
+			}
+			cout << count << endl;
+		}
+		else if (com == 8) {
+			bitset<64> result;
+
+			for (int i = 0; i < 64; i++) {
+				if (masks[m].test(i) && flag.test(i)) {
+					result.set(i);
+				}
+			}
+			cout << result.to_ulong() << endl;
+		}
+	}
+	return 0;
+}

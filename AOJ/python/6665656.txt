@@ -1,0 +1,70 @@
+"""
+会津オンラインジャッジ
+Distance
+ITP1_11_B
+https://onlinejudge.u-aizu.ac.jp/courses/lesson/2/ITP1/11/ITP1_11_B
+"""
+
+
+class Dice:
+    def __init__(self, value):
+        self.value = value
+
+    def kaiten(self, c):
+        if c == 'S':
+            temp = self.value[0]
+            self.value[0] = self.value[4]
+            self.value[4] = self.value[5]
+            self.value[5] = self.value[1]
+            self.value[1] = temp
+        elif c == 'N':
+            temp = self.value[0]
+            self.value[0] = self.value[1]
+            self.value[1] = self.value[5]
+            self.value[5] = self.value[4]
+            self.value[4] = temp
+        elif c == 'E':
+            temp = self.value[0]
+            self.value[0] = self.value[3]
+            self.value[3] = self.value[5]
+            self.value[5] = self.value[2]
+            self.value[2] = temp
+        elif c == 'W':
+            temp = self.value[0]
+            self.value[0] = self.value[2]
+            self.value[2] = self.value[5]
+            self.value[5] = self.value[3]
+            self.value[3] = temp
+        else:
+            pass
+
+    def value_of_top(self):
+        return self.value[0]
+
+
+def kaiten_dice(d, top, front):
+    if d.value[2] == top:
+        d.kaiten('W')
+    elif d.value[3] == top:
+        d.kaiten('E')
+    else:
+        while d.value_of_top == top:
+            d.kaiten('S')
+    d.kaiten('N')
+    while d.value[1] == front:
+        d.kaiten('W')
+    d.kaiten('S')
+    d.kaiten('W')
+
+
+line = input()
+values = list(map(int, line.split(' ')))
+dice = Dice(values)
+line = input()
+q = int(line)
+for i in range(q):
+    line = input()
+    top, front = list(map(int, line.split(' ')))
+    kaiten_dice(dice, top, front)
+    print(dice.value_of_top())
+

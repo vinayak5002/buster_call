@@ -1,0 +1,65 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+typedef long long ll;
+typedef pair<ll, ll> pr;
+typedef pair<pr, ll> pr2;
+
+const ll Max_N = 1e4;
+vector<ll> parent(Max_N), rk(Max_N);
+
+void init(ll N){
+    for(ll i = 0; i < N; i++){
+        parent[i] = i;
+        rk[i] = 0;
+    }
+}
+
+ll root(ll x){
+    if(parent[x] == x){
+        return x;
+    }else{
+        return parent[x] = root(parent[x]);
+    }
+}
+
+void unite(ll x, ll y){
+    x = root(x); y = root(y);
+    if(x == y) return;
+    if(rk[x] < rk[y]){
+        parent[x] = y;
+    }else{
+        parent[y] = x;
+        if(rk[x] == rk[y]) rk[x]++;
+    }
+}
+
+bool same(ll x, ll y){
+    return root(x) == root(y);
+}
+
+
+bool comp(pr2 e1, pr2 e2){
+    return e1.second < e2.second;
+}
+
+int main(void){
+    ll V, E; cin >> V >> E;
+    vector<pr2> e(E);
+    for(ll i = 0; i < E; i++){
+        ll s, t, w; cin >> s >> t >> w;
+        e[i] = {{s, t}, w};
+    }
+    sort(e.begin(), e.end(), comp);
+    init(V);
+    ll ans = 0;
+    for(ll i = 0; i < E; i++){
+        ll u = e[i].first.first, v = e[i].first.second;
+        if(!same(u, v)){
+            unite(u, v);
+            ans += e[i].second;
+        }
+    }
+    cout << ans << endl;
+}
+

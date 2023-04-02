@@ -1,0 +1,77 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+using ld = long double;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll n, W;
+  cin >> n >> W;
+  vector<ll> v(n), w(n);
+  rep(i, 0, n) cin >> v[i] >> w[i];
+
+  ll m = n / 2;
+  map<ll, ll> dp;
+
+  for(ll bi = 0; bi < (1 << m); bi++){
+      bitset<32> bits(bi);
+      ll sumv = 0;
+      ll sumw = 0;
+      rep(i, 0, m){
+          if(bits[i]){
+              sumv += v[i];
+              sumw += w[i];
+          } 
+      }
+      if(dp.find(sumw) == dp.end()) dp[sumw] = sumv;
+      else dp[sumw] = max(dp[sumw], sumv);
+  }
+
+  auto itr1 = dp.begin(), itr2 = dp.begin();
+  itr2++;
+  while(itr2 != dp.end()){
+      itr2->second = max(itr2->second, itr1->second);
+      itr1++; itr2++;
+  }
+
+  //irep(i, dp) cout << i->first <<" " << i->second << endl; 
+
+  ll ans = 0;
+
+  for(ll bi = 0; bi < (1 << (n - m)); bi++){
+      bitset<32> bits(bi);
+      ll sumv = 0;
+      ll sumw = 0;
+      for(ll i = 0; i < n - m; i++){
+          if(bits[i]){
+              sumw += w[m + i];
+              sumv += v[m + i];
+          }
+      }
+      if(W - sumw < 0) continue;
+      auto itr = dp.upper_bound(W - sumw);
+      itr--;
+      ans = max(ans, sumv + itr->second);
+  }
+  cout << ans << endl;
+
+
+
+  return 0;
+}

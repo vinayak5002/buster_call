@@ -1,0 +1,133 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<math.h>
+
+/*
+2022 NTHU PME Programming Practice #1
+E - (Bonus)Road Construction
+*/
+/*
+version:1.2
+8/64		2000<n<2025
+*/
+
+#define			CITY_NOS_MAX		(100000)
+
+//#define IF_DEBUGGING_ON
+
+double		route0				(	unsigned long		*axis_x		,
+							unsigned long		*axis_y		,
+							unsigned long		size
+						) ;
+
+int main(void)
+{
+	long		loop_i						;
+	long		loop_j						;
+	long		loop_k						;
+	unsigned long	city_nos					;
+	unsigned long	axis_x	[CITY_NOS_MAX]				;
+	unsigned long	axis_y	[CITY_NOS_MAX]				;
+	double		cost						;
+	unsigned char	running						;
+	unsigned int	temp_idx					;
+
+					running			=	1		;
+	while(running==1) {
+	  if(scanf("%d\n", &city_nos)==EOF) 
+					running			=	0		;
+	  if(running==1) {
+		for(loop_i=0;loop_i<city_nos;loop_i++) {
+		  if(			scanf("%d%d\n",axis_x+loop_i,axis_y+loop_i)==EOF	) {
+					running			=	0		;
+					break;
+		  }
+		}
+	  }
+
+	  if(running==1) {
+#ifdef	IF_DEBUGGING_ON
+		for(loop_i=0;loop_i<city_nos;loop_i++) {
+					temp_idx		=	loop_i		;
+					printf("(x%d,y%d)=(%d,%d)\n",temp_idx,temp_idx,axis_x[temp_idx],axis_y[temp_idx]);
+		}
+#endif
+					cost			=	route0	(axis_x, axis_y, city_nos);
+					printf("%.0f\n",cost);
+	  }
+	}
+
+    	return 0;
+}
+
+double		route0				(	unsigned long		*axis_x		,
+							unsigned long		*axis_y		,
+							unsigned long		size
+						) {
+
+		double		result	=	0	;
+		unsigned long	loop_i			;
+		unsigned long	loop_j			;
+		unsigned long	loop_k			;
+
+		unsigned long	index			;
+		unsigned long	count			;
+
+		unsigned long	cost_x			;
+		unsigned long	cost_y			;
+		unsigned long	cost_l			;
+		unsigned long	cost_g		[3]	;
+		double		cost_t			;
+
+		unsigned char	done	[CITY_NOS_MAX]	;
+		unsigned long	queue	[CITY_NOS_MAX]	;
+
+					loop_i			=		0			;
+		if(				size<2001					) {
+		  for(loop_j=0;loop_j<size;loop_j++) {
+					done	[loop_j]	=		0			;
+		  }
+					done	[0]		=		1			;
+					queue	[0]		=		loop_i			;
+					cost_t			=		0			;
+		  for(count=1;count<size;count++) {
+					cost_g		[2]	=		-1			;
+
+		    for(loop_j=0;loop_j<count;loop_j++) {
+					index			=		queue	[loop_j]	;
+		      for(loop_k=0;loop_k<size;loop_k++) {
+		        if(		done[loop_k]==0					) {
+					cost_x			=		abs(axis_x[index]-axis_x[loop_k]);
+					cost_y			=		abs(axis_y[index]-axis_y[loop_k]);
+				if(		cost_x>cost_y					)
+					cost_l			=		cost_x			;
+				else	cost_l			=		cost_y			;
+
+				if(		cost_l<cost_g[2]				) {
+					cost_g		[0]	=		index			;
+					cost_g		[1]	=		loop_k			;
+					cost_g		[2]	=		cost_l			;
+				}
+
+		        }
+		      }
+		    }
+					done	[cost_g[1]]	=		1			;
+					queue	[count]		=		cost_g		[1]	;
+					cost_t			+=		cost_g		[2]	;
+#ifdef	IF_DEBUGGING_ON
+		    			printf("round%d (%d,%d)->(%d,%d)\tcost=%u\ttotal=%.0f\n",loop_i,axis_x[cost_g[0]],axis_y[cost_g[0]],axis_x[cost_g[1]],axis_y[cost_g[1]],cost_g[2],cost_t);
+#endif
+		  }
+#ifdef	IF_DEBUGGING_ON
+		    			printf("\n");
+#endif
+		  if(				loop_i==0					||
+						cost_t<result					)
+					result			=		cost_t			;
+		}
+
+		return	result		;
+}
+

@@ -1,0 +1,93 @@
+import sys
+input = lambda: sys.stdin.readline().rstrip()
+sys.setrecursionlimit(10**8)
+from collections import defaultdict as dd,deque
+INF=float('INF')
+
+##辺の追加
+##sからtヘ容量fの辺を張る
+def add_edge(s,t,f):
+    ssize=len(edge[s])
+    tsize=len(edge[t])
+
+    edge[s].append([t,f,tsize])
+    edge[t].append([s,0,ssize])
+
+    return 
+
+##始点からの深さを調べる
+def D_BFS(s):
+
+    for i in range(V+1):depth[i]=INF
+    depth[s]=0
+
+    q=deque()
+    q.append(s)
+    while len(q):
+        s=q.popleft()
+        for i,a  in enumerate(edge[s]):
+            to,cost=a[0],a[1]
+            if cost and depth[to]==INF:
+                depth[to]=depth[s]+1
+                q.append(to)
+
+    return
+
+##流量チェック
+def D_DFS(s,t,F):
+
+    if s==t:return F
+    
+    itr=chk[s]
+    for i in range(itr,len(edge[s])):
+
+        to,cost,rev=edge[s][i]
+
+        ##まだ流す容量が存在するか確認
+        if cost==0:continue
+
+        ##より深い点か確認
+        if depth[s]>=depth[to]:continue
+
+        ##tまでのパスを見つけたら流せるだけ流す
+        flow=D_DFS(to,t,min(F,cost))
+
+        ##流せるなら再帰的に流量を戻していく
+        if flow>0:
+
+            edge[s][i][1]-=flow
+            edge[to][rev][1]+=flow
+
+            chk[s]=i
+            return flow
+
+    chk[s]=len(edge[s])
+    return 0
+
+def Dinic(s,t):
+
+    Flow=0
+    while 1:
+        D_BFS(s)
+        if depth[t]==INF:return Flow
+
+        for i in range(V+1):chk[i]=0
+
+        F=INF
+        while F>0:
+            F=D_DFS(s,t,INF)
+            Flow+=F
+            
+V,E=map(int,input().split())
+
+##辞書に[行き先,コスト,対応する辺の位置]を記録する
+edge=dd(list)
+for i in range(E):
+    u,v,c=map(int,input().split())
+    add_edge(u,v,c)
+
+depth=[INF]*(V+1)
+chk=[0]*(V+1)
+
+res=Dinic(0,V-1)
+print(res)

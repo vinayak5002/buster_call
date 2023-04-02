@@ -1,0 +1,51 @@
+import heapq
+
+def kruskal_algorithm(graph_list, nodenum):
+
+    uf_roots = [-1] * nodenum
+    uf_rank = [1] * nodenum
+
+    def uf_root(a):
+        if uf_roots[a] == -1:
+            return a
+        else:
+            uf_roots[a] = uf_root(uf_roots[a])
+            return uf_roots[a]        
+
+    def uf_union(a, b):
+        ra = uf_root(a)
+        rb = uf_root(b)
+        if ra == rb:
+            return False
+        if uf_rank[ra] > uf_rank[rb]:
+            uf_roots[rb] = ra
+        else:
+            uf_roots[ra] = rb
+            uf_rank[rb] = max(uf_rank[rb], uf_rank[ra] + 1)
+        return True
+
+    graph_list = [[d, s, t] for s, t, d in graph_list]
+    branch = []
+    heapq.heapify(graph_list)
+
+    while graph_list:
+        d, s, t = heapq.heappop(graph_list)
+        if uf_union(s, t):
+            branch.append((s, t, d))
+    
+    return branch
+
+
+def main():
+
+    v, e = map(int, input().split())
+    graph_list = [list(map(int, input().split())) for i in range(e)]
+
+    br = kruskal_algorithm(graph_list, v)
+
+    print(sum([d for _, _, d in br]))
+
+
+main()
+
+

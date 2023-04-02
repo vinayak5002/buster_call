@@ -1,0 +1,41 @@
+Q = [0]*100000
+head = 0
+tail = 0
+
+def enqueue(x):
+  global Q, tail
+  Q[tail] = x
+  if (tail+1) == len(Q):
+    tail = 0
+  else:
+    tail += 1
+
+def dequeue():
+  global Q, head
+  a = head
+  if (head+1) == len(Q):
+    head = 0
+  else:
+    head += 1
+  return Q[a]
+
+
+elaps = 0
+n, q = input().split()
+n, q = int(n), int(q)
+
+for _ in range(n):
+  name, time = input().split()
+  time = int(time)
+  Hash = {"name":name, "t":time}
+  enqueue(Hash)
+
+while head != tail:
+  u = dequeue()
+  c = min(u["t"],q)
+  u["t"] -= c
+  elaps += c
+  if u["t"] > 0:
+    enqueue(u)
+  else:
+    print(u["name"], elaps, sep=" ")

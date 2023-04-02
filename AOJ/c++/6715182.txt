@@ -1,0 +1,315 @@
+#include <algorithm>
+#include <cassert>
+#include <climits>
+#include <cmath>
+#include <iostream>
+#include <iterator>
+#include <map>
+#include <numeric>
+#include <queue>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
+#include <random>
+#include <complex>
+#include <bitset>
+#include <iomanip>
+#include <memory>
+#include <functional>
+#include <stack>
+
+#define rep(i, n, s) for (int i = (s); i < int(n); i++)
+#define per(i, n, s) for (int i = (n) - 1; i >= int(s); i--)
+#define MM << " " <<
+#define all(x) begin(x), end(x)
+#define rall(x) rbegin(x), rend(x)
+
+template <class T>
+using MinHeap = std::priority_queue<T, std::vector<T>, std::greater<T>>;
+template <class T>
+using MaxHeap = std::priority_queue<T>;
+
+using ll = long long;
+using Pii = std::pair<int, int>;
+using Pll = std::pair<ll, ll>;
+using Pdd = std::pair<double, double>;
+
+template <class T>
+bool chmin(T &a, const T b) {
+    if (b < a) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <class T>
+bool chmax(T &a, const T b) {
+    if (a < b) {
+        a = b;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+template <class T>
+void vdeb(const std::vector<T> &da) {
+    auto n = da.size();
+    for (size_t i = 0; i < n; i++) {
+        if (i == n - 1)
+            std::cout << da[i];
+        else
+            std::cout << da[i] << " ";
+    }
+    std::cout << std::endl;
+}
+template<class T>
+void vdeb(const std::vector<std::vector<T>> &da) {
+    auto n = da.size();
+    for (size_t i = 0; i < n; i++) {
+        // std::cout << i << " : ";
+        vdeb(da[i]);
+    }
+    std::cout << std::endl;
+}
+
+struct modint {
+    long long num;
+    const static long long p = 1000000007;
+    constexpr static long long pow(long long n, long long k) {//n^k(mod p)
+        n %= p;
+        long long ret = 1;
+        while(k) {
+            if(k&1) ret = ret * n % p;
+            n = n * n % p;
+            k >>= 1;
+        }
+        return ret;
+    }
+    // a*A + b*B = 1
+    constexpr static void euclid(long long &a, long long &b) { // a>=b A*b+B*(a-a/b*b)=1
+        if (a == 1) {
+            a = 1;
+        }
+        else {
+            long long A = b, B = a % b;
+            euclid(A, B);
+            b = (A - (p + a / b) % p * B % p + p) % p;
+            a = B;
+        }
+    }
+    constexpr static long long rev(const long long n) {// n*x-p*y=1
+        //long long q = p;
+        //euclid(p, n, p);
+        //return n % q;
+        return pow(n,p-2);
+    }
+    constexpr modint() : num(0) {}
+    constexpr modint(long long x) : num(x%p < 0 ? x%p+p : x%p) {}
+    constexpr modint inv() const {return rev(num);}
+    modint operator-() const {return modint(p-num);}
+    modint& operator+=(const modint &other){
+        num = (num + other.num) % p;
+        return *this;
+    }
+    modint& operator-=(const modint &other){
+        num = (num - other.num + p) % p;
+        return *this;
+    }
+    modint& operator*=(const modint &other){
+        num = (num * other.num) % p;
+        if(num < 0) num += p;
+        return *this;
+    }
+    modint& operator/=(const modint &other){
+        (*this) *= other.inv();
+        return *this;
+    }
+    modint& operator+=(const long long &other){
+        num = (num + other) % p;
+        return *this;
+    }
+    modint& operator-=(const long long &other){
+        num = (num - other + p) % p;
+        return *this;
+    }
+    modint& operator*=(const long long &other){
+        num = (num * other) % p;
+        return *this;
+    }
+    modint& operator/=(const long long &other){
+        (*this) *= rev(other);
+        return *this;
+    }
+    modint& operator++(){return *this += 1;}
+    modint& operator--(){return *this -= 1;}
+    modint& operator=(const long long &other){return (*this) = modint(other);}
+    modint operator+(const modint &other) const{return modint(*this) += other;}
+    modint operator-(const modint &other) const{return modint(*this) -= other;}
+    modint operator*(const modint &other) const{return modint(*this) *= other;}
+    modint operator/(const modint &other) const{return modint(*this) /= other;}
+    modint operator+(const long long &other) const{return modint(*this) += other;}
+    modint operator-(const long long &other) const{return modint(*this) -= other;}
+    modint operator*(const long long &other) const{return modint(*this) *= other;}
+    modint operator/(const long long &other) const{return modint(*this) /= other;}
+    bool operator==(const modint &other) const{return num == other.num;}
+};
+std::istream& operator>>(std::istream &is, modint x) {
+    is >> x.num;
+    return is;
+}
+std::ostream& operator<<(std::ostream &os, const modint &x){
+    os << x.num;
+    return os;
+}
+
+
+namespace std {
+template<>
+struct numeric_limits<Pll> {
+    static constexpr Pll
+    max() noexcept { return { LLONG_MAX/2, LLONG_MAX /2 }; }
+};
+}
+
+using namespace std;
+
+Pll operator+(const Pll&rhs, const Pll &lhs) {
+    return {rhs.first + lhs.first, rhs.second + lhs.second};
+}
+
+Pll operator/(const Pll&rhs, const int &lhs) {
+    return {rhs.first / lhs, rhs.second / lhs};
+}
+
+
+template<class T>
+T zero() { return  0; }
+
+template<>
+Pll zero<Pll>() { return {0, 0}; }
+
+
+
+template <typename T, bool directed = false>
+struct Dijkstra {
+    struct edge {
+        int to;
+        T cost;
+        int id;
+        edge(int to, T cost, int id) : to(to), cost(cost), id(id) {}
+    };
+
+    vector<vector<edge>> es;
+    vector<T> d;
+    vector<int> pre_v, pre_e;
+    const T INF_T = numeric_limits<T>::max() / 2;
+    const int n;
+    int m;
+
+    Dijkstra(int n) : es(n), d(n), pre_v(n), pre_e(n), n(n), m(0) {}
+
+    void add_edge(int from, int to, T cost) {
+        assert(0 <= from);
+        assert(0 <= to);
+        assert(from < n);
+        assert(to < n);
+        es[from].emplace_back(to, cost, m);
+        if (!directed) es[to].emplace_back(from, cost, m);
+        m++;
+    }
+
+    T shortest_path(int s, int t = 0) {
+        fill(begin(d), end(d), INF_T);
+        using P = pair<T, int>;
+        priority_queue<P, vector<P>, greater<P>> que;
+        que.emplace(d[s] = zero<T>(), s);
+        while (!que.empty()) {
+            auto [p, i] = que.top();
+            que.pop();
+            if (p > d[i]) continue;
+            for (auto &e : es[i]) {
+                if (d[i] + e.cost < d[e.to]) {
+                    pre_v[e.to] = i, pre_e[e.to] = e.id;
+                    que.emplace(d[e.to] = d[i] + e.cost, e.to);
+                }
+            }
+        }
+        return d[t];
+    }
+
+    vector<int> restore_path(int s, int t, bool use_id = false) {
+        if (d[t] == INF_T) return {};
+        vector<int> ret;
+        for (int now = t; now != s; now = pre_v[now]) ret.push_back(use_id ? pre_e[now] : now);
+        if (!use_id) ret.push_back(s);
+        reverse(begin(ret), end(ret));
+        return ret;
+    }
+};
+
+const int K = 35;
+const ll MOD = 1000'000'007;
+
+int n, p, q;
+ll solve() {
+    Dijkstra<ll, true> g1(n*2*K);
+    Dijkstra<Pll, true> g2(n*2);
+    rep(i,p,0) {
+        ll a, b, c;
+        cin >> a >> b >> c;
+        --a; --b;
+        g2.add_edge(a, b, {0, c});
+        rep(j,K,0) {
+            const int d = j * n * 2;
+            g1.add_edge(d + a, d + b, c);
+            g1.add_edge(d + b, d + a, c);
+        }
+    }
+    rep(i,q,0) {
+        ll a, b, c;
+        cin >> a >> b >> c;
+        --a; --b;
+        g2.add_edge(a + n, b + n, {0, c});
+        rep(j,K,0) {
+            const int d = j * n * 2 + n;
+            g1.add_edge(d + a, d + b, c);
+            g1.add_edge(d + b, d + a, c);
+        }
+    }
+    rep(i,n,0) {
+        g2.add_edge(i, i+n, {1, 0});
+        g2.add_edge(i+n, i, {0, 0});
+        rep(j,K,0) {
+            g1.add_edge(j * n * 2 + i, j * n * 2 + n + i, 1LL << j);
+            if(j) g1.add_edge(j * n * 2 - n + i, j * n * 2 + i, 0LL);
+        }
+    }
+    g1.shortest_path(0);
+    ll ans = g1.INF_T;
+    rep(i,K*2,0) {
+        chmin(ans, g1.d[i * n + n - 1]);
+    }
+    if(ans != g1.INF_T) return ans % MOD;
+    g2.shortest_path(0);
+    auto val = min(g2.d[n-1], g2.d[n*2-1]);
+    ans = modint::pow(2, val.first);
+    ans += val.second;
+    ans -= 1;
+    return ans % MOD;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    std::cin.tie(nullptr);
+    vector<ll> ans;
+    while(1) {
+        cin >> n >> p >> q;
+        if(n == 0) break;
+        ans.emplace_back(solve());
+    }
+    for(auto &i : ans) cout << i << endl;
+}

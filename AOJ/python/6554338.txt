@@ -1,0 +1,25 @@
+import sys
+ioi = sys.stdin
+import io
+ioi = io.StringIO("""2 20
+5 9
+4 10
+""")
+rxs = lambda: map(int, ioi.readline().split())
+N, W = rxs()
+vw = [[*rxs()] for _ in range(N)]
+dp = []
+
+# dp[n][w] = max(dp[n-1][w], dp[n-1][w-w[n]]+v[n])
+
+for n in range(N):
+    dp.append([])
+    for w in range(W+1):
+        dp[n].append(max(
+            dp[n-1][w],
+            dp[n-1][w-vw[n][1]] + vw[n][0],
+        ) if n > 0 else (vw[n][0] * (vw[n][1] <= w)))
+
+print(dp[N-1][W])
+
+

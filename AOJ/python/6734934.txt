@@ -1,0 +1,39 @@
+from collections import defaultdict
+
+def dfs(node_index):
+    global has_circle
+    if (node_index in visited):
+        if (node_index in trace):
+            has_circle = 1
+            return
+        return
+
+    visited.append(node_index)
+    trace.append(node_index)
+
+    if(node_index != ''):
+        children = graphDict[node_index]
+        for child in children:
+            dfs(child)
+    trace.pop()
+
+if __name__ == "__main__":
+    graphData = []
+    vSum, eSum = map(int, input().strip().split())
+    for i in range(eSum):
+        oneLine = list(map(int, input().strip().split()))
+        graphData.append(oneLine)
+    # print(graphData)
+
+    graphDict = defaultdict(set)
+    # print(graphDict)
+    for cur in graphData:
+        graphDict[cur[0]].add((cur[1]))
+    # print(graphDict)
+
+    visited = []
+    trace = []
+    has_circle = 0
+    for i in range(vSum):
+        dfs(i)
+    print(has_circle)

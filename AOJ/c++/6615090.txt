@@ -1,0 +1,98 @@
+#include<cstdio>
+#include<iostream>
+#include<algorithm>
+using namespace std;
+const int maxn=1e5+10;
+struct node{
+	int p,r,l;
+};
+node t[maxn];
+int d[maxn];
+int printf(int u)
+{
+	cout<<"node "<<u<<": ";
+	cout<<"parent = "<<t[u].p<<",  ";
+	cout<<"depth = "<<d[u]<<", ";
+	if(t[u].p==-1)
+	{
+		cout<<"root, ";
+	}
+	else if(t[u].r==-1)
+	{
+		cout<<"leaf, ";
+	}
+	else 
+	{
+		cout<<"internal node, ";
+	}
+	cout<<"[";
+	for(int i=0,m=t[u].l;m!=-1;i++,m=t[m].r)
+	{
+		if(i)
+		{
+			cout<<", ";
+		}
+		cout<<m;
+	}
+	cout<<"]"<<endl;
+}
+
+int dp(int u,int p)
+{
+	d[u]=p;
+	if(t[u].r!=-1)
+	{
+		dp(t[u].r,p);
+	}
+	if(t[u].l!=-1)
+	{
+		dp(t[u].l,p+1);
+	}
+}
+ 
+int main()
+{
+	int n;
+	scanf("%d",&n);
+	for(int i=0;i<n;i++)
+	{
+		t[i].p=-1;
+		t[i].l=-1;
+		t[i].r=-1;
+	}
+	for(int i=0;i<n;i++)
+	{
+		int u,k;
+		scanf("%d %d",&u,&k);
+		for(int j=0;j<k;j++)
+		{
+			int a,b;
+			scanf("%d",&a);
+			if(j)
+			{
+				t[b].r=a;
+			}
+			else
+			{
+				t[u].l=a;
+			}
+			b=a;
+			t[a].p=u;
+		}
+	}
+	int h;
+	for(int i=0;i<n;i++)
+	{
+		if(t[i].p==-1)
+		{
+			h=i;
+		}
+	}
+	dp(h,0);
+	for(int i=0;i<n;i++)
+	{
+		printf(i);
+	}
+	return 0;
+}
+

@@ -1,0 +1,43 @@
+import sys
+
+sys.setrecursionlimit(10**9)
+
+def dp(l,r,d):
+	if (l,r) in d.keys():
+		return d[(l,r)]
+
+	if r-l==1:
+		d[(l,r)] = 0
+		return 0
+	if r-l == 2:
+		if abs(L[r-1] - L[l]) <= 1:
+			d[(l,r)] = 2
+			return 2
+		else:
+			d[(l,r)] = 0
+			return 0
+
+	if abs(L[l] - L[r-1]) <= 1:
+
+		tmp = dp(l+1, r-1,d)
+
+		if tmp == r-l-2:
+			d[(l,r)] = tmp+2
+			return tmp+2
+
+	ret = 0
+
+	for i in range(l+1,r):
+		ret = max(ret, dp(l,i,d) + dp(i,r,d))
+
+	d[(l,r)] = ret
+	return ret
+
+
+while True:
+	N = int(input())
+	if N == 0:
+		exit()
+	L = list(map(int,input().split()))
+	d = dict()
+	print(dp(0,N,d))

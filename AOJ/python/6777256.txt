@@ -1,0 +1,82 @@
+import copy
+from collections import deque
+
+def state(mat):
+    s = []
+    for y in range(3):
+        for x in range(3):
+            s.append(mat[y][x])
+    return s
+
+#----------------------------------
+dy = [0,-1,1,0]
+dx = [-1,0,0,1]
+
+A = []
+pos = [-1,-1]
+for _ in range(3):
+    a = list(input().split())
+    A.append(a)
+for i in range(3):
+    for j in range(3):
+        if A[i][j] == "0":
+            pos = [i,j]
+
+B = []
+num = 1
+for i in range(3):
+    b = []
+    for j in range(3):
+        b.append(str(num))
+        num += 1
+        num %= 9
+    B.append(b)
+ans = "".join(state(B))
+
+shp = "".join(state(A))
+dct = dict()
+dct[shp] = 0
+deq = deque()
+deq.append((A,pos,0))
+#print(A,pos)
+#print()
+#print(*A,sep="\n")
+
+#K = 0
+flag = False
+while len(deq) > 0 and not flag: # and K < 20:
+#    K += 1
+    acr,pcr,cnt = deq.popleft() #パズルの状態(crr), 0の位置, 移動回数
+    y,x = pcr[0],pcr[1]
+#    print(acr)
+    for i in range(4):
+        ny,nx = y + dy[i], x + dx[i]
+#        na = acr[:] # Next A
+        na = copy.deepcopy(acr)
+        c = cnt + 1 # count
+        if not (0 <= ny < 3 and 0 <= nx < 3): continue
+        na[ny][nx], na[y][x] = na[y][x], na[ny][nx]
+        nsh = "".join(state(na))
+
+        if nsh not in dct or dct[nsh] > c:
+            dct[nsh] = c
+            deq.append((na,[ny,nx],c))
+        if ans in dct:
+            print(dct[ans])
+            flag = True
+            
+#    print()
+#    print(deq)
+
+#print(ans)
+#print(dct)
+#for k,v in dct.items():
+#    if k == ans:
+#        print(v)
+#    print(k,v)
+#print(deq)
+#print(*A,sep="\n")
+#print()
+#print(*B,sep="\n")
+
+

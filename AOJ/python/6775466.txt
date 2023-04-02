@@ -1,0 +1,135 @@
+import sys
+
+sys.setrecursionlimit(100000)
+
+
+class Node:
+    def __init__(self, key):
+        self.key = key
+        self.left = None
+        self.right = None
+        self.parent = None
+
+
+class BinarySearchTree:
+    def __init__(self, key):
+        self.root = None
+        self.inorderList = []
+        self.preorderList = []
+        self.insert(key)
+
+    def insert(self, key):
+        rootNode = self.root
+        if rootNode is None:
+            self.root = Node(key)
+            return
+        else:
+            while True:
+                targetValue = rootNode.key
+                if key < targetValue:
+                    if rootNode.left is None:
+                        rootNode.left = Node(key)
+                        return
+                    rootNode = rootNode.left
+                elif key > targetValue:
+                    if rootNode.right is None:
+                        rootNode.right = Node(key)
+                        return
+                    rootNode = rootNode.right
+                else:
+                    rootNode.key = key
+                    return
+
+    def __inorder(self, node):
+        if node is not None:
+            self.__inorder(node.left)
+            self.inorderList.append(node.key)
+            self.__inorder(node.right)
+
+    def inorder(self):
+        self.inorderList = []
+        node = self.root
+        self.__inorder(node)
+        return self.inorderList
+
+    def __preorder(self, node):
+        if node is not None:
+            self.preorderList.append(node.key)
+            self.__preorder(node.left)
+            self.__preorder(node.right)
+
+    def preorder(self):
+        node = self.root
+        self.preorderList = []
+        self.__preorder(node)
+        return self.preorderList
+
+    def find(self, key):
+        node = self.root
+        while node is not None and key != node.key:
+            if key < node.key:
+                node = node.left
+            else:
+                node = node.right
+        return node
+
+    def deleteNode(self, root, key):
+        if root is None:
+            # rootがない場合Noneを返す
+            return root
+
+        if key < root.key:
+            # 　削除対象がrootより小さければ、左部分木から削除する
+            root.left = self.deleteNode(root.left, key)
+        elif key > root.key:
+            # 　削除対象がrootより大きければ、右部分木から削除する
+            root.right = self.deleteNode(root.right, key)
+        else:
+            # 　削除対象がrootと同じ場合
+            if root.left is None:
+                # 左の子がない場合、rootを削除し、右の子で置き換える
+                temp = root.right
+                root = None
+            elif root.right is None:
+                # 右の子がない場合、rootを削除し、左の子で置き換える
+                temp = self.root.left
+                root = None
+            else:
+                # 左も右もある場合、右側の最小nodeを見つけて置き換える
+                temp = self.__minimumNode(root.right)
+                root.key = temp.key
+                root.right = self.deleteNode(root.right, temp.key)
+        return root
+
+    def __minimumNode(self, targetNode):
+        node = targetNode
+        while node.left is not None:
+            node = node.left
+        return node
+
+
+m = int(input())
+
+
+binarySearchTree = None
+
+for _ in range(m):
+    command = input().split()
+    if command[0] == "insert":
+        key = int(command[1])
+        if binarySearchTree is None:
+            binarySearchTree = BinarySearchTree(key)
+        else:
+            binarySearchTree.insert(key)
+    elif command[0] == "print":
+        print(" " + " ".join(map(str, binarySearchTree.inorder())))
+        print(" " + " ".join(map(str, binarySearchTree.preorder())))
+    elif command[0] == "find":
+        key = int(command[1])
+        if binarySearchTree.find(key) is None:
+            print("no")
+        else:
+            print("yes")
+    else:
+        key = int(command[1])
+        binarySearchTree.deleteNode(binarySearchTree.root, key)

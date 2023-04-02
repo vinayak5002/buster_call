@@ -1,0 +1,77 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    h, w, s = map(int, f.readline().split())
+    image = []
+    for _ in range(h):
+        image.append(list(map(int, f.readline().split())))
+
+    if s == h * w:
+        print(0)
+    else:
+        num_pixels = 255
+        pixel_hist_grid = [[[0] * num_pixels for _ in range(w)] for _ in range(h)]
+        pixel_hist_grid[0][0][image[0][0] - 1] += 1
+        for x in range(1, w):
+            pixel_hist_grid[0][x] = pixel_hist_grid[0][x - 1][:]
+            pixel_hist_grid[0][x][image[0][x] - 1] += 1
+
+        for y in range(1, h):
+            pixel_hist_grid[y][0] = pixel_hist_grid[y - 1][0][:]
+            pixel_hist_grid[y][0][image[y][0] - 1] += 1
+            for x in range(1, w):
+                pixel_hist_grid[y][x] = [i + j - k for i, j, k in zip(pixel_hist_grid[y][x - 1],
+                                                                      pixel_hist_grid[y - 1][x],
+                                                                      pixel_hist_grid[y - 1][x - 1])]
+                pixel_hist_grid[y][x][image[y][x] - 1] += 1
+
+        all_pixel_hist = pixel_hist_grid[h - 1][w - 1]
+        min_num_pixels = sum([1 for i in all_pixel_hist if i > 0])
+
+        for hh in range(1, max(2, min(h, s + 1))):
+            for ww in range(min(w, s + 1), 0, -1):
+                if ww * hh > s:
+                    continue
+
+                for y in range(h - hh + 1):
+                    by = y - 1
+                    ey = y + hh - 1
+                    for x in range(w - ww + 1):
+                        bx = x - 1
+                        ex = x + ww - 1
+                        cur_pixel_hist = pixel_hist_grid[ey][ex]
+                        if bx >= 0:
+                            dif_x_pixel_hist = pixel_hist_grid[ey][bx]
+                            cur_pixel_hist = [i - j for i, j in zip(cur_pixel_hist, dif_x_pixel_hist)]
+                        if by >= 0:
+                            dif_y_pixel_hist = pixel_hist_grid[by][ex]
+                            cur_pixel_hist = [i - j for i, j in zip(cur_pixel_hist, dif_y_pixel_hist)]
+
+                        if bx >= 0 and by >= 0:
+                            dif_xy_pixel_hist = pixel_hist_grid[by][bx]
+                            cur_pixel_hist = [i + j for i, j in zip(cur_pixel_hist, dif_xy_pixel_hist)]
+
+                        remaining_pixel_hist = [i - j for i, j in zip(all_pixel_hist, cur_pixel_hist)]
+                        num_remaining_pixels = sum(1 for i in remaining_pixel_hist if i > 0)
+                        min_num_pixels = min(min_num_pixels, num_remaining_pixels)
+                break
+
+        print(min_num_pixels)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

@@ -1,0 +1,76 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class LowLink:
+    def __init__(self, num_vertexes, adjacency_list):
+        self._num_vertexes = num_vertexes
+        self._adjacent_list = adjacency_list
+        self._is_used = [False] * num_vertexes
+        self._ord = [0] * num_vertexes
+        self._low = [0] * num_vertexes
+        self._articulation_point_list = []
+        return
+
+    def _dfs(self, u, k, parent):
+        self._is_used[u] = True
+        self._ord[u] = k
+        k += 1
+        self._low[u] = self._ord[u]
+
+        is_articulation_point = False
+        counter = 0
+        for v in self._adjacent_list[u]:
+            if not self._is_used[v]:
+                counter += 1
+                k = self._dfs(v, k, u)
+                self._low[u] = min(self._low[u], self._low[v])
+                if parent != -1 and self._ord[u] <= self._low[v]:
+                    is_articulation_point = True
+            elif v != parent:
+                self._low[u] = min(self._low[u], self._ord[v])
+        if parent == -1 and counter >= 2:
+            is_articulation_point = True
+
+        if is_articulation_point:
+            self._articulation_point_list.append(u)
+
+        return k
+
+    def search(self):
+        k = 0
+        for u in range(self._num_vertexes):
+            if not self._is_used[u]:
+                k = self._dfs(u, k, -1)
+        return self._articulation_point_list
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    sys.setrecursionlimit(2**16 - 1)
+    num_vertexes, num_edges = map(int, f.readline().split())
+    adjacency_list = [[] for _ in range(num_vertexes)]
+    for _ in range(num_edges):
+        s, t = map(int, f.readline().split())
+        adjacency_list[s].append(t)
+        adjacency_list[t].append(s)
+
+    low_link = LowLink(num_vertexes, adjacency_list)
+    articulation_point_list = low_link.search()
+    articulation_point_list.sort()
+    print(*articulation_point_list, sep='\n')
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

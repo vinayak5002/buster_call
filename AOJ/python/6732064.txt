@@ -1,0 +1,66 @@
+module ProblemB where
+
+import qualified Data.HashSet as HS
+import qualified Data.HashMap.Strict as HM
+import Data.List
+import Data.Maybe
+import Control.Monad
+import Control.Monad.ST
+import Control.Applicative
+import Data.STRef
+import Debug.Trace
+
+type Edge = (Int, Int)
+type Group = HS.HashSet Int
+type Groups = HM.HashMap Int Group
+
+rootKey :: Groups -> Int -> Maybe Int
+rootKey gs v = listToMaybe. HM.keys $ HM.filter (HS.member v) gs
+
+maximumMay :: [Int] -> Maybe Int
+maximumMay [] = Nothing
+maximumMay ls = Just . maximum $ ls
+
+unionFind :: STRef s Groups -> Edge -> ST s Bool
+unionFind gsref e = do
+  gs <- readSTRef gsref
+  let (v0, v1) = e
+  let g0k = rootKey gs v0
+      g1k = rootKey gs v1
+  if fromMaybe False ((==) <$> g0k <*> g1k) then return True else do
+    let maxk = fromMaybe 0 $ maximumMay $ HM.keys gs
+    let g0 = find gs g0k v0
+        g1 = find gs g1k v1
+        g = HS.union g0 g1
+    let gs1 = maybe gs (`HM.delete` gs) g0k
+        gs2 = maybe gs1 (`HM.delete` gs1) g1k
+        gs3 = HM.insert (maxk+1) g gs2
+    writeSTRef gsref gs3
+    return False
+  where
+  find gs key v = maybe (HS.singleton v) (\k -> HM.findWithDefault HS.empty k gs) key
+
+existClosed :: [Edge] -> Bool
+existClosed es = runST $ do
+  gsref <- newSTRef HM.empty
+  let r = find id <$> mapM (unionFind gsref) es
+  fromMaybe False <$> r
+
+readInt = read :: (String -> Int)
+
+readGEn = do
+  gn:en:_ <- map readInt . words <$> getLine
+  return (gn, en)
+
+readEdge :: IO Edge
+readEdge = do
+  v0:v1:_ <- map readInt . words <$> getLine
+  return (v0, v1)
+
+main = do
+  (gn, en) <- readGEn
+  es <- replicateM en readEdge
+  print $ if existClosed es then 1 else 0
+  
+
+

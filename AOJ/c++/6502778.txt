@@ -1,0 +1,88 @@
+#include <iostream>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+
+#define x first
+#define y second
+
+using namespace std;
+
+typedef long long LL;
+typedef pair<int, int> PII;
+
+const int N = 4e4 + 10;
+
+int n, m;
+int h[N], e[N], ne[N], w[N], v[N], idx;
+int dist[N];
+int cost[N];
+bool st[N];
+
+void add(int a, int b, int c, int d)
+{
+	w[idx] = c, v[idx] = d, e[idx] = b, ne[idx] = h[a], h[a] = idx ++ ;
+}
+
+void dijkstra()
+{
+	memset(cost, 0x3f, sizeof cost);
+	memset(dist, 0x3f, sizeof dist);
+	dist[1] = 0;
+	
+	priority_queue<PII, vector<PII>, greater<PII> > heap;
+	heap.push({0, 1});
+	
+	while (heap.size())
+	{
+		PII t = heap.top();
+		heap.pop();
+		
+		int ver = t.y, dis = t.x;
+		
+		if (st[ver]) continue;
+		st[ver] = true;
+		
+		for (int i = h[ver]; ~i; i = ne[i])
+		{
+			int j = e[i];
+			if (dist[j] > dis + w[i])
+			{
+				dist[j] = dis + w[i];
+				cost[j] = v[i];
+				heap.push({dist[j], j});
+			}
+			else if (dist[j] == dis + w[i])
+			{
+				cost[j] = min(cost[j], v[i]);
+				heap.push({dist[j], j});
+			}
+		}
+	}
+}
+
+int main()
+{
+	while (scanf("%d%d", &n, &m), n||m)
+	{
+		memset(st, false, sizeof st);
+		memset(h, -1, sizeof h);
+		idx = 0;
+		
+		for (int i = 0; i < m; i ++ )
+		{
+			int a, b, c, d;
+			scanf("%d%d%d%d", &a, &b, &c, &d);
+			add(a, b, c, d), add(b, a, c, d);
+		}
+		
+		dijkstra();
+		
+		LL res = 0;
+		for (int i = 2; i <= n; i ++ ) res += cost[i];
+		
+		printf("%lld\n", res);
+	}
+	
+	return 0;
+}

@@ -1,0 +1,52 @@
+import itertools, math
+
+class Node:
+    def __init__(self, dims, axis, nodes):
+        self.dims = dims
+        self.axis, self.nodes = axis, nodes
+        self.left = self.right = None
+    def query_range(self, ys, zs, lowers=None, uppers=None, normalize=True):
+        dims, axis = self.dims, self.axis
+        lowers = lowers or [-math.inf]*dims
+        uppers = uppers or [+math.inf]*dims
+        ys, zs = zip(*((min(ws), max(ws)) for ws in [*zip(ys, zs)][:dims])) if normalize else (ys, zs)
+        if zs[axis] < lowers[axis] or uppers[axis] < ys[axis]: return []
+        lowers2, uppers2 = lowers[:], uppers[:]
+        lowers2[axis] = uppers2[axis] = self.values[0][axis]
+        return itertools.chain(
+            ( vs for vs in self.values if all(y <= v <= z for v, y, z in [*zip(vs, ys, zs)][:dims]) ),
+            self.left.query_range(ys, zs, lowers, uppers2, normalize=False) if self.left else [],
+            self.right.query_range(ys, zs, lowers2, uppers, normalize=False) if self.right else [],
+        )
+    pass
+
+def kdtree(xss, dims=None, axis=0, leaf_size=1):
+    dims = dims or len(xss[0])
+
+    if not xss: return None
+    
+    node = Node(dims, axis, len(xss))
+    xss.sort(key=lambda xs: xs[axis])
+
+    if node.nodes <= leaf_size:
+        node.values = xss
+        return node
+
+    mid = node.nodes//2
+    node.values = [xss[mid]]
+    node.left = kdtree(xss[0:mid], dims, (axis+1)%dims, leaf_size)
+    
+    if node.nodes > 1:
+        node.right = kdtree(xss[mid+1:], dims, (axis+1)%dims, leaf_size)
+
+    return node
+
+rxs = lambda: [*map(int, input().split())]
+N, = rxs()
+tree = kdtree([(x, y, i) for i, (x, y) in ((i, rxs()) for i in range(N))], dims=2, leaf_size=1)
+Q, = rxs()
+
+for sx, tx, sy, ty in [rxs() for _ in range(Q)]:
+    ans = "\n".join(map(str, sorted(i[2] for i in tree.query_range((sx, sy), (tx, ty)))))
+    print((ans + "\n") if ans else "")
+

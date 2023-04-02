@@ -1,0 +1,178 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+using db = double;
+using str = string;
+
+using pi = pair<int,int>;
+using pl = pair<ll,ll>;
+using pd = pair<db,db>;
+
+using vi = vector<int>;
+using vb = vector<bool>;
+using vl = vector<ll>;
+using vd = vector<db>;
+using vs = vector<str>;
+using vpi = vector<pi>;
+using vpl = vector<pl>;
+using vpd = vector<pd>;
+
+#define tcT template<class T
+#define tcTU tcT, class U
+tcT> using V = vector<T>;
+tcT, size_t SZ> using AR = array<T,SZ>;
+tcT> using PR = pair<T,T>;
+// pairs
+#define mp make_pair
+#define f first
+#define s second
+
+// vectors
+// size(x), rbegin(x), rend(x) need C++17
+#define sz(x) int((x).size())
+#define bg(x) begin(x)
+#define all(x) bg(x), end(x)
+#define rall(x) x.rbegin(), x.rend()
+#define sor(x) sort(all(x))
+#define rsz resize
+#define ins insert
+#define ft front()
+#define bk back()
+#define pb push_back
+#define eb emplace_back
+#define pf push_front
+// #define rtn return
+
+#define lb lower_bound
+#define ub upper_bound
+
+// loops
+#define FOR(i,a,b) for (ll (i) = (a); (i) < (b); ++(i))
+#define REP(i,a) FOR(i,0,a)
+#define ROF(i,a,b) for (ll (i) = (b)-1; (i) >= (a); --(i))
+#define PER(i,a) ROF(i,0,a)
+#define rep(a) REP(_,a)
+#define each(a,x) for (auto& a: x)
+#define bit_and(m, op) (m & (1 << op))
+#define bit_or(m, op) (m | (1 << op))
+#define bit_xor(m, i) (m ^ (1 << i))
+
+const int MOD = 1e9+7;
+const int MX = 2e5+5;
+const ll INF = 1e18;
+const db PI = acos((db)-1);
+
+const int max_val = 1001;
+
+/*
+IDEA DEL ALGORITMO:
+Utilizar DP con bitmask de v filas y 2^v columnas.
+Cada columna en binario 0 significa que el nodo está disponible y 1
+que está bloqueado.
+Es el clásico problema del TSP que tiene como complejidad inicial O(n!),
+pero haciendo uso de la programación dinámica bajamos esa complejidad a exponencial.
+
+COMPLEJIDAD:
+O(n^2 * 2^n)
+*/
+
+/* PROBLEMA A NUEVO */
+
+int main() 
+{
+    int t, v, d, beg, end, w;
+    cin >> v >> d;
+
+    int adjacency[v][v];
+    FOR (i, 0, v) {
+        FOR (j, 0, v) {
+            if (i != j) adjacency[i][j] = MX;
+            else adjacency[i][j] = 0;
+        }
+    }
+
+    while (d--) {
+        cin >> beg >> end >> w;
+        adjacency[beg][end] = w;
+    }
+
+    int dp[v][1 << v];
+
+    ROF (m, 0, (1 << v)) {
+        FOR (u, 0, v) {
+            if (m == (1 << v) - 1) {
+                dp[u][m] = adjacency[u][0];
+                continue;
+            }
+
+            dp[u][m] = MX;
+
+            FOR (op, 0, v) {
+                if (bit_and(m, op) == 0 and adjacency[u][op] != MX) {
+                    dp[u][m] = min(dp[u][m], adjacency[u][op]+dp[op][m | (1 << op)]);
+                }
+            }
+        }
+    }
+
+    if (dp[0][1] == MX) cout << "-1";
+    else cout << dp[0][1];
+    cout << endl;
+}
+
+/* PROBLEMA A ANTIGUO */
+
+/*
+Me salió el ejercicio A anterior antes de que lo cambien.
+La idea es utilizar dp con bitmask para reducir la complejidad
+del problema TSP de O(n!) a O(2^n * n^2).
+En este bitmask 0 significa que el nodo está disponible, mientras que
+1 quiere decir que está bloqueado.
+Complejidad: O(2^n * n^2)
+*/
+
+// int main() 
+// {
+//     int t, n, d;
+//     cin >> t;
+//     while (t--) {
+//         cin >> n;
+
+//         ++n;
+
+//         int adjacency[n][n];
+
+//         FOR (i, 0, n) {
+//             FOR (j, 0, n) {
+//                 if (i == j) adjacency[i][j] = 0;
+//                 else {
+//                     cin >> d;
+//                     adjacency[i][j] = d;
+//                 }
+//             }
+//         }
+
+
+//         int dp[n][1 << n];
+
+//         ROF (m, 0, (1 << n)) {
+//             FOR (u, 0, n) {
+//                 if (m == (1 << n) - 1) {
+//                     dp[u][m] = adjacency[u][0];
+//                     continue;
+//                 }
+
+//                 dp[u][m] = INT_MAX;
+
+//                 FOR (op, 0, n) {
+//                     if (bit_and(m, op) == 0) {
+//                         dp[u][m] = min(dp[u][m], adjacency[u][op]+dp[op][m | (1 << op)]);
+//                     }
+//                 }
+//             }
+//         }
+
+//         cout << dp[0][0] << endl;
+//     }
+// }

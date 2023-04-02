@@ -1,0 +1,287 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+//構造体宣言
+struct node
+{
+    struct node *right;
+    struct node *left;
+    struct node *parent;
+    int key;
+};
+
+//構造体変数の宣言
+typedef struct node *Node;
+
+// NILの定義
+#define NIL NULL
+
+Node root;
+
+Node treeMinimum(Node x)
+{
+}
+
+Node treeMaximum(Node x)
+{
+}
+
+Node treeSearch(Node u, int k)
+{
+    while (u != NIL && k != u->key)
+    {
+        if (k < u->key)
+        {
+            u = u->left;
+        }
+        else
+        {
+            u = u->right;
+        }
+    }
+    return u;
+}
+
+Node treeSuccessor(Node x)
+{
+}
+
+void treeDelete(Node z)
+{
+    //構造体変数の宣言
+    Node y; // node to be deleted
+
+    //子がない時の処理
+    if (z->left == NIL && z->right == NIL)
+    {
+        if (z->parent->left == z) //削除したい節点が親の左の子のとき
+        {
+            z->parent->left = NIL;
+        }
+        else //削除したい節点が親の右の子のとき
+        {
+            z->parent->right = NIL;
+        }
+    }
+    else if (z->left == NIL || z->right == NIL) //子が一つだけあるとき
+    {
+        if (z->parent->left == z) //削除したい節点が親の左の子のとき
+        {
+            if (z->left == NIL)
+            {
+                z->parent->left = z->right;
+                z->right->parent = z->parent;
+            }
+            else
+            {
+                z->parent->left = z->left;
+                z->left->parent = z->parent;
+            }
+        }
+        else //削除したい節点が親の右の子のとき
+        {
+            if (z->left == NIL)
+            {
+                z->parent->right = z->right;
+                z->right->parent = z->parent;
+            }
+            else
+            {
+                z->parent->right = z->left;
+                z->left->parent = z->parent;
+            }
+        }
+    }
+    else if (z->left != NIL && z->right != NIL)
+    {
+        y = z->right;
+        while (y->left != NIL)
+        {
+            y = y->left;
+        }
+        if (y->left != NIL)
+        {
+            y->parent->left = NIL;
+        }
+        if (z->parent->right == z)
+        {
+            z->parent->right = y;
+        }
+        else
+        {
+            z->parent->left = y;
+        }
+        y->parent = z->parent;
+        y->left = z->left;
+        y->right = z->right->right;
+    }
+
+    /*
+    //削除する節点の特定
+    if (z->left == NIL || z->right == NIL) //削除する節点の子がないか１つのとき
+    {
+        y = z;
+    }
+    else //削除する節点の子が２つのとき
+    {
+        y = treeSuccessor(z->right);
+    }
+
+    //削除する節点に子があるかの判定と子の設定
+    if (y->left != NIL)
+    {
+        x = y->left;
+    }
+    else
+    {
+        x = y->right;
+    }
+
+    //削除する節点の子の親を変更
+    if (x != NIL)
+    {
+        x->parent = y->parent;
+    }
+
+    //削除する節点が根かどうか判別して親に新しいこの情報を挿入
+    if (y->parent == NIL) //根のとき
+    {
+        root = x;
+    }
+    else if (y->parent->left == y) //親の左の子になるとき
+    {
+        y->parent->left = x;
+    }
+    else //親の右の子になるとき
+    {
+        y->parent->right = x;
+    }
+
+    //次節点のキーを挿入
+    if (y != z)
+    {
+        z->key = y->key;
+    }
+    */
+}
+
+//挿入関数
+void insert(int k)
+{
+    Node y = NIL;
+    Node x = root;
+    Node z;
+
+    z = malloc(sizeof(struct node));
+    z->key = k;
+    z->left = NIL;
+    z->right = NIL;
+
+    while (x != NIL)
+    {
+        y = x;
+        if (z->key < x->key)
+        {
+            x = x->left;
+        }
+        else
+        {
+            x = x->right;
+        }
+    }
+    z->parent = y;
+
+    if (y == NIL)
+    {
+        root = z;
+    }
+    else if (z->key < y->key)
+    {
+        y->left = z;
+    }
+    else
+    {
+        y->right = z;
+    }
+}
+
+// Inorderの表示
+void inorder(Node u)
+{
+    if (u == NIL)
+    {
+        return;
+    }
+
+    inorder(u->left);
+
+    printf(" %d", u->key);
+
+    inorder(u->right);
+}
+
+// Preorderの表示
+void preorder(Node u)
+{
+    if (u == NIL)
+    {
+        return;
+    }
+    printf(" %d", u->key);
+
+    preorder(u->left);
+
+    preorder(u->right);
+}
+
+// main関数
+int main()
+{
+    int n, i, x;
+    char com[20];
+
+    //命令回数の受付
+    scanf("%d", &n);
+
+    //命令の受付
+    for (i = 0; i < n; i++)
+    {
+        scanf("%s", com);
+
+        // findの受付
+        if (com[0] == 'f')
+        {
+            scanf("%d", &x);
+            Node t = treeSearch(root, x);
+            if (t != NIL)
+                printf("yes\n");
+            else
+                printf("no\n");
+        }
+
+        // insertの受付
+        else if (com[0] == 'i')
+        {
+            scanf("%d", &x);
+            insert(x);
+        }
+
+        // printの受付
+        else if (com[0] == 'p')
+        {
+            inorder(root);
+            printf("\n");
+            preorder(root);
+            printf("\n");
+        }
+
+        // deleteの受付
+        else if (com[0] == 'd')
+        {
+            scanf("%d", &x);
+            treeDelete(treeSearch(root, x));
+        }
+    }
+
+    return 0;
+}

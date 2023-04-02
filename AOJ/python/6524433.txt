@@ -1,0 +1,63 @@
+from collections import deque
+strings = input()
+length = len(strings)
+
+height = 0
+num = 0
+area = 0
+
+leftside = deque()
+olds = deque()
+area_list = deque()
+
+
+for i in range(length):
+    #print(i)
+    #print(olds)
+    try:
+        if strings[i] == "\\":
+            leftside.append(i)
+
+        elif (strings[i] == "/"):
+            l = leftside.pop()
+            area = i - l
+            
+
+            if len(olds) > 0:
+                old = olds.pop()
+
+                if(l < old):#合体する場合
+                    while(l < old):
+                        #print(olds)
+                        #print(area_list)
+                        area += area_list.pop()
+
+                        if len(olds) > 0:
+                            old = olds.pop()
+                        else:
+                            #print(area_list)
+                            break
+                    area_list.append(area)
+                    olds.append(l)
+
+                else:#新しく溝ができる場合
+                    #print(i)
+                    #print(area)
+                    area_list.append(area)
+                    olds.append(old)
+                    olds.append(l)
+
+            else:#過去にできた溝の左側をoldsに格納
+                area_list.append(area)
+                olds.append(l)
+    except:
+        continue
+
+#if strings[length-1] == "_":
+
+
+
+print(sum(area_list))
+
+area_list.appendleft(len(area_list))
+print(" ".join(list(map(str,area_list))))

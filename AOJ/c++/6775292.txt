@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define int long long
+#define rep(i, N) for(int i = 0; i < N; i++)
+#define INF 1000000000000000000
+#define max(a, b) (a > b? a : b)
+
+signed main() {
+    while (true) {
+        int n, m, t, p;
+        cin >> n >> m >> t >> p;
+        if (n + m + t + p == 0 && n*m*t*p == 0) return 0;
+        // init
+        int paper[n][m];
+        rep(i, n) {
+            rep(j, m) {
+                if (i < n && j < m) paper[i][j] = 1;
+                else paper[i][j] = 0;
+            }
+        }
+
+        // fold
+        rep(i, t) {
+            int d, c;
+            cin >> d >> c;
+            if (d == 1) {
+                int n_new = n - c + max(2*c - n, 0);
+                int paper_new[n_new][m];
+                for (int x = 0; x < n_new; x++) {
+                    for (int y = 0; y < m; y++) {
+                        if (x + c >= n) paper_new[x][y] = 0;
+                        else paper_new[x][y] = paper[x + c][y];
+                        if (x < c) {
+                            paper_new[x][y] += paper[c - x - 1][y];
+                        }
+                    }
+                }
+                n = n_new;
+                rep(i, n_new) rep(j, m) paper[i][j] = paper_new[i][j];
+            }
+            else if (d == 2) {
+                int m_new = m - c + max(2*c - m, 0);
+                int paper_new[n][m_new];
+                for (int x = 0; x < n; x++) {
+                    for (int y = 0; y < m_new; y++) {
+                        if (y + c >= m) paper_new[x][y] = 0;
+                        else paper_new[x][y] = paper[x][y + c];
+                        if (y < c) {
+                            paper_new[x][y] += paper[x][c - y - 1];
+                        }
+                    }
+                }
+                m = m_new;
+                rep(i, n) rep(j, m_new) paper[i][j] = paper_new[i][j];
+            }
+        }
+
+        // pierce
+        rep(i, p) {
+            int x, y;
+            cin >> x >> y;
+            cout << paper[x][y] << endl;;
+        }
+    }
+    
+}

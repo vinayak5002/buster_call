@@ -1,0 +1,41 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, length = map(int, f.readline().split())
+    a_list = list(map(int, f.readline().split()))
+    max_num = 1000_001
+    b_list = [max_num] * (n - length + 1)
+    deq = [max_num] * n
+    s = 0
+    t = 0
+
+    for i in range(n):
+        while s < t and a_list[deq[t - 1]] >= a_list[i]:
+            t -= 1
+        deq[t] = i
+        t += 1
+
+        if i - length + 1 >= 0:
+            b_list[i - length + 1] = a_list[deq[s]]
+            if deq[s] == i - length + 1:
+                s += 1
+
+    print(*b_list)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

@@ -1,0 +1,58 @@
+from collections import defaultdict, deque, Counter
+from itertools import permutations, product
+from heapq import heapify, heappop, heappush
+import math
+import bisect
+import sys
+sys.setrecursionlimit(700000)
+input = sys.stdin.readline
+inf = float('inf')
+mod1 = 10**9+7
+mod2 = 998244353
+
+#################################################
+
+class LowLink():
+
+    def __init__(self, adj):
+        self.n = len(adj)
+        self.adj = adj
+        self.ord = [inf]*self.n
+        self.low = [inf]*self.n
+        self.son = [[] for _ in range(self.n)]
+        for i in range(N):
+            self.dfs(i, None, 0)
+        
+    def dfs(self, now, pre, o):
+        if self.ord[now] != inf: return o, now
+        if pre is not None: self.son[pre].append(now)
+        self.ord[now] = o
+        self.low[now] = o
+        o += 1
+        for next in self.adj[now]:
+            if next == pre: continue
+            o, l = self.dfs(next, now, o)
+            self.low[now] = min(self.low[now], l)
+        return o, self.low[now]
+    
+    def articlation_points(self):
+        ret = set()
+        for i in range(self.n):
+            if self.ord[i] == 0:
+                if len(self.son[i]) >= 2:
+                    ret.add(i)
+            else:
+                for j in self.son[i]:
+                    if self.ord[i] <= self.low[j]:
+                        ret.add(i)
+        return ret
+
+N, M = map(int, input().rstrip('\n').split())
+adj = [[] for _ in range(N)]
+for _ in range(M):
+    a, b = map(int, input().rstrip('\n').split())
+    adj[a].append(b)
+    adj[b].append(a)
+LL = LowLink(adj)
+ap = sorted(LL.articlation_points())
+if ap: print(*ap, sep="\n")

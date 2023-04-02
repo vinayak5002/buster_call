@@ -1,0 +1,84 @@
+class Node:
+    def __init__(self, val):
+        self.val = val
+        self.next = None
+        self.prev = None
+        
+class DoublyLinkedList:
+    def __init__(self):
+        self.head = None
+        self.tail = None 
+      
+    def insert(self, val):
+        node = Node(val)
+        if self.head is None:
+            self.head = node
+            self.head.prev = node
+            self.head.next = node
+            return
+        node.prev = self.head.prev
+        node.next = self.head
+        self.head.prev.next = node
+        self.head.prev = node
+        self.head = node
+        return
+      
+    def delete(self, val):
+        check_node = self.head
+        if check_node is None:
+            return
+        while check_node.val != val:
+            if check_node.next == self.head:
+                break
+            else:
+                check_node = check_node.next
+                
+        check_node.prev.next = check_node.next
+        check_node.next.prev = check_node.prev
+        check_node = None
+        return
+      
+    def deleteFirst(self):
+        if self.head is None:
+            return
+        elif self.head == self.head.prev:
+            self.head = None
+        else:
+            self.head.prev.next = self.head.next
+            self.head.next.prev = self.head.prev
+            self.head = self.head.next
+        return
+      
+    def deleteLast(self):
+        if self.head is None:
+            return
+        elif self.head == self.head.prev:
+            self.head = None
+        else:
+            self.head.prev.prev.next = self.head
+            self.head.prev = self.head.prev.prev
+        return
+            
+        
+
+n = int(input())
+input_list = list(input().split() for i in range(n))
+anser_list = DoublyLinkedList()
+for i in range(n):
+    if input_list[i][0] == 'insert':
+        anser_list.insert(int(input_list[i][1]))
+    elif input_list[i][0] == 'delete':
+        anser_list.delete(int(input_list[i][1]))    
+    elif input_list[i][0] == 'deleteFirst':
+        anser_list.deleteFirst()
+    else:
+        anser_list.deleteLast()
+
+anser_text = ''        
+anser = anser_list.head
+anser_text = str(anser.val)
+anser = anser.next
+while anser.prev != anser_list.head.prev:
+    anser_text = anser_text + ' ' + str(anser.val)
+    anser = anser.next
+print(str.rstrip(anser_text))

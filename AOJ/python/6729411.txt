@@ -1,0 +1,40 @@
+import sys
+
+if len(sys.argv) == 2:
+    sys.stdin = open(sys.argv[1])
+
+m, n, k = map(int, input().split())
+mod = 998244353
+
+if k > m or k > n:
+    print(0)
+    exit()
+
+# nは任意の数に置き換え可能
+fact = [1] * k
+inv = [1] * k
+finv = [1] * k
+for i in range(2, k):
+    fact[i] = fact[i - 1] * i % mod
+    inv[i] = mod - inv[mod % i] * (mod // i) % mod
+    finv[i] = finv[i - 1] * inv[i] % mod
+def comb(x, y):
+    return fact[x] * finv[y] % mod * finv[x - y] % mod
+
+ans = pow(m, n, mod)
+c = m
+for i in range(1, k):
+    cnt = 0
+    for j in range(1, i + 1):
+        cnt += (-1)**(i - j) * comb(i, j) * pow(j, n, mod) % mod
+        cnt %= mod
+    cnt *= c
+    cnt %= mod
+    c *= (m - i) % mod
+    c %= mod
+    c *= pow(i + 1, mod - 2, mod)
+    c %= mod
+    ans -= cnt
+    ans %= mod
+print(ans)
+

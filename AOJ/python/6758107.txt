@@ -1,0 +1,34 @@
+n, q = map(int, input().strip().split())
+vertices2 = list(range(n))
+edges2 = []
+for i in range(q):
+    oneLine = list(map(int, input().strip().split()))
+    edges2.append(oneLine)
+edges2.sort(key=lambda x:x[2])
+
+ori_trees2=dict()
+for i in vertices2:
+    ori_trees2[i]=i
+
+def find_node(x):
+    if ori_trees2[x]!=x:
+        ori_trees2[x]=find_node(ori_trees2[x])
+    return ori_trees2[x]
+
+mst=[]
+
+num=len(vertices2)-1
+
+for edge2 in edges2:
+    v1,v2,_=edge2
+    if find_node(v1)!=find_node(v2):
+        ori_trees2[find_node(v2)]=find_node(v1)
+        mst.append(edge2)
+        num-=1
+        if num==0:
+            break
+
+result = 0
+for i in mst:
+    result = result + i[2]
+print(result)

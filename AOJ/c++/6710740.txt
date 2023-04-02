@@ -1,0 +1,145 @@
+#include<iostream>
+#include<algorithm>
+#include<map>
+#include<queue>
+#include<stack>
+#include<set>
+#include<bitset>
+#include<vector>
+#include<string>
+
+#define rep(i,n) for(int i=0;i<(n);i++)
+using namespace std;
+using ll=long long;
+using P=pair<int,int>;
+using P_S=pair<int,string>;
+
+
+struct Tree{
+    int node;
+    int right;
+    int left;
+    int parent;
+    int sibling;
+    int degree;
+    int depth;
+    int height;
+    string type;
+
+    Tree(){//初期化
+        parent=-1;
+        sibling=-1;
+        height=-1;
+    }
+
+    string answer()
+    {
+        string st;
+        st+="node "+to_string(node);
+        st+=": parent = "+to_string(parent);
+        st+=", sibling = "+to_string(sibling);
+        st+=", degree = "+to_string(degree);
+        st+=", depth = "+to_string(depth);
+        st+=", height = "+to_string(height);
+        st+=", "+type;
+        return st;
+    }
+};
+
+vector<Tree> t;
+
+void dfs(int id,int depth){
+    if(id==-1)return;
+    t[id].depth=depth;
+    dfs(t[id].right,depth+1);
+    dfs(t[id].left,depth+1);
+}
+
+void print_pre(int id){
+    if(id==-1) return;
+    cout<<" "<<id;
+    print_pre(t[id].left);
+    print_pre(t[id].right);
+}
+
+void print_mid(int id){
+    if(id==-1) return;
+    print_mid(t[id].left);
+    cout<<" "<<id;
+    print_mid(t[id].right);
+}
+void print_post(int id){
+    if(id==-1) return;
+    print_post(t[id].left);
+    print_post(t[id].right);
+    cout<<" "<<id;
+
+}
+
+int main()
+{
+    int n;
+    cin>>n;
+    t.resize(n);
+    rep(i,n){
+        int id,left,right;
+        cin>>id>>left>>right;
+        t[id].node=id;
+        t[id].right=right;
+        t[id].left=left;
+    }
+    vector<bool>seen(n,false);
+    vector<int>leaf_list;
+    queue<Tree>A;
+    for(int i=0;i<n;i++){
+        if(seen[i]==false){
+            A.push(t[i]);
+            while(!A.empty()){
+                Tree now=A.front();
+                int degree=0;
+                A.pop();
+                seen[now.node]=true;
+                if(now.right!=-1){
+                    A.push(t[now.right]);
+                    t[now.right].parent=now.node;
+                    t[now.right].sibling=now.left;
+                    degree++;
+                }
+                if(now.left!=-1){
+                    A.push(t[now.left]);
+                    t[now.left].parent=now.node;
+                    t[now.left].sibling=now.right;
+                    degree++;
+                }
+
+                t[now.node].degree=degree;
+                if(degree==0) {
+                    t[now.node].type="leaf";
+                    t[now.node].height=0;
+                    leaf_list.push_back(now.node);
+                }
+                else t[now.node].type="internal node";
+            }
+        }
+    }
+    int root;
+    rep(i,n) {
+        if(t[i].parent==-1) {
+        root=i;
+        t[i].type="root";
+        break;
+        }
+    }
+    /*rep(i,n){
+        cout<<t[i].node<<" "<<t[i].parent<<" "<<t[i].sibling<<" "<<t[i].type<<endl;
+    }*/
+    cout<<"Preorder"<<endl;
+    print_pre(root);
+    cout<<endl;
+    cout<<"Inorder"<<endl;
+    print_mid(root);
+    cout<<endl;
+    cout<<"Postorder"<<endl;
+    print_post(root);
+    cout<<endl;
+}

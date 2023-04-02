@@ -1,0 +1,76 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+NOT_INCLUDED = 0
+ON_EDGE = 1
+INCLUDED = 2
+
+EPS = 1e-10
+
+
+def v_diff(v0, v1):
+    dif = []
+    for i in range(len(v0)):
+        dif.append(v1[i] - v0[i])
+    return dif
+
+
+def inner_product(v0, v1):
+    ip = 0
+    for i in range(len(v0)):
+        ip += v0[i] * v1[i]
+    return ip
+
+
+def cross_product2d(v0, v1):
+    return v0[0] * v1[1] - v0[1] * v1[0]
+
+
+def is_included(p, n, p_list):
+    included = False
+    for i in range(n):
+        p0 = p_list[i - 1]
+        p1 = p_list[i]
+        a = v_diff(p, p0)
+        b = v_diff(p, p1)
+        if math.fabs(cross_product2d(a, b)) < EPS and inner_product(a, b) < EPS:
+            return ON_EDGE
+
+        if a[1] > b[1]:
+            a, b = b, a
+        if a[1] < EPS < b[1] and cross_product2d(a, b) > EPS:
+            included = not included
+    if included:
+        return INCLUDED
+    else:
+        return NOT_INCLUDED
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n = int(f.readline())
+    p_list = []
+    for _ in range(n):
+        x, y = map(int, f.readline().split())
+        p_list.append((x, y))
+
+    q = int(f.readline())
+    for _ in range(q):
+        p = list(map(int, f.readline().split()))
+        print(is_included(p, n, p_list))
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

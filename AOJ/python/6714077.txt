@@ -1,0 +1,249 @@
+from fractions import Fraction
+
+# TODO: Line, Segment の Equal を定義する。
+
+T = Fraction
+
+
+class Point:
+
+    def __init__(self, x, y):
+        self.x = T(x)
+        self.y = T(y)
+
+    def __neg__(self):
+        return self.__class__(-self.x, -self.y)
+
+    def __add__(self, other):
+        return self.__class__(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other):
+        return self.__class__(self.x - other.x, self.y - other.y)
+
+    def __mul__(self, other):
+        if isinstance(other, type(self)):
+            return self.__class__(self.x * other.x - self.y * other.y, self.x * other.y + self.y * other.x)
+        else:
+            return self.__class__(self.x * other, self.y * other)
+
+    __rmul__ = __mul__
+
+    def norm_square(self):
+        return self.x * self.x + self.y * self.y
+
+    def inv(self):
+        return self.__class__(self.x, -self.y) * (1 / self.norm_square())
+
+    def __truediv__(self, other):
+        if isinstance(other, type(self)):
+            return self * other.inv()
+        else:
+            return self.__class__(self.x / other, self.y / other)
+
+    def __eq__(self, other):
+        return (self.x == other.x and self.y == other.y)
+
+    def __lt__(self, other):
+        return (self.x < other.x or (self.x == other.x and self.y < other.y))
+
+    def __le__(self, other):
+        return (self.x < other.x or (self.x == other.x and self.y <= other.y))
+
+    def __repr__(self):
+        return "%s(%s, %s)" % (self.__class__.__name__,
+                               self.x, self.y)
+
+
+Vec = Point
+
+
+class Line:
+
+    def __init__(self, a: Point, b: Point):
+        self.a = a
+        self.b = b
+
+    def __repr__(self):
+        return "%s(%s, %s)" % (self.__class__.__name__,
+                               self.a, self.b)
+
+
+class Segment(Line):
+    pass
+
+
+class Real_Circle:
+
+    def __init__(self, center: Point, radius, radius_is_squared: bool = False):
+        self.center = center
+        radius = T(radius)
+        if radius_is_squared:
+            self.radius_square = radius
+        else:
+            self.radius_square = radius * radius
+
+    def __repr__(self):
+        return "%s(center=%s, r**2=%s)" % (self.__class__.__name__,
+                                           self.center, self.radius_square)
+
+
+class Rational_Circle(Real_Circle):
+
+    def __init__(self, center: Point, radius, radius_is_squared: bool = False):
+        self.radius = T(radius)
+        super().__init__(center, radius, False)
+
+    def __repr__(self):
+        return "%s(center=%s, r=%s)" % (self.__class__.__name__,
+                                        self.center, self.radius)
+
+
+def dot(a: Vec, b: Vec) -> T:
+    return a.x * b.x + a.y * b.y
+
+
+def cross(a: Vec, b: Vec) -> T:
+    return a.x * b.y - a.y * b.x
+
+
+def parallel(a, b):
+    if isinstance(a, Line) or isinstance(a, Segment):
+        a = a.b - a.a
+    if isinstance(b, Line) or isinstance(b, Segment):
+        b = b.b - b.a
+    return cross(a, b) == 0
+
+
+def orthogonal(a, b):
+    if isinstance(a, Line) or isinstance(a, Segment):
+        a = a.b - a.a
+    if isinstance(b, Line) or isinstance(b, Segment):
+        b = b.b - b.a
+    return dot(a, b) == 0
+
+
+def ccw(a: Point, b: Point, c: Point):
+    """
+    0: c is on [a, b]
+    1: counter clockwise
+    -1: clockwise
+    2: c a b
+    -2: a b c
+    https://onlinejudge.u-aizu.ac.jp/status/users/zkou/submissions/1/CGL_1_C/judge/5781413/Python3    """
+    b -= a
+    c -= a
+    if cross(b, c) > 0:
+        return +1  # "COUNTER_CLOCKWISE"
+    if cross(b, c) < 0:
+        return -1  # "CLOCKWISE"
+    if dot(b, c) < 0:
+        return +2  # "ONLINE_BACK" [c, a, b]
+    if b.norm_square() < c.norm_square():
+        return -2  # "ONLINE_FRONT" [a, b, c]
+    return 0  # "ON_SEGMENT" c is on [a, b]
+
+
+def projection(l, p: Point) -> Point:
+    return l.a + (l.b - l.a) * (dot(p - l.a, l.b - l.a) / (l.b - l.a).norm_square())
+
+
+def reflection(l, p: Point) -> Point:
+    return projection(l, p) * 2 - p
+
+
+def _intersect_line_point(l: Line, p: Point):
+    return int(abs(ccw(l.a, l.b, p)) != 1)
+
+
+def _intersect_segment_point(s: Segment, p: Point):
+    return int(ccw(s.a, s.b, p) == 0)
+
+
+def _intersect_line_line(l: Line, m: Line):
+    if cross(l.a - l.b, m.a - m.b) != 0:
+        return 1
+    return 0 if abs(ccw(l.a, l.b, m.a)) == 1 else 2
+
+
+def _intersect_line_segment(l: Line, s: Segment):
+    a = ccw(l.a, l.b, s.a)
+    b = ccw(l.a, l.b, s.b)
+    if a * b == 1:
+        return 0
+    if a * b == -1 or (a + b) % 2:
+        return 1
+    return 2
+
+
+def _distance_square_point_point(a: Point, b: Point) -> T:
+    return (a - b).norm_square()
+
+
+def _distance_square_line_point(l: Line, p: Point) -> T:
+    return _distance_square_point_point(p, projection(l, p))
+
+
+def _intersect_circle_line(c: Real_Circle, l: Line):
+    d = _distance_square_line_point(l, c.center)
+    if d > c.radius_square:
+        return 0
+    if d == c.radius_square:
+        return 1
+    return 2
+
+def _intersect_circle_point(c: Real_Circle, p: Point):
+    return int((p - c.center).norm_square() == c.radius_square)
+
+def _intersect_segment_segment(s: Segment, t: Segment):
+    "https://onlinejudge.u-aizu.ac.jp/status/users/zkou/submissions/1/CGL_2_B/judge/5781571/Python3"
+    return int((ccw(s.a, s.b, t.a) * ccw(s.a, s.b, t.b) <= 0) and (ccw(t.a, t.b, s.a) * ccw(t.a, t.b, s.b) <= 0))
+
+def _intersect_circle_segment(c: Real_Circle, s: Segment):
+    # TODO: 丁寧に追って、書く。
+    pass
+
+def compare_roots(a: T, b: T, c: T):
+    """
+    -1: sqrt(a) + sqrt(b) < sqrt(c)
+    0: sqrt(a) + sqrt(b) == sqrt(c)
+    1: sqrt(a) + sqrt(b) > sqrt(c)
+    """
+    assert a >= 0
+    assert b >= 0
+    assert c >= 0
+    c -= a + b
+    if c < 0:
+        return 1
+    d = a * b * 4 - c * c
+    if d > 0:
+        return 1
+    if d < 0:
+        return -1
+    return 0
+
+def number_of_common_tangents(c1: Real_Circle, c2: Real_Circle):
+    """
+    0: include
+    1: inscribe
+    2: cross
+    3: circumscribe
+    4: separate
+    (equal to number of common tangent)
+    """
+    d = _distance_square_point_point(c1.center, c2.center)
+    r1 = min(c1.radius_square, c2.radius_square)
+    r2 = max(c1.radius_square, c2.radius_square)
+    com = compare_roots(r1, r2, d)
+    return compare_roots(d, r1, r2) + 1 if com == 1 else 3 - com
+
+def intersect(obj1, obj2):
+    pass
+
+
+c1x, c1y, c1r = map(int, input().split())
+c2x, c2y, c2r = map(int, input().split())
+c1 = Real_Circle(Point(c1x, c1y), c1r)
+c2 = Real_Circle(Point(c2x, c2y), c2r)
+
+print(number_of_common_tangents(c1, c2))
+

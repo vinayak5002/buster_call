@@ -1,0 +1,41 @@
+N = int(input())
+P = [i for i in range(N)]
+A = []
+for i in range(N):
+    A.append(list(map(int, input().split())))
+
+def root(x):
+    path_to_root = []
+    while P[x] != x:
+        path_to_root.append(x)
+        x = P[x]
+    for node in path_to_root:
+        P[node] = x # パス圧縮
+    return x
+
+def is_same_set(x, y):
+    return root(x) == root(y)
+
+def unite(x, y):
+    P[root(x)] = root(y)
+
+# 重みについて昇順に辺を整列
+def kruskal(A):
+    krskl = []
+    for i in range(N):
+        for j in range(N):
+            if A[i][j] != -1:
+                krskl.append([A[i][j], i, j]) # [重み，始点，終点]
+    return sorted(krskl)
+
+def main():
+    ans = 0
+    edges = kruskal(A)
+    for edge in edges:
+        if not is_same_set(edge[1], edge[2]):
+            ans += edge[0]
+            unite(edge[1], edge[2])
+    print(ans)
+
+if __name__ == '__main__':
+    main()

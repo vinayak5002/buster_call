@@ -1,0 +1,29 @@
+import sys
+sys.setrecursionlimit(10**6)
+
+cnt = 1
+def dfs(now,pre):
+    global cnt
+    if first[now-1]:
+        ans[now-1].append(cnt)
+        first[now-1] = False
+    for choice in connected[now-1]:
+        if check[choice-1]:
+            continue
+        cnt += 1
+        dfs(choice,now)
+    cnt += 1
+    check[now-1] = True
+    ans[now-1].append(cnt)
+
+n = int(input())
+connected = []
+for i in range(n):
+    u,k,*v=map(int, input().split())
+    connected.append(v)
+first = [True]*n
+check = [False]*n
+ans = [[i+1] for i in range(n)]
+dfs(1,-1)
+for i in range(n):
+    print(*ans[i])

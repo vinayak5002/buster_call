@@ -1,0 +1,72 @@
+#include<iostream>
+#include<vector>
+#include<algorithm>
+using namespace std;
+
+class RMQ{
+private:
+	const int INF = 2147483647;
+	vector<int> segment;
+	int N;
+
+public:
+	RMQ(){
+		int n, q;
+		cin >> n >> q;
+
+		initRMQ(n);
+
+		for(int i=0; i<q; i++){
+			int com, x, y;
+			cin >> com >> x >> y;
+
+			if(com==0){
+				update(x, y);
+			}
+			else if(com==1){
+				find(x, y);
+			}
+		}
+	}
+
+	void initRMQ(int n_){
+		N=1;
+
+		while(N < n_){
+			N *= 2;
+		}
+
+		segment.resize(2*N-1);
+
+		for(int i=0; i<segment.size(); i++){
+			segment[i] = INF;
+		}
+	}
+
+	void update(int k, int x){
+		k += N-1;
+		segment[k] = x;
+		while(k>0){
+			k = (k-1)/2;
+			segment[k] = min(segment[k*2+1], segment[k*2+2]);
+		}
+	}
+
+	void find(int a, int b){
+		cout << query(a, b+1, 0, 0, N) << endl;
+	}
+
+	int query(int a, int b, int k, int l, int r){
+		if(r<=a || b<=l) return INF;
+		if(a<=l && r<=b) return segment[k];
+
+		int vl = query(a, b, k*2+1, l, (l+r)/2);
+		int vr = query(a, b, k*2+2, (l+r)/2, r);
+		return min(vl, vr);
+	}
+};
+
+int main(){
+	RMQ rmq = RMQ();
+	return 0;
+}

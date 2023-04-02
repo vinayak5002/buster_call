@@ -1,0 +1,46 @@
+def partition(AS, AN, Or, p, r):
+    i = p-1
+    for j in range(p, r):
+        if AN[j] <= AN[r]:
+            i += 1
+            AN[i], AN[j] = AN[j], AN[i]
+            AS[i], AS[j] = AS[j], AS[i]
+            Or[i], Or[j] = Or[j], Or[i]
+    AN[r], AN[i+1] = AN[i+1], AN[r]
+    AS[r], AS[i+1] = AS[i+1], AS[r]
+    Or[r], Or[i+1] = Or[i+1], Or[r]
+    return i+1
+
+def quickSort(AS, AN, Or, p, r):
+    if p < r:
+        q = partition(AS, AN, Or, p, r)
+        quickSort(AS, AN, Or, p, q-1)
+        quickSort(AS, AN, Or, q+1, r)
+
+def is_stable(AN, Or, n):
+    for i in range(n):
+        for j in range(i+1, n):
+            if (AN[i] == AN[j]) and (Or[i] > Or[j]):
+                return "Not stable"
+    return "Stable"
+
+
+#input
+n = int(input())
+AS = [""] * n
+AN = [""] * n
+Order = [""] * n
+for i in range(n):
+    cont = input().split()
+    AS[i] = cont[0]
+    AN[i] = int(cont[1])
+    Order[i] = i
+
+quickSort(AS, AN, Order, 0, n-1)
+
+stab_res = is_stable(AN, Order, n)
+print(stab_res)
+
+for i in range(n):
+    print(AS[i] + " " + str(AN[i]))    
+

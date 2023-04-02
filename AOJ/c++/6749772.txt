@@ -1,0 +1,162 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for(int i=0; i<(n); i++)
+#define INF ((1LL<<62)-(1LL<<31))
+#define all(a)  (a).begin(),(a).end()
+#define rall(a)  (a).rbegin(),(a).rend()
+typedef long long ll;
+typedef pair<ll,ll> pl;
+
+#define EPS (1e-10)
+#define equals(a,b) (fabs((a)-(b))<EPS)
+
+//点
+class Point { 
+public:
+    double x,y;
+    Point(double x=0,double y=0): x(x),y(y) {}
+    Point operator + (Point p) { return Point(x+p.x,y+p.y); }
+    Point operator - (Point p) { return Point(x-p.x,y-p.y); }
+    Point operator * (double k) { return Point(x*k,y*k); }
+    Point operator / (double k) { return Point(x/k,y/k); }
+    bool operator < (const Point &p) const { return x!=p.x ? x<p.x : y<p.y; }
+    bool operator == (const Point &p) const { return fabs(x-p.x)<EPS && fabs(y-p.y)<EPS; }
+};
+//ベクトル
+typedef Point Vector; 
+//線分
+struct Segment { Point p1,p2; }; 
+//直線
+typedef Segment Line;
+//円 
+class Circle { 
+public:
+    Point c; double r;
+    Circle(Point c=Point(),double r=0.0): c(c),r(r) {} 
+};
+//多角形
+typedef vector<Point> Polygon; 
+
+//function list
+double norm(Point p);
+double abs(Point p);
+double arg(Point p);
+  //内積
+double dot(Vector a,Vector b);
+  //外積
+double cross(Vector a,Vector b);
+  //射影(1_A)
+Point project(Segment s,Point p);
+  //線対称の点(1_B)
+Point reflect(Segment s,Point p);
+  //反時計回り(1_C)
+static const int COUNTER_CLOCKWISE=1;   //p0,p1,p2が反時計回りになる
+static const int CLOCKWISE=-1;          //p0,p1,p2が時計回りになる
+static const int ONLINE_BACK=2;         //p2,p0,p1の順で同一直線上にある
+static const int ONLINE_FRONT=-2;       //p0,p1,p2の順で同一直線上にある
+static const int ON_SEGMENT=0;          //p2が線分p0p1上にある
+int ccw(Point p0,Point p1,Point p2);
+  //直交判定(2_A)
+bool isOrthogonal(Vector a,Vector b);
+bool isOrthogonal(Point a1,Point a2,Point b1,Point b2);
+bool isOrthogonal(Segment s1,Segment s2);
+  //平行判定(2_A)
+bool isParallel(Vector a,Vector b);
+bool isParallel(Point a1,Point a2,Point b1,Point b2);
+bool isParallel(Segment s1,Segment s2);
+  //交差判定(2_B)
+bool intersect(Point p1,Point p2,Point p3,Point p4);
+bool intersect(Segment s1,Segment s2);
+int intersect(Circle c,Line l);
+  //交点(2_C)
+Point getCrossPointSS(Segment s1,Segment s2); 
+pair<Point,Point> getCrossPointCL(Circle c,Line l);
+  //距離(2_D)
+double getDistancePP(Point a,Point b);
+double getDistanceLP(Line l,Point p);
+double getDistanceSP(Segment s,Point p);
+double getDistanceSS(Segment s1,Segment s2);
+//end of list
+
+double norm(Point p) { return p.x*p.x+p.y*p.y; }
+double abs(Point p) { return sqrt(norm(p)); } 
+double arg(Point p) { return atan2(p.y,p.x); }
+
+double dot(Vector a,Vector b) { return a.x*b.x+a.y*b.y; };
+double cross(Vector a,Vector b) { return a.x*b.y-a.y*b.x; }
+
+Point project(Segment s,Point p) {
+    Vector base=s.p2-s.p1;
+    double r=dot(p-s.p1,base)/norm(base);
+    return s.p1+base*r;
+}
+Point reflect(Segment s,Point p) { return p+(project(s,p)-p)*2.0; }
+int ccw(Point p0,Point p1,Point p2) {
+    Vector a=p1-p0,b=p2-p0;
+    if(cross(a,b)>EPS) return COUNTER_CLOCKWISE;
+    if(cross(a,b)<-EPS) return CLOCKWISE;
+    if(dot(a,b)<-EPS) return ONLINE_BACK;
+    if(norm(a)<norm(b)) return ONLINE_FRONT;
+    return ON_SEGMENT;
+}
+
+bool isOrthogonal(Vector a,Vector b) { return equals(dot(a,b),0.0); }
+bool isOrthogonal(Point a1,Point a2,Point b1,Point b2) { return isOrthogonal(a1-a2,b1-b2); }
+bool isOrthogonal(Segment s1,Segment s2) { return equals(dot(s1.p2-s1.p1,s2.p2-s2.p1),0.0); }
+
+bool isParallel(Vector a,Vector b) { return equals(cross(a,b),0.0); }
+bool isParallel(Point a1,Point a2,Point b1,Point b2) { return isParallel(a1-a2,b1-b2); }
+bool isParallel(Segment s1,Segment s2) { return equals(cross(s1.p2-s1.p1,s2.p2-s2.p1),0.0); }
+
+bool intersect(Point p1,Point p2,Point p3,Point p4) { return (ccw(p1,p2,p3)*ccw(p1,p2,p4)<=0&&ccw(p3,p4,p1)*ccw(p3,p4,p2)<=0); }
+bool intersect(Segment s1,Segment s2) { return intersect(s1.p1,s1.p2,s2.p1,s2.p2); }
+int intersect(Circle c,Line l) {
+    double dist=getDistanceLP(l,c.c);
+    if(equals(dist,c.r)) return 1;
+    else if(dist<c.r) return 2;
+    else return 0;
+}
+
+Point getCrossPointSS(Segment s1,Segment s2) {
+    Vector base=s2.p2-s2.p1;
+    double d1=abs(cross(base,s1.p1-s2.p1));
+    double d2=abs(cross(base,s1.p2-s2.p1));
+    double t=d1/(d1+d2);
+    return s1.p1+(s1.p2-s1.p1)*t;
+}
+pair<Point,Point> getCrossPointCL(Circle c,Line l) {
+    assert(intersect(c,l));
+    Vector pr=project(l,c.c);
+    Vector e=(l.p2-l.p1)/abs(l.p2-l.p1);
+    double base=sqrt(c.r*c.r-norm(pr-c.c));
+    Point p1=pr-e*base,p2=pr+e*base;
+    return p1<p2 ? make_pair(p1,p2):make_pair(p2,p1);
+}
+
+double getDistancePP(Point a,Point b) { return abs(a-b); }
+double getDistanceLP(Line l,Point p) { return abs(cross(l.p2-l.p1,p-l.p1)/abs(l.p2-l.p1)); }
+double getDistanceSP(Segment s,Point p) {
+    if(dot(s.p2-s.p1,p-s.p1)<0.0) return abs(p-s.p1);
+    if(dot(s.p1-s.p2,p-s.p2)<0.0) return abs(p-s.p2);
+    return getDistanceLP(s,p);
+}
+double getDistanceSS(Segment s1,Segment s2) {
+    if(intersect(s1,s2)) return 0.0;
+    return min(min(getDistanceSP(s1,s2.p1),getDistanceSP(s1,s2.p2)),min(getDistanceSP(s2,s1.p1),getDistanceSP(s2,s1.p2)));
+}
+
+
+int main() {
+    Circle C;
+    cin >> C.c.x >> C.c.y >> C.r;
+    int n;
+    cin >> n;
+    while(n--) {
+        Line l;
+        cin >> l.p1.x >> l.p1.y >> l.p2.x >> l.p2.y;
+        auto cp=getCrossPointCL(C,l);
+        cout << fixed << setprecision(16);
+        cout << cp.first.x << " " << cp.first.y << " " << cp.second.x << " " << cp.second.y << endl;
+    }
+    return 0;
+}

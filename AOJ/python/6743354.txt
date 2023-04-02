@@ -1,0 +1,31 @@
+import sys
+
+def is_deliverable(w, k, p):
+    net = 0
+    count = 1
+    for wi in w:
+        if net + wi <= p:
+            net += wi
+        else:
+            count += 1
+            net = wi
+        if count > k:
+            return False
+    return True
+
+n, k = list(map(int, sys.stdin.readline().split()))
+w = list(map(int, sys.stdin.readlines()))
+
+minimum = max(w)
+maximum = sum(w)
+min_p = maximum + 1
+
+while minimum <= maximum:
+    mid = (minimum + maximum) // 2
+    if is_deliverable(w, k, mid):
+        min_p = mid
+        maximum = mid - 1
+    else:
+        minimum = mid + 1
+        
+print(min_p)

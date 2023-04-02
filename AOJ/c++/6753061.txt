@@ -1,0 +1,61 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+using ll = long long;
+const ll INF = (1ll << 31) - 1;
+
+struct SegmentTree {
+  int n;
+  vector<ll> node;
+
+  SegmentTree(vector<ll> vec) {
+    int siz = vec.size();
+    n = 1;
+    while (n < siz)
+      n *= 2;
+    node.assign(2 * n - 1, INF);
+    for (int i = 0; i < siz; i++)
+      node.at(i + n - 1) = vec.at(i);
+    for (int i = n - 2; i >= 0; i--)
+      node.at(i) = min(node.at(i * 2 + 1), node.at(i * 2 + 2));
+  }
+
+  void update(int x, ll y) {
+    node.at(x + n - 1) = y;
+    int i = x + n - 1;
+    while (i > 0) {
+      i = (i - 1) / 2;
+      node.at(i) = min(node.at(i * 2 + 1), node.at(i * 2 + 2));
+    }
+  }
+
+  ll getmin(int a, int b, int l = 0, int r = -1, int k = 0) {
+    if (r == -1)
+      r = n;
+    if (a <= l && b >= r)
+      return node[k];
+    else if (a >= r || b <= l)
+      return INF;
+    else {
+      ll v1 = getmin(a, b, l, (l + r) / 2, k * 2 + 1);
+      ll v2 = getmin(a, b, (l + r) / 2, r, k * 2 + 2);
+      return min(v1, v2);
+    }
+  }
+};
+
+int main() {
+  int n, q;
+  cin >> n >> q;
+  vector<ll> vec(n, INF);
+  SegmentTree seg(vec);
+  for (int i = 0; i < q; i++) {
+    int com, x, y;
+    cin >> com >> x >> y;
+    if (com) {
+      cout << seg.getmin(x, y + 1) << endl;
+    }
+    else
+      seg.update(x, (ll)y);
+  }
+}

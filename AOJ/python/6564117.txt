@@ -1,0 +1,41 @@
+import sys
+sys.setrecursionlimit(10**7)
+
+def DFS(G, v):
+    global gcnt
+    memo[v] = True
+    memo_go[v] = gcnt
+    gcnt += 1
+    
+    for next_v in range(len(G[v])):
+        if memo[G[v][next_v]]:
+            continue
+        DFS(G, G[v][next_v])
+        gcnt += 1
+        
+    memo_out[v] = gcnt
+        
+n = int(input())
+
+G = [[] for i in range(n+1)]
+for _ in range(n):
+    tmp = list(map(int, input().split()))
+    u = tmp[0]
+    if tmp[1] != 0:
+        for i in range(len(tmp[2:])):
+            G[u].append(tmp[2+i])
+    
+memo = [False for _ in range(n+1)]
+memo_go = [0 for i in range(n+1)]
+memo_out = [0 for i in range(n+1)]
+
+gcnt = 1
+
+for i in range(1, n+1):
+    if memo[i]:
+        continue
+    DFS(G, i)
+    gcnt += 1
+
+for i in range(1, n+1):
+    print(i, memo_go[i], memo_out[i])

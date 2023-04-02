@@ -1,0 +1,24 @@
+'''
+dp[bit][i] := 最後にiに行ってbitにする最小コスト
+初期状態をdp[iだけのbit][i] := 0からiに行くコスト、ただしdp[1][0] = INFとしてdp[full_bit][0]を求める？
+'''
+INF = float("inf")
+V, E = map(int, input().split())
+ad_mat = [[INF] * V for _ in range(V)]
+for _ in range(E):
+    s, t, d = map(int, input().split())
+    ad_mat[s][t] = d
+
+bit_pattern_count = pow(2, V)
+dp = [[INF for _ in range(V)] for _ in range(bit_pattern_count)]
+for i in range(1, V):
+    dp[2**i][i] = ad_mat[0][i]
+
+for pattern in range(bit_pattern_count):
+    for last_v in range(V):
+        for second_last_v in range(V):
+            if ((pattern >> last_v) & 1) and ((pattern >> second_last_v) & 1):
+                dp[pattern][last_v] = min(dp[pattern][last_v], dp[pattern - 2 ** last_v][second_last_v] + ad_mat[second_last_v][last_v])
+
+print(dp[bit_pattern_count-1][0] if dp[bit_pattern_count-1][0] != INF else -1)
+

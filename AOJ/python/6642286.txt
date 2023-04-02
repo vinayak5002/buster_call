@@ -1,0 +1,61 @@
+import sys
+import heapq
+from _heapq import heappush, heappop
+from collections import deque
+
+
+BIG_NUM = 2000000000
+
+
+class Edge:
+    def __init__(self,to,dist):
+        self.to = to
+        self.dist = dist
+
+
+POW = [0]*20
+POW[0] = 1
+for i in range(1,20):
+    POW[i] = POW[i-1]*2
+
+V,E = map(int,input().split())
+
+G = [[] for _ in range(V)] #隣接リスト
+dp = [[BIG_NUM] * V for _ in range(POW[V])]
+
+for _ in range(E):
+    s,t,d = map(int,input().split())
+    G[s].append(Edge(t,d))
+
+
+start = 0
+dp[POW[start]][start] = 0
+
+for state in range(POW[V]):
+    for last in range(V):
+        if dp[state][last] == BIG_NUM:
+            continue
+        for e in G[last]:
+            if state&POW[e.to] > 0:
+                continue
+            next_state = state|POW[e.to]
+            next_dist = dp[state][last] + e.dist
+            if dp[next_state][e.to] > next_dist:
+                dp[next_state][e.to] = next_dist
+
+ans = BIG_NUM
+for last in range(1,V):
+    if dp[POW[V]-1][last] == BIG_NUM:
+        continue
+    for e in G[last]:
+        if e.to != start:
+            continue
+        tmp = dp[POW[V]-1][last] + e.dist
+        if ans > tmp:
+            ans = tmp
+
+if ans == BIG_NUM:
+    print('-1')
+else:
+    print(ans) 
+

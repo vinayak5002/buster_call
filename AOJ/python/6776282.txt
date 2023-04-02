@@ -1,0 +1,29 @@
+tri_n = 182
+lim = 10 ** 6 + 1
+INF = 10 ** 9
+
+pollock = [0] * tri_n
+p_odd = [0] * tri_n
+for i in range(tri_n):
+    x = i * (i+1) * (i+2) // 6
+    pollock[i] = x
+    if x % 2:
+        p_odd[i] = x
+
+dp = [INF] * lim
+dp_odd = [INF] * lim
+dp[0] = 0
+dp_odd[0] = 0
+for i in range(lim):
+    for j in range(tri_n):
+        if i - pollock[j] < 0:
+            break
+        dp[i] = min(dp[i-pollock[j]]+1, dp[i])
+        dp_odd[i] = min(dp_odd[i-p_odd[j]]+1, dp_odd[i])
+
+while True:
+    fig = int(input())
+    if not fig:
+        break
+    print(dp[fig], dp_odd[fig])
+

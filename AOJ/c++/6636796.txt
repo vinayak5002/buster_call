@@ -1,0 +1,61 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <map>
+#include <set>
+#include <deque>
+#include <queue>
+#define TEST cout << "TEST" << endl
+#define IINF 2147483647
+#define LLINF 9223372036854775807
+#define AMARI 998244353
+using namespace std;
+
+//ダイクストラ
+//グラフのvectorと始点となるノードを引数にして、他のノードへの距離を入れたvectorを返す関数
+//経路復元する関数も
+//g[i][j] = {c,y}の時、点iから出ているj番目の矢印は、コストcでyへ向かう
+//s→始点となるノード
+vector<long long> ococo_dijkstra(vector<vector<pair<long long, int>>> g,int s) {
+    vector<long long> ans(g.size(),LLINF);
+    priority_queue<pair<long long, int>, vector<pair<long long, int>>, greater<pair<long long, int>>> que;
+    que.emplace(0,s);
+    vector<bool> visited(g.size(), false);
+    ans[s] = 0;
+
+    while (!que.empty()) {
+        int karis = que.top().second;
+        que.pop();
+        if (!visited[karis]) {
+            for (int i = 0; i < g[karis].size(); i++) {
+                if (ans[g[karis][i].second] > ans[karis] + g[karis][i].first) {
+                    ans[g[karis][i].second] = ans[karis] + g[karis][i].first;
+                    que.emplace( ans[g[karis][i].second], g[karis][i].second);
+                }
+            }
+        }
+        visited[karis] = true;
+    }
+    return ans;
+}
+
+int main(void) {
+    int v, e, r;
+    cin >> v >> e >> r;
+    vector<vector<pair<long long, int>>> g(v);
+    int s, t, d;
+    for (int i = 0; i < e; i++) {
+        cin >> s >> t >> d;
+        g[s].push_back({ d,t });
+        //g[t].push_back({ d,s });
+    }
+    vector<long long> res;
+    res = ococo_dijkstra(g, r);
+    for (int i = 0; i < v; i++) {
+        if (res[i] == LLINF)cout << "INF" << endl;
+        else cout << res[i] << endl;
+    }
+    
+    return 0;
+}

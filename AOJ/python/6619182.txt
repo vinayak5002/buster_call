@@ -1,0 +1,30 @@
+import collections
+n = int(input())
+ukv = [ map(int,input().split()) for _ in range(n) ]
+graph = {i:collections.deque() for i in range(1,n+1)}
+for x in ukv:
+    u,k,*v = x
+    for y in v:
+        graph[u].append(y)
+
+seen = [0]*(n+1)
+ans = [-1]*(n+1)
+queue = collections.deque()
+
+ans[1] = 0
+seen[1] = 1
+queue.append(1)
+while queue:
+    q = queue.popleft()
+
+    if not graph[q]:
+        continue
+    for x in graph[q]:
+        if seen[x] == 0:
+            queue.append(x)
+            ans[x] = ans[q]+1
+            seen[x] = 1
+
+
+for i in range(1,n+1):
+    print(i,ans[i])

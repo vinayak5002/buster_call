@@ -1,0 +1,29 @@
+f_inf = float('inf')
+def merge(A, left, mid, right):
+    L = A[left:mid] + [f_inf]
+    R = A[mid:right] + [f_inf]
+    i, j, cnt = 0, 0, 0
+    for k in range(left, right):
+        if L[i] <= R[j]:
+            A[k] = L[i]
+            i+=1
+        else:
+            A[k] = R[j]
+            j += 1
+            cnt += mid - left - i
+    return cnt
+
+def merge_sort(A, left, right):
+    cnt = 0
+    if right - left > 1:
+        mid = (left + right) //2
+        cnt += merge_sort(A, left, mid) + merge_sort(A, mid, right)
+        cnt += merge(A, left, mid, right)
+    return cnt
+
+n = int(input())
+A = list(map(int, input().split()))
+
+r = merge_sort(A, 0, n)
+print(r)
+    

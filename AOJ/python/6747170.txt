@@ -1,0 +1,106 @@
+import re
+
+
+def main():
+    count = int(input())
+    for i in range(count):
+        t = input()
+        n = int(input())
+        for j in range(n):
+            l = input()
+            if l == "forward char":
+                if t.endswith('^'):
+                    pass
+                    # do nothing
+                if '^' not in t:
+                    t = str(t[0]) + '^' + t[1:]
+                else:
+                    index = t.find('^')
+                    temp = t[index + 1]
+                    t = t[:index] + temp + t[index + 1:]
+                    t = t[:index + 1] + '^' + t[index + 2:]
+            elif l == "forward word":
+                if '^' not in t:
+                    if ' ' not in t:
+                        t = t + '^'
+                    else:
+                        index = t.find(' ')
+                        t = insertTextAt(t, index, '^')
+                else:
+                    splitted = t.split('^')
+                    right = splitted[1]
+                    res = re.search(r'. ', right)
+                    if res is None:
+                        t = splitted[0] + right + '^'
+                    else:
+                        index = res.start()
+                        # print(right)
+                        # print(index)
+                        right = insertTextAt(right, index + 1, '^')
+                        t = splitted[0] + right
+
+
+            elif l == "backward char":
+                if '^' not in t:
+                    pass
+                    # do nothing
+                elif t[1] == '^':
+                    t = deleteCharAt(t, 1)
+                else:
+                    index = t.find('^')
+                    t = deleteCharAt(t, index)
+                    t = insertTextAt(t, index - 1, '^')
+            elif l == "backward word":
+                if '^' not in t:
+                    pass
+                    # do nothing
+                elif ' ' not in t:
+                    t = t.replace('^', '')
+                else:
+                    tsplit = t.split('^')
+                    left = tsplit[0]
+                    if ' ' not in left:
+                        t = t.replace('^', '')
+                    else:
+                        left = rreplace(left, r' \D', ' ^', 1)
+                        t = left + tsplit[1]
+            elif l.startswith("insert"):
+                text = re.search(r"\"(.*)\"", l).group(1)
+
+                cursor = t.find('^')
+                if cursor == -1:
+                    t = text + '^' + t
+                else:
+                    t = t[:cursor] + text + t[cursor:]
+            elif l == "delete word":
+                splitted = t.split('^')
+                right = splitted[1]
+                flag = True
+                index = 0
+                c = right[index]
+                while right != ' ' or flag:
+                    if c != ' ':
+                        flag = False
+                    right = deleteCharAt(right, index)
+                    index += 1
+                    c = right[index]
+                t = splitted[0] + right
+            elif l == "delete char":
+                index = t.find('^')
+                t = deleteCharAt(t, index + 1)
+            print(t)
+        print(t)
+
+
+def rreplace(s, old, new, occurrence):
+    li = s.rsplit(old, occurrence)
+    return new.join(li)
+
+def deleteCharAt(s, index):
+    return s[:index] + s[index + 1:]
+
+def insertTextAt(s, index, c):
+    return s[:index] + c + s[index:]
+
+if __name__ == '__main__':
+    main()

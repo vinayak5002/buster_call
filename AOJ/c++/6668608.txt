@@ -1,0 +1,128 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using P = pair<int, int>;
+using T = tuple<int, int, int, int>;
+#define test cout << "test:"
+const int inf = 1073741824;
+const long long linf = 1152921504606846976;
+// const long long mod = 998244353;
+// const long long mod = 1000000007;
+const vector<int> dx = {1, 0, -1, 0}, dy = {0, 1, 0, -1};
+
+void _main(int w, int h)
+{
+	vector<string> rl(h), rr(h);
+	for (int i = 0; i < h; i++)
+	{
+		cin >> rl[i] >> rr[i];
+		reverse(rr[i].begin(), rr[i].end());
+	}
+
+
+	P lstart, lgoal, rstart, rgoal;
+	for (int i = 0; i < h; i++)
+	{
+		for (int j = 0; j < w; j++)
+		{
+			if (rl[i][j] == 'L')
+			{
+				lstart = {i, j};
+			}
+
+			if (rl[i][j] == '%')
+			{
+				lgoal = {i, j};
+			}
+
+			if (rr[i][j] == 'R')
+			{
+				rstart = {i, j};
+			}
+
+			if (rr[i][j] == '%')
+			{
+				rgoal = {i, j};
+			}
+		}
+	}
+
+
+	queue<P> lq, rq;
+	set<T> vis;
+	lq.push(lstart);
+	rq.push(rstart);
+	vis.insert({lstart.first, lstart.second, rstart.first, rstart.second});
+
+	while (lq.size() and rq.size())
+	{
+		auto [lnowx, lnowy] = lq.front();
+		auto [rnowx, rnowy] = rq.front();
+		lq.pop();
+		rq.pop();
+
+		if (((rl[lnowx][lnowy] == '%') ^ (rr[rnowx][rnowy] == '%')))
+		{
+			continue;
+		}
+
+		if ((rl[lnowx][lnowy] == '%') and (rr[rnowx][rnowy] == '%'))
+		{
+			cout << "Yes\n";
+			return;
+		}
+
+		for (int i = 0; i < 4; i++)
+		{
+
+			int lnexx = lnowx + dx[i];
+			int lnexy = lnowy + dy[i];
+			int rnexx = rnowx + dx[i];
+			int rnexy = rnowy + dy[i];
+
+			if (lnexx < 0 or lnexx >= h)
+				lnexx -= dx[i], lnexy -= dy[i];
+
+			else if (lnexy < 0 or lnexy >= w)
+				lnexx -= dx[i], lnexy -= dy[i];
+
+			else if (rl[lnexx][lnexy] == '#')
+				lnexx -= dx[i], lnexy -= dy[i];
+
+			if (rnexx < 0 or rnexx >= h)
+				rnexx -= dx[i], rnexy -= dy[i];
+
+			else if (rnexy < 0 or rnexy >= w)
+				rnexx -= dx[i], rnexy -= dy[i];
+
+			else if (rr[rnexx][rnexy] == '#')
+				rnexx -= dx[i], rnexy -= dy[i];
+
+			
+			if (vis.count({lnexx, lnexy, rnexx, rnexy}))
+				continue;
+			lq.push({lnexx, lnexy});
+			rq.push({rnexx, rnexy});
+			vis.insert({lnexx, lnexy, rnexx, rnexy});
+		}
+	}
+
+	cout << "No\n";
+	return;
+}
+
+int main()
+{
+	ios::sync_with_stdio(false);
+	cin.tie(0);
+	cout << fixed << setprecision(15);
+	while (true)
+	{
+		int w, h;
+		cin >> w >> h;
+
+		if (w == 0 and h == 0)
+			break;
+		_main(w, h);
+	}
+}

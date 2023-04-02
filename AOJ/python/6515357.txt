@@ -1,0 +1,79 @@
+def prim():
+    # 入力受け取り
+    v, e = map(int,input().split())
+    # s = []
+    # t = []
+    # w = []
+    cost = [[] for _ in range(v)]
+    for _ in range(e):
+        tmp_s, tmp_t, tmp_w = map(int,input().split())
+        cost[tmp_s].append((tmp_t, tmp_w))
+        cost[tmp_t].append((tmp_s, tmp_w))
+    # print(cost)
+
+    # アルゴリズム
+    mincost = [float("inf") for _ in range(v+1)]
+    used = [False for _ in range(v)]
+
+    mincost[0] = 0
+    res = 0
+
+    while True:
+        v_idx = -1
+        for u in range(v):
+            if not used[u] and (v_idx == -1 or mincost[u] < mincost[v_idx]):
+                v_idx = u
+        
+        if v_idx == -1:
+            break
+        used[v_idx] = True
+        res += mincost[v_idx]
+
+        for u, c in cost[v_idx]:
+            mincost[u] = min(mincost[u], c)
+
+    return res
+
+def find(x):
+    if par[x] == x:
+        return x
+    else:
+        par[x] = find(par[x]) 
+        return par[x]
+
+def unite(x, y):
+    x = find(x)
+    y = find(y)
+    if x == y:
+        return 0
+    if rank[x] < rank[y]:
+        par[x] = y
+    else:
+        par[y] = x
+        if rank[x] == rank[y]:
+            rank[x] += 1
+
+def same(x, y):
+    return (find(x) == find(y))
+
+def kruskal(v, e, stw):
+    # costの小さい順にソート
+    stw = sorted(stw, reverse=False, key=lambda x: x[2])
+    res = 0
+    for i in range(e):
+        edge = stw[i]
+        if not same(edge[0], edge[1]):
+            unite(edge[0], edge[1])
+            res += edge[2]
+    return res
+
+# print(prim())
+v, e = map(int,input().split())
+stw = []
+for i in range(e):
+    stw.append([int(i) for i in input().split()])
+
+par = [i for i in range(v)]
+rank = [0 for _ in range(v)]
+print(kruskal(v, e, stw))
+

@@ -1,0 +1,118 @@
+
+import scala.annotation.tailrec
+import scala.io.StdIn
+
+object Main {
+  def main(args: Array[String]): Unit = {
+    val Array(n, k) = StdIn.readLine().split(" ").map(_.toInt)
+
+    val ws = List.fill(n)(StdIn.readLong())
+
+    val solver = new Solver(ws, k, n)
+
+    val p = solver.solve
+    println(p)
+
+  }
+}
+
+
+class Solver(packages: List[Long], truckNum: Int, allPackageNum: Int) {
+
+  def solve: Long = {
+    import BinarySearch.binarySearch
+
+    val minL = packages.max
+    val maxR = minL * allPackageNum
+
+    binarySearch(minL, maxR)(canLoadBy).get
+  }
+
+  /**
+   *
+   * @param p the max load weight
+   * @return
+   */
+  def canLoadBy(p: Long): Boolean = {
+    import Implicits.ListOps
+
+    val loadPackages: List[Long] => (Long, List[Long]) = _.reduceWhile { _ + _}(_ <= p)
+
+    @tailrec
+    def go(restPackages: List[Long], restTrucksNum: Int): Boolean = {
+      if (restPackages.isEmpty) true
+      else if (restTrucksNum == 0) false
+      else {
+        val (_, newRestPackages) = loadPackages(restPackages)
+
+        go(newRestPackages, restTrucksNum - 1)
+      }
+    }
+    go(packages, truckNum)
+  }
+
+}
+
+object BinarySearch {
+
+  /**
+   *
+   * @param left  left edge of search range
+   * @param right right edge of search range
+   * @param p  function to determine if the intermediate value is within the search range
+   * @param num
+   * @tparam A  data type of array
+   * @return  The minimum value within the search range, if any. If not, none.
+   */
+  def binarySearch[A](left: A, right: A)(p: A => Boolean)(implicit num: Integral[A]): Option[A] = {
+    import num._
+
+    val one = num.one
+    val two = num.fromInt(2)
+
+    @tailrec
+    def go(l: A, r: A): A =
+      if (l >= r) r
+      else {
+        val mid = (l + r) / two
+
+        if (p(mid)) go(l, mid)
+        else go(mid + one, r)
+      }
+
+    if (left > right || !p(right)) None
+    else Some(go(left, right))
+
+  }
+}
+
+
+object Implicits {
+
+  implicit class ListOps[A](self: List[A]) {
+
+    /**
+     *
+     * @param z  initial value
+     * @param op  aggregation function
+     * @param p  function determining to continue process or not
+     * @tparam B
+     * @return
+     */
+    def foldWhile[B](z: B)(op: (B, A) => B)(p: B => Boolean): (B, List[A]) = {
+
+      @tailrec
+      def go(zs: List[A], accum: B): (B, List[A]) = zs match {
+        case Nil => (accum, Nil)
+        case x :: xs =>
+          val s = op(accum, x)
+          if (p(s)) go(xs, s) else (accum, zs)
+      }
+      go(self, z)
+    }
+
+    def reduceWhile(op: (A, A) => A)(p: A => Boolean): (A, List[A]) =
+      self.tail.foldWhile(self.head)(op)(p)
+  }
+}
+

@@ -1,0 +1,136 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+class union_find{
+  private:
+    ll n; //要素数
+    vector<ll> par; // iの親
+    vector<ll> rank; // 木の深さ
+    vector<ll> siz; // iの属する集合の要素数
+    
+  public:
+    // 要素の初期化
+    union_find(ll n): n(n){
+      par.resize(n);
+      rank.resize(n, 0);
+      siz.resize(n, 1); 
+      for(ll i = 0; i < n; i++){
+        par[i] = i;
+      }
+    }
+
+    // 木の根を求める
+    ll root(ll x){
+      if(par[x] == x) return x;
+      else{
+        ll r = root(par[x]);
+        return par[x] = r;
+      }
+    }
+
+    // 木の併合(rank基準) 
+    void unite(ll x, ll y){
+      x = root(x);
+      y = root(y);
+      if(x == y) return;
+
+      if(rank[x] < rank[y]){
+        par[x] = y;
+        siz[y] += siz[x];
+      }
+      else{
+        par[y] = x;
+        siz[x] += siz[y];
+        if(rank[x] == rank[y]) rank[x]++;
+      }
+    }
+
+    // xとyが同じ集合に属するかどうか
+    bool same(ll x, ll y){
+      return root(x) == root(y);
+    }
+
+    // xの属する集合の要素数
+    ll size(ll x){
+      return siz[root(x)];
+    }
+
+    // 全体でいくつ集合があるか
+    ll kind(){
+      ll res = 0;
+      for(ll i= 0; i < n; i++) if(i == root(i)) res++;
+      return res;
+    }
+};
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll n;
+  cin >> n;
+  union_find uf(n);
+  vector<ll> a(n);
+  rep(i, 0, n) cin >> a[i];
+  auto b = a;
+  sort(ALL(b));
+  rep(i, 0, n){
+      uf.unite(a[i] - 1, b[i] - 1);
+  }
+
+  //cout << uf.kind() << endl;
+
+  map<ll, set<ll>> mp;
+  rep(i, 0, n){
+      mp[uf.root(i) + 1].insert(i + 1);
+  }
+  /*
+  irep(i, mp){
+      cout << i->first << " " << i->second.size() << endl;
+      irep(j, i->second){
+          cout << *j << endl;
+      }
+      cout << endl;
+  }*/
+
+  ll ans = 0;
+  ll mini = *min_element(ALL(a));
+
+  for(auto itr = mp.begin(); itr != mp.end(); itr++){
+      set<ll> st = itr->second;
+      if(st.size() == 1) continue;
+      ll tmp1 = *st.begin() * (st.size() - 1);
+      for(auto itr2 = st.begin(); itr2 != st.end(); itr2++){
+          if(itr2 != st.begin()) tmp1 += *itr2;
+      }
+      
+      ll tmp2 = 2 * (mini + *st.begin());
+      for(auto itr2 = st.begin(); itr2 != st.end(); itr2++){
+          if(itr2 != st.begin()) tmp2 += *itr2;
+      
+      }
+      ans += min(tmp1, tmp2);
+  }
+  cout << ans << endl;
+
+
+
+
+  return 0;
+}

@@ -1,0 +1,13 @@
+r, c = map(int, input().split())
+spread_sheet,tmp_list = [],[]
+for i in range(r):
+  spread_sheet.append(list(map(int, input().split())))
+  spread_sheet[i].append(sum(spread_sheet[i]))
+for i in range(c+1):
+  tmp = 0
+  for j,item in enumerate(spread_sheet):
+    tmp += spread_sheet[j][i]
+  tmp_list.append(tmp)
+spread_sheet.append(tmp_list)
+for item in spread_sheet:
+  print(*item)

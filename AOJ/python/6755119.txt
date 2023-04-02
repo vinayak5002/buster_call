@@ -1,0 +1,37 @@
+import sys
+
+if len(sys.argv) == 2:
+    sys.stdin = open(sys.argv[1])
+
+n, m = map(int, input().split())
+P = [list(map(int, input().split())) for _ in range(n)]
+
+P.sort(key=lambda x: x[0])
+ans = 0
+A = [0 for _ in range(n + 1)]
+B = [0 for _ in range(n + 1)]
+res = 0
+left = 1
+right = m
+for i in range(n):
+    p, d = P[i]
+    if d == 0:
+        res += p - left
+    else:
+        res -= p - left
+    A[i + 1] = res
+    left += 1
+res = 0
+for i in range(n - 1, -1, -1):
+    p, d = P[i]
+    if d == 0:
+        res += p - right
+    else:
+        res -= p - right
+    B[i] = res
+    right -= 1
+
+for i in range(n + 1):
+    ans = max(ans, A[i] + B[i])
+print(ans)
+

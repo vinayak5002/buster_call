@@ -1,0 +1,57 @@
+// #define _GLIBCXX_DEBUG
+#include <bits/stdc++.h>
+
+using namespace std;
+#define ll long long
+#define LLMAX numeric_limits<ll>::max()
+#define LLMIN numeric_limits<ll>::min()
+#define INTMAX numeric_limits<int>::max()
+#define INTMIN numeric_limits<int>::min()
+#define rep(i, n) for (decltype(n) i = 0; i < (n); i++)
+#define rep1(i, n) for (decltype(n) i = 1; i <= (n); i++)
+#define rep2(i, k, n) for (decltype(n) i = k; i <= (n); i++)
+#define repr(i, n) for (decltype(n) i = (n)-1; i >= 0; i--)
+#define repr1(i, n) for (decltype(n) i = (n); i > 0; i--)
+#define repr2(i, k, n) for (decltype(n) i = n; i >= k; i--)
+auto chmax = [](auto& a, auto b) {bool ret=a<b; if(ret)a=b; return ret; };
+auto chmin = [](auto& a, auto b) {bool ret=a>b; if(ret)a=b; return ret; };
+template <typename T>
+using pq_inv = priority_queue<T, vector<T>, greater<T>>;
+
+struct Solver {
+    void solve() {
+        int v, e;
+        cin >> v >> e;
+        vector<vector<int>> dist(v, vector<int>(v, 1 << 20));
+        rep(i, e) {
+            int s, t, d;
+            cin >> s >> t >> d;
+            dist[s][t] = d;
+        }
+        vector<vector<int>> dp(1 << v, vector<int>(v, 1 << 20));
+        dp[0][0] = 0;
+        for (int S = 0; S < (1 << v); S++) {
+            for (int u = 0; u < v; u++) {
+                for (int k = 0; k < v; k++) {
+                    if((S&(1<<u))==0)//if(u!=k)
+                        chmin(dp[S | (1<<u)][u], dp[S][k] + dist[k][u]);
+                    // printf("S:%-10d u:%-3d k:%-3d, dp[S][k]:%-10d dist[k][u]:%-10d, dp[S|u][u]:%-10d\n",S,u,k,dp[S][k], dist[k][u], dp[S|u][u]);
+                }
+            }
+        }
+        if (dp[(1 << v) - 1][0] >= (1 << 20)) {
+            cout << -1 << endl;
+        } else {
+            cout << dp[(1 << v) - 1][0] << endl;
+        }
+    };
+};
+
+int main() {
+    std::cin.tie(nullptr);
+    Solver solver;
+    solver.solve();
+    return 0;
+}
+
+

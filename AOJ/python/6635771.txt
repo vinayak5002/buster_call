@@ -1,0 +1,68 @@
+import itertools
+ep = lambda s:exit(print(s))
+rdi = lambda:map(int,input().split())
+lrdi = lambda:list(rdi())
+MOD,MOD9 = 7+10**9,998244353
+INF = float("inf")
+ans,Ans = 0,[]
+
+k = int(input())
+R,C = [True]*8,[True]*8
+Q = []
+for i in range(k):
+    r,c = rdi()
+    Q.append([r,c])
+    R[r],C[c] = False,False
+
+R = [i for i in range(8) if R[i]]
+C = [i for i in range(8) if C[i]]
+
+def Check(Q):
+    Visited = [[0]*8 for _ in range(8)]
+    for i in Q:
+        r,c = i[0],i[1]
+        Visited[c][r] = 1
+        while True:
+            if c>0 and r>0:
+                c-=1
+                r-=1
+                if Visited[c][r]: return False
+            else: break
+
+        r, c = i[0], i[1]
+        while True:
+            if c<7 and r<7:
+                c+=1
+                r+=1
+                if Visited[c][r]: return False
+            else: break
+        r, c = i[0], i[1]
+
+        while True:
+            if c<7 and r>0:
+                c+=1
+                r-=1
+                if Visited[c][r]: return False
+            else: break
+
+        r, c = i[0], i[1]
+        while True:
+            if c>0 and r<7:
+                c-=1
+                r+=1
+                if Visited[c][r]: return False
+            else: break
+
+    for i in Visited:
+        for j in i:
+            if j==1: print("Q",end="")
+            else: print(".",end="")
+        print("")
+    exit()
+
+for i in itertools.permutations(R,len(R)):
+    nQ = Q[::]
+    for j in zip(i,C):
+        nQ.append(list(j))
+    Check(nQ)
+

@@ -1,0 +1,84 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class RangeMinMaxQuery:
+    def __init__(self, n, init_val, is_min=True):
+        self._n = 1
+        self._is_min = is_min
+        while self._n < n:
+            self._n <<= 2
+        self._data = [init_val] * (2 * self._n - 1)
+        return
+
+    def _query_sub(self, s, t, k, left, right):
+        if right <= s or t <= left:
+            if self._is_min:
+                return math.inf
+            else:
+                return -math.inf
+        if s <= left and right <= t:
+            return self._data[k]
+        else:
+            mid = (left + right) // 2
+            k2 = 2 * k
+            l_val = self._query_sub(s, t, k2 + 1, left, mid)
+            r_val = self._query_sub(s, t, k2 + 2, mid, right)
+            if self._is_min:
+                return min(l_val, r_val)
+            else:
+                return max(l_val, r_val)
+
+    """i: zero-based"""
+    def update(self, i, x):
+        i += self._n - 1
+        self._data[i] = x
+        while i > 0:
+            i = (i - 1) // 2
+            i2 = 2 * i
+            left = i2 + 1
+            right = i2 + 2
+            if self._is_min:
+                self._data[i] = min(self._data[left], self._data[right])
+            else:
+                self._data[i] = max(self._data[left], self._data[right])
+        return
+
+    """[s, t), zero-based"""
+    def find(self, s, t):
+        return self._query_sub(s, t, 0, 0, self._n)
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, q = list(map(int, f.readline().split()))
+    init_val = 2 ** 31 - 1
+    rmq = RangeMinMaxQuery(n, init_val, True)
+
+    for _ in range(q):
+        query_list = list(map(int, f.readline().split()))
+        if query_list[0] == 0:
+            i = query_list[1]
+            x = query_list[2]
+            rmq.update(i, x)
+        else:
+            s = query_list[1]
+            t = query_list[2] + 1
+            min_val = rmq.find(s, t)
+            print(min_val)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

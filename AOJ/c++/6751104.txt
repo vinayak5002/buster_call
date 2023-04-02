@@ -1,0 +1,86 @@
+#pragma region
+
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <deque>
+#include <queue>
+#include <stack>
+#include <set>
+#include <map>
+#include <algorithm>
+#include <functional>
+#include <utility>
+#include <bitset>
+#include <cmath>
+#include <numeric> // gcd, lcm
+#include <cstdlib>
+#include <ctime>
+#include <cstdio>
+#include <cassert>
+#include <iomanip>
+using namespace std;
+
+using ull = unsigned long long;
+using ll = long long;
+using vi = vector<int>;
+using vll = vector<ll>;
+using vvi = vector<vi>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using pii = pair<int,int>;
+using vpii = vector<pii>;
+
+#pragma endregion
+
+const int INF = (1ll << 31) - 1;
+
+struct SegmentTree{
+    int N;
+    vi node;
+
+    SegmentTree(int sz_data){
+        N = 1;
+        while(N < sz_data) N <<= 1;
+        node.assign(2*N-1, INF);
+    }
+    
+    void update(int i, int x){
+        i += N - 1;
+        node[i] = x;
+        while(i > 0){
+            i = (i-1)/2;
+            node[i] = min(node[2*i+1], node[2*i+2]);
+        }
+    }
+    // 配列 data の区間 [l,r) の最小値.
+    // 注目ノード v とその data 上での区間 [i,j) を与える.
+    int getMin(int l, int r, int v, int i, int j){
+        if(j <= l or r <= i) return INF;
+        if(l <= i and j <= r) return node[v];
+        
+        int mini = getMin(l, r, 2*v+1, i, (i+j)/2);
+        int minj = getMin(l, r, 2*v+2, (i+j)/2, j);
+        return min(mini, minj);
+    }
+    int getMin(int l, int r){
+        return getMin(l, r, 0, 0, N);
+    }
+};
+
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+
+    int n, q; cin >> n >> q;
+    SegmentTree seg(n);
+    while(q--){
+        int c, x, y; cin >> c >> x >> y;
+        if(c == 0) seg.update(x,y);
+        else cout << seg.getMin(x, y+1) << endl;
+    }
+
+    return 0;
+}

@@ -1,0 +1,79 @@
+class Node:
+    def __init__(self):#コンストラクタ
+        self.parent = -1
+        self.left = -1
+        self.right = -1
+        self.sibling = -1
+        self.degree = 0
+        self.depth = 0
+        self.height = 0
+        self.type = ""
+
+def Pre_order(node):#先行
+    if node != -1:
+        print("",node,end='')
+        Pre_order(tree[node].left)
+        Pre_order(tree[node].right)
+
+def in_order(node):
+    if node != -1:
+        in_order(tree[node].left)
+        print("",node,end='')
+        in_order(tree[node].right)
+
+def Post_order(node):
+    if node != -1:
+        Post_order(tree[node].left)
+        Post_order(tree[node].right)
+        print("",node,end='')
+
+def printorder():
+    for i, t in enumerate(tree) :
+        if t.parent == -1:
+            tree[i].type="root"
+            print('Preorder')
+            Pre_order(i)
+            print('\nInorder')
+            in_order(i)
+            print('\nPostorder')
+            Post_order(i)
+
+N = int(input())
+tree = [Node() for i in range(N)]#ノードを格納したN個の配列を作る
+
+#木を作る
+for i in range(N):
+    #id, 子供の数k, c_0~c_k
+    treeinf = list(map(int, input().split()))#文字列を入力しint型に変換してから配列を作る
+    node = treeinf[0]
+    left = treeinf[1]
+    right = treeinf[2]
+    tree[node].left = left
+    tree[node].right = right
+
+    if left != -1 and right !=-1:#子供あり(2)
+        tree[node].degree = 2
+        tree[left].sibling=right
+        tree[left].parent=node
+        tree[right].sibling=left
+        tree[right].parent=node
+        if( i != 0):
+            tree[node].type = "internal node"
+    if left != -1 and right ==-1:#子供あり(1)
+        tree[node].degree = 1
+        tree[left].sibling=right
+        tree[left].parent=node
+        
+        if( i != 0):
+            tree[node].type = "internal node"
+    if left == -1 and right !=-1:#子供あり(1)
+        tree[node].degree = 1
+        tree[right].sibling=left
+        tree[right].parent=node
+        if( i != 0):
+            tree[node].type = "internal node"
+    if left == -1 and right ==-1:#子供なし
+        tree[node].type = "leaf"
+
+
+printorder()

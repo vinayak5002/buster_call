@@ -1,0 +1,66 @@
+# 53.
+# https://atcoder.jp/contests/abc149/tasks/abc149_b
+
+class SegTree:
+    def __init__(self, size):
+        n = 1
+        while n <= size:
+            n *= 2
+        self.size = n
+        self.array = [0] * (n * 2)
+
+    def set_value(self, x, value):
+        index = self.size + x
+        self.array[index] = max(self.array[index], value)
+        while index > 1:
+            index = index // 2
+            self.array[index] = max(self.array[index * 2], self.array[index * 2 + 1])
+    
+    def max_value(self, l, r, debug_on=False):
+        return self._max_value(l, r, 0, self.size, 1)
+
+    def _max_value(self, l, r, a, b, ind):
+        #[l, r) の最大値を取得
+        if l >= b or r <= a:
+            return 0
+        elif l == a and r == b:
+            return self.array[ind]
+
+        mid = (a + b) // 2
+        val1 = self._max_value(l, min(r, mid), a, mid, 2 * ind)
+        val2 = self._max_value(max(l, mid), r, mid, b, 2 * ind + 1)
+        return max(val1, val2)            
+
+
+def main():
+    N = int(input())
+    A = []
+    for _ in range(N):
+        A.append(int(input()))
+
+    # 座標圧縮
+    value_set = set()
+    for a in A:
+        value_set.add(a)
+    value_list = list(value_set)
+    value_list.sort()
+    coord_map = {}
+    for index, val in enumerate(value_list):
+        coord_map[val] = index
+    
+    new_A = [coord_map[a] for a in A]
+    
+    dp = {}
+    seg_tree = SegTree(max(new_A) + 1)
+    for a in new_A:
+        value = seg_tree.max_value(0, a, debug_on=(a == 1)) if a > 0 else 0
+        if a not in dp:
+            dp[a] = 0
+        dp[a] = max(dp[a], value + 1)
+        seg_tree.set_value(a, dp[a])
+
+    print(max(dp.values()))
+
+if __name__ == "__main__":
+    main()
+

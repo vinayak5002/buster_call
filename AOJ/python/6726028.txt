@@ -1,0 +1,54 @@
+from collections import defaultdict
+import copy
+N=int(input())
+A=list(input().split())
+B=A.copy()
+d=defaultdict(int)
+h_bub="Stable"
+h_sel="Stable"
+    
+
+for i in range(N):
+    t=A[i]
+    d[t]=i
+
+def bubble(A,N):
+    for i in range(1,N):
+        for j in range(N-1,i-1,-1):
+            if int(A[j][1])<int(A[j-1][1]):
+                A[j],A[j-1]=A[j-1],A[j]
+
+    return A
+    
+def select(A,N):
+    for i in range(N):
+        m=float("inf")
+        mm=0
+        t=i
+        for j in range(i,N):
+            if int(A[j][1])<m:
+                t=j
+                mm=A[j]
+                m=int(A[j][1])
+        if int(A[i][1])!=int(mm[1]):
+            A[i],A[t]=mm,A[i]
+    
+    return A
+
+A_bub=bubble(A,N)
+A_sel=select(B,N)
+
+for i in range(N-1):
+    u0=A_bub[i]
+    u1=A_bub[i+1]
+    v0=A_sel[i]
+    v1=A_sel[i+1]
+    if u0[1]==u1[1] and d[u0]>d[u1]:
+        h_bub="Not stable"
+    if v0[1]==v1[1] and d[v0]>d[v1]:
+        h_sel="Not stable"
+    
+print(*A_bub)
+print(h_bub)
+print(*A_sel)
+print(h_sel)

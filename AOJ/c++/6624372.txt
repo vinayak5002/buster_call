@@ -1,0 +1,73 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+#define rep(i, a, b) for(ll i = (ll)a; i < (ll)b; i++)
+#define irep(i, v) for(auto i = (v).begin(); i != (v).end(); i++)
+#define ALL(v) (v).begin(), (v).end()
+#define SZ(v) (ll)(v).size()
+
+const ll INF = 1e18;
+const ld EPS = 1e-10;
+const ll MOD = 1e9 + 7;
+const ld PI = M_PI;
+
+ll n;
+vector<vector<ll>> G;
+vector<ll> seen, color;
+
+void dfs(ll s, ll j){
+    rep(i, 0, SZ(G[s])){
+        ll v = G[s][i];
+        if(seen[v] == 0){
+            seen[v] = 1;
+            color[v] = j;
+            dfs(v, j);
+        }
+    }
+}
+
+int main(){
+  cin.tie(0);
+  ios::sync_with_stdio(false);
+  srand((unsigned)time(NULL));
+  cout << fixed << setprecision(20);
+
+  ll n, m;
+  cin >> n >> m;
+  G.resize(n);
+  seen.resize(n, 0);
+  color.resize(n, -1);
+
+  rep(i, 0, m){
+      ll a, b;
+      cin >> a >> b;
+      G[a].push_back(b);
+      G[b].push_back(a);
+  }
+
+  ll j = 0;
+  rep(i, 0, n){
+      if(color[i] == -1){
+          seen[i] = 1;
+          color[i] = j;
+          dfs(i, j);
+          j++;
+      }
+  }
+
+  ll q;
+  cin >> q;
+  while(q--){
+      ll a, b;
+      cin >> a >> b;
+      if(color[a] == color[b]) cout << "yes" << endl;
+      else cout << "no" << endl;
+  }
+
+
+  return 0;
+}

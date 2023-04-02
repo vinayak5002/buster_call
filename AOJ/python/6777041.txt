@@ -1,0 +1,26 @@
+import collections,sys
+def LI(): return list(map(int,sys.stdin.readline().rstrip().split()))
+W,H = LI()
+sub_area = [[0]+LI()+[0] for _ in range(H)]
+area = [[0]*(W+2)]+[[0]*(W+2)]+sub_area+[[0]*(W+2)]+[[0]*(W+2)]
+dhdw_even = [[-1,0],[-1,1],[0,-1],[0,1],[1,0],[1,1]]
+dhdw_odd = [[-1,-1],[-1,0],[0,-1],[0,1],[1,-1],[1,0]]
+seen = [[0]*(W+2) for _ in range(H+4)]
+queue = collections.deque() #位置[行,列]を入れておく
+def bfs():
+    ans = 0
+    seen[0][0] = 1
+    queue.append([0,0])
+    while queue:
+        qh,qw = queue.popleft()
+        for dh,dw in dhdw_even if qh%2==0 else dhdw_odd:
+            nh,nw = qh+dh,qw+dw
+            if not(0<=nh<=(H+4)-1) or not(0<=nw<=(W+2)-1) or seen[nh][nw]:
+                continue
+            if area[nh][nw]==1:
+                ans += 1
+                continue
+            seen[nh][nw] = 1
+            queue.append([nh,nw])
+    return ans
+print(bfs())

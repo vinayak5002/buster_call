@@ -1,0 +1,69 @@
+class Node:
+    def __init__(self, x, prev, next):
+        self.value = x
+        self.prev = prev
+        self.next = next
+    
+    def set_prev(self,prev):
+        self.prev = prev
+
+    def set_next(self,next):
+        self.next = next
+
+nil = Node(1,0,0)
+nil.set_prev(nil)
+nil.set_next(nil)
+
+def insert(x):
+    n = Node(x,0,0)
+    n.set_next(nil.next)
+    nil.next.set_prev(n)
+    nil.set_next(n)
+    n.set_prev(nil)
+
+def listSearch(x):
+    n = nil.next
+    while(n != nil and n.value != x):
+        n = n.next
+    return n
+
+
+def deleteNode(n):
+    if n == nil:
+        pass
+    else:
+        n.prev.set_next(n.next)
+        n.next.set_prev(n.prev)
+
+def delete(x):
+    deleteNode(listSearch(x))
+
+def deleteFirst():
+    deleteNode(nil.next)
+
+def deleteLast():
+    deleteNode(nil.prev)
+
+n = int(input())
+
+
+for i in range(n):
+    command = input()
+    if command[:7] == "insert ":
+        insert(int(command[7:]))
+    elif command[:7] == "delete ":
+        delete(int(command[7:]))
+    elif command[:7] == "deleteF":
+        deleteFirst()
+    elif command[:7] == "deleteL":
+        deleteLast()
+
+
+ans = []
+n = nil.next
+while(n != nil):
+    ans.append(n.value)
+    n = n.next
+
+print(*ans)
+

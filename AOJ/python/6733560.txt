@@ -1,0 +1,26 @@
+import sys
+inf = float('inf')
+input = lambda: sys.stdin.readline().rstrip()
+
+##################
+
+n, m = map(int, input().split())
+G = [[inf]*n for _ in range(n)]
+for _ in range(m):
+  s, t, d = map(int, input().split())
+  G[s][t] = d
+
+dp = [[inf]*n for _ in range(1 << n)]
+dp[0][0] = 0
+
+rann = list(range(n))
+for s in range(1 << n):
+  for v in rann:
+    for u in rann:
+      if u == v or ((s != 0) and not (s & (1 << u))):
+        continue
+      if not (s & (1 << v)):
+        dp[s|(1<<v)][v] = min(dp[s|(1<<v)][v], dp[s][u]+G[u][v])
+
+print(dp[-1][0] if dp[-1][0] != inf else -1)
+

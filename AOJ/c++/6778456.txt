@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 2000000002
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 123456
+#define M 1000000007
+typedef long long int ll;
+const int debug = 0 ; 
+const int debug1 = 0 ; 
+#define REP(i,n) for(int i=0; i<(int)n; i++)
+
+int partition(vector<int> &A,vector<char> &C, int lf, int rt){
+    // [l,r]のパーティション整理を行う。閉区間
+    int border = lf;
+    int cur = lf;
+    while( cur < rt ){
+        if ( A[cur] <= A[rt] ) {
+            swap(A[border],A[cur]);
+            swap(C[border],C[cur]);
+            cur++; 
+            border++;
+        } else {
+            cur++;
+        }
+    }
+    swap(A[border],A[rt]);
+    swap(C[border],C[rt]);
+    return border;
+}
+int Qsort(vector<int> &A,vector<char> &C, int s, int g){
+    // [l,r]のパーティション整理を行う。閉区間
+    if (g-s>0){
+        int q = partition(A,C,s,g);
+        Qsort(A,C,s,q-1);
+        Qsort(A,C,q+1,g);
+    }
+    return 0;
+}
+
+int main() {
+    int n ;
+    vector<int> A;
+    vector<int> B;
+    vector<char> C;
+    vector<char> D;
+
+    scanf ("%d",&n);
+    REP(i,n){ 
+        char ch;    int tmp;
+        scanf(" %c", &ch);     scanf("%d",&tmp);
+        A.push_back(tmp);
+        B.push_back(tmp);
+        C.push_back(ch);
+        D.push_back(ch);
+    }
+    /*REP(i,n){ 
+        printf("%c%d ", C[i], A[i]) ; 
+    }*/
+    Qsort(A,C,0,n-1) ; 
+
+    int flag = 0;
+    REP(i, n){ 
+        int id1, id2, id3, id4;
+        if (i<n-1 && A[i]==A[i+1]) {
+            REP(j,n) {
+                if (B[j]==A[i] && D[j]==C[i]) { id1 = j;}
+                if (B[j]==A[i+1] && D[j]==C[i+1]) { id2 = j;}
+            }
+            // printf("%d vs %d \n", id1, id2);
+            if  (id1 > id2 ) {flag = -1 ;  break;}
+        }
+    }
+
+    if ( flag == 0 ) { cout << "Stable" << endl ; }
+    else { cout << "Not stable" << endl ; }
+    
+    
+    for (int i = 0; i < n ; i++ ) {
+        cout << C[i] << " " << A[i] << endl; 
+    }
+
+    /*printf("%s\n", (flag == 0 ? "Stable" :"Not stable") ) ; 
+    REP(i,n) {
+        printf("%c %d", C[i], A[i]) ;
+        if (i<n-1) {printf("\n"); } 
+    }*/
+}
+

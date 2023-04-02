@@ -1,0 +1,94 @@
+import sys
+import math
+from heapq import heappush, heappop
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class MinCostFlow:
+    def __init__(self, num_vertexes):
+        self._num_vertexes = num_vertexes
+        self._graph = [[] for _ in range(num_vertexes)]
+        return
+
+    def add_edge(self, v, u, cap, cost):
+        f_edge = [u, cap, cost, None]
+        f_edge[3] = b_edge = [v, 0, -cost, f_edge]
+        self._graph[v].append(f_edge)
+        self._graph[u].append(b_edge)
+        return
+
+    def calc_min_cost_flow(self, s, t, f):
+        min_cost = 0
+        h_list = [0] * self._num_vertexes
+        prev_v = [-1] * self._num_vertexes
+        prev_e = [[]] * self._num_vertexes
+        while f > 0:
+            d_list = [math.inf] * self._num_vertexes
+            d_list[s] = 0
+            hq = [(0, s)]
+
+            while hq:
+                cd, v = heappop(hq)
+                if d_list[v] < cd:
+                    continue
+
+                for edge in self._graph[v]:
+                    u, cap, cost, _ = edge
+                    nd = d_list[v] + cost + h_list[v] - h_list[u]
+                    if cap > 0 and d_list[u] > nd:
+                        d_list[u] = nd
+                        prev_v[u] = v
+                        prev_e[u] = edge
+                        heappush(hq, (d_list[u], u))
+
+            if d_list[t] == math.inf:
+                return -1
+
+            for v in range(self._num_vertexes):
+                h_list[v] += d_list[v]
+
+            d = f
+            v = t
+            while v != s:
+                d = min(d, prev_e[v][1])
+                v = prev_v[v]
+
+            f -= d
+            min_cost += d * h_list[t]
+
+            v = t
+            while v != s:
+                prev_e[v][1] -= d
+                b_edge = prev_e[v][3]
+                b_edge[1] += d
+                v = prev_v[v]
+
+        return min_cost
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    num_vertexes, num_edges, flow = map(int, f.readline().split())
+    ff = MinCostFlow(num_vertexes)
+    start = 0
+    goal = num_vertexes - 1
+    for _ in range(num_edges):
+        v, u, cap, cost = map(int, f.readline().split())
+        ff.add_edge(v, u, cap, cost)
+
+    print(ff.calc_min_cost_flow(start, goal, flow))
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

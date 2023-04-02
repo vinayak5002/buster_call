@@ -1,0 +1,26 @@
+INF = float("inf")
+mod = 10**9+7
+    
+#N = int(input())
+#S = input()
+V,E = map(int,input().split())
+#w = list(map(int,input().split()))
+path = [[INF]*V for _ in range(V)]
+for _ in range(E):
+    s,t,d = map(int,input().split())
+    path[s][t] = d
+for i in range(V):
+    path[i][i] = 0
+dp = [[INF]*V for _ in range(2**V)]
+dp[0][0] = 0
+for i in range(2**V):
+    for j in range(V):
+        if i & (1<<j):
+            S = i-2**j
+            for k in range(V):
+                if S == 0 or S & (1<<k):
+                    dp[i][j] = min(dp[i][j],dp[S][k] + path[k][j])
+if dp[2**V-1][0] == INF:
+    print(-1)
+else:
+    print(dp[2**V-1][0])

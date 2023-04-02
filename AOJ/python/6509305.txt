@@ -1,0 +1,36 @@
+import sys
+input = sys.stdin.readline
+
+INF = 1<<60
+v, e = map(int, input().split())
+
+dp = [[INF]*v for _ in range(v)]
+for i in range(e):
+    s, t, d = map(int, input().split())
+    dp[s][t] = d
+
+for i in range(v):
+    dp[i][i] = 0
+
+for k in range(v):
+    for i in range(v):
+        for j in range(v):
+            dp[i][j] = min(dp[i][j], dp[i][k]+dp[k][j])
+
+exist_negative_cycle = False
+for i in range(v):
+    if dp[i][i] < 0:
+        exist_negative_cycle = True
+
+if exist_negative_cycle:
+    print('NEGATIVE CYCLE')
+else:
+    for i in range(v):
+        for j in range(v):
+            if dp[i][j] < INF/2:
+                print(dp[i][j], end=' ')
+            else:
+                print('INF', end=' ')
+            
+            if j == v-1:
+                print()

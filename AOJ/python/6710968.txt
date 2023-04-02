@@ -1,0 +1,27 @@
+n,m,start=map(int,input().split())
+import heapq
+g=[[] for _ in range(n)]
+for _ in range(m):
+    s,t,d=map(int,input().split())
+    g[s].append((t,d))
+q=[]
+heapq.heappush(q,(0,start))
+dst=[10**18]*n;cfm=[0]*n
+while q:
+    now_d,now_place=heapq.heappop(q)
+    if cfm[now_place]:
+        continue
+    cfm[now_place]=1
+    dst[now_place]=now_d
+    for to_place,cost in g[now_place]:
+        if cfm[to_place]:
+            continue
+        if dst[to_place]>=now_d+cost:
+            continue
+        dst[to_place]=now_d+cost
+        heapq.heappush(q,(dst[to_place],to_place))
+for i in dst:
+    if i>=10**18:
+        print('INF')
+    else:
+        print(i)

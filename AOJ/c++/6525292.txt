@@ -1,0 +1,60 @@
+#include<stdio.h>
+#include<stdlib.h>
+typedef struct {
+    int parent;
+    int depth;
+    int k;
+    int *c;
+}  NODE;
+NODE node[10000];
+void depth(int id, int d)  {
+    int i;
+    node[id].depth = d;
+    for (i=0;i<node[id].k;i++) {
+        depth(node[id].c[i], d+1);
+    }
+}
+
+int main(void)  {
+    int n;
+    int id, k, c;
+    int i, j;
+    scanf("%d", &n);
+    for (i=0;i<n;i++) {
+        node[i].parent=-1;
+    }
+for (i=0;i<n;i++) {
+    scanf("%d%d", &id, &k);
+    node[i].k=k;
+    node[i].c=(int *)malloc(k*sizeof(int));
+    for (j=0;j<k;j++) {
+        scanf("%d", &node[id].c[j]);
+        node[node[id].c[j]].parent=id;
+    }
+}
+ 
+for (i=0;i<n;i++) {
+    printf("node %d:parent=%d, depth=%d, ", i, node[i].parent, node[i].depth);
+    if(node[i].parent==-1) {
+        printf("root,");
+    }
+    else if(node[i].k>0)  {
+        printf("internal node,");
+    }
+else {
+    print("leaf,");
+}    
+printf("[");
+for (j=0;j<node[i].k;j++)  {
+    if (j!=0) {
+        printf(",");
+         }
+    printf("%d", node[i].c[j]);
+        }
+ printf("]\n");   
+    
+}
+return 0;    
+    
+}
+

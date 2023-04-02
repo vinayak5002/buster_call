@@ -1,0 +1,76 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<bool> seen;//探索済みかどうかの判定
+vector<int> d; // 先行順
+vector<int> f; // 後行順
+
+void DFS(vector<vector<int>> &G, int u, int& turn) { 
+    d[u] = turn;// 先行順を記憶
+    turn=turn+1;
+    seen[u] = true;//探索済みにしている。
+    for (auto next_u : G[u]){ 
+        if (seen[next_u]){
+            continue;//探索済みであればスキップ
+        }
+        DFS(G, next_u, turn);//再帰
+    }
+    f[u] = turn;//後行順を記憶
+    turn=turn+1;
+}
+
+void erase(vector<int> &root, int v)
+{
+    for (auto it = root.begin(); it != root.end();)
+    {
+        if (*it == v) {
+            it = root.erase(it);
+        }
+        else {
+            it++;
+        }
+    }
+}
+
+int main(){
+    int n;// 頂点数
+    cin >> n ;
+    int i,j,u,k,v;//uは頂点数, kはuの出次数, vはuに隣接する頂点
+
+    // グラフの入力
+    vector<vector<int>> G(n+1);
+    vector<int> root;
+    for (i = 0; i < n; i++) {
+        root.push_back(i+1);
+    }
+    
+    G[0].push_back(-1);
+    for (i = 0; i < n; i++) {
+        cin >> u >> k;
+        for(j=0;j<k;j++){
+            cin >> v;
+            G[u].push_back(v);
+            erase(root, v);
+        }
+    }
+              
+
+    // 頂点 1 から深さ優先探索
+    seen.assign(n+1, false); // 全て未探索に設定
+    d.resize(n+1);
+    f.resize(n+1);
+    int  turn = 1;//探索した順番
+    
+    int size=root.size();
+    if(size>=2){
+        for (i = 0; i < size; i++) {
+            DFS(G, root[i], turn);
+      }
+    }else{
+        DFS(G, 1, turn);
+    }
+    // 結果の出力
+    for (u = 1; u <= n; u++)
+        cout << u << " " << d[u] << " " << f[u] << endl;
+}

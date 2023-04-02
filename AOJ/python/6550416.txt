@@ -1,0 +1,27 @@
+import sys
+from math import inf
+
+def main(ioi):
+    rxs = lambda: map(int, ioi.readline().split())
+    N, M = rxs()
+    Cs = [*rxs()]
+
+    # dp[n] = 1 + min(dp[n-Cs[0]], dp[n-Cs[1]], ..., dp[n-Cs[M-1]])
+
+    dp = [None] * (N+1)
+    dp[0] = 0
+
+    for i in range(1, N+1):
+        cs = [dp[i-c] for c in Cs if i-c >= 0]
+        dp[i] = (1+min(cs)) if cs else inf
+
+    return dp[N]
+
+DBG=False
+if not DBG: print(main(sys.stdin))
+else:
+    import io
+    print(main(io.StringIO("""15 6
+1 2 7 8 12 50
+""")))
+

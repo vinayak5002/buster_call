@@ -1,0 +1,94 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <math.h>
+
+using namespace std;
+
+struct UnionFind {
+    vector<int> rank, p, df;
+    UnionFind(int n) {
+        rank.resize(n, 0);
+        p.resize(n, 0);
+        df.resize(n, 0);
+        for (int i = 0; i < n; i++)
+            tree(i);
+    }
+
+    void tree(int x) {
+        p[x] = x;
+        rank[x] = 0;
+        df[x] = 0;
+    }
+
+    bool check(int x, int y)
+    {
+      return root(x) == root(y);
+    }
+
+    void unit(int x, int y, int z) {
+      z -= weight(x);
+      z += weight(y);
+        x = root(x);
+        y = root(y);
+        if (rank[x] > rank[y])
+        {
+          swap(x, y);
+          z = abs(z);
+        }
+        rank[y] += rank[x];
+        p[x] = y;
+        df[x] = z;
+    }
+
+    int root(int x) {
+      int r;
+      if (x != p[x])
+      {
+        r = root(p[x]);
+        df[x] += df[p[x]];
+        return p[x] = r;
+      }
+      return x;
+    }
+
+    int weight(int a)
+    {
+      root(a);
+      return df[a];
+    }
+
+    int diff(int x, int y)
+    {
+      return weight(x) - weight(y);
+    }
+};
+
+
+
+int main() {
+    int v, e;
+    cin >> v >> e;
+    UnionFind uf = UnionFind(v);
+    for (int i = 0; i < e; i++) {
+      int op, x, y, z;
+      cin >> op;
+      if(op == 0)
+      {
+        cin >> x >> y >> z;
+        uf.unit(x, y, z);
+      }
+      else
+      {
+        cin >> x >> y;
+        if(uf.check(x, y))
+          cout << uf.diff(x, y) << endl;
+        else
+          cout << "?" << endl;
+      }
+    }
+
+
+    return 0;
+}
+

@@ -1,0 +1,49 @@
+board = [] # 盤上に置かれた駒を表すリスト
+
+k = int(input())
+fix_q = [list(map(int, input().split())) for _ in range(k)]
+
+def deplication(x, y):
+    """斜めの重複チェック"""
+    for x1 in range(0, x):
+        y1 = board[x1]
+        if abs(x - x1) == abs(y - y1):
+            return True
+    return False
+
+
+def n_queen(n, x):
+    """
+    xはクイーンを配置する行
+    yはクイーンを配置する列
+    1行ずつ配置していき最後の行まで配置できたらcountを+1する
+    """
+    global count
+    if n == x:
+        flag = True
+        for t in fix_q:
+            r = t[0]
+            c = t[1]
+            
+            if not board[r] == c:
+                flag = False
+                
+        if flag:
+            ans = [['.' for _ in range(8)]for _ in range(8)]
+            for i in range(len(board)):
+                ans[i][board[i]] = 'Q'
+            for i in range(8):
+                print(''.join(ans[i]))
+            exit()
+                    
+            
+    else:
+        for y in range(0, n):
+            if y in board or deplication(x, y):
+                continue
+            board.append(y)
+            n_queen(n, x + 1)
+            board.pop()
+
+
+n_queen(8, 0)

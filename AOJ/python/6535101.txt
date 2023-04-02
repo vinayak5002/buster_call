@@ -1,0 +1,21 @@
+main :: IO ()
+main = do
+  [_,k] <- fmap (map read . words) getLine
+  getContents >>=
+    print . solve k . map read . words
+
+solve :: Int -> [Int] -> Int
+solve k ws = succ $ bsearch 0 (10^10) (\p -> chk k ws p p)
+
+bsearch :: Int -> Int -> (Int -> Bool) -> Int
+bsearch l h f
+  | l+1 == h = l
+  | otherwise  = if f mid then bsearch mid h f else bsearch l mid f
+  where mid = (l+h) `div` 2
+
+chk :: Int -> [Int] -> Int -> Int -> Bool
+chk _ [] _ _ = False
+chk 0 _ _ _  = True
+chk k xs@(w:ws) p r
+  | w > r     = chk (k-1) xs p p
+  | otherwise = chk k ws p (r-w)

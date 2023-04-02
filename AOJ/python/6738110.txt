@@ -1,0 +1,53 @@
+class Node:
+    # Constructor to create a new node
+    def __init__(self, data):
+        self.data = data
+        self.left = None
+        self.right = None
+
+class BuildTree:
+    def __init__(self, inorder_nodes, preorder_nodes):
+        self.inorder_nodes = inorder_nodes
+        self.preorder_nodes = preorder_nodes
+        self.postorder_nodes = []
+        self.preorder_idx = 0
+    
+    def find_inorder_idx(self, start, end, node):
+        for i in range(start, end + 1):
+            if self.inorder_nodes[i] == node.data:
+                return i
+
+    def postorder_traverse(self, root):
+        if root is None:
+            return None
+
+        self.postorder_traverse(root.left)
+        self.postorder_traverse(root.right)
+        if root is not None:
+            self.postorder_nodes.append(root)
+    
+    def __call__(self, start, end):
+        if start > end:
+            return None
+
+        node = Node(self.preorder_nodes[self.preorder_idx])
+        self.preorder_idx += 1
+
+        inorder_idx = self.find_inorder_idx(start, end, node)
+
+        node.left = self(start, inorder_idx - 1)
+        node.right = self(inorder_idx + 1, end)
+
+        return node
+
+if __name__ == "__main__":
+    n_nodes = int(input())
+    preorder_nodes = [int(e) for e in input().split()]
+    inorder_nodes = [int(e) for e in input().split()]
+
+    build_tree = BuildTree(inorder_nodes, preorder_nodes)
+    root = build_tree(0, len(inorder_nodes) - 1)
+
+    build_tree.postorder_traverse(root)
+    for idx, node in enumerate(build_tree.postorder_nodes):
+        print(node.data, end=" " if idx < len(build_tree.postorder_nodes) - 1 else '\n')

@@ -1,0 +1,41 @@
+#include<bits/stdc++.h>
+using namespace std;
+typedef pair<double, int> PA;
+const double INF = 100100100;
+int n, b;
+double t[10], memo[33][(1<<10)];
+vector<PA> vec[33];
+double dfs(int now, int bit){
+    if(now == b) return 0;
+    if(memo[now][bit] != -1) return memo[now][bit];
+    double res = INF;
+    for(int i=0;i<vec[now].size();i++){
+        double cost = vec[now][i].first;
+        int next = vec[now][i].second;
+        for(int j=0;j<n;j++){
+            if( (bit & 1<<j) != 0) continue;
+            res = min(res, dfs(next, (bit | 1<<j)) + cost/t[j]);
+        }
+    }
+    return memo[now][bit] = res;
+}
+int main(){
+    int m, p, a, x, y;
+    double z, ans;
+    while(scanf("%d %d %d %d %d", &n, &m, &p, &a, &b), n!=0){
+        for(int i=0;i<n;i++) scanf("%lf", &t[i]);
+        for(int i=0;i<33;i++){
+            vec[i].clear();
+            for(int j=0;j<(1<<10);j++) memo[i][j] = -1;
+        }
+        for(int i=0;i<p;i++){
+            scanf("%d %d %lf", &x, &y, &z);
+            vec[x].push_back(PA(z, y));
+            vec[y].push_back(PA(z, x));
+        }
+        ans = dfs(a, 0);
+        if(ans == INF) puts("Impossible");
+        else printf("%lf\n", ans);
+    }
+    return(0);
+}

@@ -1,0 +1,43 @@
+from collections import deque
+while True:
+    w, h = map(int, input().split())
+    # 0 0でwhileから抜けて終了
+    if w == 0 and h == 0:
+        break
+    areas = [list(map(int, input().split())) for _ in range(h)]
+
+    #print(areas)
+
+    move = [[-1, -1], [-1, 0], [-1, 1],
+                      [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]]
+    count = 0
+    queue = deque([])
+    for i in range(h):
+        for j in range(w):
+            start = [i, j]
+            queue.append(start)
+            has_island = False
+            while queue:
+                now = queue.popleft() #先頭を出す
+                '''print("--now--")
+                print(now)
+                print("-------")'''
+                #areasのnowの位置が0なら海なのでループの最初に戻す
+                if areas[now[0]][now[1]] == 0:
+                    continue
+
+                #areasが陸ならhas_islandをTrueにする
+                has_island = True
+                #areasのnowの位置を0に更新する
+                areas[now[0]][now[1]] = 0
+                #8方向に対して走査して範囲内なら追加していく
+                for moveF in move:
+                    next = [now[0] + moveF[0],
+                                     now[1] + moveF[1]]
+                    if 0 <= next[0] and next[0] < h and 0 <= next[1] and next[1] < w:
+                        queue.append(next)
+            #has_islandがTrueの時に島の数をカウントする
+            if has_island:
+                count += 1
+    print(count)
+

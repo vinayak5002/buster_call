@@ -1,0 +1,46 @@
+module Main where
+
+import Control.Applicative ((<$>))
+import Control.Monad
+import qualified Data.ByteString.Char8 as BS
+import Data.List
+import Data.Maybe
+
+main :: IO ()
+main = do
+  n <- readLn :: IO Int
+  ss <- replicateM n readLn
+  let l = lMin ss
+  let r = rMax ss
+  -- print l
+  -- print r
+  print $ ans l (tail r)
+
+ans :: [Int] -> [Int] -> Int
+ans [a] [] = -10000000000
+ans (a : as) (b : bs) =
+  max (b - a) (ans as bs)
+
+rMax a =
+  reverse $ cumMax [] $reverse a
+
+lMin a = cumMin [] a
+
+cumMin :: [Int] -> [Int] -> [Int]
+cumMin a [] = a
+cumMin [] (a : as) = cumMin [a] as
+cumMin bf (a : as) =
+  let c = last bf
+   in if c < c
+        then cumMin (bf ++ [c]) as
+        else cumMin (bf ++ [a]) as
+
+cumMax :: [Int] -> [Int] -> [Int]
+cumMax a [] = a
+cumMax [] (a : as) = cumMax [a] as
+cumMax bf (a : as) =
+  let c = last bf
+   in if c > a
+        then cumMax (bf ++ [c]) as
+        else cumMax (bf ++ [a]) as
+

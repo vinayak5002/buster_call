@@ -1,0 +1,79 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+INF = 100_000
+
+
+def calc_min_cost_arborescence(num_vertexes, edges, root):
+    min_cost_s = [(INF, -1)] * num_vertexes
+    for s, t, w in edges:
+        min_cost_s[t] = min(min_cost_s[t], (w, s))
+    min_cost_s[root] = (-1, -1)
+
+    group_index_list = [0] * num_vertexes
+    is_group = [False] * num_vertexes
+    num_reduced_vertexes = 0
+    is_used = [False] * num_vertexes
+    for v in range(num_vertexes):
+        if not is_used[v]:
+            chain = []
+            cv = v
+            while not is_used[cv] and cv != -1:
+                chain.append(cv)
+                is_used[cv] = True
+                cv = min_cost_s[cv][1]
+            if cv != -1:
+                is_cycle_found = False
+                for u in chain:
+                    group_index_list[u] = num_reduced_vertexes
+                    if u == cv:
+                        is_cycle_found = True
+                        is_group[num_reduced_vertexes] = True
+                    if not is_cycle_found:
+                        num_reduced_vertexes += 1
+                if is_cycle_found:
+                    num_reduced_vertexes += 1
+            else:
+                for u in chain:
+                    group_index_list[u] = num_reduced_vertexes
+                    num_reduced_vertexes += 1
+
+    if num_reduced_vertexes == num_vertexes:
+        return sum(map(lambda x:x[0], min_cost_s)) + 1
+
+    # res = sum(min_cost_s[v][0] for v in range(num_vertexes) if v != root and is_group[group_index_list[v]])
+    res = sum(min_cost_s[v][0] for v in range(num_vertexes) if v != root)
+    n_edges = []
+    for s, t, w in edges:
+        gs = group_index_list[s]
+        gt = group_index_list[t]
+        if gs == gt:
+            continue
+        if is_group[gt]:
+            n_edges.append((gs, gt, w - min_cost_s[t][0]))
+        else:
+            n_edges.append((gs, gt, w))
+
+    return res + calc_min_cost_arborescence(num_reduced_vertexes, n_edges, group_index_list[root])
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    num_vertexes, num_edges, root = map(int, f.readline().split())
+    edges = [list(map(int, f.readline().split())) for _ in range(num_edges)]
+    print(calc_min_cost_arborescence(num_vertexes, edges, root))
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

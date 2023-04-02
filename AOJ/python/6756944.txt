@@ -1,0 +1,53 @@
+INF = 10 ** 7
+SIZE = 10 ** 6 + 1
+
+
+def make_array():
+    all_, odd_= [], []
+    sankaku = 0
+    sankaku_wa = 0
+    for k in range(1, 200):
+        sankaku += k
+        sankaku_wa += sankaku
+        if sankaku_wa > SIZE:
+            break
+        if sankaku_wa % 2:
+            odd_.append(sankaku_wa)
+        all_.append(sankaku_wa)
+    return all_, odd_
+
+
+def test():
+    all_, odd_ = make_array()
+    dp_all = [INF] * SIZE
+    dp_odd_only = [INF] * SIZE
+    dp_all[0], dp_odd_only[0] = 0, 0
+    for i in range(1, SIZE):
+        for a in all_:
+            if i - a >= 0:
+                dp_all[i] = min(dp_all[i], dp_all[i-a] + 1)
+            else:
+                break
+        for a in odd_:
+            if i - a >= 0:
+                dp_odd_only[i] = min(dp_odd_only[i], dp_odd_only[i-a] + 1)
+            else:
+                break
+    return dp_all, dp_odd_only
+
+
+def main():
+    result = []
+    dp_all, dp_odd_only = test()
+    while True:
+        N = int(input())
+        if N == 0:
+            break
+        result.append((dp_all[N], dp_odd_only[N]))
+
+    for a, b in result:
+        print(a, b)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,35 @@
+import sys
+input = sys.stdin.readline
+
+v, e, r = map(int, input().split())
+g = [[] for _ in range(v)]
+for i in range(e):
+    s, t, d = map(int, input().split())
+    g[s].append((t, d))
+
+exist_negative_cycle = False
+dist = [10**20]*v
+dist[r] = 0
+
+for  iter in range(v):
+    update = False
+    for now in range(v):
+        if dist[now] == 10**20:
+            continue
+        for to in g[now]:
+            if dist[to[0]] > dist[now]+ to[1]:
+                update = True
+                dist[to[0]] = dist[now]+to[1]
+    if not update:
+        break
+    if iter == v-1 and update:
+        exist_negative_cycle = True
+
+if exist_negative_cycle:
+    print('NEGATIVE CYCLE')
+else:
+    for i in range(v):
+        if dist[i] < 10**20:
+            print(dist[i])
+        else:
+            print('INF')

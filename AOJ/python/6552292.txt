@@ -1,0 +1,58 @@
+import sys
+
+
+
+import bisect
+import array
+import heapq
+from collections import deque, defaultdict
+import math
+import copy
+from itertools import permutations
+
+sys.setrecursionlimit(10**9)
+INF = float("inf")
+mod = 998244353
+
+#n = int(input())
+#N = input()
+while True:
+    W,H = map(int,input().split())
+    if W == H == 0:
+        exit() 
+    #A = list(map(int,input().split()))
+    c = [[[] for _ in range(W)] for _ in range(H)]# c[i][j] : (i,j)からいけるマスの集合 ((i,j-1),(i-1,j),(i-1,j),(i+1,j)以外は入らない)
+    for i in range(2*H-1):
+        L = list(map(int,input().split()))
+        if i%2 == 0:
+            for j in range(W-1):
+                if L[j] == 0:
+                    c[i//2][j].append((i//2,j+1))
+                    c[i//2][j+1].append((i//2,j))
+        else:
+            for j in range(W):
+                if L[j] == 0:
+                    c[i//2][j].append((i//2+1,j))
+                    c[i//2+1][j].append((i//2,j))
+
+    def bfs(sy,sx):
+        d = [[INF]*W for _ in range(H)]
+        d[sy][sx] = 1
+        q = []
+        heapq.heappush(q,(0,(sy,sx)))
+        while q:
+            cost,(y,x) = heapq.heappop(q)
+            if cost > d[y][x]:
+                continue
+            for ny,nx in c[y][x]:
+                if d[ny][nx] > d[y][x] + 1:
+                    d[ny][nx] = d[y][x] + 1
+                    heapq.heappush(q,(d[ny][nx],(ny,nx)))
+        return d
+
+    ans = bfs(0,0)[H-1][W-1]
+    if ans == INF:
+        print(0)
+    else:
+        print(ans)
+

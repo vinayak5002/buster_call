@@ -1,0 +1,75 @@
+from collections import Counter, deque, defaultdict
+from itertools import permutations, combinations, accumulate, product, chain
+from functools import lru_cache
+from bisect import bisect, bisect_left, insort, insort_left
+from heapq import heapify, heappush, heappop
+from array import array
+from decimal import Decimal
+from copy import deepcopy
+from pprint import pprint
+from string import ascii_uppercase, ascii_lowercase, ascii_letters
+from math import factorial, floor, ceil, sqrt
+import math
+import sys
+sys.setrecursionlimit(1<<30)
+
+read = sys.stdin.read
+readline = sys.stdin.readline
+readlines = sys.stdin.readlines
+
+def DFS(n, J):
+    global A
+
+    if n >= 8:
+        for i in range(8):
+            print(''.join(A[i]))
+        exit()
+
+    if 'Q' not in A[n]:
+        for i in range(8):
+            if J[n][i]:
+                JJ = cal(n, i, J)
+                A[n][i] = 'Q'
+                DFS(n+1, JJ)
+                A[n][i] = '.'
+    else:
+        DFS(n+1, deepcopy(J))
+
+def cal(x, y, J):
+    JJ = deepcopy(J)
+    for i in range(8):
+        JJ[i][y] = JJ[x][i] = False
+    t = 1
+    while True:
+
+        if t > 7:
+            break
+
+        if x+t < 8:
+            if y+t < 8:
+                JJ[x+t][y+t] = False
+            if 0 <= y-t:
+                JJ[x+t][y-t] = False
+
+        if 0 <= x-t:
+            if y+t < 8:
+                JJ[x-t][y+t] = False
+            if 0 <= y-t:
+                JJ[x-t][y-t] = False
+
+        t += 1
+
+    return JJ
+
+if __name__ == '__main__':
+    N = int(readline())
+    A = [['.'] * 8 for _ in range(8)]
+    J = [[True] * 8 for _ in range(8)]
+    
+    for _ in range(N):
+        x, y = map(int, readline().split())
+        A[x][y] = 'Q'
+        J = cal(x, y, J)
+
+    DFS(0, J)
+

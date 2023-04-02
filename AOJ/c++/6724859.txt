@@ -1,0 +1,86 @@
+#include <iostream>
+#include <stdio.h>
+#include <limits>
+
+#define MAX 101
+
+using namespace std;
+
+static const int NIL = -1;
+static const int WHITE = 0;
+static const int GRAY = 1;
+static const int BLACK = 2;
+static const int INFTY = (1 << 21);
+
+int M[MAX][MAX], color[MAX], d[MAX], p[MAX];
+int n;
+
+void dijkstra() {
+
+	int mincost, u;
+
+	for (int i = 0; i < n; i++) {
+		color[i] = WHITE;
+		d[i] = INFTY;
+		p[i] = NIL;
+	}
+	d[0] = 0;
+
+	while (true) {
+		mincost = INFTY;
+		u = NIL;
+		for (int i = 0; i < n; i++) {
+			if (mincost > d[i] && color[i] != BLACK) {
+				mincost = d[i];
+				u = i;
+			}
+		}
+
+		if (u == NIL) break;
+
+		color[u] = BLACK;
+
+		for (int i = 0; i < n; i++) {
+			if (color[i] != BLACK && M[u][i] != INFTY) {
+				if (d[i] > M[u][i]+d[u]) {
+					d[i] = M[u][i]+d[u];
+					p[i] = u;
+					color[i] = GRAY;
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i < n; i++) {
+		if (d[i] == INFTY) {
+			cout << i << " " << -1 << endl;
+		}
+		else {
+			cout << i << " " << d[i] << endl;
+		}
+	}
+
+}
+
+int main() {
+
+	scanf("%d", &n);
+	for (int i = 0; i < n; i++) {
+		for (int j = 0; j < n; j++) {
+			M[i][j] = INFTY;
+		}
+	}
+
+	int u, k,v,c;
+	for (int i = 0; i < n; i++) {
+		cin >> u >> k;
+		for (int j = 0; j < k; j++) {
+			cin >> v >> c;
+			M[u][v] = c;
+		}
+	}
+
+	dijkstra();
+
+	return 0;
+}

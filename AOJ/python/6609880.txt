@@ -1,0 +1,91 @@
+import java.util.*;
+
+public class Main
+{    
+  static void Intercambiar(int[] a, int i, int j)
+  {
+      int temp = a[i];
+      a[i] = a[j];
+      a[j] = temp;
+  }
+  
+  static int Particionar2(int[] a,int p, int r)
+  {
+      int x = a[r];
+      int i = p - 1;
+      for (int j = p; j < r; j++)
+      {
+          if(a[j] <= x)
+          {
+              i++;
+              Intercambiar(a, i, j);
+          }
+          
+      }
+      Intercambiar(a, i + 1, r);
+      return i + 1;
+  }
+  
+  static int Particionar(int[] a, int l, int r)
+  {
+      int p = a[l];
+      int i = l + 1;
+      int j = r;
+      while(i <= j)
+      {
+          while(i <= r && a[i] < p)
+              i++;
+          while(j > l && a[j] >= p)
+              j--;
+          if( i < j) Intercambiar(a, i, j);
+      }
+      Intercambiar(a,j,l);
+      return j;
+  }
+  
+  static int QuickSort(int[] a, int l, int r)
+  {
+      if(l >= r) return -1;
+      int k = Particionar2(a, l, r);     
+      QuickSort(a, l, k - 1);
+      QuickSort(a, k + 1 , r);
+      return k;
+  } 
+    
+  static int QuickSort(int[] a)
+  {
+      return QuickSort(a,0,a.length - 1);
+  }
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) 
+    {       
+        Scanner escaner  = new Scanner(System.in);        
+        int[] arreglo = new int[escaner.nextInt()];
+        
+        for (int i = 0; i < arreglo.length; i++) 
+            arreglo[i] = escaner.nextInt();
+        
+        //int pivote = arreglo[arreglo.length -1];
+        int pivote = QuickSort(arreglo);
+        
+         
+         
+        if(0 == pivote) 
+            System.out.print("[" + arreglo[0] + "]");
+        else 
+            System.out.print(arreglo[0]);
+        for(int i = 1; i< arreglo.length; i++)
+        {
+            if(i == pivote)
+                System.out.print(" [" + arreglo[i] + "]");
+            else                
+                System.out.print(" " + arreglo[i]);
+        }
+        System.out.println();
+        
+               
+                      
+    }    
+}

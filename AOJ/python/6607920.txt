@@ -1,0 +1,65 @@
+
+from decimal import Decimal
+
+
+N,L = map(int,input().split())
+
+def ok(m,sche):
+  tank = L
+  t0 = 0
+  s0=sche[0][0]
+  for i in sche:
+    [s,t,u] = i
+    tank = min(L,(s-t0)*m+tank)
+    tank += (m-u)*(t-s)
+    tank = min(tank,L)
+    t0 = t
+    if tank < 0:
+      return False
+  tank = min(m*(86400-t)+tank,L)
+  t0=0
+  for i in sche:
+    [s,t,u] = i
+    tank = min(L,(s-t0)*m+tank)
+    tank += (m-u)*(t-s)
+    tank = min(tank,L)
+    t0 = t
+    if tank < 0:
+      return False
+  tank = min(m*(86400-t)+tank,L)
+  tank0 = tank
+  t0=0
+  for i in sche:
+    [s,t,u] = i
+    tank = min(L,(s-t0)*m+tank)
+    tank += (m-u)*(t-s)
+    tank = min(tank,L)
+    t0 = t
+    if tank < 0:
+      return False
+  tank = min(m*(86400-t)+tank,L)
+  if tank0 > tank:
+    return False
+
+  return True
+
+def solve():
+  mini = Decimal(1/86400)
+  maxi = Decimal(1000001)
+  sche = []
+  for _ in range(N):
+    sche.append(list(map(int,input().split())))
+  while(maxi-mini > 0.000001):
+    m = (maxi+mini)/Decimal(2.0)
+    if ok(m,sche):
+      maxi = m
+    else:
+      mini = m
+  print(Decimal(mini))
+
+
+while N!=0:
+  solve()
+  N,L = map(int,input().split())
+
+

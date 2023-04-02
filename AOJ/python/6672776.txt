@@ -1,0 +1,246 @@
+import scala.annotation.tailrec
+import scala.io.StdIn
+
+trait Comparable[K] {
+  def compare(c:Comparable[K]):Int = {
+    val k = c.getKey
+    compare(k)
+  }
+  def compare(k:K):Int
+  def getKey:K
+}
+
+class AvlTree[K]() {
+
+  case class Content( var items:List[Comparable[K]] = Nil,
+                      var left:BNode = None,
+                      var right:BNode = None,
+                      var balance:Int = 0)
+
+  type BNode = Option[Content]
+
+  case class Result(heightChanged:Boolean, newBNode:Option[BNode])
+
+  var root:BNode = None
+
+  def rotateRR(a:BNode):BNode = {
+    // println(s"RR rotation. node:${a.map(_.items.head.getKey())}")
+    for {
+      x <- a
+      b = x.right
+      y <- b
+    }
+    yield {
+      x.right = y.left
+      y.left  = a
+      y.balance match {
+        case 0 =>
+          x.balance = -1
+          y.balance = 1
+        case _ =>
+          x.balance = 0
+          y.balance = 0
+      }
+      y
+    }
+  }
+  def rotateLL(a:BNode):BNode = {
+    // println(s"LL rotation. node:${a.map(_.items.head.getKey())}")
+    for {
+      x <- a
+      b = x.left
+      y <- b
+    }
+    yield {
+      x.left = y.right
+      y.right  = a
+      y.balance match {
+        case 0 =>
+          x.balance = 1
+          y.balance = -1
+        case _ =>
+          x.balance = 0
+          y.balance = 0
+      }
+      y
+    }
+  }
+  def rotateRL(a:BNode):BNode = {
+    // println(s"RL rotation. node:${a.map(_.items.head.getKey())}")
+    for {
+      x <- a
+      b = x.right
+      y <- b
+      c = y.left
+      z <- c
+    }
+    yield {
+      x.right = z.left
+      y.left  = z.right
+      z.right = b
+      z.left  = a
+      z.balance match {
+        case 0 =>
+          x.balance = 0
+          y.balance = 0
+        case 1 =>
+          x.balance = 0
+          y.balance = -1
+        case _ =>
+          x.balance = 1
+          y.balance = 0
+      }
+      z.balance = 0
+      z
+    }
+  }
+  def rotateLR(a:BNode):BNode = {
+    // println(s"LR rotation. node:${a.map(_.items.head.getKey())}")
+    for {
+      x <- a
+      b = x.left
+      y <- b
+      c = y.right
+      z <- c
+    }
+    yield {
+      x.left  = z.right
+      y.right  = z.left
+      z.right = a
+      z.left  = b
+      z.balance match {
+        case 0 =>
+          x.balance = 0
+          y.balance = 0
+        case 1 =>
+          x.balance = -1
+          y.balance = 0
+        case _: Int =>
+          x.balance = 0
+          y.balance = 1
+      }
+      z.balance = 0
+      z
+    }
+  }
+
+  def insert(item:Comparable[K]):Unit = {
+
+    def traverse(cur:BNode):Result = {
+      cur match {
+        case Some(x) =>
+          val n = x.items.head
+          n.compare(item) match {
+            case 1 => // the item is grater than current node.
+              val result = traverse(x.right)
+              result.newBNode.foreach(x.right = _)
+              if (result.heightChanged) {
+                x.balance match {
+                  case 1 => // a left tree of x is higher
+                    x.balance = 0
+                    Result(heightChanged = false, None)
+                  case 0 => // a left tree of x is same height of right tree.
+                    x.balance = -1
+                    Result(heightChanged = true, None)
+                  case _ => // a right tree of x is higher
+                    x.right match {
+                      case Some(y) =>
+                        if (y.balance < 0) { // a right tree of y is higher
+                          Result(heightChanged = false, Some(rotateRR(cur)))
+                        }
+                        else {
+                          Result(heightChanged = false, Some(rotateRL(cur)))
+                        }
+                      case None => throw new RuntimeException("No Binary Node found.")
+                    }
+                }
+              } else { // No factor changed
+                Result(heightChanged = false, None)
+              }
+            case 0 => // the item is equal of current node.
+              x.items = item::x.items
+              Result(heightChanged = false, None)
+            case _ => // the item is less than current node.
+              val result = traverse(x.left)
+              result.newBNode.foreach(x.left = _)
+              if (result.heightChanged) {
+                x.balance match {
+                  case 1 => // a left tree of x is higher
+                    x.left match {
+                      case Some(y) =>
+                        if (y.balance < 0) { // a right tree of y is higher
+                          Result(heightChanged = false, Some(rotateLR(cur)))
+                        }
+                        else {
+                          Result(heightChanged = false, Some(rotateLL(cur)))
+                        }
+                      case None => throw new RuntimeException("No Binary Node found.")
+                    }
+                  case 0 => // a left tree of x is same height of right tree.
+                    x.balance = 1
+                    Result(heightChanged = true, None)
+                  case _ => // a right tree of x is higher
+                    x.balance = 0
+                    Result(heightChanged = false, None)
+                }
+              } else { // No factor changed
+                Result(heightChanged = false, None)
+              }
+          }
+        case None => // Create new BNode
+          Result(heightChanged = true, Some(Some(Content(List(item)))))
+      }
+    }
+
+    val result = traverse(root)
+    result.newBNode.foreach(root = _)
+  }
+
+  private def findBNode(key:K):Option[BNode] = {
+    def traverse(current:BNode):Option[BNode] = {
+      current.flatMap { x =>
+        val h = x.items.head
+        h.compare(key) match {
+          case 1 => traverse(x.right)
+          case 0 => Some(current)
+          case _ => traverse(x.left)
+        }
+      }
+    }
+    traverse(root)
+  }
+
+  def findFirst(key:K):Option[Comparable[K]] = {
+    findBNode(key).flatMap(_.map(c => c.items.head))
+  }
+}
+
+
+object Main extends App {
+  val N  = StdIn.readInt()
+  val S = for (_ <- 0 until N) yield StdIn.readLine().split(" ").toList
+
+  class Element(val v:String) extends Comparable[String] {
+    override def compare(k:String): Int = getKey match {
+      case v if k > v =>  1
+      case v if k < v => -1
+      case _ => 0
+    }
+    override def getKey: String = v
+  }
+  @tailrec
+  def solver(ll:List[List[String]], ac:List[String]):List[String] = {
+    ll match {
+      case List() => ac.reverse
+      case List("insert", s)::xs =>
+        tree.insert(new Element(s))
+        solver(xs, ac)
+      case List("find", s)::xs => if (tree.findFirst(s).isDefined) solver(xs, "yes"::ac) else solver(xs, "no"::ac)
+    }
+  }
+
+  val tree = new AvlTree[String]
+  val C = solver(S.toList, List())
+  println(s"${C.mkString("\n")}")
+
+}

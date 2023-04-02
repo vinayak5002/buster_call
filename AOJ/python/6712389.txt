@@ -1,0 +1,102 @@
+N=4
+N2=16
+LIMIT=100
+path=[0for i in range(LIMIT)]
+dx=[0,-1,0,1]
+dy=[1,0,-1,0]
+dir=['r','u','l','d']
+MDT=[[0 for i in range(N2)] for j in range(N2)]
+limit=0
+path=[0 for i in range(LIMIT)]
+class Puzzle:
+    def __init__(self):
+        f=[0 for i in range(N2)]
+        self.f = f # Puzzle的列表表示
+        self.space = 0  #
+        self.MD = 0 # 
+state=Puzzle()
+
+
+def getALLMD(pz):
+    sum_=0
+    for i in range(0,N2):
+        if pz.f[i]==N2:
+            continue
+        sum_+=MDT[i][pz.f[i]-1]
+    return sum_
+
+def issolved():
+    for i in range(0,N2):
+        if state.f[i]!=i+1:
+            return False
+    return True
+
+def dfs(depth,prev):
+    global state
+    if state.MD==0:
+        return True
+    #如果当前深度加上启发超过了限制，则进行剪枝
+    if depth+state.MD>limit:
+        return False
+    sx=int(state.space/N)
+    sy=state.space%N
+    tmp=Puzzle()
+
+    for r in range(0,4):
+        tx=sx+dx[r]
+        ty=sy+dy[r]
+        if tx<0 or ty<0 or tx>=N or ty >=N:
+            continue
+        if max(prev,r)-min(prev,r)==2:
+            continue
+        tmp=state
+
+        #计算曼哈顿距离的差值，同时交换拼图块
+        state.MD-=MDT[tx*N+ty][state.f[tx*N+ty]-1]
+        state.MD += MDT[sx * N + sy][state.f[tx * N + ty] - 1]
+        state.f[tx*N+ty],state.f[sx * N + sy]=state.f[sx * N + sy],state.f[tx*N+ty]
+        state.space=tx*N+ty
+        if dfs(depth+1,r):
+            path[depth]=r
+            return True
+        state=tmp
+
+    return False
+
+
+def interative_deepening(in_):
+    global state
+    in_.MD=getALLMD(in_) #初始状态的曼哈顿距离
+    for limit in range(in_.MD,LIMIT+1):
+        state=in_
+        if dfs(0,-100):
+            ans=''
+            for i in range(0,limit):
+                ans+=dir[path[i]]
+            return ans
+    return 'unsolvable'
+
+for i in range(0,N2):
+    for j in range(0,N2):
+        MDT[i][j]=int(abs(i/N-j/N)+abs(i%N-j%N))
+
+in_=Puzzle()
+s=[]
+for i in range(4):
+    a=[int(x) for x in input().split()]
+    for item in a:
+        s.append(item)
+
+for i in range(0,N2):
+    in_.f[i]=s[i]
+    if in_.f[i]==0:
+        in_.f[i]=N2
+        in_.space=i
+
+
+ans=interative_deepening(in_)
+# print(ans)
+print(len(ans))
+
+
+

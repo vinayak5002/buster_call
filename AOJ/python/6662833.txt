@@ -1,0 +1,140 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class Treap:
+    def __init__(self, key, priority):
+        self.left = None
+        self.right = None
+        self.key = key
+        self.priority = priority
+
+    def rotate_right(self, n0):
+        n1 = n0.left
+        n0.left = n1.right
+        n1.right = n0
+        return n1
+
+    def rotate_left(self, n0):
+        n1 = n0.right
+        n0.right = n1.left
+        n1.left = n0
+        return n1
+
+    def insert(self, n, key, priority):
+        if n is None:
+            return Treap(key, priority)
+        if key == n.key:
+            return n
+
+        if key < n.key:
+            n.left = self.insert(n.left, key, priority)
+            if n.priority < n.left.priority:
+                n = self.rotate_right(n)
+        else:
+            n.right = self.insert(n.right, key, priority)
+            if n.priority < n.right.priority:
+                n = self.rotate_left(n)
+        return n
+
+    def treap_delete(self, n, key):
+        if n.left is None and n.right is None:
+            return None
+        elif n.left is None:
+            n = self.rotate_left(n)
+        elif n.right is None:
+            n = self.rotate_right(n)
+        else:
+            if n.left.priority > n.right.priority:
+                n = self.rotate_right(n)
+            else:
+                n = self.rotate_left(n)
+        return self.delete(n, key)
+
+    def delete(self, n, key):
+        if n is None:
+            return None
+        if key < n.key:
+            n.left = self.delete(n.left, key)
+        elif n.key < key:
+            n.right = self.delete(n.right, key)
+        else:
+            return self.treap_delete(n, key)
+        return n
+
+    def find(self, n, key):
+        if n is None:
+            return False
+        if n.key == key:
+            return True
+        if key < n.key:
+            return n.find(n.left, key)
+        if n.key < key:
+            return n.find(n.right, key)
+        return False
+
+    def print_in_order(self, n):
+        if n is None:
+            return
+
+        self.print_in_order(n.left)
+        print(' ' + str(n.key), end='')
+        self.print_in_order(n.right)
+        return
+
+    def print_pre_order(self, n):
+        if n is None:
+            return
+
+        print(' ' + str(n.key), end='')
+        self.print_pre_order(n.left)
+        self.print_pre_order(n.right)
+        return
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    m = int(f.readline())
+    treap_tree = None
+
+    for _ in range(m):
+        query_str_list = list(f.readline().split())
+        if query_str_list[0] == 'insert':
+            key = int(query_str_list[1])
+            priority = int(query_str_list[2])
+            if treap_tree is None:
+                treap_tree = Treap(key, priority)
+            else:
+                treap_tree = treap_tree.insert(treap_tree, key, priority)
+        elif query_str_list[0] == 'find':
+            key = int(query_str_list[1])
+            if treap_tree is None:
+                print('no')
+            elif treap_tree.find(treap_tree, key):
+                print('yes')
+            else:
+                print('no')
+        elif query_str_list[0] == 'delete':
+            key = int(query_str_list[1])
+            if treap_tree is not None:
+                treap_tree = treap_tree.delete(treap_tree, key)
+        elif treap_tree is not None:
+            treap_tree.print_in_order(treap_tree)
+            print('')
+            treap_tree.print_pre_order(treap_tree)
+            print('')
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

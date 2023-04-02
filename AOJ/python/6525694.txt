@@ -1,0 +1,41 @@
+import sys
+input = sys.stdin.readline
+def MI(): return map(int, input().split())
+
+class UnionFind:
+    def __init__(self, n):
+        self.n=n
+        self.parent_size=[-1]*n
+
+    def union(self, a, b):
+        x, y=self.find(a), self.find(b)
+        if x == y:
+            return 
+        if abs(self.parent_size[x])<abs(self.parent_size[y]):
+            x, y=y, x
+        self.parent_size[x] += self.parent_size[y] 
+        self.parent_size[y]=x
+        return
+
+    def same(self, a, b):
+        return self.find(a) == self.find(b)
+        
+    def find(self, a):
+        if self.parent_size[a]<0:
+            return a
+        self.parent_size[a]=self.find(self.parent_size[a])
+        return self.parent_size[a]
+
+n, q = MI()
+uf = UnionFind(n)
+for i in range(q):
+    com, x, y = MI()
+    if com == 0:
+        if uf.same(x, y):
+            continue
+        uf.union(x, y)
+    else:
+        if uf.same(x, y):
+            print(1)
+        else:
+            print(0)

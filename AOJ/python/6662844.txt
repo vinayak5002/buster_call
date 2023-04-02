@@ -1,0 +1,57 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def max_heapify(src_list, i):
+    size = len(src_list)
+    max_idx = i
+    max_val = src_list[i]
+
+    l_idx = 2 * i + 1
+    if l_idx < size and max_val < src_list[l_idx]:
+        max_idx = l_idx
+        max_val = src_list[l_idx]
+    r_idx = 2 * i + 2
+    if r_idx < size and max_val < src_list[r_idx]:
+        max_idx = r_idx
+
+    if max_idx != i:
+        src_list[i], src_list[max_idx] = src_list[max_idx], src_list[i]
+        max_heapify(src_list, max_idx)
+
+    return
+
+
+def build_max_heap(src_list):
+    size = len(src_list)
+    s_idx = (size - 1) // 2
+
+    for i in range(s_idx, -1, -1):
+        max_heapify(src_list, i)
+
+    return
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('../test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    f.readline()
+    max_heap = list(map(int, f.readline().split()))
+
+    build_max_heap(max_heap)
+    print(' ', end='')
+    print(*max_heap)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

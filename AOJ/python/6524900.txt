@@ -1,0 +1,49 @@
+from math import inf
+from operator import itemgetter
+from itertools import count, islice
+
+rxs = lambda: map(int, input().split())
+N, Q = rxs()
+Qs = [tuple(rxs()) for _ in range(Q)]
+bit0 = [0]*(N+1)
+bit1 = [0]*(N+1)
+
+def _add(bit, s, x):
+    while s <= N:
+        bit[s] += x
+        s += s & -s
+
+def _radd(s, x):
+    _add(bit0, N-s+1, x)
+    _add(bit1, s, s*x)
+
+def add(s, t, x):
+    if s > 1:
+        _radd(s-1, -x)
+    _radd(t, x)
+
+def _getsum(bit, s):
+    ans = 0
+    while s > 0:
+        ans += bit[s]
+        s -= s & -s
+    return ans
+
+def _rgetsum(s):
+    return _getsum(bit0, N-s+1) * s + (_getsum(bit1, s-1) if s > 1 else 0)
+
+def getsum(s, t):
+    return _rgetsum(t) - (_rgetsum(s-1) if s > 1 else 0)
+
+ans = []
+for q, *params in Qs:
+    if q == 0:
+        s, t, x = params
+        add(s, t, x)
+    else:
+        s, t = params
+        ans.append(getsum(s, t))
+
+print("\n".join(map(str, ans)))
+
+

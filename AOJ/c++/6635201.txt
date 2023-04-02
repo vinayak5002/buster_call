@@ -1,0 +1,110 @@
+#include <bits/stdc++.h>
+using namespace std;
+#include <atcoder/all>
+using namespace atcoder;
+using ll = long long;
+using ld = long double;
+using P = pair<int, int>;
+using Graph = vector<vector<ll>>;
+using vi = vector<int>;
+using vl = vector<long>;
+using vll = vector<long long>;
+using vvi = vector<vi>;
+using vvl = vector<vl>;
+using vvll = vector<vll>;
+using vs = vector<string>;
+using vc = vector<char>;
+using vvc = vector<vc>;
+using pll = pair<long long, long long>;
+using vpll = vector<pll>;
+using mint = modint1000000007;
+const long double EPS = 1e-18;
+const long long INF = 1e18;
+const long double PI = acos(-1.0L);
+#define reps(i, a, n) for (ll i = (a); i < (ll)(n); i++)
+#define rep(i, n) for (ll i = (0); i < (ll)(n); i++)
+#define rrep(i, n) for (ll i = (1); i < (ll)(n + 1); i++)
+#define repd(i, n) for (ll i = n - 1; i >= 0; i--)
+#define rrepd(i, n) for (ll i = n; i >= 1; i--)
+#define ALL(n) begin(n), end(n)
+#define IN(a, x, b) (a <= x && x < b)
+#define INIT                          \
+    std::ios::sync_with_stdio(false); \
+    std::cin.tie(0);
+template <class T>
+inline T CHMAX(T &a, const T b) {
+    return a = (a < b) ? b : a;
+}
+template <class T>
+inline T CHMIN(T &a, const T b) {
+    return a = (a > b) ? b : a;
+}
+// 初期化
+void init(ll N, vll &par, vll &rank) {
+    rep(i, N) {
+        par.at(i) = i;
+        rank.at(i) = 0;
+    }
+}
+// 木の根を求める
+ll find(ll x, vll &par) {
+    if (par.at(x) == x) {
+        return x;
+    } else {
+        return par.at(x) = find(par.at(x), par);
+    }
+}
+// xとyの属する集合を併合
+void unite(ll x, ll y, vll &par, vll &rank) {
+    x = find(x, par);
+    y = find(y, par);
+    if (x == y) {
+        return;
+    }
+    if (rank.at(x) < rank.at(y)) {
+        par.at(x) = y;
+    } else {
+        par.at(y) = x;
+    }
+    if (rank.at(x) == rank.at(y)) {
+        rank.at(x)++;
+    }
+}
+// xとyが同じ集合に属するか
+bool same(ll x, ll y, vll &par) { return find(x, par) == find(y, par); }
+struct edge {
+    ll from;
+    ll to;
+    ll cost;
+};
+struct hikaku {
+    bool comp(const edge &e1, const edge &e2) { return e1.cost < e2.cost; }
+};
+ll kruskal(vector<edge> es, ll choten, ll hen) {
+    sort(es.begin(), es.end(), hikaku{});
+    vll par(choten);
+    vll rank(choten);
+    init(choten, par, rank);
+    ll res = 0;
+    rep(i, hen) {
+        edge e = es.at(i);
+        if (!same(e.from, e.to, par)) {
+            unite(e.from, e.to, par, rank);
+            res += e.cost;
+        }
+    }
+    return res;
+}
+int main() {
+    ll V, E;
+    cin >> V >> E;
+    vector<edge> es(E);
+    rep(i, E) {
+        ll s, t, w;
+        cin >> s >> t >> w;
+        s--;
+        t--;
+        es.at(i) = {s, t, w};
+    }
+    cout << kruskal(es, V, E) << endl;
+}

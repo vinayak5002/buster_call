@@ -1,0 +1,160 @@
+macro_rules! read_line {
+    ($($xs: tt)*) => {
+        let mut buf = String::new();
+        std::io::stdin().read_line(&mut buf).unwrap();
+        let mut iter = buf.split_whitespace();
+        expand!(iter, $($xs)*);
+    };
+}
+
+macro_rules! expand {
+    ($iter: expr,) => {};
+    ($iter: expr, mut $var: ident : $type: tt, $($xs: tt)*) => {
+        let mut $var = value!($iter, $type);
+        expand!($iter, $($xs)*);
+    };
+    ($iter: expr, $var: ident : $type: tt, $($xs: tt)*) => {
+        let $var = value!($iter, $type);
+        expand!($iter, $($xs)*);
+    };
+}
+
+macro_rules! value {
+    ($iter:expr, ($($type: tt),*)) => {
+        ($(value!($iter, $type)),*)
+    };
+    ($iter: expr, [$type: tt; $len: expr]) => {
+        (0..$len).map(|_| value!($iter, $type)).collect::<Vec<_>>()
+    };
+    ($iter: expr, Chars) => {
+        value!($iter, String).chars().collect::<Vec<_>>()
+    };
+    ($iter: expr, Isize1) => {
+        value!($iter, isize) - 1
+    };
+    ($iter: expr, Usize1) => {
+        value!($iter, usize) - 1
+    };
+    ($iter: expr, $type: ty) => {
+        $iter.next().unwrap().parse::<$type>().unwrap()
+    };
+}
+
+pub trait BinarySearch<T> {
+    fn lower_bound(&self, key: T) -> usize;
+    fn upper_bound(&self, key: T) -> usize;
+}
+
+impl<T> BinarySearch<T> for [T]
+where
+    T: Ord,
+{
+    fn lower_bound(&self, key: T) -> usize {
+        let mut ng = -1 as isize;
+        let mut ok = self.len() as isize;
+        while ok - ng > 1 {
+            let mid = (ok + ng) / 2;
+            if key <= self[mid as usize] {
+                ok = mid;
+            } else {
+                ng = mid;
+            }
+        }
+        ok as usize
+    }
+
+    fn upper_bound(&self, key: T) -> usize {
+        let mut ng = -1 as isize;
+        let mut ok = self.len() as isize;
+        while ok - ng > 1 {
+            let mid = (ok + ng) / 2;
+            if key < self[mid as usize] {
+                ok = mid;
+            } else {
+                ng = mid;
+            }
+        }
+        ok as usize
+    }
+}
+
+pub fn compress<T>(v: &Vec<T>) -> (Vec<usize>, Vec<T>)
+where
+    T: Ord + Clone,
+{
+    let mut vs = v.clone();
+    vs.sort();
+    vs.dedup();
+
+    let mut res = vec![];
+    for a in v.clone() {
+        res.push(vs.lower_bound(a));
+    }
+
+    (res, vs)
+}
+
+fn main() {
+    read_line! {
+        n: usize,
+    }
+
+    let mut x = vec![];
+    let mut y = vec![];
+    for _ in 0..n {
+        read_line! {
+            xyxy: (isize, isize, isize, isize),
+        }
+        x.push(xyxy.0);
+        y.push(xyxy.1);
+        x.push(xyxy.2);
+        y.push(xyxy.3);
+    }
+
+    let (x, xs) = compress(&x);
+    let (y, ys) = compress(&y);
+
+    let mut x1 = vec![];
+    let mut y1 = vec![];
+    let mut x2 = vec![];
+    let mut y2 = vec![];
+
+    for i in 0..n {
+        x1.push(x[2 * i]);
+        x2.push(x[2 * i + 1]);
+        y1.push(y[2 * i]);
+        y2.push(y[2 * i + 1]);
+    }
+
+    let mut imos_mat = vec![vec![0; ys.len()]; xs.len()];
+
+    for i in 0..n {
+        imos_mat[x1[i]][y1[i]] += 1;
+        imos_mat[x2[i]][y2[i]] += 1;
+        imos_mat[x1[i]][y2[i]] -= 1;
+        imos_mat[x2[i]][y1[i]] -= 1;
+    }
+
+    for i in 0..xs.len() {
+        for j in 0..ys.len() - 1 {
+            imos_mat[i][j + 1] += imos_mat[i][j];
+        }
+    }
+
+    for j in 0..ys.len() {
+        for i in 0..xs.len() - 1 {
+            imos_mat[i + 1][j] += imos_mat[i][j];
+        }
+    }
+
+    let mut ans = 0;
+    for i in 0..xs.len() - 1 {
+        for j in 0..ys.len() - 1 {
+            if imos_mat[i][j] > 0 {
+                ans += (xs[i + 1] - xs[i]) * (ys[j + 1] - ys[j]);
+            }
+        }
+    }
+
+    println!("{}", ans);
+}

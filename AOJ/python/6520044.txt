@@ -1,0 +1,85 @@
+N,q = map(int,input().split())
+
+
+#=====my_RMQ=====
+
+import bisect
+
+#監視対象のリストのサイズに合わせて
+#セグメント木を初期化。
+#INFには初期化したときに最初に入れる値を格納。
+
+tmp = [1]
+tmp2 = 1
+INF = 0
+
+while tmp2<N:
+    tmp2*=2
+    tmp.append(tmp2)
+
+size = bisect.bisect_left(tmp,N)
+size2 = tmp[size]*2
+data = [INF]*size2
+
+#監視対象となるリストが与えられるときは
+#コメントアウトをはずし、dataに格納。
+
+#print(data)
+#for i,v in enumerate(A):
+#    data[i+tmp2] = A[i]
+
+#for i in range(tmp2-1,0,-1):
+#    data[i] = min(data[i*2],data[i*2+1])
+
+
+#リストk番目の値にaを加算するクエリ
+#問題が一番最初の要素を1番目とカウントする
+#場合に対応している。
+
+def updata(k,a):
+    kk = (k-1)+tmp2
+    data[kk] += a
+
+    while kk>1:
+        if kk%2 == 0:
+            data[kk//2] = data[kk]+data[kk+1]
+        else:
+            data[kk//2] = data[kk]+data[kk-1]
+        kk = kk//2
+    return
+
+#リストl～r番目の合計値を返すクエリ
+
+def query(l,r):
+    left = (l-1)+tmp2
+    right = (r-1)+tmp2
+
+    if left == right:
+        return data[left]
+
+    winleft = data[left]
+    winright = data[right]
+
+    while left//2 != right//2:
+        if left%2 == 0:
+            if left+1<=right:
+                winleft = winleft+data[left+1]
+        left = left//2
+
+        if right%2 == 1:
+            if right-1>=left:
+                winright = winright+data[right-1]
+        right = right//2
+
+    return winleft+winright
+
+for i in range(q):
+    qq = list(map(int,input().split()))
+    if qq[0] == 0:
+        updata(qq[1],qq[2])
+    else:
+        print(query(qq[1],qq[2]))
+
+#print(data)
+
+

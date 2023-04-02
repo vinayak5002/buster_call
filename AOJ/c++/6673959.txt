@@ -1,0 +1,72 @@
+#include<bits/stdc++.h>
+#define int long long
+using namespace std;
+static const int INF = 1E10+7;
+
+int N,M;
+int d[1000][1000];
+int cd[1000][1000];
+
+
+void read_graph() {
+	for(int i = 0 ; i < 1000 ; i++){
+		for(int j = 0; j < 1000 ; j++){
+			d[i][j] = INF;
+			if(i == j) d[i][j] = 0;
+		}
+	}
+	
+	cin >> N >> M;
+	int s, t, w;
+	for(int i=1; i<=M; i++){
+		cin >> s >> t >> w;
+		d[s][t] = w;
+	}
+}
+
+
+void floyd_warshall() {
+	
+	for(int k = 0; k < N; k++){
+		for(int i = 0; i < N; i++){
+			for(int j = 0; j < N; j++){
+				if(d[i][k] < INF && d[k][j] < INF){
+					d[i][j] = std::min(d[i][j], d[i][k] + d[k][j]);
+				}
+			}
+		}
+	}
+	
+	for(int i = 0 ; i < N ; i++){
+		for(int j = 0 ; j < N ; j++){
+			cd[i][j] = d[i][j];
+		}
+	}
+	
+	for(int i = 0 ; i < N ; i++){
+		for(int j = 0; j < N ; j++){
+			for(int t = 0; t < N; t++){
+				if(d[i][t] < INF && d[t][t] < 0 && d[t][j] < INF){
+					puts("NEGATIVE CYCLE");
+					return;
+				}
+			}
+		}
+	}
+	
+	for(int i = 0 ; i <  N; i++){
+		for(int j = 0 ; j < N ; j++){
+			if(d[i][j]==INF) cout<<"INF";
+			else cout << d[i][j] ;
+			cout << (j == N-1 ? "\n" : " ");
+		}
+	}
+	
+	return ;
+}
+
+signed main() {
+	read_graph();
+	floyd_warshall();
+	return 0;
+}

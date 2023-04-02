@@ -1,0 +1,53 @@
+import sys
+from collections import deque
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def topological_sort(adjacency_list, in_degree_list, num_vertexes):
+    sorted_vertex_list = []
+    q = deque()
+    for i in range(num_vertexes):
+        if in_degree_list[i] == 0:
+            q.append(i)
+
+    while q:
+        v = q.popleft()
+
+        for u in adjacency_list[v]:
+            in_degree_list[u] -= 1
+            if in_degree_list[u] == 0:
+                q.append(u)
+
+        sorted_vertex_list.append(v)
+
+    return sorted_vertex_list
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    num_vertexes, num_edges = map(int, f.readline().split())
+    adjacency_list = [[] for _ in range(num_vertexes)]
+    in_degree_list = [0] * num_vertexes
+    for _ in range(num_edges):
+        s, t = map(int, f.readline().split())
+        adjacency_list[s].append(t)
+        in_degree_list[t] += 1
+
+    sorted_vertex_list = topological_sort(adjacency_list, in_degree_list, num_vertexes)
+    print(*sorted_vertex_list)
+
+    if READ_FROM_FILE:
+        f.close()
+
+    return
+
+
+if __name__ == '__main__':
+    main()
+

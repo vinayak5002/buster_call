@@ -1,0 +1,32 @@
+import sys
+input = sys.stdin.buffer.readline
+sys.setrecursionlimit(10 ** 7)
+inf = 10 ** 18
+
+
+def main():
+    N, M = map(int, input().split())
+    if (N, M) == (0, 0):
+        return False
+    A = list(map(int, input().split()))
+    B = list(map(int, input().split()))
+    C = [(M + b - a) % M for a, b in zip(A, B)]
+
+    dp = [[inf] * 2 for _ in range(N)]
+    dp[0][0] = C[0]
+    dp[0][1] = C[0] + M
+    for i in range(1, N):
+        for j in range(2):
+            for k in range(2):
+                L = C[i-1] + M * j
+                R = C[i] + M * k
+                dp[i][k] = min(dp[i][k], dp[i-1][j] + abs(R - L))
+
+    res = min(dp[N-1][0] + C[N-1], dp[N-1][1] + C[N-1] + M) // 2
+    print(res)
+
+    return True
+
+
+while main():
+    ...

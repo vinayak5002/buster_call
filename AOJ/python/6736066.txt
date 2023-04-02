@@ -1,0 +1,35 @@
+while 1:
+    n = int(input())
+    if n == 0:
+        break
+    b = input()
+    b = int(b, 2)
+    b ^= 1 << 52
+    sa = 0
+    sb = b
+    while n > 0:
+        l = 0
+        r = 1 << 60
+        while r - l > 1:
+            mid = (l + r) // 2
+            nsb = sb + b * mid
+            if (nsb >> 53) > 0:
+                r = mid
+            else:
+                l = mid
+        if r > n:
+            sb += b * n
+            break
+        n -= r
+        sb += b * r
+        b >>= 1
+        sb >>= 1
+        sa += 1
+        if b == 0:
+            break
+
+    
+    sb ^= 1 << 52
+    ans = bin(sa)[2:].zfill(12) + bin(sb)[2:].zfill(52)
+    print(ans)
+

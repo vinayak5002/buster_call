@@ -1,0 +1,72 @@
+class Node:
+    def __init__(self, key):
+        self.key = key
+        self.parent = None
+        self.left = None
+        self.right = None
+
+
+class BinarySearchTree:
+    def __init__(self, key):
+        self.root = None
+        self.inorderList = []
+        self.preorderList = []
+        self.insert(key)
+
+    def insert(self, key):
+        rootNode = self.root
+        if rootNode is None:
+            self.root = Node(key)
+            return
+        else:
+            while True:
+                targetValue = rootNode.key
+                if key < targetValue:
+                    if rootNode.left is None:
+                        rootNode.left = Node(key)
+                        return
+                    rootNode = rootNode.left
+                elif key > targetValue:
+                    if rootNode.right is None:
+                        rootNode.right = Node(key)
+                        return
+                    rootNode = rootNode.right
+                else:
+                    rootNode.key = key
+                    return
+
+
+m = int(input())
+inorderList = []
+preorderList = []
+
+
+def inorder(node, inorderList):
+    if node is not None:
+        inorder(node.left, inorderList)
+        inorderList.append(node.key)
+        inorder(node.right, inorderList)
+    return inorderList
+
+
+def preorder(node, preorderList):
+    if node is not None:
+        preorderList.append(node.key)
+        preorder(node.left, preorderList)
+        preorder(node.right, preorderList)
+    return preorderList
+
+
+binarySearchTree = None
+
+for _ in range(m):
+    command = input().split()
+    if command[0] == "insert":
+        key = int(command[1])
+        if binarySearchTree is None:
+            binarySearchTree = BinarySearchTree(key)
+        else:
+            binarySearchTree.insert(key)
+    else:
+        print(" " + " ".join(map(str, inorder(binarySearchTree.root, inorderList))))
+        print(" " + " ".join(map(str, preorder(binarySearchTree.root, preorderList))))

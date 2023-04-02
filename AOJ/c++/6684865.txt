@@ -1,0 +1,62 @@
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 8;
+int arr[N][N];
+int col[N], row[N], dx[2 * N - 1], dy[2 * N - 1];
+
+void init() {
+  for (int i = 0; i < N; i++)
+    col[i] = row[i] = 0;
+  for (int i = 0; i < 2 * N; i++)
+    dx[i] = dy[i] = 0;
+}
+void print() {
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < N; j++) {
+      if (arr[i][j]) {
+        if (row[i] != j) {
+          return;
+        }
+      }
+    }
+  }
+
+  for (int i = 0; i < N; i++) {
+    for (int j = 0; j < N; j++) {
+      cout << ((row[i] == j) ? "Q" : ".");
+    }
+    cout << endl;
+  }
+}
+void recursive(int i) {
+  if (i == N) {
+    print();
+    return;
+  }
+
+  for (int j = 0; j < N; j++) {
+    if ((row[i] || col[j] || dx[i + j] || dy[i - j + N - 1])) continue;
+
+    row[i] = j;
+    col[j] = dx[i + j] = dy[i - j + N - 1] = 1;
+    recursive(i + 1);
+    row[i] = col[j] = dx[i + j] = dy[i - j + N - 1] = 0;
+  }
+}
+
+int main() {
+  ios::sync_with_stdio(false);
+  cin.tie(0);
+
+  init();
+
+  int n, x, y;
+  cin >> n;
+  for (int i = 0; i < n; i++) {
+    cin >> x >> y;
+    arr[x][y] = 1;
+  }
+
+  recursive(0);
+  return 0;
+}

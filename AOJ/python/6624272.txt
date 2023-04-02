@@ -1,0 +1,256 @@
+class node():
+    def __init__(self, id, left, right, key):
+        self.id = id
+        self.leftchildid = left
+        self.rightchildid = right
+        self.depth = -1
+        self.height = -1
+        self.childidlist = []
+        if self.leftchildid >= 0:
+            self.childidlist.append(self.leftchildid)
+        if self.rightchildid >= 0:
+            self.childidlist.append(self.rightchildid)
+        self.key = key
+
+    def set_parent(self, p):
+        self.parent = p
+    
+    def set_depth(self, d):
+        self.depth = d
+
+    def set_height_candidate(self, h):
+        if self.height < h:
+            self.height = h
+
+
+class Binary_Search_Tree():
+    def __init__(self):
+        self.nodelist = []
+        self.root = -1
+
+    def sort_by_ID(self):
+        self.nodelist = sorted(self.nodelist, key=lambda x: x.id)
+
+    def add_node(self, node):
+        self.nodelist.append(node)
+
+    def search_parent(self, node):
+        is_root = True
+        for p_cand in self.nodelist:
+            if node.id in p_cand.childidlist:
+                node.set_parent(p_cand)
+                is_root = False
+                break
+        
+        if is_root:
+            node.set_parent(node)
+
+    def search_all_parent(self):
+        for n in self.nodelist:
+            self.search_parent(n)
+
+
+    def search_all_parent_by_IDtoNode(self, IDtoNode, node):
+            cur_node = node
+            if node == self.root:
+                node.set_parent(node)
+
+            if cur_node.childidlist == []:
+                pass
+            else:
+                for cid in cur_node.childidlist:
+                    IDtoNode[cid].parent = cur_node
+                    self.search_all_parent_by_IDtoNode(IDtoNode, IDtoNode[cid])
+
+
+    def is_root(self, node):
+        if node.parent == node:
+            self.root = node
+            return True
+        else:
+            return False
+ 
+    def is_leaf(self, node):
+        if node.childidlist == []:
+            return True
+        else:
+            return False
+        
+    def calc_depth(self, node):
+        if node.depth >= 0:
+            return node.depth
+
+        dpth_cnt = 0
+        cur_node = node
+        Anc_list = [node]
+        while not self.is_root(cur_node):
+            dpth_cnt += 1
+            cur_node = cur_node.parent
+            Anc_list.append(cur_node)
+ 
+        for a in Anc_list:
+            a.set_depth(dpth_cnt)
+            dpth_cnt -= 1        
+        
+        return node.depth
+
+    def siblingID(self, node):
+        if self.is_root(node):
+            return -1
+        else:
+            sblist = node.parent.childidlist
+            if len(sblist) == 1:
+                return -1
+            else:
+                if sblist[0] == node.id:
+                    return sblist[1]
+                else:
+                    return sblist[0]
+
+    def calc_all_height(self):
+        for n in self.nodelist:
+            h = 0
+            cur_node = n
+            while True:
+                cur_node.set_height_candidate(h)
+                if self.is_root(cur_node):
+                    break
+                cur_node = cur_node.parent
+                h += 1
+
+    def preorder_tree_walk(self, PL, IDtoNode, node):
+        PL.append(node.id)
+        if node.leftchildid >= 0:
+            self.preorder_tree_walk(PL, IDtoNode, IDtoNode[node.leftchildid])
+        if node.rightchildid >= 0:
+            self.preorder_tree_walk(PL, IDtoNode, IDtoNode[node.rightchildid])
+
+    def inorder_tree_walk(self, IL, IDtoNode, node):
+        if node.leftchildid >= 0:
+            self.inorder_tree_walk(IL, IDtoNode, IDtoNode[node.leftchildid])
+        IL.append(node.id)
+        if node.rightchildid >= 0:
+            self.inorder_tree_walk(IL, IDtoNode, IDtoNode[node.rightchildid])
+
+    def postorder_tree_walk(self, PL, IDtoNode, node):
+        if node.leftchildid >= 0:
+            self.postorder_tree_walk(PL, IDtoNode, IDtoNode[node.leftchildid])
+        if node.rightchildid >= 0:
+            self.postorder_tree_walk(PL, IDtoNode, IDtoNode[node.rightchildid])
+        PL.append(node.id)
+
+
+    def preorder_tree_walk_printkey(self, PL, IDtoNode, node):
+        PL.append(node.key)
+        if node.leftchildid >= 0:
+            self.preorder_tree_walk_printkey(PL, IDtoNode, IDtoNode[node.leftchildid])
+        if node.rightchildid >= 0:
+            self.preorder_tree_walk_printkey(PL, IDtoNode, IDtoNode[node.rightchildid])
+
+    def inorder_tree_walk_printkey(self, IL, IDtoNode, node):
+        if node.leftchildid >= 0:
+            self.inorder_tree_walk_printkey(IL, IDtoNode, IDtoNode[node.leftchildid])
+        IL.append(node.key)
+        if node.rightchildid >= 0:
+            self.inorder_tree_walk_printkey(IL, IDtoNode, IDtoNode[node.rightchildid])
+
+    def insert(self, nodez, IDtoNode):
+        nodey = -1
+        nodex = self.root
+        while nodex != -1:
+            nodey = nodex
+            if nodez.key < nodex.key:
+                nodex = IDtoNode[nodex.leftchildid]
+            else:
+                nodex = IDtoNode[nodex.rightchildid]
+
+        if nodey != -1:
+            nodez.set_parent(nodey)
+            if nodez.key < nodey.key:
+                nodey.leftchildid = nodez.id
+            else:
+                nodey.rightchildid = nodez.id
+
+        else:
+            nodez.set_parent(nodez)
+            self.root = nodez
+
+    
+
+
+
+import sys
+readline = sys.stdin.readline
+
+#input
+BST = Binary_Search_Tree()
+
+n = int(input())
+
+IDtoNode=[""]*500001
+IDset = set()
+Childrenset = set()
+
+IDtoNode[-1] = -1
+
+for i in range(n):
+    comm = readline()
+    if comm[:7] == "insert ":
+        new_node = node(i, -1, -1, int(comm[7:]))
+        BST.add_node(new_node)
+        IDtoNode[new_node.id] = new_node
+
+        #set position
+        BST.insert(new_node, IDtoNode)
+
+    else:
+        #print
+        Inorderlist = []
+        BST.inorder_tree_walk_printkey(Inorderlist, IDtoNode,  BST.root)
+        #print("Inorder")
+        print("", *Inorderlist)
+        """Str = ""
+        for i in Inorderlist:
+            Str += " " + str(i)
+
+        print(Str)"""
+
+        Preorderlist = []
+        BST.preorder_tree_walk_printkey(Preorderlist, IDtoNode,  BST.root)
+        #print("Preorder")
+        print("", *Preorderlist)
+        """Str = ""
+        for i in Preorderlist:
+            Str += " " + str(i)
+
+        print(Str)"""
+
+
+
+
+
+
+
+
+
+
+"""
+    IDset.add(ID)
+    for cid in new_node.childidlist:
+        Childrenset.add(cid)
+
+
+
+#set_parent_data
+#OT.search_all_parent()
+Rootset = IDset - Childrenset
+RootID = Rootset.pop()
+BST.root = IDtoNode[RootID]
+BST.search_all_parent_by_IDtoNode(IDtoNode, BST.root)
+
+BST.calc_all_height()
+
+#sort
+BST.sort_by_ID()
+
+"""

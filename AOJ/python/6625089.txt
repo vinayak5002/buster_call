@@ -1,0 +1,156 @@
+class node():
+    def __init__(self, id):
+        self.id = id
+        self.leftid = -1
+        self.rightid = -1
+        self.parentid = -1
+
+    def set_parentid(self, p):
+        self.parentid = p
+    
+
+class Binary_Tree():
+    def __init__(self):
+        self.nodelist = []
+        self.root = -1
+
+    def add_node(self, node):
+        self.nodelist.append(node)
+
+
+    def preorder_tree_walk(self, PL, IDtoNode, node):
+        PL.append(node.id)
+        if node.leftid >= 0:
+            self.preorder_tree_walk(PL, IDtoNode, IDtoNode[node.leftid])
+        if node.rightid >= 0:
+            self.preorder_tree_walk(PL, IDtoNode, IDtoNode[node.rightid])
+
+    def inorder_tree_walk(self, IL, IDtoNode, node):
+        if node.leftid >= 0:
+            self.inorder_tree_walk(IL, IDtoNode, IDtoNode[node.leftid])
+        IL.append(node.id)
+        if node.rightid >= 0:
+            self.inorder_tree_walk(IL, IDtoNode, IDtoNode[node.rightid])
+
+    def postorder_tree_walk(self, PL, IDtoNode, node):
+        if node.leftid >= 0:
+            self.postorder_tree_walk(PL, IDtoNode, IDtoNode[node.leftid])
+        if node.rightid >= 0:
+            self.postorder_tree_walk(PL, IDtoNode, IDtoNode[node.rightid])
+        PL.append(node.id)
+
+
+
+
+
+def Reconstruct_Tree(BT, PL, IL, IDtoNode):
+    MapIDtoPreorder = [""]*(len(PL)+1)
+    for i in range(len(PL)):
+        new_node = node(PL[i])
+        IDtoNode[PL[i]] = new_node
+        MapIDtoPreorder[PL[i]] = i
+    MapIDtoInorder = [""]*(len(IL)+1)
+    for i in range(len(IL)):
+        MapIDtoInorder[IL[i]] = i
+
+    
+    idqueue = [PL[0]]
+    #construct
+    while len(idqueue) > 0:
+        cur_id = idqueue.pop(0)
+        cur_node = IDtoNode[cur_id]
+        #set root
+        if cur_id == PL[0]:
+            cur_node.parentid == cur_node.id
+            BT.root = cur_node
+        
+        for j in range(MapIDtoPreorder[cur_id] + 1, len(PL)):
+            #check successor of cur_node is a child
+            
+            if cur_node == BT.root:
+                cur_is_root = True
+            else:
+                cur_is_root = False
+
+            if not (cur_is_root):
+                if IDtoNode[cur_node.parentid].leftid == cur_node.id:
+                    cur_is_left = True
+                else:
+                    cur_is_left = False
+
+            chcand_node = IDtoNode[PL[j]]
+            #check whether chcand is left child
+            """
+            if (MapIDtoInorder[chcand_node.id] < MapIDtoInorder[cur_node.id]) and (chcand_node.parentid < 0) and (cur_node.leftid < 0):
+                cur_node.leftid = chcand_node.id
+                chcand_node.parentid = cur_node.id
+                idqueue.append(chcand_node.id)
+            elif (MapIDtoInorder[chcand_node.id] > MapIDtoInorder[cur_node.id]) and (chcand_node.parentid < 0) and (cur_node.rightid < 0):
+                cur_node.rightid = chcand_node.id
+                chcand_node.parentid = cur_node.id
+                idqueue.append(chcand_node.id)
+            """
+
+            chcand_in_range = False
+            if cur_is_root:
+                chcand_in_range = True
+            else:
+                if cur_is_left:
+                    if MapIDtoInorder[chcand_node.id] < MapIDtoInorder[cur_node.parentid]:
+                        chcand_in_range = True
+                else:
+                    if MapIDtoInorder[chcand_node.id] > MapIDtoInorder[cur_node.parentid]:
+                        chcand_in_range = True
+
+
+            if chcand_in_range and (MapIDtoInorder[chcand_node.id] < MapIDtoInorder[cur_node.id]) and (chcand_node.parentid < 0) and (cur_node.leftid < 0):
+                cur_node.leftid = chcand_node.id
+                chcand_node.parentid = cur_node.id
+                idqueue.append(chcand_node.id)
+            elif chcand_in_range and (MapIDtoInorder[chcand_node.id] > MapIDtoInorder[cur_node.id]) and (chcand_node.parentid < 0) and (cur_node.rightid < 0):
+                cur_node.rightid = chcand_node.id
+                chcand_node.parentid = cur_node.id
+                idqueue.append(chcand_node.id)
+                
+                
+             
+
+
+
+    
+
+
+
+#input
+BT = Binary_Tree()
+
+n = int(input())
+
+IDtoNode=[""]*101
+IDset = set()
+Childrenset = set()
+
+PL = list(map(int, input().split()))
+IL = list(map(int, input().split()))
+
+
+Reconstruct_Tree(BT, PL, IL, IDtoNode)
+
+
+
+
+
+
+
+
+
+
+Postorderlist = []
+BT.postorder_tree_walk(Postorderlist, IDtoNode,  BT.root)
+#print("Postorder")
+Str = ""
+for i in Postorderlist:
+    Str += " " + str(i)
+
+print(Str[1:])
+

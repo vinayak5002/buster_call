@@ -1,0 +1,90 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#define NIL NULL
+
+struct node{
+	int key;
+	struct node *parent;
+	struct node *right;
+	struct node *left;
+};
+
+typedef struct node * Node;
+Node root;
+
+Node find(Node x,int k){
+	while(x !=NIL && k!=x->key){
+		if(k < x->key)x=x->left;
+		else x=x->right;
+	}
+	return x;
+}
+void insert(int node){
+	Node y=NIL;//xの親
+	Node x=root;//zの挿入する位置の根を視点
+	Node z;
+	
+	z=malloc(sizeof(struct node));
+	z->key=node;
+	z->left=NIL;
+	z->right=NIL;
+
+	while(x != NIL){//nodeが存在しなくなるまで挿入位置を探索
+		y=x;//親設定
+		if(z->key < x->key)x=x->left;
+		else x=x->right;
+	}
+	z->parent=y;//xがNILにたどり着いたときの親yがzの親となる
+	
+	if(y==NIL)root=z;//yが初期値NILのままなら挿入前の二分木が空だから接点を根とする
+	//xがNILまでたどり着いた時の親yの持つ値と比較することで、挿入接点を親yの左、右を決定
+	else{
+		if(z->key < y->key)y->left=z;
+		else y->right=z;
+	}
+}
+
+void Preorder(Node node){
+	if(node==NIL)return;
+	printf(" %d",node->key);
+	Preorder(node->left);
+	Preorder(node->right);
+}
+
+void Inorder(Node node){
+	if(node==NIL)return;
+	Inorder(node->left);
+	printf(" %d",node->key);
+	Inorder(node->right);
+}
+
+int main(void){
+	int n,i,x;
+	char com[10];
+	scanf("%d",&n);
+	
+	for(i=0;i<n;i++){
+		scanf("%s",com);
+		if(com[0]=='i'){
+			scanf("%d",&x);
+			insert(x);
+		}
+		else if(com[0]=='f'){
+			scanf("%d",&x);
+			Node t=find(root,x);
+			if(t != NIL)printf("yes"\n);
+			else printf("no"\n);
+		}
+		else if(com[0]=='p'){
+			Inorder(root);
+			printf("\n");
+			Preorder(root);
+			printf("\n");
+		}
+	}
+	return 0;
+}
+		
+	
+

@@ -1,0 +1,73 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <cmath>
+#include <set>
+#include <map>
+#include <deque>
+#include <cassert>
+#define TEST cout << "TEST" << endl
+#define IINF 2147483647
+#define LLINF 9223372036854775807
+#define AMARI 998244353
+using namespace std;
+
+int main(void) {
+    cin.tie(nullptr);
+    ios::sync_with_stdio(false);
+    int n;
+    cin >> n;
+    vector<int> p(n);
+    for (int i = 0; i < n; i++)cin >> p[i];
+    vector<int> kaisuu(n, IINF);
+    vector<int> ikisaki(n, 0);
+    vector<bool> loop(n, false);
+    kaisuu[0] = 0;
+    int count = 0;
+    for (int i = 0; i < n; i++)if (p[i] != 0 && ikisaki[i] == 0)ikisaki[i] = p[i];
+    for (int i = 0; i < n; i++) {
+        if (loop[i])continue;
+        if (ikisaki[i] != 0) {
+            int now = i;
+            bool flag = false;
+            set<int> rireki;
+
+            while (ikisaki[now] != 0) { 
+                now += ikisaki[now];
+                if (rireki.find(now) != rireki.end() || loop[now] == true) {
+                    flag = true;
+                    break;
+                }
+                rireki.insert(now);
+            }
+            if (flag) {
+                for (auto j = rireki.begin(); j != rireki.end(); j++) {
+                    //ikisaki[*j] = -1;
+                    loop[*j] = true;
+                }
+                ikisaki[i] = -1;
+            }
+            else ikisaki[i] = now - i;
+        }
+    }
+    for (int i = 0; i < n; i++)if (loop[i])ikisaki[i] = -1;
+
+    vector<int> dp(n, IINF);
+    dp[0] = 0;
+    for (int i = 0; i < n; i++) {
+        if (ikisaki[i] == 0) {
+            for (int j = 0; j < 6; j++){
+                if (i + j + 1 == n)break;
+                dp[i + j + 1] = min(dp[i + j + 1], dp[i] + 1);
+            }
+        }
+        else if (ikisaki[i] > 0) {
+            dp[ikisaki[i] + i] = min(dp[ikisaki[i] + i], dp[i]);
+        }
+    }
+    //cout << endl;
+    //for (int i = 0; i < n; i++)cout << ikisaki[i] << endl;
+    cout << dp[n - 1] << endl;
+    return 0;
+}

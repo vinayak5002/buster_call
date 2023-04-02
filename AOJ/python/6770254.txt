@@ -1,0 +1,56 @@
+global ind
+global S,f
+
+xx=[1]
+for i in range(1,20):
+  xx.append(xx[-1]*i)
+
+while 1:
+  n=int(input())
+  if n==0:break
+  x=list(input())
+  s=input()
+  t=input()
+  f=dict()
+  ans=0
+  def calc():
+    if len(S)==1:return f[S[0]]
+    return solve(1)[0]
+  def solve(ind):
+    a,i=read(ind)
+    z=S[i]
+    i+=1
+    b,i=read(i)
+    if z==">":return (max(a,b),i)
+    else:return (min(a,b),i)
+  def read(ind):
+    if S[ind] in f:
+      anss=f[S[ind]]
+      ind+=1
+      return (anss,ind) 
+    elif S[ind]=="(":
+      ind+=1
+      anss,i=solve(ind)
+      return (anss,i+1)
+    else:
+      print("error")
+  for i in range(n):
+    for bit in range(2**(n-1)):
+      p=m=0
+      for j in range(n-1):
+        if bit&(1<<j):
+          f[x[j]]=1
+          p+=1
+        else:
+          f[x[j]]=-1
+          m+=1
+      f[x[n-1]]=0
+      S=s
+      ans1=calc()
+      S=t
+      ans2=calc()
+      if ans1==ans2==0:
+        ans+=xx[p]*xx[m]
+    x.append(x[0])
+    del x[0]
+  print(ans)

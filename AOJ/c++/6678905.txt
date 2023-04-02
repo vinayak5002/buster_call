@@ -1,0 +1,74 @@
+#include <iostream>
+#include <cassert>
+#include <cmath>
+#include <vector>
+using ll = long long;
+using namespace std;
+vector<vector<ll>> tree;
+vector<ll> depth;
+vector<vector<ll>> parent;
+ll logn = 0;
+
+void dfs(ll v, ll p, ll d) {
+	depth[v] = d;
+	parent[0][v] = p;
+	for (auto nv: tree[v]) dfs(nv, v, d+1);
+}
+
+ll GetLCA(ll a, ll b) {
+	if (depth[a] > depth[b]) swap(a, b);
+	for (ll x = logn-1; x >= 0; x--) {
+		ll p = parent[x][b];
+		if (p != -1 && depth[a] <= depth[p]) b = p;
+	}
+	assert(depth[a] == depth[b]);
+	if (a==b) return a;
+	for (ll x = logn-1; x >= 0; x--) {
+		ll pa = parent[x][a];
+		ll pb = parent[x][b];
+		if (pa != pb) a = pa, b = pb;
+	}
+	assert(parent[0][a] == parent[0][b]);
+	return parent[0][a];
+}
+		
+int main() {
+	ll n; cin >> n;
+	tree.resize(n);
+	depth.resize(n, 0);
+	logn = 0;
+	while (pow(2, logn) <= n) logn++;
+	parent.resize(logn, vector<ll>(n, -1));
+
+	for (ll i = 0; i < n; i++) {
+		ll k; cin >> k;
+		for (ll j = 0; j < k; j++) {
+			ll c; cin >> c;
+			tree[i].push_back(c);
+		}
+	}
+
+	
+	ll root = 0;
+	dfs(root, -1, 0);
+	
+	for (ll x = 0; x < logn; x++) {
+		if (x+1 >= logn) continue;
+		for (ll a = 0; a < n; a++) {
+			ll p = parent[x][a];
+			parent[x+1][a] = (p == -1 ? -1 : parent[x][p]);
+		}
+	}
+	
+	ll q; cin >> q;
+	vector<pair<ll, ll>> query;
+	for (ll i = 0; i < q; i++) {
+		ll u, v; cin >> u >> v;
+		query.emplace_back(u, v);
+	}
+	
+	for (auto [a, b]: query) {
+		cout << GetLCA(a, b) << endl;
+	}
+}
+

@@ -1,0 +1,71 @@
+from collections import deque
+from collections import defaultdict
+
+d_L = [[-1,0],[1,0],[0,-1],[0,1]]
+
+
+while True:
+	w,h = map(int,input().split())
+	if w==0 and h == 0:
+		break
+
+	sx = 0
+	sy = 0
+	gx = h-1
+	gy = w-1
+	d = defaultdict(int)
+	que = deque()
+	que.append((sx,sy))
+	d[(sx,sy)] = 1
+	checked_s = set()
+
+	under_L = []
+	right_L = []
+	for i in range(2*h-1):
+		if i%2==0:
+			right_L.append(list(map(int,input().split())))
+		else:
+			under_L.append(list(map(int,input().split())))
+	while que:
+		
+		now_node = que.popleft()
+		checked_s.add(now_node)
+		x,y = now_node
+
+		# 下方向への移動
+		if x != h-1: # 一番下のマスから下には移動しない
+			if not under_L[x][y] == 1:
+				next_x,next_y = x+1,y
+				if not((next_x,next_y) in checked_s):
+					d[(next_x,next_y)] = d[now_node]+1
+					checked_s.add((next_x,next_y))
+					que.append((next_x,next_y))
+
+		# 上方向への移動
+		if x != 0: # 一番上のマスから上には移動しない
+			if not under_L[x-1][y] == 1:
+				next_x,next_y = x-1,y
+				if not((next_x,next_y) in checked_s):
+					d[(next_x,next_y)] = d[now_node]+1
+					checked_s.add((next_x,next_y))
+					que.append((next_x,next_y))
+
+		# 右方向への移動
+		if y != w-1: # 一番右のマスから右には移動しない
+			if not right_L[x][y] == 1:
+				next_x,next_y = x,y+1
+				if not((next_x,next_y) in checked_s):
+					d[(next_x,next_y)] = d[now_node]+1
+					checked_s.add((next_x,next_y))
+					que.append((next_x,next_y))
+
+		# 左方向への移動
+		if y != 0: # 一番左のマスから左には移動しない
+			if not right_L[x][y-1] == 1:
+				next_x,next_y = x,y-1
+				if not((next_x,next_y) in checked_s):
+					d[(next_x,next_y)] = d[now_node]+1
+					checked_s.add((next_x,next_y))
+					que.append((next_x,next_y))
+
+	print(d[(gx,gy)])

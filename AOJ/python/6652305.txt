@@ -1,0 +1,90 @@
+import sys
+from heapq import heappush, heappop
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def is_extending(n, a_list, i):
+    if a_list[i] == 0:
+        return False
+
+    if i == 0 and a_list[0] > a_list[1]:
+        return True
+
+    if i == n - 1 and a_list[-1] > a_list[-2]:
+        return True
+
+    if a_list[i - 1] < a_list[i] > a_list[i + 1]:
+        return True
+
+    return False
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test1.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n, max_l = map(int, f.readline().split())
+    a_list = [int(f.readline()) for _ in range(n)]
+    hq = []
+    extending_icicle_set = set()
+
+    for i, a in enumerate(a_list):
+        if is_extending(n, a_list, i):
+            heappush(hq, [max_l - a, 0, 0, i])
+            extending_icicle_set.add(i)
+
+    c_time = 0
+    while hq:
+        c_icicle = heappop(hq)
+        ci = c_icicle[3]
+        c_time = c_icicle[0]
+        d_time = c_icicle[2]
+        a_list[ci] = 0
+        extending_icicle_set.discard(ci)
+
+        pi = ci - 1
+        ni = ci + 1
+        if pi >= 0 and pi not in extending_icicle_set:
+            ppi = pi - 1
+            add_d_time = False
+            if ppi >= 0 and ppi in extending_icicle_set:
+                a_list[ppi] += d_time
+                add_d_time = True
+
+            if is_extending(n, a_list, pi):
+                d = max_l - a_list[pi]
+                heappush(hq, [c_time + d, c_time, d, pi])
+                extending_icicle_set.add(pi)
+
+            if add_d_time:
+                a_list[ppi] -= d_time
+
+        if ni <= n - 1 and ni not in extending_icicle_set:
+            nni = ni + 1
+            add_d_time = False
+            if nni <= n - 1 and nni in extending_icicle_set:
+                a_list[nni] += d_time
+                add_d_time = True
+
+            if is_extending(n, a_list, ni):
+                d = max_l - a_list[ni]
+                heappush(hq, [c_time + d, c_time, d, ni])
+                extending_icicle_set.add(ni)
+
+            if add_d_time:
+                a_list[nni] -= d_time
+
+    print(c_time)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

@@ -1,0 +1,32 @@
+#include <iostream>
+#include <string>
+#include <stack>
+#include <vector>
+
+using namespace std;
+
+int main()
+{
+	string S; cin >> S;
+	int x = 0;
+	stack<int> S1;
+	vector<pair<int, int>> A;
+	for (char s : S) switch (s) {
+	case '\\': S1.push(x++); break;
+	case '_': ++x; break;
+	case '/':
+		if (S1.empty()) break;
+		auto a = x++ - S1.top();
+		for (; !A.empty() && A.back().first >= S1.top(); A.pop_back()) a += A.back().second;
+		A.push_back({S1.top(), a});
+		S1.pop();
+		break;
+	}
+	int s = 0;
+	for (auto [x, a] : A) s += a;
+	cout << s << endl << A.size();
+	for (auto [x, a] : A) cout << ' ' << a;
+	cout << endl;
+	return 0;
+}
+

@@ -1,0 +1,37 @@
+import sys
+input = lambda: sys.stdin.readline().rstrip()
+inf = float('inf')
+
+def bellman_ford(G: list, s: int) -> list:
+  "Return dist from s. / O(|E|log|V|)"
+  # 0-indexed
+  n = len(G)
+  dist = [inf] * n
+  dist[s] = 0
+  for _ in range(n):
+    update = 0
+    for v,e in enumerate(G):
+      for x,c in e:
+        if dist[v] != inf and dist[v] + c < dist[x]:
+          dist[x] = dist[v] + c
+          update = 1
+    if not update:
+      break
+  else:
+    return 'NEGATIVE CYCLE'
+  return dist
+
+#  -----------------------  #
+
+v, e, r = map(int, input().split())
+G = [[] for _ in range(v)]
+for _ in range(e):
+  s, t, d = map(int, input().split())
+  G[s].append((t, d))
+
+dist = bellman_ford(G, r)
+if dist == 'NEGATIVE CYCLE':
+  print('NEGATIVE CYCLE')
+  exit()
+print('\n'.join(map(lambda x: 'INF' if x == inf else str(x), dist)))
+

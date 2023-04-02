@@ -1,0 +1,30 @@
+import sys
+import builtins
+import math
+sys.setrecursionlimit(10**7)
+builtins.input = lambda: sys.stdin.readline().strip()
+
+
+def main():
+    N = int(input())
+    Q = [[input(), input()] for _ in range(N)]
+
+    def lcs(x, y):
+        dp = [[0]*(len(x)+1) for _ in range(len(y)+1)]
+
+        for i in range(1, len(y)+1):
+            for j in range(1, len(x)+1):
+                dp[i][j] = max(dp[i - 1][j], dp[i][j - 1])
+                if x[j-1] == y[i-1]:
+                    dp[i][j] += 1
+                dp[i][j] = min(i, dp[i][j])
+                
+        return dp[len(y)][len(x)]
+
+    for q in Q:
+        print(lcs(*q))
+
+
+if __name__ == '__main__':
+    main()
+

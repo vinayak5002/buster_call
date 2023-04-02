@@ -1,0 +1,27 @@
+N,E = map(int,input().split())
+Graph = [[] for _ in range(N)]
+dist = [[float('inf') for j in range(N)] for i in range(N)]
+for _ in range(E):
+  a,b,c = map(int,input().split())
+  Graph[a].append((b,c))
+  dist[a][b] = c
+for l in range(N):
+  dist[l][l] = 0
+for i in range(N): #経由
+  for j in range(N): #始点
+    for k in range(N): #終点
+      dist[j][k] = min(dist[j][k],dist[j][i]+dist[i][k])
+import sys
+for l in range(N):
+  if dist[l][l] < 0:
+    print('NEGATIVE CYCLE')
+    sys.exit()
+for i in range(N):
+  L = []
+  for j in range(N):
+    if dist[i][j] != float('inf'):
+      L.append(dist[i][j])
+    else:
+      L.append('INF')
+  print(*L)
+

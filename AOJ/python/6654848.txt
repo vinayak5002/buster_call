@@ -1,0 +1,79 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class LowestCommonAncestor:
+    def __init__(self, num_nodes, children_list, root=0):
+        self._num_nodes = num_nodes
+        self._max_k = 1
+        while 1 << self._max_k < num_nodes:
+            self._max_k += 1
+
+        self._doubling_parents = [[-1] * num_nodes for _ in range(self._max_k)]
+        self._depths = [-1] * num_nodes
+        self._dfs(children_list, root)
+        for k in range(self._max_k - 1):
+            for v in range(num_nodes):
+                if self._doubling_parents[k][v] < 0:
+                    self._doubling_parents[k + 1][v] = -1
+                else:
+                    self._doubling_parents[k + 1][v] = self._doubling_parents[k][self._doubling_parents[k][v]]
+        return
+
+    def _dfs(self, children_list, root):
+        stack = [(root, -1, 0)]
+
+        while stack:
+            n, p, d = stack.pop()
+            self._doubling_parents[0][n] = p
+            self._depths[n] = d
+            for c in children_list[n]:
+                stack.append((c, n, d + 1))
+        return
+
+    def get_lca(self, n0, n1):
+        if self._depths[n0] < self._depths[n1]:
+            n0, n1 = n1, n0
+
+        for k in range(self._max_k):
+            if (self._depths[n0] - self._depths[n1]) >> k & 1:
+                n0 = self._doubling_parents[k][n0]
+
+        if n0 == n1:
+            return n0
+
+        for k in reversed(range(self._max_k)):
+            if self._doubling_parents[k][n0] != self._doubling_parents[k][n1]:
+                n0 = self._doubling_parents[k][n0]
+                n1 = self._doubling_parents[k][n1]
+
+        return self._doubling_parents[0][n0]
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test1.txt', 'r')
+    else:
+        f = sys.stdin
+
+    n = int(f.readline())
+    children_list = [[] for _ in range(n)]
+    for i in range(n):
+        children_list[i] = list(map(int, f.readline().split()))[1:]
+
+    lca = LowestCommonAncestor(n, children_list, 0)
+    q = int(f.readline())
+    for _ in range(q):
+        u, v = map(int, f.readline().split())
+        print(lca.get_lca(u, v))
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

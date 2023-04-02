@@ -1,0 +1,45 @@
+import sys
+sys.setrecursionlimit(10000)
+
+def rec(i,j):
+    #ベースケース
+    if i >= j:
+        dp[i][j] = 0
+        return 0
+    elif dp[i][j] != -1:
+        return dp[i][j]
+    elif j-i ==1:
+        if abs(A[i]-A[j])<=1:
+            dp[i][j] = 2
+            
+    #全ポイントゲットできる時
+    if  abs(A[i]-A[j])<=1 and rec(i+1,j-1) == (j-1-(i+1)+1):
+        dp[i][j] = j-i+1
+    #全部倒せないときはkで区切って最大のポイント数を探す
+    else:
+        for k in range(i,j):
+            dp[i][j] = max(dp[i][j],rec(i,k)+rec(k+1,j))
+    
+    return dp[i][j]
+
+def main():
+    ans = []
+    while(1):
+        N = int(input())
+        if N == 0:
+            break
+        #達磨
+        global A
+        A = list(map(int,input().split()))
+        
+        #dp[i][j] = iからjまでの区間でもっともポイント高いやつ
+        global dp
+        dp = [[-1]*N for _ in range(N)]
+        
+        ans.append(rec(0,N-1))
+        
+    for a in ans:
+        print(a)
+        
+if __name__ == "__main__":
+    main()

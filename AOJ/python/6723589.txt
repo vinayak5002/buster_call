@@ -1,0 +1,54 @@
+import sys
+import math
+import heapq
+from collections import deque, Counter, defaultdict
+from sys import stdin
+
+
+INF = 10 ** 7
+int1 = lambda x: int(x) - 1
+stinput = lambda: stdin.readline()[:-1]
+ii = lambda: int(stinput())  # int input
+mi = lambda: map(int, stdin.readline().split())  # map input (int)
+li = lambda: list(mi())  # list input (int)
+mi1 = lambda: map(int1, stdin.readline().split())  # map input (int)-1
+li1 = lambda: list(mi1())  # list input (int)-1
+mis = lambda: map(str, stdin.readline().split())  # map input (string)
+lis = lambda: list(mis())  # list input (string)
+
+while 1:
+    M, T, P, R = mi()
+    if M == 0: break
+    wa = [defaultdict(int) for t in range(T)] # 間違えた回数を問題ごとに記録
+    ac = [set() for t in range(T)] # 正解した問題を格納してく
+    time = [0 for t in range(T)] # しょよう時間１
+    nwa = [0 for t in range(T)] # 最終的なWA数
+    Q = [] #提出履歴
+    for i in range(R):
+        tmp = li1()
+        Q.append(tmp)
+    Q.sort() # 時系列順に並べると見通しよさそう
+    for q in Q:
+        [m, t, p, j] = q
+        j += 1
+        m += 1
+        if j: # WA
+            wa[t][p] += 1
+        else:
+            if p in ac[t]: continue
+            ac[t].add(p)
+            time[t] += m
+            nwa[t] += wa[t][p]
+    for t in range(T):
+        time[t] += nwa[t]*20
+    nac = [len(a) for a in ac]
+    # [nac, time, team]
+    result = [[-nac[t], time[t], -t] for t in range(T)]
+    res = sorted(result)
+    for t in range(T - 1):
+        print(-res[t][-1]+1, end="")
+        if res[t][1] == res[t+1][1] and res[t][0] == res[t+1][0]:
+            print("=", end="")
+        else:
+            print(",", end="")
+    print(-res[-1][-1]+1)

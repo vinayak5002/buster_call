@@ -1,0 +1,38 @@
+use std::io;
+use std::io::Read;
+
+fn main() {
+    let mut buf = String::new();
+    io::stdin().read_to_string(&mut buf).unwrap();
+    let mut iter = buf.split_whitespace();
+
+    let n: usize = iter.next().unwrap().parse().unwrap();
+    let q: usize = iter.next().unwrap().parse().unwrap();
+
+    let mut disjoint_set: Vec<usize> = (0..n).collect();
+    for _ in 0..q {
+        let command: usize = iter.next().unwrap().parse().unwrap();
+        let x: usize = iter.next().unwrap().parse().unwrap();
+        let y: usize = iter.next().unwrap().parse().unwrap();
+
+        if command == 0 {
+            let root_x = root(x, &disjoint_set);
+            disjoint_set[root_x] = root(y, &disjoint_set);
+        } else if command == 1 {
+            if root(x, &disjoint_set) == root(y, &disjoint_set) {
+                println!("1")
+            } else {
+                println!("0")
+            }
+        }
+    }
+}
+
+fn root(x: usize, disjoint_set: &Vec<usize>) -> usize {
+    let mut index = x;
+    while index != disjoint_set[index] {
+        index = disjoint_set[index]
+    }
+    return index;
+}
+

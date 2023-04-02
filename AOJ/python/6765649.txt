@@ -1,0 +1,88 @@
+from sys import exit, stdin, setrecursionlimit
+from bisect import bisect_left, bisect_right, insort_left, insort_right
+from collections import defaultdict, deque, Counter
+from heapq import heappop, heappush, heapify
+#from itertools import permutations, combinations, accumulate
+#from math import sqrt, factorial
+#math.log(x, y)はyを底としたxの対数を返す。
+#数学ではlogとかlnで表される自然対数（ネイピア数eを底とする対数）は、math.log(x)で計算できる。
+#二進対数（2を底とする対数）は、math.log2(x)で計算できる。math.log(x, 2)よりも正確な値となる。
+#常用対数（10を底とする対数）は、math.log10(x)で計算できる。math.log(x, 10)よりも正確な値となる。
+#from decimal import Decimal, ROUND_HALF_UP
+#decimalには文字列で渡す PyPyは遅いのでPython3で提出する
+#d1 = Decimal('1.1') d2 = Decimal('2.3') -> d1 + d2などの演算で浮動小数点数での誤差がなくなる(割り算もok)
+#四捨五入: dをDecimalオブジェクトとして、d.quantize(Decimal('1'), rounding=ROUND_HALF_UP)) (1にすると整数を返し、0.1にすると小数第一位で四捨五入)
+INF = 10**18
+MOD = 10**9+7
+MOD2 = 998244353
+eps = 0.0000000001
+setrecursionlimit(10**7)
+#pypyでの再帰TLE対策(自分の環境では使えないので提出時のみコメントアウトするように注意)
+#import pypyjit
+#pypyjit.set_param('max_unroll_recursion=-1')
+#list複数行読み込み高速化 改行、空白区切り注意
+#[list(map(int, stdin.readline().split())) for _ in range(M)]
+#複数行読み込み　行ごとに文字列として読み込む ex) ['9 2 6 5 3', '改行', '5 8 9 7 9', '改行'] 改行区切りなのと空白区切りをsplitする必要があるので注意
+#query = stdin.readlines()
+
+
+N, M = map(int, input().split())
+if N == 0 and M == 0:exit()
+edges = []
+for i in range(M):
+    s, d, c = map(int, input().split())
+    s -= 1
+    d -= 1
+    edges.append((c, s, d, i))
+
+par = [-1] * N
+rank = [0] * N
+def find(x):
+    if par[x] < 0:
+        return x
+    par[x] = find(par[x])
+    return par[x]
+
+def unite(x, y):
+    x = find(x)
+    y = find(y)
+    if x == y:return
+    if rank[x] < rank[y]:
+        x, y = y, x
+    if rank[y] == rank[x]:
+        rank[x] += 1
+    par[x] += par[y]
+    par[y] = x
+    return
+
+def same(x, y):
+    return find(x) == find(y)
+
+def size(x):
+    return -par[find(x)]
+
+def calc_mst(edges, ban=-1):
+    used = []
+    res = 0
+    for w, u, v, i in edges:
+        if i == ban:continue
+        if same(u, v):continue
+        unite(u, v)
+        res += w
+        used.append((i, w))
+    if len(used) != N-1:res = INF
+    return used, res
+
+edges.sort()
+used, weight = calc_mst(edges)
+ans = 0
+cnt = 0
+for e in used:
+    par = [-1] * N
+    rank = [0] * N
+    if calc_mst(edges, e[0])[1] > weight:
+        ans += e[1]
+        cnt += 1
+print(cnt, ans)
+    
+

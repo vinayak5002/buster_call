@@ -1,0 +1,52 @@
+import sys
+import math
+import heapq
+from collections import deque, Counter, defaultdict
+from sys import stdin
+from bisect import bisect, bisect_left
+
+
+INF = 10 ** 7
+int1 = lambda x: int(x) - 1
+stinput = lambda: stdin.readline()[:-1]
+ii = lambda: int(stinput())  # int input
+mi = lambda: map(int, stdin.readline().split())  # map input (int)
+li = lambda: list(mi())  # list input (int)
+mi1 = lambda: map(int1, stdin.readline().split())  # map input (int)-1
+li1 = lambda: list(mi1())  # list input (int)-1
+mis = lambda: map(str, stdin.readline().split())  # map input (string)
+lis = lambda: list(mis())  # list input (string)
+
+while 1:
+    H, W = mi()
+    if H == 0: break
+    Pond = [li() for _ in range(H)]
+    ans = 0
+    # 全部見よう
+    for left in range(0, W - 2):
+        for right in range(left+2, W):
+            for up in range(0, H - 2):
+                for down in range(up+2, H):
+                    wallU = min(Pond[up][left:right+1])
+                    wallD = min(Pond[down][left:right+1])
+                    wallR = min([Pond[h][right] for h in range(up, down+1)])
+                    wallL = min([Pond[h][left] for h in range(up, down+1)])
+                    wall = min(wallU, wallD, wallR, wallL) # 壁の一番低いところ
+                    
+                    # 内部調査
+                    judge = 1
+                    tmp = 0
+                    for h in range(up+1, down):
+                        for w in range(left+1, right):
+                            diff = wall - Pond[h][w]
+                            if diff <= 0: 
+                                judge = 0
+                                tmp = 0
+                                break
+                            tmp += diff
+                        if not(judge): 
+                            tmp = 0
+                            break
+                    if ans < tmp:
+                        ans = tmp
+    print(ans)

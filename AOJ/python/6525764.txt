@@ -1,0 +1,56 @@
+from math import inf
+#from array import array
+import sys
+
+class RSUQ:
+
+    def __init__(self, N):
+        m = 1
+        while m < N: m *= 2
+        self.seg0 = [None]*(2*m-1)
+        self.seg1 = [0]*(2*m-1)
+        self.m = m
+        self.n = N
+
+    def update(self, s, t, x):
+        seg0, seg1 = self.seg0, self.seg1
+        def _update(s, t, x, node, lft, rht):
+            if s <= lft and rht <= t:
+                seg0[node] = x
+            elif lft < t and s < rht:
+                mid = (lft+rht)//2
+                if seg0[node] is not None:
+                    _update(lft, mid, seg0[node], node*2+1, lft, mid)
+                    _update(mid, rht, seg0[node], node*2+2, mid, rht)
+                    seg0[node] = None
+                a = _update(s, t, x, node*2+1, lft, mid)
+                b = _update(s, t, x, node*2+2, mid, rht)
+                seg1[node] = a+b
+            return seg1[node] if seg0[node] == None else seg0[node]*(rht-lft)
+        _update(s, t, x, 0, 0, self.n)
+
+    def getsum(self, s, t):
+        seg0, seg1 = self.seg0, self.seg1
+        def _getsum(node, lft, rht):
+            if t <= lft or  rht <= s: return 0
+            if s <= lft and rht <= t:
+                return seg1[node] if seg0[node] == None else seg0[node]*(rht-lft)
+            mid = (lft+rht)//2
+            a = _getsum(node*2+1, lft, mid)
+            b = _getsum(node*2+2, mid, rht)
+            return a+b
+        return _getsum(0, 0, self.n)
+
+def main():
+    rxs = lambda: list(map(int, sys.stdin.readline().split()))
+    N, Q = rxs()
+    Qs = [rxs() for _ in range(Q)]
+    rsuq, ans = RSUQ(N), []
+    for q in Qs:
+        if q[0]: ans.append(rsuq.getsum(q[1], q[2]+1))
+        else: rmq.update(q[1], q[2]+1, q[3])
+    print("\n".join(map(str, ans)))
+
+if __name__ == '__main__':
+    main()
+

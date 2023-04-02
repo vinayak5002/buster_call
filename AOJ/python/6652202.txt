@@ -1,0 +1,73 @@
+class Node:
+	def __init__(self, key):
+		self.key = key
+		self.right = None
+		self.left = None
+
+
+def insert(root, node):
+	parent = None
+	current = root
+
+	while current:
+		parent  = current
+		if node.key < parent.key:
+			current = parent.left
+		else:
+			current = parent.right
+
+	if not parent:
+		return node 
+	
+	if node.key < parent.key:
+		parent.left = node
+	else:
+		parent.right = node
+
+	return root
+
+
+def find(tree, value):
+	if not tree:
+		return False
+	if tree.key == value:
+		return True 
+	return find(tree.left, value) if value < tree.key else find(tree.right, value)
+
+
+def traverse(node):
+	if not node:
+		return
+	yield from traverse(node.left)
+	yield node.key
+	yield from traverse(node.right)
+
+
+def traverse_pre(node):
+	if not node:
+		return
+	yield node.key
+	yield from traverse_pre(node.left)
+	yield from traverse_pre(node.right)
+
+
+def print_tree(tree):
+	print(' ' + ' '.join(map(str, traverse(tree))))
+	print(' ' + ' '.join(map(str, traverse_pre(tree))))
+
+
+if __name__ == '__main__':
+    N = int(input())
+    tree = None
+    for _ in range(N):
+        command = input()
+        if command.startswith('insert'):
+            op, n = command.split(' ')
+            tree = insert(tree, Node(int(n)))
+        elif command.startswith('find'):
+            op, n = command.split(' ')
+            print('yes' if find(tree, int(n)) else 'no')
+        else:
+            if tree:
+                print_tree(tree)
+

@@ -1,0 +1,30 @@
+#include "stdio.h"
+
+
+int main(void) {
+    int n, x, result[30000];
+    int p = 0;
+    
+    while (1) {
+        scanf("%d %d", &n, &x);
+        result[p] = 0;
+        if (  n == 0 && x == 0 ) {
+            break;
+        } else {
+            for (int i = 1; i <= n; i++) {
+                for (int j = 1; j <= n; j++) {
+                    for (int k = 1; k <= n; k++) {
+                        if ( ( i + j + k ) == x  && i < j && j < k ) {
+                            result[p]++;
+                        }
+                    }
+                }
+            }
+        }
+        p++;
+    }
+    for (int i = 0; i < p; i++) {
+        printf("%d\n", result[i]);
+    }
+    return 0;
+}

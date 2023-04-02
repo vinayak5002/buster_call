@@ -1,0 +1,52 @@
+class graph:
+    def __init__(self,n):
+        self.n = n
+        self.djset = [i for i in range(n)]
+        self.rank = [0] * n
+        self.weight = [0] * n
+    
+    def findSet(self,x):
+        if x != self.djset[x]:
+            px = self.findSet(self.djset[x])
+            self.weight[x] += self.weight[self.djset[x]]
+            self.djset[x] = px
+        return self.djset[x]
+    
+    def unite(self,x,y,z):
+        px = self.findSet(x)
+        py = self.findSet(y)
+
+        if self.rank[px] < self.rank[py]:
+            self.djset[py] = px
+            self.weight[py] += z
+
+        else :
+            self.djset[px] = py
+            self.weight[px] -= z
+            if self.rank[px] == self.rank[py]:
+                self.rank[py] = self.rank[py] + 1
+            
+    def solve(self,x,y):
+        px = self.findSet(x)
+        py = self.findSet(y)
+        if px == py:
+            print(self.weight[y] - self.weight[x])
+        else :
+            print("?")
+
+
+
+
+n,q = map(int,input().split())
+g = graph(n)
+
+for _ in range(q):
+    l = input()
+    if l[0] == "0":
+       _,x,y,z = map(int,l.split())
+       g.unite(x,y,z)
+        
+    if l[0] == "1":
+        _,x,y = map(int,l.split())
+        g.solve(x,y)
+

@@ -1,0 +1,116 @@
+#include<bits/stdc++.h>
+using namespace std;
+#define MOD 1000000007
+//#define MOD 998244353
+#define INF 1e18 + 10
+#define EPS 1e-9
+#define F first
+#define S second
+
+#define debug(x) cout<<x<<endl;
+#define repi(i,x,n) for(int i=x;i<n;i++)
+#define rep(i,n) repi(i,0,n)
+#define lp(i,n) repi(i,0,n)
+#define repn(i,n) for(int i=n;i>=0;i--)
+#define int long long
+#define endl "\n"
+
+typedef pair<int,int> PII;
+typedef pair<int,string> PIS;
+typedef pair<string,int> PSI;
+
+template <typename T>
+bool chmax(T &a, const T& b) {
+  if (a < b) {
+    a = b; 
+    return true;
+  }
+  return false;
+}
+
+template <typename T>
+bool chmin(T &a, const T& b) {
+  if (a > b) {
+    a = b;
+    return true;
+  }
+  return false;
+}
+
+
+signed main(){
+  cin.tie(0);	
+  ios::sync_with_stdio(false);
+  string s;
+  cin>>s;
+  int dpmx[110][110]={};
+  int dpmn[110][110]={};
+  rep(i,110){
+    rep(j,110){
+      dpmx[i][j]=-INF;
+      dpmn[i][j]=INF;
+    }
+  }
+  int nex=0;
+  vector<int> plmy,l,r;
+  rep(i,s.size() ){
+    if(isdigit(s[i]) ){
+      dpmx[nex][nex]=s[i]-'0';
+      dpmn[nex][nex]=s[i]-'0';
+      nex++;
+
+      if(i!=0 && s[i-1]=='(') l.push_back(1);
+      else l.push_back(0);
+      if(i!=s.size()-1 && s[i+1]==')') r.push_back(1);
+      else r.push_back(0);
+
+      
+    }
+    if(s[i]=='+') plmy.push_back(1);
+    if(s[i]=='-') plmy.push_back(0);
+
+  }
+
+  repi(siz,1,nex){
+    rep(p,nex){
+    rep(L,nex){
+      int R=L+siz;
+      if(R < nex){
+	
+	int mx=-INF,mn=INF;
+	repi(mid,L,R){
+	  
+	  
+	  
+	  if(r[L]!=1 && l[R]!=1 && dpmx[L][mid]!=-INF && dpmn[mid+1][R]!=INF){
+	    if(plmy[mid]==1){
+	      chmax(mx,dpmx[L][mid]+dpmx[mid+1][R]);
+	      chmin(mn,dpmn[L][mid]+dpmn[mid+1][R]);
+	    }else{
+	      chmax(mx,dpmx[L][mid]-dpmn[mid+1][R]);
+	      chmin(mn,dpmn[L][mid]-dpmx[mid+1][R]);
+	    }
+
+	    
+	  }
+	}
+	dpmx[L][R]=mx;
+	dpmn[L][R]=mn;
+	}
+      }
+    }
+  }
+  /*rep(i,5){
+    rep(j,5){
+      cout<<'('<<dpmx[i][j]<<" "<<dpmn[i][j]<<')';
+    }
+    cout<<endl;
+    }*/
+  cout<<dpmx[0][nex-1]<<endl;
+  
+  
+  
+
+  return 0;
+}
+

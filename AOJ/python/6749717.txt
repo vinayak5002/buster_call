@@ -1,0 +1,83 @@
+
+import sys,random,bisect
+from collections import deque,defaultdict
+from heapq import heapify,heappop,heappush
+from itertools import permutations
+from math import log,gcd
+
+input = lambda :sys.stdin.readline().rstrip()
+mi = lambda :map(int,input().split())
+li = lambda :list(mi())
+
+g1 = [1]
+for i in range(1,20):
+    g1.append(g1[-1]*i)
+
+while True:
+    n = int(input())
+    if n==0:
+        break
+    A = input()
+    S = input()
+    T = input()
+
+    def calc(S,i,s):
+        if S[i]=="#":
+            return "#",i+1
+        if S[i]=="(":
+            L,i = calc(S,i+1,s)
+            p = S[i]
+            i += 1
+            R,i = calc(S,i,s)
+            i += 1
+
+            #print("LR:",L,R)
+
+            if p=="<":
+                if L=="#" or R=="#":
+                    return "#",i
+                else:
+                    return "(" + L + "<" + R + ")",i
+            else:
+                if L=="#" and R=="#":
+                    return "#",i
+                elif L=="#":
+                    return R,i
+                elif R=="#":
+                    return L,i
+                else:
+                    return "(" + L + ">" + R + ")",i
+        else:
+            if S[i]==s:
+                return "#",i+1
+            else:
+                return S[i],i+1
+    
+    dp_S = [S for i in range(1<<n)]
+    dp_T = [T for i in range(1<<n)]
+    for k in range(n):
+        for i in range(2**k,2**(k+1)):
+            pre_i = i - 2**k
+            dp_S[i],_ = calc(dp_S[pre_i],0,A[k])
+            dp_T[i],_ = calc(dp_T[pre_i],0,A[k])
+    
+    #print(dp_S)
+    #print(dp_T)
+    
+    res = 0
+    for i in range(1<<n):
+        t = 0
+        for k in range(n):
+            if i>>k & 1:
+                t += 1
+        for k in range(n):
+            if i>>k & 1 == 0:
+                if dp_S[i]!="#" and dp_T[i]!="#" and dp_S[i+2**k]=="#" and dp_T[i+2**k]=="#":
+                    res += g1[t] * g1[n-1-t]
+    
+    print(res)
+
+                    
+
+
+        

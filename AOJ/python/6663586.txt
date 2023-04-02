@@ -1,0 +1,77 @@
+import sys
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+class UnionFindTree:
+    def __init__(self, num_elements):
+        self._num_elements = num_elements
+        self._parents = list(range(num_elements))
+        self._rank = [0] * num_elements
+        return
+
+    def find(self, idx):
+        parent = self._parents[idx]
+        if parent == idx:
+            return idx
+        self._parents[idx] = self.find(parent)
+        return self._parents[idx]
+
+    def unite(self, idx0, idx1):
+        root0 = self.find(idx0)
+        root1 = self.find(idx1)
+
+        if self._rank[root0] < self._rank[root1]:
+            self._parents[root0] = root1
+        elif self._rank[root1] < self._rank[root0]:
+            self._parents[root1] = root0
+        else:
+            self._parents[root1] = root0
+            self._rank[root0] += 1
+        return
+
+    def is_same(self, idx0, idx1):
+        return self.find(idx0) == self.find(idx1)
+
+
+def kruskal(num_vertexes, edge_list):
+    weight = 0
+    uft = UnionFindTree(num_vertexes)
+    edge_list.sort()
+    for edge in edge_list:
+        w = edge[0]
+        v = edge[1]
+        u = edge[2]
+        if not uft.is_same(v, u):
+            uft.unite(v, u)
+            weight += w
+    return weight
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    num_vertexes = int(f.readline())
+    edge_list = []
+    for i in range(num_vertexes):
+        row = list(map(int, f.readline().split()))
+        for j in range(len(row)):
+            w = row[j]
+            if w >= 0:
+                edge_list.append((w, i, j))
+
+    weight = kruskal(num_vertexes, edge_list)
+    print(weight)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

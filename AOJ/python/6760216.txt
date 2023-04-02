@@ -1,0 +1,119 @@
+import math
+
+
+def inputLine():
+    return [int(x) for x in input().split(" ")]
+
+
+# lazy実装
+class MinSegmentTreeLazy:
+    INF = 2**31 -1
+
+    def __init__(self, n) -> None:
+        self.n = 1
+        while self.n < n:
+            self.n *= 2# 末端ノード数
+
+        # データの初期化
+        self.D = []
+        self.lazy = []
+        for i in range(self.n*2 -1):# 二分木の上層は末端-1の数 ！（知らんかった） + 0indexからより-1
+            self.D.append(self.INF)
+            self.lazy.append(self.INF)
+
+    @staticmethod
+    def calcParent(x, y):
+        #最小求めるより(別の場合はこれを変更... INFの値も適切に変更)
+        return min(x, y)
+
+
+    def update(self, k, x):
+        k += self.n -1# 中のノード数
+        self.D[k] = x
+        # 上層階に反映
+        while k > 0:
+            k = math.floor((k-1)/2 )#全切り捨て
+            self.D[k] = self.calcParent(self.D[k*2+1], self.D[k*2+2])
+            
+
+    # [a, b]
+    def find(self, a, b):
+        return self.query(a, b+1, 0, 0, self.n)
+
+    # [a, b)
+    def query(self, a, b, k, l, r):
+        
+        
+        self.lazyEvaluate(k)# 処理溜めていた部分を実行
+
+        # a: 調べたいindex始点, b: 調べたいindex終点, k: 現在のindex, l: 現在のindexが指す始点, r: 現在のindexが指す終点
+        if r <= a or b <= l:# 範囲外
+            return self.INF
+        if a <= l and r <= b:
+            #print(a, b, k, l, r, self.D, self.lazy)
+            return self.D[k]
+
+        mid_i = math.floor((r+l)/2 )
+        vl = self.query(a, b, k*2+1, l, mid_i)# r+1 /2がわからぬ
+        vr = self.query(a, b, k*2+2, mid_i, r)
+        return self.calcParent(vl, vr)
+        
+
+    #
+    def lazyEvaluate(self, k):
+        if self.lazy[k] == self.INF:
+            # 処理溜め部分はないので何もしない
+            return None
+        
+        self.D[k] = self.lazy[k]# 今の部分を変更
+        #print(k)
+        if k < self.n -1:
+            #末端以外は末端を調べた時用に情報を下へと伝播
+            self.lazy[k*2+1] = self.lazy[k]
+            self.lazy[k*2+2] = self.lazy[k]
+
+        self.lazy[k] = self.INF# ノード更新、下を調べた場合の結果を伝え終わったので捨てる
+        
+    # [a, b]
+    def rangeUpdate(self, a, b, value):
+        self.rangeUpdateQuery(a, b+1, value, 0, 0, self.n)
+
+    # [a, b)
+    def rangeUpdateQuery(self, a, b, value, k, l, r):
+        # a: 調べたいindex始点, b: 調べたいindex終点, value: a~bでの値, k: 現在のindex, l: 現在のindexが指す始点, r: 現在のindexが指す終点
+
+        # ここでも戻しておく
+        self.lazyEvaluate(k)
+
+
+        if r <= a or b <= l:# 範囲外
+            return None
+        if a <= l and r <= b:
+            #print(a, b, k, l, r, self.D)
+            self.lazy[k] = value# 丸々収まるノードで表現しておく(再帰的にfindで調べるため、利用可能)
+            return 
+
+
+        mid_i = math.floor((r+l)/2 )
+        self.rangeUpdateQuery(a, b, value, k*2+1, l, mid_i)
+        self.rangeUpdateQuery(a, b, value, k*2+2, mid_i, r)
+        return None
+
+
+
+if __name__ == "__main__":
+    [n, q] = inputLine()
+    MST = MinSegmentTreeLazy(n)
+
+    for _ in range(q):
+        args = inputLine()
+
+        if args[0] == 0:
+            [_, s, t, x] = args
+            MST.rangeUpdate(s, t, x)
+
+        if args[0] == 1:
+            v = MST.find(args[1], args[1])
+            print(v)
+
+        #print(MST.lazy)

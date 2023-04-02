@@ -1,0 +1,75 @@
+import sys
+input = lambda: sys.stdin.readline().rstrip()
+sys.setrecursionlimit(10**6)
+from heapq import heapify, heappush, heappop
+from collections import deque
+##################
+
+n = int(input())
+p = [int(input()) for _ in range(n)]
+p.extend([0]*max(p))
+
+roop, noroop = set(), set()
+tmp_set = set()
+def rec(i, x):
+  if tmp_set and i == x:
+    return (False, tmp_set)
+  tmp_set.add(i)
+  if p[x] == 0:
+    return (True, tmp_set)
+  if x >= n:
+    return (True, tmp_set)
+  if x < 0:
+    return (False, tmp_set)
+  if x in roop:
+    return (False, tmp_set)
+  if x in noroop:
+    return (True, tmp_set)
+  return rec(i, p[x] + x)
+
+for i in range(n):
+  if p[i] == 0:
+    noroop.add(i)
+    continue
+  tmp_set.clear()
+  flag, st = rec(i, i)
+  if flag:
+    noroop |= st
+  else:
+    roop |= st 
+
+inf = float('inf')
+
+G = [[] for _ in range(len(p))]
+for i in range(len(p)):
+  if p[i] == 0:
+    for j in [1,2,3,4,5,6]:
+      if i+j >= len(p):
+        continue
+      G[i].append((i+j, 1))
+  elif i not in roop:
+    if 0 <= i+p[i] < len(p):
+      G[i].append((i+p[i], 0))
+      G[i+p[i]].append((i, 0))
+
+def dijkstra(G: int, s: int) -> list:
+  dist = [inf] * len(G)
+  ans = []
+  dist[s] = 0
+  hq = []
+  heappush(hq, (0, s))
+  while hq:
+    d, v = heappop(hq)
+    if dist[v] < d:
+      continue
+    for x,c in G[v]:
+      nd = d + c
+      if dist[x] > nd:
+        dist[x] = nd
+        heappush(hq, (nd, x))
+  return dist
+
+dist = dijkstra(G, 0)
+
+print(min(dist[n-1:]))
+

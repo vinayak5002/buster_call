@@ -1,0 +1,40 @@
+from copy import deepcopy
+from itertools import accumulate
+import sys
+import math
+import heapq
+from collections import deque, Counter, defaultdict
+from sys import stdin
+from re import split # 複数の区切り文字用
+
+
+INF = 10 ** 7
+int1 = lambda x: int(x) - 1
+stinput = lambda: stdin.readline()[:-1]
+ii = lambda: int(stinput())  # int input
+mi = lambda: map(int, stdin.readline().split())  # map input (int)
+li = lambda: list(mi())  # list input (int)
+mi1 = lambda: map(int1, stdin.readline().split())  # map input (int)-1
+li1 = lambda: list(mi1())  # list input (int)-1
+mis = lambda: map(str, stdin.readline().split())  # map input (string)
+lis = lambda: list(mis())  # list input (string)
+matli = lambda: list(map(int, stdin.read().split())) 
+
+
+N, H, W = mi()
+X = li()
+imos = [0 for i in range(N * W + 1)]
+for i in range(N):
+    left = W * i
+    right = W * (i + 1)
+    if i % 2: # 西に
+        left -= X[i] 
+        right -= X[i] 
+    else: # 東に
+        left += X[i]
+        right += X[i]
+    imos[left] += 1
+    imos[right] -= 1
+imos = list(accumulate(imos))
+res = [0 if imo else 1 for imo in imos]
+print(H * (sum(res) - 1))

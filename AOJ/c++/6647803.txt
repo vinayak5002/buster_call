@@ -1,0 +1,86 @@
+#include <iostream>
+#include <vector>
+#include <list>
+#include <cmath>
+#include <stack>
+using namespace std;
+
+
+
+vector<int> ls;
+vector<int> tmp;
+long long myMerge(long long a, long long b)
+{
+    long long mid = a+(b-a)/2;
+    for(long long i = a; i<=b;i++)
+    {
+        tmp[i] = ls[i];
+    }
+    long long i = a;
+    long long j = mid+1;
+    long long cnt = 0;
+    for(long long k = a;k<=b;k++)
+    {
+        if(i==mid+1)
+        {
+            ls[k] = tmp[j];
+            j++;
+        }
+        else if(j == b+1)
+        {
+            ls[k] = tmp[i];
+            i++;
+        }
+        else if(tmp[i]<=tmp[j])
+        {
+            ls[k] = tmp[i];
+            i++;
+        }
+        else
+        {
+            ls[k] = tmp[j];
+            j++;
+            cnt += mid - i +1;
+        }
+    }
+    return cnt;
+
+}
+
+long long mergeCount(long long a, long long b)
+{
+    if(a==b)
+    {
+        return 0;
+    }
+    long long mid = a+(b-a)/2;
+    long long lc = mergeCount(a, mid);
+    long long rc = mergeCount(mid+1, b);
+    if(ls[mid]<=ls[mid+1])
+    {
+        return lc+rc;
+    }
+    long long cc = myMerge(a, b);
+    return lc+rc+cc;
+}
+
+
+
+int main()
+{
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    cout.tie(nullptr);
+    long long n;
+    cin >> n;
+    ls.resize(n);
+    tmp.resize(n);
+    for(int i = 0; i < n; i++)
+    {
+        cin >> ls[i];
+    }
+    cout << mergeCount(0, n-1) << endl;
+
+    return 0;
+}
+

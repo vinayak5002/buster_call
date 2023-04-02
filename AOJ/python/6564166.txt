@@ -1,0 +1,26 @@
+import sys
+sys.setrecursionlimit(10**7)
+
+N = int(input()) 
+G = [[] for i in range(N)]
+for i in range(N):
+	u, k, *vs = map(int, input().split()) 
+	G[u-1] = [e for e in vs]
+
+discovered = [-1]*N 
+finished = [-1]*N
+
+def dfs(v, t): 
+	t += 1
+	discovered[v-1] = t 
+	for i in G[v-1]:
+		if discovered[i-1] == -1: 
+			t = dfs(i, t)
+	t += 1
+	finished[v-1] = t 
+	return t
+
+dfs(1, 0)
+
+for i in range(N):
+	print(i+1, discovered[i], finished[i])

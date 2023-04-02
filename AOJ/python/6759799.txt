@@ -1,0 +1,66 @@
+// https://algo-logic.info/segment-tree/
+
+#include <iostream>
+#include <cmath>
+#include <vector>
+#include <iterator>
+#include <algorithm>
+
+static const int INF = 2147483647;
+int n;
+
+class Ruq{
+    private:
+        std::vector<int> D;
+        // int n;
+    public:
+        Ruq(int n_){
+            n = 1;
+            while(n < n_) n *= 2;
+            for(int i=0; i< 2*n-1; ++i) this->D.push_back(INF);
+        }
+
+        void update(int s, int t, int x=-1, int k=0, int l=0, int r=n){
+        // void update(int s, int t, int r, int x=-1, int k=0, int l=0){
+
+            if(r<=s || t<=l) return;
+            if(s<=l && t>=r){
+                if(x>=0) this->D[k]=x;
+                return;
+            }
+            if(this->D[k] != INF) this->D[k*2+1] = this->D[k*2+2] = this->D[k];
+            this->D[k] = INF;
+            update(s, t, x, k*2+1, l, (l+r)/2);
+            update(s, t, r, x, k*2+2, (l+r)/2);
+            // update(s, t, (l+r)/2, x, k*2+1, l);
+            // update(s, t, (l+r)/2, r, x, k*2+2);
+        }
+
+        int findi(int num){
+            return this->D[num + n - 1];
+        }
+
+        int get_n(){return n;};
+};
+
+int main(){
+    int n_, q, com, s, t, x, num;
+    std::cin >> n_ >> q;
+    Ruq ruq = Ruq(n_);
+
+    for(int i=0; i<q; ++i){
+        std::cin >> com;
+        if(com == 0){
+            std::cin >> s, t, x;
+            ruq.update(s, t+1, x);
+            // ruq.update(s, t+1, ruq.get_n(), x);
+        }
+        else{
+            std::cin >> num;
+            ruq.update(num, num+1);
+            // ruq.update(num, num+1, ruq.get_n());
+            std::cout << ruq.findi(num) << std::endl;
+        }
+
+    }
+}

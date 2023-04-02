@@ -1,0 +1,42 @@
+'''
+決められた台数のトラックに荷物を積むとき、
+何キロ積めるトラックを用意したら良いか？
+トラックは同じ容量のトラックを用意することにする
+'''
+n, k = map(int, input().split())
+W = [int(input()) for i in range(n)]
+
+# 次の２つの範囲から全部の荷物を積める最小値を求める
+min_value = max(W) - 1 # 最低でも一番重い荷物の重量になる
+max_value = sum(W) # 最高でも全ての荷物の合計重量になる（１台のトラックに全部の荷物を積んだ場合）
+
+# 二分探索をして求める
+while min_value + 1 < max_value:
+
+    # 中間地点を求める
+    max_p = (min_value + max_value) // 2
+
+    truck_cnt = 1
+    curtruck_sum_w = 0
+    
+    # 今の最大積載量(max_pで、荷物を一つずつ積んでいく
+    for w in W:
+        # 
+        if max_p < curtruck_sum_w + w:
+            # 新しいトラックに荷物を積む
+            curtruck_sum_w = w
+            truck_cnt += 1
+        else:
+            # 今のトラックに荷物を積む
+            curtruck_sum_w += w
+    
+    # 荷物を全部積んだけど、トラックが余っている場合        
+    if truck_cnt <= k:
+        # 半分より前に適正値があるから中間値をmaxにする
+        max_value = max_p
+    else:
+        # 半分より後ろに適正値があるから中間値をminにする
+        min_value = max_p
+        
+print(max_value)
+

@@ -1,0 +1,70 @@
+#include <bits/stdc++.h>
+
+template <std::uint32_t MOD>
+class ModInt {
+	std::uint32_t value;
+	friend std::ostream &operator<<(std::ostream &os, const ModInt &x){ return os << x.value; }
+	friend std::istream &operator>>(std::istream &is, ModInt &x){ is >> x.value; x.value %= MOD; return is; }
+public:
+	constexpr ModInt(std::uint32_t x = 0): value(x % MOD) {}
+	constexpr ModInt operator-() const { return value == 0 ? 0 : MOD - value; }
+	constexpr ModInt &operator+=(const ModInt &other){ if(value < MOD - other.value) value += other.value; else value -= MOD - other.value; return *this; }
+	constexpr ModInt &operator-=(const ModInt &other){ if(value >= other.value) value -= other.value; else value += MOD - other.value; return *this; }
+	constexpr ModInt &operator*=(const ModInt &other){ value = static_cast<std::uint64_t>(value) * other.value % MOD; return *this; }
+	constexpr ModInt &operator/=(const ModInt &other){ return *this *= other.inv(); }
+	friend constexpr ModInt operator+(ModInt left, const ModInt &right){ return left += right; }
+	friend constexpr ModInt operator-(ModInt left, const ModInt &right){ return left -= right; }
+	friend constexpr ModInt operator*(ModInt left, const ModInt &right){ return left *= right; }
+	friend constexpr ModInt operator/(ModInt left, const ModInt &right){ return left /= right; }
+	constexpr ModInt inv() const { unsigned a = MOD, s = 0; unsigned b = value, t = 1; bool sign = true; while(b){ s += t * (a / b); a %= b; sign = !sign; std::swap(a, b); std::swap(s, t); } if(sign) s = MOD - s; return s; }
+	constexpr ModInt pow(unsigned n) const { ModInt tmp = *this, ret = 1; while(n){ if(n % 2) ret *= tmp; tmp *= tmp; n /= 2; } return ret; }
+};
+
+template <std::uint32_t MOD>
+struct Factorials {
+	std::vector<ModInt<MOD>> fac, finv, inv;
+	Factorials(std::size_t n) : fac(n, 1), finv(n, 1), inv(n, 1) {
+		for(int i = 2; i < n; i++){
+			fac[i] = fac[i - 1] * i;
+			inv[i] = -inv[MOD % i] * (MOD / i);
+			finv[i] = finv[i - 1] * inv[i];
+		}
+	}
+	ModInt<MOD> factorial(std::size_t n) const { return fac[n]; }
+	ModInt<MOD> permutation(std::size_t n, std::size_t k) const { return fac[n] * finv[n - k]; }
+	ModInt<MOD> combination(std::size_t n, std::size_t k) const { return fac[n] * finv[k] * finv[n - k]; }
+};
+
+int main(){
+	int n;
+	std::cin >> n;
+	int count1 = 0, count2 = 0, count3 = 0;
+	const Factorials<998244353> f(n + 1);
+	ModInt<998244353> ans = 1;
+	std::vector<int> count(10);
+	for(int i = 0; i <= n; i++){
+		int a;
+		if(i < n){
+			std::cin >> a;
+			count[a]++;
+		}
+		if(i == n || a == 6){
+			ans *= f.fac[count[2] + count[3] + count[4] + count[8] + count[9]]
+				* f.finv[count[2] + count[4] + count[8]]
+				* f.finv[count[3] + count[9]];
+			count[2]
+			= count[3]
+			= count[4]
+			= count[8]
+			= count[9]
+			= 0;
+		}
+	}
+	ans *= f.fac[n]
+		* f.finv[count[1]]
+		* f.finv[count[5]]
+		* f.finv[count[7]]
+		* f.finv[n - count[1] - count[5] - count[7]];
+	std::cout << ans << std::endl;
+}
+

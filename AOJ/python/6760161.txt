@@ -1,0 +1,62 @@
+'''
+会津オンラインジャッジ
+Areas on the Cross-Section Diagram
+HOME- ALDS1-ALDS1_3_D
+https://onlinejudge.u-aizu.ac.jp/courses/lesson/1/ALDS1/1/ALDS1_3_D
+'''
+
+from re import I
+
+
+up_string = '/'
+down_string = '\\'
+
+
+def calc_mizutamari_menseki(mojiretsu: str):
+    temp = 0
+    depth = 0
+    for s in mojiretsu:
+        if s == down_string:
+            depth += 1
+            temp += depth - 0.5
+        elif s == up_string:
+            depth -= 1
+            temp += depth + 0.5
+        else:
+            temp += depth
+    return int(temp)
+
+
+koudo = list()
+hight = 0
+line = input()
+for index in range(len(line)):
+    if line[index] == up_string:
+        hight += 1
+        koudo.append(hight)
+    elif line[index] == down_string:
+        koudo.append(hight)
+        hight -= 1
+    else:
+        koudo.append(hight)
+
+mizutamari = list()
+index = 0
+
+while index < len(line):
+    if line[index] == down_string:
+        try:
+            end = koudo.index(koudo[index], index + 1)
+        except:
+            index += 1
+            continue
+        mizutamari.append(calc_mizutamari_menseki(line[index:end + 1]))
+        index = end
+    else:
+        index = line.find(down_string, index)
+        if index == -1:
+            break
+
+print(sum(mizutamari))
+print(len(mizutamari), *mizutamari)
+

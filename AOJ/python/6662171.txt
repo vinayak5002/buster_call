@@ -1,0 +1,67 @@
+import sys
+import math
+
+# READ_FROM_FILE = True
+READ_FROM_FILE = False
+
+
+def bellman_ford(num_vertexes, edge_list, start):
+    cost_from_s = [math.inf] * num_vertexes
+    cost_from_s[start] = 0
+    is_negative_cycle = False
+
+    counter = 0
+    while True:
+        if counter >= num_vertexes:
+            is_negative_cycle = True
+            break
+
+        is_updated = False
+        for edge in edge_list:
+            v = edge[0]
+            u = edge[1]
+            c = edge[2]
+            if cost_from_s[v] != math.inf:
+                cost = cost_from_s[v] + c
+                if cost_from_s[u] > cost:
+                    cost_from_s[u] = cost
+                    is_updated = True
+
+        if not is_updated:
+            break
+        counter += 1
+
+    return cost_from_s, is_negative_cycle
+
+
+def main():
+    if READ_FROM_FILE:
+        f = open('test0.txt', 'r')
+    else:
+        f = sys.stdin
+
+    num_vertexes, num_edges, start = list(map(int, f.readline().split()))
+    edge_list = []
+    for _ in range(num_edges):
+        s, t, d = list(map(int, f.readline().split()))
+        edge_list.append((s, t, d))
+
+    cost_from_s, is_negative_cycle = bellman_ford(num_vertexes, edge_list, start)
+    if is_negative_cycle:
+        print('NEGATIVE CYCLE')
+    else:
+        for i in range(num_vertexes):
+            cost = cost_from_s[i]
+            if cost == math.inf:
+                print('INF')
+            else:
+                print(cost)
+
+    if READ_FROM_FILE:
+        f.close()
+    return
+
+
+if __name__ == '__main__':
+    main()
+

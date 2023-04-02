@@ -1,0 +1,82 @@
+#include<cstdio>
+#include<iostream>
+#include<algorithm>
+using namespace std;
+
+const int maxn=200+5;
+const int INF=100000000;
+
+int N,M;
+int d1[maxn][maxn],d2[maxn][maxn];
+
+int R,z[1000+50];
+
+int dp[1000+50][maxn];
+
+void solve()
+{
+    for(int i=0;i<maxn;i++)fill(d1[i],d1[i]+maxn,INF);
+    for(int i=0;i<maxn;i++)fill(d2[i],d2[i]+maxn,INF);
+    for(int i=0;i<1000+50;i++)fill(dp[i],dp[i]+maxn,INF);
+
+    for(int i=0;i<maxn;i++)d1[i][i]=0;
+    for(int i=0;i<maxn;i++)d2[i][i]=0;
+
+    for(int i=0;i<M;i++)
+    {
+        int x,y,t;
+        char ch;
+        cin>>x>>y>>t>>ch;
+        x--;y--;
+        if(ch=='L')
+        {
+            d1[x][y]=t;
+            d1[y][x]=t;
+        }
+        else
+        {
+            d2[x][y]=t;
+            d2[y][x]=t;
+        }
+    }
+
+    scanf("%d",&R);
+    for(int i=0;i<R;i++)
+    {
+        scanf("%d",&z[i]);
+        z[i]--;
+    }
+
+    for(int k=0;k<N;k++)
+        for(int i=0;i<N;i++)
+            for(int j=0;j<N;j++)
+                d1[i][j]=min(d1[i][j],d1[i][k]+d1[k][j]);
+
+    for(int k=0;k<N;k++)
+        for(int i=0;i<N;i++)
+            for(int j=0;j<N;j++)
+                d2[i][j]=min(d2[i][j],d2[i][k]+d2[k][j]);
+
+    dp[0][0]=0;
+
+    for(int i=1;i<R;i++)
+        for(int j=0;j<N;j++){
+            dp[i][j]=min(dp[i][j],dp[i-1][j]+d1[z[i-1]][z[i]]);//必须要这一步
+
+            for(int k=0;k<N;k++)
+                dp[i][j]=min(dp[i][j],dp[i-1][k]+d2[k][j]+d1[j][z[i]]+d1[z[i-1]][k]);
+        }
+
+    int res=INF;
+    for(int j=0;j<N;j++)
+        res=min(res,dp[R-1][j]);
+
+    printf("%d\n",res);
+}
+
+int main()
+{
+    while(scanf("%d%d",&N,&M)&&N)
+        solve();
+}
+

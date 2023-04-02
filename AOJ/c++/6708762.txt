@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#pragma GCC target("avx")
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+
+struct Fast {
+  Fast() {
+    std::cin.tie(0);
+    ios::sync_with_stdio(false);
+  }
+} fast;
+
+int convert_code(string word) {
+  int num = word.size();
+  for (const auto &buf : word) {
+    switch (buf) {
+    case 'A':
+      num = num << 2 | 0;
+      break;
+    case 'C':
+      num = num << 2 | 1;
+      break;
+    case 'G':
+      num = num << 2 | 2;
+      break;
+    case 'T':
+      num = num << 2 | 3;
+      break;
+    }
+  }
+  return num;
+}
+
+class Dict {
+private:
+  const int nn;
+  vector<int> ary;
+  int hash(const int n) { return n % nn; }
+
+public:
+  Dict(int n) : nn(n), ary(n, -1) {}
+  void insert(int code) {
+    int num = code;
+    while (true) {
+      const int hash_value = hash(num);
+      if (ary[hash_value] < 0) {
+        ary[hash_value] = code;
+        break;
+      }
+      num = (num + nn - 1) % nn;
+    }
+  }
+
+  bool find(int code) {
+    int num = code;
+    while (true) {
+      const int hash_value = hash(num);
+      if (ary[hash_value] < 0) {
+        return false;
+      } else if (ary[hash_value] == code) {
+        return true;
+      }
+      num = 1 + num % (nn - 1);
+    }
+  }
+};
+
+int main() {
+  int n;
+  Dict dic(n);
+  cin >> n;
+  for (int i = 0; i < n; i++) {
+    string command, word;
+    cin >> command >> word;
+    const int code = convert_code(word);
+    if (command == "insert") {
+      dic.insert(code);
+    } else {
+      if (dic.find(code)) {
+        cout << "yes" << endl;
+      } else {
+        cout << "no" << endl;
+      }
+    }
+  }
+
+  return 0;
+}
+

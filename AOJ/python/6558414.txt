@@ -1,0 +1,40 @@
+while True:
+
+    N,M = map(int,input().split())
+    if N == 0 and M == 0:
+        break
+    #S = input()
+    INF = float("inf")
+    C = []
+    for _ in range(M):
+        C.append(int(input()))
+    X = []
+    for _ in range(N):
+        X.append(int(input()))
+    dp1 = [INF]*256
+    dp2 = [INF]*256
+    dp1[128] = 0
+    jijou = [[(i-j)**2 for j in range(256)] for i in range(256)]
+    decode = [[0 for _ in range(-255,256)] for _ in range(256)]
+    for i in range(256):
+        for j in range(-255,256):
+            if i+j<0:
+                decode[i][j] = 0
+            elif i+j>255:
+                decode[i][j] = 255
+            else:
+                decode[i][j] = i+j
+
+    for x in X:
+        for y in range(256):
+            for c in C:
+                j = decode[y][c]
+                if dp1[y]!=INF:
+                    dp2[j] = min(dp2[j], dp1[y] + jijou[x][j])
+        dp1 = dp2[:]
+        dp2 = [INF]*256
+
+    ans = INF
+    for j in range(256):
+        ans = min(ans,dp1[j])
+    print(ans)

@@ -1,0 +1,72 @@
+import math
+
+
+def inputLine():
+    return [int(x) for x in input().split(" ")]
+
+
+class MinSegmentTree:
+    INF = 2**31 -1
+
+    def __init__(self, n) -> None:
+        self.n = 1
+        while self.n < n:
+            self.n *= 2# 末端ノード数
+
+        # データの初期化
+        self.D = []
+        for i in range(self.n*2 -1):# 二分木の上層は末端-1の数 ！（知らんかった） + 0indexからより-1
+            self.D.append(self.INF)
+
+    @staticmethod
+    def calcParent(x, y):
+        #最小求めるより(別の場合はこれを変更... INFの値も適切に変更)
+        return min(x, y)
+
+
+    def update(self, k, x):
+        k += self.n -1# 中のノード数
+        self.D[k] = x
+        # 上層階に反映
+        while k > 0:
+            k = math.floor((k-1)/2 )#全切り捨て
+            self.D[k] = self.calcParent(self.D[k*2+1], self.D[k*2+2])
+            
+
+    # [a, b]
+    def find(self, a, b):
+        return self.query(a, b+1, 0, 0, self.n)
+
+    # [a, b)
+    def query(self, a, b, k, l, r):
+        #print(a, b, k, l, r)
+
+        # a: 調べたいindex始点, b: 調べたいindex終点, k: 現在のindex, l: 現在のindexが指す始点, r: 現在のindexが指す終点
+        if r <= a or b <= l:# 範囲外
+            return self.INF
+        if a <= l and r <= b:
+            #print(a, b, k, l, r, self.D)
+            return self.D[k]
+
+        mid_i = math.floor((r+l)/2 )
+        vl = self.query(a, b, k*2+1, l, mid_i)# r+1 /2がわからぬ
+        vr = self.query(a, b, k*2+2, mid_i, r)
+        return self.calcParent(vl, vr)
+        
+
+
+
+
+if __name__ == "__main__":
+    [n, q] = inputLine()
+    MST = MinSegmentTree(n)
+
+    for _ in range(q):
+        [com, x, y] = inputLine()
+
+        if com == 0:
+            MST.update(x, y)
+
+        if com == 1:
+            v = MST.find(x, y)
+            print(v)

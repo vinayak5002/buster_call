@@ -1,0 +1,33 @@
+A = input()
+E = [0]
+elev = 0
+for a in A:
+    if a == '\\': elev -= 1
+    if a == '/': elev += 1
+    E.append(elev)
+land = min(E)
+E = [e+abs(land) for e in E]
+
+k1 = 0
+k2 = 0 
+K = [] 
+while max(E):
+    top = max(E)
+    pos = [i for i, x in enumerate(E) if x == top]
+    if len(pos) == 1: E[pos[0]] -= 1
+    else:
+        for i in range(1, len(pos)):
+            if pos[i]-pos[i-1]!=1:
+                dist = pos[i]-pos[i-1]-1
+                s = dist*top-sum(E[pos[i-1]+1:pos[i]])
+                k1 += s
+                k2 += 1
+                K.append([pos[i], s])
+                for j in range(pos[i-1]+1, pos[i]): E[j] = top
+                break
+            if i == len(pos)-1:
+                for j in range(len(pos)): E[pos[j]] -= 1
+K.sort()
+k3 = [k[1] for k in K]
+print(k1)
+print(k2, *k3)

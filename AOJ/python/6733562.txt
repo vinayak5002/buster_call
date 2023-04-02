@@ -1,0 +1,74 @@
+from itertools import accumulate
+import itertools
+import sys
+
+from attr import field
+
+sys.setrecursionlimit(10**9)
+import math
+import heapq
+import bisect
+from collections import deque, Counter, defaultdict, OrderedDict
+from sys import stdin
+import copy
+from decimal import Decimal
+from operator import mul
+from functools import reduce
+
+
+MOD = 10 ** 9 + 7
+def int1(x): return int(x) - 1
+def stinput(): return stdin.readline()[:-1]
+def ii(): return int(stinput())  # int input
+def mi(): return map(int, stdin.readline().split())  # map input (int)
+def li(): return list(mi())  # lis input (int)
+def mi1(): return map(int1, stdin.readline().split())  # map input (int)-1
+def li1(): return list(mi1())  # lis input (int)-1
+def mis(): return map(str, stdin.readline().split())  # map input (string)
+def lis(): return list(mis())  # lis input (string)
+def my_lcm(x, y):
+    return (x * y) // math.gcd(x, y)
+def cmb(n,r):
+    r = min(n-r,r)
+    if r == 0: return 1
+    over = reduce(mul, range(n, n - r, -1))
+    under = reduce(mul, range(1,r + 1))
+    return over // under
+def combnations_count(n, r):
+    return math.factorial(n) // (math.factorial(n-r) * math.factorial(r))
+# 2次元累積和
+def cumulative_sum_2d(arr):
+    # cumsum_2d[i][j] = [0, i) * [0, j) の総和
+    h = len(arr)
+    w = len(arr[0])
+    cumsum_2d = [[0] * (w + 1) for i in range(h + 1)]
+    for i in range(h):
+        for j in range(w):
+            cumsum_2d[i + 1][j + 1] = cumsum_2d[i + 1][j] + cumsum_2d[i][j + 1] - cumsum_2d[i][j] + arr[i][j]
+    return cumsum_2d
+
+
+while True:
+    N = ii()
+    if N == 0:
+        break
+    W,H = mi()
+    ans = 0
+    cnt = 0
+    field = [[0 for i in range(W)] for j in range(H)]
+    for i in range(N):
+        x,y = mi1()
+        field[y][x] = 1
+    cumsum = cumulative_sum_2d(field)
+    s,t = mi()
+    for i in range(H-t+1):
+        for j in range(W-s+1):
+            a1, a2, b1, b2 = i, i+t, j, j+s
+            cnt = cumsum[a2][b2] + cumsum[a1][b1] - cumsum[a2][b1] - cumsum[a1][b2]
+            if cnt > ans:
+                ans = cnt
+    print(ans)
+                    
+
+    
+

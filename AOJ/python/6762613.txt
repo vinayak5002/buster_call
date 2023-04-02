@@ -1,0 +1,53 @@
+from collections import Counter, deque, defaultdict
+from itertools import permutations, combinations, accumulate, product, chain
+from functools import lru_cache
+from bisect import bisect, bisect_left, insort, insort_left
+from heapq import heapify, heappush, heappop
+from array import array
+from decimal import Decimal
+from copy import deepcopy
+from pprint import pprint
+from string import ascii_uppercase, ascii_lowercase, ascii_letters
+from math import factorial, floor, ceil, sqrt, log, log2, log10
+import math
+import sys
+sys.setrecursionlimit(1<<30)
+
+read = sys.stdin.read
+readline = sys.stdin.readline
+readlines = sys.stdin.readlines
+
+class UnionFind():
+    def __init__(self, n):
+        self.n = n
+        self.parents = [-1] * n
+    def find(self, x):
+        if self.parents[x] < 0:
+            return x
+        else:
+            self.parents[x] = self.find(self.parents[x])
+            return self.parents[x]
+    def union(self, x, y):
+        xp = self.find(x)
+        yp = self.find(y)
+        if xp == yp:
+            return False
+        if self.parents[xp] > self.parents[yp]:
+            xp, yp = yp, xp
+        self.parents[xp] += self.parents[yp]
+        self.parents[yp] = xp
+        return True
+
+if __name__ == '__main__':
+    N, Q = map(int, readline().split())
+    uf = UnionFind(N)
+    for _ in range(Q):
+        cmd, x, y = map(int, readline().split())
+        if cmd:
+            if uf.find(x) == uf.find(y):
+                print(1)
+            else:
+                print(0)
+        else:
+            uf.union(x, y)
+

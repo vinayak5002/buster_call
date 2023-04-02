@@ -1,0 +1,46 @@
+def root(x):
+    if par[x] == x:
+        return x
+    else:
+        y = root(par[x])
+        weight[x] += weight[par[x]]
+        par[x] = y
+        return y
+
+
+def unite(x, y, w):
+    root_x = root(x)
+    root_y = root(y)
+
+    if ranks[root_x] < ranks[root_y]:
+        par[root_x] = root_y
+        weight[root_x] = weight[y] - w - weight[x]
+    elif ranks[root_x] == ranks[root_y]:
+        ranks[root_x] += 1
+        par[root_y] = root_x
+        weight[root_y] = weight[x] + w - weight[y]
+    else:
+        par[root_y] = root_x
+        weight[root_y] = weight[x] + w - weight[y]
+
+
+N, Q = map(int, input().split())
+par =  [i for i in range(N)]
+ranks = [0] * N
+weight = [0] * N
+
+
+l = [input() for _ in range(Q)]
+
+
+for j in range(Q):
+    q = list(map(int, l[j].split()))
+    
+    if q[0] == 0:
+        unite(q[1], q[2], q[3])
+    else:
+        if root(q[1]) == root(q[2]):
+            print(weight[q[2]]-weight[q[1]])
+        else:
+            print("?")
+

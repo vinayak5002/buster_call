@@ -1,0 +1,13 @@
+import qualified Data.Vector as V
+main :: IO ()
+main = do
+  n <- readLn
+  ss <- fmap (V.fromList . map read . words) getLine
+  getLine
+  ts <- fmap (V.fromList . map read . words) getLine
+  print $ solve n ss ts
+bsearch :: Integral b => (b -> Bool) -> (b, b) -> b
+bsearch c t = snd $ head $ dropWhile (\(l,u) -> u - l > 1) $ iterate f t  where
+  f (l,u) = (\x -> if c x then (l,x) else (x,u)) $ div (l + u) 2
+solve :: Int -> V.Vector Int -> V.Vector Int -> Int
+solve n ss = V.foldl (\acc t -> if t == ss V.! bsearch (\x -> t <= ss V.! x) (-1,n) then acc+1 else acc) 0

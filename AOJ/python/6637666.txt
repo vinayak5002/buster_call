@@ -1,0 +1,50 @@
+import sys
+import heapq
+from _heapq import heappush, heappop
+from collections import deque
+
+
+BIG_NUM = 2000000000
+
+V,E = map(int,input().split())
+
+dist = [[BIG_NUM] * V for _ in range(V)]
+for i in range(V):
+    dist[i][i] = 0
+
+for _ in range(E):
+    s,t,d = map(int,input().split())
+    if dist[s][t] > d:
+        dist[s][t] = d
+
+for mid in range(V):
+    for start in range(V):
+        if dist[start][mid] == BIG_NUM:
+            continue
+        for goal in range(V):
+            if dist[mid][goal] == BIG_NUM:
+                continue
+            if dist[start][goal] > dist[start][mid]+dist[mid][goal]:
+                dist[start][goal] = dist[start][mid]+dist[mid][goal]
+
+for i in range(V):
+    if dist[i][i] < 0:
+        print('NEGATIVE CYCLE')
+        sys.exit()
+
+for i in range(V):
+    is_first = True
+    for k in range(V):
+        if dist[i][k] == BIG_NUM:
+            if is_first == True:
+                print('INF',end='')
+            else:
+                print(' INF',end='')
+        else:
+            if is_first == True:
+                print('%d'%(dist[i][k]),end='')
+            else:
+                print(' %d'%(dist[i][k]),end='')
+        is_first = False
+    print()
+

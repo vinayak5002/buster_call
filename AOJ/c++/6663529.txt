@@ -1,0 +1,50 @@
+#define READ_FROM_FILE 0
+
+#if READ_FROM_FILE
+#include <fstream>
+#endif
+
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+
+int main() {
+#if READ_FROM_FILE
+	ifstream ifs("test0.txt");
+	cin.rdbuf(ifs.rdbuf());
+#endif
+	int q = -1;
+	string x;
+	string y;
+	int m = -1;
+	int n = -1;
+
+	cin >> q;
+	getline(cin, x);
+	for (int k = 0; k < q; k++) {
+		vector<vector<int>> dp;
+
+		getline(cin, x);
+		getline(cin, y);
+		m = x.size();
+		n = y.size();
+
+		dp = vector<vector<int>>(n + 1, vector<int>(m + 1, 0));
+
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < m; j++) {
+				if (x[j] == y[i]) {
+					dp[i + 1][j + 1] = dp[i][j] + 1;
+				}
+				else {
+					dp[i + 1][j + 1] = max(dp[i + 1][j], max(dp[i][j + 1], dp[i][j]));
+				}
+
+			}
+		}
+		cout << dp[n][m] << endl;
+	}
+	return 0;
+}

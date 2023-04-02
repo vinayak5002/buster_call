@@ -1,0 +1,88 @@
+#include<stdio.h>
+long long int min(long long int a, long long int b)
+{
+	if (a < b)
+		return a;
+	else
+		return b;
+}
+int main()
+{
+	long long int n, m;
+	long long int i, j, k;
+	long long int x[10004], y[10004], t[10004];
+	char sl[10004][4];
+	long long int r, z[1003];
+	long long int dl[203][203], ds[203][203];
+	long long int dp[2][203];
+	long long int inf = 1e15;
+	long long int ans;
+	for (;;)
+	{
+		scanf("%lld %lld", &n, &m);
+		if (n == 0 && m == 0)
+			break;
+		for (i = 0; i < m; i++)
+		{
+			scanf("%lld %lld %lld %s", &x[i], &y[i], &t[i], sl[i]);
+			x[i]--;
+			y[i]--;
+		}
+		scanf("%lld", &r);
+		for (i = 0; i < r; i++)
+		{
+			scanf("%lld", &z[i]);
+			z[i]--;
+		}
+		for (i = 0; i < n; i++)
+			for (j = 0; j < n; j++)
+				dl[i][j] = inf;
+		for (i = 0; i < n; i++)
+			dl[i][i] = 0;
+		for (i = 0; i < m; i++)
+		{
+			if (sl[i][0] == 'S')
+				continue;
+			dl[x[i]][y[i]] = min(dl[x[i]][y[i]], t[i]);
+			dl[y[i]][x[i]] = min(dl[y[i]][x[i]], t[i]);
+		}
+		for (k = 0; k < n; k++)
+			for (i = 0; i < n; i++)
+				for (j = 0; j < n; j++)
+					dl[i][j] = min(dl[i][j], dl[i][k] + dl[k][j]);
+		for (i = 0; i < n; i++)
+			for (j = 0; j < n; j++)
+				ds[i][j] = inf;
+		for (i = 0; i < n; i++)
+			ds[i][i] = 0;
+		for (i = 0; i < m; i++)
+		{
+			if (sl[i][0] == 'L')
+				continue;
+			ds[x[i]][y[i]] = min(ds[x[i]][y[i]], t[i]);
+			ds[y[i]][x[i]] = min(ds[y[i]][x[i]], t[i]);
+		}
+		for (k = 0; k < n; k++)
+			for (i = 0; i < n; i++)
+				for (j = 0; j < n; j++)
+					ds[i][j] = min(ds[i][j], ds[i][k] + ds[k][j]);
+		for (i = 0; i < n; i++)
+			dp[0][i] = inf;
+		dp[0][z[0]] = 0;
+		for (k = 1; k < r; k++)
+		{
+			for (i = 0; i < n; i++)
+				dp[1][i] = inf;
+			for (i = 0; i < n; i++)
+				for (j = 0; j < n; j++)
+					dp[1][i] = min(dp[1][i], dp[0][j] + dl[z[k - 1]][j] + ds[j][i] + dl[i][z[k]]);
+			for (i = 0; i < n; i++)
+				dp[0][i] = dp[1][i];
+		}
+		ans = inf;
+		for (i = 0; i < n; i++)
+			ans = min(ans, dp[0][i]);
+		printf("%lld\n", ans);
+	}
+	return 0;
+}

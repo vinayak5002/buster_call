@@ -1,0 +1,53 @@
+#include<bits/stdc++.h>
+#include<complex>
+using namespace std;
+#define int long long
+const double eps=1e-10;
+struct Vec{
+	double x,y;
+	Vec(double X=0,double Y=0){x=X;y=Y;}
+	double len(){return sqrt(x*x+y*y);}
+	Vec operator+(Vec a){return Vec(x+a.x,y+a.y);}
+	Vec operator-(Vec a){return Vec(x-a.x,y-a.y);}
+	Vec operator*(double a){return Vec(x*a,y*a);}
+	Vec operator/(double a){return Vec(x/a,y/a);}
+	double operator*(Vec a){return x*a.x+y*a.y;}
+	double operator%(Vec a){return x*a.y-y*a.x;}
+	friend istream &operator>>(istream &cin,Vec &a){return cin>>a.x>>a.y;}
+	friend ostream &operator<<(ostream &cout,Vec a){return cout<<fixed<<setprecision(10)<<a.x<<' '<<setprecision(10)<<a.y;}
+}p1,p2,p3,p0;
+namespace Point_and_Segment{
+	#define Node Vec
+	int dcmp(double x)
+	{
+		if(fabs(x)<eps)return 0;
+		return x<0?-1:1;
+	}
+	bool Intersect(Node a,Node b,Node c,Node d)//绾挎鐩镐氦
+	{
+		if(max(a.x,b.x)<min(c.x,d.x)||max(c.x,d.x)<min(a.x,b.x)||max(a.y,b.y)<min(c.y,d.y)||max(c.y,d.y)<min(a.y,b.y))return false;
+		return ((a-d)%(c-d))*((b-d)%(c-d))<=0&&((d-b)%(a-b))*((c-b)%(a-b))<=0;
+	}
+	Node Intersection(Node a,Node b,Node c,Node d)
+	{
+		Vec s1=b-a,s2=c-d,ac=c-a,cd=c-d;
+		double d1=ac%s2/s2.len();
+		double d2=cd%s2/s2.len();
+		double x=d1*s1.len()/(d1+d2);
+		Vec res=s1*x/s1.len();
+		return (res+a)/2;
+	}
+	#undef Node
+}using namespace Point_and_Segment;
+signed main()
+{
+	ios::sync_with_stdio(0);
+	cin.tie(0),cout.tie(0);
+	int q;cin>>q;
+	while(q--)
+	{
+		cin>>p0>>p1>>p2>>p3;
+		cout<<Intersection(p0,p1,p2,p3)<<'\n';
+	}
+	return 0;
+}

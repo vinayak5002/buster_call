@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i, k, n) for(int i = k; i < n; i++)
+#define MAX_N 110000
+typedef long long ll;
+//typedef pair<double, double> P;
+const ll INF = 1e18;
+const int inf = 1e9;
+using Graph = vector<vector<ll>>;
+using Field = vector<vector<char>>;
+
+int n;
+
+typedef struct {
+    double x, y;
+} Point;
+
+void func(int i, Point a, Point b) {
+    if(i == 0) return;
+
+    Point s, u, t;
+    s.x = (2.0*a.x + b.x) / 3.0;
+    s.y = (2.0*a.y + b.y) / 3.0;
+    t.x = (a.x + 2.0*b.x) / 3.0;
+    t.y = (a.y + 2.0*b.y) / 3.0;
+
+    double th = M_PI * 60 / 180.0;
+    u.x = s.x + (t.x-s.x)*cos(th) - (t.y-s.y)*sin(th);
+    u.y = s.y + (t.x-s.x)*sin(th) - (t.y-s.y)*cos(th);
+
+    func(i-1, a, s);
+    printf("%.6f %.6f\n", s.x, s.y);
+
+    func(i-1, s, u);
+    printf("%.6f %.6f\n", u.x, u.y);
+
+    func(i-1, u, t);
+    printf("%.6f %.6f\n", t.x, t.y);
+
+    func(i-1, t, b);
+}
+
+int main(void) {
+    cin >> n;
+
+    Point a, b;
+    a.x = 0; a.y = 0;
+    b.x = 100; b.y = 0;
+
+    printf("%.6f %.6f\n", a.x, a.y);
+    func(n, a, b);
+    printf("%.6f %.6f\n", b.x, b.y);
+    return 0;
+}

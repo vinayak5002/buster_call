@@ -1,0 +1,77 @@
+#include <bits/stdc++.h>
+
+#ifdef _DEBUG
+#include "debug.cpp"
+#else
+#define DE(x)
+#define DE2(x, y)
+#define DEV(v)
+#define DESq(v, h, w)
+#endif
+
+using namespace std;
+#define REP(i, n) for(int i = 0; i < (n); i++)
+#define rep(i, l, r) for(int i = l; i < (r); i++)
+#define rrep(i, r, l) for(int i = r; i >= (l); i--)
+#define ALL(v) (v).begin(), (v).end()
+using ll = long long;
+using P = pair<ll, ll>;
+constexpr ll INF = 1e18;
+constexpr int mod = 1e9 + 7;
+
+
+struct UnionFind {
+    vector<int> data;
+
+    UnionFind(int sz) :data(sz,-1){}
+
+    bool unite(int x, int y) {
+        x = find(x), y = find(y);
+        if(x == y)
+            return false;
+        if(data[x] > data[y])
+            swap(x, y);
+        data[x] += data[y];
+        data[y] = x;
+        return true;
+    }
+
+    int find(int k) {
+        if(data[k] < 0)
+            return (k);
+        return (data[k] = find(data[k]));
+    }
+
+    int size(int k) { return -data[find(k)]; }
+   
+    bool same(int x, int y) {
+        x = find(x), y = find(y);
+        if(x == y)
+            return true;
+        else
+            return false;
+    }
+};
+
+int main() {
+    while(true) {
+
+        ll w, h;
+        cin >> w >> h;
+        if(w == 0 && h == 0)
+            break;
+        UnionFind uf(w+h);
+        REP(i, w + h - 1) {
+            ll x, y, value;
+            cin >> x >> y >> value;
+            x--, y--;y+=w;
+            uf.unite(x,y);
+        }
+        if(uf.size(0)==w+h)
+        cout << "YES" << endl;
+        else
+        cout << "NO" << endl;
+
+    }
+    return 0;
+}

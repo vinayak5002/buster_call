@@ -1,0 +1,43 @@
+def heappush(items, item):
+    items.append(item)
+    i = len(items) - 1
+    p = (i - 1) // 2
+
+    while i != 0 and items[i] > items[p]:
+        items[i], items[p] = items[p], items[i]
+        i = p
+        p = (i - 1) // 2
+
+
+def heappop(items):
+    items[0], items[len(items) - 1] = items[len(items) - 1] ,items[0]
+    m = items.pop()
+
+    i = 0
+
+    while True:
+        l = i * 2 + 1
+        r = i * 2 + 2
+        largest = l if l < len(items) and items[l] > items[i] else i
+        largest = r if r < len(items) and items[r] > items[largest] else largest 
+        
+        if i == largest:
+            break
+
+        items[i], items[largest] = items[largest], items[i]
+        i = largest
+
+    return m
+
+items = []
+
+while True:
+    code = input()
+
+    if code.startswith('insert'):
+        _, n = code.split(' ')
+        heappush(items, int(n))
+    elif code == 'extract':
+        print(heappop(items))
+    elif code == 'end':
+        break

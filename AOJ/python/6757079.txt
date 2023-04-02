@@ -1,0 +1,46 @@
+while True:
+    H = int(input())
+    if H == 0:
+        exit()
+
+    A = [list(map(int, input().split())) for _ in range(H)]
+    ans = 0
+
+    while True:
+
+        D = [set() for _ in range(5)]
+        for d in range(H-1, -1, -1):
+            r = 0
+            for l in range(3):
+                if A[d][l] == 0:
+                    continue
+                if r < l:
+                    r = l
+                while r < 5 and A[d][r] == A[d][l]:
+                    r += 1
+                if r-l >= 3:
+                    ans += A[d][l] * (r-l)
+                    for x in range(l, r):
+                        D[x].add(d)
+                    break
+
+
+        if all(not d for d in D):
+            break
+
+        B = [[0]*5 for _ in range(H)]
+        for x in range(5):
+            now = H-1
+            for i in range(H-1, -1, -1):
+                if A[i][x] == 0:
+                    break
+                if i in D[x]:
+                    continue
+                B[now][x] = A[i][x]
+                now -= 1
+
+        A = B
+
+
+    print(ans)
+

@@ -1,0 +1,25 @@
+import Control.Monad.ST ( runST )
+import Data.Char (isSpace)
+import qualified Data.ByteString.Char8 as B
+import qualified Data.Vector as V
+import qualified Data.Vector.Mutable as VM
+main :: IO ()
+main = do
+  n <- readLn
+  av <- fmap (V.unfoldr (B.readInt . B.dropWhile isSpace)) B.getLine
+  putStrLn . unwords . V.toList . V.map show $ csort n av
+
+csort :: Int -> V.Vector Int -> V.Vector Int
+csort n av = V.concatMap (\i -> V.replicate (cv V.! i) i) (V.fromList [0..n+1])
+  where
+    n0 = 10001
+    cv = generateCV n0 av
+
+generateCV :: Int -> V.Vector Int -> V.Vector Int
+generateCV n av = runST $ do
+  cmv <- VM.replicate n 0
+  V.forM_ av $ \a -> do
+    val <- VM.read cmv a
+    VM.write cmv a (val+1)
+  V.freeze cmv
+

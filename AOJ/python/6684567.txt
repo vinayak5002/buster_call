@@ -1,0 +1,64 @@
+import sys
+
+
+class Node:
+    def __init__(self, key):
+        self._key = key
+        self._parent = None
+        self._left = None
+        self._right = None
+
+
+class Tree:
+    def __init__(self):
+        self._root = None
+
+    def insert(self, key):
+
+        if self._root is None:
+            self._root = Node(key)
+        else:
+            self.insert_ch(self._root, key)
+
+    def insert_ch(self, v, key):
+        if v._key > key:
+            if v._left is None:
+                v._left = Node(key)
+            else:
+                self.insert_ch(v._left, key)
+        elif v._key < key:
+            if v._right is None:
+                v._right = Node(key)
+            else:
+                self.insert_ch(v._right, key)
+        else:
+            return
+
+    def preorder(self, v):
+        if v is None:
+            return ""
+        else:
+            return " " + str(v._key) + self.preorder(v._left) + self.preorder(
+                v._right)
+
+    def inorder(self, v):
+        if v is None:
+            return ""
+        else:
+            return self.inorder(v._left) + " " + str(v._key) + self.inorder(
+                v._right)
+
+
+if __name__ == "__main__":
+
+    T = Tree()
+
+    N = int(sys.stdin.readline())
+    for line in sys.stdin.readlines():
+        #print(line)
+        if line[0] == 'i':
+            T.insert(int(line[7:]))
+        elif line[0] == 'p':
+            print(T.inorder(T._root))
+            print(T.preorder(T._root))
+

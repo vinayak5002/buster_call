@@ -1,0 +1,45 @@
+import heapq
+
+def dijkstra(s):
+    """ダイクストラ法 (重み付き有向グラフ) O(ElogV)
+
+    Args:
+        s (int): 始点
+
+    Vars:
+        N (int):     頂点数
+        edge (list): 辺に関するリスト (edge[i]: iを始点に持つ辺の[重み,終点]のリスト)
+
+    Returns:
+        list: 始点sから各頂点までの最短距離
+    """
+    dist = [float('inf')] * V
+    dist[s] = 0
+    edgelist = []
+    heapq.heappush(edgelist, [0, s])
+
+    while edgelist:
+        w, v = heapq.heappop(edgelist)
+        if dist[v] < w:
+            continue
+        for e in edge[v]:
+            if dist[e[1]] <= dist[v] + e[0]:
+                continue
+            dist[e[1]] = dist[v] + e[0]
+            heapq.heappush(edgelist, [dist[e[1]], e[1]])
+
+    return dist
+
+
+V, E, r = map(int, input().split())
+edge = [[] for _ in range(V)]
+for _ in range(E):
+    s, t, d = map(int, input().split())
+    edge[s].append([d, t])
+
+dist = dijkstra(r)
+for d in dist:
+    if d < float('inf'):
+        print(d)
+    else:
+        print('INF')

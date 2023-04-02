@@ -1,0 +1,47 @@
+#include <cstdio>
+#include <iostream>
+#include <cstring>
+using namespace std;
+const int maxW=100;
+const int maxH=100;
+int w, h;
+int dr[4]={-1,1,0,0},dc[4]={0,0,-1,1};
+char ch,table[maxH][maxW];
+
+void dfs(int r, int c){
+    char ch=table[r][c];
+    table[r][c]='x';
+    for(int k=0;k<4;++k){
+        int x=r+dr[k], y=c+dc[k];
+        if(x<0||h<=x||y<0||w<=y||table[x][y]!=ch) continue;
+        dfs(x,y);
+    }
+}
+
+// #define LOCAL
+int main(){
+    #ifdef LOCAL
+        freopen("input.txt","r",stdin);
+        freopen("output.txt","w",stdout);
+    #endif
+    while(true){
+        scanf("%d %d",&w,&h);
+        if(w==0&&h==0) break;
+        for(int r=0;r<h;++r){
+            for(int c=0;c<w;++c){
+                scanf(" %c",&table[r][c]);
+            }
+        }
+        int ans=0;
+        for(int r=0;r<h;++r){
+            for(int c=0;c<w;++c){
+                if(table[r][c]!='x') {
+                    dfs(r,c);
+                    ans++;
+                }
+            }
+        }
+        printf("%d\n",ans);
+    }
+    return 0;
+}

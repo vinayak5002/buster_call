@@ -1,0 +1,114 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <set>
+using namespace std;
+
+vector<vector<int>> touched(int h,int w,vector<vector<int>> A){
+  vector<vector<int>> x(h,vector<int>(w,0));
+  x[0][0] = 1;
+  queue<pair<int,int>> Z;
+  Z.push({0,0});
+  set<pair<int,int>> G;
+  G.insert({0,0});
+  while(Z.size()){
+    auto p = Z.front();Z.pop();
+    if(p.first && !G.count({p.first-1,p.second}) && A[p.first-1][p.second] == A[0][0]){
+      G.insert({p.first-1,p.second});
+      x[p.first-1][p.second] = 1;
+      Z.push({p.first-1,p.second});
+    }
+
+    if(p.first+1 != h && !G.count({p.first+1,p.second}) && A[p.first+1][p.second] == A[0][0]){
+      G.insert({p.first+1,p.second});
+      x[p.first+1][p.second] = 1;
+      Z.push({p.first+1,p.second});
+    }
+
+    if(p.second && !G.count({p.first,p.second-1}) && A[p.first][p.second-1] == A[0][0]){
+      G.insert({p.first,p.second-1});
+      x[p.first][p.second-1] = 1;
+      Z.push({p.first,p.second-1});
+    }
+
+    if(p.second+1 != w && !G.count({p.first,p.second+1}) && A[p.first][p.second+1] == A[0][0]){
+      G.insert({p.first,p.second+1});
+      x[p.first][p.second+1] = 1;
+      Z.push({p.first,p.second+1});
+    }
+  }
+  return x;
+}
+
+vector<vector<int>> change(int h,int w,vector<vector<int>> A,vector<vector<int>> x,int nc){
+  vector<vector<int>> ret(h,vector<int>(w));
+  for(int i = 0; h > i; i++){
+    for(int j = 0; w > j; j++){
+      if(x[i][j]){
+        ret[i][j] = nc;
+      }else{
+        ret[i][j] = A[i][j];
+      }
+    }
+  }
+  return ret;
+}
+
+int len(int h,int w, vector<vector<int>> A){
+  int ans = 0;
+  for(int i = 0; h > i; i++){
+    for(int j = 0; w > j; j++){
+      ans += A[i][j];
+    }
+  }
+  return ans;
+}
+
+int dfs(int n,int h,int w,vector<vector<int>> A,vector<vector<int>> x,int c){
+  if(n == 5){
+    return len(h,w,x);
+  }
+  int ret = 0;
+  for(int i = 1; 6 >= i; i++){
+    if(n == 4 && c != i)continue;
+    if(A[0][0] == i)continue;
+    auto B = change(h,w,A,x,i);
+    auto y = touched(h,w,B);
+    ret = max(ret,dfs(n+1,h,w,B,y,c));
+
+    // cout << n << " " << i << endl;
+    // for(int i = 0; h > i; i++){
+    //   for(int j = 0; w > j; j++){
+    //     cout << B[i][j] << " ";
+    //   }
+    //   cout << endl;
+    // }
+    // for(int i = 0; h > i; i++){
+    //   for(int j = 0; w > j; j++){
+    //     cout << y[i][j] << " ";
+    //   }
+    //   cout << endl;
+    // }
+  }
+
+  return ret;
+}
+
+void solve(int h,int w,int c){
+  vector<vector<int>> A(h,vector<int>(w));
+  for(int i = 0; h > i; i++){
+    for(int j = 0; w > j; j++){
+      cin>>A[i][j];
+    }
+  }
+  vector<vector<int>> x = touched(h,w,A);
+
+  cout << dfs(0,h,w,A,x,c) << endl;
+}
+int main(){
+  int h,w,c;
+  while(cin>>h>>w>>c,h){
+    solve(h,w,c);
+  }
+  
+}

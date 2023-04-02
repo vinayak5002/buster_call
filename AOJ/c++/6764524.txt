@@ -1,0 +1,68 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+int main(){
+    int n;
+    cin >> n;
+    vector<vector<int>> g(n);
+    vector<vector<int>> lang(205);
+    map<string, int> mp;
+    int idx = 0;
+    for(int i = 0;i < n;++i){
+        int k;
+        cin >> k;
+        for(int j = 0;j < k;++j){
+            string l;
+            cin >> l;
+            if(mp.count(l) == 0){
+                mp[l] = idx++;
+            }
+            int num = mp[l];
+            lang[num].push_back(i);
+        }
+    }
+
+    vector<vector<bool>> used(n+1, vector<bool>(n+1));
+    for(int i = 0;i <= 200;++i){
+        for(int j = 0;j < (int)lang[i].size();++j){
+            for(int k = 0;k < (int)lang[i].size();++k){
+                if(j == k) continue;
+                if(used[lang[i][j]][lang[i][k]]) continue;
+                used[lang[i][j]][lang[i][k]] = true;
+                g[lang[i][j]].push_back(lang[i][k]);
+            }
+        }
+    }
+
+    long long ans = 0;
+    for(int i = 0;i < n;++i){
+        sort(g[i].begin(), g[i].end());
+    }
+
+
+    for(int i = 0;i < n;++i){
+        for(int j = i+1;j < n;++j){
+            long long common = 0;
+            long long isize = (long long)g[i].size(), jsize = (long long)g[j].size();
+            for(int k = 0;k < (int)g[j].size();++k){
+                if(g[j][k] == i) --jsize;
+            }
+            
+            for(int k = 0;k < (int)g[i].size();++k){
+                if(find(g[j].begin(), g[j].end(), g[i][k]) != g[j].end()) ++common;
+                if(g[i][k] == j) --isize;
+            }
+            if(common == 0) continue;
+            isize -= common;
+            jsize -= common;
+            ans += 2*isize*common*jsize;
+            ans += 2*isize*common*(common-1);
+            ans += 2*(common-1)*common*jsize;
+            ans += 2*common*(common-1)*(common-2);
+        }
+    }
+    cout << ans << endl;
+
+
+}

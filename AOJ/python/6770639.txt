@@ -1,0 +1,73 @@
+def oi(): return int(input())
+def os(): return input()
+def mi(): return list(map(int, input().split()))
+
+import itertools as it
+
+def check(pat):
+    # 縦横チェック
+    tate_sets = set([])
+    yoko_sets = set([])
+    for p in pat:
+        # 縦チェック(横かも)
+        if p[0] in tate_sets:
+            return False
+        tate_sets.add(p[0])
+ 
+        # 横チェック(縦かも)
+        if p[1] in yoko_sets:
+            return False
+        yoko_sets.add(p[1])
+        
+            
+    
+    # 斜めチェック
+    for i in range(8):
+        p1 = pat[i]
+        for j in range(i+1, 8):
+            p2 = pat[j]
+            if abs(p1[1]-p2[1]) == abs(p1[0]-p2[0]):
+                return False
+    return True
+
+input_count=0
+N = oi()
+queens = []
+sets = set([])
+cannot_tate = set([])
+cannot_yoko = set([])
+cannot_naname = set([])
+for _ in range(N):
+    y,x = mi()
+    queens.append([y,x])
+    sets.add(f"{y}_{x}")
+    cannot_tate.add(y)
+    cannot_yoko.add(x)
+
+pattern = []
+for y in range(8):
+    for x in range(8):
+        # 既においてないか
+        if f"{y}_{x}" not in sets:
+            # 縦と横にないか
+            if y not in cannot_tate:
+                if x not in cannot_yoko:
+                    flg = True
+                    for qy, qx in queens:
+                        if abs(qy-y) == abs(qx-x):
+                            flg = False
+                    if flg:
+                        pattern.append([x,y])
+
+
+
+for pat in it.permutations(pattern, 8-N):
+    if check(list(pat)+queens):
+        break
+
+maps = [["."]*8 for i in range(8)]
+for y,x in list(pat)+queens:
+    maps[y][x] = "Q"
+
+for row in maps:
+    print("".join(row))

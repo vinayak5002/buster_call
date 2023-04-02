@@ -1,0 +1,50 @@
+import queue
+
+def is_one(m, w, h):
+    for i in range(h):
+        for j in range(w):
+            if m[i+1][j+1] == 1:
+                return [i+1, j+1]
+    return [-1, -1]
+
+def bfs(m, w, h, start):
+    q = queue.Queue()              
+    q.put(start)                                          
+    while not q.empty():        
+        cur = q.get()                  
+        D0 = [1, 0, -1, 0, 1, 1, -1,-1]             
+        D1 = [0, -1, 0, 1, 1, -1, 1, -1]
+        for d in range(8):          
+            nc = [0, 0]                     
+            nc[0] = cur[0]+D0[d]           
+            nc[1] = cur[1]+D1[d]
+            if m[nc[0]][nc[1]] == 1:
+                m[nc[0]][nc[1]] = 0    
+                q.put([nc[0], nc[1]])        
+    return m 
+
+def solve(w, h):
+    m = [[0 for i in range(w+2)] for j in range(h+2)]
+    start = [-1, -1]
+    count = 0
+    for i in range(h):
+        r = list(map(int, input().split()))
+        for j in range(w):
+            m[i+1][j+1] = r[j]
+            if m[i+1][j+1] == 1:
+                start = [i+1, j+1]
+      
+    while not start == [-1, -1]:                    
+        m = bfs(m, w, h, start)
+        count += 1
+        start = is_one(m, w, h)
+    return count    
+
+while True:
+    result = []
+    w, h = map(int, input().split())
+    if w == 0 and h == 0:
+        for e in result:
+            print(e)
+        break
+    result.append(solve(w,h))

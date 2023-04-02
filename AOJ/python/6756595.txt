@@ -1,0 +1,41 @@
+S = [i for i in range(10000)]
+edges = []
+
+def same(x, y):
+    return root(x) == root(y)
+ 
+def unite(x, y):
+    rootx = root(x)
+    rooty = root(y)
+    if(rootx < rooty):
+        S[rooty] = rootx
+    else:
+        S[rootx] = rooty
+        
+def root(i):
+    parent = S[i]
+    if i == parent:
+        return i
+    S[i] = root(parent)
+    return S[i]
+ 
+def main():
+    v,e = map(int, input().split())
+    
+    for _ in range(e):
+        s, t, w = map(int, input().split())
+        edges.append((w, s, t))
+        
+    edges.sort()
+    cost = 0
+     
+    for _ in edges:
+        w, s, t = _
+        if not same(s, t):
+            cost += w
+            unite(s, t)
+    print(cost)
+
+if __name__ == '__main__':
+    main()
+

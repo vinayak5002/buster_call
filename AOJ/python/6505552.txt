@@ -1,0 +1,45 @@
+import heapq
+
+
+V, E, r = map(int, input().split())
+graph = [[] for _ in range(V)]
+
+for _ in range(E):
+    
+    s, t, w = map(int, input().split())
+    graph[s].append((t, w))
+
+dist = [1 << 60] * V
+dist[r] = 0
+parents = [-1] * V
+
+result = []
+heapq.heappush(result, (dist[r], r))
+mst = set()
+node_number = 1
+ans = 0
+
+while 0 < node_number:
+    
+    cost, vertex = heapq.heappop(result)
+    
+    node_number -= 1
+    
+    if vertex in mst:
+        continue
+    else:
+        mst.add(vertex)
+        ans += cost
+    
+    for next_vertex, weight in graph[vertex]:
+        
+        if next_vertex in mst:
+            continue
+        else:
+            if weight < dist[next_vertex]:
+                dist[next_vertex] = weight
+                parents[next_vertex] = vertex
+                heapq.heappush(result, (dist[next_vertex], next_vertex))
+                node_number += 1
+
+print(ans)

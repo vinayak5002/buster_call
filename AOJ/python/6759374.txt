@@ -1,0 +1,48 @@
+class segmentT:
+    def __init__(self,n_):
+        self.n = 1
+        self.inf = 2**31 - 1
+        while self.n<n_:
+            self.n *= 2
+        self.D = [self.inf] * (2*self.n-1)
+    def update(self,k,x):
+        k += self.n - 1
+        self.D[k] = x
+
+        while k>0:
+            k = (k-1)//2
+            self.D[k] = min(self.D[k*2+1],self.D[k*2+2])
+    
+    def query(self,a,b,k,l,r):
+        if r<= a or b <= l:
+            return self.inf
+        if a <= l and r<= b:
+            return self.D[k]
+        
+        vl = self.query(a,b,k*2+1,l,(l+r)/2)
+        vr = self.query(a,b, k*2+2,(l+r)/2,r)
+
+        return min(vl,vr)
+
+
+
+    def findmin(self,a,b):
+        return self.query(a,b+1,0,0,self.n)
+
+
+        
+
+
+n,q = map(int,input().split())
+seg = segmentT(n)
+
+for _ in range(q):
+    com,x,y = map(int,input().split())
+    if com == 0:
+        seg.update(x,y)
+
+    elif com == 1:
+        print(seg.findmin(x,y))
+
+
+

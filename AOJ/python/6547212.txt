@@ -1,0 +1,96 @@
+require('readline')
+  .createInterface({ input: process.stdin })
+  .on('line', (line) => main(line, process.stdout))
+
+class SortedNumSet extends Array {
+  _binarySearch(value) {
+    let lower = 0
+    let higher = this.length - 1
+
+    while (lower <= higher) {
+      const mid = (lower + higher) >>> 1;
+      const midValue = this[mid];
+      const cmp = midValue - value;
+      if (cmp < 0) {
+          lower = mid + 1;
+      } else if (cmp > 0) {
+          higher = mid - 1;
+      } else {
+          return mid;
+      }
+    }
+    return -(higher + 1)
+  }
+
+  insert(value) {
+    const idx = this._binarySearch(value)
+    if(idx > 0) return
+    if(this[-idx] === value) return
+    this.splice(-idx, 0, value)
+  }
+
+  has(value) {
+    let lower = 0
+    let higher = this.length - 1
+
+    while (lower <= higher) {
+      const mid = (lower + higher) >>> 1;
+      const midValue = this[mid];
+      const cmp = midValue - value;
+      if (cmp < 0) {
+          lower = mid + 1;
+      } else if (cmp > 0) {
+          higher = mid - 1;
+      } else {
+          return true;
+      }
+    }
+    return false
+  }
+
+  delete(value) {
+    const idx = this._binarySearch(value)
+    if(idx < 0) return
+    if(this[-idx] !== value) return
+    this.splice(idx, 1)
+  }
+}
+
+const s = new SortedNumSet()
+let f = true
+
+/**
+ * @param {string} line 
+ * @param {NodeJS.WriteStream} so 
+ */
+function main(line, so) {
+  if(f) {
+    f = false
+    return
+  }
+
+  const o = line.split(' ')
+  switch(o[0]) {
+    case '0':
+      s.insert(Number(o[1]))
+      so.write(s.length + '\n')
+      break
+    case '1':
+      so.write((s.has(Number(o[1])) ? 1 : 0) + '\n')
+      break
+    case '2':
+      s.delete(Number(o[1]))
+      break
+    case '3':
+      const l = Number(o[1])
+      const r = Number(o[2])
+      s.forEach(v => {
+        if(l <= v && v <= r)
+          so.write(v + '\n')
+      })
+      break
+  }
+
+//   console.log(o, s)
+}
+

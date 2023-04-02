@@ -1,0 +1,35 @@
+import sys
+import math
+from collections import defaultdict, deque
+
+sys.setrecursionlimit(10 ** 6)
+stdin = sys.stdin
+
+INF = float('inf')
+
+ni = lambda: int(ns())
+na = lambda: list(map(int, stdin.readline().split()))
+ns = lambda: stdin.readline().strip()
+
+def rec(l, r):
+    if dp[l][r] != INF:
+        return dp[l][r]
+    if r - l == 1:
+        dp[l][l] = 0
+        return 0
+    res = INF
+    for mid in range(l + 1, r):
+        res = min(res, rec(l, mid) + rec(mid, r) + R[l] * C[mid - 1] * C[r - 1])
+    dp[l][r] = res
+    return res
+
+N = ni()
+R = []
+C = []
+for _ in range(N):
+    r, c = na()
+    R.append(r)
+    C.append(c)
+dp = [[INF] * (N + 1) for _ in range(N + 1)]
+
+print(rec(0, N))

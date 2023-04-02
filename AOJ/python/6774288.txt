@@ -1,0 +1,60 @@
+from collections import deque
+
+inf = 10**10
+
+while True:
+    w,h = map(int,input().split())
+
+    if w == 0 and h == 0:
+        break
+    
+    v_wall = []
+    h_wall = []
+
+    for i in range(2*h-1):
+        if i%2 == 0:
+            v_wall.append(list(map(int,input().split())))
+        else:
+            h_wall.append(list(map(int,input().split())))
+
+    visited = [[0 for i in range(w)] for j in range(h)]
+    length = [[inf for i in range(w)] for j in range(h)]
+
+    visited[0][0] = 1
+    length[0][0] = 1
+
+    que = deque([])
+
+    que.append([0,0])
+
+    while que:
+        y,x = que.popleft()
+        can_go = []
+      
+        if x != 0 and v_wall[y][x-1] != 1:
+            can_go.append([y,x-1])
+        
+        if x != w-1 and v_wall[y][x] != 1:
+            can_go.append([y,x+1])
+        
+        if y != 0 and h_wall[y-1][x] != 1:
+            can_go.append([y-1,x])
+        
+        if y != h-1 and h_wall[y][x] != 1:
+            can_go.append([y+1,x])
+        
+        if not can_go:
+            continue
+
+        for ny,nx in can_go:
+            if visited[ny][nx]:
+                continue
+
+            que.append([ny,nx])
+            visited[ny][nx] = 1
+            length[ny][nx] = length[y][x]+1
+    
+    if length[h-1][w-1] != inf:
+        print(length[h-1][w-1])
+    else:
+        print(0)

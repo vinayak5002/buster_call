@@ -1,0 +1,65 @@
+from collections import defaultdict, deque, Counter
+from itertools import permutations, product
+from heapq import heapify, heappop, heappush
+import math
+import bisect
+import sys
+sys.setrecursionlimit(700000)
+input = sys.stdin.readline
+inf = float('inf')
+mod1 = 10**9+7
+mod2 = 998244353
+
+#################################################
+
+N, M = map(int, input().rstrip('\n').split())
+adj = [[] for _ in range(N)]
+radj = [[] for _ in range(N)]
+for _ in range(M):
+    a, b = map(int, input().rstrip('\n').split())
+    adj[a].append(b)
+    radj[b].append(a)
+
+P = []
+visited = [False]*N
+for s in range(N):
+    if visited[s]: continue
+    stack = [s]
+    while stack:
+        now = stack.pop()
+        if now >= 0:
+            if visited[now]: continue
+            visited[now] = True
+            stack.append(~now)
+            for next in adj[now]:
+                if not visited[next]:
+                    stack.append(next)
+        else:
+            P.append(~now)
+
+seen = [False]*N
+tps = []
+for s in reversed(P):
+    if seen[s]: continue
+    seen[s] = True
+    scc = [s]
+    stack = [s]
+    while stack:
+        now = stack.pop()
+        for next in radj[now]:
+            if not seen[next]:
+                seen[next] = True
+                scc.append(next)
+                stack.append(next)
+    tps.append(scc)
+tps = tps[::-1]
+
+idx = [0]*N
+for i, scc in enumerate(tps):
+    for v in scc:
+        idx[v] = i
+
+Q = int(input())
+for _ in range(Q):
+    a, b = map(int, input().rstrip('\n').split())
+    print(int(idx[a] == idx[b]))

@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+#define rep(i, n) for (int i = 0; i < n; ++i)
+typedef long long ll;
+using namespace std;
+const int INF = 1e9;
+const int dx[] = {1, 0};
+const int dy[] = {0, 1};
+const int rdx[] = {-1, 0};
+const int rdy[] = {0, -1};
+
+void solve(int W, int H) {
+    vector<string> S(H);
+    rep(i, H) cin >> S[i];
+
+    string ans = "";
+    rep(i, H) rep(j, W) {
+        string cur = "";
+        if (!isdigit(S[i][j])) continue;
+        if (S[i][j] == '0') continue;
+
+        auto dfs = [&](auto &&self, int y, int x) -> void {
+            if (ans.size() < cur.size())
+                ans = cur;
+            if (ans.size() == cur.size())
+                ans = max(ans, cur);
+
+            if (y < 0 || y >= H || x < 0 || x >= W) return;
+            if (!isdigit(S[y][x])) return;
+
+            cur += S[y][x];
+            self(self, y + 1, x);
+            self(self, y, x + 1);
+            cur.pop_back();
+            return;
+        };
+        dfs(dfs, i, j);
+    }
+    cout << ans << "\n";
+}
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+
+    int W, H;
+    while (cin >> W >> H, W)
+        solve(W, H);
+
+    return 0;
+}
+

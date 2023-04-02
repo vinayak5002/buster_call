@@ -1,0 +1,84 @@
+
+class Graph():
+    def __init__(self,size):
+        self.size = size
+        self.vertexes = []
+        self.edges = []
+        self.visited = []
+        for i in range(size):
+            self.vertexes.append(None)
+            self.visited.append(False)
+    def existClosedPath(self,e):
+        for i in range(self.size): self.visited[i] = False
+        self.search_e = e
+        return self.existClosedPath_search(e.v1)
+    def existClosedPath_search(self,root_v):
+        self.visited[root_v.id] = True
+        adjs = self.getAdjs(root_v)
+        exist = False
+        for adj in adjs:
+            if(adj == self.search_e.v2):
+                return True
+            if(self.visited[adj.id] == False):
+                exist = self.existClosedPath_search(adj)
+                if(exist): break
+        return exist
+                
+    def addVertex(self,v):
+        if(self.vertexes[v.id] == None): self.vertexes[v.id] = v
+    def addEdge(self,v1,v2,cost):
+        if(self.vertexes[v1.id] == None): self.vertexes[v1.id] = v1
+        else: v1 = self.vertexes[v1.id]
+        if(self.vertexes[v2.id] == None): self.vertexes[v2.id] = v2
+        else: v2 = self.vertexes[v2.id]
+        for i in range(len(self.edges)):
+            if(cost < self.edges[i].cost):
+                self.edges.insert(i,Edge(v1,v2,cost)) 
+                return
+        self.edges.append(Edge(v1,v2,cost))
+    def getEdges(self):
+        return self.edges
+    def getAdjs(self,v):
+        adjs = []
+        for e in self.edges:
+            if(v == e.v1):
+                adjs.append(e.v2)
+            if(v == e.v2):
+                adjs.append(e.v1)
+                
+        return adjs
+         
+class Vertex():
+    def __init__(self,id):
+        self.id = id
+
+    def __str__(self):
+        return str(self.id)
+
+class Edge():
+    def __init__(self, v1,v2,cost):
+        self.v1 = v1
+        self.v2 = v2
+        self.cost = cost
+    def __str__(self):
+        return  "[v1,v2]=["+str(self.v1.id)+","+str(self.v2.id)+"] cost="+str(self.cost)
+
+n = int(input())
+graph = Graph(n)
+for i in range(n):
+    inp = list(map(int,input().split()))
+    for j in range(i+1,len(inp)):
+        if(inp[j] >= 1):
+            graph.addEdge(Vertex(i),Vertex(j),cost=inp[j])
+
+graph2 = Graph(n)
+for e in graph.getEdges():
+    if(graph2.existClosedPath(e) == False):
+        graph2.addEdge(e.v1,e.v2,e.cost)
+
+sum = 0
+for e in graph2.getEdges():
+    sum += e.cost
+print(sum)
+
+

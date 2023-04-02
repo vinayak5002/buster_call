@@ -1,0 +1,17 @@
+while True:
+    h, w = map(int,input().split())
+    if (w == 0) and (h == 0):
+        break
+    for i in range(h):
+        if i%2 == 0:#even
+            txt = "#." * (w//2)
+            if w%2 == 1:
+                txt += "#"
+            print(txt)
+
+        else:#odd
+            txt = ".#" * (w//2)
+            if w%2 == 1:
+                txt += "."
+            print(txt)
+    print("")

@@ -1,0 +1,33 @@
+n = int(input())
+edges = [[] for _ in range(n)]
+for _ in range(n - 1):
+    u, v, c = map(int, input().split())
+    edges[u].append((v, c))
+    edges[v].append((u, c))
+
+dist = [-1] * n
+dist[0] = 0
+stack = [0]
+while stack:
+    pos = stack.pop()
+    for npos, c in edges[pos]:
+        if dist[npos] != -1:
+            continue
+        dist[npos] = dist[pos] + c
+
+ma = -1
+for i, d in enumerate(dist):
+    if d > ma:
+        ma = d
+        ind = i
+
+dist = [-1] * n
+dist[ind] = 0
+stack = [ind]
+while stack:
+    pos = stack.pop()
+    for npos, c in edges[pos]:
+        if dist[npos] != -1:
+            continue
+        dist[npos] = dist[pos] + c
+print(max(dist))

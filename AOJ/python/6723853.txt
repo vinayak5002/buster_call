@@ -1,0 +1,49 @@
+import sys
+import math
+import heapq
+from collections import deque, Counter, defaultdict
+from sys import stdin
+
+
+INF = 10 ** 7
+int1 = lambda x: int(x) - 1
+stinput = lambda: stdin.readline()[:-1]
+ii = lambda: int(stinput())  # int input
+mi = lambda: map(int, stdin.readline().split())  # map input (int)
+li = lambda: list(mi())  # list input (int)
+mi1 = lambda: map(int1, stdin.readline().split())  # map input (int)-1
+li1 = lambda: list(mi1())  # list input (int)-1
+mis = lambda: map(str, stdin.readline().split())  # map input (string)
+lis = lambda: list(mis())  # list input (string)
+
+while 1:
+    N, M = mi()
+    if N == 0: break
+
+    csH = [0]
+    csW = [0]
+    SH = []
+    SW = []
+    for i in range(N):
+        h = ii()
+        csH.append(csH[-1] + h)
+
+    for i in range(N):
+        for j in range(i+1, N+1):
+            SH.append(csH[j] - csH[i])
+    CSH = Counter(SH)
+
+    for i in range(M):
+        w = ii()
+        csW.append(csW[-1] + w)
+
+    for i in range(M):
+        for j in range(i+1, M+1):
+            SW.append(csW[j] - csW[i])
+    CSW = Counter(SW)
+
+    ans = 0
+    for csh in CSH:
+        ans += CSW[csh] * CSH[csh]
+    print(ans)
+

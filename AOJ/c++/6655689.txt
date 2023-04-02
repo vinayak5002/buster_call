@@ -1,0 +1,81 @@
+#include <stdio.h>
+#define N 100005
+#define NTL -1
+typedef struct{
+	int p,l,r;
+}Node;
+Node tree[N];
+int M,depth[N];
+
+void print(int node_point) //出力//
+{
+	int i,c_node;
+	printf("node %d: ",node_point);
+	printf("parent=%d ,",tree[node_point].p);
+	printf("depth=%d, ",depth[node_point]);
+	
+	if(tree[node_point].p==NTL)
+	printf("root, ");
+	else if(tree[node_point].l==NTL)
+	{
+		printf("leaf, ");
+	}
+	else
+	{
+		printf("internal node, ");
+	}
+	printf("[");
+	for(i=0,c_node=tree[node_point].l; c_node!=NTL;i++,c_node=tree[c_node].r)
+	{
+		if(i) printf(",");
+		printf("%d",c_node);
+	}
+	printf("]\n");
+}
+int getDepth(int u,int p) //再帰的に深さを求める//
+{
+	depth[u]=p;
+	if(tree[u].r!=NTL) getDepth(tree[u].r,p);
+	if(tree[u].l!=NTL) getDepth(tree[u].l,p+1);
+}
+		
+
+int  main(void)
+{
+	int i,j,k,id,s,l,r;
+	scanf("%d",&M);
+	for(i=0;i<M;i++)
+	{
+		tree[i].p=NTL;
+		tree[i].l=NTL;
+		tree[i].r=NTL;
+	}
+	for(i=0;i<M;i++)
+	{
+		scanf("%d %d",&id,&k);
+		for(j=0;j<k;j++)
+		{
+			scanf("%d",&s);
+			if(j==0)
+			{
+				tree[id].l=s; 
+			}//最初は一番左//
+			else tree[l].r=s;
+			l=s;
+			tree[s].p=id;
+		}
+	}
+		
+	for(i=0;i<M;i++)
+	{
+		if(tree[i].p==NTL) r=i;
+	}
+	getDepth(r,0);
+
+	for(i=0;i<M;i++) print(i);
+		
+	return 0;
+}
+			
+				
+		

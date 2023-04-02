@@ -1,0 +1,34 @@
+import sys
+from functools import lru_cache
+
+sys.setrecursionlimit(10**9)
+
+@lru_cache(maxsize=None)
+
+def dp(l,r):
+	if r-l==1:return 0
+	if r-l == 2:
+		if abs(L[r-1] - L[l]) <= 1:
+			return 2
+		else:
+			return 0
+
+	if abs(L[l] - L[r-1]) <= 1:
+		if dp(l+1, r-1) == r-l-2:
+			return dp(l+1,r-1)+2
+
+	ret = 0
+	for i in range(l+1,r):
+		ret = max(ret, dp(l,i) + dp(i,r))
+	return ret
+
+
+while True:
+	N = int(input())
+	if N == 0:
+		exit()
+	L = list(map(int,input().split()))
+
+
+	print(dp(0,N))
+	dp.cache_clear()

@@ -1,0 +1,68 @@
+#include <stdio.h>
+
+#define MAX 25
+#define NIL -1
+
+void preoder_tree_walk(int);
+void inorder_tree_walk(int);
+void postorder_tree_walk(int);
+
+typedef struct node{    //節点を保存しておく型
+  int parent;
+  int left;
+  int right;
+}node_t;
+
+node_t T[MAX];
+
+int main(void){
+  int n, v, l, r, root;
+  scanf("%d", &n);
+
+  for (int i = 0; i < n; i++) {   //節点の初期化
+    T[i].parent = NIL;
+  }
+
+  for (int i = 0; i < n; i++) {
+    scanf("%d %d %d", &v, &l, &r);
+    T[v].left = l;
+    T[v].right = r;
+    if( l != NIL ) T[l].parent = v;   //節点lの親はv
+    if( r != NIL ) T[r].parent = v;   //節点rの親はv
+  }
+
+  for (int i = 0; i < n; i++) {   //parentがNILの節点がroot
+    if( T[i].parent == NIL ) root = i;
+  }
+
+  printf("Preoder\n");
+  preoder_tree_walk(root);
+  printf("\nInorder\n");
+  inorder_tree_walk(root);
+  printf("\nPostorder\n");
+  postorder_tree_walk(root);
+
+  return 0;
+}
+
+void preoder_tree_walk(int u){
+  if ( u == NIL ) return;
+  printf("%d ", u);
+  preoder_tree_walk(T[u].left);
+  preoder_tree_walk(T[u].right);
+}
+
+void inorder_tree_walk(int u){
+  if ( u == NIL ) return;
+  inorder_tree_walk(T[u].left);
+  printf("%d ", u);
+  inorder_tree_walk(T[u].right);
+}
+
+void postorder_tree_walk(int u){
+  if( u == NIL ) return;
+  postorder_tree_walk(T[u].left);
+  postorder_tree_walk(T[u].right);
+  printf("%d ", u);
+}
+

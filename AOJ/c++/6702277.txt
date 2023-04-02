@@ -1,0 +1,51 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000
+#define NIL -2000000002
+#define MAXN 50
+int n;
+int A[1001][1001] ; // 0以外では初期化できないんだってーーー。
+vector<char> X;
+vector<char> Y;
+
+int calcLCS(int m, int n) {
+    // 文字列XmとYnのLCSを返す。(1文字めからm文字め　ずれに注意)
+    if ( A[m][n] != NIL ) {return A[m][n]; }
+    if ( X[m-1] == Y[n-1] ) {  //ここがindexのずれ 
+        A[m][n] = calcLCS( m-1, n-1 ) + 1;
+        return A[m][n];
+    } else {
+        int e = calcLCS(m-1, n);
+        int f = calcLCS(m, n-1);
+        A[m][n] = ( e > f ) ? e : f ;
+        return A[m][n];
+    }
+
+}
+
+void clearvalueA() {
+    for (int i=0 ; i<1001; i++) {
+        for  (int j=0; j<1001; j++) {
+            A[i][j] = NIL ;
+            if ( i==0 || j==0 ) { A[i][j]=0; } //大事
+        }
+    }
+}
+
+int main() {
+    int c;
+    cin >> c ;
+    for (int i = 0 ; i < c ; i++ ) {
+        X.clear();  Y.clear();  clearvalueA();
+        string instr ;
+        cin >> instr ;
+        for (int j = 0 ; j < instr.length() ; j++) { X.push_back(instr[j]) ; } 
+        cin >> instr ;
+        for (int j = 0 ; j < instr.length() ; j++) { Y.push_back(instr[j]) ; } 
+        //cout << X.size() << "and "  << Y.size() << endl ;
+        cout << calcLCS (X.size(), Y.size()) << endl ;
+    }
+	// cout << calcfib(c) << endl;
+	return 0 ;
+}
+

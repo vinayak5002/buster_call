@@ -1,0 +1,85 @@
+#include<iostream>
+#include<vector>
+#include<deque>
+using namespace std;
+using ll = long long;
+#define rep(i, n) for (ll i = 0; i < (ll)(n); i++)
+#define REP(i, a, b) for (ll i = a; i < (ll)(b); i++)
+#define all(v) v.begin(), v.end()
+  
+int main() {
+    ll t=0;
+    while(true){
+        ll N,ans=0;
+        cin>>N;
+        if(N==0)break;
+        ll A,B,C,D;
+        cin>>A>>B>>C>>D;
+        A--;
+        B--;
+        C--;
+        D--;
+        vector<ll> X(N+1),Y(N+1);
+        rep(i,N+1){
+            cin>>X.at(i)>>Y.at(i);
+            X.at(i)--;
+            Y.at(i)--;
+        }
+        rep(i,N){
+            vector<vector<ll>> search(100,vector<ll> (100,-1));
+            deque<pair<ll,ll>> todo;
+            search.at(X.at(i)).at(Y.at(i))=0;
+            pair<ll,ll> p,q;
+            p.first=X.at(i);
+            p.second=Y.at(i);
+            todo.push_front(p);
+            while(todo.size()>0){
+                q=todo.front();
+                todo.pop_front();
+                if(q.first>0&&search.at(q.first-1).at(q.second)==-1){
+                    p.first=q.first-1;
+                    p.second=q.second;
+                    search.at(p.first).at(p.second)=search.at(q.first).at(q.second);
+                    if(!(A<=p.first&&p.first<=C&&B<=p.second&&p.second<=D)){
+                        search.at(p.first).at(p.second)++;
+                        todo.push_back(p);
+                    }
+                    else todo.push_front(p);
+                }
+                if(q.first<99&&search.at(q.first+1).at(q.second)==-1){
+                    p.first=q.first+1;
+                    p.second=q.second;
+                    search.at(p.first).at(p.second)=search.at(q.first).at(q.second);
+                    if(!(A<=p.first&&p.first<=C&&B<=p.second&&p.second<=D)){
+                        search.at(p.first).at(p.second)++;
+                        todo.push_back(p);
+                    }
+                    else todo.push_front(p);
+                }
+                if(q.second>0&&search.at(q.first).at(q.second-1)==-1){
+                    p.first=q.first;
+                    p.second=q.second-1;
+                    search.at(p.first).at(p.second)=search.at(q.first).at(q.second);
+                    if(!(A<=p.first&&p.first<=C&&B<=p.second&&p.second<=D)){
+                        search.at(p.first).at(p.second)++;
+                        todo.push_back(p);
+                    }
+                    else todo.push_front(p);
+                }
+                if(q.second<99&&search.at(q.first).at(q.second+1)==-1){
+                    p.first=q.first;
+                    p.second=q.second+1;
+                    search.at(p.first).at(p.second)=search.at(q.first).at(q.second);
+                    if(!(A<=p.first&&p.first<=C&&B<=p.second&&p.second<=D)){
+                        search.at(p.first).at(p.second)++;
+                        todo.push_back(p);
+                    }
+                    else todo.push_front(p);
+                }
+            }
+            ans+=search.at(X.at(i+1)).at(Y.at(i+1));
+            t++;
+        }
+        cout<<ans<<endl;
+    }
+}

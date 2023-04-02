@@ -1,0 +1,51 @@
+from math import inf
+#from array import array
+import sys
+
+class RMQ:
+
+    def __init__(self, N):
+        m = 1
+        while m < N: m *= 2
+        self.seg0 = [0]*(2*m-1)
+        self.seg1 = [0]*(2*m-1)
+        self.m = m
+        self.n = N
+
+    def add(self, s, t, x):
+        seg0, seg1 = self.seg0, self.seg1
+        def _add(node, lft, rht):
+            if s <= lft and rht <= t:
+                seg0[node] += x
+            elif lft < t and s < rht:
+                mid = (lft+rht)//2
+                a = _add(node*2+1, lft, mid)
+                b = _add(node*2+2, mid, rht)
+                seg1[node] = min(a, b)
+            return seg0[node] + seg1[node]
+        _add(0, 0, self.n)
+
+    def find(self, s, t):
+        seg0, seg1 = self.seg0, self.seg1
+        def _find(node, lft, rht):
+            if t <= lft or  rht <= s: return inf
+            if s <= lft and rht <= t: return seg0[node]+seg1[node]
+            mid = (lft+rht)//2
+            a = _find(node*2+1, lft, mid)
+            b = _find(node*2+2, mid, rht)
+            return seg0[node] + min(a, b)
+        return _find(0, 0, self.n)
+
+def main():
+    rxs = lambda: list(map(int, sys.stdin.readline().split()))
+    N, Q = rxs()
+    Qs = [rxs() for _ in range(Q)]
+    rmq, ans = RMQ(N), []
+    for q in Qs:
+        if q[0]: ans.append(rmq.find(q[1], q[2]+1))
+        else: rmq.add(q[1], q[2]+1, q[3])
+    print("\n".join(map(str, ans)))
+
+if __name__ == '__main__':
+    main()
+

@@ -1,0 +1,70 @@
+#include <iostream>
+#include <cstdio>
+#include <cmath>
+#include <algorithm>
+#include <string>
+#include <vector>
+#include <list>
+#include <map>
+#include <bitset>
+#include <functional>
+#include <utility>
+
+using namespace std;
+
+#define FOR(i,a,b) for(int i=(a);i<(b);++i)
+#define REP(i,n)  FOR(i,0,n)
+#define UNDEFCHAN -1
+
+int dx[4],dy[4];
+int fmemory[1<<16];
+
+int f(int s){
+	if(fmemory[s]!=UNDEFCHAN) return fmemory[s];
+	if(s==0) return 1;
+
+	int bn=15;
+	while(bn>=0){
+		if(s>>(15-bn)&1){break;}
+		else{bn--; continue;}
+	}
+
+	int bx=bn%4, by=bn/4;
+
+	int re=0;
+	FOR(i,0,4){
+		int ax=bx-dx[i], ay=by-dy[i];
+		int an=ay*4+ax;
+		if(ax<0||4<=ax||ay<0||4<=ay||(~s>>(15-an)&1)){continue;}
+		else{
+			re += f( s - (1<<(15-an)) - (1<<(15-bn)));
+		}
+	}
+
+	fmemory[s]=re;
+	return re;
+}
+
+
+
+int answer(){
+	FOR(s,0,1<<16) fmemory[s]=UNDEFCHAN;
+	return f((1<<16)-1);
+}
+
+
+
+int main(){
+	while(true){
+		cin>>dx[0];
+		
+		if(dx[0]>=4){
+			return 0;
+		}
+			
+		cin>>dy[0]>>dx[1]>>dy[1]>>dx[2]>>dy[2]>>dx[3]>>dy[3];
+		
+		cout<<answer()<<endl;
+	}
+}
+

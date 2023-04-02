@@ -1,0 +1,91 @@
+#include <bits/stdc++.h>
+using namespace std ;
+#define MAX 1000000
+#define NIL -2000000002
+#define INF 2000000002
+#define MAXN 500
+int n;
+int t = NIL;
+
+struct Node {
+    int name;
+    vector<pair<int,int>>  to; 
+    int con; 
+    Node() { con = 0; }
+};
+/*    //Overload the < operator.
+    bool operator< (const Node & n1, const Node & n2)
+    {
+        return n1.dist < n2.dist ;
+    }
+    //Overload the > operator.
+    bool operator> (const Node & n1, const Node & n2)
+    {
+        return n1.dist > n2.dist ;
+    }
+*/
+
+vector<Node> R; 
+int dist[MAXN];
+
+priority_queue<pair<int,int>, vector<pair<int,int>>, greater<pair<int,int>> > Q;
+// int A[10001][10001] ; // 0以外では初期化できないんだってーーー。
+
+int checkcost (int u, int v) {
+    return INF;
+}
+
+void init() {
+    for (int i = 0 ; i < n ; i++ ) {
+        dist[i] = INF;
+        R[i].con = 0;
+    }
+}
+
+void calc_ans () {
+    init();
+    dist[0]=0;
+    Q.push(make_pair(0,0));
+    R[0].con=1;
+    while (Q.size()>0){
+        pair<int,int> f = Q.top(); 
+        Q.pop();
+        int d = f.first;   int u = f.second;
+        // printf ("Qtop dist=%d  to=%d \n", d, u ) ; 
+        if ( d > dist[u] ) {continue;} 
+        R[u].con = 2;
+        for (int j=0; j<R[u].to.size() ; j++) { 
+            int v = R[u].to.at(j).second;
+            if (R[v].con == 2) {continue;}
+            if ( dist[u]+R[u].to.at(j).first < dist[v] ) {
+                dist[v] = dist[u]+R[u].to.at(j).first;
+                // printf ("Qpush dist=%d  to=%d \n", dist[v], v ) ; 
+                Q.push(make_pair(dist[v], v));
+                R[v].con =1;
+            }
+        }
+    }    
+}
+
+int main() {
+    cin >> n  ;
+    // nは登場人物の人数、
+    R.resize(n);
+    for (int i = 0 ; i < n ; i++ ) {
+        int a, b, from, to , cost; 
+        cin >> a >> b;
+        R[i].name=a; 
+        for (int j = 0 ; j < b ; j++ ) {
+            cin >> to >> cost;
+            R[i].to.push_back(make_pair(cost,to));          
+        }
+    }
+    calc_ans();
+    for (int i=0; i<n; i++) {
+        if (dist[i] < INF) { printf("%d %d\n",i, dist[i]); }
+        else { printf("%d -1\n",dist[i]);  }
+    }
+
+	return 0 ;
+}
+

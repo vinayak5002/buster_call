@@ -1,0 +1,44 @@
+from collections import defaultdict,deque
+DX = [1,0,-1,0]
+DY = [0,1,0,-1]
+ep = lambda s:exit(print(s))
+rdi = lambda:map(int,input().split())
+lrdi = lambda:list(rdi())
+MOD,MOD9 = 7+10**9,998244353
+INF = float("inf")
+ans,Ans = 0,[]
+
+while True:
+    c,r = rdi()
+    if c==0 and r==0: exit()
+    MAZE = [[[0]*4 for j in range(c)] for i in range(r)]
+
+    for i in range(r):
+        MAZE[i][0][0]=1
+        MAZE[i][c-1][2]=1
+
+    for i in range(2*r-1):
+        L = lrdi()
+        if i%2:
+            for j in range(c):
+                if L[j]:
+                    MAZE[i//2][j][3]=1
+                    MAZE[i//2+1][j][1]=1
+        else:
+            for j in range(c-1):
+                if L[j]:
+                    MAZE[i//2][j][2]=1
+                    MAZE[i//2][j+1][0]=1
+
+    que = deque([[0,0]])
+    Dist = [[-1]*c for i in range(r)]
+    Dist[0][0] = 1
+    while len(que)>0:
+        y,x = que.popleft()
+        for v,(dy,dx) in enumerate(zip(DY,DX)):
+            Y,X = y+dy,x+dx
+            if 0<=Y<r and 0<=X<c and MAZE[Y][X][v]!=1 and Dist[Y][X]==-1:
+                Dist[Y][X]=Dist[y][x]+1
+                que.append([Y,X])
+
+    print(Dist[-1][-1] if Dist[-1][-1]!=-1 else 0)

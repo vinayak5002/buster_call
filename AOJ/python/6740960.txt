@@ -1,0 +1,63 @@
+import sys
+input = sys.stdin.readline
+
+class Node:
+  def __init__(self, x):
+    self.key = x
+    self.prev = None
+    self.next = None
+class NodeTree:
+  def __init__(self):
+    self.st_node = Node(None)
+    self.ed_node = Node(None)
+    self.st_node.next = self.ed_node
+    self.ed_node.prev = self.st_node
+  def insert(self, x):
+    new_node = Node(x)
+    new_node.next = self.st_node.next
+    new_node.prev = self.st_node
+    self.st_node.next.prev = new_node
+    self.st_node.next = new_node
+  def delete(self, x):
+    tmp_node = self.st_node.next
+    while tmp_node!=self.ed_node:
+      if tmp_node.key == x:
+        tmp_node.prev.next = tmp_node.next
+        tmp_node.next.prev = tmp_node.prev
+        del tmp_node
+        break
+      tmp_node = tmp_node.next
+  def deleteFirst(self):
+    del_node = self.st_node.next
+    newst_node = self.st_node.next.next
+    newst_node.prev = self.st_node
+    self.st_node.next = newst_node
+    del del_node
+  def deleteLast(self):
+    del_node = self.ed_node.prev
+    newed_node = self.ed_node.prev.prev
+    newed_node.next = self.ed_node
+    self.ed_node.prev = newed_node
+    del del_node
+  def print(self):
+    tmp_node = self.st_node.next
+    dlmt=""
+    while tmp_node!=self.ed_node:
+      print(dlmt+tmp_node.key, end="")
+      tmp_node = tmp_node.next
+      dlmt=" "
+    print()
+
+n = int(input())
+nt = NodeTree()
+for _ in range(n):
+  cmd = input().rstrip()
+  if cmd[0]=="i":
+    nt.insert(cmd[7:])
+  elif cmd[6]=="F":
+    nt.deleteFirst()
+  elif cmd[6]=="L":
+    nt.deleteLast()
+  else:
+    nt.delete(cmd[7:])
+nt.print()

@@ -1,0 +1,37 @@
+n = gets.to_i
+edges = Hash.new{|h, k| h[k] = []}
+n.times{
+    line = gets.chomp.split.map{|x| x.to_i - 1}
+    u = line[0]
+    (line[1] + 1).times{|i| edges[u] << line[2 + i]}
+}
+
+h = Hash.new{|h, k| h[k] = []}
+visited = {}
+t = 1
+n.times{|i|
+    next if visited[i]
+    h[i][0] = i + 1
+    h[i][1] = t
+    t += 1
+    temp = [i]
+    while !temp.empty?
+        from = temp[-1]
+        if visited[from]
+            h[from][2] = t
+            t += 1
+            temp.pop
+        else
+            visited[from] = true
+            edges[from].each{|to|
+                if !visited[to]
+                    h[to][0] = to + 1
+                    h[to][1] = t
+                    t += 1
+                    temp << to
+                end
+            }
+        end
+    end
+}
+n.times{|i| puts h[i].join(" ")}

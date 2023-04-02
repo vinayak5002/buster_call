@@ -1,0 +1,697 @@
+#include <stdio.h>
+#include <sstream>
+#include <string.h>
+#include <vector>
+#include <map>
+#include <algorithm>
+#include <utility>
+#include <set>
+#include <cctype>
+#include <queue>
+#include <stack>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <deque>
+#include <limits>
+#include <iomanip>
+#include <ctype.h>
+#include <unordered_map>
+#include <random>
+#include <numeric>
+#include <iostream>
+#include <array>
+
+#define _USE_MATH_DEFINES
+#include <iostream>
+#include <math.h>
+#include <bitset>
+using namespace std;
+typedef long long ll;
+typedef unsigned long long ull;
+typedef pair<int, int> pii;
+typedef pair<ll, ll> pll;
+typedef pair<ll, double> pld;
+typedef pair<double, double> pdd;
+typedef pair<double, ll> pdl;
+typedef pair<int, char> pic;
+typedef vector<ll> vl;
+typedef vector<pll> vpll;
+typedef vector<int> vi;
+typedef vector<string> table;
+typedef priority_queue<ll, vector<ll>, greater<ll>> llgreaterq;
+typedef priority_queue<pll, vector<pll>, greater<pll>> pllgreaterq;
+typedef priority_queue<pair<ll, pll>, vector<pair<ll, pll>>, greater<pair<ll, pll>>> plpllgreaterq;
+typedef priority_queue<vi, vector<vi>, greater<vi>> vigreaterq;
+typedef priority_queue<vl, vector<vl>, greater<vl >> vlgreaterq;
+typedef vector<vl> mat;
+typedef vector<mat> thd;
+template <class o, class p, class q>
+using tuple3q = priority_queue<tuple<o, p, q>, vector<tuple<o, p, q>>, greater<tuple<o, p, q>>>;
+template <class o, class p, class q, class r>
+using tuple4q = priority_queue<tuple<o, p, q, r>, vector<tuple<o, p, q, r>>, greater<tuple<o, p, q, r>>>;
+template <class o, class p, class q, class r, class s>
+using tuple5q = priority_queue<tuple<o, p, q, r, s>, vector<tuple<o, p, q, r, s>>, greater<tuple<o, p, q, r, s>>>;
+int dx[] = { -1,0,1,0 };
+int dy[] = { 0,1,0,-1 };
+#define bit(x,v) ((ll)x << v)
+#define rep(x,n) for(ll x = 0;x < n;x++)
+#define rep2(x,f,v) for(ll x=f;x<v;x++)
+#define repe(v,x) for(auto v : x)
+// 許容する誤差ε
+#define EPS (1e-10)
+// 2つのスカラーが等しいかどうか
+#define EQ(a,b) (std::abs(a-b) < EPS)
+// 2つのベクトルが等しいかどうか
+#define EQV(a,b) ( EQ((a).real(), (b).real()) && EQ((a).imag(), (b).imag()) )
+#define all(a) a.begin(),a.end()
+#define all0(a) memset(a,0,sizeof(a))
+#define allm1(a) memset(a,-1,sizeof(a))
+#define set_float() cout << fixed << setprecision(10);
+#define coutl(s) cout <<s <<endl;
+#define pln(s) cout<<s<<"\n";
+#define put_float(v) 	set_float() \
+						pln(v)
+#define vinsert(v,p,x) v.insert(v.begin() + p,x)
+#define vsort(v) sort(all(v));
+#define vdesc(v) vsort(v); \
+					reverse(all(v))
+#define dup(v) v.erase(unique(all(v)),v.end())
+#define ion(i,j) ((i & (1LL << j)) > 0)
+#define next(i) i++;i%=2
+#define Len size()
+#define psp(a,b) push_back(make_pair(a,b))
+#define psp2(a,b) push(make_pair(a,b))
+#define cini(a) a; cin >> a
+#define infa(a,b) (a + b) % INF
+#define infm(a,b) (a * b) % INF
+#define infd(a,b) (a * INFinv(b)) % INF
+#define infs(a,b) (a + INF - inff(b)) % INF
+#define inf(a) (a) %= INF
+#define inff(a) ((a + INF) % INF)
+#define No cout << "No" << endl
+#define Yes cout << "Yes" << endl
+#define NO cout << "NO" << endl
+#define YES cout << "YES" << endl
+#define smal -(ll)1000000009*1000000009
+#define big (ll)1000000009*1000000009
+#define frontpop(q) q.front();q.pop()
+#define toppop(q) q.top();q.pop()
+#define arr(a,s) a[s]; all0(a);
+#define nxt(cu) (cu+1) % 2 
+#define chkover(x,y,h,w) (x<0||y<0||x>=h||y>=w)
+#define psb(v) ll value;cin>>value;v.push_back(value);
+ll n, m;
+
+bool chmin(ll& a, ll b) { if (a > b) { a = b; return 1; } return 0; }
+ll INF = 1000000007;
+const int MAX = 2000010;
+void cout2(ll val) {
+	if (val == big) {
+		pln(-1);
+	}
+	else {
+		pln(val);
+	}
+}
+string padleft(string x, ll dig, char c) {
+	ll si = x.size();
+	for (ll i = 0; i < dig - si; i++)
+	{
+		x = c + x;
+	}
+	return x;
+}
+long long fac[MAX], finv[MAX], inv[MAX];
+void COMinit() {
+	fac[0] = fac[1] = 1;
+	finv[0] = finv[1] = 1;
+	inv[1] = 1;
+	for (int i = 2; i < MAX; i++) {
+		fac[i] = fac[i - 1] * i % INF;
+		inv[i] = INF - inv[INF % i] * (INF / i) % INF;
+		finv[i] = finv[i - 1] * inv[i] % INF;
+	}
+}
+
+// 二項係数計算
+long long COM(int n, int k) {
+	if (n < k) return 0;
+	if (n < 0 || k < 0) return 0;
+	return fac[n] * (finv[k] * finv[n - k] % INF) % INF;
+}
+
+ll getpow(ll b, ll x, ll md) {
+	ll t = b % md;
+	ll res = 1;
+	while (x > 0)
+	{
+		if (x & 1) {
+			res *= t;
+			res %= md;
+		}
+		x >>= 1;
+		t *= t;
+		t %= md;
+	}
+	return res % md;
+}
+ll getpow(ll b, ll x) {
+
+	return getpow(b, x, INF);
+}
+/// 素数を法とする場合
+ll modinv(ll x) {
+	return getpow(x, INF - 2);
+}
+
+ll extgcd(ll a, ll b, ll& x, ll& y) {
+	ll d = a;
+	if (b != 0) {
+		d = extgcd(b, a % b, y, x);
+		y -= (a / b) * x;
+	}
+	else {
+		x = 1; y = 0;
+	}
+	return d;
+}
+
+/// <summary>
+/// 素数を法としない場合
+/// </summary>
+/// <param name="a"></param>
+/// <param name="m"></param>
+/// <returns></returns>
+ll modinv(ll a, ll m) {
+	ll x, y;
+	extgcd(a, m, x, y);
+	return (m + x % m) % m;
+}
+
+ll gcd(ll a, ll b) {
+	if (b == 0) return a;
+	return gcd(b, a % b);
+}
+
+class mint {
+public:
+	long long x = 0;
+	mint(ll x = 0) {
+		this->x = (x % INF + INF) % INF;
+	}
+	mint operator-() const {
+		return mint(-x);
+	}
+	mint& operator+=(const mint& a) {
+		if ((x += a.x) >= INF) x -= INF;
+		return *this;
+	}
+	mint& operator-=(const mint& a) {
+		if ((x += INF - a.x) >= INF) x -= INF;
+		return *this;
+	}
+	mint& operator*=(const  mint& a) {
+		(x *= a.x) %= INF;
+		return *this;
+	}
+	mint operator+(const mint& a) const {
+		mint res(*this);
+		return res += a;
+	}
+	mint operator-(const mint& a) const {
+		mint res(*this);
+		return res -= a;
+	}
+	mint operator*(const mint& a) const {
+		mint res(*this);
+		return res *= a;
+	}
+	mint pow(ll t) const {
+		if (!t) return 1;
+		mint a = pow(t >> 1);
+		a *= a;
+		if (t & 1) a *= *this;
+		return a;
+	}
+	// for prime INF
+	mint inv() const {
+		return pow(INF - 2LL);
+	}
+	mint& operator/=(const mint& a) {
+		return (*this) *= a.inv();
+	}
+	mint operator/(const mint& a) const {
+		mint res(*this);
+		return res /= a;
+	}
+
+	friend ostream& operator<<(ostream& os, const mint& m) {
+		os << m.x;
+		return os;
+	}
+};
+typedef vector<mint> vml;
+typedef vector<vml> matm;
+// Union find
+vl pr;
+vl lank;
+vl udpt;
+void uini(int _n) {
+	_n++; // 一個拡張しておく
+	pr = vl(_n + 1);
+	lank = vl(_n + 1);
+	udpt = vl(_n + 1, 0);
+	for (ll i = 0; i <= _n; i++)
+	{
+		pr[i] = i;
+		lank[i] = 1;
+	}
+}
+
+int parent(int x) {
+	if (x == pr[x]) return x;
+	auto paren = parent(pr[x]);
+	udpt[x] = udpt[paren] + 1;
+	return pr[x] = paren;
+}
+
+int same(int x, int y) {
+	return parent(x) == parent(y);
+}
+
+bool unit(int x, int y) {
+
+	int px = parent(x);
+	int py = parent(y);
+
+	if (px == py) return false;
+	if (lank[py] <= lank[px]) {
+		pr[py] = px;
+		lank[px] += lank[py];
+	}
+	else {
+		pr[px] = py;
+		lank[py] += lank[px];
+	}
+	return true;
+}
+
+bool unitm(int x, int y) {
+
+	int px = parent(x);
+	int py = parent(y);
+
+	if (px == py) return false;
+	if (lank[py] < lank[px]) {
+		pr[py] = px;
+		lank[px] += lank[py];
+	}
+	else {
+		pr[px] = py;
+		lank[py] += lank[px];
+	}
+	return true;
+}
+/// <summary>
+/// 数字の小さい方を親にするように処理
+/// </summary>
+/// <param name="x"></param>
+/// <param name="y"></param>
+/// <returns></returns>
+bool unitlow(int x, int y) {
+
+	int px = parent(x);
+	int py = parent(y);
+
+	if (px == py) return false;
+
+	if (py < px) {
+		pr[py] = px;
+		lank[px] += lank[py];
+	}
+	else {
+		pr[px] = py;
+		lank[py] += lank[px];
+	}
+	return true;
+}
+ll wit[500010];
+map<ll, ll> mp[100010];
+ll parent2(ll x) {
+	if (x == pr[x]) return x;
+	// 元々の親から変わっている時、wit[pr[x]]には親からの距離が入っている
+	// 同じところを二度通らないので大丈夫なはず
+	ll o = pr[x];
+	pr[x] = parent2(o);
+	wit[x] += wit[o]; // 親の重みを足す
+	return pr[x];
+}
+int same2(int x, int y) {
+	return parent2(x) == parent2(y);
+}
+bool relate(int x, int y, int v) {
+
+	auto px = parent2(x);
+	auto py = parent2(y);
+	// 自分の距離が取れる
+	ll xd = wit[x];
+	ll yd = wit[y];
+	// ↑のydにvを足した値とxdを比較する
+	// yd+v> xdであれば、pyが親となる
+	// yの直接の親はxとしてしまう?
+	// wit[y] = v;
+	if (px == py)
+		return false;
+	if (xd + v > yd) {
+		pr[py] = px;
+
+		wit[py] = xd + v - yd; // 親同士の距離を入れておく
+	}
+	else {
+		pr[px] = py;
+		wit[px] = yd - (xd + v);
+	}
+	return true;
+}
+
+int ci = 0;
+struct Node {
+	int key = 0;
+	int priority;
+	Node* parent, * left, * right;
+	Node(int key, int priority);
+	Node() {}
+};
+Node NIL;
+Node::Node(int key, int priority) : key(key), priority(priority) {
+	left = &NIL;
+	right = &NIL;
+}
+Node* root = new Node();
+void cenrec(Node* k) {
+	if (k->key == NIL.key) return;
+	cenrec(k->left);
+	cout << " " << k->key;
+	cenrec(k->right);
+}
+void fastrec(Node* k)
+{
+	if (k->key == NIL.key) return;
+	cout << " " << k->key;
+	fastrec(k->left);
+	fastrec(k->right);
+}
+void insert(Node* v) {
+	Node* y = &NIL;
+	Node* x = root;
+	while (x->key != NIL.key)
+	{
+		y = x;
+		if (v->key < x->key) {
+			x = x->left;
+		}
+		else {
+			x = x->right;
+		}
+	}
+	v->parent = y;
+	if (y->key == NIL.key) {
+		root = v;
+	}
+	else if (v->key < y->key) {
+		y->left = v;
+	}
+	else {
+		y->right = v;
+	}
+
+}
+
+Node* find(Node* k, ll v)
+{
+	if (k->key == NIL.key) return &NIL;
+	if (k->key == v) return k;
+	if (v < k->key) return find(k->left, v);
+	return find(k->right, v);
+}
+void delp12(Node* x) {
+	if (x->key == NIL.key)  return;
+	Node* l = x->left;
+	Node* r = x->right;
+	Node* pr = x->parent;
+
+	if (l->key == NIL.key
+		&& r->key == NIL.key) {
+		if (pr->left == x) {
+			pr->left = &NIL;
+		}
+		else pr->right = &NIL;
+	}
+	else if (l->key != NIL.key) {
+		if (pr->left == x) {
+			pr->left = l;
+		}
+		else pr->right = l;
+		l->parent = pr;
+	}
+	else if (r->key != NIL.key) {
+		if (pr->left == x) {
+			pr->left = r;
+		}
+		else pr->right = r;
+		r->parent = pr;
+	}
+}
+Node* get_next(Node* k) {
+	if (k->key == NIL.key) return &NIL;
+	Node* res = get_next(k->left);
+	if (res->key != NIL.key) return res;
+	return k;
+}
+void del(Node* x) {
+
+	if (x->key == NIL.key) return;
+	Node* l = x->left;
+	Node* r = x->right;
+
+	if (l->key != NIL.key && r->key != NIL.key) {
+		Node* nex = get_next(r);
+		x->key = nex->key;
+		delp12(nex);
+	}
+	else {
+		delp12(x);
+	}
+}
+Node* rightRotate(Node* t) {
+	Node* s = t->left;
+	t->left = s->right;
+	s->right = t;
+	return s;
+}
+Node* leftRotate(Node* t) {
+	Node* s = t->right;
+	t->right = s->left;
+	s->left = t;
+	return s;
+}
+Node* _insert(Node* t, int key, int priority) {
+	if (t->key == NIL.key) {
+		return new Node(key, priority);
+	}
+	if (key == t->key) {
+		return t;
+	}
+
+	if (key < t->key) {
+		t->left = _insert(t->left, key, priority);
+		if (t->priority < t->left->priority) {
+			t = rightRotate(t);
+		}
+	}
+	else {
+		t->right = _insert(t->right, key, priority);
+		if (t->priority < t->right->priority) {
+			t = leftRotate(t);
+		}
+	}
+	return t;
+}
+Node* delete1(Node* t, int key);
+Node* _delete(Node* t, int key) {
+	if (t->left->key == NIL.key && t->right->key == NIL.key) {
+		return &NIL;
+	}
+	else if (t->left->key == NIL.key) {
+		t = leftRotate(t);
+	}
+	else if (t->right->key == NIL.key) {
+		t = rightRotate(t);
+	}
+	else
+	{
+		if (t->left->priority > t->right->priority) {
+			t = rightRotate(t);
+		}
+		else
+			t = leftRotate(t);
+	}
+	return delete1(t, key);
+}
+Node* delete1(Node* t, int key) {
+	if (t->key == NIL.key) {
+		return &NIL;
+	}
+	if (key < t->key) {
+		t->left = delete1(t->left, key);
+	}
+	else if (key > t->key) {
+		t->right = delete1(t->right, key);
+	}
+	else return _delete(t, key);
+	return t;
+}
+int H;
+int left(int i) {
+	return i * 2 + 1;
+}
+int right(int i) {
+	return i * 2 + 2;
+}
+class edge {
+public:
+	int from, to, i;
+	ll val;
+	ll cap, rev,icap;
+	edge() {}
+	edge(ll to) : to(to) {}
+	edge(ll to, ll i) : to(to), i(i) {}
+	edge(ll from, ll to, ll val) : from(from), to(to), val(val) {}
+	void flowEdge(ll _to, ll _cap, ll _rev) {
+		to = _to;
+		cap = _cap;
+		icap = _cap;
+		rev = _rev;
+	}
+};
+typedef vector<vector<edge>> vve;
+
+class LCA {
+private:
+	vector<vector<edge>> v;
+	vector<vector<int>> parent;
+	vector<int> depth;
+	ll root;
+	void dfs(int n, int m, int d) {
+		parent[0][n] = m;
+		depth[n] = d;
+		for (auto x : v[n]) {
+			if (x.to != m) dfs(x.to, n, d + 1);
+		}
+	}
+public:
+	LCA(){}
+	LCA(ll N, ll root, vector<vector<edge>>& tree) {
+		v = tree;
+		this->root = root;
+		parent = vector<vector<int>>(21, vector<int>(N + 1, 0));
+		depth = vector<int>(N + 1, 0);
+		dfs(root, -1, 0);
+		for (int j = 0; j + 1 < 20; j++) {
+			for (int i = 1; i <= N; i++) {
+				if (parent[j][i] < 0) parent[j + 1][i] = -1;
+				else parent[j + 1][i] = parent[j][parent[j][i]];
+			}
+		}
+	}
+	int lca(int n, int m) {
+		if (depth[n] > depth[m]) swap(n, m);
+		if (n == root)
+			return root;
+		for (int j = 0; j < 20; j++) {
+			if ((depth[m] - depth[n]) >> j & 1) m = parent[j][m];
+		}
+		if (n == m) return n;
+		for (int j = 19; j >= 0; j--) {
+			if (parent[j][n] != parent[j][m]) {
+				n = parent[j][n];
+				m = parent[j][m];
+			}
+		}
+		return parent[0][n];
+	}
+	int dep(int n) { return depth[n]; }
+};
+ll k;
+
+
+//　ここまでライブラリ
+// ここからコード
+ll parent22(ll x) {
+	if (pr[x] == x)
+		return x;
+	ll o = pr[x];
+	ll p = parent22(o);
+	wit[x] += wit[o];
+	return p;
+}
+void relate22(ll x, ll y, ll z) {
+	auto px = parent22(x);
+	auto py = parent22(y);
+	if (px == py)return;
+
+	ll wx = wit[x];
+	ll wy = wit[y] + z;
+	if (wx < wy) {
+		pr[px] = py;
+		wit[px] = wy - wx;
+	}
+	else {
+		pr[py] = px;
+		wit[py] = wx - wy;
+
+	}
+}
+bool same22(ll x, ll y) {
+	return parent22(x) == parent22(y);
+}
+ll dif(ll x, ll y) {
+	return wit[x] - wit[y];
+}
+void solv() { 
+	ll q;
+	cin >> n >> q;
+	uini(n);
+	rep(i, q) {
+		ll t, x, y, z;
+		cin >> t >> x >> y;
+		if (t == 0) {
+			cin >> z;
+			relate22(x, y, z);
+		}
+		else {
+			if (same22(x, y)) {
+				pln(dif(x, y));
+			}else{
+				pln("?") ;
+			}
+		}
+	}
+}
+
+
+int main()
+{
+	cin.tie(0);
+	ios::sync_with_stdio(false);
+	INF = 998244353;
+
+	COMinit();
+	solv();
+	return 0;
+
+}
+
+
+

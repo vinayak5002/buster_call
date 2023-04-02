@@ -1,0 +1,79 @@
+isContinueCommand = True
+H = 0
+heapList = []
+
+
+def maxHeapify(index):
+    leftNodeIndex = 2 * (index + 1) - 1
+    rightNodeIndex = 2 * (index + 1)
+    isRightNodeBiggerThanSelf = False
+    isLeftNodeBiggerThanSelf = False
+    largestNodeIndex = index
+    # 子と自分の中で値が最大のノードを選ぶ
+    if leftNodeIndex <= H - 1 and heapList[leftNodeIndex] > heapList[index]:
+        isLeftNodeBiggerThanSelf = True
+    if rightNodeIndex <= H - 1 and heapList[rightNodeIndex] > heapList[index]:
+        isRightNodeBiggerThanSelf = True
+
+    isChildNodeBiggerThanSelf = isRightNodeBiggerThanSelf or isLeftNodeBiggerThanSelf
+
+    if isChildNodeBiggerThanSelf:
+        if not isRightNodeBiggerThanSelf:
+            largestNodeIndex = leftNodeIndex
+        elif not isLeftNodeBiggerThanSelf:
+            largestNodeIndex = rightNodeIndex
+        else:
+            if heapList[leftNodeIndex] >= heapList[rightNodeIndex]:
+                largestNodeIndex = leftNodeIndex
+            else:
+                largestNodeIndex = rightNodeIndex
+
+        heapList[index], heapList[largestNodeIndex] = (
+            heapList[largestNodeIndex],
+            heapList[index],
+        )
+        maxHeapify(largestNodeIndex)
+
+
+def extract():
+    global H
+    if H < 1:
+        return -1
+    maxHeapify(0)
+    maxValue = heapList[0]
+    heapList[0], heapList[H - 1] = heapList[H - 1], heapList[0]
+    H -= 1
+    heapList.pop(-1)
+    maxHeapify(0)
+    print(maxValue)
+    return
+
+
+def increaseKey(index, key):
+    if key < heapList[index]:
+        return
+    heapList[index] = key
+    while index > 0 and heapList[(index + 1) // 2 - 1] < heapList[index - 1]:
+        heapList[index - 1], heapList[(index + 1) // 2 - 1] = (
+            heapList[(index + 1) // 2 - 1],
+            heapList[index - 1],
+        )
+        index = (index + 1) // 2 - 1
+
+
+def insert(key):
+    global H
+    H += 1
+    heapList.append(-1)
+    increaseKey(H - 1, key)
+
+
+while isContinueCommand:
+    command = input().split()
+    if command[0] == "end":
+        isContinueCommand = False
+        break
+    elif command[0] == "extract":
+        extract()
+    else:
+        insert(int(command[1]))

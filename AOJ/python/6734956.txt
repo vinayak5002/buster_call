@@ -1,0 +1,18 @@
+num_list=[]
+ans_list=[]
+
+while True:
+    num=input()
+    if num=='0':
+        break
+    num_list.append(num)
+
+
+for i in range(len(num_list)):
+    sum=0
+    for ii in range(len(num_list[i])):
+        sum+=int(num_list[i][ii])
+    ans_list.append(sum)
+
+for i in range(len(ans_list)):
+    print(ans_list[i])

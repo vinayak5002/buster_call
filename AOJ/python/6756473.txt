@@ -1,0 +1,86 @@
+from heapq import *
+
+MOD = 10 ** 9 + 7
+
+while 1:
+    n, p, q = map(int, input().split())
+    if n == 0:
+        break
+    edges = [[] for _ in range(2 * n)]
+    for _ in range(p):
+        u, v, c = map(int, input().split())
+        u -= 1
+        v -= 1
+        edges[u].append((v, c))
+        edges[v].append((u, c))
+    for _ in range(q):
+        u, v, c = map(int, input().split())
+        u -= 1
+        v -= 1
+        u += n
+        v += n
+        edges[u].append((v, c))
+        edges[v].append((u, c))
+    for i in range(n):
+        edges[i + n].append((i, 0))
+
+    inf = float("inf")
+    dist = [inf] * (2 * n)
+    dist[0] = 0
+    hq = [0]
+    while hq:
+        tmp = heappop(hq)
+        tax_d = tmp >> 20
+        pos = tmp ^ (tax_d << 20)
+        tax = tax_d >> 40
+        d = tax_d ^ (tax << 40)
+        if dist[pos] < tax_d:
+            continue
+        if pos < n:
+            npos = pos + n
+            tmp = tax_d + (1 << 40)
+            if tmp < dist[npos]:
+                dist[npos] = tmp
+                heappush(hq, (tmp << 20) | npos)                
+        
+        for npos, c in edges[pos]:
+            tmp = tax_d + c
+            if tmp < dist[npos]:
+                dist[npos] = tmp
+                heappush(hq, (tmp << 20) | npos)
+
+    tmp = dist[n - 1]
+    if tmp == inf:
+        print(-1)
+        continue
+    tax = tmp >> 40
+    d = tmp ^ (tax << 40)
+    if tax > 35:
+        ans = pow(2, tax, MOD) + d - 1
+        print(ans % MOD)
+        continue
+    
+    dist = [inf] * (2 * n)
+    dist[0] = 0
+    hq = [0]
+    for i in range(40):
+        while hq:
+            tmp = heappop(hq)
+            d = tmp >> 20
+            pos = tmp ^ (d << 20)
+            if dist[pos] < d:
+                continue
+            for npos, c in edges[pos]:
+                tmp = d + c
+                if tmp < dist[npos]:
+                    dist[npos] = tmp
+                    heappush(hq, (tmp << 20) + npos)
+        add = 1 << i
+        for j in range(n):
+            if dist[j + n] > dist[j] + add:
+                dist[j + n] = dist[j] + add
+                heappush(hq, (dist[j + n] << 20) + j + n)
+    print(dist[n - 1] % MOD)
+
+
+

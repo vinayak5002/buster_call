@@ -1,0 +1,137 @@
+import sys
+class Node:
+    def __init__(self, v):
+        self.value = v
+        self.left = None
+        self.right = None
+        self.parent = None
+
+    def insert(self, val):
+        par_node = Node(None)
+        ins_node = Node(val)
+
+        i = self
+
+        while i is not None:
+            par_node = i
+            if ins_node.value is not None:
+                if ins_node.value < i.value:
+                    i = i.left
+                else:
+                    i = i.right
+
+        ins_node.parent = par_node
+        if par_node is None:
+            self = ins_node
+        else:
+            if ins_node.value is not None:
+                if ins_node.value < par_node.value:
+                    par_node.left = ins_node
+                else:
+                    par_node.right = ins_node
+
+    def find(self, v):
+        if self.value == v:
+            
+            print("yes")
+            
+        elif self.value < v:
+            if self.right == None:
+                
+                print("no")
+                
+            else:
+                self.right.find(v)
+        else:
+            if self.left == None:
+                
+                print("no")
+                
+            else:
+                self.left.find(v)
+
+    def getMinimum(self):
+        while self.left != None:
+            self = self.left
+        return self
+
+    def getSuccessor(self):
+        if self.right != None:
+            return self.right.getMinimum()
+        
+        y = self.parent
+        while y != None and self == y.right:
+            self = y
+            y = y.parent
+        return y
+        
+    def delete(self, num):
+        while self != None and self.value != num:
+            if num < self.value:
+                self = self.left
+            else:
+                self = self.right
+                
+        y = Node(None)
+        if self is not None:
+            if self.left == None or self.right == None:
+                y = self
+            else:
+                y = self.getSuccessor()
+        
+        x = None
+        if y is not None:
+            if self is not None:
+
+                if y.left != None:
+                    x = y.left
+                else:
+                    x = y.right
+                
+                if x != None:
+                    x.parent = y.parent
+                
+                if y.parent == None:
+                    parent_node = x
+                elif y == y.parent.left:
+                    y.parent.left = x
+                else:
+                    y.parent.right = x
+                
+                if y != self:
+                    self.value = y.value
+
+
+def pre_order(t):
+    if t != None:
+        print('', t.value, end='')
+        pre_order(t.left)
+        pre_order(t.right)
+
+
+def in_order(t):
+    if t != None:
+        in_order(t.left)
+        print('', t.value, end='')
+        in_order(t.right)
+
+
+N = int(sys.stdin.readline())
+root = Node(None)  # root作成
+line = sys.stdin.readline().split()
+if line[0][0] == 'i':
+    root = Node(int(line[1]))
+for i in range(N-1):
+    line = sys.stdin.readline().split()
+    if line[0][0] == 'i':
+        root.insert(int(line[1]))
+    elif line[0][0] == 'p':
+        in_order(root)
+        print()
+        pre_order(root)
+        print()
+    elif line[0][0] == 'f':
+        root.find(int(line[1]))
+    elif line[0][0] == 'd':
+        root.delete(int(line[1]))
+

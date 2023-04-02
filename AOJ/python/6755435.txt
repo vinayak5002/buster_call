@@ -1,0 +1,39 @@
+import sys
+def input(): return sys.stdin.readline().rstrip()  # 文字列
+
+
+def solve(f):
+    stk = []
+    for s in f:
+        if s == "]":
+            x, y = stk.pop(), stk.pop()
+            op = stk.pop()
+            stk.pop()
+            if op == "^":
+                stk.append(str(int(x) ^ int(y)))
+            elif op == "+":
+                stk.append(str(int(x) | int(y)))
+            else:
+                stk.append(str(int(x) & int(y)))
+        else:
+            stk.append(s)
+    return stk[0]
+
+
+while True:
+    form = input()
+    if form == ".":
+        break
+    a, b, c, d = list(input())
+    f = form.replace("a", a).replace("b", b).replace("c", c).replace("d", d)
+    x = solve(f)
+    ans = 0
+    for i in range(10):
+        for j in range(10):
+            for k in range(10):
+                for l in range(10):
+                    f = form.replace("a", str(i)).replace("b", str(j)).replace("c", str(k)).replace("d", str(l))
+                    ans += x == solve(f)
+
+    print(x, ans)
+
